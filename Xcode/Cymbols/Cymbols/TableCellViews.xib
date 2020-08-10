@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner"/>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView identifier="IDFileNameCellView" id="c22-O7-iKe" customClass="CEEFileNameCellView">
+            <rect key="frame" x="0.0" y="0.0" width="394" height="20"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="uM5-2f-o0s" customClass="CEETextLabel">
+                    <rect key="frame" x="20" y="3" width="374" height="18"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="18" id="dPv-ZV-ClJ"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="source name"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="y5a-5g-jck" customClass="CEEImageView">
+                    <rect key="frame" x="0.0" y="0.0" width="20" height="20"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="20" id="8fp-gP-uMb"/>
+                        <constraint firstAttribute="width" constant="20" id="Zi6-Oq-H3w"/>
+                    </constraints>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_file_16x16" id="XaZ-wq-cst"/>
+                </imageView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="y5a-5g-jck" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="3D7-yv-pwo"/>
+                <constraint firstAttribute="trailing" secondItem="uM5-2f-o0s" secondAttribute="trailing" id="6dX-Uv-czQ"/>
+                <constraint firstItem="uM5-2f-o0s" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="-1" id="cpH-Rk-13p"/>
+                <constraint firstItem="y5a-5g-jck" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" id="jML-QW-ObT"/>
+                <constraint firstItem="uM5-2f-o0s" firstAttribute="leading" secondItem="y5a-5g-jck" secondAttribute="trailing" id="kEX-Xs-vLB"/>
+            </constraints>
+            <connections>
+                <outlet property="title" destination="uM5-2f-o0s" id="mxR-z3-WPw"/>
+            </connections>
+            <point key="canvasLocation" x="96" y="38"/>
+        </customView>
+        <customView identifier="IDSourceBufferSaveConfirmCellView" id="DOt-U7-aqq" customClass="CEESourceBufferSaveConfirmCellView">
+            <rect key="frame" x="0.0" y="0.0" width="394" height="20"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="rwX-pp-pnv" customClass="CEECheckBox">
+                    <rect key="frame" x="5" y="2" width="22" height="17"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="17" id="cuN-jf-vnJ"/>
+                        <constraint firstAttribute="width" constant="22" id="nim-lL-MHZ"/>
+                    </constraints>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Zy4-MJ-sZa" customClass="CEETextLabel">
+                    <rect key="frame" x="27" y="3" width="367" height="18"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="18" id="Bdf-P6-zgJ"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="source name"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="rwX-pp-pnv" firstAttribute="leading" secondItem="DOt-U7-aqq" secondAttribute="leading" constant="5" id="8qs-kO-3ba"/>
+                <constraint firstAttribute="trailing" secondItem="Zy4-MJ-sZa" secondAttribute="trailing" id="IWe-iW-wAa"/>
+                <constraint firstItem="rwX-pp-pnv" firstAttribute="top" secondItem="DOt-U7-aqq" secondAttribute="top" constant="1" id="VzN-XI-RkJ"/>
+                <constraint firstItem="Zy4-MJ-sZa" firstAttribute="leading" secondItem="rwX-pp-pnv" secondAttribute="trailing" id="e8E-t7-nDh"/>
+                <constraint firstItem="Zy4-MJ-sZa" firstAttribute="top" secondItem="DOt-U7-aqq" secondAttribute="top" constant="-1" id="h9h-fT-4v4"/>
+            </constraints>
+            <connections>
+                <outlet property="title" destination="Zy4-MJ-sZa" id="43M-8y-v2F"/>
+            </connections>
+            <point key="canvasLocation" x="96" y="111"/>
+        </customView>
+        <customView identifier="IDFilePathCellView" id="E4A-hY-VtA" customClass="CEEFilePathCellView">
+            <rect key="frame" x="0.0" y="0.0" width="394" height="20"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="uFF-Nx-0gN" customClass="CEETextLabel">
+                    <rect key="frame" x="0.0" y="3" width="394" height="18"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="18" id="HMQ-mu-S4p"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="source name"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="uFF-Nx-0gN" firstAttribute="top" secondItem="E4A-hY-VtA" secondAttribute="top" constant="-1" id="23o-kP-nSW"/>
+                <constraint firstAttribute="trailing" secondItem="uFF-Nx-0gN" secondAttribute="trailing" id="cPF-t7-1Cu"/>
+                <constraint firstItem="uFF-Nx-0gN" firstAttribute="leading" secondItem="E4A-hY-VtA" secondAttribute="leading" id="wEh-Na-o4U"/>
+            </constraints>
+            <connections>
+                <outlet property="title" destination="uFF-Nx-0gN" id="cQT-gU-m4U"/>
+            </connections>
+            <point key="canvasLocation" x="96" y="185"/>
+        </customView>
+    </objects>
+    <resources>
+        <image name="icon_file_16x16" width="16" height="16"/>
+    </resources>
+</document>

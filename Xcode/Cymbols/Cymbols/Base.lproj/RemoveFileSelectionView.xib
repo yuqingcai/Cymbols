@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner"/>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="c22-O7-iKe" customClass="CEERemoveFileSelectionView">
+            <rect key="frame" x="0.0" y="0.0" width="600" height="482"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView identifier="IDRemoveFileSelectionTableView" translatesAutoresizingMaskIntoConstraints="NO" id="Gl2-6j-fQI" customClass="CEETableView">
+                    <rect key="frame" x="20" y="15" width="560" height="387"/>
+                    <constraints>
+                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="560" id="azw-1y-zm5"/>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="387" id="mY6-mk-Bfk"/>
+                    </constraints>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Sye-BU-pvV" customClass="CEETextField">
+                    <rect key="frame" x="20" y="410" width="560" height="24"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="24" id="fRX-dl-QhZ"/>
+                    </constraints>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="v4A-Aa-YAX" customClass="CEETextLabel">
+                    <rect key="frame" x="20" y="438" width="560" height="24"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="24" id="ZRb-1L-hME"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Remove Files from Project"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+            </subviews>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="v4A-Aa-YAX" secondAttribute="trailing" constant="20" id="1ET-jc-7n8"/>
+                <constraint firstItem="v4A-Aa-YAX" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="5Hd-mK-oGQ"/>
+                <constraint firstItem="Gl2-6j-fQI" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="9Fr-XL-O39"/>
+                <constraint firstItem="v4A-Aa-YAX" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="20" id="9d1-1S-6Sv"/>
+                <constraint firstItem="Sye-BU-pvV" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="ESW-lk-0wA"/>
+                <constraint firstAttribute="trailing" secondItem="Sye-BU-pvV" secondAttribute="trailing" constant="20" id="JMD-0w-dAT"/>
+                <constraint firstAttribute="trailing" secondItem="Gl2-6j-fQI" secondAttribute="trailing" constant="20" id="LxI-1C-aFs"/>
+                <constraint firstItem="Sye-BU-pvV" firstAttribute="top" secondItem="v4A-Aa-YAX" secondAttribute="bottom" constant="4" id="QXt-PS-ubX"/>
+                <constraint firstAttribute="bottom" secondItem="Gl2-6j-fQI" secondAttribute="bottom" constant="15" id="YpR-ri-EFy"/>
+                <constraint firstItem="Gl2-6j-fQI" firstAttribute="top" secondItem="Sye-BU-pvV" secondAttribute="bottom" constant="8" id="mFb-nk-wrV"/>
+            </constraints>
+            <connections>
+                <outlet property="filePathInput" destination="Sye-BU-pvV" id="i6c-YB-ult"/>
+                <outlet property="sourceTable" destination="Gl2-6j-fQI" id="U4X-ef-2fh"/>
+            </connections>
+            <point key="canvasLocation" x="199" y="192"/>
+        </customView>
+    </objects>
+</document>

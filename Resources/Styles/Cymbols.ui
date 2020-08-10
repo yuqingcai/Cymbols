@@ -1,0 +1,2778 @@
+// this is a Cymbols UserInterface configuration file
+{
+    "Name" : "Cymbols",
+    
+    "IDView" : {
+        "text_color" : "hsba(230, 0, 40, 100)",
+    },
+
+    "IDView : actived" : {
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDView : selected" : {
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDView : actived & selected" : {
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDHighlightView" : {
+        "background_color" : "rgba(173, 214, 255, 40)",
+        "text_color" : "hsba(0, 0, 40, 100)",
+    },
+
+    "IDHighlightView : actived" : {
+        "background_color" : "rgba(173, 214, 255, 40)",
+        "text_color" : "hsba(0, 0, 30, 100)",
+    },
+
+    "IDHighlightView : selected" : {
+        "background_color" : "rgba(173, 214, 255, 40)",
+        "text_color" : "hsba(0, 0, 40, 100)",
+    },
+    
+    "IDHighlightView : actived & selected" : {
+        "background_color" : "rgba(173, 214, 255, 40)",
+        "text_color" : "hsba(0, 0, 30, 100)",
+    },
+    
+    "IDWindowContentView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "text_color" : "hsba(230, 0, 40, 100)",
+    },
+
+    "IDWindowContentView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDWindowContentView : selected" : {
+        "background_color" : "rgba(230, 230, 230, 40)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDWindowContentView : actived & selected" : {
+        "background_color" : "rgba(230, 230, 230, 40)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDImageView" : {
+        "tint_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDImageView : actived" : {
+        "tint_color" : "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDImageView : highlighted" : {
+        "tint_color" : "hsba(230, 0, 100, 100)",
+    },
+    
+    "IDImageView : actived & highlighted" : {
+        "tint_color" : "hsba(230, 0, 100, 100)",
+    },
+    
+    "IDScroller" : {
+        "knob_color" : "rgba(150, 150, 150, 100)",
+    },
+    
+    "IDScroller : actived" : {
+        "knob_color" : "rgba(150, 150, 150, 100)",
+    },
+    
+    "IDScroller : selected" : {
+        "knob_color" : "rgba(150, 150, 150, 100)",
+    },
+    
+    "IDScroller : actived & selected" : {
+        "knob_color" : "rgba(150, 150, 150, 100)",
+    },
+    
+    "IDButton" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDButton : disabled" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 100, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDButton : actived" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDButton : selected" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+
+    "IDButton : actived & selected" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+
+    "IDButton : selected & clicked" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDButton : actived & clicked" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDButton : actived & selected & clicked" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+
+    "IDStateButton" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDStateButton : disabled" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 0, 50, 100)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 0, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDStateButton : actived" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDStateButton : selected" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDStateButton : actived & disabled" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 0, 50, 100)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 0, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDStateButton : actived & selected" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+
+    "IDStateButton : actived & selected & disabled" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 0, 50, 100)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 0, 50, 100)",
+        "radius" : "2.0",
+    },
+
+    "IDStateButton : selected & clicked" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+
+    "IDStateButton : actived & clicked" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDStateButton : actived & selected & clicked" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 100, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDCheckBox" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "rgba(255, 255, 255, 100)",
+        "box_content_color" : "rgba(30, 30, 30, 100)",
+    },
+    
+    "IDCheckBox : disabled" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(230, 230, 230, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : clicked" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "rgba(255, 255, 255, 100)",
+        "box_content_color" : "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDCheckBox : actived & disabled" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(230, 230, 230, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : actived & selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : actived & selected & disabled" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(230, 230, 230, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : selected & clicked" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : actived & clicked" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : actived & selected & clicked" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+        
+    "IDCheckBox : highlighted" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 100, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : actived & highlighted" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 100, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : actived & clicked & highlighted" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 100, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+    
+    "IDCheckBox : actived & selected & clicked & highlighted" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 100, 100)",
+        "border_width" : "0.0",
+        "box_outline_color" : "hsba(230, 100, 30, 100)",
+        "box_background_color" : "rgba(255, 255, 255, 100)",
+        "box_background_color_checked" : "hsba(230, 100, 30, 100)",
+        "box_content_color" : "rgba(255, 255, 255, 100)",
+    },
+
+    "IDSessionView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)"
+    },
+    
+    "IDSessionView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)"
+    },
+
+    "IDSessionView : selected" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)"
+    },
+    
+    "IDSessionView : actived & selected" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)"
+    },
+
+    "IDToolbarView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)"
+    },
+    
+    "IDToolbarView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)"
+    },
+    
+    "IDToolbarView : selected" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)"
+    },
+    
+    "IDToolbarView : actived & selected" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)"
+    },
+
+    "IDSessionSymbolView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+    },
+    
+    "IDSessionSymbolView:actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+    },
+
+    "IDSessionReferenceView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+    },
+    
+    "IDSessionReferenceView:actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+    },
+
+    "IDSessionSourceView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+    },
+    
+    "IDSessionSourceView:actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+    },
+    
+    "IDTitleView" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "borders" : "bottom",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 50, 100)",
+    },
+    
+    "IDTitleView : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "borders" : "bottom",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 30, 100)",
+    },
+    
+    "IDTitleView : selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "borders" : "bottom",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 50, 100)",
+    },
+    
+    "IDTitleView : actived & selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "borders" : "bottom",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 30, 100)",
+    },
+    
+    "IDTabView" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "borders" : "bottom",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 50, 100)",
+    },
+    
+    "IDTabView : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "borders" : "bottom",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 50, 100)",
+    },
+    
+    "IDTabView : selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "borders" : "bottom",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 50, 100)",
+    },
+    
+    "IDTabView : actived & selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "borders" : "bottom",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 30, 100)",
+    },
+    
+    "IDToolbarButton" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDToolbarButton : disabled" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDToolbarButton: actived" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+    },
+        
+    "IDToolbarButton: actived & clicked" : {
+        "icon_color": "hsba(230, 100, 60, 100)",
+    },
+    
+    "IDToolbarButton: actived & disabled" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTitlebarButton" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTitlebarButton : disabled" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTitlebarButton: actived" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDTitlebarButton: actived & clicked" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+    },
+
+    "IDToolbarButton: actived & disabled" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+
+    "IDTitlebarStateButton" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTitlebarStateButton : disabled" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+        
+    "IDTitlebarStateButton : actived" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDTitlebarStateButton : selected" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTitlebarStateButton : actived & disabled" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTitlebarStateButton : actived & selected" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTitlebarStateButton : actived & clicked" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTitlebarStateButton : selected & clicked" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTitlebarStateButton : actived & selected & clicked" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDTabbarButton" : {
+        "icon_color": "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDTabbarButton : disabled" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+        
+    "IDTabbarButton: actived" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTabbarButton: selected" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDTabbarButton: actived & disabled" : {
+        "icon_color": "hsba(230, 100, 50, 100)",
+    },
+    
+    "IDTabbarButton: actived & selected" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+    },
+        
+    "IDTabbarButton: actived & clicked" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+    },
+
+    "IDTabbarButton : selected & clicked" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+    },
+
+    "IDTabbarButton: actived & selected & clicked" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDTabbarStateButton" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "radius" : "2.0",
+    },
+
+    "IDTabbarStateButton : disabled" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "radius" : "2.0",
+    },
+
+    "IDTabbarStateButton : actived" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTabbarStateButton : selected" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTabbarStateButton : actived & disabled" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTabbarStateButton : actived & selected" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTabbarStateButton : actived & clicked" : {
+        "icon_color": "hsba(230, 0, 50, 100)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "radius" : "2.0",
+    },
+
+    "IDTabbarStateButton : selected & clicked" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTabbarStateButton : actived & selected & clicked" : {
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTableView" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 0, 0, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDTableView : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+    
+    "IDTableView : selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 0, 0, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader : selected" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding : selected": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : selected" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : selected" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal : selected" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDTableView : actived & selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader : actived & selecte" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived & selecte": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived & selecte": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived & selecte" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived & selecte" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+    
+    "IDTableRowView" : {
+        "background_color" : "hsba(238, 100, 30, 0)",
+    },
+    
+    "IDTableRowView : actived" : {
+        "background_color" : "hsba(238, 100, 30, 0)",
+    }, 
+    
+    "IDTableRowView : selected" : {
+        "background_color" : "hsba(238, 100, 30, 0)",
+    }, 
+    
+    "IDTableRowView : highlighted" : {
+        "background_color" : "hsba(238, 100, 30, 100)",
+    }, 
+    
+    "IDTableRowView : actived & selected" : {
+        "background_color" : "hsba(238, 100, 30, 0)",
+    }, 
+    
+    "IDTableRowView : actived & highlighted" : {
+        "background_color" : "hsba(238, 100, 30, 100)",
+    }, 
+    
+    "IDTableRowView : selected & highlighted" : {
+        "background_color" : "hsba(238, 100, 30, 100)",
+    }, 
+    
+    "IDTableRowView : actived & selected & highlighted" : {
+        "background_color" : "hsba(238, 100, 30, 100)",
+    }, 
+    
+    "IDSplitView" : {
+        "grid_color" : "rgba(209, 209, 209, 100)",
+    },
+    
+    "IDSplitView : actived" : {
+        "grid_color" : "rgba(204, 204, 204, 100)",
+    },
+    
+    "IDSplitView : selected" : {
+        "grid_color" : "rgba(209, 209, 209, 100)",
+    },
+    
+    "IDSplitView : actived & selected" : {
+        "grid_color" : "rgba(204, 204, 204, 100)",
+    },
+    
+    "IDTextView" : {
+        "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "caret_color" : "hsba(230, 0, 0, 100)",
+        "caret_color_marked" : "hsba(230, 100, 30, 100)",
+        "text_background_color_selected" : "hsba(230, 0, 80, 30)",
+        "text_background_color_selected_outline" : "hsba(230, 0, 50, 100)",
+        "text_background_color_marked" : "hsba(230, 0, 80, 30)",
+        "text_background_color_marked_outline" : "hsba(230, 0, 50, 100)",
+        "text_background_color_searched" : "hsba(60, 100, 100, 100)",
+        "text_background_color_searched_outline" : "hsba(60, 100, 100, 100)",
+        "text_background_color_highlight" : "hsba(117, 100, 100, 100)",
+        "text_background_color_highlight_outline" : "hsba(117, 100, 100, 100)",
+        "knob_color" : "rgba(150, 150, 150, 100)",
+        "aligment" : "left",
+        "IDVerticalScroller" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(244, 244, 244, 100)",
+        },
+        "IDHorizontalScroller" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(244, 244, 244, 100)",
+        },
+    },
+    
+    "IDTextView : actived" : {
+        "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "caret_color" : "hsba(230, 0, 0, 100)",
+        "caret_color_marked" : "hsba(230, 100, 30, 100)",
+        "text_background_color_selected" : "rgba(172, 212, 255, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "text_background_color_marked" : "hsba(230, 0, 80, 30)",
+        "text_background_color_marked_outline" : "hsba(230, 100, 50, 100)",
+        "text_background_color_searched" : "hsba(60, 100, 100, 100)",
+        "text_background_color_searched_outline" : "hsba(60, 100, 100, 100)",
+        "text_background_color_highlight" : "hsba(117, 100, 100, 100)",
+        "text_background_color_highlight_outline" : "hsba(117, 100, 100, 100)",
+        "knob_color" : "rgba(150, 150, 150, 100)",
+        "aligment" : "left",
+        "IDVerticalScroller" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(244, 244, 244, 100)",
+        },
+        "IDHorizontalScroller" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(244, 244, 244, 100)",
+        },
+    },
+    
+    "IDTextView : selected" : {
+        "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "caret_color" : "hsba(230, 0, 0, 100)",
+        "caret_color_marked" : "hsba(230, 100, 30, 100)",
+        "text_background_color_selected" : "hsba(230, 0, 80, 30)",
+        "text_background_color_selected_outline" : "hsba(230, 0, 50, 100)",
+        "text_background_color_marked" : "hsba(230, 0, 80, 30)",
+        "text_background_color_marked_outline" : "hsba(230, 0, 50, 100)",
+        "text_background_color_searched" : "hsba(60, 100, 100, 100)",
+        "text_background_color_searched_outline" : "hsba(60, 100, 100, 100)",
+        "text_background_color_highlight" : "hsba(117, 100, 100, 100)",
+        "text_background_color_highlight_outline" : "hsba(117, 100, 100, 100)",
+        "knob_color" : "rgba(150, 150, 150, 100)",
+        "aligment" : "left",
+        "IDVerticalScroller" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(244, 244, 244, 100)",
+        },
+        "IDHorizontalScroller" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(244, 244, 244, 100)",
+        },
+    },
+    
+    "IDTextView : actived & selected" : {
+        "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "caret_color" : "hsba(230, 0, 0, 100)",
+        "caret_color_marked" : "hsba(230, 100, 30, 100)",
+        "text_background_color_selected" : "rgba(172, 212, 255, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "text_background_color_marked" : "hsba(230, 0, 80, 30)",
+        "text_background_color_marked_outline" : "hsba(230, 100, 50, 100)",
+        "text_background_color_searched" : "hsba(60, 100, 100, 100)",
+        "text_background_color_searched_outline" : "hsba(60, 100, 100, 100)",
+        "text_background_color_highlight" : "hsba(117, 100, 100, 100)",
+        "text_background_color_highlight_outline" : "hsba(117, 100, 100, 100)",
+        "knob_color" : "rgba(150, 150, 150, 100)",
+        "aligment" : "left",
+        "IDVerticalScroller" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(244, 244, 244, 100)",
+        },
+        "IDHorizontalScroller" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(244, 244, 244, 100)",
+        },
+    },
+    
+    "IDTextField" : {
+        "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "caret_color" : "hsba(230, 0, 0, 100)",
+        "caret_color_marked" : "hsba(230, 100, 30, 100)",
+        "text_background_color_selected" : "hsba(230, 0, 80, 30)",
+        "text_background_color_selected_outline" : "hsba(230, 0, 50, 100)",
+        "text_background_color_marked" : "hsba(230, 0, 80, 30)",
+        "text_background_color_marked_outline" : "hsba(230, 0, 50, 100)",
+        "text_background_color_searched" : "hsba(60, 100, 100, 30)",
+        "text_background_color_searched_outline" : "hsba(60, 100, 100, 100)",
+        "text_background_color_highlight" : "hsba(117, 100, 100, 100)",
+        "text_background_color_highlight_outline" : "hsba(117, 100, 100, 100)",
+        "corner_radius" : "2.0",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "aligment" : "left",
+    },
+    
+    "IDTextField : actived" : {
+        "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "caret_color" : "hsba(230, 0, 0, 100)",
+        "caret_color_marked" : "hsba(230, 100, 30, 100)",
+        "text_background_color_selected" : "rgba(172, 212, 255, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "text_background_color_marked" : "hsba(230, 0, 80, 30)",
+        "text_background_color_marked_outline" : "hsba(230, 100, 50, 100)",
+        "text_background_color_searched" : "hsba(60, 100, 100, 100)",
+        "text_background_color_searched_outline" : "hsba(60, 100, 100, 100)",
+        "text_background_color_highlight" : "hsba(117, 100, 100, 100)",
+        "text_background_color_highlight_outline" : "hsba(117, 100, 100, 100)",
+        "corner_radius" : "2.0",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "aligment" : "left",
+    },
+    
+    "IDTextField : selected" : {
+        "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "caret_color" : "hsba(230, 0, 0, 100)",
+        "caret_color_marked" : "hsba(230, 100, 30, 100)",
+        "text_background_color_selected" : "hsba(230, 0, 80, 30)",
+        "text_background_color_selected_outline" : "hsba(230, 0, 50, 100)",
+        "text_background_color_marked" : "hsba(230, 0, 80, 30)",
+        "text_background_color_marked_outline" : "hsba(230, 0, 50, 100)",
+        "text_background_color_searched" : "hsba(60, 100, 100, 100)",
+        "text_background_color_searched_outline" : "hsba(60, 100, 100, 100)",
+        "text_background_color_highlight" : "hsba(117, 100, 100, 100)",
+        "text_background_color_highlight_outline" : "hsba(117, 100, 100, 100)",
+        "corner_radius" : "2.0",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "aligment" : "left",
+    },
+    
+    "IDTextField : actived & selected" : {
+        "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "caret_color" : "hsba(230, 0, 0, 100)",
+        "caret_color_marked" : "hsba(230, 100, 30, 100)",
+        "text_background_color_selected" : "rgba(172, 212, 255, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "text_background_color_marked" : "hsba(230, 0, 80, 30)",
+        "text_background_color_marked_outline" : "hsba(230, 100, 50, 100)",
+        "text_background_color_searched" : "hsba(60, 100, 100, 100)",
+        "text_background_color_searched_outline" : "hsba(60, 100, 100, 100)",
+        "text_background_color_highlight" : "hsba(117, 100, 100, 100)",
+        "text_background_color_highlight_outline" : "hsba(117, 100, 100, 100)",
+        "corner_radius" : "2.0",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "aligment" : "left",
+    },
+    
+    "IDTextLabel" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextLabel : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextLabel : highlighted" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 100, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextLabel : actived & highlighted" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 100, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+        
+    "IDSessionSymbolTableView" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 0, 0, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "NO",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDSessionSymbolTableView : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "NO",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+    
+    "IDSessionReferenceTableView" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 0, 0, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "NO",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDSessionReferenceTableView : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "NO",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+    
+    "IDSessionSourceTableView" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 0, 0, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "NO",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDSessionSourceTableView : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "NO",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+    
+    "IDContextSourceTableView" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 0, 0, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "NO",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDContextSourceTableView : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "NO",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+    
+    "IDProjectSettingView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "text_color" : "hsba(230, 0, 40, 100)",
+    },
+
+    "IDProjectSettingView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDProjectPropertyView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "text_color" : "hsba(230, 0, 40, 100)",
+    },
+
+    "IDProjectPropertyView:actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+
+    
+    "IDProjectSettingTitle" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDProjectSettingTitle : actived" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDProjectSettingName" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+    },
+    "IDProjectSettingName : actived" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDProjectSettingPath" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDProjectSettingPath : actived" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDProjectSettingSource" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDProjectSettingSource : actived" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDProjectSettingInfo" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDProjectSettingInfo : actived" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDProjectSettingSourceTableView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDProjectSettingSourceTableView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+    
+    "IDProjectSettingSaveAtButton" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingSaveAtButton : disabled" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingSaveAtButton : actived" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingSaveAtButton : actived & disabled" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+        
+    "IDProjectSettingSaveAtButton : actived & clicked" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingAddPathButton" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingAddPathButton : disabled" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingAddPathButton : actived" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingAddPathButton : actived & disabled" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingAddPathButton : actived & clicked" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingRemovePathButton" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingRemovePathButton : disabled" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingRemovePathButton : actived" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingRemovePathButton : actived & disabled" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDProjectSettingRemovePathButton : actived & clicked" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDLineNumberView" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "1.0",
+        "border_color" : "rgba(244, 244, 244, 100)",
+    },
+    
+    "IDLineNumberView:actived" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "1.0",
+        "border_color" : "rgba(244, 244, 244, 100)",
+    },
+    
+    "IDLineNumberView:selected" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "1.0",
+        "border_color" : "rgba(244, 244, 244, 100)",
+    },
+    
+    "IDLineNumberView:actived & selected" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "background_color" : "rgba(244, 244, 244, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "1.0",
+        "border_color" : "rgba(244, 244, 244, 100)",
+    },
+    
+    "IDProjectPropertySourceTableView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDProjectPropertySourceTableView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+    
+    "IDAddFileSelectionTableView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDAddFileSelectionTableView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+        
+    "IDAddFileSelectionAddPathButton" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionAddPathButton : disabled" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionAddPathButton : actived" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionAddPathButton : actived & disabled" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionAddPathButton : actived & clicked" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionOpenPanelButton" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionOpenPanelButton : disabled" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionOpenPanelButton : actived" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionOpenPanelButton : actived & disabled" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionOpenPanelButton : actived & clicked" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionRemoveButton" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionRemoveButton : disabled" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionRemoveButton : actived" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionRemoveButton : actived & disabled" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDAddFileSelectionRemoveButton : actived & clicked" : {
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "1.0",
+    },
+    
+    "IDFilePathConfirmTitle" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDFilePathConfirmTitle : actived" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+    },
+    
+    "IDFilePathConfirmTableView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDFilePathConfirmTableView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+        
+    "IDRemoveFileSelectionTitle" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+    },
+    
+    "IDRemoveFileSelectionTitle : actived" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+    },
+        
+    "IDRemoveFileSelectionTableView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDRemoveFileSelectionTableView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+    
+    "IDWelcomeViewAppName" : {
+        "font" : "font(\"Helvetica\", 14.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "center",
+    },
+
+    "IDWelcomeViewAppName : actived" : {
+        "font" : "font(\"Helvetica\", 14.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "center",
+    },
+    
+    "IDWelcomeViewAppName : selected" : {
+        "font" : "font(\"Helvetica\", 14.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "center",
+    },
+
+    "IDWelcomeViewAppName : actived & selected" : {
+        "font" : "font(\"Helvetica\", 14.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "center",
+    },
+    
+    "IDWelcomeViewInfo" : {
+        "font" : "font(\"Arial\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "center",
+    },
+
+    "IDWelcomeViewInfo : actived" : {
+        "font" : "font(\"Arial\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "center",
+    },
+
+    "IDWelcomeViewInfo : selected" : {
+        "font" : "font(\"Arial\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "center",
+    },
+
+    "IDWelcomeViewInfo : actived & selected" : {
+        "font" : "font(\"Arial\", 12.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(236, 236, 236, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "center",
+    },
+        
+    "IDSessionStatusBar" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "borders" : "top",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 50, 100)",
+        "border_width" : "1.0",
+    },
+    
+    "IDSessionStatusBar : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "borders" : "top",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 30, 100)",
+    },
+    
+    "IDSessionStatusBar : selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "borders" : "top",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 50, 100)",
+    },
+    
+    "IDSessionStatusBar : actived & selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "borders" : "top",
+        "border_width" : "1.0",
+        "icon_color" : "hsba(0, 0, 30, 100)",
+    },
+    
+    "IDProjectSettingView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+    },
+
+    "IDProjectSettingView:actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+    },
+    
+    "IDProjectPropertyView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+    },
+
+    "IDProjectPropertyView:actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+    },
+    
+    "IDFilePathConfirmView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+    },
+
+    "IDFilePathConfirmView:actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+    },
+    
+    "IDAddFileSelectionView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+    },
+
+    "IDAddFileSelectionView:actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+    },
+        
+    "IDRemoveFileSelectionView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+    },
+
+    "IDRemoveFileSelectionView:actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+    },
+    
+    "IDTextSearchTextLabel" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextSearchTextLabel : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextSearchTextLabel : selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextSearchTextLabel : actived & selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextReplaceTextLabel" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextReplaceTextLabel : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextReplaceTextLabel : selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextReplaceTextLabel : actived & selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextSearchResultLabel" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextSearchResultLabel : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextSearchResultLabel : selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextSearchResultLabel : actived & selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(244, 244, 244, 0)",
+        "text_selected_background_color" : "hsba(230, 20, 100, 100)",
+        "text_background_color_selected_outline" : "hsba(230, 100, 50, 100)",
+        "aligment" : "left",
+    },
+    
+    "IDTextReplaceButton" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceButton : disabled" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceButton : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceButton : selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceButton : actived & disabled" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceButton : actived & selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+
+    "IDTextReplaceButton : selected & clicked" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceButton : actived & clicked" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceButton : actived & selected & clicked" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+ 
+    "IDTextReplaceAllButton" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceAllButton : disabled" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceAllButton : actived" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceAllButton : selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceAllButton : actived & disabled" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceAllButton : actived & selected" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceAllButton : selected & clicked" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 50, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceAllButton : actived & clicked" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "hsba(230, 100, 30, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDTextReplaceAllButton : actived & selected & clicked" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "rgba(200, 200, 200, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+        "border_width" : "0.0",
+        "icon_color": "hsba(230, 100, 30, 100)",
+        "radius" : "2.0",
+    },
+    
+    "IDAutoCompleteView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "text_color" : "hsba(230, 0, 40, 100)",
+    },
+
+    "IDAutoCompleteView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDAutoCompleteView : selected" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDAutoCompleteView : actived & selected" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "text_color" : "hsba(230, 0, 30, 100)",
+    },
+    
+    "IDSessionFrameManagerView" : {
+        "font" : "font(\"Times\", 14.0, \"Bold\", 5.0)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "background_color" : "rgba(236, 236, 236, 0)",
+    },
+    
+    "IDSessionFrameManagerView : actived " : {
+        "font" : "font(\"Times\", 14.0, \"Bold\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+    },
+    
+    "IDSourceHistoryView" : {
+        "font" : "font(\"Times\", 14.0, \"Bold\", 5.0)",
+        "text_color" : "hsba(230, 0, 50, 100)",
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "border_width" : "1.0",
+        "corner_radius" : "1.0",
+    },
+    
+    "IDSourceHistoryView : actived " : {
+        "font" : "font(\"Times\", 14.0, \"Bold\", 5.0)",
+        "text_color" : "hsba(230, 100, 30, 100)",
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(204, 204, 204, 100)",
+        "border_width" : "1.0",
+        "corner_radius" : "1.0",
+    },
+    
+    "IDSaveModifiedBuffersTableView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "borders" : "left-top-bottom",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDSaveModifiedBuffersTableView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+        "borders" : "left-top-bottom",
+        "enable_draw_header" : "YES",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+    
+    "IDSourceHistoryTableView" : {
+        "background_color" : "rgba(236, 236, 236, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "NO",
+        "IDTableViewHeader" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 0, 50, 100)",
+        },
+        "IDTableViewHeaderPadding": {
+            "background_color" : "rgba(236, 236, 236, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(209, 209, 209, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+        "IDScrollerHorizontal" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(236, 236, 236, 100)",
+        },
+    },
+    
+    "IDSourceHistoryTableView : actived" : {
+        "background_color" : "rgba(230, 230, 230, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "0.0",
+        "enable_draw_header" : "NO",
+        "IDTableViewHeader : actived" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "divider_color" : "rgba(209, 209, 209, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+            "text_color" : "hsba(230, 100, 30, 100)",
+        },
+        "IDTableViewHeaderPadding : actived": {
+            "background_color" : "rgba(230, 230, 230, 100)",
+            "border_color" : "rgba(209, 209, 209, 100)",
+        },
+        "IDGridView : actived": {
+            "row_spacing" : "0.0",
+            "grid_color" : "rgba(204, 204, 204, 100)",
+            "grid_width" : "1.0",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+        "IDScrollerVertical : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+        "IDScrollerHorizontal : actived" : {
+            "knob_color" : "rgba(150, 150, 150, 100)",
+            "background_color" : "rgba(230, 230, 230, 100)",
+        },
+    },
+
+    "IDSaveModifiedBuffersSourceContentView" : {
+        "borders" : "top-bottom-right",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+    },
+    
+    "IDSaveModifiedBuffersSourceContentView : actived" : {
+        "borders" : "top-bottom-right",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "1.0",
+    },
+    
+    "IDSaveModifiedBuffersSplitView" : {
+        "grid_color" : "rgba(209, 209, 209, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "0.0",
+    },
+    
+    "IDSaveModifiedBuffersSplitView : actived" : {
+        "grid_color" : "rgba(204, 204, 204, 100)",
+        "border_color" : "rgba(209, 209, 209, 100)",
+        "border_width" : "0.0",
+    },
+
+}
+

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Source History Controller-->
+        <scene sceneID="RGl-Fm-0FV">
+            <objects>
+                <viewController storyboardIdentifier="IDSourceHistoryController" id="6zT-6t-Z8n" customClass="CEESourceHistoryController" sceneMemberID="viewController">
+                    <view key="view" identifier="IDSourceHistoryView" id="mjT-Vc-BwL" customClass="CEEView">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <customView identifier="IDSourceHistoryTableView" translatesAutoresizingMaskIntoConstraints="NO" id="X4l-0a-udz" customClass="CEETableView">
+                                <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                            </customView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="X4l-0a-udz" firstAttribute="leading" secondItem="mjT-Vc-BwL" secondAttribute="leading" id="Tbj-TT-lwQ"/>
+                            <constraint firstAttribute="bottom" secondItem="X4l-0a-udz" secondAttribute="bottom" id="XHg-eC-7dY"/>
+                            <constraint firstItem="X4l-0a-udz" firstAttribute="top" secondItem="mjT-Vc-BwL" secondAttribute="top" id="gi9-pi-1KX"/>
+                            <constraint firstAttribute="trailing" secondItem="X4l-0a-udz" secondAttribute="trailing" id="paN-an-Tul"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="historyTable" destination="X4l-0a-udz" id="v9Q-30-iRU"/>
+                    </connections>
+                </viewController>
+                <customObject id="lUr-el-VQV" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-301" y="3701"/>
+        </scene>
+    </scenes>
+</document>

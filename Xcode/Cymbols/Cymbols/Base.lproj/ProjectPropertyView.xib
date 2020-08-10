@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner"/>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="c22-O7-iKe" customClass="CEEProjectPropertyView">
+            <rect key="frame" x="0.0" y="0.0" width="600" height="500"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="1wP-qB-QOK" customClass="CEETextLabel">
+                    <rect key="frame" x="20" y="410" width="560" height="23"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="23" id="Rl7-gd-TVN"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Save Path"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="H6F-Io-6vM" customClass="CEETextLabel">
+                    <rect key="frame" x="20" y="437" width="560" height="23"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="23" id="uN0-xB-z4W"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Project Name"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <customView identifier="IDProjectPropertySourceTableView" translatesAutoresizingMaskIntoConstraints="NO" id="lxh-Sb-ocZ" customClass="CEETableView">
+                    <rect key="frame" x="20" y="17" width="560" height="362"/>
+                    <constraints>
+                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="560" id="TOg-gr-RlI"/>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="362" id="bLP-1A-Hev"/>
+                    </constraints>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="nea-9B-qMV" customClass="CEETextLabel">
+                    <rect key="frame" x="20" y="468" width="560" height="23"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="23" id="x8Q-Mn-Lg6"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Project Property"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="S3k-NT-zgK" customClass="CEETextLabel">
+                    <rect key="frame" x="20" y="383" width="560" height="23"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="23" id="htt-g3-NWn"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="File Paths"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="nea-9B-qMV" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="9" id="4pS-fn-sxO"/>
+                <constraint firstAttribute="trailing" secondItem="H6F-Io-6vM" secondAttribute="trailing" constant="20" id="9sT-Vw-siv"/>
+                <constraint firstItem="S3k-NT-zgK" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="DiY-9J-WtL"/>
+                <constraint firstAttribute="bottom" secondItem="lxh-Sb-ocZ" secondAttribute="bottom" constant="17" id="EA4-1U-rh6"/>
+                <constraint firstAttribute="trailing" secondItem="lxh-Sb-ocZ" secondAttribute="trailing" constant="20" id="GPF-xq-BOr"/>
+                <constraint firstAttribute="trailing" secondItem="1wP-qB-QOK" secondAttribute="trailing" constant="20" id="Hw8-ms-kyU"/>
+                <constraint firstItem="lxh-Sb-ocZ" firstAttribute="top" secondItem="S3k-NT-zgK" secondAttribute="bottom" constant="4" id="IsM-KS-TJ5"/>
+                <constraint firstItem="H6F-Io-6vM" firstAttribute="top" secondItem="nea-9B-qMV" secondAttribute="bottom" constant="8" id="Roi-bX-iZW"/>
+                <constraint firstItem="lxh-Sb-ocZ" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="RsF-l3-lvI"/>
+                <constraint firstItem="1wP-qB-QOK" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="Rzx-4t-ZK4"/>
+                <constraint firstAttribute="trailing" secondItem="nea-9B-qMV" secondAttribute="trailing" constant="20" id="Uoi-aT-05C"/>
+                <constraint firstItem="nea-9B-qMV" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="Zen-Dc-QRV"/>
+                <constraint firstAttribute="trailing" secondItem="S3k-NT-zgK" secondAttribute="trailing" constant="20" id="alu-ee-Xh7"/>
+                <constraint firstItem="S3k-NT-zgK" firstAttribute="top" secondItem="1wP-qB-QOK" secondAttribute="bottom" constant="4" id="h9j-te-uiq"/>
+                <constraint firstItem="H6F-Io-6vM" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="s6U-UB-tSk"/>
+                <constraint firstItem="1wP-qB-QOK" firstAttribute="top" secondItem="H6F-Io-6vM" secondAttribute="bottom" constant="4" id="sWX-Rj-jTd"/>
+            </constraints>
+            <connections>
+                <outlet property="filePathTable" destination="lxh-Sb-ocZ" id="LhH-hs-AOr"/>
+                <outlet property="projectNameLabel" destination="H6F-Io-6vM" id="8DC-YK-ANF"/>
+                <outlet property="savePathLabel" destination="1wP-qB-QOK" id="T7k-cx-cbW"/>
+                <outlet property="sourceFileLabel" destination="S3k-NT-zgK" id="IAK-Ho-yBg"/>
+            </connections>
+            <point key="canvasLocation" x="139" y="154"/>
+        </customView>
+    </objects>
+</document>
