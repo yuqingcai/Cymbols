@@ -260,7 +260,7 @@ CEEList * cee_list_copy_deep(CEEList* list,
         last = new_list;
         list = list->next;
         while (list) {
-            last->next = cee_list_create ();
+            last->next = cee_list_create();
             last->next->prev = last;
             last = last->next;
             if (func)

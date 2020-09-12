@@ -6,29 +6,24 @@
 //  Copyright © 2019 Lazycatdesign. All rights reserved.
 //
 
-#import "CymbolsDelegate.h"
 #import "CEESourceBuffer.h"
 
 NSNotificationName CEENotificationSourceBufferStateChanged = @"CEENotificationSourceBufferStateChanged";
-NSNotificationName CEENotificationSourceBufferHighlightSymbol = @"CEENotificationSourceBufferHighlightSymbol";
-NSNotificationName CEENotificationSourceBufferSymbolSelected = @"CEENotificationSourceBufferSymbolSelected";
-NSNotificationName CEENotificationSourceBufferSymbolSearched = @"CEENotificationSourceBufferSymbolSearched";
 
 @interface CEESourceBuffer()
-
 @property (strong) NSString* modificationDate;
-
+@property (readonly) NSUInteger referenceCount;
 @end
 
 @implementation CEESourceBuffer
 
+@synthesize state = _state;
+
 static CEESymbolWrapper* symbol_wrapper_create(CEESourceSymbol* symbol,
-                                               cee_int index,
-                                               cee_uint level)
+                                            cee_uint level)
 {
     CEESymbolWrapper* wrapper = cee_malloc0(sizeof(CEESymbolWrapper));
     wrapper->symbol_ref = symbol;
-    wrapper->index = index;
     wrapper->level = level;
     return wrapper;
 }
@@ -42,14 +37,17 @@ static void symbol_wrapper_free(cee_pointer data)
     cee_free(wrapper);
 }
 
-static void symbol_tree_dump(CEETree* tree, 
-                             int n, 
-                             CEEList** list)
+static void symbol_tree_dump_to_wrappers(CEETree* tree, 
+                                         int n, 
+                                         CEEList** list)
 {
+    if (!tree)
+        return;
+    
     CEEList* p = NULL;    
     CEESourceSymbol* symbol = tree->data;
     if (symbol) {
-        CEESymbolWrapper* wrapper = symbol_wrapper_create(symbol, 0, n);
+        CEESymbolWrapper* wrapper = symbol_wrapper_create(symbol, n);
         *list = cee_list_prepend(*list, wrapper);
     }
     
@@ -58,7 +56,7 @@ static void symbol_tree_dump(CEETree* tree,
         p = CEE_TREE_CHILDREN_FIRST(tree);
         while (p) {
             tree = p->data;
-            symbol_tree_dump(tree, n, list);
+            symbol_tree_dump_to_wrappers(tree, n, list);
             p = CEE_TREE_NODE_NEXT(p);
         }
     }
@@ -71,17 +69,17 @@ static cee_int symbol_wrapper_compare(const cee_pointer a,
     CEESymbolWrapper* wrapper1 = (CEESymbolWrapper*)b;
     CEESourceSymbol* symbol0 = wrapper0->symbol_ref;
     CEESourceSymbol* symbol1 = wrapper1->symbol_ref;
-    return cee_symbol_location_compare(symbol0, symbol1);
+    return cee_source_symbol_location_compare(symbol0, symbol1);
 }
 
-static void buffer_parse(CEESourceBuffer* buffer)
+void cee_source_buffer_parse(CEESourceBuffer* buffer,
+                             CEESourceBufferParserOption options)
 {
     CEESourceParserRef parser = buffer.parser_ref;
     if (!parser)
         return;
     
-    cee_ulong m0 = cee_timestamp_ms();
-    
+    cee_ulong m0 = 0;
     const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
     CEESourceFregment* statement = NULL;
     CEESourceFregment* prep_directive = NULL;
@@ -89,14 +87,16 @@ static void buffer_parse(CEESourceBuffer* buffer)
     CEEList* tokens_ref = NULL;
     CEESourceTokenMap* source_token_map = NULL;
     
-    if (buffer.statement)
-        cee_source_fregment_free_full(buffer.statement);
-    
+    m0 = cee_timestamp_ms();
+    /** parse buffer begin */
+    if (buffer.comment)
+        cee_source_fregment_free_full(buffer.comment);
+
     if (buffer.prep_directive)
         cee_source_fregment_free_full(buffer.prep_directive);
     
-    if (buffer.comment)
-        cee_source_fregment_free_full(buffer.comment);
+    if (buffer.statement)
+        cee_source_fregment_free_full(buffer.statement);
     
     if (buffer.tokens_ref)
         cee_list_free(buffer.tokens_ref);
@@ -104,57 +104,46 @@ static void buffer_parse(CEESourceBuffer* buffer)
     if (buffer.source_token_map)
         cee_source_token_map_free(buffer.source_token_map);
     
+    if (buffer.prep_directive_symbol_tree)
+        cee_tree_free(buffer.prep_directive_symbol_tree);
+    
+    if (buffer.statement_symbol_tree)
+        cee_tree_free(buffer.statement_symbol_tree);
+    
     cee_source_symbol_parse(parser, 
                             (const cee_uchar*)[buffer.filePath UTF8String],
                             subject, 
-                            &statement, 
                             &prep_directive,
+                            &statement, 
                             &comment, 
                             &tokens_ref, 
                             &source_token_map);
     
-    buffer.statement = statement;
-    buffer.prep_directive = prep_directive;
     buffer.comment = comment;
+    buffer.prep_directive = prep_directive;
+    buffer.statement = statement;
     buffer.tokens_ref = tokens_ref;
     buffer.source_token_map = source_token_map;
+    buffer.prep_directive_symbol_tree = cee_source_fregment_symbol_tree_create(buffer.prep_directive);
+    buffer.statement_symbol_tree = cee_source_fregment_symbol_tree_create(buffer.statement);
     
+    /** parse buffer end */
     cee_ulong m1 = cee_timestamp_ms();
     fprintf(stdout, "\nbuffer_parse cost: %lu ms\n", m1 - m0);
     
-    m0 = cee_timestamp_ms();
-    
-    if (buffer.symbol_wrappers)
-        cee_list_free_full(buffer.symbol_wrappers, symbol_wrapper_free);
-    
-    CEEList* symbol_wrappers = NULL;
-    CEETree* tree = NULL;
-    if (buffer.prep_directive) {
-        tree = cee_source_fregment_symbol_tree_create(buffer.prep_directive);
-        symbol_tree_dump(tree, 0, &symbol_wrappers);
-        cee_tree_free(tree);
+    if (options & kCEESourceBufferParserOptionCreateSymbolWrapper) {
+        /** symbol wrappers create begin */
+        if (buffer.symbol_wrappers)
+            cee_list_free_full(buffer.symbol_wrappers, symbol_wrapper_free);
+        
+        CEEList* wrappers = NULL;
+        symbol_tree_dump_to_wrappers(buffer.prep_directive_symbol_tree, 0, &wrappers);
+        symbol_tree_dump_to_wrappers(buffer.statement_symbol_tree, 0, &wrappers);
+        
+        wrappers = cee_list_sort(wrappers, symbol_wrapper_compare);
+        buffer.symbol_wrappers = wrappers;
+        /** symbol wrappers create end */
     }
-    if (buffer.statement) {
-        tree = cee_source_fregment_symbol_tree_create(buffer.statement);
-        symbol_tree_dump(tree, 0, &symbol_wrappers);
-        cee_tree_free(tree);
-    }
-    symbol_wrappers = cee_list_sort(symbol_wrappers, symbol_wrapper_compare);
-    CEEList* p = symbol_wrappers;
-    int i = 0;
-    while (p) {
-        CEESymbolWrapper* wrapper = p->data;
-        wrapper->index = i;
-        i ++;
-        p = p->next;
-    }
-    
-    
-    buffer.symbol_wrappers = symbol_wrappers;
-    m1 = cee_timestamp_ms();
-    
-    fprintf(stdout, "\nsymbols wrappers create cost: %lu ms\n", m1 - m0);
-    
 }
 
 static void text_buffer_modified(cee_pointer buffer, 
@@ -162,7 +151,8 @@ static void text_buffer_modified(cee_pointer buffer,
                                  CEERange original,
                                  CEERange replacement) 
 {
-    buffer_parse((__bridge CEESourceBuffer*)buffer);
+    cee_source_buffer_parse((__bridge CEESourceBuffer*)buffer,
+                            kCEESourceBufferParserOptionCreateSymbolWrapper);
     [(__bridge CEESourceBuffer*)buffer setState:kCEESourceBufferStateModified];
 }
 
@@ -193,14 +183,11 @@ static void binary_buffer_modified(cee_pointer buffer,
 }
 
 - (instancetype)initWithFilePath:(nullable NSString*)filePath {
-    
     self = [super init];
     if (!self)
         return nil;
 
     cee_ulong length = 0;
-    CymbolsDelegate* delegate = (CymbolsDelegate*)[NSApp delegate];
-    _project_ref = [delegate currentProject];
     _referenceCount = 0;
     
     if (!filePath) {
@@ -209,11 +196,10 @@ static void binary_buffer_modified(cee_pointer buffer,
         _storage = cee_text_storage_create((__bridge cee_pointer)self,
                                            (const cee_uchar*)"",
                                            text_buffer_modified);
-        _states = kCEESourceBufferStateFileUntitled;
+        _state = kCEESourceBufferStateFileUntitled;
     }
     else {
         _filePath = filePath;
-        _symbol_cache = cee_symbol_cache_create();
         cee_uchar* content = NULL;
         cee_file_contents_get([_filePath UTF8String], &content, &length);
         
@@ -231,8 +217,7 @@ static void binary_buffer_modified(cee_pointer buffer,
                                                  length,
                                                  binary_buffer_modified);
         }
-        _states = kCEESourceBufferStateNormal;
-        buffer_parse(self);
+        _state = kCEESourceBufferStateNormal;
         
         cee_free(content);
     }
@@ -251,15 +236,14 @@ static void binary_buffer_modified(cee_pointer buffer,
 }
 
 - (void)dealloc {
-    
-    if (_statement)
-        cee_source_fregment_free_full(_statement);
+    if (_comment)
+        cee_source_fregment_free_full(_comment);
     
     if (_prep_directive)
         cee_source_fregment_free_full(_prep_directive);
     
-    if (_comment)
-        cee_source_fregment_free_full(_comment);
+    if (_statement)
+        cee_source_fregment_free_full(_statement);
     
     if (_tokens_ref)
         cee_list_free(_tokens_ref);
@@ -267,35 +251,42 @@ static void binary_buffer_modified(cee_pointer buffer,
     if (_source_token_map)
         cee_source_token_map_free(_source_token_map);
     
+    if (_symbol_wrappers)
+        cee_list_free_full(_symbol_wrappers, symbol_wrapper_free);
+    
+    if (_prep_directive_symbol_tree)
+        cee_tree_free(_prep_directive_symbol_tree);
+    
+    if (_statement_symbol_tree)
+        cee_tree_free(_statement_symbol_tree);
+    
     if (_storage)
         cee_text_storage_free(_storage);
-    
-    if (_symbolsSearched)
-        cee_list_free_full(_symbolsSearched, cee_symbol_free);
-    
-    if (_symbol_cache)
-        cee_symbol_cache_free(_symbol_cache);
 }
 
 - (void)setState:(CEESourceBufferState)state {
-    _states |= state;
+    _state |= state;
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferStateChanged object:self];
 }
 
+- (CEESourceBufferState)state {
+    return _state;
+}
+
 - (void)clearState:(CEESourceBufferState)state {
-    _states &= ~state;
+    _state &= ~state;
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferStateChanged object:self];
 }
 
 - (BOOL)stateSet:(CEESourceBufferState)state {
-    return _states & state;
+    return _state & state;
 }
 
 - (void)reload {
     cee_uchar* content = NULL;
     cee_file_contents_get([_filePath UTF8String], &content, NULL);
     cee_text_storage_buffer_set(_storage, content);
-    buffer_parse(self);
+    cee_source_buffer_parse(self, kCEESourceBufferParserOptionCreateSymbolWrapper);
     cee_free(content);
     [self setState:kCEESourceBufferStateReload];
     [self clearState:kCEESourceBufferStateReload];
@@ -314,19 +305,6 @@ static void binary_buffer_modified(cee_pointer buffer,
 - (void)updateFileModifiedDate {
     NSDate* modificationDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];
     _modificationDate = [self UTCStringFromDate:modificationDate];
-}
-
-- (cee_uint)symbolWrapperLength {
-    return cee_list_length(_symbol_wrappers);
-}
-
-- (CEESymbolWrapper*)symbolWrapperByIndex:(NSInteger)index {
-    return cee_list_nth(_symbol_wrappers,  (cee_uint)index)->data;
-}
-
-- (void)highlightSymbol:(CEESourceSymbol*)symbol {
-    _highlightedSymbol = symbol;
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferHighlightSymbol object:self];
 }
 
 @end
@@ -362,6 +340,7 @@ static void binary_buffer_modified(cee_pointer buffer,
     CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
     if (!buffer)
         return nil;
+    
     [buffer referenceIncrease];
     [_buffers addObject:buffer];
     
@@ -382,16 +361,17 @@ static void binary_buffer_modified(cee_pointer buffer,
     [buffer referenceDecrease];
     if (!buffer.referenceCount)
         [_buffers removeObject:buffer];
+    
 }
 
-- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filepath {
+- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filePath {
     NSString* filePathBeforeSave = buffer.filePath;
     
-    [[NSString stringWithUTF8String:(const char *)cee_text_storage_buffer_get(buffer.storage)] writeToURL:[NSURL fileURLWithPath:filepath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
+    [[NSString stringWithUTF8String:(const char *)cee_text_storage_buffer_get(buffer.storage)] writeToURL:[NSURL fileURLWithPath:filePath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
     [buffer updateFileModifiedDate];
     
-    if (![filePathBeforeSave isEqualToString:filepath]) {
-        buffer.filePath = filepath;
+    if (![filePathBeforeSave isEqualToString:filePath]) {
+        buffer.filePath = filePath;
         [buffer setState:kCEESourceBufferStateFilePathChanged];
         [buffer clearState:kCEESourceBufferStateFilePathChanged];
     }
@@ -404,7 +384,13 @@ static void binary_buffer_modified(cee_pointer buffer,
     
     if ([buffer stateSet:kCEESourceBufferStateFileDeleted])
         [buffer clearState:kCEESourceBufferStateFileDeleted];
-    
+}
+
+- (CEESourceBuffer*)getSourceBufferWithFilePath:(NSString*)filePath {
+    for (CEESourceBuffer* buffer in _buffers)
+        if ([buffer.filePath compare:filePath options:NSLiteralSearch] == NSOrderedSame)
+            return buffer;
+    return nil;
 }
 
 - (void)updateSourceBuffers {
@@ -429,6 +415,14 @@ static void binary_buffer_modified(cee_pointer buffer,
 
 - (BOOL)fileExistsAtPath:(NSString*)filePath {
     return [[NSFileManager defaultManager] fileExistsAtPath:filePath];
+}
+
+- (BOOL)hasModifiedBuffer {
+    for (CEESourceBuffer* buffer in _buffers) {
+        if (buffer.state & kCEESourceBufferStateModified)
+            return YES;
+    }
+    return NO;
 }
 
 @end

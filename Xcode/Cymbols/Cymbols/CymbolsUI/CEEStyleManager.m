@@ -9,6 +9,7 @@
 #import "CEEStyleManager.h"
 #import "CEEJSONReader.h"
 #import "NSView+UIStyle.h"
+#import "CEEScroller.h"
 
 NSNotificationName CEENotificationUserInterfaceStyleUpdate = @"CEENotificationUserInterfaceStyleUpdate";
 NSNotificationName CEENotificationTextHighlightStyleUpdate = @"CEENotificationTextHighlightStyleUpdate";
@@ -149,6 +150,137 @@ static CEEStyleManager* gStyleManager = nil;
     return _textHighlightStyleName;
 }
 
+- (NSImage*)filetypeIconFromFileName:(NSString*)fileName {
+    NSString* identifier = @"icon_file_type_common_16x16";
+    NSString* extension = [fileName pathExtension];
+    
+    if ([fileName caseInsensitiveCompare:@"Makefile"] == NSOrderedSame)
+        identifier = @"icon_file_type_makefile_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"c"] == NSOrderedSame)
+        identifier = @"icon_file_type_c_16x16";
+        
+    if ([extension caseInsensitiveCompare:@"cpp"] == NSOrderedSame ||
+        [extension caseInsensitiveCompare:@"cc"] == NSOrderedSame)
+        identifier = @"icon_file_type_cpp_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"h"] == NSOrderedSame)
+        identifier = @"icon_file_type_c_header_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"hpp"] == NSOrderedSame)
+        identifier = @"icon_file_type_c_header_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"m"] == NSOrderedSame)
+        identifier = @"icon_file_type_objective_c_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"mm"] == NSOrderedSame)
+        identifier = @"icon_file_type_cpp_16x16";
+        
+    if ([extension caseInsensitiveCompare:@"asm"] == NSOrderedSame ||
+        [extension caseInsensitiveCompare:@"s"] == NSOrderedSame)
+        identifier = @"icon_file_type_asm_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"txt"] == NSOrderedSame ||
+        [extension caseInsensitiveCompare:@"text"]== NSOrderedSame)
+        identifier = @"icon_file_type_text_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"html"] == NSOrderedSame)
+        identifier = @"icon_file_type_html_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"js"] == NSOrderedSame)
+        identifier = @"icon_file_type_javascript_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"java"] == NSOrderedSame)
+        identifier = @"icon_file_type_java_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"swift"] == NSOrderedSame)
+        identifier = @"icon_file_type_swift_16x16";
+    
+    if ([extension caseInsensitiveCompare:@"png"] == NSOrderedSame ||
+        [extension caseInsensitiveCompare:@"jpg"] == NSOrderedSame ||
+        [extension caseInsensitiveCompare:@"jpeg"] == NSOrderedSame ||
+        [extension caseInsensitiveCompare:@"tft"] == NSOrderedSame ||
+        [extension caseInsensitiveCompare:@"bmp"] == NSOrderedSame)
+        identifier = @"icon_file_type_image_16x16";
+    
+    return [NSImage imageNamed:identifier];
+}
+
+
+- (NSImage*)symbolIconFromSymbolType:(CEESourceSymbolType)type {
+    NSString* identifier = nil;
+    switch (type) {
+            
+        case kCEESourceSymbolTypeFunctionDefinition:
+            identifier = @"icon_function_definition_16x16";
+            break;
+        case kCEESourceSymbolTypeMessageDefinition:
+            identifier = @"icon_message_definition_16x16";
+            break;
+        case kCEESourceSymbolTypeFunctionDeclaration:
+            identifier = @"icon_function_declaration_16x16";
+            break;
+        case kCEESourceSymbolTypeMessageDeclaration:
+            identifier = @"icon_message_declaration_16x16";
+            break;
+        case kCEESourceSymbolTypeVariableDeclaration:
+        case kCEESourceSymbolTypeLabel:
+        case kCEESourceSymbolTypeFunctionParameter:
+        case kCEESourceSymbolTypeMessageParameter:
+            identifier = @"icon_variable_declaration_16x16";
+            break;
+        case kCEESourceSymbolTypeCustomTypeDeclaration:
+            identifier = @"icon_custom_type_declaration_16x16";
+            break;
+        case kCEESourceSymbolTypeProperty:
+            identifier = @"icon_property_16x16";
+            break;
+        case kCEESourceSymbolTypeTypeDefine:
+            identifier = @"icon_typedef_16x16";
+            break;
+        case kCEESourceSymbolTypeEnumerator:
+            identifier = @"icon_enumerator_16x16";
+            break;
+        case kCEESourceSymbolTypePrepDirectiveDefine:
+        case kCEESourceSymbolTypePrepDirectiveInclude:
+        case kCEESourceSymbolTypePrepDirectiveParameter:
+        case kCEESourceSymbolTypePrepDirectiveCommon:
+            identifier = @"icon_prep_directive_define_16x16";
+            break;
+        case kCEESourceSymbolTypeTemplateDeclaration:
+            identifier = @"icon_template_declaration_16x16";
+            break;
+        case kCEESourceSymbolTypeNamespaceDefinition:
+            identifier = @"icon_namespace_definition_16x16";
+            break;
+        case kCEESourceSymbolTypeClassDefinition:
+            identifier = @"icon_class_definition_16x16";
+            break;
+        case kCEESourceSymbolTypeEnumDefinition:
+            identifier = @"icon_enum_definition_16x16";
+            break;
+        case kCEESourceSymbolTypeUnionDefinition:
+            identifier = @"icon_union_definition_16x16";
+            break;
+        case kCEESourceSymbolTypeInterfaceDeclaration:
+            identifier = @"icon_interface_declaration_16x16";
+            break;
+        case kCEESourceSymbolTypeImplementationDefinition:
+            identifier = @"icon_implementation_definition_16x16";
+            break;
+        case kCEESourceSymbolTypeProtocolDeclaration:
+            identifier = @"icon_protocol_declaration_16x16";
+            break;
+        case kCEESourceSymbolTypeExternBlock:
+            identifier = @"icon_source_block_16x16";
+            break;
+        default:
+            break;
+    }
+    
+    return [NSImage imageNamed:identifier];
+}
+
 @end
 
 
@@ -159,23 +291,43 @@ static CEEStyleManager* gStyleManager = nil;
     NSString* patternString = @"(rgba|hsba)\\s*\\(\\s*([0-9]+)\\s*,\\s*([0-9]+)\\s*,\\s*([0-9]+)\\s*,\\s*([0-9]+)\\s*\\)";
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
     NSArray *matches = [regex matchesInString:string options:0 range:NSMakeRange(0, [string length])];
-    
-    for (NSTextCheckingResult *match in matches) {
-        if ([[string substringWithRange:[match rangeAtIndex:1]] caseInsensitiveCompare:@"rgba"] == NSOrderedSame) {
-            CGFloat r = [[string substringWithRange:[match rangeAtIndex:2]] floatValue];
-            CGFloat g = [[string substringWithRange:[match rangeAtIndex:3]] floatValue];
-            CGFloat b = [[string substringWithRange:[match rangeAtIndex:4]] floatValue];
-            CGFloat a = [[string substringWithRange:[match rangeAtIndex:5]] floatValue];
-            color = [NSColor colorWithRed:r/256.0 green:g/256.0 blue:b/256.0 alpha:a/100.0];
-        }
-        else if ([[string substringWithRange:[match rangeAtIndex:1]] caseInsensitiveCompare:@"hsba"] == NSOrderedSame) {
-            CGFloat h = [[string substringWithRange:[match rangeAtIndex:2]] floatValue];
-            CGFloat s = [[string substringWithRange:[match rangeAtIndex:3]] floatValue];
-            CGFloat b = [[string substringWithRange:[match rangeAtIndex:4]] floatValue];
-            CGFloat a = [[string substringWithRange:[match rangeAtIndex:5]] floatValue];
-            color = [NSColor colorWithHue:h/360.0 saturation:s/100.0 brightness:b/100.0 alpha:a/100.0];
+    if (matches.count) {
+        for (NSTextCheckingResult *match in matches) {
+            if ([[string substringWithRange:[match rangeAtIndex:1]] caseInsensitiveCompare:@"rgba"] == NSOrderedSame) {
+                CGFloat r = [[string substringWithRange:[match rangeAtIndex:2]] floatValue] / 256.0;
+                CGFloat g = [[string substringWithRange:[match rangeAtIndex:3]] floatValue] / 256.0;
+                CGFloat b = [[string substringWithRange:[match rangeAtIndex:4]] floatValue] / 256.0;
+                CGFloat a = [[string substringWithRange:[match rangeAtIndex:5]] floatValue] / 100.0;
+                color = [NSColor colorWithSRGBRed:r green:g blue:b alpha:a];
+                
+            }
+            else if ([[string substringWithRange:[match rangeAtIndex:1]] caseInsensitiveCompare:@"hsba"] == NSOrderedSame) {
+                CGFloat h = [[string substringWithRange:[match rangeAtIndex:2]] floatValue] / 360.0;
+                CGFloat s = [[string substringWithRange:[match rangeAtIndex:3]] floatValue] / 100.0;
+                CGFloat b = [[string substringWithRange:[match rangeAtIndex:4]] floatValue] / 100.0;
+                CGFloat a = [[string substringWithRange:[match rangeAtIndex:5]] floatValue] / 100.0;
+                color = [NSColor colorWithHue:h saturation:s brightness:b alpha:a];
+                color = [color colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
+            
+            }
         }
     }
+    else {
+        patternString = @"#[0-9a-fA-F]+";
+        regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
+        matches = [regex matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+        if (matches.count) {
+            unsigned int hexValue = 0;
+            NSString* hexString = [string substringFromIndex:1];
+            NSScanner* scanner = [NSScanner scannerWithString:hexString];
+            [scanner scanHexInt:&hexValue];
+            CGFloat r = (CGFloat)(((unsigned char)(hexValue >> 16)) / 256.0);
+            CGFloat g = (CGFloat)(((unsigned char)(hexValue >> 8)) / 256.0);
+            CGFloat b = (CGFloat)(((unsigned char)(hexValue)) / 256.0);
+            color = [NSColor colorWithSRGBRed:r green:g blue:b alpha:1.0];
+        }
+    }
+    
     return color;
 }
 
@@ -242,39 +394,41 @@ static CEEStyleManager* gStyleManager = nil;
     return selector;
 }
 
-- (CEEViewStyle)getStyleFromSchemeSelector:(NSString*)selector {
-    CEEViewStyle style = kCEEViewStyleInit;
+- (CEEViewStyleState)getStyleFromSchemeSelector:(NSString*)selector {
+    CEEViewStyleState state = kCEEViewStyleStateActived;
     NSString* descriptor = nil;
-    NSInteger colon = [selector rangeOfString:@":"].location;
-    if (colon != NSNotFound) {
-        descriptor = [selector substringWithRange:NSMakeRange(colon, selector.length - colon)];
-        if ([descriptor containsString:@"selected"])
-            style |= kCEEViewStyleSelected;
-        if ([descriptor containsString:@"actived"])
-            style |= kCEEViewStyleActived;
-        if ([descriptor containsString:@"clicked"])
-            style |= kCEEViewStyleClicked;
-        if ([descriptor containsString:@"disabled"])
-            style |= kCEEViewStyleDisabled;
-        if ([descriptor containsString:@"highlighted"])
-            style |= kCEEViewStyleHeighLighted;
+    NSString* pattern = @"([a-zA-Z0-9_]+)\\s*(\\[\\s*([a-zA-Z0-9]+)\\s*\\])?";
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSArray *matches = [regex matchesInString:selector options:0 range:NSMakeRange(0, [selector length])];
+    if (matches.count) {
+        for (NSTextCheckingResult *match in matches)
+            if (match.numberOfRanges == 4)
+                descriptor = [selector substringWithRange:[match rangeAtIndex:3]];
     }
-    return style;
-}
-
-- (BOOL)selectorContainStyleDescriptor:(NSString*)key {
-    return [key rangeOfString:@":"].location != NSNotFound;
+    if ([descriptor caseInsensitiveCompare:@"actived"] == NSOrderedSame)
+        state = kCEEViewStyleStateActived;
+    if ([descriptor caseInsensitiveCompare:@"deactived"] == NSOrderedSame)
+        state = kCEEViewStyleStateDeactived;
+    if ([descriptor caseInsensitiveCompare:@"clicked"] == NSOrderedSame)
+        state = kCEEViewStyleStateClicked;
+    if ([descriptor caseInsensitiveCompare:@"disabled"] == NSOrderedSame)
+        state = kCEEViewStyleStateDisabled;
+    if ([descriptor caseInsensitiveCompare:@"highlighted"] == NSOrderedSame)
+        state = kCEEViewStyleStateHeighLighted;
+    
+    return state;
 }
 
 - (NSString*)getIdentifierFromSchemeSelector:(NSString*)selector {
-    NSString* identifier = nil;
-    NSInteger colon = [selector rangeOfString:@":"].location;
-    if (colon != NSNotFound)
-        identifier = [selector substringWithRange:NSMakeRange(0, colon)];
-    else
-        identifier = selector;
     
-    identifier = [identifier stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    NSString* identifier = nil;
+    NSString* pattern = @"([a-zA-Z0-9_]+)\\s*(\\[\\s*([a-zA-Z0-9]+)\\s*\\])?";
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSArray *matches = [regex matchesInString:selector options:0 range:NSMakeRange(0, [selector length])];
+    if (matches.count) {
+        for (NSTextCheckingResult *match in matches)
+            identifier = [selector substringWithRange:[match rangeAtIndex:1]];
+    }
     return identifier;
 }
 
@@ -286,7 +440,7 @@ static CEEStyleManager* gStyleManager = nil;
     NSRange suffixRange;
     CEEUserInterfaceStyleScheme* scheme = nil;
     NSString* schemeIdentifier = nil;
-    CEEViewStyle style = kCEEViewStyleInit;
+    CEEViewStyleState state = kCEEViewStyleStateDeactived;
     
     current = [self selectorFromIdentifier:identifiers[0]];
     if (identifiers.count == 1) {
@@ -301,13 +455,13 @@ static CEEStyleManager* gStyleManager = nil;
     for (NSString* selector in descriptor.allKeys) {
         schemeIdentifier = [self getIdentifierFromSchemeSelector:selector];
         if ([schemeIdentifier compare:current options:NSLiteralSearch] == NSOrderedSame) {
-            style = [self getStyleFromSchemeSelector:selector];
+            state = [self getStyleFromSchemeSelector:selector];
             if (isTail) {
                 if (!*schemes)
                     *schemes = [[NSMutableArray alloc] init];
                 
                 scheme = [[CEEUserInterfaceStyleScheme alloc] init];
-                scheme.style = style;
+                scheme.styleState = state;
                 scheme.descriptor = descriptor[selector];
                 [(*schemes) addObject:scheme];
             }
@@ -321,14 +475,23 @@ static CEEStyleManager* gStyleManager = nil;
 - (void)configureView:(__kindof NSView*)view {
     if (!_descriptor)
         return;
-    
-    NSString* selector = [view getSchemeIdentifier];
-    if (!selector)
-        selector = [view getSchemeClassName];
-    
+        
     NSMutableArray* schemes = nil;
+    BOOL useClassIdentifier = NO;
+    NSString* selector = [view getSchemeObjectIdentifier];
+    if (!selector) {
+        useClassIdentifier = YES;
+        selector = [view getSchemeClassIdentifier];
+    }
     [self enumerateSchemes:&schemes fromDescriptor:_descriptor withIdentifier:selector];
+    
+    if (!schemes && !useClassIdentifier) {
+        selector = [view getSchemeClassIdentifier];
+        [self enumerateSchemes:&schemes fromDescriptor:_descriptor withIdentifier:selector];
+    }
+    
     [view setSytleSchemes:schemes];
+    return;
 }
 
 @end

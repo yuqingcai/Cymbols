@@ -23,6 +23,8 @@ cee_char* cee_string_from_range(CEERange* range);
 cee_char* cee_string_from_ranges(CEEList* ranges);
 cee_boolean cee_location_in_range(cee_long location,
                                   CEERange range);
+cee_boolean cee_location_in_ranges(cee_long location,
+                                   CEEList* ranges);
 cee_long cee_range_tail(CEERange range);
 cee_boolean cee_location_overflow_range(cee_long location,
                                         CEERange range);

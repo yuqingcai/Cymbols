@@ -26,13 +26,6 @@
                         </userDefinedRuntimeAttribute>
                     </userDefinedRuntimeAttributes>
                 </customView>
-                <customView identifier="IDProjectSettingSourceTableView" translatesAutoresizingMaskIntoConstraints="NO" id="qUO-Q1-Qb2" customClass="CEETableView">
-                    <rect key="frame" x="20" y="30" width="560" height="324"/>
-                    <constraints>
-                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="324" id="jWK-S1-siR"/>
-                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="560" id="nyk-hw-YCi"/>
-                    </constraints>
-                </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="OFt-FS-1Bm" customClass="CEETextField">
                     <rect key="frame" x="126" y="428" width="454" height="24"/>
                     <constraints>
@@ -85,7 +78,7 @@
                         <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Source Files"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
-                <customView identifier="IDProjectSettingAddPathButton" translatesAutoresizingMaskIntoConstraints="NO" id="qo6-mS-OmK" customClass="CEEButton">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="qo6-mS-OmK" customClass="CEEButton">
                     <rect key="frame" x="20" y="0.0" width="23" height="22"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="22" id="9AK-OI-oIr"/>
@@ -104,7 +97,7 @@
                         </userDefinedRuntimeAttribute>
                     </userDefinedRuntimeAttributes>
                 </customView>
-                <customView identifier="IDProjectSettingRemovePathButton" translatesAutoresizingMaskIntoConstraints="NO" id="a32-f4-9IG" customClass="CEEButton">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="a32-f4-9IG" customClass="CEEButton">
                     <rect key="frame" x="48" y="0.0" width="23" height="22"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="23" id="K3Z-QS-569"/>
@@ -123,6 +116,22 @@
                         </userDefinedRuntimeAttribute>
                     </userDefinedRuntimeAttributes>
                 </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="J9L-pL-Jti" customClass="CEEContainerView">
+                    <rect key="frame" x="20" y="30" width="560" height="331"/>
+                    <subviews>
+                        <customView translatesAutoresizingMaskIntoConstraints="NO" id="XGl-be-vic" customClass="CEETableView">
+                            <rect key="frame" x="1" y="1" width="558" height="329"/>
+                        </customView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="XGl-be-vic" firstAttribute="top" secondItem="J9L-pL-Jti" secondAttribute="top" constant="1" id="AmB-DU-llH"/>
+                        <constraint firstAttribute="bottom" secondItem="XGl-be-vic" secondAttribute="bottom" constant="1" id="BNG-vN-ABq"/>
+                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="500" id="cdY-JU-H62"/>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="300" id="g25-rz-UdD"/>
+                        <constraint firstAttribute="trailing" secondItem="XGl-be-vic" secondAttribute="trailing" constant="1" id="hgu-wp-8Dt"/>
+                        <constraint firstItem="XGl-be-vic" firstAttribute="leading" secondItem="J9L-pL-Jti" secondAttribute="leading" constant="1" id="pKX-bH-C2A"/>
+                    </constraints>
+                </customView>
             </subviews>
             <constraints>
                 <constraint firstItem="G7j-6Z-aBD" firstAttribute="leading" secondItem="rqJ-OA-JOu" secondAttribute="trailing" constant="8" id="0lG-JF-ovQ"/>
@@ -133,27 +142,27 @@
                 <constraint firstItem="vKQ-4c-BuE" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="6PS-7i-BP0"/>
                 <constraint firstItem="w9P-Lo-li0" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="16" id="6Xl-Q6-ZwS"/>
                 <constraint firstItem="qo6-mS-OmK" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="6mm-Bk-lOk"/>
+                <constraint firstItem="qo6-mS-OmK" firstAttribute="top" secondItem="J9L-pL-Jti" secondAttribute="bottom" constant="8" id="9Cv-h8-XC1"/>
                 <constraint firstAttribute="trailing" secondItem="OFt-FS-1Bm" secondAttribute="trailing" constant="20" id="FcT-R7-ekL"/>
-                <constraint firstItem="qo6-mS-OmK" firstAttribute="top" secondItem="qUO-Q1-Qb2" secondAttribute="bottom" constant="8" id="IMg-wi-fJC"/>
                 <constraint firstItem="G7j-6Z-aBD" firstAttribute="leading" secondItem="rqJ-OA-JOu" secondAttribute="trailing" constant="8" id="Iko-ub-CG5"/>
                 <constraint firstItem="w9P-Lo-li0" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="Qih-Hf-vAh"/>
                 <constraint firstItem="Nq6-Dd-10K" firstAttribute="top" secondItem="w9P-Lo-li0" secondAttribute="bottom" constant="8" id="RV2-eK-r0x"/>
                 <constraint firstItem="OFt-FS-1Bm" firstAttribute="top" secondItem="w9P-Lo-li0" secondAttribute="bottom" constant="8" id="TUz-1m-dIt"/>
                 <constraint firstItem="Ie8-uo-OBP" firstAttribute="top" secondItem="rqJ-OA-JOu" secondAttribute="bottom" constant="8" id="XCf-TP-sXW"/>
+                <constraint firstAttribute="trailing" secondItem="J9L-pL-Jti" secondAttribute="trailing" constant="20" id="aeI-qU-5Nt"/>
                 <constraint firstItem="vKQ-4c-BuE" firstAttribute="top" secondItem="Nq6-Dd-10K" secondAttribute="bottom" constant="10" id="aif-3M-6bq"/>
                 <constraint firstAttribute="bottom" secondItem="a32-f4-9IG" secondAttribute="bottom" id="crf-oG-0K8"/>
+                <constraint firstItem="J9L-pL-Jti" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="iMW-qL-JSl"/>
+                <constraint firstItem="J9L-pL-Jti" firstAttribute="top" secondItem="Ie8-uo-OBP" secondAttribute="bottom" constant="1" id="lMH-tP-q8k"/>
                 <constraint firstAttribute="trailing" secondItem="G7j-6Z-aBD" secondAttribute="trailing" constant="20" id="n4i-8d-ZF1"/>
                 <constraint firstItem="a32-f4-9IG" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="48" id="pvb-GK-EhE"/>
                 <constraint firstItem="Ie8-uo-OBP" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="rgV-Dk-eC7"/>
                 <constraint firstItem="rqJ-OA-JOu" firstAttribute="leading" secondItem="vKQ-4c-BuE" secondAttribute="trailing" constant="8" id="vhz-jJ-K9H"/>
-                <constraint firstItem="qUO-Q1-Qb2" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="vkZ-vG-geR"/>
-                <constraint firstAttribute="trailing" secondItem="qUO-Q1-Qb2" secondAttribute="trailing" constant="20" id="voH-PH-Ofn"/>
-                <constraint firstItem="qUO-Q1-Qb2" firstAttribute="top" secondItem="Ie8-uo-OBP" secondAttribute="bottom" constant="8" id="w43-1N-fur"/>
                 <constraint firstAttribute="bottom" secondItem="qo6-mS-OmK" secondAttribute="bottom" id="wNG-DR-PjQ"/>
             </constraints>
             <connections>
                 <outlet property="addFilePathButton" destination="qo6-mS-OmK" id="za1-UI-e2F"/>
-                <outlet property="filePathTable" destination="qUO-Q1-Qb2" id="ISm-WA-vWF"/>
+                <outlet property="filePathTable" destination="XGl-be-vic" id="rvF-dN-HLl"/>
                 <outlet property="nameInput" destination="OFt-FS-1Bm" id="M1J-rF-7kg"/>
                 <outlet property="projectNameLabel" destination="Nq6-Dd-10K" id="AS6-lA-qAe"/>
                 <outlet property="removeFilePathsButton" destination="a32-f4-9IG" id="8QQ-WU-0Ut"/>

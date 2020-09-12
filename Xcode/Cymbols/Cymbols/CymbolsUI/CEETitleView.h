@@ -19,11 +19,12 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface CEETitleView : CEEView
-@property (strong) NSColor* iconColor;
-@property (weak) id<CEETitleViewDelegate> delegate;
 @property CGFloat leadingOffset;
 @property CGFloat tailingOffset;
 @property NSString* title;
+@property CGFloat kern;
+@property (weak) id<CEETitleViewDelegate> delegate;
+@property (weak) CEEView* draggingSource;
 @end
 
 NS_ASSUME_NONNULL_END

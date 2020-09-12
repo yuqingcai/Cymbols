@@ -48,7 +48,7 @@
         if (minimalStringSize.width < captionWidth) {
             if (drawingSize.width < captionWidth) {
                 rect = dirtyRect;
-                rect.origin.x = _leadingOffset;
+                rect.origin.x = self.frame.size.width - 20.0 - drawingSize.width;
                 diff = (self.font.ascender + fabs(self.font.descender)) / 2.0 - fabs(self.font.descender);
                 rect.origin.y = (self.frame.size.height / 2.0) - diff;
                 [drawingString drawWithRect:rect options:0 context:nil];
@@ -65,7 +65,7 @@
                     subIndex ++;
                 }
                 rect = dirtyRect;
-                rect.origin.x = _leadingOffset;
+                rect.origin.x = self.frame.size.width - 20.0 - drawingSize.width;
                 diff = (self.font.ascender + fabs(self.font.descender)) / 2.0 - fabs(self.font.descender);
                 rect.origin.y = (self.frame.size.height / 2.0) - diff;
                 [drawingString drawWithRect:rect options:0 context:nil];

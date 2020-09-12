@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "cee_symbol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -28,6 +29,8 @@ extern NSNotificationName CEENotificationTextHighlightStyleUpdate;
 - (NSArray*)textHighlightStyleNames;
 - (void)setUserInterfaceStyle:(NSDictionary*)descriptor;
 - (void)setTextHighlightDescriptor:(NSString*)descriptor;
+- (NSImage*)filetypeIconFromFileName:(NSString*)fileName;
+- (NSImage*)symbolIconFromSymbolType:(CEESourceSymbolType)type;
 @end
 
 

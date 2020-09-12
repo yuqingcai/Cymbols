@@ -10,10 +10,20 @@
 
 @implementation CEESourceBufferSaveConfirmCellView
 
-- (void)drawRect:(NSRect)dirtyRect {
-    [super drawRect:dirtyRect];
+- (void)setStyleState:(CEEViewStyleState)state {
+    [super setStyleState:state];
+    for (NSView* view in self.subviews)
+        [view setStyleState:state];
+}
+
+- (IBAction)select:(id)sender {
+    if (!self.sourceBufferIdentifier || !_delegate)
+        return;
     
-    // Drawing code here.
+    if (_check.state == NSControlStateValueOn)
+        [_delegate sourceBufferSelect:self.sourceBufferIdentifier];
+    else if (_check.state == NSControlStateValueOff)
+        [_delegate sourceBufferDeselect:self.sourceBufferIdentifier];
 }
 
 @end

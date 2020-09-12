@@ -11,6 +11,7 @@
 @implementation CEEButton
 
 @synthesize title = _title;
+@synthesize state = _state;
 
 - (void)initProperties { 
     [super initProperties];
@@ -25,6 +26,7 @@
     _borderWidth = 0.0;
     _cornerRadius = 1.0;
     _title = @"";
+    _state = NSOffState;
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
@@ -90,7 +92,8 @@
     }
     
     if (_icon) {
-        _icon = [self tintedImage:_icon withColor:_iconColor];
+        if (_iconColor)
+            _icon = [self tintedImage:_icon withColor:_iconColor];
         CGFloat iconWidth = _icon.size.width;
         CGFloat iconHeight = _icon.size.height;
         CGRect r0 = CGRectMake(0, 0, iconWidth, iconHeight);
@@ -109,8 +112,7 @@
     if (!self.enabled)
         return;
     
-    [self setStyle:kCEEViewStyleClicked];
-    
+    self.state = NSOnState;
     while (keepOn) {
         NSEventMask eventMask = NSEventMaskLeftMouseUp | NSEventMaskLeftMouseDragged;
         event = [[self window] nextEventMatchingMask:eventMask];
@@ -120,13 +122,13 @@
         switch ([event type]) {
             case NSEventTypeLeftMouseDragged:
                 if (isInside)
-                    [self setStyle:kCEEViewStyleClicked];
+                    self.state = NSOnState;
                 else
-                    [self clearStyle:kCEEViewStyleClicked];
+                    self.state = NSOffState;
                 break;
                 
             case NSEventTypeLeftMouseUp:
-                [self clearStyle:kCEEViewStyleClicked];
+                self.state = NSOffState;
                 
                 if (isInside && self.action)
                     [self sendAction:self.action to:self.target];
@@ -137,7 +139,23 @@
                 /* Ignore any other kind of event. */
                 break;
         }
-    };
+    }
+}
+
+- (void)setState:(NSControlStateValue)state {
+    _state = state;
+    if (_state == NSOnState)
+        [self setStyleState:kCEEViewStyleStateClicked];
+    else if (_state == NSOffState) {
+        if (self.superview && [self.superview styleState] == kCEEViewStyleStateDeactived)
+            [self setStyleState:kCEEViewStyleStateDeactived];
+        else
+            [self setStyleState:kCEEViewStyleStateActived];
+    }
+}
+
+- (NSControlStateValue)state {
+    return _state;
 }
 
 - (NSString*)title {
@@ -150,55 +168,33 @@
 }
 
 - (void)updateUserInterface {
-    
-    [super updateUserInterface];
-    
-    CEEUserInterfaceStyleScheme* current = (CEEUserInterfaceStyleScheme*)[self.styleSchemes pointerAtIndex:self.style];    
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
     if (!current)
         return;
     
-    NSDictionary* descriptor = current.descriptor;
+    if (current.font)
+        self.font = current.font;
     
-    NSString* fontProperty = descriptor[@"font"];
-    NSString* backgroundColorProperty = descriptor[@"background_color"];
-    NSString* borderColorProperty = descriptor[@"border_color"];
-    NSString* textColorProperty = descriptor[@"text_color"];
-    NSString* textShadowProperty = descriptor[@"text_shadow"];
-    NSString* gradientProperty = descriptor[@"gradient"];
-    NSString* gradientAngleProperty = descriptor[@"gradient_angle"];
-    NSString* borderWidthProperty = descriptor[@"border_width"];
-    NSString* iconColorProperty = descriptor[@"icon_color"];
-    NSString* radiusProperty = descriptor[@"radius"];
+    if (current.backgroundColor)
+        self.backgroundColor = current.backgroundColor;
     
-    if (fontProperty)
-        self.font = [CEEUserInterfaceStyleConfiguration createFontFromString:fontProperty];
+    if (current.borderColor)
+        self.borderColor = current.borderColor;
     
-    if (backgroundColorProperty)
-        self.backgroundColor = [CEEUserInterfaceStyleConfiguration createColorFromString:backgroundColorProperty];
+    if (current.textColor)
+        self.textColor = current.textColor;
     
-    if (borderColorProperty)
-        self.borderColor = [CEEUserInterfaceStyleConfiguration createColorFromString:borderColorProperty];
+    if (current.textShadow)
+        self.textShadow = current.textShadow;
     
-    if (textColorProperty)
-        self.textColor = [CEEUserInterfaceStyleConfiguration createColorFromString:textColorProperty];
+    if (current.gradient)
+        self.gradient = current.gradient;
     
-    if (textShadowProperty)
-        self.textShadow = [CEEUserInterfaceStyleConfiguration createShadowFromString:textShadowProperty];
+    self.gradientAngle = current.gradientAngle;
+    self.borderWidth = current.borderWidth;
     
-    if (gradientProperty)
-        self.gradient = [CEEUserInterfaceStyleConfiguration createGradientFromString:gradientProperty];
-    
-    if (gradientAngleProperty)
-        self.gradientAngle = [gradientAngleProperty floatValue];
-    
-    if (borderWidthProperty)
-        self.borderWidth = [borderWidthProperty floatValue];
-    
-    if (iconColorProperty)
-        self.iconColor = [CEEUserInterfaceStyleConfiguration createColorFromString:iconColorProperty];
-    
-    if (radiusProperty)
-        self.cornerRadius = [radiusProperty floatValue];    
+    self.iconColor = current.iconColor;
+    self.cornerRadius = current.cornerRadius;
 }
 
 @end

@@ -6,7 +6,7 @@
 //  Copyright © 2019 Lazycatdesign. All rights reserved.
 //
 
-#import "CymbolsDelegate.h"
+#import "AppDelegate.h"
 #import "CEEStyleManager.h"
 #import "CEEProjectAddFileController.h"
 #import "CEEAddFileSelectionView.h"
@@ -37,8 +37,9 @@ typedef NS_ENUM(NSInteger, CEEProjectAddFileScene) {
 - (void)viewDidLoad {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [super viewDidLoad];
-    [self setViewStyle:kCEEViewStyleActived];
-    CymbolsDelegate* delegate = (CymbolsDelegate*)[NSApp delegate];
+    [self.view setStyleState:kCEEViewStyleStateActived];
+    
+    AppDelegate* delegate = [NSApp delegate];
     _addFileSelectionView = (CEEAddFileSelectionView*)[delegate nibObjectWithClass:[CEEAddFileSelectionView class] fromNibNamed:@"AddFileSelectionView"];
     [_addFileSelectionView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     
@@ -71,7 +72,7 @@ typedef NS_ENUM(NSInteger, CEEProjectAddFileScene) {
 - (void)viewWillAppear {
     _scene = kCEEFileSelection;
     [self createScene:_scene];
-    [self setViewStyle:kCEEViewStyleActived];
+    [self setViewStyleState:kCEEViewStyleStateActived];
 }
 
 - (void)createScene:(CEEProjectAddFileScene)scene {
@@ -96,7 +97,7 @@ typedef NS_ENUM(NSInteger, CEEProjectAddFileScene) {
     
     [_currentView setTranslatesAutoresizingMaskIntoConstraints:NO];
     [_currentView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
-    [_currentView setStyle:kCEEViewStyleActived];
+    [_currentView setStyleState:kCEEViewStyleStateActived];
     
     [self.view addSubview:_currentView];
     NSDictionary *views = @{
@@ -187,7 +188,7 @@ typedef NS_ENUM(NSInteger, CEEProjectAddFileScene) {
 }
 
 - (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    CymbolsDelegate* delegate = [NSApp delegate];
+    AppDelegate* delegate = [NSApp delegate];
     return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 

@@ -10,12 +10,13 @@ typedef struct _CEEGNUASMParser {
 static CEEGNUASMParser* parser_create(void);
 static void parser_free(cee_pointer data);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
+                                const cee_uchar* filepath,
                                 const cee_uchar* subject,
-                                CEESourceFregment** statement,
                                 CEESourceFregment** prep_directive,
+                                CEESourceFregment** statement,
                                 CEESourceFregment** comment,
                                 CEEList** tokens_ref,
-                                cee_pointer** buffer2tokens);
+                                CEESourceTokenMap** source_token_map);
 
 /**
  * parser
@@ -32,6 +33,11 @@ void cee_gnu_asm_parser_free(cee_pointer data)
 {
     if (!data)
         return ;
+    
+    CEESourceParserRef parser = (CEESourceParserRef)data;
+    if (parser->imp)
+        parser_free(parser->imp);
+    cee_parser_free(parser);
 }
 
 static CEEGNUASMParser* parser_create(void)
@@ -48,14 +54,13 @@ static void parser_free(cee_pointer data)
 }
 
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
+                                const cee_uchar* filepath,
                                 const cee_uchar* subject,
-                                CEESourceFregment** statement,
                                 CEESourceFregment** prep_directive,
+                                CEESourceFregment** statement,
                                 CEESourceFregment** comment,
                                 CEEList** tokens_ref,
-                                cee_pointer** buffer2tokens)
+                                CEESourceTokenMap** source_token_map)
 {
-    CEETokenID token_id = kCEETokenID_UNKNOW;
-    CEESourceFregment* root = NULL;
-    return root;
+    return TRUE;
 }

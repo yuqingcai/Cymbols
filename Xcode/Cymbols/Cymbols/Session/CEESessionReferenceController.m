@@ -6,7 +6,7 @@
 //  Copyright © 2019 Lazycatdesign. All rights reserved.
 //
 
-#import "CymbolsDelegate.h"
+#import "AppDelegate.h"
 #import "CEESessionReferenceController.h"
 #import "CEEFileNameCellView.h"
 
@@ -29,6 +29,7 @@
     [_referenceTable setTarget:self];
     [_referenceTable setAction:@selector(selectRow:)];
     [_referenceTable setAllowsMultipleSelection:NO];
+    [_referenceTable setEnableDrawHeader:NO];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortOpenSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
@@ -57,6 +58,7 @@
 }
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEESourceBuffer* buffer = _buffers[row];
     CEEFileNameCellView* cellView = [_referenceTable makeViewWithIdentifier:@"IDFileNameCellView"];
     NSString* string = [buffer.filePath lastPathComponent];
@@ -67,18 +69,19 @@
             string = [string stringByAppendingString:@" (delete)"];
     }
     cellView.title.stringValue = string;
+    [cellView.icon setImage:[styleManager filetypeIconFromFileName:[buffer.filePath lastPathComponent]]];
     return cellView;
 }
 
 - (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    CymbolsDelegate* delegate = [NSApp delegate];
+    AppDelegate* delegate = [NSApp delegate];
     return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (void)highlightSelectionInReferenceTable {
     CEESessionPort* port = _session.activedPort;
     NSIndexSet *indexSet = nil;
-    CEEBufferReference* reference = [port currentReference];
+    CEEBufferReference* reference = [port currentBufferReference];
     if (!_buffers)
         return;
     
@@ -105,7 +108,7 @@
         return ;
     
     CEESourceBuffer* buffer = _buffers[selectedRow];
-    [_session.activedPort presentSourceBuffer:buffer];
+    [_session.activedPort setActivedSourceBuffer:buffer];
 }
 
 - (void)sourceBufferStateChangedResponse:(NSNotification*)notification {

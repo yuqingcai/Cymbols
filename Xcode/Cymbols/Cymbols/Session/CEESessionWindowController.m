@@ -5,7 +5,7 @@
 //  Created by caiyuqing on 2019/7/4.
 //  Copyright © 2019 Lazycatdesign. All rights reserved.
 //
-
+#import "AppDelegate.h"
 #import "CEESessionWindowController.h"
 #import "CEESessionViewController.h"
 
@@ -36,8 +36,10 @@
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)notification {
+    AppDelegate* delegate = [NSApp delegate];
     [super windowDidBecomeMain:notification];
     [_session.project setCurrentSession:_session];
+    [delegate setCurrentProject:_session.project];
 }
 
 - (void)windowDidResignMain:(NSNotification *)notification {

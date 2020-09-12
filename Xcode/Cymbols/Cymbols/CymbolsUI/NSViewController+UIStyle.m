@@ -10,12 +10,8 @@
 
 @implementation NSViewController(UIStyle)
 
-- (void)setViewStyle:(CEEViewStyle)style {
-    [self.view setStyle:style];
-}
-
-- (void)clearViewStyle:(CEEViewStyle)style {
-    [self.view clearStyle:style];
+- (void)setViewStyleState:(CEEViewStyleState)state {
+    [self.view setStyleState:state];
 }
 
 @end

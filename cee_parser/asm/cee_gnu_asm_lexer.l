@@ -33,19 +33,19 @@ static YY_BUFFER_STATE buffer = NULL;
 %}
 
 %%
-0[xX]{H}+{IS}?                              RETURN_TOKEN_ID(kCEEGNUASMTokenID_CONSTANT                  )
-{D}+{IS}?                                   RETURN_TOKEN_ID(kCEEGNUASMTokenID_CONSTANT                  )
-0b{B}+{IS}?                                 RETURN_TOKEN_ID(kCEEGNUASMTokenID_CONSTANT                  )
-{D}+{DE}{FS}?                               RETURN_TOKEN_ID(kCEEGNUASMTokenID_CONSTANT                  )
-{D}*"."{D}+{DE}?{FS}?                       RETURN_TOKEN_ID(kCEEGNUASMTokenID_CONSTANT                  )
-{D}+"."{D}*{DE}?{FS}?                       RETURN_TOKEN_ID(kCEEGNUASMTokenID_CONSTANT                  )
-0[xX]{H}+{HE}{FS}?                          RETURN_TOKEN_ID(kCEEGNUASMTokenID_CONSTANT                  )
-0[xX]{H}*"."{H}+{HE}?{FS}?                  RETURN_TOKEN_ID(kCEEGNUASMTokenID_CONSTANT                  )
-0[xX]{H}+"."{H}*{HE}?{FS}?                  RETURN_TOKEN_ID(kCEEGNUASMTokenID_CONSTANT                  )
-{L}({L}|{D})*                               RETURN_TOKEN_ID(kCEEGNUASMTokenID_IDENTIFIER                )
-{NL}                                        RETURN_TOKEN_ID(kCEETokenID_NEW_LINE                        )
-{WS}                                        RETURN_TOKEN_ID(kCEETokenID_WHITE_SPACE                     )
-.                                           RETURN_TOKEN_ID(kCEETokenID_UNKNOW                          )
+0[xX]{H}+{IS}?                              RETURN_TOKEN_ID(kCEETokenID_CONSTANT                    )
+{D}+{IS}?                                   RETURN_TOKEN_ID(kCEETokenID_CONSTANT                    )
+0b{B}+{IS}?                                 RETURN_TOKEN_ID(kCEETokenID_CONSTANT                    )
+{D}+{DE}{FS}?                               RETURN_TOKEN_ID(kCEETokenID_CONSTANT                    )
+{D}*"."{D}+{DE}?{FS}?                       RETURN_TOKEN_ID(kCEETokenID_CONSTANT                    )
+{D}+"."{D}*{DE}?{FS}?                       RETURN_TOKEN_ID(kCEETokenID_CONSTANT                    )
+0[xX]{H}+{HE}{FS}?                          RETURN_TOKEN_ID(kCEETokenID_CONSTANT                    )
+0[xX]{H}*"."{H}+{HE}?{FS}?                  RETURN_TOKEN_ID(kCEETokenID_CONSTANT                    )
+0[xX]{H}+"."{H}*{HE}?{FS}?                  RETURN_TOKEN_ID(kCEETokenID_CONSTANT                    )
+{L}({L}|{D})*                               RETURN_TOKEN_ID(kCEETokenID_IDENTIFIER                  )
+{NL}                                        RETURN_TOKEN_ID(kCEETokenID_NEW_LINE                    )
+{WS}                                        RETURN_TOKEN_ID(kCEETokenID_WHITE_SPACE                 )
+.                                           RETURN_TOKEN_ID(kCEETokenID_UNKNOW                      )
 %%
 
 

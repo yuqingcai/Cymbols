@@ -9,10 +9,6 @@
 #import "CEEView.h"
 
 @implementation CEEHighlightView
-
-@end
-
-@interface CEEView()
 @end
 
 @implementation CEEView
@@ -22,13 +18,14 @@
     _backgroundColor = [NSColor clearColor];
     _borderColor = [NSColor clearColor];
     _textColor = [NSColor textColor];
+    _dividerColor = [NSColor clearColor];
     _textShadow = nil;
     _gradient = nil;
     _gradientAngle = 270.0;
     _borders = nil;
     _borderWidth = 0.0;
-    _style = kCEEViewStyleInit;
     _cornerRadius = 0.0;
+    _styleState = kCEEViewStyleStateActived;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)decoder {
@@ -68,13 +65,6 @@
         NSTrackingEnabledDuringMouseDrag;
     _trackingArea = [[NSTrackingArea alloc] initWithRect:self.bounds options:opt owner:self userInfo:nil];
     [self addTrackingArea:_trackingArea];
-}
-
-- (void)setFrame:(NSRect)frame {
-    [super setFrame:frame];
-    //if (self.trackingArea)
-    //    [self removeTrackingArea:self.trackingArea];
-    //[self addMouseTraceArea];
 }
 
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint {
@@ -165,27 +155,13 @@
     return _styleConfiguration;
 }
 
-- (BOOL)styleSet:(CEEViewStyle)style {
-    return (_style & style) != 0;
+- (void)setStyleState:(CEEViewStyleState)state {
+    _styleState = state;
+    [super setStyleState:state];
 }
 
-- (void)setStyle:(CEEViewStyle)style {
-    _style |= style;
-    [super setStyle:style];
-}
-
-- (void)clearStyle:(CEEViewStyle)style {
-    _style &= ~style;
-    [super clearStyle:style];
-}
-
-- (void)resetStyle:(CEEViewStyle)style {
-    _style = style;
-    [super resetStyle:style];
-}
-
-- (CEEViewStyle)style {
-    return _style;
+- (CEEViewStyleState)styleState {
+    return _styleState;
 }
 
 - (NSImage*)createDraggingHint {
@@ -246,62 +222,51 @@
 }
 
 - (void)updateUserInterface {
-    CEEUserInterfaceStyleScheme* current = (CEEUserInterfaceStyleScheme*)[_styleSchemes pointerAtIndex:self.style];
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
     if (!current)
         return;
     
-    NSDictionary* descriptor = current.descriptor;
-    NSString* fontProperty = descriptor[@"font"];
-    NSString* backgroundColorProperty = descriptor[@"background_color"];
-    NSString* borderColorProperty = descriptor[@"border_color"];
-    NSString* textColorProperty = descriptor[@"text_color"];
-    NSString* textShadowProperty = descriptor[@"text_shadow"];
-    NSString* gradientProperty = descriptor[@"gradient"];
-    NSString* gradientAngleProperty = descriptor[@"gradient_angle"];
-    NSString* bordersProperty = descriptor[@"borders"];
-    NSString* borderWidthProperty = descriptor[@"border_width"];
-    NSString* cornerRadiusProperty = descriptor[@"corner_radius"];
+    if (current.font)
+        self.font = current.font;
     
-    if (fontProperty)
-        self.font = [CEEUserInterfaceStyleConfiguration createFontFromString:fontProperty];
+    if (current.backgroundColor)
+        self.backgroundColor = current.backgroundColor;
     
-    if (backgroundColorProperty)
-        self.backgroundColor = [CEEUserInterfaceStyleConfiguration createColorFromString:backgroundColorProperty];
+    if (current.borderColor)
+        self.borderColor = current.borderColor;
     
-    if (borderColorProperty)
-        self.borderColor = [CEEUserInterfaceStyleConfiguration createColorFromString:borderColorProperty];
+    if (current.dividerColor)
+        self.dividerColor = current.dividerColor;
     
-    if (textColorProperty)
-        self.textColor = [CEEUserInterfaceStyleConfiguration createColorFromString:textColorProperty];
+    if (current.textColor)
+        self.textColor = current.textColor;
     
-    if (textShadowProperty)
-        self.textShadow = [CEEUserInterfaceStyleConfiguration createShadowFromString:textShadowProperty];
+    if (current.textShadow)
+        self.textShadow = current.textShadow;
     
-    if (gradientProperty)
-        self.gradient = [CEEUserInterfaceStyleConfiguration createGradientFromString:gradientProperty];
+    if (current.gradient)
+        self.gradient = current.gradient;
     
-    if (gradientAngleProperty)
-        self.gradientAngle = [gradientAngleProperty floatValue];
+    self.gradientAngle = current.gradientAngle;
     
-    if (bordersProperty)
-        self.borders = [NSString stringWithString:bordersProperty];
+    if (current.borders)
+        self.borders = current.borders;
     
-    if (borderWidthProperty)
-        self.borderWidth = [borderWidthProperty floatValue];
     
-    if (cornerRadiusProperty)
-        self.cornerRadius = [cornerRadiusProperty floatValue];
-    
+    self.borderWidth = current.borderWidth;
+    self.cornerRadius = current.cornerRadius;
 }
 
 - (void)setSytleSchemes:(NSArray*)schemes {
-    _styleSchemes = [[NSPointerArray alloc] init];
     
-    for (NSUInteger i = 0; i < kCEEViewStyleMax; i ++)
-        [_styleSchemes addPointer:NULL];
+    self.userInterfaceStyles = [[NSPointerArray alloc] init];
     
-    for (CEEUserInterfaceStyleScheme* scheme in schemes)
-        [_styleSchemes replacePointerAtIndex:scheme.style withPointer:(void*)scheme];
+    for (NSUInteger i = 0; i < kCEEViewStyleStateMax; i ++)
+        [self.userInterfaceStyles addPointer:NULL];
+    
+    for (CEEUserInterfaceStyleScheme* scheme in schemes) {
+        CEEUserInterfaceStyle* style = [[CEEUserInterfaceStyle alloc] initWithScheme:scheme];
+        [self.userInterfaceStyles replacePointerAtIndex:scheme.styleState withPointer:(void*)style];
+    }
 }
-
 @end

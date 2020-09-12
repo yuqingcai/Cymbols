@@ -7,6 +7,16 @@
 
 #import "CEEScroller.h"
 
+
+@interface CEEScrollerStyleItem : NSObject
+@property (strong) NSColor* knobColor;
+@property (strong) NSColor* backgroundColor;
+@end
+
+@implementation CEEScrollerStyleItem
+@end
+
+
 @interface CEEScroller()
 @property CGFloat currentValue;
 @property (readonly) CGFloat knobSize;
@@ -18,7 +28,6 @@
 
 @synthesize knobProportion = _knobProportion;
 @synthesize knobSize = _knobSize;
-
 
 - (void)initProperties {
     _knobColor = [NSColor grayColor];
@@ -337,23 +346,15 @@
 }
 
 - (void)updateUserInterface {
-    
-    [super updateUserInterface];
-        
-    CEEUserInterfaceStyleScheme* current = (CEEUserInterfaceStyleScheme*)[self.styleSchemes pointerAtIndex:self.style];    
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
     if (!current)
         return;
+        
+    if (current.knobColor)
+        self.knobColor = current.knobColor;
     
-    NSDictionary* descriptor = current.descriptor;
-    
-    NSString* knobColorProperty = descriptor[@"knob_color"];
-    NSString* backgroundColorProperty = descriptor[@"background_color"];
-    
-    if (knobColorProperty)
-        self.knobColor = [CEEUserInterfaceStyleConfiguration createColorFromString:knobColorProperty];
-    
-    if (backgroundColorProperty)
-        self.backgroundColor = [CEEUserInterfaceStyleConfiguration createColorFromString:backgroundColorProperty];
+    if (current.backgroundColor)
+        self.backgroundColor = current.backgroundColor;
 }
 
 @end

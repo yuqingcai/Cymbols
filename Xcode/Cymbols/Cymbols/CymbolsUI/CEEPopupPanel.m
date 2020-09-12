@@ -15,25 +15,49 @@
 
 @implementation CEEPopupPanel
 
-- (void)registerEventMonitor {
-    _localMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskLeftMouseDown handler:^(NSEvent *event) {
-        NSEvent *result = event;
-        if ([self isVisible]) {
-            if (!NSPointInRect([NSEvent mouseLocation], self.frame))
-                [self close];
-        }
-        return result;
-    }];
+@synthesize exclusived = _exclusived;
+
+- (void)setExclusived:(BOOL)exclusived {
+    if (_exclusived == exclusived)
+        return;
     
-    _globalMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskLeftMouseDown handler:^(NSEvent *event) {
-        if ([self isVisible])
-            [self close];
-    }];
+    _exclusived = exclusived;
+    if (_exclusived) {
+        _localMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskLeftMouseDown handler:^(NSEvent *event) {
+            NSEvent *result = event;
+            if ([self isVisible]) {
+                if (!NSPointInRect([NSEvent mouseLocation], self.frame))
+                    [self close];
+            }
+            return result;
+        }];
+        
+        _globalMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskLeftMouseDown handler:^(NSEvent *event) {
+            if ([self isVisible])
+                [self close];
+        }];
+    }
+    else {
+        [NSEvent removeMonitor:_localMonitor];
+        [NSEvent removeMonitor:_globalMonitor];
+    }
+}
+
+- (BOOL)exclusived {
+    return _exclusived;
 }
 
 - (void)dealloc {
-    [NSEvent removeMonitor:_localMonitor];
-    [NSEvent removeMonitor:_globalMonitor];
+    if (_exclusived) {
+        [NSEvent removeMonitor:_localMonitor];
+        [NSEvent removeMonitor:_globalMonitor];
+    }
+}
+
+- (void)mouseUp:(NSEvent *)event {
+    [super mouseUp:event];
+    if ([self isVisible])
+        [self close];
 }
 
 @end

@@ -11,13 +11,15 @@
 
 #import <Foundation/Foundation.h>
 
-BOOL IdentifierIsReserved(NSString* string);
-NSString* CreateUnifiedIdentifier(void);
-NSString* CreateUnifiedIdentifierWithPrefix(NSString* string);
-NSString* CreateClassIdentifier(NSString* className);
-NSString* ClassNameByUnifiedIdentifier(NSString* identifier);
+NSString* CreateObjectID(NSObject* object);
+NSString* ClassNameFromObjectID(NSString* identifier);
 NSString* IdentifierByDeletingPrefix(NSString* identifier);
 NSString* IdentifierByDeletingSuffix(NSString* identifier);
-NSString* CreateUnifiedIdentifierWithPrefixAndSuffix(NSString* prefix,
-                                                     NSString* suffix);
+NSString* CreateObjectIDPrefix(NSObject* object);
+NSString* CreateObjectIDWithPrefixAndSuffix(NSString* prefix,
+                                            NSString* suffix);
+NSString* CreateObjectIDWithPrefix(NSString* prefix);
+NSString* CreateClassID(NSObject* object);
+BOOL IdentifierIsReserved(NSString* identifier);
+
 #endif /* CEEIdentifier_h */

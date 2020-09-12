@@ -24,6 +24,7 @@ typedef struct _CEETextColor* CEETextColorRef;
 typedef struct _CEETextGlyph* CEETextGlyphRef;
 
 typedef struct _CEETextAttribute {
+    cee_char* name;
     CEETextFontRef font;
     cee_float font_size;
     CEETextColorRef forecolor;

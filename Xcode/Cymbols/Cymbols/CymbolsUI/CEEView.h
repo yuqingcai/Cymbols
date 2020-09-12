@@ -24,18 +24,19 @@ typedef NS_ENUM(NSInteger, CEEViewRegion) {
 @interface CEEView : NSView {
 @protected
     CEEUserInterfaceStyleConfiguration* _styleConfiguration;
-    CEEViewStyle _style;
+    CEEViewStyleState _styleState;
 }
 @property (strong) NSTrackingArea *trackingArea;
-@property NSPointerArray* styleSchemes;
-@property (strong, nullable) NSFont* font;
-@property (strong, nullable) NSColor* textColor;
-@property (strong, nullable) NSColor* backgroundColor;
-@property (strong, nullable) NSColor* borderColor;
-@property (strong, nullable) NSShadow* textShadow;
-@property (strong, nullable) NSGradient* gradient;
+@property NSPointerArray* userInterfaceStyles;
+@property (strong) NSFont* font;
+@property (strong) NSColor* textColor;
+@property (strong) NSColor* backgroundColor;
+@property (strong) NSColor* borderColor;
+@property (strong) NSColor* dividerColor;
+@property (strong) NSShadow* textShadow;
+@property (strong) NSGradient* gradient;
 @property CGFloat gradientAngle;
-@property (strong, nullable) NSString* borders;
+@property (strong) NSString* borders;
 @property CGFloat borderWidth;
 @property CGFloat cornerRadius;
 

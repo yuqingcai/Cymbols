@@ -11,13 +11,14 @@
 @implementation CEEStateButton
 
 - (void)mouseDown:(NSEvent *)event {
-    if (!self.enabled)
-        return;
     
     BOOL keepOn = YES;
     BOOL isInside = YES;
     NSPoint location;
-        
+    
+    if (!self.enabled)
+        return;
+    
     while (keepOn) {
         NSEventMask eventMask = NSEventMaskLeftMouseUp | NSEventMaskLeftMouseDragged;
         event = [[self window] nextEventMatchingMask:eventMask];
@@ -27,11 +28,10 @@
         switch ([event type]) {
             case NSEventTypeLeftMouseUp:
                 if (isInside) {
-                    
-                    if ([self styleSet:kCEEViewStyleClicked])
-                        [self clearStyle:kCEEViewStyleClicked];
-                    else
-                        [self setStyle:kCEEViewStyleClicked];
+                    if (self.state == NSOffState)
+                        self.state = NSOnState;
+                    else if (self.state == NSOnState)
+                        self.state = NSOffState;
                     
                     if (self.action)
                         [self sendAction:self.action to:self.target];
@@ -44,20 +44,6 @@
                 break;
         }
     }
-}
-
-- (void)setPushed:(BOOL)pushed {
-    if (!self.enabled)
-        return;
-    
-    if (pushed)
-        [self setStyle:kCEEViewStyleClicked];
-    else
-        [self clearStyle:kCEEViewStyleClicked];
-}
-
-- (BOOL)pushed {
-    return [self styleSet:kCEEViewStyleClicked];
 }
 
 @end

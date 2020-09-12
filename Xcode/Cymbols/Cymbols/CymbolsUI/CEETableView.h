@@ -31,30 +31,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEETableViewHeader : CEEView
 @property NSUInteger columns;
-@property (strong, nullable) NSColor* dividerColor;
+@property (strong) NSColor* dividerColor;
 @end
 
-@protocol CEETableRowViewDelegate <NSObject>
-@required
-- (void)rowViewEntered:(NSInteger)row;
-- (void)rowViewExixted:(NSInteger)row;
-- (void)rowViewSelected:(NSInteger)row;
-@end
-
-
-typedef NS_ENUM(NSInteger, CursorExitedType) {
-    kCursorExitedTypeBacktrack,
-    kCursorExitedTypeThrought
-};
 @interface CEETableRowView : CEEView
 @property NSInteger index;
-@property id<CEETableRowViewDelegate> delegate;
-@property CursorExitedType cursorExitedType;
 @end
 
-@interface CEETableView : CEEView <NSDraggingDestination, NSDraggingSource, NSPasteboardWriting, CEETableRowViewDelegate>
-@property (strong, nullable) NSColor* textColorSelected;
-@property (strong, nullable) NSColor* backgroundColorSelected;
+@interface CEETableView : CEEView <NSDraggingDestination, NSDraggingSource, NSPasteboardWriting>
 @property BOOL enableDrawHeader;
 @property (readonly) NSInteger selectedRow;
 @property (readonly) NSIndexSet* selectedRowIndexes;

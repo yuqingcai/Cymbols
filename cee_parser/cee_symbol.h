@@ -8,7 +8,6 @@ extern "C" {
 #include "cee_lib.h"
 #include "cee_tag.h"
 #include "cee_token.h"
-#include "cee_symbol_cache.h"
 
 typedef enum _CEESourceSymbolType {
     kCEESourceSymbolTypeUnknow = 0,
@@ -26,7 +25,7 @@ typedef enum _CEESourceSymbolType {
     kCEESourceSymbolTypeMessageDefinition,
     kCEESourceSymbolTypeFunctionParameter,
     kCEESourceSymbolTypeMessageParameter,
-    kCEESourceSymbolTypeTypedef,
+    kCEESourceSymbolTypeTypeDefine,
     kCEESourceSymbolTypeClassDefinition,
     kCEESourceSymbolTypeEnumDefinition,
     kCEESourceSymbolTypeUnionDefinition,
@@ -52,82 +51,45 @@ typedef struct _CEESourceSymbol {
     cee_char* fregment_range;
 } CEESourceSymbol;
 
-void cee_symbols_clean(cee_pointer db);
-cee_boolean cee_symbols_write(cee_pointer db,
-                              CEEList* symbols);
-CEEList* cee_symbols_search_by_descriptor(cee_pointer db,
+CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* descriptor,
-                                          CEESymbolCacheRef cache);
-CEEList* cee_symbols_search_by_parent(cee_pointer db,
-                                      const cee_char* parent);
-CEEList* cee_symbols_search_by_type(cee_pointer db,
-                                    const cee_char* type);
-CEEList* cee_symbols_search_by_filepath(cee_pointer db,
-                                        const cee_char* filepath);
-cee_boolean cee_symbols_delete_by_filepath(cee_pointer db,
-                                           const cee_char* filepath);
-void cee_symbol_free(cee_pointer data);
-CEESourceSymbol* cee_symbol_create(CEESourceSymbolType type,
-                                   const cee_char* descriptor,
-                                   const cee_char* parent,
-                                   const cee_char* derived,
-                                   const cee_char* data_type,
-                                   const cee_char* language,
-                                   const cee_char* filepath,
-                                   const cee_char* locations,
-                                   const cee_char* block_range);
-CEESourceSymbol* cee_symbol_copy(CEESourceSymbol* symbol);
-void cee_symbol_dump(CEESourceSymbol* symbol);
-void cee_symbols_dump(CEEList* symbols);
-CEESourceSymbolType cee_symbol_database_search(cee_pointer database, 
-                                               const cee_uchar* subject, 
-                                               cee_long offset, 
-                                               cee_ulong length);
-CEESourceSymbol* cee_symbol_from_token_slice(const cee_uchar* filepath,
-                                             const cee_uchar* subject,
-                                             CEEList* begin,
-                                             CEEList* end,
-                                             CEESourceSymbolType type,
-                                             const cee_char* language);
-CEESourceSymbol* cee_symbol_from_tokens(const cee_uchar* filepath,
-                                        const cee_uchar* subject,
-                                        CEEList* tokens,
-                                        CEESourceSymbolType type,
-                                        const cee_char* language);
-cee_int cee_symbol_location_compare(const cee_pointer a,
-                                    const cee_pointer b);
-
-typedef enum _CEESourceReferenceType {
-    kCEESourceReferenceTypeUnknow = 0,
-    kCEESourceReferenceTypeReplacement,
-    kCEESourceReferenceTypeFunction,
-    kCEESourceReferenceTypeCustomTypeDeclaration,
-    kCEESourceReferenceTypeVariable,
-    kCEESourceReferenceTypeMember,
-    kCEESourceReferenceTypeTypeDefine,
-    kCEESourceReferenceTypeEnumerator,
-    kCEESourceReferenceTypeNamespace,
-    kCEESourceReferenceTypeLabel,
-    kCEESourceReferenceTypeMax,
-} CEESourceReferenceType;
-
-typedef enum _CEESourceReferenceSearchOption {
-    kCEESourceReferenceSearchOptionLocal = 0x1 << 0,
-    kCEESourceReferenceSearchOptionGlobal = 0x1 << 1
-} CEESourceReferenceSearchOption;
-
-typedef struct _CEESourceReference {
-    CEESourceReferenceType type;
-    CEEList* tokens_ref;
-    cee_char* descriptor;
-    CEEList* locations;
-} CEESourceReference;
-
-CEESourceReference* cee_reference_create(const cee_uchar* subject,
-                                         CEEList* tokens,
-                                         CEESourceReferenceType type);
-void cee_reference_free(cee_pointer data);
-cee_boolean cee_symbol_is_block_type(CEESourceSymbol* symbol);
+                                          const cee_char* parent,
+                                          const cee_char* derived,
+                                          const cee_char* data_type,
+                                          const cee_char* language,
+                                          const cee_char* filepath,
+                                          const cee_char* locations,
+                                          const cee_char* block_range);
+void cee_source_symbol_free(cee_pointer data);
+CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol);
+CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_uchar* filepath,
+                                                           const cee_uchar* subject,
+                                                           CEEList* begin,
+                                                           CEEList* end,
+                                                           CEESourceSymbolType type,
+                                                           const cee_char* language);
+CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_uchar* filepath,
+                                                      const cee_uchar* subject,
+                                                      CEEList* tokens,
+                                                      CEESourceSymbolType type,
+                                                      const cee_char* language);
+void cee_source_symbol_print(CEESourceSymbol* symbol);
+void cee_source_symbols_print(CEEList* symbols);
+cee_boolean cee_source_symbol_is_block_type(CEESourceSymbol* symbol);
+cee_int cee_source_symbol_location_compare(const cee_pointer a,
+                                           const cee_pointer b);
+cee_boolean cee_source_symbols_are_equal(CEESourceSymbol* symbol0,
+                                         CEESourceSymbol* symbol1);
+typedef cee_boolean (*CEESymbolMatcher)(cee_pointer data,
+                                        cee_pointer user_data);
+CEESourceSymbol* cee_source_symbol_tree_search(CEETree* tree,
+                                               CEESymbolMatcher searcher,
+                                               cee_pointer user_data);
+cee_boolean cee_source_symbol_matcher_by_buffer_offset(cee_pointer data,
+                                                       cee_pointer user_data);
+cee_boolean cee_source_symbol_matcher_by_descriptor(cee_pointer data,
+                                                    cee_pointer user_data);
+cee_boolean cee_source_symbol_is_definition(CEESourceSymbol* symbol);
 
 #ifdef __cplusplus
 }

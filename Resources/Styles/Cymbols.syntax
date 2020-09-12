@@ -1,330 +1,254 @@
 // this is a Cymbols configuration file
 {
-    "name" : "Cymbols",
+    "name" : "Default",
     
     "rules" : [
         {
-            "identifier" : "plantext",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "plantext",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "rgba(20, 20, 20, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#424242",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "c_comment",
-            "font" : "font(\"Courier\", 12.0, \"italic\", 5.0)",
-            "underline" : "true",
-            "strikethrough" : "true",
-            "forecolor" : "hsba(0, 0, 60, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "name" : "keyword",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#f06292",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "cpp_comment",
-            "font" : "font(\"Courier\", 12.0, \"italic\", 5.0)",
-            "underline" : "true",
-            "strikethrough" : "true",
-            "forecolor" : "hsba(0, 0, 60, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "name" : "comment",
+            "font" : "font(\"Menlo\", 11.0, \"italic\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#bdbdbd",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "keyword",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "constant",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "hsba(0, 800, 100, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-        },
-        
-        {
-            "identifier" : "literal",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "rgba(230, 80, 0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#42a5f5",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "character",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "character",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "rgba(230, 80, 0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#ffa726",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "identifier",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "literal",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 250, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#ff5722",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "constant",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "punctuation",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 250, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#757575",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "attribute",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "prep_directive",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 250, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-        },
-        
-        {
-            "identifier" : "class",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "hsba(230, 100, 30, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#e57373",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "enumerator",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "rgba(128.0, 0.0, 128.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-        },
-        
-        {
-            "identifier" : "object",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 250.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-        },
-
-        {
-            "identifier" : "function",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "hsba(230, 100, 30, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-        },
-
-        {
-            "identifier" : "variable",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 128.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-        },
-
-        {
-            "identifier" : "parameter",
-            "font" : "font(\"Courier\", 12.0, \"italic\", 5.0)",
+            "name" : "parameter",
+            "font" : "font(\"Menlo\", 11.0, \"italic\", 5.0)",
             "underline" : "true",
             "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 128.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-        },
-        
-        {
-            "identifier" : "prep_directive",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "hsba(0, 80, 100, 100)",
-            "backgroundcolor" : "rgba(20, 20, 20, 0)"
+            "forecolor" : "#ff7043",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "prep_replacement",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "function",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "hsba(230, 100, 30, 100)",
-            "backgroundcolor" : "rgba(20, 20, 20, 0)"
+            "forecolor" : "#0097a7",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "prep_condition",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "variable",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "hsba(100, 100, 60, 100)",
-            "backgroundcolor" : "rgba(20, 20, 20, 0)"
-        },
-        
-        {
-            "identifier" : "enum",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "hsba(230, 100, 30, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#f57f17",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "union",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "class",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "hsba(230, 100, 30, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#673ab7",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "namespace",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "enum",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "hsba(230, 100, 30, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#673ab7",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
         
         {
-            "identifier" : "template",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "union",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 250.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#673ab7",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "interface",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#673ab7",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "implementation",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#673ab7",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "protocol",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#673ab7",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "protocol",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#673ab7",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "enumerator",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#5c6bc0",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "type_declaration",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#673ab7",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "namespace",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#5c6bc0",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
 
         {
-            "identifier" : "declarator",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "type_reference",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 250.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-        },
-        
-        {
-            "identifier" : "punctuation",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "hsba(297, 70, 50, 100)",
-            "backgroundcolor" : "rgba(20, 20, 20, 0)"
-        },
-        
-        {
-            "identifier" : "reference",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "rgba(0, 128.0, 0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-        },
-        
-        {
-            "identifier" : "type_declaration",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 128.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#FF7575",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
             
         },
         
         {
-            "identifier" : "type_reference",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "prep_directive_reference",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 250.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#FF7575",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
             
         },
         
         {
-            "identifier" : "type_define_reference",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "rgba(255.0, 0, 0.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-            
-        },
-        
-        {
-            "identifier" : "type_reference",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "rgba(128.0, 0, 250.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-            
-        },
-        
-        {
-            "identifier" : "prep_directive_reference",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "rgba(255.0, 0, 0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-            
-        },
-        
-        {
-            "identifier" : "prep_directive_parameter_reference",
-            "font" : "font(\"Courier\", 12.0, \"italic\", 5.0)",
+            "name" : "prep_directive_parameter_reference",
+            "font" : "font(\"Menlo\", 11.0, \"italic\", 5.0)",
             "underline" : "true",
             "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 250.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#FF7575",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
             
         },
         
         {
-            "identifier" : "variable_reference",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "variable_reference",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "rgba(0, 128.0, 0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#ffa000",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
             
         },
         
         {
-            "identifier" : "function_reference",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "member_reference",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "hsba(230, 100, 120, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
+            "forecolor" : "#c0ca33",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
             
         },
         
         {
-            "identifier" : "message_reference",
-            "font" : "font(\"Courier\", 12.0, \"regular\", 5.0)",
+            "name" : "function_reference",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "hsba(230, 100, 30, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-        },
-        
-        {
-            "identifier" : "member_reference",
-            "font" : "font(\"Courier\", 12.0, \"italic\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "rgba(0, 0, 250.0, 100)",
-            "backgroundcolor" : "rgba(0, 0, 0, 0)"
-            
+            "forecolor" : "#00bcd4",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         }
     ]
 }

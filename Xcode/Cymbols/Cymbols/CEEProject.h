@@ -16,11 +16,15 @@ extern NSNotificationName CEENotificationProjectRemoveFilePaths;
 extern NSNotificationName CEENotificationSessionPortOpenSourceBuffer;
 extern NSNotificationName CEENotificationSessionPortSaveSourceBuffer;
 extern NSNotificationName CEENotificationSessionPortCloseSourceBuffer;
-extern NSNotificationName CEENotificationSessionPortPresentSourceBuffer;
+extern NSNotificationName CEENotificationSessionPortActiveSourceBuffer;
 extern NSNotificationName CEENotificationSessionPresent;
 extern NSNotificationName CEENotificationSessionCreatePort;
 extern NSNotificationName CEENotificationSessionActivePort;
 extern NSNotificationName CEENotificationSessionDeletePort;
+extern NSNotificationName CEENotificationSessionPortCreateContext;
+extern NSNotificationName CEENotificationSessionPortSetTargetSymbol;
+extern NSNotificationName CEENotificationSessionPortRequestTargetSymbolSelection;
+extern NSNotificationName CEENotificationSessionPortSetActivedSymbol;
 
 @class CEEProject;
 @class CEESession;
@@ -47,20 +51,27 @@ NSDictionary* JSONDictionaryFromString(NSString* string);
 @interface CEESessionPort : NSObject <CEESerialization>
 @property (weak) CEESession* session;
 @property (strong, readonly) NSString* identifier;
-@property (strong, readonly) NSMutableArray* references;
-@property NSInteger referenceIndex;
+@property (strong, readonly) NSMutableArray* bufferReferences;
+@property (readonly) CEEList* context;
+@property (readonly) CEESourceSymbol* target_symbol;
+@property (readonly) CEESourceSymbol* actived_symbol;
 
-- (void)appendReference:(CEESourceBuffer*)buffer;
-- (void)nextReference;
-- (void)prevReference;
-- (CEEBufferReference*)currentReference;
+- (void)appendBufferReference:(CEESourceBuffer*)buffer;
+- (void)nextBufferReference;
+- (void)prevBufferReference;
+- (CEEBufferReference*)currentBufferReference;
+- (void)setActivedSourceBuffer:(CEESourceBuffer*)buffer;
 - (void)presentHistory:(CEEBufferReference*)reference;
-- (void)openSourceBufferWithFilePath:(NSString*)filePath;
-- (void)openSourceBuffersWithFilePaths:(NSArray*)filePaths;
-- (void)openUntitledSourceBuffer;
-- (void)presentSourceBuffer:(CEESourceBuffer*)buffer;
+- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString*)filePath;
+- (NSArray*)openSourceBuffersWithFilePaths:(NSArray*)filePaths;
+- (CEESourceBuffer*)openUntitledSourceBuffer;
 - (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filePath;
 - (void)discardSourceBuffers;
+- (void)createContextByCluster:(CEETokenCluster*)cluster;
+- (void)jumpToTargetSymbolByCluster:(CEETokenCluster*)cluster;
+- (void)setTargetSourceSymbol:(CEESourceSymbol*)symbol;
+- (void)setActivedSourceSymbol:(CEESourceSymbol*)symbol;
+
 @end
 
 @interface CEESession : NSObject <CEESerialization>
@@ -77,6 +88,7 @@ NSDictionary* JSONDictionaryFromString(NSString* string);
 - (NSString*)serialize;
 - (void)deserialize:(NSDictionary*)dict;
 - (void)registerSourceBuffer:(CEESourceBuffer*)buffer;
+- (void)cleanRegisteredSourceBuffers;
 @end
 
 @interface CEEProject : NSDocument

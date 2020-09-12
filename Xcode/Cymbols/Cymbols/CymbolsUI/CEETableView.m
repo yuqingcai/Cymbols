@@ -42,9 +42,12 @@
 
 - (void)initProperties {
     [super initProperties];
-    _dividerColor = [NSColor gridColor];
+    self.borderWidth = 1.0;
+    self.borders = @"bottom";
+    self.dividerColor = [NSColor gridColor];
     _horizontalOffset = 0.0;
     _cursorRectWidth = 4.0;
+    
 }
 
 - (void)setColumns:(NSUInteger)columns {
@@ -224,9 +227,10 @@
 - (void)drawDividers {
     NSBezierPath* path = nil;
     CGFloat dividerOffset = 0.0;
-    
-    if (_dividerColor)
-        [_dividerColor setStroke];
+    CGFloat lineWidth = 1.0;
+    CGFloat dividerInterval = 4.0;
+    if (self.dividerColor)
+        [self.dividerColor setStroke];
     
     // draw dividers
     CGFloat width = 0.0;
@@ -234,9 +238,9 @@
         width += [_columnWidths[i] floatValue];
         dividerOffset = _horizontalOffset + width;
         path = [NSBezierPath bezierPath];
-        [path setLineWidth: 1.0];
-        [path moveToPoint: CGPointMake(dividerOffset, self.borderWidth*3)];
-        [path lineToPoint: CGPointMake(dividerOffset, self.frame.size.height-self.borderWidth*3)];
+        [path setLineWidth: lineWidth];
+        [path moveToPoint: CGPointMake(dividerOffset, dividerInterval)];
+        [path lineToPoint: CGPointMake(dividerOffset, self.frame.size.height - dividerInterval)];
         [path stroke];
     }
     // draw dividers end
@@ -254,55 +258,49 @@
     }
 }
 
+- (void)updateUserInterface {
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
+    if (!current)
+        return;
+    
+    if (current.font)
+        self.font = current.font;
+    
+    if (current.backgroundColor)
+        self.backgroundColor = current.backgroundColor;
+    
+    if (current.borderColor)
+        self.borderColor = current.borderColor;
+    
+    if (current.textColor)
+        self.textColor = current.textColor;
+    
+    if (current.textShadow)
+        self.textShadow = current.textShadow;
+    
+    if (current.gradient)
+        self.gradient = current.gradient;
+    
+    self.gradientAngle = current.gradientAngle;
+    self.cornerRadius = current.cornerRadius;
+    
+    if (current.dividerColor)
+        self.dividerColor = current.dividerColor;
+}
+
 @end
 
-@interface CEETableRowView()
-@property CGFloat enterY;
-@property CGFloat exitedY;
-@end
 @implementation CEETableRowView
 
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
 }
 
-//- (void)setFrame:(NSRect)frame {
-//    [super setFrame:frame];
-//    if (self.trackingArea)
-//        [self removeTrackingArea:self.trackingArea];
-//    [self addMouseTraceArea];
-//}
-
-- (void)mouseEntered:(NSEvent *)event {
-    // mouse left button is down
-    //NSPoint location = [self convertPoint:[event locationInWindow] fromView:nil];
-    //_enterY = location.y;
-    if ((NSEvent.pressedMouseButtons & 0x1) != 0) {
-        if (_delegate)
-            [_delegate rowViewEntered:_index];
-    }
-    //[super mouseEntered:event];
+- (void)setStyleState:(CEEViewStyleState)state {
+    [super setStyleState:state];
+    for (NSView* view in self.subviews)
+        [view setStyleState:state];
 }
-
-- (void)mouseExited:(NSEvent *)event {
-    //NSPoint location = [self convertPoint:[event locationInWindow] fromView:nil];
-    //_exitedY = location.y;
-    // mouse left button is down
-    if ((NSEvent.pressedMouseButtons & 0x1) != 0) {
-        if (_delegate)
-            [_delegate rowViewExixted:_index];
-    }
-    
-    //[super mouseExited:event];
-}
-
-//- (void)mouseDown:(NSEvent *)event {
-//    if ((NSEvent.pressedMouseButtons & 0x1) != 0) {
-//        if (_delegate)
-//            [_delegate rowViewSelected:_index];
-//    }
-//    [super mouseDown:event];
-//}
 
 @end
 
@@ -331,6 +329,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 @interface CEETableView() {
     NSMutableIndexSet* _selectedRowIndexes;
 };
+
 @property (strong) CEEScroller* verticalScroller;
 @property (strong) CEEScroller* horizontalScroller;
 @property (strong) CEETableViewHeader* header;
@@ -347,7 +346,6 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 @property NSTimer* autoScrollTimer;
 @property NSTimer* clickDetectTimer;
 @property NSUInteger clickTicktack;
-@property BOOL doubleCkick;
 @property BOOL autoScrollSelecting;
 @property NSPasteboard* draggingSessionPasteboard;
 @property NSInteger keySelectedRowIndex;
@@ -357,18 +355,17 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 @property NSInteger updateColumn;
 @property NSMutableArray* rowViewBuffer;
 @property NSMutableArray* cellViewBuffer;
-@property NSPoint mouseLocation;
 @property BOOL clickDetect;
+@property NSMutableIndexSet* selectedRowIndexesClip;
 @end
 
 @implementation CEETableView
 
 @synthesize selectedRowIndexes = _selectedRowIndexes;
+@synthesize enableDrawHeader = _enableDrawHeader;
 
 - (void)initProperties {
     [super initProperties];
-    _textColorSelected = [NSColor selectedTextColor];
-    _backgroundColorSelected = [NSColor selectedTextBackgroundColor];
     _numberOfRows = 0;
     _autoScrollSelecting = NO;
     _draggingSessionPasteboard = [NSPasteboard pasteboardWithName:@"IDDraggingSessionPasteboard"];
@@ -378,6 +375,8 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     _updateRow = -1;
     _updateColumn = -1;
     _allowsMultipleSelection = NO;
+    _enableDrawHeader = NO;
+    self.borderWidth = 0.0;
     [self createComponents];
     [self enableComponents: kComponentStateHeader | kComponentStateGrid];
     [self setColumns:1];
@@ -385,6 +384,22 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 
 - (BOOL)isFlipped {
     return YES;
+}
+
+- (void)setEnableDrawHeader:(BOOL)enableDrawHeader {
+    _enableDrawHeader = enableDrawHeader;
+    if (_enableDrawHeader) {
+        if (![self componentIsPresented:_header])
+            [self enableComponents:kComponentStateHeader];
+    }
+    else {
+        if ([self componentIsPresented:_header])
+            [self disableComponents:kComponentStateHeader];
+    }
+}
+
+- (BOOL)enableDrawHeader {
+    return _enableDrawHeader;
 }
 
 - (void)createComponents {
@@ -395,12 +410,29 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     [self createGrid];
 }
 
+- (void)setIdentifier:(NSUserInterfaceItemIdentifier)identifier {
+    [super setIdentifier:identifier];
+    
+    if (_header)
+        [_header setIdentifier:[self createComponentIdentifier:@"IDTableViewHeader"]];
+    
+    if (_headerPadding)
+        [_headerPadding setIdentifier:[self createComponentIdentifier:@"IDTableViewHeaderPadding"]];
+    
+    if (_verticalScroller)
+        [_verticalScroller setIdentifier:[self createComponentIdentifier:@"IDScrollerVertical"]];
+    
+    if (_horizontalScroller)
+        [_horizontalScroller setIdentifier:[self createComponentIdentifier:@"IDScrollerHorizontal"]];
+    
+    if (_grid)
+        [_grid setIdentifier:[self createComponentIdentifier:@"IDGridView"]];
+}
+
 - (void)createHeader {
     NSRect frame = NSMakeRect(0, 0, 0, 0);
     _header = [[CEETableViewHeader alloc] initWithFrame:frame];
     [_header setAutoresizingMask:NSViewWidthSizable];
-    _header.borders = @"bottom";
-    _header.borderWidth = 1.0;
     [_header setTarget: self];
     [_header setDragDividerAction:@selector(dragHeaderDivider:)];
     [_header setIdentifier:[self createComponentIdentifier:@"IDTableViewHeader"]];
@@ -409,8 +441,6 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 - (void)createHeaderPadding {
     NSRect frame = NSMakeRect(0, 0, 0, 0);
     _headerPadding = [[CEETableViewHeader alloc] initWithFrame:frame];
-    _headerPadding.borders = @"bottom-left";
-    _headerPadding.borderWidth = 1.0;
     [_headerPadding setAutoresizingMask:NSViewMinXMargin];
     [_headerPadding setIdentifier:[self createComponentIdentifier:@"IDTableViewHeaderPadding"]];
 }
@@ -619,7 +649,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     if (_componentState & kComponentStateHeader) {
         if (![self componentIsPresented:_header]) {
             [self addSubview:_header];
-            [_header setStyle:self.style];
+            [_header setStyleState:self.styleState];
         }
     }
     else {
@@ -633,7 +663,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     if (_componentState & kComponentStateHeaderPadding) {
         if (![self componentIsPresented:_headerPadding])
             [self addSubview:_headerPadding];
-            [_headerPadding setStyle:self.style];
+            [_headerPadding setStyleState:self.styleState];
     }
     else {
         if ([self componentIsPresented:_headerPadding])
@@ -646,7 +676,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     if (_componentState & kComponentStateGrid) {
         if (![self componentIsPresented:_grid])
             [self addSubview:_grid];
-            [_grid setStyle:self.style];
+            [_grid setStyleState:self.styleState];
     }
     else {
         if ([self componentIsPresented:_grid])
@@ -659,7 +689,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     if (_componentState & kComponentStateVerticalScroller) {
         if (![self componentIsPresented:_verticalScroller])
             [self addSubview:_verticalScroller];
-            [_verticalScroller setStyle:self.style];
+            [_verticalScroller setStyleState:self.styleState];
     }
     else {
         if ([self componentIsPresented:_verticalScroller])
@@ -672,7 +702,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     if (_componentState & kComponentStateHorizontalScroller) {
         if (![self componentIsPresented:_horizontalScroller])
             [self addSubview:_horizontalScroller];
-            [_horizontalScroller setStyle:self.style];
+            [_horizontalScroller setStyleState:self.styleState];
     }
     else {
         if ([self componentIsPresented:_horizontalScroller])
@@ -898,6 +928,9 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 }
 
 - (void)reloadGrid {
+    //cee_ulong m0 = 0;
+    //cee_ulong m1 = 0;
+        
     NSMutableArray* rowViews = nil;
     NSInteger row = -1;
     CGFloat y = 0.0;
@@ -907,9 +940,8 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     _firstRowIndex = -1;
     _keySelectedRowIndex = -1;
     _numberOfRows = [_dataSource numberOfRowsInTableView:self];
-    if (!_numberOfRows)
-        return;
-    
+        
+    //m0 = cee_timestamp_ms();
     NSArray* removed = [_grid removeAllRowViews];
     if (!_rowViewBuffer)
         _rowViewBuffer = [[NSMutableArray alloc] init];
@@ -922,12 +954,19 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         [_cellViewBuffer addObjectsFromArray:cellViews];
     }
     [_rowViewBuffer addObjectsFromArray:removed];
+    //m1 = cee_timestamp_ms();
+    //NSLog(@"recycle cost: %lu ms", m1 - m0);
     
-    
+    //m0 = cee_timestamp_ms();
     [_grid setColumnOffsets:[_header columnOffsets]];
     [_grid setColumnWidths:[_header columnWidths]];
-
+    //m1 = cee_timestamp_ms();
+    //NSLog(@"adjust column offsets and widths cost: %lu ms", m1 - m0);
     
+    if (!_numberOfRows)
+        return;
+    
+    //m0 = cee_timestamp_ms();
     _firstRowIndex = 0;
     row = _firstRowIndex;
     rowViews = [[NSMutableArray alloc] init];
@@ -941,13 +980,20 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         if (y > _grid.frame.size.height || row >= _numberOfRows)
             break;
     }
+    //m1 = cee_timestamp_ms();
+    //NSLog(@"create rows cost: %lu ms", m1 - m0);
     
+    //m0 = cee_timestamp_ms();
     [_grid appendRowViews:rowViews];
-    
+    //m1 = cee_timestamp_ms();
+    //NSLog(@"append row views cost: %lu ms", m1 - m0);
+        
+    //m0 = cee_timestamp_ms();
     _keySelectedRowIndex = 0;
     _selectedRowIndexes = [NSMutableIndexSet indexSetWithIndex:_keySelectedRowIndex];
-    
     [self updateGrid];
+    //m1 = cee_timestamp_ms();
+    //NSLog(@"update grid cost: %lu ms", m1 - m0);
 }
 
 - (void)updateGrid {
@@ -1036,14 +1082,12 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     rowView = [self getRowViewFromBuffer];
     if (!rowView) {
         rowView = [[CEETableRowView alloc] init];
-        [rowView setDelegate:self];
         [rowView setAutoresizingMask:NSViewWidthSizable];
         [rowView setStyleConfiguration:_styleConfiguration];
     }
     [rowView setFrame:NSMakeRect(0.0, 0.0, _grid.frame.size.width, rowHeight)];
     for (CEEView* cellView in cellViews)
         [rowView addSubview:cellView];
-    [rowView resetStyle:self.style];
     [rowView setIndex:row];
     
     return rowView;
@@ -1056,70 +1100,6 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     [_rowViewBuffer removeObjectAtIndex:0];
     return view;
 }
-/*
-- (void)mouseDown:(NSEvent*)event {
-    [self.window makeFirstResponder:self];
-    _mouseLocation = [self convertPoint:[event locationInWindow] fromView:nil];
-    [self stopClickDetect];
-    [self tintedGridRowViews];
-}
-
-- (void)mouseUp:(NSEvent *)event {
-    if (_autoScrollSelecting) {
-        [self stopAutoScrollSelecting];
-        _autoScrollSelecting = NO;
-    }
-    
-    // stop auto scroll select
-    if (_autoScrollSelecting) {
-        [self stopAutoScrollSelecting];
-        _autoScrollSelecting = NO;
-    }
-    
-    if (_clickDetect)
-        [self startClickDetect];
-    
-    // do click action
-    if (_action)
-        ((void (*)(id, SEL,typeof(self)))objc_msgSend)(_target, _action, self);
-}*/
-/*
-- (void)mouseDragged:(NSEvent *)event {
-    NSPoint location = [self convertPoint:[event locationInWindow] fromView:nil];
-    CGFloat deltaX = fabs(_mouseLocation.x - location.x);
-    CGFloat deltaY = fabs(_mouseLocation.y - location.y);
-    _mouseLocation = location;
-    
-    // start dragging row
-    if ([_dataSource respondsToSelector:@selector(tableView:writeRowsWithIndexes:toPasteboard:)]) {
-        if (deltaX < 0.1 || deltaY < 0.1)
-            return;
-        [_draggingSessionPasteboard clearContents];
-        if ([_dataSource tableView:self writeRowsWithIndexes:_selectedRowIndexes toPasteboard:_draggingSessionPasteboard]) {
-            NSDraggingItem* draggingItem = [[NSDraggingItem alloc] initWithPasteboardWriter:self];
-            NSImage* draggingImage = [self createDraggingImage];
-            [draggingItem setDraggingFrame:NSMakeRect(location.x, location.y, draggingImage.size.width, draggingImage.size.height) contents:draggingImage];
-            [self beginDraggingSessionWithItems:@[draggingItem] event:event source:(id<NSDraggingSource>)self];
-            return; // break from current event handle
-        }
-    } // end of dragging row
-    
-    _clickDetect = NO;
-    [self stopClickDetect];
-    // auto scroll select
-    if ([self shouldAutoScrollSelecting:location] && !_autoScrollSelecting) {
-        [self startAutoScrollSelecting];
-        _autoScrollSelecting = YES;
-    }
-    else if (![self shouldAutoScrollSelecting:location] && _autoScrollSelecting) {
-        [self stopAutoScrollSelecting];
-        _autoScrollSelecting = NO;
-    }
-    // end of auto scroll select
-    
-    [self tintedGridRowViews];
-}
-*/
 
 - (void)mouseDown:(NSEvent*)event {
     [self.window makeFirstResponder:self];
@@ -1128,11 +1108,12 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     BOOL isDragging = NO;
     BOOL clickDetect = NO;
     NSPoint location0 = [self convertPoint:[event locationInWindow] fromView:nil];
-    NSInteger rowIndexAtMouseDownPosition = [self gridRowIndexByLocation:location0];
-    NSMutableIndexSet* selectionsWhenDragging = nil;
+    NSInteger rowAtMouseDown = [self tableRowIndexByLocation:location0];
+    NSMutableIndexSet* selectedWhenDragging = nil;
+    NSMutableIndexSet* selectedOverlap = nil;
     
-     if (rowIndexAtMouseDownPosition == -1)
-         goto exit;
+    if (rowAtMouseDown == -1)
+        goto exit;
     
     [self stopClickDetect];
     
@@ -1146,46 +1127,49 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     
     // row selection when mouse down
     if (event.modifierFlags & NSEventModifierFlagShift) {
+        _selectedRowIndexesClip = nil;
         if (!_allowsMultipleSelection) {
-            _keySelectedRowIndex = rowIndexAtMouseDownPosition;
-            _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:rowIndexAtMouseDownPosition];
+            _keySelectedRowIndex = rowAtMouseDown;
+            _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:_keySelectedRowIndex];
         }
         else {
-            [_selectedRowIndexes addIndexes:[self selectionFrom:_keySelectedRowIndex to:rowIndexAtMouseDownPosition]];
+            [_selectedRowIndexes addIndexes:[self selectionFrom:_keySelectedRowIndex to:rowAtMouseDown]];
         }
     }
     else if (event.modifierFlags & NSEventModifierFlagCommand) {
         if (!_allowsMultipleSelection) {
-            _keySelectedRowIndex = rowIndexAtMouseDownPosition;
+            _keySelectedRowIndex = rowAtMouseDown;
             _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:_keySelectedRowIndex];
         }
         else {
-            if ([_selectedRowIndexes containsIndex:rowIndexAtMouseDownPosition]) {
-                [_selectedRowIndexes removeIndex:rowIndexAtMouseDownPosition];
-                if (_keySelectedRowIndex == rowIndexAtMouseDownPosition) {
-                    if (_selectedRowIndexes.count == 0) {
-                        _keySelectedRowIndex = 0;
-                    }
-                    else {
-                        _keySelectedRowIndex = [_selectedRowIndexes indexGreaterThanIndex:rowIndexAtMouseDownPosition];
-                        if (_keySelectedRowIndex == NSNotFound)
-                            _keySelectedRowIndex = [_selectedRowIndexes indexLessThanIndex:rowIndexAtMouseDownPosition];
-                    }
+            _selectedRowIndexesClip = [[NSMutableIndexSet alloc] initWithIndexSet:_selectedRowIndexes];
+            
+            if ([_selectedRowIndexes containsIndex:rowAtMouseDown]) {
+                [_selectedRowIndexes removeIndex:rowAtMouseDown];
+                if (_selectedRowIndexes.count == 0) {
+                    _keySelectedRowIndex = 0;
+                    _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:_keySelectedRowIndex];
+                }
+                else {
+                    _keySelectedRowIndex = [_selectedRowIndexes indexGreaterThanIndex:rowAtMouseDown];
+                    if (_keySelectedRowIndex == NSNotFound)
+                        _keySelectedRowIndex = [_selectedRowIndexes indexLessThanIndex:rowAtMouseDown];
                 }
             }
             else {
-                _selectedRowIndexes = [self selectionIndexAppend:rowIndexAtMouseDownPosition];
-                _keySelectedRowIndex = rowIndexAtMouseDownPosition;
+                _keySelectedRowIndex = rowAtMouseDown;
+                [_selectedRowIndexes addIndex:rowAtMouseDown];
             }
         }
     }
     else {
-        if ([_selectedRowIndexes containsIndex:rowIndexAtMouseDownPosition]) {
-            _keySelectedRowIndex = rowIndexAtMouseDownPosition;
+        _selectedRowIndexesClip = nil;
+        if ([_selectedRowIndexes containsIndex:rowAtMouseDown]) {
+            _keySelectedRowIndex = rowAtMouseDown;
             clickDetect = YES;
         }
         else {
-            _keySelectedRowIndex = rowIndexAtMouseDownPosition;
+            _keySelectedRowIndex = rowAtMouseDown;
             _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:_keySelectedRowIndex];
         }
     } // end of row selection when mouse down
@@ -1199,9 +1183,9 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         CGFloat deltaX = location1.x - location0.x;
         CGFloat deltaY = location1.y - location0.y;
         
-        NSInteger rowIndexWhenMouseDragging = [self gridRowIndexByLocation:location1];
-        if (rowIndexWhenMouseDragging == -1)
-            rowIndexWhenMouseDragging = [[_grid.subviews lastObject] index];
+        NSInteger rowAtMouseDragging = [self tableRowIndexByLocation:location1];
+        if (rowAtMouseDragging == -1)
+            rowAtMouseDragging = [[_grid.subviews lastObject] index];
         switch ([event type]) {
             case NSEventTypeLeftMouseDragged:
                 
@@ -1237,14 +1221,23 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
                 
                 if (!_autoScrollSelecting && NSPointInRect(location1, _grid.frame)) {
                     if (_allowsMultipleSelection) {
-                        if (selectionsWhenDragging)
-                            [_selectedRowIndexes removeIndexes:selectionsWhenDragging];
-                        selectionsWhenDragging = [self selectionFrom:_keySelectedRowIndex to:rowIndexWhenMouseDragging];
-                        [_selectedRowIndexes addIndexes:selectionsWhenDragging];
-                        NSLog(@"%ld", _keySelectedRowIndex);
+                        if (_selectedRowIndexesClip) {
+                            selectedWhenDragging = [self selectionFrom:_keySelectedRowIndex to:rowAtMouseDragging];
+                            selectedOverlap = [[NSMutableIndexSet alloc] init];
+                            [selectedWhenDragging enumerateIndexesUsingBlock:^(NSUInteger index, BOOL *stop) {
+                                if ([_selectedRowIndexesClip containsIndex:index])
+                                    [selectedOverlap addIndex:index];
+                            }];
+                            _selectedRowIndexes = [[NSMutableIndexSet alloc] initWithIndexSet:_selectedRowIndexesClip];
+                            [_selectedRowIndexes addIndexes:selectedWhenDragging];
+                            [_selectedRowIndexes removeIndexes:selectedOverlap];
+                        }
+                        else {
+                            _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:rowAtMouseDragging];
+                        }
                     }
                     else {
-                        _keySelectedRowIndex = rowIndexWhenMouseDragging;
+                        _keySelectedRowIndex = rowAtMouseDragging;
                         _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:_keySelectedRowIndex];
                     }
                     [self tintedGridRowViews];
@@ -1267,7 +1260,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
                 
                 if (clickDetect)
                     [self startClickDetect];
-                
+                [[self nextResponder] mouseUp:event];
                 break;
 
             default:
@@ -1281,11 +1274,6 @@ exit:
     [super mouseDown:event];
 }
 
-
-- (void)setKeyRowAsSelectedRowIndexes {
-    _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:_keySelectedRowIndex];
-    [self tintedGridRowViews];
-}
 
 - (void)startClickDetect {
     _clickTicktack = 0;
@@ -1303,7 +1291,8 @@ exit:
 - (void)clickDetecting:(NSTimer*)timer {
     _clickTicktack ++;
     if (_clickTicktack == 5) {
-        [self setKeyRowAsSelectedRowIndexes];
+        _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:_keySelectedRowIndex];
+        [self tintedGridRowViews];
         [self stopClickDetect];
     }
 }
@@ -1362,29 +1351,22 @@ exit:
     return selection;
 }
 
-- (NSMutableIndexSet*)selectionIndexAppend:(NSInteger)index {
-    if (index < 0)
-        return nil;
-    NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] initWithIndexSet:_selectedRowIndexes];
-    [indexSet addIndex:index];
-    return indexSet;
-}
-
 - (void)tintedGridRowViews {
     for (CEETableRowView* rowView in _grid.subviews) {
         NSInteger index = rowView.index;
         if ([_selectedRowIndexes containsIndex:index]) {
-            if (![rowView styleSet:kCEEViewStyleHeighLighted])
-                [rowView setStyle:kCEEViewStyleHeighLighted];
+            if (rowView.styleState != kCEEViewStyleStateHeighLighted)
+                [rowView setStyleState:kCEEViewStyleStateHeighLighted];
         }
         else {
-            if ([rowView styleSet:kCEEViewStyleHeighLighted])
-                [rowView clearStyle:kCEEViewStyleHeighLighted];
+            if (rowView.styleState == kCEEViewStyleStateHeighLighted)
+                [rowView setStyleState:kCEEViewStyleStateActived];
+            
         }
     }
 }
 
-- (NSInteger)gridRowIndexByLocation:(NSPoint)point { 
+- (NSInteger)tableRowIndexByLocation:(NSPoint)point { 
     point = [_grid convertPoint:point fromView:self];
     for (CEETableRowView* rowView in _grid.subviews) {
         NSRect rect = rowView.frame;
@@ -1526,8 +1508,20 @@ exit:
     if (select) {
         NSInteger firstIndex = [[[_grid subviews] firstObject] index];
         if (_allowsMultipleSelection) {
-            NSMutableIndexSet* selectionIndexSetWhenDragging = [self selectionFrom:_keySelectedRowIndex to:firstIndex];
-            [_selectedRowIndexes addIndexes:selectionIndexSetWhenDragging];
+            NSMutableIndexSet* selectedWhenDragging = [self selectionFrom:_keySelectedRowIndex to:firstIndex];
+            NSMutableIndexSet* selectedOverlap = [[NSMutableIndexSet alloc] init];
+            if (_selectedRowIndexesClip) {
+                [selectedWhenDragging enumerateIndexesUsingBlock:^(NSUInteger index, BOOL *stop) {
+                    if ([_selectedRowIndexesClip containsIndex:index])
+                        [selectedOverlap addIndex:index];
+                }];
+                _selectedRowIndexes = [[NSMutableIndexSet alloc] initWithIndexSet:_selectedRowIndexesClip];
+                [_selectedRowIndexes addIndexes:selectedWhenDragging];
+                [_selectedRowIndexes removeIndexes:selectedOverlap];
+            }
+            else {
+                [_selectedRowIndexes addIndexes:selectedWhenDragging];
+            }
         }
         else {
             _keySelectedRowIndex = firstIndex;
@@ -1549,8 +1543,20 @@ exit:
     if (select) {
         NSInteger lastIndex = [[[_grid subviews] lastObject] index];
         if (_allowsMultipleSelection) {
-            NSMutableIndexSet* selectionIndexSetWhenDragging = [self selectionFrom:_keySelectedRowIndex to:lastIndex];
-            [_selectedRowIndexes addIndexes:selectionIndexSetWhenDragging];
+            NSMutableIndexSet* selectedWhenDragging = [self selectionFrom:_keySelectedRowIndex to:lastIndex];
+            NSMutableIndexSet* selectedOverlap = [[NSMutableIndexSet alloc] init];
+            if (_selectedRowIndexesClip) {
+                [selectedWhenDragging enumerateIndexesUsingBlock:^(NSUInteger index, BOOL *stop) {
+                    if ([_selectedRowIndexesClip containsIndex:index])
+                        [selectedOverlap addIndex:index];
+                }];
+                _selectedRowIndexes = [[NSMutableIndexSet alloc] initWithIndexSet:_selectedRowIndexesClip];
+                [_selectedRowIndexes addIndexes:selectedWhenDragging];
+                [_selectedRowIndexes removeIndexes:selectedOverlap];
+            }
+            else {
+                [_selectedRowIndexes addIndexes:selectedWhenDragging];
+            }
         }
         else {
             _keySelectedRowIndex = lastIndex;
@@ -1616,6 +1622,8 @@ exit:
 }
 
 - (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)extend {
+    if (!indexes)
+        return;
     NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
     NSInteger i = [indexes firstIndex];
     while (i != NSNotFound) {
@@ -1630,110 +1638,44 @@ exit:
     return _grid.rowHeight;
 }
 
+- (void)setStyleState:(CEEViewStyleState)state {
+    _styleState = state;
+    [self updateUserInterface];
+    [self setNeedsDisplay:YES];
+    [_verticalScroller setStyleState:state];
+    [_horizontalScroller setStyleState:state];
+    [_header setStyleState:state];
+    [_headerPadding setStyleState:state];
+    [self tintedGridRowViews];
+}
+
 - (void)updateUserInterface {
-    [super updateUserInterface];
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
     
-    CEEUserInterfaceStyleScheme* current = (CEEUserInterfaceStyleScheme*)[self.styleSchemes pointerAtIndex:self.style];    
     if (!current)
         return;
     
-    NSDictionary* descriptor = current.descriptor;
-    NSString* textColorSelectedProperty = descriptor[@"text_color_selected"];
-    NSString* backgroundColorSelectedProperty = descriptor[@"background_color_selected"];
-    NSString* enableDrawHeaderProperty = descriptor[@"enable_draw_header"];
-        
-    if (textColorSelectedProperty)
-        self.textColorSelected = [CEEUserInterfaceStyleConfiguration createColorFromString:textColorSelectedProperty];
+    if (current.font)
+        self.font = current.font;
     
-    if (backgroundColorSelectedProperty)
-        self.backgroundColorSelected = [CEEUserInterfaceStyleConfiguration createColorFromString:backgroundColorSelectedProperty];
+    if (current.backgroundColor)
+        self.backgroundColor = current.backgroundColor;
     
-    if (enableDrawHeaderProperty)
-        self.enableDrawHeader = [enableDrawHeaderProperty boolValue];
+    if (current.borderColor)
+        self.borderColor = current.borderColor;
     
-    if (self.enableDrawHeader)
-        [self enableComponents:kComponentStateHeader];
-    else
-        [self disableComponents:kComponentStateHeader];
+    if (current.textColor)
+        self.textColor = current.textColor;
+    
+    if (current.textShadow)
+        self.textShadow = current.textShadow;
+    
+    if (current.gradient)
+        self.gradient = current.gradient;
+
+    self.gradientAngle = current.gradientAngle;
+    self.cornerRadius = current.cornerRadius;
 }
-
-#pragma mark - protocol CEETableRowViewDelegate
-
-/*- (void)rowViewEntered:(NSInteger)row {
-    if (!_allowsMultipleSelection) {
-        _keySelectedRowIndex = row;
-        _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:_keySelectedRowIndex];
-    }
-    else {
-        if (_autoScrollSelecting) {
-            if ([_selectedRowIndexes containsIndex:row])
-                [_selectedRowIndexes removeIndex:row];
-            else
-                [_selectedRowIndexes addIndex:row];
-        }
-        else {
-            if ([_selectedRowIndexes containsIndex:row])
-                [_selectedRowIndexes removeIndex:row];
-            else
-                [_selectedRowIndexes addIndex:row];
-        }
-    }
-}
-
-- (void)rowViewExixted:(NSInteger)row {
-}
-
-- (void)rowViewSelected:(NSInteger)row {
-    NSEvent* event = [NSApp currentEvent];
-    _clickDetect = NO;
-    // row selection when mouse down
-    if (event.modifierFlags & NSEventModifierFlagShift) {
-        if (!_allowsMultipleSelection) {
-            _keySelectedRowIndex = row;
-            _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:row];
-        }
-        else {
-            _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:row];
-        }
-    }
-    else if (event.modifierFlags & NSEventModifierFlagCommand) {
-        if (!_allowsMultipleSelection) {
-            _keySelectedRowIndex = row;
-            _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:_keySelectedRowIndex];
-        }
-        else {
-            if ([_selectedRowIndexes containsIndex:row]) {
-                [_selectedRowIndexes removeIndex:row];
-                if (_keySelectedRowIndex == row) {
-                    if (_selectedRowIndexes.count == 0) {
-                        _keySelectedRowIndex = 0;
-                    }
-                    else {
-                        _keySelectedRowIndex = [_selectedRowIndexes indexGreaterThanIndex:row];
-                        if (_keySelectedRowIndex == NSNotFound)
-                            _keySelectedRowIndex = [_selectedRowIndexes indexLessThanIndex:row];
-                    }
-                }
-            }
-            else {
-                _selectedRowIndexes = [self selectionIndexAppend:row];
-                _keySelectedRowIndex = row;
-            }
-        }
-    }
-    else {
-        if ([_selectedRowIndexes containsIndex:row]) {
-            _keySelectedRowIndex = row;
-            _clickDetect = YES;
-        }
-        else {
-            _keySelectedRowIndex = row;
-            _selectedRowIndexes = [self selectionFrom:_keySelectedRowIndex to:_keySelectedRowIndex];
-        }
-    }
-}
- */
-
 
 #pragma mark - protocol NSDraggingDestination
 

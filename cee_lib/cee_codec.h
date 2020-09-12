@@ -111,6 +111,7 @@ cee_long cee_codec_utf8_encoded_byte0_get(const cee_uchar* subject,
 CEERange cee_codec_utf8_range_decoded_to_encoded(const cee_uchar* subject,
                                                  CEERange range);
 
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

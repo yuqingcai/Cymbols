@@ -13,10 +13,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEImageView : NSImageView {
     CEEUserInterfaceStyleConfiguration* _styleConfiguration;
-    CEEViewStyle _style;
+    CEEViewStyleState _styleState;
 }
-@property NSPointerArray* styleSchemes;
-@property (strong, nullable) NSColor* tintColor;
+@property NSPointerArray* userInterfaceStyles;
+@property (strong) NSColor* tintColor;
 - (void)initProperties;
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint;
 @end

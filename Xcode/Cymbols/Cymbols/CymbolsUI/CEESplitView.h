@@ -14,11 +14,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEESplitView : NSSplitView {
     CEEUserInterfaceStyleConfiguration* _styleConfiguration;
-    CEEViewStyle _style;
+    CEEViewStyleState _styleState;
 }
-@property (strong) NSColor* gridColor;
-@property NSPointerArray* styleSchemes;
-@property (strong, nullable) NSColor* borderColor;
+@property NSPointerArray* userInterfaceStyles;
+@property (strong) NSColor* dividerColorVertical;
+@property (strong) NSColor* dividerColorHorizontal;
+@property (strong) NSColor* borderColor;
 @property CGFloat borderWidth;
 @property CGFloat cornerRadius;
 

@@ -13,14 +13,7 @@
             <rect key="frame" x="0.0" y="0.0" width="600" height="480"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <customView identifier="IDAddFileSelectionTableView" translatesAutoresizingMaskIntoConstraints="NO" id="80s-Of-StE" customClass="CEETableView">
-                    <rect key="frame" x="20" y="32" width="560" height="368"/>
-                    <constraints>
-                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="335" id="PHv-49-ZzW"/>
-                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="553" id="aP9-cv-WT8"/>
-                    </constraints>
-                </customView>
-                <customView identifier="IDAddFileSelectionOpenPanelButton" translatesAutoresizingMaskIntoConstraints="NO" id="4zr-YC-SUz" customClass="CEEButton">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="4zr-YC-SUz" customClass="CEEButton">
                     <rect key="frame" x="20" y="0.0" width="24" height="24"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="24" id="HHH-GF-0q1"/>
@@ -30,7 +23,7 @@
                         <userDefinedRuntimeAttribute type="image" keyPath="icon" value="NSAddTemplate"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
-                <customView identifier="IDAddFileSelectionRemoveButton" translatesAutoresizingMaskIntoConstraints="NO" id="PPD-z2-Icc" customClass="CEEButton">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="PPD-z2-Icc" customClass="CEEButton">
                     <rect key="frame" x="52" y="0.0" width="24" height="24"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="24" id="AHv-Gl-OzM"/>
@@ -65,23 +58,39 @@
                         <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Add Files to Project"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="aCo-70-YoA" customClass="CEEContainerView">
+                    <rect key="frame" x="20" y="32" width="560" height="368"/>
+                    <subviews>
+                        <customView translatesAutoresizingMaskIntoConstraints="NO" id="zRq-l1-Ye6" customClass="CEETableView">
+                            <rect key="frame" x="1" y="1" width="558" height="366"/>
+                        </customView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="300" id="376-FM-azR"/>
+                        <constraint firstItem="zRq-l1-Ye6" firstAttribute="top" secondItem="aCo-70-YoA" secondAttribute="top" constant="1" id="70b-52-Upx"/>
+                        <constraint firstItem="zRq-l1-Ye6" firstAttribute="leading" secondItem="aCo-70-YoA" secondAttribute="leading" constant="1" id="9U3-RY-MKk"/>
+                        <constraint firstAttribute="trailing" secondItem="zRq-l1-Ye6" secondAttribute="trailing" constant="1" id="Km4-Jc-MW1"/>
+                        <constraint firstAttribute="bottom" secondItem="zRq-l1-Ye6" secondAttribute="bottom" constant="1" id="kKf-FV-DY4"/>
+                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="500" id="xbg-I4-GRx"/>
+                    </constraints>
+                </customView>
             </subviews>
             <constraints>
                 <constraint firstItem="PPD-z2-Icc" firstAttribute="leading" secondItem="4zr-YC-SUz" secondAttribute="trailing" constant="8" id="4PH-C0-WCX"/>
                 <constraint firstItem="iwq-gc-IOh" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="48" id="5kv-yb-AMh"/>
+                <constraint firstItem="aCo-70-YoA" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="97L-9f-17F"/>
                 <constraint firstAttribute="bottom" secondItem="4zr-YC-SUz" secondAttribute="bottom" id="Cgm-VG-DUV"/>
                 <constraint firstItem="9Pg-mO-EwY" firstAttribute="top" secondItem="SA3-4Q-t8g" secondAttribute="bottom" constant="8" id="FpU-MD-0Bg"/>
                 <constraint firstAttribute="bottom" secondItem="PPD-z2-Icc" secondAttribute="bottom" id="KoP-NG-0es"/>
                 <constraint firstItem="SA3-4Q-t8g" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="16" id="Ms3-1E-3FY"/>
+                <constraint firstAttribute="trailing" secondItem="aCo-70-YoA" secondAttribute="trailing" constant="20" id="OUQ-9o-Qei"/>
                 <constraint firstAttribute="trailing" secondItem="iwq-gc-IOh" secondAttribute="trailing" constant="20" id="Q9I-iL-oh2"/>
-                <constraint firstItem="80s-Of-StE" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="TbO-xQ-vD1"/>
                 <constraint firstItem="SA3-4Q-t8g" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="XCj-zM-74d"/>
                 <constraint firstItem="iwq-gc-IOh" firstAttribute="leading" secondItem="9Pg-mO-EwY" secondAttribute="trailing" constant="8" id="ZNy-RM-9aG"/>
-                <constraint firstAttribute="trailing" secondItem="80s-Of-StE" secondAttribute="trailing" constant="20" id="Zss-an-RKF"/>
+                <constraint firstItem="aCo-70-YoA" firstAttribute="top" secondItem="iwq-gc-IOh" secondAttribute="bottom" constant="8" id="bYp-Ka-kHS"/>
                 <constraint firstItem="9Pg-mO-EwY" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="fID-Fh-pkP"/>
-                <constraint firstItem="4zr-YC-SUz" firstAttribute="top" secondItem="80s-Of-StE" secondAttribute="bottom" constant="8" id="g7W-Ja-i5t"/>
                 <constraint firstAttribute="trailing" secondItem="SA3-4Q-t8g" secondAttribute="trailing" constant="20" id="mrk-TM-Xxr"/>
-                <constraint firstItem="80s-Of-StE" firstAttribute="top" secondItem="9Pg-mO-EwY" secondAttribute="bottom" constant="8" id="tw6-Ma-adL"/>
+                <constraint firstItem="4zr-YC-SUz" firstAttribute="top" secondItem="aCo-70-YoA" secondAttribute="bottom" constant="8" id="qEv-fp-U2a"/>
                 <constraint firstItem="4zr-YC-SUz" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="xeL-N1-msT"/>
             </constraints>
             <connections>
@@ -89,7 +98,7 @@
                 <outlet property="filePathInput" destination="9Pg-mO-EwY" id="9fk-Qo-cQP"/>
                 <outlet property="openFilePanelButton" destination="4zr-YC-SUz" id="WQQ-nN-5Bu"/>
                 <outlet property="removeFilePathsButton" destination="PPD-z2-Icc" id="Hrr-lD-tdx"/>
-                <outlet property="sourceTable" destination="80s-Of-StE" id="Hh6-0Z-yvT"/>
+                <outlet property="sourceTable" destination="zRq-l1-Ye6" id="I77-h8-rex"/>
             </connections>
             <point key="canvasLocation" x="195" y="241"/>
         </customView>

@@ -13,32 +13,33 @@
             <rect key="frame" x="0.0" y="0.0" width="394" height="20"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="uM5-2f-o0s" customClass="CEETextLabel">
-                    <rect key="frame" x="20" y="3" width="374" height="18"/>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="uM5-2f-o0s" customClass="CEETableRowCellViewTextLabel">
+                    <rect key="frame" x="28" y="3" width="366" height="18"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="18" id="dPv-ZV-ClJ"/>
+                        <constraint firstAttribute="height" constant="18" id="RAO-en-bRF"/>
                     </constraints>
                     <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="source name"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="file name"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="y5a-5g-jck" customClass="CEEImageView">
-                    <rect key="frame" x="0.0" y="0.0" width="20" height="20"/>
+                    <rect key="frame" x="8" y="0.0" width="20" height="20"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="20" id="8fp-gP-uMb"/>
-                        <constraint firstAttribute="width" constant="20" id="Zi6-Oq-H3w"/>
+                        <constraint firstAttribute="width" constant="20" id="cSA-jQ-rfq"/>
+                        <constraint firstAttribute="height" constant="20" id="kde-H6-Vw9"/>
                     </constraints>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_file_16x16" id="XaZ-wq-cst"/>
                 </imageView>
             </subviews>
             <constraints>
-                <constraint firstItem="y5a-5g-jck" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="3D7-yv-pwo"/>
-                <constraint firstAttribute="trailing" secondItem="uM5-2f-o0s" secondAttribute="trailing" id="6dX-Uv-czQ"/>
-                <constraint firstItem="uM5-2f-o0s" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="-1" id="cpH-Rk-13p"/>
-                <constraint firstItem="y5a-5g-jck" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" id="jML-QW-ObT"/>
-                <constraint firstItem="uM5-2f-o0s" firstAttribute="leading" secondItem="y5a-5g-jck" secondAttribute="trailing" id="kEX-Xs-vLB"/>
+                <constraint firstAttribute="bottom" secondItem="uM5-2f-o0s" secondAttribute="bottom" constant="3" id="1NC-FJ-Iyy"/>
+                <constraint firstItem="y5a-5g-jck" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="8" id="HUb-da-8Ss"/>
+                <constraint firstAttribute="bottom" secondItem="y5a-5g-jck" secondAttribute="bottom" id="aWp-h9-uKz"/>
+                <constraint firstItem="uM5-2f-o0s" firstAttribute="leading" secondItem="y5a-5g-jck" secondAttribute="trailing" id="gDK-ce-Jao"/>
+                <constraint firstAttribute="trailing" secondItem="uM5-2f-o0s" secondAttribute="trailing" id="rCx-yV-JdJ"/>
             </constraints>
             <connections>
+                <outlet property="icon" destination="y5a-5g-jck" id="l23-Cw-d2E"/>
                 <outlet property="title" destination="uM5-2f-o0s" id="mxR-z3-WPw"/>
             </connections>
             <point key="canvasLocation" x="96" y="38"/>
@@ -48,30 +49,34 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="rwX-pp-pnv" customClass="CEECheckBox">
-                    <rect key="frame" x="5" y="2" width="22" height="17"/>
+                    <rect key="frame" x="8" y="2" width="22" height="17"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="17" id="cuN-jf-vnJ"/>
-                        <constraint firstAttribute="width" constant="22" id="nim-lL-MHZ"/>
+                        <constraint firstAttribute="width" constant="22" id="iwi-xO-OSx"/>
+                        <constraint firstAttribute="height" constant="17" id="lYt-sf-O3I"/>
                     </constraints>
+                    <connections>
+                        <action selector="select:" target="DOt-U7-aqq" id="6la-N2-jOR"/>
+                    </connections>
                 </customView>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Zy4-MJ-sZa" customClass="CEETextLabel">
-                    <rect key="frame" x="27" y="3" width="367" height="18"/>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Zy4-MJ-sZa" customClass="CEETableRowCellViewTextLabel">
+                    <rect key="frame" x="30" y="3" width="364" height="18"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="18" id="Bdf-P6-zgJ"/>
+                        <constraint firstAttribute="height" constant="18" id="wSr-61-mGD"/>
                     </constraints>
                     <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="source name"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="file path"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
             </subviews>
             <constraints>
-                <constraint firstItem="rwX-pp-pnv" firstAttribute="leading" secondItem="DOt-U7-aqq" secondAttribute="leading" constant="5" id="8qs-kO-3ba"/>
-                <constraint firstAttribute="trailing" secondItem="Zy4-MJ-sZa" secondAttribute="trailing" id="IWe-iW-wAa"/>
-                <constraint firstItem="rwX-pp-pnv" firstAttribute="top" secondItem="DOt-U7-aqq" secondAttribute="top" constant="1" id="VzN-XI-RkJ"/>
-                <constraint firstItem="Zy4-MJ-sZa" firstAttribute="leading" secondItem="rwX-pp-pnv" secondAttribute="trailing" id="e8E-t7-nDh"/>
-                <constraint firstItem="Zy4-MJ-sZa" firstAttribute="top" secondItem="DOt-U7-aqq" secondAttribute="top" constant="-1" id="h9h-fT-4v4"/>
+                <constraint firstItem="Zy4-MJ-sZa" firstAttribute="leading" secondItem="rwX-pp-pnv" secondAttribute="trailing" id="GS6-9P-h0x"/>
+                <constraint firstAttribute="trailing" secondItem="Zy4-MJ-sZa" secondAttribute="trailing" id="VI7-rJ-Phc"/>
+                <constraint firstAttribute="bottom" secondItem="Zy4-MJ-sZa" secondAttribute="bottom" constant="3" id="knd-77-egU"/>
+                <constraint firstItem="rwX-pp-pnv" firstAttribute="leading" secondItem="DOt-U7-aqq" secondAttribute="leading" constant="8" id="rTY-ze-kjh"/>
+                <constraint firstAttribute="bottom" secondItem="rwX-pp-pnv" secondAttribute="bottom" constant="2" id="u0Y-pH-8RT"/>
             </constraints>
             <connections>
+                <outlet property="check" destination="rwX-pp-pnv" id="Rtr-su-aZX"/>
                 <outlet property="title" destination="Zy4-MJ-sZa" id="43M-8y-v2F"/>
             </connections>
             <point key="canvasLocation" x="96" y="111"/>
@@ -80,28 +85,65 @@
             <rect key="frame" x="0.0" y="0.0" width="394" height="20"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="uFF-Nx-0gN" customClass="CEETextLabel">
-                    <rect key="frame" x="0.0" y="3" width="394" height="18"/>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="uFF-Nx-0gN" customClass="CEETableRowCellViewTextLabel">
+                    <rect key="frame" x="8" y="3" width="386" height="18"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="18" id="HMQ-mu-S4p"/>
+                        <constraint firstAttribute="height" constant="18" id="CEv-ro-eAt"/>
                     </constraints>
                     <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="source name"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="file path"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
             </subviews>
             <constraints>
-                <constraint firstItem="uFF-Nx-0gN" firstAttribute="top" secondItem="E4A-hY-VtA" secondAttribute="top" constant="-1" id="23o-kP-nSW"/>
-                <constraint firstAttribute="trailing" secondItem="uFF-Nx-0gN" secondAttribute="trailing" id="cPF-t7-1Cu"/>
-                <constraint firstItem="uFF-Nx-0gN" firstAttribute="leading" secondItem="E4A-hY-VtA" secondAttribute="leading" id="wEh-Na-o4U"/>
+                <constraint firstItem="uFF-Nx-0gN" firstAttribute="leading" secondItem="E4A-hY-VtA" secondAttribute="leading" constant="8" id="7eE-eD-av2"/>
+                <constraint firstAttribute="trailing" secondItem="uFF-Nx-0gN" secondAttribute="trailing" id="9DB-rG-5JV"/>
+                <constraint firstAttribute="bottom" secondItem="uFF-Nx-0gN" secondAttribute="bottom" constant="3" id="CC7-8Z-zfR"/>
             </constraints>
             <connections>
                 <outlet property="title" destination="uFF-Nx-0gN" id="cQT-gU-m4U"/>
             </connections>
             <point key="canvasLocation" x="96" y="185"/>
         </customView>
+        <customView identifier="IDSymbolCellView" id="yiQ-nJ-vxH" customClass="CEESymbolCellView">
+            <rect key="frame" x="0.0" y="0.0" width="394" height="20"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Nfa-Pw-8hN" customClass="CEETableRowCellViewTextLabel">
+                    <rect key="frame" x="28" y="3" width="366" height="18"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="18" id="zXQ-OH-1ZW"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="symbol name"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="8DZ-xr-nvr" customClass="CEEImageView">
+                    <rect key="frame" x="8" y="0.0" width="20" height="20"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="20" id="DDh-UL-Z2j"/>
+                        <constraint firstAttribute="width" constant="20" id="Tts-Ln-f07"/>
+                    </constraints>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_symbol_16x16" id="pEv-Fd-zvU"/>
+                </imageView>
+            </subviews>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="Nfa-Pw-8hN" secondAttribute="trailing" id="Fup-bX-QgY"/>
+                <constraint firstAttribute="bottom" secondItem="8DZ-xr-nvr" secondAttribute="bottom" id="ScR-CI-Ryy"/>
+                <constraint firstItem="8DZ-xr-nvr" firstAttribute="leading" secondItem="yiQ-nJ-vxH" secondAttribute="leading" constant="8" id="SyC-dx-WrX"/>
+                <constraint firstAttribute="bottom" secondItem="Nfa-Pw-8hN" secondAttribute="bottom" constant="3" id="bBj-eZ-R5n"/>
+                <constraint firstItem="Nfa-Pw-8hN" firstAttribute="leading" secondItem="8DZ-xr-nvr" secondAttribute="trailing" id="rlS-Ac-Fb6"/>
+            </constraints>
+            <connections>
+                <outlet property="icon" destination="8DZ-xr-nvr" id="v7E-Yt-Caa"/>
+                <outlet property="leading" destination="SyC-dx-WrX" id="8EA-Mx-QVh"/>
+                <outlet property="title" destination="Nfa-Pw-8hN" id="mHc-V0-kot"/>
+            </connections>
+            <point key="canvasLocation" x="96" y="255"/>
+        </customView>
     </objects>
     <resources>
         <image name="icon_file_16x16" width="16" height="16"/>
+        <image name="icon_symbol_16x16" width="16" height="16"/>
     </resources>
 </document>

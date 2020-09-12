@@ -16,7 +16,7 @@
 
 - (void)initProperties {
     [super initProperties];
-    _gridWidth = 0.0;
+    _gridWidth = 1.0;
     _gridColor = [NSColor clearColor];
     _rowSpacing = 2.0;
     _enableDrawHorizontalGrid = NO;
@@ -195,33 +195,42 @@
 }
 
 - (void)updateUserInterface {
-    [super updateUserInterface];
-    
-    CEEUserInterfaceStyleScheme* current = (CEEUserInterfaceStyleScheme*)[self.styleSchemes pointerAtIndex:self.style];    
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
     if (!current)
         return;
-        
-    NSDictionary* descriptor = current.descriptor;
-    NSString* rowSpacingProperty = descriptor[@"row_spacing"];
-    NSString* gridColorProperty = descriptor[@"grid_color"];
-    NSString* gridWidthProperty = descriptor[@"grid_width"];
-    NSString* enableDrawHorizontalGridProperty = descriptor[@"enable_draw_horizontal_grid"];
-    NSString* enableDrawVerticalGridProperty = descriptor[@"enable_draw_vertical_grid"];
     
-    if (rowSpacingProperty)
-        self.rowSpacing = [rowSpacingProperty floatValue];
+    if (current.font)
+        self.font = current.font;
     
-    if (gridColorProperty)
-        self.gridColor = [CEEUserInterfaceStyleConfiguration createColorFromString:gridColorProperty];
+    if (current.backgroundColor)
+        self.backgroundColor = current.backgroundColor;
     
-    if (gridWidthProperty)
-        self.gridWidth = [gridWidthProperty floatValue];
+    if (current.borderColor)
+        self.borderColor = current.borderColor;
     
-    if (enableDrawHorizontalGridProperty)
-        self.enableDrawHorizontalGrid = [enableDrawHorizontalGridProperty boolValue];
+    if (current.textColor)
+        self.textColor = current.textColor;
     
-    if (enableDrawVerticalGridProperty)
-        self.enableDrawVerticalGrid = [enableDrawVerticalGridProperty boolValue];
+    if (current.textShadow)
+        self.textShadow = current.textShadow;
+    
+    if (current.gradient)
+        self.gradient = current.gradient;
+    
+    self.gradientAngle = current.gradientAngle;
+    
+    if (current.borders)
+        self.borders = current.borders;
+    
+    self.borderWidth = current.borderWidth;
+    self.cornerRadius = current.cornerRadius;
+    self.rowSpacing = current.rowSpacing;
+    
+    if (current.gridColor)
+        self.gridColor = current.gridColor;
+    
+    self.enableDrawHorizontalGrid = current.enableDrawHorizontalGrid;
+    self.enableDrawVerticalGrid = current.enableDrawVerticalGrid;
 }
 
 @end

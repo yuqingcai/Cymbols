@@ -154,7 +154,7 @@ static cee_float rect_origin_diff(CEERect* r0, CEERect* r1)
 CEEList* cee_rects_outline_create(CEEList* rects)
 {
     CEEList* points = NULL;
-    cee_float default_radius = 5.0;
+    cee_float corner_radius = 4.0;
     cee_float radius = 0.0;
     cee_float diff = 0.0;
     CEEPoint* p1 = NULL;
@@ -176,10 +176,10 @@ CEEList* cee_rects_outline_create(CEEList* rects)
         if (p->next)
             next = p->next->data;
         
-        radius = default_radius;
+        radius = corner_radius;
         if (prev) {
             diff = rect_tail_diff(current, prev);
-            radius =  diff >= default_radius ? default_radius : diff;
+            radius =  diff >= corner_radius ? corner_radius : diff;
         }
         
         if (!prev || rect_tail_compare(current, prev) == 1) {
@@ -214,10 +214,10 @@ CEEList* cee_rects_outline_create(CEEList* rects)
         }
         
         
-        radius = default_radius;
+        radius = corner_radius;
         if (next) {
             diff = rect_tail_diff(current, next);
-            radius =  diff >= default_radius ? default_radius : diff;
+            radius =  diff >= corner_radius ? corner_radius : diff;
         }
         if (!next || rect_tail_compare(current, next) == 1) {
             p1 = cee_point_create(current->origin.x + current->size.width,
@@ -279,10 +279,10 @@ CEEList* cee_rects_outline_create(CEEList* rects)
         
         
         
-        radius = default_radius;
+        radius = corner_radius;
         if (next) {
             diff = rect_origin_diff(current, next);
-            radius = diff >= default_radius ? default_radius : diff;
+            radius = diff >= corner_radius ? corner_radius : diff;
         }
             
         if (!next || rect_origin_compare(current, next) == -1) {
@@ -316,13 +316,13 @@ CEEList* cee_rects_outline_create(CEEList* rects)
             points = cee_list_append(points, c2);
         }
         
-        radius = default_radius;
+        radius = corner_radius;
         if (prev) {
             diff = rect_origin_diff(current, prev);
-            radius = diff >= default_radius ? default_radius : diff;
+            radius = diff >= corner_radius ? corner_radius : diff;
         }
         else {
-            radius = default_radius;
+            radius = corner_radius;
         }
         
         if (prev && rect_origin_compare(current, prev) == -1) {

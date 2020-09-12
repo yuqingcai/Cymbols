@@ -7,7 +7,7 @@
 //
 
 #import "CEEViewController.h"
-#import "CEESplitView.h"
+#import "CEESessionFrameSplitView.h"
 #import "CEEProject.h"
 #import "CEESessionFrameViewController.h"
 #import "CEESessionFrameManagerView.h"

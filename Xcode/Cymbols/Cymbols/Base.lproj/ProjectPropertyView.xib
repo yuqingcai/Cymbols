@@ -31,13 +31,6 @@
                         <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Project Name"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
-                <customView identifier="IDProjectPropertySourceTableView" translatesAutoresizingMaskIntoConstraints="NO" id="lxh-Sb-ocZ" customClass="CEETableView">
-                    <rect key="frame" x="20" y="17" width="560" height="362"/>
-                    <constraints>
-                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="560" id="TOg-gr-RlI"/>
-                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="362" id="bLP-1A-Hev"/>
-                    </constraints>
-                </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="nea-9B-qMV" customClass="CEETextLabel">
                     <rect key="frame" x="20" y="468" width="560" height="23"/>
                     <constraints>
@@ -56,24 +49,40 @@
                         <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="File Paths"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Ljn-hm-QtQ" customClass="CEEContainerView">
+                    <rect key="frame" x="20" y="8" width="560" height="367"/>
+                    <subviews>
+                        <customView translatesAutoresizingMaskIntoConstraints="NO" id="lxh-Sb-ocZ" customClass="CEETableView">
+                            <rect key="frame" x="1" y="1" width="558" height="365"/>
+                        </customView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstAttribute="bottom" secondItem="lxh-Sb-ocZ" secondAttribute="bottom" constant="1" id="Bk4-PL-cpP"/>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="300" id="HKk-cW-wt6"/>
+                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="500" id="Noh-R0-lhC"/>
+                        <constraint firstItem="lxh-Sb-ocZ" firstAttribute="leading" secondItem="Ljn-hm-QtQ" secondAttribute="leading" constant="1" id="VEr-XM-UAN"/>
+                        <constraint firstAttribute="trailing" secondItem="lxh-Sb-ocZ" secondAttribute="trailing" constant="1" id="Zar-27-3we"/>
+                        <constraint firstItem="lxh-Sb-ocZ" firstAttribute="top" secondItem="Ljn-hm-QtQ" secondAttribute="top" constant="1" id="yiK-kO-UHz"/>
+                    </constraints>
+                </customView>
             </subviews>
             <constraints>
                 <constraint firstItem="nea-9B-qMV" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="9" id="4pS-fn-sxO"/>
                 <constraint firstAttribute="trailing" secondItem="H6F-Io-6vM" secondAttribute="trailing" constant="20" id="9sT-Vw-siv"/>
                 <constraint firstItem="S3k-NT-zgK" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="DiY-9J-WtL"/>
-                <constraint firstAttribute="bottom" secondItem="lxh-Sb-ocZ" secondAttribute="bottom" constant="17" id="EA4-1U-rh6"/>
-                <constraint firstAttribute="trailing" secondItem="lxh-Sb-ocZ" secondAttribute="trailing" constant="20" id="GPF-xq-BOr"/>
                 <constraint firstAttribute="trailing" secondItem="1wP-qB-QOK" secondAttribute="trailing" constant="20" id="Hw8-ms-kyU"/>
-                <constraint firstItem="lxh-Sb-ocZ" firstAttribute="top" secondItem="S3k-NT-zgK" secondAttribute="bottom" constant="4" id="IsM-KS-TJ5"/>
                 <constraint firstItem="H6F-Io-6vM" firstAttribute="top" secondItem="nea-9B-qMV" secondAttribute="bottom" constant="8" id="Roi-bX-iZW"/>
-                <constraint firstItem="lxh-Sb-ocZ" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="RsF-l3-lvI"/>
                 <constraint firstItem="1wP-qB-QOK" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="Rzx-4t-ZK4"/>
                 <constraint firstAttribute="trailing" secondItem="nea-9B-qMV" secondAttribute="trailing" constant="20" id="Uoi-aT-05C"/>
                 <constraint firstItem="nea-9B-qMV" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="Zen-Dc-QRV"/>
                 <constraint firstAttribute="trailing" secondItem="S3k-NT-zgK" secondAttribute="trailing" constant="20" id="alu-ee-Xh7"/>
+                <constraint firstAttribute="bottom" secondItem="Ljn-hm-QtQ" secondAttribute="bottom" constant="8" id="b9o-He-gRC"/>
+                <constraint firstAttribute="trailing" secondItem="Ljn-hm-QtQ" secondAttribute="trailing" constant="20" id="eW9-wi-HQU"/>
                 <constraint firstItem="S3k-NT-zgK" firstAttribute="top" secondItem="1wP-qB-QOK" secondAttribute="bottom" constant="4" id="h9j-te-uiq"/>
                 <constraint firstItem="H6F-Io-6vM" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="s6U-UB-tSk"/>
+                <constraint firstItem="Ljn-hm-QtQ" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="sFq-6E-Rka"/>
                 <constraint firstItem="1wP-qB-QOK" firstAttribute="top" secondItem="H6F-Io-6vM" secondAttribute="bottom" constant="4" id="sWX-Rj-jTd"/>
+                <constraint firstItem="Ljn-hm-QtQ" firstAttribute="top" secondItem="S3k-NT-zgK" secondAttribute="bottom" constant="8" id="uij-u9-cLX"/>
             </constraints>
             <connections>
                 <outlet property="filePathTable" destination="lxh-Sb-ocZ" id="LhH-hs-AOr"/>

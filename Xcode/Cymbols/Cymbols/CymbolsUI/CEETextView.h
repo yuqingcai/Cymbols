@@ -29,9 +29,11 @@ IB_DESIGNABLE
 - (void)textViewFrameChanged:(CEETextView*)textView;
 - (void)textViewSearchText:(CEETextView*)textView;
 - (void)textViewEscape:(CEETextView*)textView;
-- (void)textViewMouseUp:(CEETextView*)textView;
-- (void)textViewMouseDown:(CEETextView*)textView;
 - (void)textViewNewLine:(CEETextView*)textView;
+- (void)textViewSelectWithCommand:(CEETextView*)textView;
+- (void)textViewHighlightTokenCluster:(CEETextView*)textView;
+- (void)textViewIgnoreTokenCluster:(CEETextView*)textView;
+- (void)textViewCreateContext:(CEETextView*)textView;
 @end
 
 @class CEETextView;
@@ -43,17 +45,16 @@ IB_DESIGNABLE
     BOOL _retain_storage;
 }
 
-@property NSColor* caretColor;
-@property NSColor* caretColorMarked;
-@property NSColor* textBackgroundColorSelected;
-@property NSColor* textBackgroundColorSelectedOutline;
-@property NSColor* textBackgroundColorMarked;
-@property NSColor* textBackgroundColorMarkedOutline;
-@property NSColor* textBackgroundColorSearched;
-@property NSColor* textBackgroundColorSearchedOutline;
-@property NSColor* textBackgroundColorHighlight;
-@property NSColor* textBackgroundColorHighlightOutline;
-
+@property (strong) NSColor* caretColor;
+@property (strong) NSColor* caretColorMarked;
+@property (strong) NSColor* textBackgroundColorSelected;
+@property (strong) NSColor* textBackgroundColorSelectedOutline;
+@property (strong) NSColor* textBackgroundColorMarked;
+@property (strong) NSColor* textBackgroundColorMarkedOutline;
+@property (strong) NSColor* textBackgroundColorSearched;
+@property (strong) NSColor* textBackgroundColorSearchedOutline;
+@property (strong) NSColor* textBackgroundColorHighlight;
+@property (strong) NSColor* textBackgroundColorHighlightOutline;
 @property CEETextLayoutAlignment aligment;
 @property (readonly) CEETextEditRef edit;
 @property (readonly) CEETextStorageRef storage;

@@ -10,10 +10,10 @@
 
 @implementation CEEFilePathCellView
 
-- (void)drawRect:(NSRect)dirtyRect {
-    [super drawRect:dirtyRect];
-    
-    // Drawing code here.
+- (void)setStyleState:(CEEViewStyleState)state {
+    [super setStyleState:state];
+    for (NSView* view in self.subviews)
+        [view setStyleState:state];
 }
 
 @end

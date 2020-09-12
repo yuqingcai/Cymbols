@@ -8,11 +8,18 @@
 
 #import "CEEImageView.h"
 
+@interface CEEImageViewStyleItem : NSObject
+@property (strong) NSColor* tintColor;
+@end
+
+@implementation CEEImageViewStyleItem
+@end
+
 @implementation CEEImageView
 
 - (void)initProperties {
     _tintColor = nil;
-    _style = kCEEViewStyleInit;
+    _styleState = kCEEViewStyleStateActived;
 }
 
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint {
@@ -33,6 +40,15 @@
     [super drawRect:dirtyRect];
 }
 
+- (void)setStyleState:(CEEViewStyleState)state {
+    _styleState = state;
+    [super setStyleState:state];
+}
+
+- (CEEViewStyleState)styleState {
+    return _styleState;
+}
+
 - (void)setStyleConfiguration:(CEEUserInterfaceStyleConfiguration*)configuration {
     _styleConfiguration = configuration;
     [configuration configureView:self];
@@ -43,52 +59,25 @@
     return _styleConfiguration;
 }
 
-- (BOOL)styleSet:(CEEViewStyle)style {
-    return (_style & style) != 0;
-}
-
-- (void)setStyle:(CEEViewStyle)style {
-    _style |= style;
-    [super setStyle:style];
-}
-
-- (void)clearStyle:(CEEViewStyle)style {
-    _style &= ~style;
-    [super clearStyle:style];
-}
-
-- (void)resetStyle:(CEEViewStyle)style {
-    _style = style;
-    [super resetStyle:style];
-}
-
-- (CEEViewStyle)style {
-    return _style;
-}
-
 - (void)updateUserInterface {
-    [super updateUserInterface];
-    
-    CEEUserInterfaceStyleScheme* current = (CEEUserInterfaceStyleScheme*)[_styleSchemes pointerAtIndex:self.style];
-        
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
     if (!current)
         return;
     
-    NSDictionary* descriptor = current.descriptor;
-    NSString* tintColorProperty = descriptor[@"tint_color"];
-    
-    if (tintColorProperty)
-        self.tintColor = [CEEUserInterfaceStyleConfiguration createColorFromString:tintColorProperty];
+    if (current.tintColor)
+        self.tintColor = current.tintColor;
 }
 
 - (void)setSytleSchemes:(NSArray*)schemes {
-    _styleSchemes = [[NSPointerArray alloc] init];
+    self.userInterfaceStyles = [[NSPointerArray alloc] init];
     
-    for (NSUInteger i = 0; i < kCEEViewStyleMax; i ++)
-        [_styleSchemes addPointer:NULL];
+    for (NSUInteger i = 0; i < kCEEViewStyleStateMax; i ++)
+        [self.userInterfaceStyles addPointer:NULL];
     
-    for (CEEUserInterfaceStyleScheme* scheme in schemes)
-        [_styleSchemes replacePointerAtIndex:scheme.style withPointer:(void*)scheme];
+    for (CEEUserInterfaceStyleScheme* scheme in schemes) {
+        CEEUserInterfaceStyle* style = [[CEEUserInterfaceStyle alloc] initWithScheme:scheme];
+        [self.userInterfaceStyles replacePointerAtIndex:scheme.styleState withPointer:(void*)style];
+    }
 }
 
 @end

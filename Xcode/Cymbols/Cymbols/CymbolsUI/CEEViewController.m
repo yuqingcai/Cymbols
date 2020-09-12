@@ -14,7 +14,6 @@
 @implementation CEEViewController
 
 - (void)initProperties {
-    [self setIdentifier:CreateClassIdentifier([self className])];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
@@ -51,7 +50,7 @@
     [super viewDidLoad];
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [self.view setStyleConfiguration:[styleManager userInterfaceConfiguration]];
-    [self.view setStyle:kCEEViewStyleActived];
+    [self.view setStyleState:kCEEViewStyleStateActived];
 }
 
 - (void)updateStyle:(NSNotification*)notification {

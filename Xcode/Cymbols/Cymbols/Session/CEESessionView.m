@@ -20,11 +20,10 @@
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
     
-    [self.borderColor setStroke];
+    [self.dividerColor setStroke];
     NSBezierPath* border = [NSBezierPath bezierPath];
     [border setLineWidth: _seperateLineSize];
     NSSize frameSize = self.frame.size;
-    
     [border moveToPoint: CGPointMake(-0.5, frameSize.height - _seperateLineTopSpace - (_seperateLineSize / 2.0))];
     [border lineToPoint: CGPointMake(frameSize.width, frameSize.height - _seperateLineTopSpace - (_seperateLineSize / 2.0))];
     [border stroke];

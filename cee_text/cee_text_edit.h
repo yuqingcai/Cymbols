@@ -78,7 +78,7 @@ void cee_text_edit_replace_ranges(CEETextEditRef edit,
                                   CEEList* ranges);
 void cee_text_edit_caret_position_set(CEETextEditRef edit,
                                       CEEPoint position);
-cee_long cee_text_edit_caret_buffet_offset_get(CEETextEditRef edit);
+cee_long cee_text_edit_caret_buffer_offset_get(CEETextEditRef edit);
 void cee_text_edit_scroll_left(CEETextEditRef edit);
 void cee_text_edit_scroll_right(CEETextEditRef edit);
 void cee_text_edit_scroll_vertical_to(CEETextEditRef edit,
@@ -125,10 +125,14 @@ CEEList* cee_text_edit_selection_rects_create(CEETextEditRef edit);
 void cee_text_edit_attributes_configure(CEETextEditRef edit,
                                         const cee_uchar* descriptor);
 void cee_text_edit_highlight_clear(CEETextEditRef edit);
-void cee_text_edit_highlight_range_set(CEETextEditRef edit,
-                                       CEERange range);
+void cee_text_edit_highlight_set(CEETextEditRef edit,
+                                 CEEList* ranges);
 CEEList* cee_text_edit_highlight_rects_create(CEETextEditRef edit);
-
+void cee_text_edit_cursor_position_set(CEETextEditRef edit,
+                                       CEEPoint position);
+cee_long cee_text_edit_cursor_buffer_offset_get(CEETextEditRef edit);
+void cee_text_edit_scroll_to_pragraph(CEETextEditRef edit,
+                                      cee_long index);
 
 #ifdef __cplusplus
 }

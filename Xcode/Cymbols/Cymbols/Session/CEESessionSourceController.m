@@ -6,7 +6,7 @@
 //  Copyright © 2019 Lazycatdesign. All rights reserved.
 //
 
-#import "CymbolsDelegate.h"
+#import "AppDelegate.h"
 #import "CEESessionSourceController.h"
 #import "CEESessionFrameManager.h"
 
@@ -43,11 +43,11 @@
 }
 
 - (void)toggleContextView {
-    [_spliter toggleViewByIdentifier:@"IDSessionContextController"];
+    [_spliter toggleViewByIdentifier:@"IDSessionContextViewController"];
 }
 
 - (void)showContextView:(BOOL)shown {
-    [_spliter showView:shown byIdentifier:@"IDSessionContextController"];
+    [_spliter showView:shown byIdentifier:@"IDSessionContextViewController"];
 }
 
 - (void)splitViewHorizontally {

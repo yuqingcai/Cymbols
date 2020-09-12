@@ -10,8 +10,10 @@
 
 @implementation CEEControl
 
+@synthesize enabled = _enabled;
+
 - (void)initProperties {
-    _style = kCEEViewStyleInit;
+    _styleState = kCEEViewStyleStateActived;
     [self setEnabled:YES];
 }
 
@@ -47,12 +49,17 @@
 }
 
 - (void)setEnabled:(BOOL)enabled {
+    _enabled = enabled;
     if (!enabled)
-        [self setStyle:kCEEViewStyleDisabled];
+        [self setStyleState:kCEEViewStyleStateDisabled];
     else
-        [self clearStyle:kCEEViewStyleDisabled];
+        [self setStyleState:kCEEViewStyleStateActived];
     
     [super setEnabled:enabled];
+}
+
+- (BOOL)enabled {
+    return _enabled;
 }
 
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint {
@@ -67,6 +74,15 @@
     return tintedImage;
 }
 
+- (void)setStyleState:(CEEViewStyleState)state {
+    _styleState = state;
+    [super setStyleState:state];
+}
+
+- (CEEViewStyleState)styleState {
+    return _styleState;
+}
+
 - (void)setStyleConfiguration:(CEEUserInterfaceStyleConfiguration*)configuration {
     _styleConfiguration = configuration;
     [configuration configureView:self];
@@ -77,41 +93,19 @@
     return _styleConfiguration;
 }
 
-- (BOOL)styleSet:(CEEViewStyle)style {
-    return (_style & style) != 0;
-}
-
-- (void)setStyle:(CEEViewStyle)style {
-    _style |= style;
-    [super setStyle:style];
-}
-
-- (void)clearStyle:(CEEViewStyle)style {
-    _style &= ~style;
-    [super clearStyle:style];
-}
-
-- (void)resetStyle:(CEEViewStyle)style {
-    _style = style;
-    [super resetStyle:style];
-}
-
-- (CEEViewStyle)style {
-    return _style;
-}
-
 - (void)updateUserInterface {
     
 }
 
 - (void)setSytleSchemes:(NSArray*)schemes {
-    _styleSchemes = [[NSPointerArray alloc] init];
+    self.userInterfaceStyles = [[NSPointerArray alloc] init];
+        
+    for (NSUInteger i = 0; i < kCEEViewStyleStateMax; i ++)
+        [self.userInterfaceStyles addPointer:NULL];
     
-    for (NSUInteger i = 0; i < kCEEViewStyleMax; i ++)
-        [_styleSchemes addPointer:NULL];
-    
-    for (CEEUserInterfaceStyleScheme* scheme in schemes)
-        [_styleSchemes replacePointerAtIndex:scheme.style withPointer:(void*)scheme];
+    for (CEEUserInterfaceStyleScheme* scheme in schemes) {
+        CEEUserInterfaceStyle* style = [[CEEUserInterfaceStyle alloc] initWithScheme:scheme];
+        [self.userInterfaceStyles replacePointerAtIndex:scheme.styleState withPointer:(void*)style];
+    }
 }
-
 @end

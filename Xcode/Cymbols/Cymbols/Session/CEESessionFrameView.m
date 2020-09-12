@@ -105,6 +105,9 @@
     }
 }
 
+- (void)setStyleState:(CEEViewStyleState)state {
+}
+
 #pragma mark - protocol NSDraggingDestination
 
 - (BOOL)attachable {
@@ -209,41 +212,6 @@
 
 - (NSPasteboardWritingOptions)writingOptionsForType:(NSPasteboardType)type pasteboard:(NSPasteboard *)pasteboard {
     return NSPasteboardWritingPromised;
-}
-
-- (NSImage*)createDraggingHint {
-    NSString* title = @"";
-    CEEView* titleView = nil;
-    
-    if (self.delegate) {
-        title = [self.delegate titleOfFrameView:self];
-        titleView = [self.delegate titleViewInFrameView:self];
-    }
-    
-    if (!titleView || !title)
-        return nil;
-    
-    NSDictionary* attributes = @{
-                                 NSFontAttributeName : titleView.font,
-                                 NSForegroundColorAttributeName : titleView.textColor,
-                                 NSKernAttributeName : @(0.22)
-                                 };
-    
-    NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:title attributes:attributes];
-    
-    NSRect drawingRect = NSMakeRect(0.0,
-                                    0.0,
-                                    attributedString.size.width,
-                                    attributedString.size.height);
-    
-    NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(drawingRect.size.width, drawingRect.size.height)];
-    [image lockFocus];
-    [[NSColor clearColor] set];
-    NSRectFill(NSMakeRect(0, 0, image.size.width, image.size.height));
-    [attributedString drawInRect:drawingRect];
-    [image unlockFocus];
-    
-    return image;
 }
 
 - (NSDraggingItem*)createDraggingItem {

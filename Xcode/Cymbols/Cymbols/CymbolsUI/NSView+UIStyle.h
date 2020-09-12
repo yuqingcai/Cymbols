@@ -12,34 +12,75 @@
 NS_ASSUME_NONNULL_BEGIN
 
 
-typedef NS_OPTIONS(NSUInteger, CEEViewStyle) {
-    kCEEViewStyleInit = 0,
-    kCEEViewStyleSelected = 1 << 0,
-    kCEEViewStyleActived = 1 << 1 ,
-    kCEEViewStyleClicked = 1 << 2,
-    kCEEViewStyleDisabled = 1 << 3,
-    kCEEViewStyleHeighLighted = 1 << 4,
-    kCEEViewStyleMax = 1 << 5,
+typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
+    kCEEViewStyleStateActived       = 0 ,
+    kCEEViewStyleStateDeactived     = 1,
+    kCEEViewStyleStateClicked       = 2,
+    kCEEViewStyleStateDisabled      = 3,
+    kCEEViewStyleStateHeighLighted  = 4,
+    kCEEViewStyleStateMax           = 5,
 };
 
 @interface CEEUserInterfaceStyleScheme : NSObject
-@property CEEViewStyle style;
+@property CEEViewStyleState styleState;
 @property (strong) NSDictionary* descriptor;
 @end
 
+
+@interface CEEUserInterfaceStyle : NSObject
+@property (strong) NSFont* font;
+@property (strong) NSColor* textColor;
+@property (strong) NSColor* backgroundColor;
+@property (strong) NSColor* borderColor;
+@property (strong) NSShadow* textShadow;
+@property (strong) NSGradient* gradient;
+@property CGFloat gradientAngle;
+@property (strong) NSString* borders;
+@property CGFloat borderWidth;
+@property CGFloat cornerRadius;
+
+@property (strong) NSColor* caretColor;
+@property (strong) NSColor* caretColorMarked;
+@property (strong) NSColor* textBackgroundColorSelected;
+@property (strong) NSColor* textBackgroundColorSelectedOutline;
+@property (strong) NSColor* textBackgroundColorMarked;
+@property (strong) NSColor* textBackgroundColorMarkedOutline;
+@property (strong) NSColor* textBackgroundColorSearched;
+@property (strong) NSColor* textBackgroundColorSearchedOutline;
+@property (strong) NSColor* textBackgroundColorHighlight;
+@property (strong) NSColor* textBackgroundColorHighlightOutline;
+@property (strong) NSString* aligment;
+
+@property (strong) NSColor* dividerColor;
+@property (strong) NSColor* dividerColorVertical;
+@property (strong) NSColor* dividerColorHorizontal;
+@property CGFloat rowSpacing;
+@property (strong) NSColor* gridColor;
+@property CGFloat gridWidth;
+@property BOOL enableDrawHorizontalGrid;
+@property BOOL enableDrawVerticalGrid;
+@property (strong) NSColor* knobColor;
+@property (strong) NSColor* iconColor;
+@property (strong) NSColor* boxOutlineColor;
+@property (strong) NSColor* boxBackgroundColor;
+@property (strong) NSColor* boxBackgroundColorChecked;
+@property (strong) NSColor* boxContentColor;
+@property (strong) NSColor* tintColor;
+- (instancetype)initWithScheme:(CEEUserInterfaceStyleScheme*)scheme;
+@end
+
+
 @interface NSView(UIStyle)
-- (BOOL)styleSet:(CEEViewStyle)style;
-- (void)setStyle:(CEEViewStyle)style;
-- (void)clearStyle:(CEEViewStyle)style;
-- (void)resetStyle:(CEEViewStyle)style;
-- (CEEViewStyle)style;
+- (void)setStyleState:(CEEViewStyleState)state;
+- (CEEViewStyleState)styleState;
 - (void)setStyleConfiguration:(CEEUserInterfaceStyleConfiguration*)configuration;
 - (CEEUserInterfaceStyleConfiguration*)styleConfiguration;
-- (NSString*)getSchemeIdentifier;
-- (NSString*)getSchemeClassName;
+- (NSString*)getSchemeObjectIdentifier;
+- (NSString*)getSchemeClassIdentifier;
 - (NSString*)createComponentIdentifier:(NSString*)identifier;
 - (void)updateUserInterface;
 - (void)setSytleSchemes:(NSArray*)schemes;
+
 @end
 
 NS_ASSUME_NONNULL_END

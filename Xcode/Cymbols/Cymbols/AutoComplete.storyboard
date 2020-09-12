@@ -6,11 +6,11 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Auto Complete Controller-->
+        <!--Auto Complete View Controller-->
         <scene sceneID="ZjM-8C-h87">
             <objects>
-                <viewController storyboardIdentifier="IDAutoCompleteController" id="TR2-zF-plE" customClass="CEEAutoCompleteController" sceneMemberID="viewController">
-                    <view key="view" identifier="IDAutoCompleteView" id="mTr-3m-ojv" customClass="CEEView">
+                <viewController storyboardIdentifier="IDAutoCompleteViewController" id="TR2-zF-plE" customClass="CEEAutoCompleteViewController" sceneMemberID="viewController">
+                    <view key="view" id="mTr-3m-ojv" customClass="CEEView">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </view>

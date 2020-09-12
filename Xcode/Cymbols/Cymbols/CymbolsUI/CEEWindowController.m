@@ -14,7 +14,6 @@
 @implementation CEEWindowController
 
 - (void)initProperties {
-    [self setIdentifier:CreateClassIdentifier([self className])];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
@@ -68,11 +67,11 @@
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)notification {
-    [self.contentViewController setViewStyle:kCEEViewStyleActived];
+    [self.contentViewController setViewStyleState:kCEEViewStyleStateActived];
 }
 
 - (void)windowDidResignMain:(NSNotification *)notification {
-    [self.contentViewController clearViewStyle:kCEEViewStyleActived];
+    [self.contentViewController setViewStyleState:kCEEViewStyleStateDeactived];
 }
 
 - (NSString*)serialize {

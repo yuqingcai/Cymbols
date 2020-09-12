@@ -152,6 +152,23 @@ cee_boolean cee_location_in_range(cee_long location,
             (location < range.location + range.length);
 }
 
+cee_boolean cee_location_in_ranges(cee_long location,
+                                   CEEList* ranges)
+{
+    if (!ranges)
+        return FALSE;
+    
+    CEEList* p = ranges;
+    CEERange* range = NULL;
+    while (p) {
+        range = p->data;
+        if (cee_location_in_range(location, *range))
+            return TRUE;
+        p = p->next;
+    }
+    return FALSE;
+}
+
 cee_boolean cee_location_overflow_range(cee_long location,
                                         CEERange range)
 {
@@ -181,3 +198,4 @@ CEERange cee_range_consistent_from_discrete(CEEList* ranges)
                                rangeN->location + rangeN->length - range0->location);
     return range;
 }
+

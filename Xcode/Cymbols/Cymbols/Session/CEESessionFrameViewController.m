@@ -5,24 +5,24 @@
 //  Created by Qing on 2018/8/16.
 //  Copyright © 2018年 Lazycatdesign. All rights reserved.
 //
-#import "CymbolsDelegate.h"
-#import "CEESourceViewController.h"
+#import "AppDelegate.h"
+#import "CEEEditViewController.h"
 #import "CEESessionFrameViewController.h"
 #import "CEESessionFrameManager.h"
-#import "CEETabView.h"
-#import "CEETabbarButton.h"
 #import "CEESourceBuffer.h"
-#import "CEESourceHistoryController.h"
+#import "CEETitlebarButton.h"
+#import "CEESourceHistoryViewController.h"
 #import "CEEPopupPanel.h"
 #import "CEEIdentifier.h"
+#import "CEEProjectContextViewController.h"
 
 @interface CEESessionFrameViewController()
-@property (strong) IBOutlet CEETabView *titlebar;
-@property (strong) IBOutlet CEETabbarButton *closeButton;
-@property (strong) IBOutlet CEETabbarButton *previousButton;
-@property (strong) IBOutlet CEETabbarButton *nextButton;
-@property (weak) IBOutlet CEETabbarButton *bufferListButton;
-@property (strong) CEESourceViewController* sourceViewController;
+@property (weak) IBOutlet CEETitleView *titlebar;
+@property (weak) IBOutlet CEETitlebarButton *closeButton;
+@property (weak) IBOutlet CEETitlebarButton *previousButton;
+@property (weak) IBOutlet CEETitlebarButton *nextButton;
+@property (weak) IBOutlet CEETitlebarButton *bufferListButton;
+@property (strong) CEEEditViewController* editViewController;
 @property (strong) NSPanel* titleDetail;
 @property (strong) CEEPopupPanel* sourceHistoryPanel;
 @end
@@ -32,24 +32,17 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self.view setTranslatesAutoresizingMaskIntoConstraints:NO];
-        
-    //_titleDetail = [NSPanel windowWithContentViewController:[[NSStoryboard storyboardWithName:@"Session" bundle:nil] instantiateControllerWithIdentifier:@"IDAutoCompleteController"]];
-    //[_titleDetail setFloatingPanel:YES];
-    //[_titleDetail setBecomesKeyOnlyIfNeeded:YES];
-    //[_titleDetail setStyleMask:NSWindowStyleMaskBorderless];
-    //[_titleDetail setHasShadow:NO];
-    //[_titleDetail setBackgroundColor:[NSColor clearColor]];
     
-    _sourceHistoryPanel = [CEEPopupPanel windowWithContentViewController:[[NSStoryboard storyboardWithName:@"SourceHistory" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceHistoryController"]];
+    _sourceHistoryPanel = [CEEPopupPanel windowWithContentViewController:[[NSStoryboard storyboardWithName:@"SourceHistory" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceHistoryViewController"]];
     [_sourceHistoryPanel setStyleMask:NSWindowStyleMaskBorderless];
     [_sourceHistoryPanel setHasShadow:YES];
     [_sourceHistoryPanel setBackgroundColor:[NSColor clearColor]];
     [_sourceHistoryPanel setDelegate:self];
     [_sourceHistoryPanel setFloatingPanel:YES];
-    [_sourceHistoryPanel registerEventMonitor];
+    [_sourceHistoryPanel setExclusived:YES];
     
     [_titlebar setDelegate:self];
-    [_titlebar setHost:self.view];
+    [_titlebar setDraggingSource:(CEESessionFrameView*)self.view];
     CGFloat leadingOffset = _previousButton.frame.size.width + 
         _nextButton.frame.size.width + _bufferListButton.frame.size.width + 12.0;
     CGFloat tailingOffset = self.view.frame.size.width - _closeButton.frame.origin.x;
@@ -60,10 +53,13 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deletePortResponse:) name:CEENotificationSessionDeletePort object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(requestTargetSymbolSelectionResponse:) name:CEENotificationSessionPortRequestTargetSymbolSelection object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setTargetSymbolResponse:) name:CEENotificationSessionPortSetTargetSymbol object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setActivedSymbolResponse:) name:CEENotificationSessionPortSetActivedSymbol object:nil];
 }
 
 - (BOOL)becomeFirstResponder {
-    [self.view.window makeFirstResponder:_sourceViewController];
+    [self.view.window makeFirstResponder:_editViewController];
     return YES;
 }
 
@@ -79,17 +75,17 @@
 
 - (IBAction)close:(id)sender {
     if (_manager)
-        [_manager closeFrame:self];
+        [_manager closeFrame:self]; //bug here...
 }
 
 - (IBAction)prev:(id)sender {
     if (_port)
-        [_port prevReference];
+        [_port prevBufferReference];
 }
 
 - (IBAction)next:(id)sender {
     if (_port)
-        [_port nextReference];
+        [_port nextBufferReference];
 }
 
 - (void)expandTitleViewDetail:(CEETitleView *)titleView {
@@ -105,55 +101,57 @@
     //[_titleDetail orderOut:self];
 }
 
-- (IBAction)showSourceHistory:(id)sender {
+- (IBAction)presentHistory:(id)sender {
     NSPoint point0 = [self.titlebar convertPoint:_bufferListButton.frame.origin toView:nil];    
     NSPoint point1 = [self.view convertPoint:_titlebar.frame.origin toView:nil];
-    NSRect rect = [self.view.window convertRectToScreen:NSMakeRect(point0.x, point1.y, 300, 0)];
-    [(CEEView*)_sourceHistoryPanel.contentView setStyle:kCEEViewStyleActived];
-    [(CEESourceHistoryController*)_sourceHistoryPanel.contentViewController setPort:self.port];
-    [_sourceHistoryPanel setFrame:rect display:NO];
-    [_sourceHistoryPanel orderFront:self];
+    point1 = [self.view.window convertPointToScreen:point1];
+    NSRect rect = NSMakeRect(point1.x, point1.y, 400 , 400);
+    rect.origin.y -= 400;    
+    [(CEEView*)_sourceHistoryPanel.contentView setStyleState:kCEEViewStyleStateActived];
+    [(CEESourceHistoryViewController*)_sourceHistoryPanel.contentViewController setPort:self.port];
+    [_sourceHistoryPanel setFrame:rect display:YES];
+    [_sourceHistoryPanel orderFront:nil];
 }
 
-
-- (void)present {
-    CEESourceViewController* viewController = nil;
-    CEESourceBuffer* buffer = [[_port currentReference] buffer];
-    NSInteger paragraphIndex = [[_port currentReference] paragraphIndex];
+- (void)presentSource {
+    CEEEditViewController* viewController = nil;
+    CEESourceBuffer* buffer = [[_port currentBufferReference] buffer];
+    NSInteger paragraphIndex = [[_port currentBufferReference] paragraphIndex];
     
     if (!buffer)
         return;
     
     if (buffer.type == kCEEBufferTypeUTF8)
-        viewController = [[NSStoryboard storyboardWithName:@"SourceViewController" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
+        viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
     else if (buffer.type == kCEEBufferTypeBinary) {
-        viewController = [[NSStoryboard storyboardWithName:@"SourceViewController" bundle:nil] instantiateControllerWithIdentifier:@"IDBinaryEditViewController"];
+        viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDBinaryEditViewController"];
     }
     
     if (!viewController)
         return;
     
-    if (_sourceViewController) {
-        [_sourceViewController.view removeFromSuperview];
-        [_sourceViewController removeFromParentViewController];
+    if (_editViewController) {
+        [_editViewController.view removeFromSuperview];
+        [_editViewController removeFromParentViewController];
     }
     
-    _sourceViewController = viewController;
-    [_sourceViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
-    
-    [self.view addSubview:_sourceViewController.view];
-    [self addChildViewController:_sourceViewController];
-    [self.view setStyle:kCEEViewStyleActived | kCEEViewStyleSelected];
+    _editViewController = viewController;
+    [_editViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
+        
+    [self.view addSubview:_editViewController.view];
+    [self addChildViewController:_editViewController];
     
     NSDictionary *views = @{
                             @"titlebar" : _titlebar,
-                            @"sourceView" : _sourceViewController.view,
+                            @"editView" : _editViewController.view,
                             };
-    NSArray *constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[sourceView]-0-|" options:0 metrics:nil views:views];
-    NSArray *constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[sourceView]-0-|" options:0 metrics:nil views:views];
+    NSArray *constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[editView]-0-|" options:0 metrics:nil views:views];
+    NSArray *constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[editView]-0-|" options:0 metrics:nil views:views];
     [self.view addConstraints:constraintsH];
     [self.view addConstraints:constraintsV];
     
+    [viewController setEditable:YES];
+    [viewController setIntelligence:YES];
     [viewController setPort:_port];
     [viewController setBuffer:buffer];
     [viewController setParagraphIndex:paragraphIndex];
@@ -163,12 +161,14 @@
 }
 
 - (void)select {
-    [self.view.window makeFirstResponder:_sourceViewController];
-    [self.view setStyle:kCEEViewStyleSelected | kCEEViewStyleActived];
+    [self.view.window makeFirstResponder:_editViewController];
+    [_titlebar setStyleState:kCEEViewStyleStateActived];
+    [_editViewController setViewStyleState:kCEEViewStyleStateActived];
 }
 
 - (void)deselect {
-    [self.view clearStyle:kCEEViewStyleSelected];
+    [_titlebar setStyleState:kCEEViewStyleStateDeactived];
+    [_editViewController setViewStyleState:kCEEViewStyleStateDeactived];
 }
 
 - (void)setTitle:(NSString *)title {
@@ -177,7 +177,7 @@
 }
 
 - (void)textBufferStateChangedResponse:(NSNotification*)notification {
-    CEESourceBuffer* buffer = [[_port currentReference] buffer];
+    CEESourceBuffer* buffer = [[_port currentBufferReference] buffer];
     if (notification.object != buffer)
         return;
     
@@ -197,6 +197,45 @@
     [_manager closeFrame:self];
 }
 
+- (void)requestTargetSymbolSelectionResponse:(NSNotification*)notification {
+    if (notification.object != _port)
+        return;
+    
+    NSWindowController* contextWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectContextWindowController"];
+    NSModalResponse responese = NSModalResponseCancel;
+    responese = [NSApp runModalForWindow:contextWindowController.window];
+    if (responese == NSModalResponseOK) {
+        CEEProjectContextViewController* contextViewController = (CEEProjectContextViewController*)contextWindowController.contentViewController;
+        CEESourceSymbol* selection = contextViewController.selectedSymbol;
+        [_port setTargetSourceSymbol:selection];
+    }
+    [contextWindowController close];
+}
+
+- (void)setTargetSymbolResponse:(NSNotification*)notification {
+    if (notification.object != _port || !_port.target_symbol)
+        return;
+    
+    NSString* filePath = [NSString stringWithUTF8String:_port.target_symbol->filepath];
+    CEEList* ranges = cee_ranges_from_string(_port.target_symbol->locations);
+    if (ranges) {
+        [_port openSourceBufferWithFilePath:filePath];
+        [self.editViewController highlightRanges:ranges];
+        cee_list_free_full(ranges, cee_range_free);
+    }
+}
+
+- (void)setActivedSymbolResponse:(NSNotification*)notification {
+    if (notification.object != _port || !_port.actived_symbol)
+        return;
+    
+    CEEList* ranges = cee_ranges_from_string(_port.actived_symbol->locations);
+    if (ranges) {
+        [self.editViewController highlightRanges:ranges];
+        cee_list_free_full(ranges, cee_range_free);
+    }
+}
+
 - (void)windowDidResignKey:(NSNotification *)notification {
     if (notification.object == _sourceHistoryPanel)
         [_sourceHistoryPanel close];
@@ -214,6 +253,7 @@
 - (void)moveFrameView:(CEESessionFrameView*)frameView0 attachAt:(CEEViewRegion)region relateTo:(CEESessionFrameView*)frameView1 {
     if (!_manager)
         return;
+    
     [_manager moveFrameView:frameView0 attachAt:region relateTo:frameView1];
 }
 

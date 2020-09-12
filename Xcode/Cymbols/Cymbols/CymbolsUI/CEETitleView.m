@@ -9,12 +9,6 @@
 
 #import "CEETitleView.h"
 
-@interface CEETitleView ()
-@property CGFloat kern;
-@property CGFloat iconWidth;
-@property CGFloat iconHeight;
-@end
-
 @implementation CEETitleView
 
 @synthesize title = _title;
@@ -22,7 +16,6 @@
 - (void)initProperties {
     [super initProperties];
     _kern = 0.22;
-    _iconColor = [NSColor grayColor];
     _leadingOffset = 5.0;
     _tailingOffset = 5.0;
 }
@@ -98,6 +91,47 @@
 
 - (NSString*)title {
     return _title;
+}
+
+- (NSImage*)createDraggingHint {    
+    NSDictionary* attributes = @{
+                                 NSFontAttributeName : self.font,
+                                 NSForegroundColorAttributeName : self.textColor,
+                                 NSKernAttributeName : @(0.22)
+                                 };
+    
+    NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:self.title attributes:attributes];
+    
+    NSRect drawingRect = NSMakeRect(0.0,
+                                    0.0,
+                                    attributedString.size.width,
+                                    attributedString.size.height);
+    
+    NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(drawingRect.size.width, drawingRect.size.height)];
+    [image lockFocus];
+    [[NSColor clearColor] set];
+    NSRectFill(NSMakeRect(0, 0, image.size.width, image.size.height));
+    [attributedString drawInRect:drawingRect];
+    [image unlockFocus];
+    
+    return image;
+}
+
+
+- (void)mouseDragged:(NSEvent *)event {
+    [super mouseDragged:event];
+    
+    if (!_draggingSource)
+        return ;
+    
+    NSPoint location = [event locationInWindow];
+    location = [self convertPoint:location fromView:nil];
+    NSDraggingItem* item = [_draggingSource createDraggingItem];
+    NSImage* hint = [self createDraggingHint];
+    NSRect rect = NSMakeRect(location.x, location.y, hint.size.width, hint.size.height);
+    [item setDraggingFrame:rect contents:hint];
+    [self beginDraggingSessionWithItems:@[item] event:event source:(id<NSDraggingSource>)_draggingSource];
+    
 }
 
 @end

@@ -2,12 +2,15 @@
 #include <stdio.h>
 #include "cee_backend.h"
 
-static cee_boolean tables_existed(sqlite3* database);
-static cee_boolean tables_create(sqlite3* database);
-static CEEList* validate_filepaths(cee_pointer database,
+static cee_boolean tables_existed(sqlite3* db);
+static cee_boolean tables_create(sqlite3* db);
+static CEEList* validate_filepaths(cee_pointer db,
                                    CEEList* filepaths);
 static cee_pointer filepath_list_copy(const cee_pointer src,
                                cee_pointer data);
+static CEEList* symbols_search(sqlite3* db,
+                               const cee_char* condition);
+
 cee_pointer cee_database_create(const cee_char* path)
 {
     int error = 0;
@@ -197,9 +200,9 @@ static cee_boolean tables_create(sqlite3* database)
     return TRUE;
 }
 
-CEEList* cee_database_session_descriptors_get(cee_pointer database)
+CEEList* cee_database_session_descriptors_get(cee_pointer db)
 {
-    if (!database)
+    if (!db)
         return NULL;
     
     CEEList* descriptors = NULL;
@@ -210,7 +213,7 @@ CEEList* cee_database_session_descriptors_get(cee_pointer database)
     "SELECT descriptor FROM cee_project_sessions;";
     
     sqlite3_stmt* stmt = NULL;
-    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         fprintf(stdout, "SQL Error");
         return NULL;
     }
@@ -235,14 +238,14 @@ CEEList* cee_database_session_descriptors_get(cee_pointer database)
     return descriptors;
 }
 
-cee_boolean cee_database_session_descriptors_remove(cee_pointer database)
+cee_boolean cee_database_session_descriptors_remove(cee_pointer db)
 {
-    if (!database)
+    if (!db)
         return FALSE;
     
     char *message = NULL;
     char* sql = "DELETE FROM cee_project_sessions;";
-    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
+    if (sqlite3_exec(db, sql, NULL, NULL, &message) != SQLITE_OK) {
         fprintf(stderr, "SQL Error: %s\n", message);
         sqlite3_free(message);
         return FALSE;
@@ -250,10 +253,10 @@ cee_boolean cee_database_session_descriptors_remove(cee_pointer database)
     return TRUE;
 }
 
-cee_boolean cee_database_session_descriptor_append(cee_pointer database,
+cee_boolean cee_database_session_descriptor_append(cee_pointer db,
                                                    const cee_char* descriptor)
 {
-    if (!database || !descriptor)
+    if (!db || !descriptor)
         return FALSE;
     
     cee_boolean ret = TRUE;
@@ -261,7 +264,7 @@ cee_boolean cee_database_session_descriptor_append(cee_pointer database,
     char* sql =
     "INSERT INTO cee_project_sessions (descriptor) VALUES (?);";
     
-    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         fprintf(stdout, "error");
         return FALSE;
     }
@@ -278,13 +281,13 @@ cee_boolean cee_database_session_descriptor_append(cee_pointer database,
     return ret;
 }
 
-cee_boolean cee_database_filepaths_append(cee_pointer database,
+cee_boolean cee_database_filepaths_append(cee_pointer db,
                                           CEEList* filepaths)
 {
-    if (!database)
+    if (!db)
         return FALSE;
     
-    CEEList* validateds = validate_filepaths(database, filepaths);
+    CEEList* validateds = validate_filepaths(db, filepaths);
     if (!validateds)
         return FALSE;
     
@@ -296,12 +299,12 @@ cee_boolean cee_database_filepaths_append(cee_pointer database,
     char* sql =
     "INSERT INTO cee_project_file_paths (name, path) VALUES (?, ?);";
     
-    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         fprintf(stdout, "error");
         return FALSE;
     }
     
-    sqlite3_exec(database, "BEGIN TRANSACTION", NULL, NULL, &message);
+    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &message);
     p = validateds;
     while (p) {
         filepath = p->data;
@@ -322,7 +325,7 @@ cee_boolean cee_database_filepaths_append(cee_pointer database,
         p = p->next;
     }
     
-    sqlite3_exec(database, "END TRANSACTION", NULL, NULL, &message);
+    sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &message);
     sqlite3_finalize(stmt);
     
     cee_list_free_full(validateds, cee_free);
@@ -330,7 +333,7 @@ cee_boolean cee_database_filepaths_append(cee_pointer database,
     return TRUE;
 }
 
-static CEEList* validate_filepaths(cee_pointer database,
+static CEEList* validate_filepaths(cee_pointer db,
                                    CEEList* filepaths)
 {
     CEEList* existeds = NULL;
@@ -338,7 +341,7 @@ static CEEList* validate_filepaths(cee_pointer database,
     CEEList* p = NULL;
     CEEList* q = NULL;
     
-    existeds = cee_database_filepaths_get(database, NULL);
+    existeds = cee_database_filepaths_get(db, NULL);
     if (!existeds)
         return cee_list_copy_deep(filepaths, 
                                   filepath_list_copy, 
@@ -369,10 +372,10 @@ static cee_pointer filepath_list_copy(const cee_pointer src,
     return cee_strdup(src);
 }
 
-CEEList* cee_database_filepaths_get(cee_pointer database,
+CEEList* cee_database_filepaths_get(cee_pointer db,
                                     const cee_char* condition)
 {
-    if (!database)
+    if (!db)
         return NULL;
     
     CEEList* filepaths = NULL;
@@ -388,7 +391,7 @@ CEEList* cee_database_filepaths_get(cee_pointer database,
     else
         sprintf(sql, "SELECT path, name FROM cee_project_file_paths ORDER BY name ASC;");
             
-    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK)
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
         return NULL;
     
     do {
@@ -407,10 +410,10 @@ CEEList* cee_database_filepaths_get(cee_pointer database,
     return filepaths;
 }
 
-cee_boolean cee_database_filepaths_remove(cee_pointer database,
+cee_boolean cee_database_filepaths_remove(cee_pointer db,
                                           CEEList* filepaths)
 {
-    if (!database || !filepaths)
+    if (!db || !filepaths)
         return FALSE;
     
     CEEList* p = NULL;
@@ -419,12 +422,12 @@ cee_boolean cee_database_filepaths_remove(cee_pointer database,
     char* sql =
     "DELETE FROM cee_project_file_paths WHERE path=?;";
     
-    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         fprintf(stdout, "error");
         return FALSE;
     }
     
-    sqlite3_exec(database, "BEGIN TRANSACTION", NULL, NULL, &message);
+    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &message);
     
     p = filepaths;
     while (p) {
@@ -440,8 +443,237 @@ cee_boolean cee_database_filepaths_remove(cee_pointer database,
     }
     
     
-    sqlite3_exec(database, "END TRANSACTION", NULL, NULL, &message);
+    sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &message);
     sqlite3_finalize(stmt);
+    
+    return TRUE;
+}
+
+void cee_database_symbols_clean(cee_pointer db)
+{
+    if (!db)
+        return;
+        
+    char *message = NULL;
+    char* sql = "DELETE FROM cee_source_symbols;";
+    if (sqlite3_exec(db, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+    }
+}
+
+cee_boolean cee_database_symbols_write(cee_pointer db,
+                                       CEEList* symbols)
+{
+    if (!db)
+        return FALSE;
+    
+    sqlite3_stmt* stmt = NULL;
+    char *message = NULL;
+    char* sql =
+    "INSERT INTO cee_source_symbols (type, descriptor, parent, derives, protos, language, filepath, locations, fregment_range) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    int ret = SQLITE_OK;
+    
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "error");
+        return FALSE;
+    }
+    
+    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &message);
+    
+    CEEList* p = symbols;
+    while (p) {
+        CEESourceSymbol* symbol = p->data;
+        
+        sqlite3_bind_int (stmt, 1, symbol->type);
+        sqlite3_bind_text(stmt, 2, symbol->descriptor, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 3, symbol->parent, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 4, symbol->derives, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 5, symbol->protos, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 6, symbol->language, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 7, symbol->filepath, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 8, symbol->locations, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 9, symbol->fregment_range, -1, SQLITE_STATIC);
+        ret = sqlite3_step(stmt);
+        
+        sqlite3_reset(stmt);
+        sqlite3_clear_bindings(stmt);
+        
+        if (ret != SQLITE_DONE)
+            break;
+        
+        p = p->next;
+    }
+    
+    sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &message);
+    sqlite3_finalize(stmt);
+    return TRUE;
+}
+
+CEEList* cee_database_symbols_search_by_descriptor(cee_pointer db,
+                                                   const cee_char* descriptor)
+{
+    if (!db || !descriptor)
+        return NULL;
+    
+    char* condition = NULL;
+    cee_strconcat0(&condition, "descriptor=", "'", descriptor, "'", NULL);
+    CEEList* symbols = symbols_search(db, condition);
+    
+    cee_free(condition);
+    
+    return symbols;
+}
+
+CEEList* cee_database_symbols_search_by_parent(cee_pointer db,
+                                               const cee_char* parent)
+{
+    if (!db || !parent)
+        return NULL;
+    
+    CEEList* symbols = NULL;
+    char* condition = NULL;
+    cee_strconcat0(&condition, "parent=", "'", parent, "'", NULL);
+    symbols = symbols_search(db, condition);
+    cee_free(condition);
+    return symbols;
+}
+
+CEEList* cee_database_symbols_search_by_type(cee_pointer db,
+                                             const cee_char* type)
+{
+    if (!db || !type)
+        return NULL;
+    
+    CEEList* symbols = NULL;
+    char* condition = NULL;
+    cee_strconcat0(&condition, "type=", "'", type, "'", NULL);
+    symbols = symbols_search(db, condition);
+    cee_free(condition);
+    return symbols;
+}
+
+CEEList* cee_database_symbols_search_by_filepath(cee_pointer db,
+                                                 const cee_char* filepath)
+{
+    if (!db || !filepath)
+        return NULL;
+    
+    CEEList* symbols = NULL;
+    char* condition = NULL;
+    cee_strconcat0(&condition, "filepath=", "'", filepath, "'", NULL);
+    symbols = symbols_search(db, condition);
+    cee_free(condition);
+    return symbols;
+}
+
+static CEEList* symbols_search(sqlite3* db,
+                               const cee_char* condition)
+{
+    if (!db || !condition)
+        return NULL;
+    
+    CEEList* symbols = NULL;
+    CEESourceSymbol* symbol = NULL;
+    char* sql = NULL;
+    char* text = NULL;
+    int length = 0;
+    sqlite3_stmt* stmt;
+    
+    cee_strconcat0(&sql, 
+                   "SELECT type, descriptor, parent, derives, protos, language, filepath, locations fregment_range FROM cee_source_symbols WHERE ",
+                   condition, 
+                   ";",
+                   NULL);
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        return NULL;
+    
+    do {
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            break;
+        
+        symbol = cee_source_symbol_create(kCEESourceSymbolTypeUnknow,
+                                          NULL,
+                                          NULL, 
+                                          NULL, 
+                                          NULL, 
+                                          NULL, 
+                                          NULL,
+                                          NULL,
+                                          NULL);
+        
+        /** type */
+        symbol->type = sqlite3_column_int(stmt, 0);
+                
+        /** descriptor */
+        text = (char*)sqlite3_column_text(stmt, 1);
+        length = sqlite3_column_bytes(stmt, 1);
+        symbol->descriptor = cee_strndup(text, length);
+        
+        /** parent */
+        text = (char*)sqlite3_column_text(stmt, 2);
+        length = sqlite3_column_bytes(stmt, 2);
+        symbol->parent = cee_strndup(text, length);
+        
+        /** derives */
+        text = (char*)sqlite3_column_text(stmt, 3);
+        length = sqlite3_column_bytes(stmt, 3);
+        symbol->derives = cee_strndup(text, length);
+        
+        /** protos */
+        text = (char*)sqlite3_column_text(stmt, 4);
+        length = sqlite3_column_bytes(stmt, 4);
+        symbol->protos = cee_strndup(text, length);
+        
+        /** language */
+        text = (char*)sqlite3_column_text(stmt, 5);
+        length = sqlite3_column_bytes(stmt, 5);
+        symbol->language = cee_strndup(text, length);
+        
+        /** filepath */
+        text = (char*)sqlite3_column_text(stmt, 6);
+        length = sqlite3_column_bytes(stmt, 6);
+        symbol->filepath = cee_strndup(text, length);
+        
+        /** locations */
+        text = (char*)sqlite3_column_text(stmt, 7);
+        length = sqlite3_column_bytes(stmt, 7);
+        symbol->locations = cee_strndup(text, length);
+        
+        /** fregment_range */
+        text = (char*)sqlite3_column_text(stmt, 8);
+        length = sqlite3_column_bytes(stmt, 8);
+        symbol->fregment_range = cee_strndup(text, length);
+        
+        symbols = cee_list_prepend(symbols, symbol);
+        
+    } while (1);
+    
+    sqlite3_finalize(stmt);
+    
+    cee_free(sql);
+    return symbols;
+}
+
+cee_boolean cee_database_symbols_delete_by_filepath(cee_pointer db,
+                                                    const cee_char* filepath)
+{    
+    if (!db || !filepath)
+        return FALSE;
+    
+    char *message = NULL;
+    char* sql = NULL;
+    cee_strconcat0(&sql, 
+                   "DELETE FROM cee_source_symbols WHERE filepath=",
+                   filepath,
+                   ";",
+                   NULL);
+    
+    if (sqlite3_exec(db, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+        return FALSE;
+    }
     
     return TRUE;
 }

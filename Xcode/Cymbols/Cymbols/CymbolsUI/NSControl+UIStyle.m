@@ -10,40 +10,16 @@
 
 @implementation NSControl(UIStateable)
 
-- (BOOL)styleSet:(CEEViewStyle)style {
-    return NO;
-}
-
-- (CEEViewStyle)style {
-    return kCEEViewStyleInit;
-}
-
-- (void)setStyle:(CEEViewStyle)style {
+- (void)setStyleState:(CEEViewStyleState)state {
     [self updateUserInterface];
     [self setNeedsDisplay:YES];
     for (NSView* view in self.subviews)
-        [view setStyle:style];
-}
-
-- (void)clearStyle:(CEEViewStyle)style {
-    [self updateUserInterface];
-    [self setNeedsDisplay:YES];
-    for (NSView* view in self.subviews)
-        [view clearStyle:style];
-}
-
-- (void)resetStyle:(CEEViewStyle)style {
-    [self updateUserInterface];
-    [self setNeedsDisplay:YES];
-    for (NSView* view in self.subviews)
-        [view resetStyle:style];
+        [view setStyleState:state];
 }
 
 - (void)setStyleConfiguration:(CEEUserInterfaceStyleConfiguration*)configuration {
     [self updateUserInterface];
     [self setNeedsDisplay:YES];
-    for (NSView* view in self.subviews)
-        [view setStyleConfiguration:configuration];
 }
 
 - (CEEUserInterfaceStyleConfiguration*)styleConfiguration {

@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEGridView : CEEView
 @property CGFloat rowSpacing;
-@property (strong, nullable) NSColor* gridColor;
+@property (strong) NSColor* gridColor;
 @property CGFloat gridWidth;
 @property BOOL enableDrawHorizontalGrid;
 @property BOOL enableDrawVerticalGrid;

@@ -7,49 +7,27 @@
 //
 
 #include "CEEIdentifier.h"
-#include "cee_lib.h"
 
-BOOL IdentifierIsReserved(NSString* string)
-{
-    if (!string)
-        return NO;
+NSString* CreateObjectID(NSObject* object) {
+    NSString* identifier = [object className];
+    NSString* uuid = [[NSUUID UUID] UUIDString];
     
-    NSString* identifier = string;
-    if ([[identifier substringWithRange:NSMakeRange(0, 1)] isEqualToString:@"_"])
-        return YES;
-    return NO;
-}
-
-NSString* CreateUnifiedIdentifier(void) {
-    cee_char* uuid_string = cee_uuid_string_random();
-    NSString* identifier = [NSString stringWithFormat:@"%s", uuid_string];
-    cee_free(uuid_string);
-    return identifier;
-}
-
-NSString* CreateUnifiedIdentifierWithPrefix(NSString* string)
-{
-    NSString* identifier = string;
     if ([[identifier substringWithRange:NSMakeRange(0, 3)] isEqualToString:@"CEE"])
         identifier = [identifier stringByReplacingCharactersInRange:NSMakeRange(0, 3) withString:@"ID"];
-    else if (![[identifier substringWithRange:NSMakeRange(0, 2)] isEqualToString:@"ID"])
-        identifier = [@"ID" stringByAppendingString:identifier];
     
-    cee_char* uuid_string = cee_uuid_string_random();
-    identifier = [NSString stringWithFormat:@"%@#%s", identifier, uuid_string];
-    cee_free(uuid_string);
+    identifier = [NSString stringWithFormat:@"%@#%@", identifier, uuid];
     return identifier;
 }
 
-NSString* CreateClassIdentifier(NSString* className)
+NSString* CreateObjectIDPrefix(NSObject* object)
 {
-    NSString* identifier = className;
-    if ([[identifier substringWithRange:NSMakeRange(0, 3)] isEqualToString:@"CEE"])
-        identifier = [identifier stringByReplacingCharactersInRange:NSMakeRange(0, 3) withString:@"ID"];
-    return identifier;
+    NSString* prefix = [object className];
+    if ([[prefix substringWithRange:NSMakeRange(0, 3)] isEqualToString:@"CEE"])
+        prefix = [prefix stringByReplacingCharactersInRange:NSMakeRange(0, 3) withString:@"ID"];
+    return prefix;
 }
 
-NSString* ClassNameByUnifiedIdentifier(NSString* identifier)
+NSString* ClassNameFromObjectID(NSString* identifier)
 {
     NSString* string = identifier;
     NSInteger location = [string rangeOfString:@"#"].location;
@@ -83,8 +61,29 @@ NSString* IdentifierByDeletingSuffix(NSString* identifier)
     return string;
 }
 
-NSString* CreateUnifiedIdentifierWithPrefixAndSuffix(NSString* prefix,
-                                                     NSString* suffix)
+NSString* CreateObjectIDWithPrefixAndSuffix(NSString* prefix,
+                                            NSString* suffix)
 {
     return [prefix stringByAppendingFormat:@"#%@", suffix];
+}
+
+NSString* CreateObjectIDWithPrefix(NSString* prefix)
+{
+    NSString* uuid = [[NSUUID UUID] UUIDString];
+    return [prefix stringByAppendingFormat:@"#%@", uuid];
+}
+
+NSString* CreateClassID(NSObject* object) {
+    NSString* identifier = [object className];
+    if ([[identifier substringWithRange:NSMakeRange(0, 3)] isEqualToString:@"CEE"])
+        identifier = [identifier stringByReplacingCharactersInRange:NSMakeRange(0, 3) withString:@"Class"];
+    
+    return identifier;
+}
+
+BOOL IdentifierIsReserved(NSString* identifier)
+{
+    if ([[identifier substringWithRange:NSMakeRange(0, 1)] isEqualToString:@"_"])
+        return YES;
+    return NO;
 }

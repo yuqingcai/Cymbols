@@ -35,7 +35,6 @@
     return data;
 }
 
-
 + (id)objectFromFile:(NSString*)filepath {
     NSString* string = [CEEJSONReader stringFromFile:filepath];
     NSData* data = [string dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];

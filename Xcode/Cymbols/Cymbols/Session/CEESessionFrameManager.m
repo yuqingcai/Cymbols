@@ -8,7 +8,6 @@
 
 #import "CEEStyleManager.h"
 #import "CEEIdentifier.h"
-#import "CEEView.h"
 #import "CEESessionFrameManager.h"
 
 
@@ -32,20 +31,18 @@
     [self.view setTranslatesAutoresizingMaskIntoConstraints:NO];
     [(CEESessionFrameManagerView*)self.view setDelegate:self];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(openSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(presentSourceBufferResponse:) name:CEENotificationSessionPortPresentSourceBuffer object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activeSourceBufferResponse:) name:CEENotificationSessionPortActiveSourceBuffer object:nil];
 }
 
-- (CEESplitView*)createSplitViewWithFrame:(NSRect)theFrame vertical:(BOOL)vertical splitViewDelegate:(id<NSSplitViewDelegate>)splitViewDelegate {
-    
+- (CEESessionFrameSplitView*)createSplitViewWithFrame:(NSRect)theFrame vertical:(BOOL)vertical splitViewDelegate:(id<NSSplitViewDelegate>)splitViewDelegate {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    CEESessionFrameSplitView * splitView = [[CEESessionFrameSplitView alloc] initWithFrame:theFrame];
     
-    CEESplitView * splitView = [[CEESplitView alloc] initWithFrame:theFrame];
-    
-    [splitView setStyle:kCEEViewStyleActived];
+    [splitView setStyleState:kCEEViewStyleStateActived];
     [splitView setDelegate:splitViewDelegate];
     [splitView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     [splitView becomeFirstResponder];
-    [splitView setIdentifier:CreateUnifiedIdentifierWithPrefix(CreateClassIdentifier([splitView className]))];
+    [splitView setIdentifier:CreateObjectID(splitView)];
     [splitView setTranslatesAutoresizingMaskIntoConstraints:NO];
     [splitView setDividerStyle:NSSplitViewDividerStyleThin];
     [splitView setVertical:vertical];
@@ -338,8 +335,8 @@
     CEESessionFrameViewController* frame = [[NSStoryboard storyboardWithName:@"Session" bundle:nil] instantiateControllerWithIdentifier:@"IDSessionFrameViewController"];
     if (!frame)
         return nil;
-    [frame setIdentifier:CreateUnifiedIdentifierWithPrefix(CreateClassIdentifier([frame className]))];
-    [frame.view setIdentifier:CreateUnifiedIdentifierWithPrefix(CreateClassIdentifier([frame.view className]))];
+    [frame setIdentifier:CreateObjectID(frame)];
+    [frame.view setIdentifier:CreateObjectID(frame.view)];
     [frame setManager:self];
     return frame;
 }
@@ -393,8 +390,8 @@
             return;
         
         [newFrame setPort:port];
-        [newFrame setIdentifier:[self frameIdentifierFromPort:port]];
-        [newFrame.view setIdentifier:[self frameViewIdentifierFromPort:port]];
+        [newFrame setIdentifier:[self frame:newFrame identifierFromPort:port]];
+        [newFrame.view setIdentifier:[self frameView:newFrame.view identifierFromPort:port]];
         [self addChildViewController:newFrame];
         [self attach:newFrame at:region relateTo:frame];
         
@@ -423,7 +420,7 @@
 - (void)split:(CEESplitFrameDirection)direction {
     CEESessionFrameViewController* frame = nil;
     CEESessionPort* port = nil;
-    CEEBufferReference* reference = [_session.activedPort currentReference];
+    CEEBufferReference* reference = [_session.activedPort currentBufferReference];
     if (!reference)
         return;
     
@@ -436,9 +433,9 @@
     if (!port)
         return;
     [frame setPort:port];
-    [frame setIdentifier:[self frameIdentifierFromPort:port]];
-    [frame.view setIdentifier:[self frameViewIdentifierFromPort:port]];
-    [frame.port presentSourceBuffer:reference.buffer];
+    [frame setIdentifier:[self frame:frame identifierFromPort:port]];
+    [frame.view setIdentifier:[self frameView:frame.view identifierFromPort:port]];
+    [frame.port setActivedSourceBuffer:reference.buffer];
     [self selectFrame:frame];
 }
 
@@ -458,34 +455,36 @@
         
         [self split:kCEESplitFrameDirectionVertical withFrame:frame];
         [frame setPort:port];
-        [frame setIdentifier:[self frameIdentifierFromPort:port]];
-        [frame.view setIdentifier:[self frameViewIdentifierFromPort:port]];
+        [frame setIdentifier:[self frame:frame identifierFromPort:port]];
+        [frame.view setIdentifier:[self frameView:frame.view identifierFromPort:port]];
         [self selectFrame:frame];
-        [frame present];        
+        [frame presentSource];
     }
     else {
         for (CEESessionFrameViewController* frame in self.childViewControllers) {
             if (frame.port == port) {
-                [frame present];
+                [frame presentSource];
                 break;
             }
         }
     }
 }
 
-- (NSString*)frameViewIdentifierFromPort:(CEESessionPort*)port {
+- (NSString*)frameView:(NSView*)view identifierFromPort:(CEESessionPort*)port {
     NSString* suffix = IdentifierByDeletingPrefix([NSString stringWithString:port.identifier]);
-    NSString* identifier = CreateUnifiedIdentifierWithPrefixAndSuffix(CreateClassIdentifier([CEESessionFrameView className]), suffix);
+    NSString* prefix = CreateObjectIDPrefix(view);
+    NSString* identifier = CreateObjectIDWithPrefixAndSuffix(prefix, suffix);
     return identifier;
 }
 
-- (NSString*)frameIdentifierFromPort:(CEESessionPort*)port {
+- (NSString*)frame:(CEESessionFrameViewController*)frame identifierFromPort:(CEESessionPort*)port {
     NSString* suffix = IdentifierByDeletingPrefix([NSString stringWithString:port.identifier]);
-    NSString* identifier = CreateUnifiedIdentifierWithPrefixAndSuffix(CreateClassIdentifier([CEESessionFrameViewController className]), suffix);
+    NSString* prefix = CreateObjectIDPrefix(frame);
+    NSString* identifier = CreateObjectIDWithPrefixAndSuffix(prefix, suffix);
     return identifier;
 }
 
-- (void)presentSourceBufferResponse:(NSNotification*)notification {
+- (void)activeSourceBufferResponse:(NSNotification*)notification {
     [self openSourceBufferResponse:notification];
 }
 
@@ -567,7 +566,7 @@
         CEESessionPort* port = [self portWithIdentifierSuffix:IdentifierByDeletingPrefix(frame.identifier)];
         if (port) {
             [frame setPort:port];
-            [frame present];
+            [frame presentSource];
             [frame deselect];
             if (port == _session.activedPort) {
                 _selectedFrame = frame;
@@ -600,18 +599,26 @@
 }
 
 - (BOOL)isFrameViewIdentifier:(NSString*)identifier {
-    return [IdentifierByDeletingSuffix(identifier) isEqualToString:CreateClassIdentifier([CEESessionFrameView className])];
+    NSString* className = ClassNameFromObjectID(identifier);
+    return [className isEqualToString:[CEESessionFrameView className]];
 }
 
 - (BOOL)isSplitViewIdentifier:(NSString*)identifier {
-    return [IdentifierByDeletingSuffix(identifier) isEqualToString:CreateClassIdentifier([CEESplitView className])];
+    NSString* className = ClassNameFromObjectID(identifier);
+    return [className isEqualToString:[CEESessionFrameSplitView className]];
 }
 
 - (NSView*)createFrameViewFromDescriptor:(NSDictionary*)dict withIdentifier:(NSString*)identifier {
     CEESessionFrameViewController* frame = [self createFrame];
     NSString* suffix = IdentifierByDeletingPrefix(identifier);
-    [frame setIdentifier:CreateUnifiedIdentifierWithPrefixAndSuffix(CreateClassIdentifier([frame className]), suffix)];
-    [frame.view setIdentifier:CreateUnifiedIdentifierWithPrefixAndSuffix(CreateClassIdentifier([frame.view className]), suffix)];
+    NSString* prefix = nil;
+    
+    prefix = CreateObjectIDPrefix(frame);
+    [frame setIdentifier:CreateObjectIDWithPrefixAndSuffix(prefix, suffix)];
+    
+    prefix = CreateObjectIDPrefix(frame.view);
+    [frame.view setIdentifier:CreateObjectIDWithPrefixAndSuffix(prefix, suffix)];
+    
     [self addChildViewController:frame];
     return frame.view;
 }
@@ -657,8 +664,8 @@
     
     [self split:kCEESplitFrameDirectionVertical withFrame:frame];
     [frame setPort:_session.activedPort];
-    [frame setIdentifier:[self frameIdentifierFromPort:_session.activedPort]];
-    [frame.view setIdentifier:[self frameViewIdentifierFromPort:_session.activedPort]];
+    [frame setIdentifier:[self frame:frame identifierFromPort:_session.activedPort]];
+    [frame.view setIdentifier:[self frameView:frame.view identifierFromPort:_session.activedPort]];
     [frame.port openSourceBuffersWithFilePaths:filePaths];
     [self selectFrame:frame];
 }

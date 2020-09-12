@@ -95,13 +95,11 @@ CEETextLineRef cee_text_line_get_by_offset(CEETextLayoutRef layout,
 void cee_text_layout_attribute_generator_set(CEETextLayoutRef layout,
                                              cee_pointer generator);
 void cee_text_layout_attribute_generate_set(CEETextLayoutRef layout,
-                                            void (*generate)(cee_pointer,
-                                                             CEETextLayoutRef,
-                                                             CEERange));
-void cee_text_layout_tags_bst_set(CEETextLayoutRef layout,
-                                  CEEBST* tags_bst);
+                                            CEEList* (*generate)(cee_pointer,
+                                                                 CEERange));
 CEETag* cee_text_layout_tag_get(CEETextLayoutRef layout,
                                 cee_long buffer_offset);
+void cee_text_layout_reset(CEETextLayoutRef layout);
 
 #ifdef __cplusplus
 }

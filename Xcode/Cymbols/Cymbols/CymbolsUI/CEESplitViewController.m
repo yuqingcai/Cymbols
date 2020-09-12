@@ -14,7 +14,6 @@
 @implementation CEESplitViewController
 
 - (void)initProperties {
-    [self setIdentifier:CreateClassIdentifier([self className])];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
@@ -116,7 +115,9 @@
 
 - (void)toggleViewByIdentifier:(NSString*)identifier {
     for (NSSplitViewItem* item in [self splitViewItems]) {
-        if ([[[item viewController] identifier] compare:identifier options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+        NSViewController* controller = [item viewController];
+        NSUserInterfaceItemIdentifier itemIdentifier = [controller identifier];
+        if ([itemIdentifier compare:identifier options:NSCaseInsensitiveSearch] == NSOrderedSame) {
             if ([item isCollapsed])
                 [item setCollapsed:NO];
             else

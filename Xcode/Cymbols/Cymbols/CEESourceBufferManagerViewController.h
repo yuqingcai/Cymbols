@@ -8,10 +8,11 @@
 
 #import "CEEViewController.h"
 #import "CEETableView.h"
+#import "CEESourceBufferSaveConfirmCellView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CEESourceBufferManagerViewController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource>
+@interface CEESourceBufferManagerViewController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, NSOpenSavePanelDelegate, CEESourceBufferSaveConfirmCellDelegate>
 
 @end
 

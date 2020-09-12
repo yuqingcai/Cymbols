@@ -6,7 +6,7 @@
 //  Copyright © 2019 Lazycatdesign. All rights reserved.
 //
 
-#import "CymbolsDelegate.h"
+#import "AppDelegate.h"
 #import "CEEStyleManager.h"
 #import "CEEProjectRemoveFileController.h"
 #import "CEERemoveFileSelectionView.h"
@@ -14,7 +14,7 @@
 #import "CEEButton.h"
 #import "CEEProject.h"
 #import "CEEFileNameCellView.h"
-#import "CEEFilePathCellView.h""
+#import "CEEFilePathCellView.h"
 
 typedef NS_ENUM(NSInteger, CEEProjectRemoveFileScene) {
     kCEEFileSelection,
@@ -38,8 +38,8 @@ typedef NS_ENUM(NSInteger, CEEProjectRemoveFileScene) {
 - (void)viewDidLoad {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [super viewDidLoad];
-    [self setViewStyle:kCEEViewStyleActived];
-    CymbolsDelegate* delegate = (CymbolsDelegate*)[NSApp delegate];
+    [self.view setStyleState:kCEEViewStyleStateActived];
+    AppDelegate* delegate = [NSApp delegate];
     _removeFileSelectionView = (CEERemoveFileSelectionView*)[delegate nibObjectWithClass:[CEERemoveFileSelectionView class] fromNibNamed:@"RemoveFileSelectionView"];
     [_removeFileSelectionView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     _filePathConfirmView = (CEEFilePathConfirmView*)[delegate nibObjectWithClass:[CEEFilePathConfirmView class] fromNibNamed:@"FilePathConfirmView"];
@@ -90,7 +90,7 @@ typedef NS_ENUM(NSInteger, CEEProjectRemoveFileScene) {
     }
     [_currentView setTranslatesAutoresizingMaskIntoConstraints:NO];
     [_currentView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
-    [_currentView setStyle:kCEEViewStyleActived];
+    [_currentView setStyleState:kCEEViewStyleStateActived];
     
     [self.view addSubview:_currentView];
     NSDictionary *views = @{
@@ -196,7 +196,7 @@ typedef NS_ENUM(NSInteger, CEEProjectRemoveFileScene) {
 }
 
 - (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    CymbolsDelegate* delegate = [NSApp delegate];
+    AppDelegate* delegate = [NSApp delegate];
     return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 

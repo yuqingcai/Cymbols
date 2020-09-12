@@ -12,10 +12,11 @@
 #import "CEEProjectCreatorController.h"
 #import "CEEProjectAddFileController.h"
 #import "CEEProjectRemoveFileController.h"
-#import "CymbolsDelegate.h"
+#import "AppDelegate.h"
 #import "CEESessionView.h"
 #import "CEESessionSourceController.h"
 #import "CEESessionStatusBar.h"
+#import "CEEProjectParseViewController.h"
 
 @interface CEESessionViewController ()
 @property (strong) IBOutlet CEESessionView *sessionView;
@@ -39,6 +40,10 @@
     _toolbar = [[NSStoryboard storyboardWithName:@"Session" bundle:nil] instantiateControllerWithIdentifier:@"IDSessionToolbar"];
     [self addChildViewController:_toolbar];
     [self showToolbar:YES];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortActiveSourceBufferResponse:) name:CEENotificationSessionPortActiveSourceBuffer object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortOpenSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionActivePortResponse:) name:CEENotificationSessionActivePort object:nil];
 }
 
 - (CGFloat)sheetOffset {
@@ -241,7 +246,7 @@
 }
 
 - (IBAction)save:(id)sender {
-    CEESourceBuffer* buffer = [[_session.activedPort currentReference] buffer];
+    CEESourceBuffer* buffer = [[_session.activedPort currentBufferReference] buffer];
     if ([buffer stateSet:kCEESourceBufferStateFileUntitled]) {
         NSString* fileName = [buffer.filePath lastPathComponent];
         NSString* savePath = [self filePathFromSavePanelWithFileName:fileName];
@@ -256,7 +261,7 @@
 }
 
 - (IBAction)saveAs:(id)sender {
-    CEESourceBuffer* buffer = [[_session.activedPort currentReference] buffer];
+    CEESourceBuffer* buffer = [[_session.activedPort currentBufferReference] buffer];
     NSString* fileName = [buffer.filePath lastPathComponent];
     NSString* savePath = [self filePathFromSavePanelWithFileName:fileName];
     if (savePath)
@@ -338,6 +343,58 @@
         [self showToolbar:YES];
     else
         [self showToolbar:NO];
+}
+
+- (void)sessionPortActiveSourceBufferResponse:(NSNotification*)notification {
+    //CEESessionPort* port = notification.object;
+    //if (port.session != _session)
+    //    return;
+    //CEEBufferReference* reference = port.currentReference;
+    //CEESourceBuffer* sourceBuffer = reference.buffer;
+    //CEETextStorageRef storage = sourceBuffer.storage;
+    //cee_ulong size = cee_text_storage_size_get(storage);
+    //[_statusBar setContent:[NSString stringWithFormat:@"Ln 1, Col1    UTF-8    LF    Space: 4    Size: %lu    Plain Text", size]];
+}
+
+- (void)sessionPortOpenSourceBufferResponse:(NSNotification*)notification {
+    //CEESessionPort* port = notification.object;
+    //if (port.session != _session)
+    //    return;
+    //CEEBufferReference* reference = port.currentReference;
+    //CEESourceBuffer* sourceBuffer = reference.buffer;
+    //CEETextStorageRef storage = sourceBuffer.storage;
+    //cee_ulong size = cee_text_storage_size_get(storage);
+    //[_statusBar setContent:[NSString stringWithFormat:@"Ln 1, Col1    UTF-8    LF    Space: 4    Size: %lu    Plain Text", size]];
+}
+
+- (void)sessionActivePortResponse:(NSNotification*)notification {
+    //CEESession* session = notification.object;
+    //if (session != _session)
+    //    return;
+    //CEESessionPort* port = session.activedPort;
+    //CEEBufferReference* reference = port.currentReference;
+    //CEESourceBuffer* sourceBuffer = reference.buffer;
+    //CEETextStorageRef storage = sourceBuffer.storage;
+    //cee_ulong size = cee_text_storage_size_get(storage);
+    //[_statusBar setContent:[NSString stringWithFormat:@"Ln 1, Col1    UTF-8    LF    Space: 4    Size: %lu    Plain Text", size]];
+}
+
+- (IBAction)buildProject:(id)sender {
+    NSWindowController* projectParseWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectParseWindowController"];
+    NSModalResponse responese = [NSApp runModalForWindow:projectParseWindowController.window];
+    [projectParseWindowController close];
+}
+
+- (IBAction)cleanProject:(id)sender {
+    cee_database_symbols_clean(_session.project.database);
+}
+
+- (IBAction)syncProject:(id)sender {
+    NSLog(@"sync project");
+}
+
+- (IBAction)searchInProject:(id)sender {
+    NSLog(@"search project");
 }
 
 @end

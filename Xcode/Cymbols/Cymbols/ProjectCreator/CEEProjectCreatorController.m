@@ -5,7 +5,7 @@
 //  Created by caiyuqing on 2019/8/2.
 //  Copyright © 2019 Lazycatdesign. All rights reserved.
 //
-#import "CymbolsDelegate.h"
+#import "AppDelegate.h"
 #import "CEEStyleManager.h"
 #import "CEEProjectCreatorController.h"
 #import "CEEProjectSettingView.h"
@@ -34,10 +34,9 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
 
 
 - (void)viewDidLoad {
-    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [super viewDidLoad];
-    [self setViewStyle:kCEEViewStyleActived];
-    CymbolsDelegate* delegate = (CymbolsDelegate*)[NSApp delegate];
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    AppDelegate* delegate = [NSApp delegate];
     _setting = [self.session.project createEmptyProjectSetting];
     
     _settingView = (CEEProjectSettingView*)[delegate nibObjectWithClass:[CEEProjectSettingView class] fromNibNamed:@"ProjectSettingView"];
@@ -99,7 +98,7 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     }
     
     [_currentView setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [_currentView setStyle:kCEEViewStyleActived];
+    [_currentView setStyleState:kCEEViewStyleStateActived];
     
     [self.view addSubview:_currentView];
     NSDictionary *views = @{
@@ -192,10 +191,9 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
 }
 
 - (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    CymbolsDelegate* delegate = [NSApp delegate];
+    AppDelegate* delegate = [NSApp delegate];
     return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
-
 
 - (IBAction)selectSavePath:(id)sender {
     NSOpenPanel* openPanel = [NSOpenPanel openPanel];

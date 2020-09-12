@@ -109,18 +109,18 @@
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
     
-    NSMutableDictionary* attributes = [[NSMutableDictionary alloc] init];
-    [attributes setValue:self.font forKey:NSFontAttributeName];
-    [attributes setValue:self.textColor forKey:NSForegroundColorAttributeName];
-    [attributes setValue: @(_kern) forKey:NSKernAttributeName];
-    
-    NSString* string = @"Cymbols";
-    NSAttributedString *drawingString = [[NSAttributedString alloc] initWithString:string attributes:attributes];
-    NSSize drawingSize = [drawingString size];
-    NSRect rect = dirtyRect;
-    rect.origin.x = (rect.size.width - drawingSize.width) / 2.0;
-    rect.origin.y = (rect.size.height - drawingSize.height) / 2.0;
-    [drawingString drawWithRect:rect options:0 context:nil];
+    //NSMutableDictionary* attributes = [[NSMutableDictionary alloc] init];
+    //[attributes setValue:self.font forKey:NSFontAttributeName];
+    //[attributes setValue:self.textColor forKey:NSForegroundColorAttributeName];
+    //[attributes setValue: @(_kern) forKey:NSKernAttributeName];
+    //
+    //NSString* string = @"Cymbols";
+    //NSAttributedString *drawingString = [[NSAttributedString alloc] initWithString:string attributes:attributes];
+    //NSSize drawingSize = [drawingString size];
+    //NSRect rect = dirtyRect;
+    //rect.origin.x = (rect.size.width - drawingSize.width) / 2.0;
+    //rect.origin.y = (rect.size.height - drawingSize.height) / 2.0;
+    //[drawingString drawWithRect:rect options:0 context:nil];
 }
 
 @end

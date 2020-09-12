@@ -80,25 +80,20 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (BOOL)becomeFirstResponder {
-    _style |= kCEEViewStyleActived;
-    _style |= kCEEViewStyleSelected;
-    [super setStyle:_style];
+    [super setStyleState:kCEEViewStyleStateActived];
     return YES;
 }
 
 - (BOOL)resignFirstResponder {
-    _style &= ~kCEEViewStyleActived;
-    _style &= ~kCEEViewStyleSelected;
-    [super clearStyle:_style];
+    [super setStyleState:kCEEViewStyleStateDeactived];
     return YES;
 }
 
-- (void)setStyle:(CEEViewStyle)style {
-    if (self.window.firstResponder != self && _editable) {
-        style &= ~kCEEViewStyleActived;
-        style &= ~kCEEViewStyleSelected;
-    }
-    [super setStyle:style];
+- (void)setStyleState:(CEEViewStyleState)state {
+    if (self.window.firstResponder != self && _editable)
+        state = kCEEViewStyleStateDeactived;
+    
+    [super setStyleState:state];
 }
 
 - (void)initProperties {
@@ -115,7 +110,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     _textBackgroundColorHighlight = [NSColor redColor];
     _textBackgroundColorHighlightOutline = [NSColor redColor];
     
-    _style = kCEEViewStyleInit;
+    _styleState = kCEEViewStyleStateActived;
     _aligment = kCEETextLayoutAlignmentLeft;
     _editable = YES;
     _highLightSearched = NO;
@@ -164,8 +159,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                                     (NSInteger)(foreColor.greenComponent * 255), 
                                     (NSInteger)(foreColor.blueComponent * 255), 
                                     (NSInteger)(foreColor.alphaComponent * 100)];
-    NSString* descriptor = [NSString stringWithFormat:@"{ \"attributes\" : { \"font\" : \"%@\", \"forecolor\" : \"%@\" } }",
-                            fontAttribute, foreColorAttribute];
+    NSString* descriptor = [NSString stringWithFormat:@"{ \"font\" : \"%@\", \"forecolor\" : \"%@\" }", fontAttribute, foreColorAttribute];
     return descriptor;
 }
 
@@ -208,15 +202,28 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     return YES;
 }
 
+- (void)resetMouseTraceArea {
+    [self removeTrackingArea:self.trackingArea];
+    NSTrackingAreaOptions opt = NSTrackingActiveInActiveApp |
+        NSTrackingMouseEnteredAndExited |
+        NSTrackingMouseMoved |
+        NSTrackingEnabledDuringMouseDrag;
+    self.trackingArea = [[NSTrackingArea alloc] initWithRect:self.bounds options:opt owner:self userInfo:nil];
+    [self addTrackingArea:self.trackingArea];
+}
+
+
 - (void)setFrameSize:(NSSize)newSize {
-    [super setFrameSize:newSize];    
+    [super setFrameSize:newSize];
+    [self resetMouseTraceArea];
     CEESize container_size = cee_size_make(self.frame.size.width,
                                            self.frame.size.height);
     cee_text_edit_container_size_set(_edit, container_size);
-    [self setNeedsDisplay:YES];
     
     if (_delegate && [_delegate respondsToSelector:@selector(textViewFrameChanged:)])
         [_delegate textViewFrameChanged:self];
+    
+    [self setNeedsDisplay:YES];
 }
 
 - (NSArray<NSAttributedStringKey> *)validAttributesForMarkedText {
@@ -249,7 +256,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 
 - (void)keyDown:(NSEvent *)event {
     if (!_editable)
-        return ;
+        return;
+    
     cee_ulong nb_character = 0;
     if (event.keyCode == kVK_Delete) {
         nb_character = cee_text_edit_marked_character_count_get(_edit);
@@ -259,7 +267,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
             [self setNeedsDisplay:YES];
         }
     }
-    
+        
     [[self inputContext] handleEvent:event];
 }
 
@@ -407,19 +415,16 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (void)mouseDown:(NSEvent *)event {
+    
     [super mouseDown:event];
-
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewMouseDown:)])
-        [_delegate textViewMouseDown:self];
-        
+    
     if ([self.window firstResponder] != self)
         [self.window makeFirstResponder:self];
     
-    NSPoint point;
-    point = [self convertPoint:[event locationInWindow] fromView:nil];
+    NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
     point = [self layoutPointFromViewPoint:point];
-    
     CEEPoint p = CEEPointFromNSPoint(point);
+    
     if (event.clickCount == 2) {
         cee_text_edit_caret_position_set(_edit, p);
         cee_text_edit_selection_anchor_position_set(_edit, p);
@@ -442,12 +447,17 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     }
     
     cee_text_edit_caret_position_set(_edit, p);
-    
+        
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
     
+    if (!(event.modifierFlags & NSEventModifierFlagCommand)) {
+        if (_delegate && [_delegate respondsToSelector:@selector(textViewCreateContext:)])
+            [_delegate textViewCreateContext:self];
+    }
+    
     if (event.modifierFlags & NSEventModifierFlagShift) {
-        cee_text_edit_selection_complete_position_set(_edit, p);        
+        cee_text_edit_selection_complete_position_set(_edit, p);
         if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChanged:)])
             [_delegate textViewSelectionChanged:self];
     }
@@ -503,8 +513,9 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                     _autoScrolling = NO;
                 }
                 
-                if (_delegate && [_delegate respondsToSelector:@selector(textViewMouseUp:)])
-                    [_delegate textViewMouseUp:self];
+                if ((event.modifierFlags & NSEventModifierFlagCommand) &&  
+                    _delegate && [_delegate respondsToSelector:@selector(textViewSelectWithCommand:)])
+                    [_delegate textViewSelectWithCommand:self];
                 
                 break;
                 
@@ -512,6 +523,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                 break;
         }
     }
+    
+    [self setNeedsDisplay:YES];
 }
 
 - (NSPoint)viewPointFromLayoutPoint:(NSPoint)point {
@@ -817,7 +830,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         [self drawSearchedHighlightRegion];
     }
     
-    caret_offset = cee_text_edit_caret_buffet_offset_get(_edit);
+    caret_offset = cee_text_edit_caret_buffer_offset_get(_edit);
     p = cee_text_layout_lines_get(layout);
     
     while (p) {
@@ -842,8 +855,10 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
             under_line = cee_text_unit_under_line_get(unit);
             position = [self viewPointFromLayoutPoint:position];
             
-            if (self.window.firstResponder == self && _editable && 
-                [self styleSet:kCEEViewStyleActived] && buffer_offset == caret_offset)
+            if (self.window.firstResponder == self && 
+                _editable && 
+                self.styleState == kCEEViewStyleStateActived && 
+                buffer_offset == caret_offset)
                 [self drawCaretAtUnit:unit inLine:line];
             
             if (background_color) {
@@ -871,102 +886,75 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (void)updateUserInterface {
-    CEEUserInterfaceStyleScheme* current = (CEEUserInterfaceStyleScheme*)[self.styleSchemes pointerAtIndex:self.style];    
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
     if (!current)
         return;
     
-    NSDictionary* descriptor = current.descriptor;
+    if (current.font)
+        self.font = current.font;
     
-    NSString* fontProperty = descriptor[@"font"];
-    NSString* backgroundColorProperty = descriptor[@"background_color"];
-    NSString* borderColorProperty = descriptor[@"border_color"];
-    NSString* textColorProperty = descriptor[@"text_color"];
-    NSString* textShadowProperty = descriptor[@"text_shadow"];
-    NSString* gradientProperty = descriptor[@"gradient"];
-    NSString* gradientAngleProperty = descriptor[@"gradient_angle"];
-    NSString* bordersProperty = descriptor[@"borders"];
-    NSString* borderWidthProperty = descriptor[@"border_width"];
-    NSString* cornerRadiusProperty = descriptor[@"corner_radius"];
-    NSString* caretColorProperty = descriptor[@"caret_color"];
-    NSString* caretColorMarkedProperty = descriptor[@"caret_color_marked"];
-    NSString* textBackgroundColorSelectedProperty = descriptor[@"text_background_color_selected"];
-    NSString* textBackgroundColorSelectedOutlineProperty = descriptor[@"text_background_color_selected_outline"];
-    NSString* textBackgroundColorMarkedProperty = descriptor[@"text_background_color_marked"];
-    NSString* textBackgroundColorMarkedOutlineProperty = descriptor[@"text_background_color_marked_outline"];
-    NSString* textBackgroundColorSearchedProperty = descriptor[@"text_background_color_searched"];
-    NSString* textBackgroundColorSearchedOutlineProperty = descriptor[@"text_background_color_searched_outline"];
-    NSString* textBackgroundColorHighlightProperty = descriptor[@"text_background_color_highlight"];
-    NSString* textBackgroundColorHighlightOutlineProperty = descriptor[@"text_background_color_highlight_outline"];
-    NSString* aligmentProperty = descriptor[@"aligment"];
+    if (current.backgroundColor)
+        self.backgroundColor = current.backgroundColor;
     
-    if (fontProperty)
-        self.font = [CEEUserInterfaceStyleConfiguration createFontFromString:fontProperty];
+    if (current.borderColor)
+        self.borderColor = current.borderColor;
     
-    if (backgroundColorProperty)
-        self.backgroundColor = [CEEUserInterfaceStyleConfiguration createColorFromString:backgroundColorProperty];
+    if (current.textColor)
+        self.textColor = current.textColor;
     
-    if (borderColorProperty)
-        self.borderColor = [CEEUserInterfaceStyleConfiguration createColorFromString:borderColorProperty];
+    if (current.textShadow)
+        self.textShadow = current.textShadow;
     
-    if (textColorProperty)
-        self.textColor = [CEEUserInterfaceStyleConfiguration createColorFromString:textColorProperty];
+    if (current.gradient)
+        self.gradient = current.gradient;
     
-    if (textShadowProperty)
-        self.textShadow = [CEEUserInterfaceStyleConfiguration createShadowFromString:textShadowProperty];
+    self.gradientAngle = current.gradientAngle;
+    
+    if (current.borders)
+        self.borders = current.borders;
+    
+    self.borderWidth = current.borderWidth;
+    self.cornerRadius = current.cornerRadius;
+    
+    if (current.caretColor)
+        self.caretColor = current.caretColor;
+    
+    if (current.caretColorMarked)
+        self.caretColorMarked = current.caretColorMarked;
+    
+    if (current.textBackgroundColorSelected)
+        self.textBackgroundColorSelected = current.textBackgroundColorSelected;
+    
+    if (current.textBackgroundColorSelectedOutline)
+        self.textBackgroundColorSelectedOutline = current.textBackgroundColorSelectedOutline;
+    
+    if (current.textBackgroundColorMarked)
+        self.textBackgroundColorMarked = current.textBackgroundColorMarked;
+    
+    if (current.textBackgroundColorMarkedOutline)
+        self.textBackgroundColorMarkedOutline = current.textBackgroundColorMarkedOutline;
+    
+    if (current.textBackgroundColorSearched)
+        self.textBackgroundColorSearched = current.textBackgroundColorSearched;
+         
+    if (current.textBackgroundColorSearchedOutline)
+        self.textBackgroundColorSearchedOutline = current.textBackgroundColorSearchedOutline;
+         
+    if (current.textBackgroundColorHighlight)
+        self.textBackgroundColorHighlight = current.textBackgroundColorHighlight;
         
-    if (gradientProperty)
-        self.gradient = [CEEUserInterfaceStyleConfiguration createGradientFromString:gradientProperty];
+    if (current.textBackgroundColorHighlightOutline)
+        self.textBackgroundColorHighlightOutline = current.textBackgroundColorHighlightOutline;
     
-    if (gradientAngleProperty)
-        self.gradientAngle = [gradientAngleProperty floatValue];
-    
-    if (bordersProperty)
-        self.borders = [NSString stringWithString:bordersProperty];
-    
-    if (borderWidthProperty)
-        self.borderWidth = [borderWidthProperty floatValue];
-    
-    if (cornerRadiusProperty)
-        self.cornerRadius = [cornerRadiusProperty floatValue];
-    
-    if (caretColorProperty)
-        self.caretColor = [CEEUserInterfaceStyleConfiguration createColorFromString:caretColorProperty];
-    
-    if (caretColorMarkedProperty)
-        self.caretColorMarked = [CEEUserInterfaceStyleConfiguration createColorFromString:caretColorMarkedProperty];
-    
-    if (textBackgroundColorSelectedProperty)
-        self.textBackgroundColorSelected = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorSelectedProperty];
-    
-    if (textBackgroundColorSelectedOutlineProperty)
-        self.textBackgroundColorSelectedOutline = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorSelectedOutlineProperty];
-    
-    if (textBackgroundColorMarkedProperty)
-        self.textBackgroundColorMarked = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorMarkedProperty];
-    
-    if (textBackgroundColorMarkedOutlineProperty)
-        self.textBackgroundColorMarkedOutline = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorMarkedOutlineProperty];
-    
-    if (textBackgroundColorSearchedProperty)
-        self.textBackgroundColorSearched = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorSearchedProperty];
-    
-    if (textBackgroundColorSearchedOutlineProperty)
-        self.textBackgroundColorSearchedOutline = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorSearchedOutlineProperty];
-    
-    if (textBackgroundColorHighlightProperty)
-        self.textBackgroundColorHighlight = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorHighlightProperty];
-    
-    if (textBackgroundColorSearchedOutlineProperty)
-        self.textBackgroundColorHighlightOutline = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorHighlightOutlineProperty];
-        
-    if (aligmentProperty) {
-        if ([aligmentProperty caseInsensitiveCompare:@"left"] == NSOrderedSame)
-            self.aligment  = kCEETextLayoutAlignmentLeft;
-        else if ([aligmentProperty caseInsensitiveCompare:@"right"] == NSOrderedSame)
-            self.aligment  = kCEETextLayoutAlignmentRight;
-        else if ([aligmentProperty caseInsensitiveCompare:@"center"] == NSOrderedSame)
-            self.aligment  = kCEETextLayoutAlignmentCenter;            
+    if (current.aligment) {
+        if ([current.aligment caseInsensitiveCompare:@"left"] == NSOrderedSame)
+            self.aligment = kCEETextLayoutAlignmentLeft;
+        else if ([current.aligment caseInsensitiveCompare:@"right"] == NSOrderedSame)
+            self.aligment = kCEETextLayoutAlignmentRight;
+        else if ([current.aligment caseInsensitiveCompare:@"center"] == NSOrderedSame)
+            self.aligment = kCEETextLayoutAlignmentCenter;
     }
+    
 }
 
 // move caret
@@ -1445,10 +1433,36 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         [_delegate textViewEscape:self];
 }
 
-- (IBAction)find:(id)sender {    
+- (IBAction)find:(id)sender {
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSearchText:)])
         [_delegate textViewSearchText:self];
 }
 
+- (void)mouseMoved:(NSEvent *)event {
+    [super mouseMoved:event];
+    if (event.modifierFlags & NSEventModifierFlagCommand) {
+        NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
+        point = [self layoutPointFromViewPoint:point];
+        CEEPoint p = CEEPointFromNSPoint(point);
+        cee_text_edit_cursor_position_set(_edit, p);
+        if (_delegate && [_delegate respondsToSelector:@selector(textViewHighlightTokenCluster:)])
+            [_delegate textViewHighlightTokenCluster:self];
+    }
+}
 
+- (void)flagsChanged:(NSEvent *)event {
+    [super flagsChanged:event];
+    if ((event.modifierFlags & NSEventModifierFlagCommand)) {
+        NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
+        point = [self layoutPointFromViewPoint:point];
+        CEEPoint p = CEEPointFromNSPoint(point);
+        cee_text_edit_cursor_position_set(_edit, p);
+        if (_delegate && [_delegate respondsToSelector:@selector(textViewHighlightTokenCluster:)])
+            [_delegate textViewHighlightTokenCluster:self];
+    }
+    else {
+        if (_delegate && [_delegate respondsToSelector:@selector(textViewIgnoreTokenCluster:)])
+            [_delegate textViewIgnoreTokenCluster:self];     
+    }        
+}
 @end

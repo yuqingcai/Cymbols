@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEPopupPanel : NSPanel
-- (void)registerEventMonitor;
+@property BOOL exclusived;
 @end
 
 NS_ASSUME_NONNULL_END

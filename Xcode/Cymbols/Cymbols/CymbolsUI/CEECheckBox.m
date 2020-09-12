@@ -10,52 +10,14 @@
 
 @implementation CEECheckBox
 
-
 - (void)initProperties { 
     [super initProperties];
     _boxOutlineColor = [NSColor gridColor];
     _boxBackgroundColor = [NSColor whiteColor];
     _boxBackgroundColorChecked = [NSColor blueColor];
     _boxContentColor = [NSColor whiteColor];
-    
-    self.borderWidth = 1.0;
-    self.backgroundColor = nil;
-}
-
-- (void)mouseDown:(NSEvent *)event {
-    if (!self.enabled)
-        return;
-    
-    BOOL keepOn = YES;
-    BOOL isInside = YES;
-    NSPoint location;
-        
-    while (keepOn) {
-        NSEventMask eventMask = NSEventMaskLeftMouseUp | NSEventMaskLeftMouseDragged;
-        event = [[self window] nextEventMatchingMask:eventMask];
-        location = [self convertPoint:[event locationInWindow] fromView:nil];
-        isInside = [self mouse:location inRect:[self bounds]];
-    
-        switch ([event type]) {
-            case NSEventTypeLeftMouseUp:
-                if (isInside) {
-                    
-                    if ([self styleSet:kCEEViewStyleClicked])
-                        [self clearStyle:kCEEViewStyleClicked];
-                    else
-                        [self setStyle:kCEEViewStyleClicked];
-                                        
-                    if (self.action)
-                        [self sendAction:self.action to:self.target];
-                }
-    
-                keepOn = NO;
-                break;
-            default:
-                /* Ignore any other kind of event. */
-                break;
-        }
-    }
+    self.borderWidth = 0.0;
+    self.backgroundColor = [NSColor clearColor];
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
@@ -104,7 +66,8 @@
                                     boxSize - boxLineWidth, 
                                     boxSize - boxLineWidth);
     path = [NSBezierPath bezierPathWithRoundedRect:contentRect xRadius:boxCornerRadius yRadius:boxCornerRadius];
-    if ([self styleSet:kCEEViewStyleClicked]) {
+    
+    if (self.state == NSOnState) {
         if (_boxBackgroundColorChecked) {
             [_boxBackgroundColorChecked setFill];
             [path fill];
@@ -169,46 +132,48 @@
     }
 }
 
-
-- (void)setChecked:(BOOL)checked {
-    if (!self.enabled)
-        return;
-    
-    if (checked)
-        [self setStyle:kCEEViewStyleClicked];
-    else
-        [self clearStyle:kCEEViewStyleClicked];
-}
-
-- (BOOL)checked {
-    return [self styleSet:kCEEViewStyleClicked];
-}
-
 - (void)updateUserInterface {
-    [super updateUserInterface];
-    
-    CEEUserInterfaceStyleScheme* current = (CEEUserInterfaceStyleScheme*)[self.styleSchemes pointerAtIndex:self.style];    
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
     if (!current)
         return;
     
-    NSDictionary* descriptor = current.descriptor;
+    if (current.font)
+        self.font = current.font;
     
-    NSString* boxOutlineColorProperty = descriptor[@"box_outline_color"];
-    NSString* boxBackgroundColorProperty = descriptor[@"box_background_color"];
-    NSString* boxBackgroundColorCheckedProperty = descriptor[@"box_background_color_checked"];
-    NSString* boxContentColorProperty = descriptor[@"box_content_color"];
+    if (current.backgroundColor)
+        self.backgroundColor = current.backgroundColor;
     
-    if (boxOutlineColorProperty)
-        self.boxOutlineColor = [CEEUserInterfaceStyleConfiguration createColorFromString:boxOutlineColorProperty];
+    if (current.borderColor)
+        self.borderColor = current.borderColor;
     
-    if (boxBackgroundColorProperty)
-        self.boxBackgroundColor = [CEEUserInterfaceStyleConfiguration createColorFromString:boxBackgroundColorProperty];
+    if (current.textColor)
+        self.textColor = current.textColor;
+    
+    if (current.textShadow)
+        self.textShadow = current.textShadow;
+    
+    if (current.gradient)
+        self.gradient = current.gradient;
+    
+    self.gradientAngle = current.gradientAngle;
+    self.borderWidth = current.borderWidth;
+    
+    if (current.iconColor)
+        self.iconColor = current.iconColor;
+    
+    self.cornerRadius = current.cornerRadius;
         
-    if (boxBackgroundColorCheckedProperty)
-        self.boxBackgroundColorChecked = [CEEUserInterfaceStyleConfiguration createColorFromString:boxBackgroundColorCheckedProperty];
-        
-    if (boxContentColorProperty)
-        self.boxContentColor = [CEEUserInterfaceStyleConfiguration createColorFromString:boxContentColorProperty];
+    if (current.boxOutlineColor)
+        self.boxOutlineColor = current.boxOutlineColor;
+    
+    if (current.boxBackgroundColor)
+        self.boxBackgroundColor = current.boxBackgroundColor;
+    
+    if (current.boxBackgroundColorChecked)
+        self.boxBackgroundColorChecked = current.boxBackgroundColorChecked;
+    
+    if (current.boxContentColor)
+        self.boxContentColor = current.boxContentColor;
 }
 
 @end

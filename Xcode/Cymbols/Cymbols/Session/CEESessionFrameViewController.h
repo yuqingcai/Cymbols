@@ -17,7 +17,7 @@
 @interface CEESessionFrameViewController : CEEViewController <CEETitleViewDelegate, CEESessionFrameViewDelegate, NSWindowDelegate>
 @property (weak) CEESessionFrameManager* manager;
 @property (weak) CEESessionPort* port;
-- (void)present;
+- (void)presentSource;
 - (void)select;
 - (void)deselect;
 @end

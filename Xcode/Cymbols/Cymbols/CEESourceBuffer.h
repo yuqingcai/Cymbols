@@ -12,20 +12,18 @@
 #import "cee_text_storage.h"
 #import "cee_binary_storage.h"
 #import "cee_datetime.h"
+#import "cee_symbol.h"
+#import "cee_reference.h"
+
 
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSNotificationName CEENotificationSourceBufferStateChanged;
-extern NSNotificationName CEENotificationSourceBufferHighlightSymbol;
-extern NSNotificationName CEENotificationSourceBufferSymbolSelected;
-extern NSNotificationName CEENotificationSourceBufferSymbolSearched;
 
 typedef struct _CEESymbolWrapper {
     CEESourceSymbol* symbol_ref;
     cee_int level;
-    cee_int index;
 } CEESymbolWrapper;
-
 
 typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
     kCEESourceBufferStateNormal = 0,
@@ -41,29 +39,24 @@ typedef NS_ENUM(NSUInteger, CEEBufferType) {
     kCEEBufferTypeBinary = 1,
 };
 
-typedef cee_pointer CEEBufferStorageRef;
-
 @class CEEProject;
 
 @interface CEESourceBuffer : NSObject
 
 @property (strong) NSString* filePath;
 @property CEEBufferType type;
-@property CEEBufferStorageRef storage;
-@property CEESourceSymbol* highlightedSymbol;
-@property NSInteger selectedSymbolIndex;
-@property CEEList* symbolsSearched;
-@property CEESourceBufferState states;
-@property CEESourceFregment* statement;
-@property CEESourceFregment* prep_directive;
+@property CEETextStorageRef storage;
+@property CEESourceBufferState state;
 @property CEESourceFregment* comment;
+@property CEESourceFregment* prep_directive;
+@property CEESourceFregment* statement;
 @property CEESourceTokenMap* source_token_map;
+@property CEETree* prep_directive_symbol_tree;
+@property CEETree* statement_symbol_tree;
+
 @property CEEList* tokens_ref;
-@property CEEList* symbol_wrappers;
 @property CEESourceParserRef parser_ref;
-@property CEESymbolCacheRef symbol_cache;
-@property CEEProject* project_ref;
-@property (readonly) NSUInteger referenceCount;
+@property CEEList* symbol_wrappers;
 
 - (instancetype)initWithFilePath:(nullable NSString*)filePath;
 - (void)setState:(CEESourceBufferState)state;
@@ -72,22 +65,30 @@ typedef cee_pointer CEEBufferStorageRef;
 - (void)reload;
 - (BOOL)isFileModified;
 - (void)updateFileModifiedDate;
-- (cee_uint)symbolWrapperLength;
-- (CEESymbolWrapper*)symbolWrapperByIndex:(NSInteger)index;
-- (void)highlightSymbol:(CEESourceSymbol*)symbol;
 - (void)referenceIncrease;
 - (void)referenceDecrease;
+
 @end
+
+typedef enum _CEESourceBufferParserOption {
+    kCEESourceBufferParserOptionCreateSymbolWrapper = 1 << 0,
+} CEESourceBufferParserOption;
+
+void cee_source_buffer_parse(CEESourceBuffer* buffer,
+                             CEESourceBufferParserOption options);
 
 @interface CEESourceBufferManager : NSObject
 
 @property (strong) NSMutableArray* buffers;
-- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filepath;
+- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath;
 - (CEESourceBuffer*)openUntitledSourceBuffer;
 - (void)closeSourceBuffer:(CEESourceBuffer*)buffer;
-- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filepath;
+- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filePath;
+- (CEESourceBuffer*)getSourceBufferWithFilePath:(NSString*)filePath;
 - (void)updateSourceBuffers;
 - (BOOL)fileExistsAtPath:(NSString*)filePath;
+- (BOOL)hasModifiedBuffer;
+
 @end
 
 NS_ASSUME_NONNULL_END

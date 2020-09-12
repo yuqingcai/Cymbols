@@ -13,9 +13,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEControl : NSControl <NSUserInterfaceItemIdentification> {
     CEEUserInterfaceStyleConfiguration* _styleConfiguration;
-    CEEViewStyle _style;
+    CEEViewStyleState _styleState;
 }
-@property NSPointerArray* styleSchemes;
+@property NSPointerArray* userInterfaceStyles;
+@property BOOL enabled;
 - (void)initProperties;
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint;
 @end

@@ -6,19 +6,17 @@
 //  Copyright © 2019 caiyuqing. All rights reserved.
 //
 
-#import "CEEButton.h"
+#import "CEEStateButton.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 IB_DESIGNABLE
 
-@interface CEECheckBox : CEEButton
-@property (strong, nullable) IBInspectable NSColor* boxOutlineColor;
-@property (strong, nullable) IBInspectable NSColor* boxBackgroundColor;
-@property (strong, nullable) IBInspectable NSColor* boxBackgroundColorChecked;
-@property (strong, nullable) IBInspectable NSColor* boxContentColor;
-- (void)setChecked:(BOOL)checked;
-- (BOOL)checked;
+@interface CEECheckBox : CEEStateButton
+@property (strong) IBInspectable NSColor* boxOutlineColor;
+@property (strong) IBInspectable NSColor* boxBackgroundColor;
+@property (strong) IBInspectable NSColor* boxBackgroundColorChecked;
+@property (strong) IBInspectable NSColor* boxContentColor;
 @end
 
 NS_ASSUME_NONNULL_END

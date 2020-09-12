@@ -48,7 +48,6 @@ typedef enum _CEETokenIdentifierType {
     kCEETokenIdentifierTypeVirtualSpecifier         = 0x1 << 13,
     kCEETokenIdentifierTypeAlignasSpecifier         = 0x1 << 14,
     kCEETokenIdentifierTypeOverloadOperator         = 0x1 << 15,
-    
 } CEETokenIdentifierType;
 
 typedef enum _CEETokenID {
@@ -318,21 +317,6 @@ typedef enum _CEETokenID {
     kCEETokenID___KIND_OF,
     
     
-    kCEEARMASMTokenID_CCOMMENT,
-    kCEEARMASMTokenID_CPPCOMMENT,
-    kCEEARMASMTokenID_IDENTIFIER,
-    kCEEARMASMTokenID_CONSTANT,
-    kCEEARMASMTokenID_CHARACTER,
-    kCEEARMASMTokenID_LITERAL,
-    
-    
-    kCEEGNUASMTokenID_CCOMMENT,
-    kCEEGNUASMTokenID_CPPCOMMENT,
-    kCEEGNUASMTokenID_IDENTIFIER,
-    kCEEGNUASMTokenID_CONSTANT,
-    kCEEGNUASMTokenID_CHARACTER,
-    kCEEGNUASMTokenID_LITERAL,
-    
     kCEETokenID_END
 } CEETokenID;
 
@@ -384,6 +368,21 @@ typedef struct _CEEToken {
     CEETokenState state;
     cee_pointer fregment_ref;
 } CEEToken;
+
+typedef struct _CEESourceTokenMap {
+    cee_pointer* map;
+    cee_ulong length;
+} CEESourceTokenMap;
+
+typedef enum _CEETokenClusterType {
+    kCEETokenClusterTypeSymbol,
+    kCEETokenClusterTypeReference,
+} CEETokenClusterType;
+
+typedef struct _CEETokenCluster {
+    CEETokenClusterType type;
+    cee_pointer content_ref;
+} CEETokenCluster;
 
 void cee_token_free(cee_pointer data);
 CEEToken* cee_token_create(CEETokenID token_id,
@@ -466,6 +465,13 @@ void cee_tokens_mark(CEEList* tokens,
 
 CEEList* cee_token_is_identifier_before(CEEList* p,
                                         CEETokenID token_id);
+CEESourceTokenMap* cee_source_token_map_create(const cee_uchar* subject);
+void cee_source_token_map_free(CEESourceTokenMap* token_map);
+void cee_source_token_map(CEESourceTokenMap* token_map,
+                          CEEList* p);
+CEETokenCluster* cee_token_cluster_create(CEETokenClusterType type,
+                                          cee_pointer content_ref);
+void cee_token_cluster_free(cee_pointer data);
 
 #ifdef __cplusplus
 }

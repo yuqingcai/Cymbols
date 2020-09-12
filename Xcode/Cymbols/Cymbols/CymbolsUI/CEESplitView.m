@@ -11,8 +11,12 @@
 @implementation CEESplitView
 
 - (void)initProperties {
-    _gridColor = [NSColor gridColor];
-    _style = kCEEViewStyleInit;
+    _dividerColorVertical = [NSColor gridColor];
+    _dividerColorHorizontal = [NSColor gridColor];
+    _borderColor = [NSColor clearColor];
+    _borderWidth = 0.0;
+    _cornerRadius = 0.0;
+    _styleState = kCEEViewStyleStateActived;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)decoder {
@@ -47,34 +51,26 @@
 
 - (void)drawDividerInRect:(NSRect)rect {
     [super drawDividerInRect:rect];
-    [_gridColor set];
+    
+    if (rect.size.height > self.dividerThickness)
+        [self.dividerColorVertical set];
+    else
+        [self.dividerColorHorizontal set];
+    
     NSRectFill(rect);
-}
-
-- (NSColor*)dividerColor {
-    return _gridColor;
 }
 
 - (CGFloat)dividerThickness {
     return 1.0;
 }
 
-- (void)drawRect:(NSRect)dirtyRect {
-    [super drawRect:dirtyRect];
-    
-    NSSize frameSize = self.frame.size;
-    if (self.borderColor && self.borderWidth > FLT_EPSILON) {
-        NSRect borderRect = NSMakeRect(self.borderWidth / 2.0,
-                                       self.borderWidth / 2.0,
-                                       frameSize.width - self.borderWidth,
-                                       frameSize.height - self.borderWidth);
-        
-        NSBezierPath* borderPath = [NSBezierPath bezierPathWithRoundedRect:borderRect xRadius:self.cornerRadius yRadius:self.cornerRadius];
-        [self.borderColor setStroke];
-        [borderPath setLineWidth: self.borderWidth];
-        [borderPath stroke];
-    }
-    
+- (void)setStyleState:(CEEViewStyleState)state {
+    _styleState = state;
+    [super setStyleState:state];
+}
+
+- (CEEViewStyleState)styleState {
+    return _styleState;
 }
 
 - (void)setStyleConfiguration:(CEEUserInterfaceStyleConfiguration*)configuration {
@@ -85,29 +81,6 @@
 
 - (CEEUserInterfaceStyleConfiguration*)styleConfiguration {
     return _styleConfiguration;
-}
-
-- (BOOL)styleSet:(CEEViewStyle)style {
-    return (_style & style) != 0;
-}
-
-- (void)setStyle:(CEEViewStyle)style {
-    _style |= style;
-    [super setStyle:style];
-}
-
-- (void)clearStyle:(CEEViewStyle)style {
-    _style &= ~style;
-    [super clearStyle:style];
-}
-
-- (void)resetStyle:(CEEViewStyle)style {
-    _style = style;
-    [super resetStyle:style];
-}
-
-- (CEEViewStyle)style {
-    return _style;
 }
 
 - (void)setNeedsLayout:(BOOL)needsLayout {
@@ -121,44 +94,27 @@
 }
 
 - (void)updateUserInterface {
-    
-    [super updateUserInterface];
-    
-    CEEUserInterfaceStyleScheme* current = (CEEUserInterfaceStyleScheme*)[self.styleSchemes pointerAtIndex:self.style];    
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
     if (!current)
         return;
     
-    NSDictionary* descriptor = current.descriptor;
-    
-    NSString* gridColorProperty = descriptor[@"grid_color"];
-    NSString* borderColorProperty = descriptor[@"border_color"];
-    NSString* borderWidthProperty = descriptor[@"border_width"];
-    NSString* cornerRadiusProperty = descriptor[@"corner_radius"];
-    
-    if (gridColorProperty)
-        self.gridColor = [CEEUserInterfaceStyleConfiguration createColorFromString:gridColorProperty];
-    else
-        self.gridColor = [NSColor gridColor];
-    
-    if (borderColorProperty)
-        self.borderColor = [CEEUserInterfaceStyleConfiguration createColorFromString:borderColorProperty];
-    
-    if (borderWidthProperty)
-        self.borderWidth = [borderWidthProperty floatValue];
-    
-    if (cornerRadiusProperty)
-        self.cornerRadius = [cornerRadiusProperty floatValue];
+    self.dividerColorVertical = current.dividerColorVertical;
+    self.dividerColorHorizontal = current.dividerColorHorizontal;
+    self.borderColor = current.borderColor;
+    self.borderWidth = current.borderWidth;
+    self.cornerRadius = current.cornerRadius;
 }
 
 - (void)setSytleSchemes:(NSArray*)schemes {
+    self.userInterfaceStyles = [[NSPointerArray alloc] init];
     
-    _styleSchemes = [[NSPointerArray alloc] init];
+    for (NSUInteger i = 0; i < kCEEViewStyleStateMax; i ++)
+        [self.userInterfaceStyles addPointer:NULL];
     
-    for (NSUInteger i = 0; i < kCEEViewStyleMax; i ++)
-        [_styleSchemes addPointer:NULL];
-    
-    for (CEEUserInterfaceStyleScheme* scheme in schemes)
-        [_styleSchemes replacePointerAtIndex:scheme.style withPointer:(void*)scheme];
+    for (CEEUserInterfaceStyleScheme* scheme in schemes) {
+        CEEUserInterfaceStyle* style = [[CEEUserInterfaceStyle alloc] initWithScheme:scheme];
+        [self.userInterfaceStyles replacePointerAtIndex:scheme.styleState withPointer:(void*)style];
+    }
 }
 
 @end

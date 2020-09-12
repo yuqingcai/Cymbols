@@ -12,11 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSSplitView(UIStyle)
-- (BOOL)styleSet:(CEEViewStyle)style;
-- (void)setStyle:(CEEViewStyle)style;
-- (void)clearStyle:(CEEViewStyle)style;
-- (void)resetStyle:(CEEViewStyle)style;
-- (CEEViewStyle)style;
+- (void)setStyleState:(CEEViewStyleState)state;
 - (void)setStyleConfiguration:(CEEUserInterfaceStyleConfiguration*)configuration;
 - (CEEUserInterfaceStyleConfiguration*)styleConfiguration;
 - (void)updateUserInterface;

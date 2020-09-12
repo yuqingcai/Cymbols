@@ -12,8 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSViewController(UIStyle)
-- (void)setViewStyle:(CEEViewStyle)style;
-- (void)clearViewStyle:(CEEViewStyle)style;
+- (void)setViewStyleState:(CEEViewStyleState)state;
 @end
 
 NS_ASSUME_NONNULL_END

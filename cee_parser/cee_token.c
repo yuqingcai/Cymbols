@@ -743,3 +743,44 @@ CEEList* cee_token_is_identifier_before(CEEList* p,
     
     return NULL;
 }
+
+CEESourceTokenMap* cee_source_token_map_create(const cee_uchar* subject)
+{
+    CEESourceTokenMap* token_map = cee_malloc0(sizeof(CEESourceTokenMap));
+    token_map->length = strlen((const cee_char*)subject) + 1; /** length contain NULL terminater */
+    token_map->map = (cee_pointer*)cee_malloc0(sizeof(cee_pointer) * token_map->length);
+    return token_map;
+}
+
+void cee_source_token_map_free(CEESourceTokenMap* token_map)
+{
+    if (token_map->map)
+        cee_free(token_map->map);
+    cee_free(token_map);
+}
+
+void cee_source_token_map(CEESourceTokenMap* token_map,
+                          CEEList* p)
+{
+    CEEToken* token = p->data;
+    for (int i = 0; i < token->length; i ++)
+        token_map->map[token->offset + i] = p;
+}
+
+CEETokenCluster* cee_token_cluster_create(CEETokenClusterType type,
+                                          cee_pointer content_ref)
+{
+    CEETokenCluster* cluster = cee_malloc0(sizeof(CEETokenCluster));
+    cluster->type = type;
+    cluster->content_ref = content_ref;
+    return cluster;
+}
+
+void cee_token_cluster_free(cee_pointer data)
+{
+    if (!data)
+        return;
+    
+    CEETokenCluster* cluster = (CEETokenCluster*)data;
+    cee_free(cluster);
+}

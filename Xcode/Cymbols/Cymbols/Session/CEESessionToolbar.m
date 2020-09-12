@@ -84,24 +84,24 @@
 }
 
 - (void)sessionPresentResponse:(NSNotification*)notification {
-    BOOL enable = NO;
-    if (_session.project.database) 
-        enable = YES;
-    [_buildProjectButton setEnabled:enable];
-    [_cleanProjectButton setEnabled:enable];
-    [_syncProjectButton setEnabled:enable];
-    [_searchInProjectButton setEnabled:enable];
+    //BOOL enable = NO;
+    //if (_session.project.database) 
+    //    enable = YES;
+    //[_buildProjectButton setEnabled:enable];
+    //[_cleanProjectButton setEnabled:enable];
+    //[_syncProjectButton setEnabled:enable];
+    //[_searchInProjectButton setEnabled:enable];
 }
 
 - (void)projectSettingPropertiesResponse:(NSNotification*)notification {
-    BOOL enable = NO;
-    if (_session.project.database) 
-        enable = YES;
-    
-    [_buildProjectButton setEnabled:enable];
-    [_cleanProjectButton setEnabled:enable];
-    [_syncProjectButton setEnabled:enable];
-    [_searchInProjectButton setEnabled:enable];
+    //BOOL enable = NO;
+    //if (_session.project.database) 
+    //    enable = YES;
+    //
+    //[_buildProjectButton setEnabled:enable];
+    //[_cleanProjectButton setEnabled:enable];
+    //[_syncProjectButton setEnabled:enable];
+    //[_searchInProjectButton setEnabled:enable];
 }
 
 @end

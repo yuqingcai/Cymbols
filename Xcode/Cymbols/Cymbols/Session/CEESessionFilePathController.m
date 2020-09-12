@@ -6,7 +6,7 @@
 //  Copyright © 2019 Lazycatdesign. All rights reserved.
 //
 
-#import "CymbolsDelegate.h"
+#import "AppDelegate.h"
 #import "CEESessionFilePathController.h"
 #import "CEEFileNameCellView.h"
 
@@ -32,6 +32,7 @@
     [_sourceTable setTarget:self];
     [_sourceTable setDoubleAction:@selector(openFiles:)];
     [_sourceTable setAllowsMultipleSelection:YES];
+    [_sourceTable setEnableDrawHeader:NO];
     [_filterInput setDelegate:self];
     [_sourceTable registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
     
@@ -57,6 +58,7 @@
 }
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     NSString* filePath = _filePathsInProject[row];
     NSString* string = [filePath lastPathComponent];
     CEEFileNameCellView *cellView = [_sourceTable makeViewWithIdentifier:@"IDFileNameCellView"];
@@ -64,11 +66,12 @@
     if (!fileExisted) 
         string = [string stringByAppendingString:@" (delete)"];
     cellView.title.stringValue = string;
+    [cellView.icon setImage:[styleManager filetypeIconFromFileName:[filePath lastPathComponent]]];
     return cellView;
 }
 
 - (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    CymbolsDelegate* delegate = [NSApp delegate];
+    AppDelegate* delegate = [NSApp delegate];
     return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 

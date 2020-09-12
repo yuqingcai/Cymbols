@@ -50,4 +50,15 @@ NSNotificationName CEENotificationTextViewNewline = @"CEENotificationTextViewNew
         [self.delegate textViewNewLine:self];
 }
 
+- (BOOL)becomeFirstResponder {
+    [super becomeFirstResponder];
+    return YES;
+}
+
+- (BOOL)resignFirstResponder {
+    [super resignFirstResponder];
+    return YES;
+}
+
+
 @end
