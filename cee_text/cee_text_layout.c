@@ -98,7 +98,6 @@ static CEETextUnit* unit_create(CEETextLine* line,
                                 cee_boolean tinted);
 static cee_boolean layout_line_contain_offset(CEETextLine* line,
                                               cee_long offset);
-static void layout_init(CEETextLayout* layout);
 static void text_layout(CEETextLayoutRef layout,
                         cee_boolean tinted);
 

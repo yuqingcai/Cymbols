@@ -7,6 +7,8 @@
 //
 
 #import "CEEView.h"
+#import "CEEScroller.h"
+#import "CEEGridView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -31,7 +33,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEETableViewHeader : CEEView
 @property NSUInteger columns;
-@property (strong) NSColor* dividerColor;
 @end
 
 @interface CEETableRowView : CEEView
@@ -39,6 +40,13 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface CEETableView : CEEView <NSDraggingDestination, NSDraggingSource, NSPasteboardWriting>
+
+@property (strong) CEEScroller* verticalScroller;
+@property (strong) CEEScroller* horizontalScroller;
+@property (strong) CEETableViewHeader* header;
+@property (strong) CEETableViewHeader* headerPadding;
+@property (strong) CEEGridView* grid;
+
 @property BOOL enableDrawHeader;
 @property (readonly) NSInteger selectedRow;
 @property (readonly) NSIndexSet* selectedRowIndexes;
@@ -48,6 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property SEL action;
 @property SEL doubleAction;
 @property id target;
+@property(readonly) NSInteger clickedRow;
 
 - (void)reloadData;
 - (__kindof NSView*)makeViewWithIdentifier:(NSUserInterfaceItemIdentifier)identifier;
@@ -57,6 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)scrollRowToVisible:(NSInteger)row;
 - (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)extend;
 - (void)setDraggingSourceOperationMask:(NSDragOperation)mask forLocal:(BOOL)isLocal;
+- (NSInteger)tableRowIndexByLocation:(NSPoint)point;
 @end
 
 NS_ASSUME_NONNULL_END

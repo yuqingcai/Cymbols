@@ -206,6 +206,17 @@ static CEEStyleManager* gStyleManager = nil;
     return [NSImage imageNamed:identifier];
 }
 
+- (NSImage*)filetypeIconFromFilePath:(NSString*)filePath {
+    BOOL isDirectory = NO;
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&isDirectory])
+        return [NSImage imageNamed:@"icon_file_not_existed_16x16"];
+    
+    if (isDirectory) 
+        return [NSImage imageNamed:@"icon_directory_16x16"];
+    
+    return [self filetypeIconFromFileName:[filePath lastPathComponent]];
+}
 
 - (NSImage*)symbolIconFromSymbolType:(CEESourceSymbolType)type {
     NSString* identifier = nil;

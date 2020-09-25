@@ -457,11 +457,11 @@ CEEList* cee_token_identifier_first_equal(CEEList* p,
                                           CEETokenID token_id);
 CEEList* cee_tokens_from_slice(CEEList* begin,
                                CEEList* end);
-void cee_token_slice_mark(CEEList* begin,
-                          CEEList* end,
-                          CEETokenState state);
-void cee_tokens_mark(CEEList* tokens,
-                     CEETokenState state);
+void cee_token_slice_state_mark(CEEList* begin,
+                                CEEList* end,
+                                CEETokenState state);
+void cee_tokens_state_mark(CEEList* tokens,
+                           CEETokenState state);
 
 CEEList* cee_token_is_identifier_before(CEEList* p,
                                         CEETokenID token_id);

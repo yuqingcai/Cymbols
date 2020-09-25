@@ -31,7 +31,7 @@ typedef enum _CEESourceReferenceSearchOption {
 typedef struct _CEESourceReference {
     CEESourceReferenceType type;
     CEEList* tokens_ref;
-    cee_char* descriptor;
+    cee_char* name;
     cee_char* locations;
 } CEESourceReference;
 

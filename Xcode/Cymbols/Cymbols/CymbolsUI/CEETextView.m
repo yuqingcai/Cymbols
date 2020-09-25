@@ -101,15 +101,10 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     
     _caretColor = [NSColor textColor];
     _caretColorMarked = [NSColor textColor];
-    _textBackgroundColorMarked = [NSColor selectedTextBackgroundColor];
-    _textBackgroundColorMarkedOutline = [NSColor selectedTextBackgroundColor];
     _textBackgroundColorSelected = [NSColor selectedTextBackgroundColor];
     _textBackgroundColorSelectedOutline = [NSColor selectedTextBackgroundColor];
-    _textBackgroundColorSearched = [NSColor findHighlightColor];
-    _textBackgroundColorSearchedOutline = [NSColor findHighlightColor];
     _textBackgroundColorHighlight = [NSColor redColor];
     _textBackgroundColorHighlightOutline = [NSColor redColor];
-    
     _styleState = kCEEViewStyleStateActived;
     _aligment = kCEETextLayoutAlignmentLeft;
     _editable = YES;
@@ -216,9 +211,9 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 - (void)setFrameSize:(NSSize)newSize {
     [super setFrameSize:newSize];
     [self resetMouseTraceArea];
-    CEESize container_size = cee_size_make(self.frame.size.width,
-                                           self.frame.size.height);
-    cee_text_edit_container_size_set(_edit, container_size);
+    CEESize size = cee_size_make(self.frame.size.width,
+                                 self.frame.size.height);
+    cee_text_edit_container_size_set(_edit, size);
     
     if (_delegate && [_delegate respondsToSelector:@selector(textViewFrameChanged:)])
         [_delegate textViewFrameChanged:self];
@@ -648,16 +643,16 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 
 - (void)drawMarkedRegion {
     CEEList* rects = cee_text_edit_marked_rects_create(_edit);
-    [_textBackgroundColorMarkedOutline setStroke];
-    [_textBackgroundColorMarked setFill];
+    [_textBackgroundColorHighlightOutline setStroke];
+    [_textBackgroundColorHighlight setFill];
     [self drawContinuousRegion:rects];
     cee_list_free_full(rects, cee_range_free);
 }
 
 - (void)drawSearchedRegions {
     CEEList* rects = cee_text_edit_searched_rects_create(_edit);
-    [_textBackgroundColorSearchedOutline setStroke];
-    [_textBackgroundColorSearched setFill];
+    [_textBackgroundColorSelectedOutline setStroke];
+    [_textBackgroundColorSelected setFill];
     [self drawRegions:rects];
     cee_list_free_full(rects, cee_range_free);
 }
@@ -684,8 +679,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     if (!count)
         return;
     
-    [_textBackgroundColorMarkedOutline setStroke];
-    [_textBackgroundColorSelected setFill];
+    [_textBackgroundColorHighlightOutline setStroke];
+    [_textBackgroundColorHighlight setFill];
     
     CEEList* p = rects;
     while (p) {
@@ -927,19 +922,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     
     if (current.textBackgroundColorSelectedOutline)
         self.textBackgroundColorSelectedOutline = current.textBackgroundColorSelectedOutline;
-    
-    if (current.textBackgroundColorMarked)
-        self.textBackgroundColorMarked = current.textBackgroundColorMarked;
-    
-    if (current.textBackgroundColorMarkedOutline)
-        self.textBackgroundColorMarkedOutline = current.textBackgroundColorMarkedOutline;
-    
-    if (current.textBackgroundColorSearched)
-        self.textBackgroundColorSearched = current.textBackgroundColorSearched;
-         
-    if (current.textBackgroundColorSearchedOutline)
-        self.textBackgroundColorSearchedOutline = current.textBackgroundColorSearchedOutline;
-         
+             
     if (current.textBackgroundColorHighlight)
         self.textBackgroundColorHighlight = current.textBackgroundColorHighlight;
         
@@ -954,148 +937,147 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         else if ([current.aligment caseInsensitiveCompare:@"center"] == NSOrderedSame)
             self.aligment = kCEETextLayoutAlignmentCenter;
     }
-    
 }
 
 // move caret
 - (void)moveRight:(id)sender {
     cee_text_edit_caret_move_right(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveLeft:(id)sender {
     cee_text_edit_caret_move_left(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveUp:(id)sender {
     cee_text_edit_caret_move_up(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveDown:(id)sender {
     cee_text_edit_caret_move_down(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveWordRight:(id)sender {
     cee_text_edit_caret_move_word_right(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveWordLeft:(id)sender {
     cee_text_edit_caret_move_word_left(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveForward:(id)sender {
     cee_text_edit_caret_move_right(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveBackward:(id)sender {
     cee_text_edit_caret_move_left(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveWordForward:(id)sender {
     cee_text_edit_caret_move_word_right(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveWordBackward:(id)sender {
     cee_text_edit_caret_move_word_left(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveToLeftEndOfLine:(id)sender {
     cee_text_edit_caret_move_paragraph_beginning(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveToRightEndOfLine:(id)sender {
     cee_text_edit_caret_move_paragraph_end(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveToBeginningOfLine:(id)sender {
     cee_text_edit_caret_move_paragraph_beginning(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveToEndOfLine:(id)sender {
     cee_text_edit_caret_move_paragraph_end(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveToBeginningOfParagraph:(id)sender {
     cee_text_edit_caret_move_paragraph_beginning(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveToEndOfParagraph:(id)sender {
     cee_text_edit_caret_move_paragraph_end(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveToBeginningOfDocument:(id)sender {
     cee_text_edit_caret_move_document_beginning(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)moveToEndOfDocument:(id)sender {
     cee_text_edit_caret_move_document_end(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)pageDown:(id)sender {
     cee_text_edit_page_down(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 - (void)pageUp:(id)sender {
     cee_text_edit_page_up(_edit);
     [self setNeedsDisplay:YES];
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretMove:)])
-        [_delegate textViewCaretMove:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+        [_delegate textViewCaretSet:self];
 }
 
 // move caret and modify selection
@@ -1465,4 +1447,12 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
             [_delegate textViewIgnoreTokenCluster:self];     
     }        
 }
+
+- (NSMenu*)menuForEvent:(NSEvent *)event {
+    NSMenu* menu = [super menuForEvent:event];
+    if (_delegate && [_delegate respondsToSelector:@selector(textView:modifyMenu:)])
+        [_delegate textView:self modifyMenu:&menu];
+    return menu;
+}
+
 @end

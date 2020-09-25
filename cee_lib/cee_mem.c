@@ -20,7 +20,7 @@ cee_pointer cee_malloc(cee_size nb_byte)
 
 cee_pointer cee_malloc0(cee_size nb_byte)
 {
-    cee_pointer bytes = calloc(1, nb_byte);
+     cee_pointer bytes = calloc(1, nb_byte);
     if (bytes)
         return bytes;
     

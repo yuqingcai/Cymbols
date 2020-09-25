@@ -130,6 +130,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [self showTextSearch:NO];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textHighlightStyleResponse:) name:CEENotificationTextHighlightStyleUpdate object:nil];
 }
 
@@ -161,13 +162,13 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [_textView setEditable:self.editable];
 }
 
-- (void)setParagraphIndex:(NSInteger)paragraphIndex {
-    CEETextEditRef edit = [_textView edit];
-    CEETextLayoutRef layout = cee_text_edit_layout(edit);
-    cee_text_layout_paragraph_index_set(layout, paragraphIndex);
-    [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
-    [_textView setNeedsDisplay:YES];
-    [self adjustScrollers];
+- (void)setOffset:(NSInteger)offset {
+    //CEETextEditRef edit = [_textView edit];
+    //CEETextLayoutRef layout = cee_text_edit_layout(edit);
+    //cee_text_layout_paragraph_index_set(layout, paragraphIndex);
+    //[_lineNmberView setLineNumberTags:[self createlineNumberTags]];
+    //[_textView setNeedsDisplay:YES];
+    //[self adjustScrollers];
 }
 
 - (void)adjustScrollers {
@@ -181,9 +182,9 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     if (fabs(_horizontalScroller.knobProportion - 1.0) < FLT_EPSILON)
         _horizontalScroller.knobProportion = 0.99;
     
-    CEETextLayoutRef layout = cee_text_edit_layout(edit);
-    NSInteger paragraphIndex = cee_text_layout_paragraph_index_get(layout);
-    [[self.port currentBufferReference] setParagraphIndex:paragraphIndex];
+    //CEETextLayoutRef layout = cee_text_edit_layout(edit);
+    //NSInteger paragraphIndex = cee_text_layout_paragraph_index_get(layout);
+    //[[self.port currentBufferReference] setBufferOffset:paragraphIndex];
 }
 
 - (void)showTextSearch:(BOOL)shown {
@@ -231,9 +232,8 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     _horizontalScroller.knobProportion = cee_text_edit_horizontal_scroller_proportion_get(edit);
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
     [_textView setNeedsDisplay:YES];
-    
-    NSInteger paragraphIndex = cee_text_layout_paragraph_index_get(layout);
-    [[self.port currentBufferReference] setParagraphIndex:paragraphIndex];
+    //NSInteger paragraphIndex = cee_text_layout_paragraph_index_get(layout);
+    //[[self.port currentBufferReference] setParagraphIndex:paragraphIndex];
 }
 
 - (void)horizontalScroll:(id)sender {
@@ -343,8 +343,8 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     cee_long index = cee_text_edit_searched_index_get(edit);
     index --;
     cee_text_edit_searched_index_set(edit, index);
-    
     [self adjustScrollers];
+    [_textView setNeedsDisplay:YES];
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
 }
 
@@ -353,8 +353,8 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     cee_long index = cee_text_edit_searched_index_get(edit);
     index ++;
     cee_text_edit_searched_index_set(edit, index);
-    
     [self adjustScrollers];
+    [_textView setNeedsDisplay:YES];
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
 }
 
@@ -453,21 +453,21 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
         return;
     
     if ([buffer stateSet:kCEESourceBufferStateModified]) {
-        
         if (_searchingText && _searchTextWhenModifing)
             [self searchText];
         
-        // if view is actived and selected, that means buffer is modified by 
-        // this editor, we don't need to do anyting. 
-        if ([self.view styleState] == kCEEViewStyleStateActived)
+        // if view is the first responder, that means buffer is modified by
+        // this editor, we don't need to do anyting.
+        if (self.view.window.firstResponder == _textView && 
+            [self.view.window isKeyWindow])
             return;
-        
         cee_text_edit_modified_update(_textView.edit);
     }
-    else if ([buffer stateSet:kCEESourceBufferStateReload]) {
+    else {
         cee_text_edit_modified_update(_textView.edit);
     }
     
+    [_textView setNeedsDisplay:YES];
     [self adjustScrollers];
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
 }
@@ -480,7 +480,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 
 #pragma mark - CEETextViewDelegate protocol
 
--(void)textViewTextChanged:(CEETextView*)textView {
+- (void)textViewTextChanged:(CEETextView*)textView {
     if (textView == _textView) {
         [self adjustScrollers];
         [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
@@ -497,13 +497,15 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     }
 }
 
-- (void)textViewFrameChangedResponse:(NSNotification*)notification {
+- (void)textViewFrameChanged:(CEETextView*)textView {
     [self adjustScrollers];
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
 }
 
-- (void)textViewCaretMove:(CEETextView*)textView {
+- (void)textViewCaretSet:(CEETextView*)textView {
     if (textView == _textView) {
+        cee_long offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
+        [self.port setActivedBufferOffset:offset];
         [self adjustScrollers];
         [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
     }
@@ -537,16 +539,24 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 - (void)textViewSelectWithCommand:(CEETextView*)textView {
     if (!self.intelligence || textView != _textView)
         return;
-    
+    [self jumpToTargetSymbol:self];
+    return;
+}
+
+- (IBAction)jumpToTargetSymbol:(id)sender {
     cee_long offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
-    CEETokenCluster* cluster = cee_token_cluster_search_by_buffer_offset(_symbolReferences,
-                                                                         self.buffer.prep_directive,
-                                                                         self.buffer.statement,
-                                                                         offset);
+    CEETokenCluster* cluster =  cee_token_cluster_search_by_buffer_offset(_symbolReferences,
+                                                                          self.buffer.prep_directive,
+                                                                          self.buffer.statement,
+                                                                          offset);
     
     [self.port jumpToTargetSymbolByCluster:cluster];
     cee_token_cluster_free(cluster);
     return;
+}
+
+- (IBAction)searchReferences:(id)sender {
+    
 }
 
 - (void)textViewHighlightTokenCluster:(CEETextView*)textView {
@@ -601,5 +611,105 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [self.port createContextByCluster:cluster];
     cee_token_cluster_free(cluster);
 }
+
+- (BOOL)filePathIsSource:(NSString*)filePath {
+    NSString* extension = [filePath pathExtension];
+    if ([extension compare:@"c" options:NSCaseInsensitiveSearch] == NSOrderedSame || 
+        [extension compare:@"cpp" options:NSCaseInsensitiveSearch] == NSOrderedSame || 
+        [extension compare:@"cc" options:NSCaseInsensitiveSearch] == NSOrderedSame || 
+        [extension compare:@"m" options:NSCaseInsensitiveSearch] == NSOrderedSame || 
+        [extension compare:@"mm" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+        return YES;
+    return NO;
+}
+
+- (BOOL)filePathIsHeader:(NSString*)filePath {
+    NSString* extension = [filePath pathExtension];
+    if ([extension compare:@"h" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+        [extension compare:@"hpp" options:NSCaseInsensitiveSearch] == NSOrderedSame )
+        return YES;
+    return NO;
+}
+
+- (void)textView:(CEETextView*)textView modifyMenu:(NSMenu**)menu {
+    NSMenu* modify = *menu;
+    if ([self filePathIsSource:self.buffer.filePath] ||
+        [self filePathIsHeader:self.buffer.filePath]) {
+        NSString* itemTitle = @"Switch Header/Source";
+        BOOL found = NO;
+        NSArray* items = [modify itemArray];
+        for (NSMenuItem* item in items) {
+            if ([item.title isEqualToString:itemTitle])
+                found = YES;
+        }
+        
+        if (!found) {
+            NSMenuItem* item = [modify insertItemWithTitle:itemTitle action:@selector(switchHeaderSource:) keyEquivalent:@"" atIndex:0];
+            [item setImage:[NSImage imageNamed:@"icon_file_switch_16x16"]];
+        }
+    }
+}
+
+- (IBAction)switchHeaderSource:(id)sender {
+    NSString* name = nil;
+    NSString* targetName = nil;
+    NSArray* filePaths = nil;
+    if ([self filePathIsSource:self.buffer.filePath]) {
+        name = [[self.buffer.filePath lastPathComponent] stringByDeletingPathExtension];
+        targetName = [name stringByAppendingPathExtension:@"h"];
+        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        if (filePaths) {
+            [self.port openSourceBuffersWithFilePaths:filePaths];
+            return;
+        }
+        
+        targetName = [name stringByAppendingPathExtension:@"hpp"];
+        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        if (filePaths) {
+            [self.port openSourceBuffersWithFilePaths:filePaths];
+            return;
+        }
+    }
+    else if ([self filePathIsHeader:self.buffer.filePath]) {
+        name = [[self.buffer.filePath lastPathComponent] stringByDeletingPathExtension];
+        targetName = [name stringByAppendingPathExtension:@"c"];
+        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        
+        if (filePaths) {
+            [self.port openSourceBuffersWithFilePaths:filePaths];
+            return;
+        }
+        
+        targetName = [name stringByAppendingPathExtension:@"cpp"];
+        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        if (filePaths) {
+            [self.port openSourceBuffersWithFilePaths:filePaths];
+            return;
+        }
+        
+        targetName = [name stringByAppendingPathExtension:@"cc"];
+        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        if (filePaths) {
+            [self.port openSourceBuffersWithFilePaths:filePaths];
+            return;
+        }
+        
+        targetName = [name stringByAppendingPathExtension:@"m"];
+        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        if (filePaths) {
+            [self.port openSourceBuffersWithFilePaths:filePaths];
+            return;
+        }
+        
+        targetName = [name stringByAppendingPathExtension:@"mm"];
+        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        if (filePaths) {
+            [self.port openSourceBuffersWithFilePaths:filePaths];
+            return;
+        }
+    }
+    
+}
+
 
 @end

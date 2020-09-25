@@ -12,9 +12,9 @@ CEESourceReference* cee_reference_create(const cee_uchar* subject,
     CEESourceReference* reference = cee_malloc0(sizeof(CEESourceReference));
     reference->type = type;
     reference->tokens_ref = tokens;
-    reference->descriptor = cee_string_from_tokens(subject,
-                                                   TOKEN_FIRST(tokens),
-                                                   kCEETokenStringOptionCompact);
+    reference->name = cee_string_from_tokens(subject,
+                                             TOKEN_FIRST(tokens),
+                                             kCEETokenStringOptionCompact);
     reference->locations = cee_ranges_string_from_tokens(TOKEN_FIRST(tokens), 
                                                          kCEERangeListTypeSeparate);
     return reference;
@@ -29,8 +29,8 @@ void cee_reference_free(cee_pointer data)
     if (reference->tokens_ref)
         cee_list_free(reference->tokens_ref);
     
-    if (reference->descriptor)
-        cee_free(reference->descriptor);
+    if (reference->name)
+        cee_free(reference->name);
     
     if (reference->locations)
         cee_free(reference->locations);
@@ -46,17 +46,17 @@ void cee_reference_print(CEESourceReference* reference)
         return ;
     }
     
-    const cee_char* descriptor = "?";
+    const cee_char* name = "?";
     const cee_char* locations = "?";
     
-    if (reference->descriptor)
-        descriptor = reference->descriptor;
+    if (reference->name)
+        name = reference->name;
     
     if (reference->locations)
         locations = reference->locations;
     
     fprintf(stdout, "%s %s\n",
-            descriptor,
+            name,
             locations);
 }
 

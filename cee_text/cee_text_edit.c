@@ -540,7 +540,7 @@ static cee_boolean buffer_offset_is_clipped_layout_bounds_vertical(CEETextEdit* 
     line_bounds = cee_text_line_bounds_get(line);
     
     if (line_bounds.origin.y + line_bounds.size.height > 
-        viewport.origin.y + viewport.size.height)
+            viewport.origin.y + viewport.size.height)
         return TRUE;
     
     return FALSE;
@@ -549,8 +549,7 @@ static cee_boolean buffer_offset_is_clipped_layout_bounds_vertical(CEETextEdit* 
 static void layout_bounds_vertical_adjust_to_buffer_offset(CEETextEdit* edit,
                                                            cee_long buffer_offset)
 {
-    if (cee_text_edit_scroll_line_down(edit))
-        cee_text_layout_run(edit->layout);
+    cee_text_edit_scroll_line_down(edit);
 }
 
 static void layout_adjust_to_buffer_offset_if_need(CEETextEdit* edit,
@@ -1515,10 +1514,8 @@ void cee_text_edit_delete_backward(CEETextEditRef edit)
         
         cee_text_layout_run(layout);
         
-        if (buffer_offset_is_outof_layout_vertical(edit, edit->caret.buffer_offset)) {
-            if (cee_text_edit_scroll_line_up(edit))
-                cee_text_layout_run(layout);
-        }
+        if (buffer_offset_is_outof_layout_vertical(edit, edit->caret.buffer_offset))
+            cee_text_edit_scroll_line_up(edit);
         
         if (buffer_offset_is_outof_layout_horizontal(edit, edit->caret.buffer_offset))
             layout_horizontal_adjust_to_buffer_offset(edit, edit->caret.buffer_offset);
@@ -1645,11 +1642,9 @@ void cee_text_edit_delete_word_backward(CEETextEditRef edit)
         
         cee_text_layout_run(layout);
         
-        if (buffer_offset_is_outof_layout_vertical(edit, edit->caret.buffer_offset)) {
-            if (cee_text_edit_scroll_line_up(edit))
-                cee_text_layout_run(layout);
-        }
-        
+        if (buffer_offset_is_outof_layout_vertical(edit, edit->caret.buffer_offset))
+            cee_text_edit_scroll_line_up(edit);
+                
         if (buffer_offset_is_outof_layout_horizontal(edit, edit->caret.buffer_offset))
             layout_horizontal_adjust_to_buffer_offset(edit, edit->caret.buffer_offset);
     }
@@ -1725,10 +1720,8 @@ void cee_text_edit_delete_to_paragraph_beginning(CEETextEditRef edit)
         
         cee_text_layout_run(layout);
         
-        if (buffer_offset_is_outof_layout_vertical(edit, edit->caret.buffer_offset)) {
-            if (cee_text_edit_scroll_line_up(edit))
-                cee_text_layout_run(layout);
-        }
+        if (buffer_offset_is_outof_layout_vertical(edit, edit->caret.buffer_offset))
+            cee_text_edit_scroll_line_up(edit);
         
         if (buffer_offset_is_outof_layout_horizontal(edit, edit->caret.buffer_offset))
             layout_horizontal_adjust_to_buffer_offset(edit, edit->caret.buffer_offset);

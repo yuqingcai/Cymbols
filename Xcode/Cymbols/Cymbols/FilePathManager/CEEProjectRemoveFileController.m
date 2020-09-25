@@ -39,11 +39,14 @@ typedef NS_ENUM(NSInteger, CEEProjectRemoveFileScene) {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [super viewDidLoad];
     [self.view setStyleState:kCEEViewStyleStateActived];
+    
     AppDelegate* delegate = [NSApp delegate];
     _removeFileSelectionView = (CEERemoveFileSelectionView*)[delegate nibObjectWithClass:[CEERemoveFileSelectionView class] fromNibNamed:@"RemoveFileSelectionView"];
     [_removeFileSelectionView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
+    
     _filePathConfirmView = (CEEFilePathConfirmView*)[delegate nibObjectWithClass:[CEEFilePathConfirmView class] fromNibNamed:@"FilePathConfirmView"];
     [_filePathConfirmView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
+    
     _condition = nil;
     _filePathsRemoving = nil;
     _filePathsWithCondition = nil;
@@ -147,27 +150,33 @@ typedef NS_ENUM(NSInteger, CEEProjectRemoveFileScene) {
 }
 
 - (NSView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    NSString* filePath = nil;
     if (tableView == _removeFileSelectionView.sourceTable) {
+        filePath = _filePathsWithCondition[row];
         if (column == 0) {
             CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFileNameCellView"];
-            cellView.title.stringValue = [_filePathsWithCondition[row] lastPathComponent];
+            cellView.title.stringValue = [filePath lastPathComponent];
+            [cellView.icon setImage:[styleManager filetypeIconFromFilePath:filePath]];
             return cellView;
         }
         else if (column == 1) {
             CEEFilePathCellView* cellView = [tableView makeViewWithIdentifier:@"IDFilePathCellView"];
-            cellView.title.stringValue = _filePathsWithCondition[row];
+            cellView.title.stringValue = filePath;
             return cellView;
         }
     }
     else if (tableView == _filePathConfirmView.sourceTable) {
+        filePath = _filePathsRemoving[row];
         if (column == 0) {
             CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFileNameCellView"];
-            cellView.title.stringValue = [_filePathsRemoving[row] lastPathComponent];
+            cellView.title.stringValue = [filePath lastPathComponent];
+            [cellView.icon setImage:[styleManager filetypeIconFromFilePath:filePath]];
             return cellView;
         }
         else if (column == 1) {
             CEEFilePathCellView* cellView = [tableView makeViewWithIdentifier:@"IDFilePathCellView"];
-            cellView.title.stringValue = _filePathsRemoving[row];
+            cellView.title.stringValue = filePath;
             return cellView;
         }
     }

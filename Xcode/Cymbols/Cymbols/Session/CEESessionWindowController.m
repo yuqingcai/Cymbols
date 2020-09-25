@@ -8,6 +8,11 @@
 #import "AppDelegate.h"
 #import "CEESessionWindowController.h"
 #import "CEESessionViewController.h"
+#import "CEESourceBufferManagerViewController.h"
+
+@interface CEESessionWindowController()
+@property (strong) NSWindowController* sourceBufferManagerWindowController;
+@end
 
 @implementation CEESessionWindowController
 
@@ -16,6 +21,42 @@
 - (NSRect)window:(NSWindow *)window willPositionSheet:(NSWindow *)sheet usingRect:(NSRect)rect {
     rect.origin.y -= [(CEESessionViewController*)self.window.contentViewController sheetOffset];
     return rect;
+}
+
+- (void)windowWillClose:(NSNotification *)notification {
+    [_session deleteAllPorts];
+    [_session.project.sessions removeObject:_session];
+}
+
+- (BOOL)windowShouldClose:(NSWindow *)sender {
+    __block BOOL shouldClose = YES;
+    NSMutableArray* syncBuffers = nil;
+    for (CEESessionPort* port in _session.ports) {
+        for (CEESourceBuffer* buffer in [port openedSourceBuffers]) {
+            if ([buffer stateSet:kCEESourceBufferStateShouldSyncWhenClose]) {
+                if (!syncBuffers)
+                    syncBuffers = [[NSMutableArray alloc] init];
+                [syncBuffers addObject:buffer];
+            }
+        }
+    }
+    
+    if (syncBuffers) {
+        if (!_sourceBufferManagerWindowController)
+            _sourceBufferManagerWindowController = [[NSStoryboard storyboardWithName:@"SourceBufferManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceBufferManagerWindowController"];
+        CEESourceBufferManagerViewController* controller = (CEESourceBufferManagerViewController*)_sourceBufferManagerWindowController.contentViewController;
+        [controller setModifiedSourceBuffers:syncBuffers];
+        [self.window beginSheet:_sourceBufferManagerWindowController.window completionHandler:(^(NSInteger result) {
+            if (result == NSModalResponseCancel)
+                shouldClose = NO;
+            else
+                shouldClose = YES;
+            [NSApp stopModalWithCode:result];
+            [controller setModifiedSourceBuffers:nil];
+        })];
+        [NSApp runModalForWindow:self.window];
+    }
+    return shouldClose;
 }
 
 - (void)windowWillBeginSheet:(NSNotification *)notification {

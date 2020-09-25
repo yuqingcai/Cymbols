@@ -9,11 +9,13 @@
 #import "CEEStyleManager.h"
 #import "CEEIdentifier.h"
 #import "CEESessionFrameManager.h"
+#import "CEESourceBufferManagerViewController.h"
 
 
 @interface CEESessionFrameManager ()
 @property (strong) NSMutableArray<NSView*>* splitViews;
 @property (strong) CEESessionFrameViewController* selectedFrame;
+@property (strong) NSWindowController* sourceBufferManagerWindowController;
 @end
 
 @implementation CEESessionFrameManager
@@ -32,6 +34,8 @@
     [(CEESessionFrameManagerView*)self.view setDelegate:self];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(openSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activeSourceBufferResponse:) name:CEENotificationSessionPortActiveSourceBuffer object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(presentHistoryResponse:) name:CEENotificationSessionPortPresentHistory object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deletePortResponse:) name:CEENotificationSessionDeletePort object:nil];
 }
 
 - (CEESessionFrameSplitView*)createSplitViewWithFrame:(NSRect)theFrame vertical:(BOOL)vertical splitViewDelegate:(id<NSSplitViewDelegate>)splitViewDelegate {
@@ -308,8 +312,8 @@
             i ++;
         }
         
-        [_session deletePort:frame1.port];
         [self removeChildViewControllerAtIndex:i];
+        [_session deletePort:frame1.port];
     }
 }
 
@@ -342,11 +346,36 @@
 }
 
 - (void)closeFrame:(CEESessionFrameViewController*)frame {
-    NSInteger i = 0;
+    __block BOOL shouldClose = YES;
+    NSMutableArray* syncBuffers = nil;
+    for (CEESourceBuffer* buffer in frame.port.openedSourceBuffers) {
+        if ([buffer stateSet:kCEESourceBufferStateShouldSyncWhenClose]) {
+            if (!syncBuffers)
+                syncBuffers = [[NSMutableArray alloc] init];
+            [syncBuffers addObject:buffer];
+        }
+    }
     
-    if (self.childViewControllers.count == 1)
+    if (syncBuffers) {
+        if (!_sourceBufferManagerWindowController)
+            _sourceBufferManagerWindowController = [[NSStoryboard storyboardWithName:@"SourceBufferManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceBufferManagerWindowController"];
+        CEESourceBufferManagerViewController* controller = (CEESourceBufferManagerViewController*)_sourceBufferManagerWindowController.contentViewController;
+        [controller setModifiedSourceBuffers:syncBuffers];
+        [self.view.window beginSheet:_sourceBufferManagerWindowController.window completionHandler:(^(NSInteger result) {
+            if (result == NSModalResponseCancel)
+                shouldClose = NO;
+            else
+                shouldClose = YES;
+            [NSApp stopModalWithCode:result];
+            [controller setModifiedSourceBuffers:nil];
+        })];
+        [NSApp runModalForWindow:self.view.window];
+    }
+    
+    if (!shouldClose)
         return;
     
+    NSInteger i = 0;
     while (i < self.childViewControllers.count) {
         if (frame == self.childViewControllers[i]) {
             [self collapseView:frame.view];
@@ -354,13 +383,19 @@
         }
         i ++;
     }
-    [_session deletePort:frame.port];
+    
     [[NSNotificationCenter defaultCenter] removeObserver:self.childViewControllers[i]];
     [self removeChildViewControllerAtIndex:i];
-    [self selectFrame:self.childViewControllers.lastObject];
+    [_session deletePort:frame.port];
+    
+    if (self.childViewControllers.count)
+        [self selectFrame:self.childViewControllers.lastObject];
 }
 
 - (void)selectFrame:(CEESessionFrameViewController*)frame {
+    if (frame.port == [_session activedPort])
+        return;
+    
     for (CEESessionFrameViewController* controller in self.childViewControllers)
         [controller deselect];
     
@@ -420,8 +455,11 @@
 - (void)split:(CEESplitFrameDirection)direction {
     CEESessionFrameViewController* frame = nil;
     CEESessionPort* port = nil;
-    CEEBufferReference* reference = [_session.activedPort currentBufferReference];
-    if (!reference)
+    NSArray* buffers = nil;
+    CEESourceBuffer* buffer = nil;
+    
+    buffer = [_session.activedPort activedSourceBuffer];
+    if (!buffer)
         return;
     
     frame = [self createFrame];
@@ -432,11 +470,24 @@
     port = [_session createPort];
     if (!port)
         return;
+    
     [frame setPort:port];
     [frame setIdentifier:[self frame:frame identifierFromPort:port]];
     [frame.view setIdentifier:[self frameView:frame.view identifierFromPort:port]];
-    [frame.port setActivedSourceBuffer:reference.buffer];
-    [self selectFrame:frame];
+    
+    if ([buffer stateSet:kCEESourceBufferStateFileTemporary]) {
+        buffer = [frame.port openUntitledSourceBuffer];
+    }
+    else {
+        buffers = [frame.port openSourceBuffersWithFilePaths:@[buffer.filePath]];
+        if (buffers)
+            buffer = buffers[0];
+    }
+    
+    if (buffer) {
+        [frame.port setActivedSourceBuffer:buffer];
+        [self selectFrame:frame];
+    }
 }
 
 - (void)mouseDown:(NSEvent *)event {
@@ -458,15 +509,44 @@
         [frame setIdentifier:[self frame:frame identifierFromPort:port]];
         [frame.view setIdentifier:[self frameView:frame.view identifierFromPort:port]];
         [self selectFrame:frame];
-        [frame presentSource];
+        [frame presentSourceBuffer];
     }
     else {
         for (CEESessionFrameViewController* frame in self.childViewControllers) {
             if (frame.port == port) {
-                [frame presentSource];
+                [frame presentSourceBuffer];
                 break;
             }
         }
+    }
+}
+
+- (void)presentHistoryResponse:(NSNotification*)notification {
+    [self openSourceBufferResponse:notification];
+}
+
+- (void)deletePortResponse:(NSNotification*)notification {
+    if (notification.object != _session)
+        return;
+    
+    CEESessionFrameViewController* target = nil;
+    NSInteger i = 0;
+    while (i < self.childViewControllers.count) {
+        CEESessionFrameViewController* frame = self.childViewControllers[i];
+        if (!frame.port.openedSourceBuffers || 
+            !frame.port.openedSourceBuffers.count) {
+            target = frame;
+            break;
+        }
+        i ++;
+    }
+    
+    if (target) {
+        [self collapseView:target.view];
+        [[NSNotificationCenter defaultCenter] removeObserver:self.childViewControllers[i]];
+        [self removeChildViewControllerAtIndex:i];
+        if (self.childViewControllers.count)
+            [self selectFrame:self.childViewControllers.lastObject];
     }
 }
 
@@ -564,9 +644,14 @@
 - (void)connectFramesToPorts {
     for (CEESessionFrameViewController* frame in self.childViewControllers) {
         CEESessionPort* port = [self portWithIdentifierSuffix:IdentifierByDeletingPrefix(frame.identifier)];
+        CEEPresentSourceState state = kCEEPresentSourceStateSuccess;
         if (port) {
             [frame setPort:port];
-            [frame presentSource];
+            state = [frame presentSourceBuffer];
+            
+            if (state == kCEEPresentSourceStateNoBuffer)
+                [port openUntitledSourceBuffer];
+            
             [frame deselect];
             if (port == _session.activedPort) {
                 _selectedFrame = frame;
@@ -586,16 +671,21 @@
 
 - (NSView*)deserializeSubview:(NSDictionary*)dict {
     NSString* identifier = [self identifierFromDescriptor:dict];
-    NSDictionary* descriptor = dict[identifier];
-    if ([self isFrameViewIdentifier:identifier])
-        return [self createFrameViewFromDescriptor:descriptor withIdentifier:identifier];
-    else if ([self isSplitViewIdentifier:identifier])
-        return [self createSplitViewFromDescriptor:descriptor withIdentifier:identifier];
+    if (identifier) {
+        NSDictionary* descriptor = dict[identifier];
+        if ([self isFrameViewIdentifier:identifier])
+            return [self createFrameViewFromDescriptor:descriptor withIdentifier:identifier];
+        else if ([self isSplitViewIdentifier:identifier])
+            return [self createSplitViewFromDescriptor:descriptor withIdentifier:identifier];
+    }
     return nil;
 }
 
 - (NSString*)identifierFromDescriptor:(NSDictionary*)descriptor {
-    return [descriptor allKeys][0];
+    NSArray* keys = [descriptor allKeys];
+    if (keys && keys.count)
+        return keys[0];
+    return nil;
 }
 
 - (BOOL)isFrameViewIdentifier:(NSString*)identifier {
@@ -639,12 +729,13 @@
     for (NSDictionary* descriptor in descriptors) {
         NSView* subview = nil;
         NSString* identifier = [self identifierFromDescriptor:descriptor];
-        if ([self isFrameViewIdentifier:identifier])
-            subview = [self createFrameViewFromDescriptor:descriptor[identifier] withIdentifier:identifier];
-        else if ([self isSplitViewIdentifier:identifier])
-            subview = [self createSplitViewFromDescriptor:descriptor[identifier] withIdentifier:identifier];
-        
-        [splitView addSubview:subview];
+        if (identifier) {
+            if ([self isFrameViewIdentifier:identifier])
+                subview = [self createFrameViewFromDescriptor:descriptor[identifier] withIdentifier:identifier];
+            else if ([self isSplitViewIdentifier:identifier])
+                subview = [self createSplitViewFromDescriptor:descriptor[identifier] withIdentifier:identifier];
+            [splitView addSubview:subview];
+        }
     }
     return splitView;
 }
@@ -663,6 +754,10 @@
         return;
     
     [self split:kCEESplitFrameDirectionVertical withFrame:frame];
+    
+    if (!_session.activedPort)
+        [_session setActivedPort:[_session createPort]];
+    
     [frame setPort:_session.activedPort];
     [frame setIdentifier:[self frame:frame identifierFromPort:_session.activedPort]];
     [frame.view setIdentifier:[self frameView:frame.view identifierFromPort:_session.activedPort]];

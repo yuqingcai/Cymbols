@@ -239,71 +239,6 @@
                                     <action selector="undo:" target="58X-QB-Qaa" id="3pQ-hl-abf"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="iqa-Ap-IuI" customClass="CEEToolbarButton">
-                                <rect key="frame" x="576" y="0.0" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="32" id="ZQs-gO-j4S"/>
-                                    <constraint firstAttribute="height" constant="32" id="kUx-d7-cC6"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split_horizontal_16x16"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="splitHorizontally:" target="58X-QB-Qaa" id="M52-Ie-jJl"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="EYJ-kY-l20" customClass="CEEToolbarButton">
-                                <rect key="frame" x="608" y="0.0" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="32" id="ocT-05-tov"/>
-                                    <constraint firstAttribute="height" constant="32" id="xo3-Oa-w6C"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split_vertical_16x16"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="splitVertically:" target="58X-QB-Qaa" id="dbR-gQ-5EA"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="pV6-My-NWN" customClass="CEEToolbarButton">
-                                <rect key="frame" x="640" y="0.0" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="32" id="oGU-DU-YB6"/>
-                                    <constraint firstAttribute="width" constant="32" id="zNQ-Iv-Gpr"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split4_16x16"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="toggleToolbar:" target="58X-QB-Qaa" id="DCS-BZ-K2P"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Fss-kx-dAK" customClass="CEEToolbarButton">
-                                <rect key="frame" x="704" y="0.0" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="32" id="T89-Lv-9G3"/>
-                                    <constraint firstAttribute="width" constant="32" id="eqC-gp-jdi"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split0_16x16"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="toggleSymbolView:" target="58X-QB-Qaa" id="eci-Pm-EYm"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="gWy-5C-Rsd" customClass="CEEToolbarButton">
-                                <rect key="frame" x="736" y="0.0" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="32" id="d0S-ik-4tx"/>
-                                    <constraint firstAttribute="height" constant="32" id="xer-pf-iKb"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split1_16x16"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="toggleReferenceView:" target="58X-QB-Qaa" id="OF2-oL-3z3"/>
-                                </connections>
-                            </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="U1r-k6-7pm" customClass="CEEToolbarButton">
                                 <rect key="frame" x="768" y="0.0" width="32" height="32"/>
                                 <constraints>
@@ -315,45 +250,6 @@
                                 </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="togglePathView:" target="58X-QB-Qaa" id="unG-ML-Acm"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="CLK-26-66d" customClass="CEEToolbarButton">
-                                <rect key="frame" x="672" y="0.0" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="32" id="KzW-iN-8SS"/>
-                                    <constraint firstAttribute="width" constant="32" id="yPm-qf-1ax"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split3_16x16"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="toggleContextView:" target="58X-QB-Qaa" id="pcr-83-E16"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="bsw-vG-zsi" customClass="CEEToolbarButton">
-                                <rect key="frame" x="512" y="0.0" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="32" id="FOn-J9-a2F"/>
-                                    <constraint firstAttribute="width" constant="32" id="yND-CT-uhy"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_new_window_16x16"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="newWindow:" target="58X-QB-Qaa" id="r56-1f-4en"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="VYt-MC-ecp" customClass="CEEToolbarButton">
-                                <rect key="frame" x="544" y="0.0" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="32" id="C5e-BI-DIu"/>
-                                    <constraint firstAttribute="width" constant="32" id="Tfw-9L-TZV"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_list_window_16x16"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="listWindows:" target="58X-QB-Qaa" id="6qa-Qg-PiY"/>
                                 </connections>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="94m-a3-k78" customClass="CEEToolbarButton">
@@ -434,6 +330,110 @@
                                     <action selector="searchInProject:" target="58X-QB-Qaa" id="JJn-kd-NN9"/>
                                 </connections>
                             </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="iqa-Ap-IuI" customClass="CEEToolbarButton">
+                                <rect key="frame" x="576" y="0.0" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="32" id="ZQs-gO-j4S"/>
+                                    <constraint firstAttribute="height" constant="32" id="kUx-d7-cC6"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split_horizontal_16x16"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="splitHorizontally:" target="58X-QB-Qaa" id="M52-Ie-jJl"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="EYJ-kY-l20" customClass="CEEToolbarButton">
+                                <rect key="frame" x="608" y="0.0" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="32" id="ocT-05-tov"/>
+                                    <constraint firstAttribute="height" constant="32" id="xo3-Oa-w6C"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split_vertical_16x16"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="splitVertically:" target="58X-QB-Qaa" id="dbR-gQ-5EA"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="pV6-My-NWN" customClass="CEEToolbarButton">
+                                <rect key="frame" x="640" y="0.0" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="32" id="oGU-DU-YB6"/>
+                                    <constraint firstAttribute="width" constant="32" id="zNQ-Iv-Gpr"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split4_16x16"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="toggleToolbar:" target="58X-QB-Qaa" id="DCS-BZ-K2P"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Fss-kx-dAK" customClass="CEEToolbarButton">
+                                <rect key="frame" x="704" y="0.0" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="32" id="T89-Lv-9G3"/>
+                                    <constraint firstAttribute="width" constant="32" id="eqC-gp-jdi"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split0_16x16"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="toggleSymbolView:" target="58X-QB-Qaa" id="eci-Pm-EYm"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="CLK-26-66d" customClass="CEEToolbarButton">
+                                <rect key="frame" x="672" y="0.0" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="32" id="KzW-iN-8SS"/>
+                                    <constraint firstAttribute="width" constant="32" id="yPm-qf-1ax"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split3_16x16"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="toggleContextView:" target="58X-QB-Qaa" id="pcr-83-E16"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="bsw-vG-zsi" customClass="CEEToolbarButton">
+                                <rect key="frame" x="512" y="0.0" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="32" id="FOn-J9-a2F"/>
+                                    <constraint firstAttribute="width" constant="32" id="yND-CT-uhy"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_new_window_16x16"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="newWindow:" target="58X-QB-Qaa" id="r56-1f-4en"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="VYt-MC-ecp" customClass="CEEToolbarButton">
+                                <rect key="frame" x="544" y="0.0" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="32" id="C5e-BI-DIu"/>
+                                    <constraint firstAttribute="width" constant="32" id="Tfw-9L-TZV"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_list_window_16x16"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="listWindows:" target="58X-QB-Qaa" id="6qa-Qg-PiY"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="16U-GW-w9h" customClass="CEEToolbarButton">
+                                <rect key="frame" x="736" y="0.0" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="32" id="WK1-rP-PY7"/>
+                                    <constraint firstAttribute="height" constant="32" id="tHt-KB-16S"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_split1_16x16"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="toggleReferenceView:" target="58X-QB-Qaa" id="hIK-7j-chv"/>
+                                </connections>
+                            </customView>
                         </subviews>
                         <constraints>
                             <constraint firstItem="Aav-vb-zjK" firstAttribute="leading" secondItem="6lh-hA-ZOK" secondAttribute="trailing" id="17E-RW-KX4"/>
@@ -445,6 +445,7 @@
                             <constraint firstItem="6lh-hA-ZOK" firstAttribute="leading" secondItem="lJj-dI-83q" secondAttribute="trailing" id="BBa-lG-5aa"/>
                             <constraint firstItem="6PV-Fp-skh" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="Bx2-5i-1Ug"/>
                             <constraint firstItem="LCH-Kc-22T" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="DUz-el-LdL"/>
+                            <constraint firstItem="U1r-k6-7pm" firstAttribute="leading" secondItem="16U-GW-w9h" secondAttribute="trailing" id="DuB-vI-zfD"/>
                             <constraint firstItem="EYJ-kY-l20" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="LzT-UY-ugL"/>
                             <constraint firstItem="pV6-My-NWN" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="Mb5-Qj-ZXF"/>
                             <constraint firstItem="5Yn-wp-tUo" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="OG3-Jm-AeN"/>
@@ -457,6 +458,7 @@
                             <constraint firstItem="U1r-k6-7pm" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="WWD-yM-p7e"/>
                             <constraint firstItem="K1J-26-ThQ" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="Wpx-BG-pTi"/>
                             <constraint firstItem="6lh-hA-ZOK" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="YAK-yc-3WT"/>
+                            <constraint firstItem="16U-GW-w9h" firstAttribute="leading" secondItem="Fss-kx-dAK" secondAttribute="trailing" id="YBO-tb-gqU"/>
                             <constraint firstItem="p1q-IR-bIj" firstAttribute="leading" secondItem="K1J-26-ThQ" secondAttribute="trailing" id="ZYR-dJ-aIZ"/>
                             <constraint firstItem="jZz-xn-KHB" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="Zbl-pq-4hg"/>
                             <constraint firstItem="TfV-XX-LR8" firstAttribute="leading" secondItem="94m-a3-k78" secondAttribute="trailing" id="Zia-Nc-6oc"/>
@@ -465,16 +467,14 @@
                             <constraint firstItem="k6z-Mf-LyB" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="db5-q1-0a0"/>
                             <constraint firstItem="94m-a3-k78" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="dko-Z5-CL6"/>
                             <constraint firstItem="eBq-Jx-txP" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="du9-lh-4Dr"/>
-                            <constraint firstItem="gWy-5C-Rsd" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="g2Z-Rj-EV9"/>
                             <constraint firstItem="94m-a3-k78" firstAttribute="leading" secondItem="evb-6e-BtH" secondAttribute="trailing" id="gBM-7T-4fa"/>
                             <constraint firstItem="GTz-0R-5TH" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="gBR-sB-ATr"/>
                             <constraint firstItem="Aav-vb-zjK" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="gJO-K3-5eh"/>
                             <constraint firstItem="evb-6e-BtH" firstAttribute="leading" secondItem="mrd-td-8Li" secondAttribute="leading" id="hyY-a7-oNz"/>
                             <constraint firstItem="bsw-vG-zsi" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="i6y-ie-rQg"/>
-                            <constraint firstItem="U1r-k6-7pm" firstAttribute="leading" secondItem="gWy-5C-Rsd" secondAttribute="trailing" id="kj9-E0-tDX"/>
+                            <constraint firstItem="16U-GW-w9h" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="kgg-p3-qbT"/>
                             <constraint firstItem="p1q-IR-bIj" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="m93-Ol-1EC"/>
                             <constraint firstItem="CLK-26-66d" firstAttribute="leading" secondItem="pV6-My-NWN" secondAttribute="trailing" id="nZ9-pI-LA9"/>
-                            <constraint firstItem="gWy-5C-Rsd" firstAttribute="leading" secondItem="Fss-kx-dAK" secondAttribute="trailing" id="o0J-3E-54y"/>
                             <constraint firstItem="TfV-XX-LR8" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="pNH-Do-Hwt"/>
                             <constraint firstItem="K1J-26-ThQ" firstAttribute="leading" secondItem="TfV-XX-LR8" secondAttribute="trailing" id="qxx-Mr-lp1"/>
                             <constraint firstItem="EYJ-kY-l20" firstAttribute="leading" secondItem="iqa-Ap-IuI" secondAttribute="trailing" id="sv7-QD-bcL"/>
@@ -507,7 +507,7 @@
                         <outlet property="syncProjectButton" destination="GTz-0R-5TH" id="RC8-Ta-LcR"/>
                         <outlet property="toggleContextButton" destination="CLK-26-66d" id="AxZ-fi-EaN"/>
                         <outlet property="toggleFilePathButton" destination="U1r-k6-7pm" id="uuZ-Oh-Qlu"/>
-                        <outlet property="toggleReferenceButton" destination="gWy-5C-Rsd" id="KAd-iC-KrW"/>
+                        <outlet property="toggleReferenceButton" destination="16U-GW-w9h" id="bzz-7u-dtJ"/>
                         <outlet property="toggleSymbolButton" destination="Fss-kx-dAK" id="wQS-ai-CKa"/>
                         <outlet property="toggleToolbarButton" destination="pV6-My-NWN" id="Pfs-7w-hA5"/>
                         <outlet property="undoButton" destination="Aav-vb-zjK" id="Qnx-Nf-eTf"/>
@@ -728,7 +728,7 @@
                 </viewController>
                 <customObject id="pr0-pl-wMx" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1015" y="1533"/>
+            <point key="canvasLocation" x="1015" y="1569"/>
         </scene>
         <!--Session Spliter0-->
         <scene sceneID="hBr-VG-wkY">
@@ -769,47 +769,9 @@
                         <subviews>
                             <customView identifier="IDSessionSymbolsTitleView" translatesAutoresizingMaskIntoConstraints="NO" id="f0H-B1-fa4" customClass="CEETitleView">
                                 <rect key="frame" x="0.0" y="275" width="250" height="25"/>
-                                <subviews>
-                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="SjF-sD-iXx" customClass="CEETitlebarButton">
-                                        <rect key="frame" x="220" y="1" width="24" height="24"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="24" id="Nwd-U8-pVe"/>
-                                            <constraint firstAttribute="height" constant="24" id="TE6-fl-ttf"/>
-                                        </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_symbol_16x16"/>
-                                        </userDefinedRuntimeAttributes>
-                                    </customView>
-                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="1lV-tL-eGD" customClass="CEETitlebarButton">
-                                        <rect key="frame" x="172" y="1" width="24" height="24"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="24" id="1ZW-gc-p87"/>
-                                            <constraint firstAttribute="height" constant="24" id="P08-39-Lt9"/>
-                                        </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_symbol_tree_16x16"/>
-                                        </userDefinedRuntimeAttributes>
-                                    </customView>
-                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="vuo-GT-IvN" customClass="CEETitlebarButton">
-                                        <rect key="frame" x="196" y="1" width="24" height="24"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="24" id="0Nn-Mt-Om9"/>
-                                            <constraint firstAttribute="height" constant="24" id="ypu-lg-J4P"/>
-                                        </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_sort_name_16x16"/>
-                                        </userDefinedRuntimeAttributes>
-                                    </customView>
-                                </subviews>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="25" id="E4C-h1-QtE"/>
-                                    <constraint firstItem="vuo-GT-IvN" firstAttribute="top" secondItem="f0H-B1-fa4" secondAttribute="top" id="dQ2-fc-7pQ"/>
-                                    <constraint firstItem="SjF-sD-iXx" firstAttribute="top" secondItem="f0H-B1-fa4" secondAttribute="top" id="eQb-2D-VvI"/>
-                                    <constraint firstItem="1lV-tL-eGD" firstAttribute="top" secondItem="f0H-B1-fa4" secondAttribute="top" id="f8x-JK-Oe9"/>
-                                    <constraint firstItem="vuo-GT-IvN" firstAttribute="leading" secondItem="1lV-tL-eGD" secondAttribute="trailing" id="mI8-D8-rtU"/>
-                                    <constraint firstAttribute="trailing" secondItem="SjF-sD-iXx" secondAttribute="trailing" constant="6" id="nG6-T4-aUO"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="250" id="rVx-Od-Wt6"/>
-                                    <constraint firstItem="SjF-sD-iXx" firstAttribute="leading" secondItem="vuo-GT-IvN" secondAttribute="trailing" id="vWp-sD-mHj"/>
                                 </constraints>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="CTk-DY-dd2" customClass="CEETableView">
@@ -836,6 +798,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="filterInput" destination="4Zw-sT-2k4" id="MoJ-DD-ED0"/>
                         <outlet property="symbolTable" destination="CTk-DY-dd2" id="jko-74-EC2"/>
                         <outlet property="titlebar" destination="f0H-B1-fa4" id="WFO-9K-eBv"/>
                     </connections>
@@ -1005,8 +968,11 @@
                                     <constraint firstAttribute="height" constant="25" id="vuP-yS-5XL"/>
                                 </constraints>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="clS-1W-cMR" customClass="CEETableView">
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="clS-1W-cMR" customClass="CEESessionReferenceTableView">
                                 <rect key="frame" x="0.0" y="0.0" width="251" height="275"/>
+                                <connections>
+                                    <outlet property="menu" destination="lId-bh-AJB" id="nqT-Ua-Jg4"/>
+                                </connections>
                             </customView>
                         </subviews>
                         <constraints>
@@ -1025,6 +991,37 @@
                     </connections>
                 </viewController>
                 <customObject id="mhP-YY-odI" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+                <menu id="lId-bh-AJB">
+                    <items>
+                        <menuItem title="Close" id="je7-Ld-z7X">
+                            <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="close:" target="mhP-YY-odI" id="UfD-IK-MLT"/>
+                            </connections>
+                        </menuItem>
+                        <menuItem title="Close Others" id="xdR-T7-7ou">
+                            <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="closeOthers:" target="mhP-YY-odI" id="T69-Oc-ZAQ"/>
+                            </connections>
+                        </menuItem>
+                        <menuItem title="Close Others Above" id="Qlv-md-bUX">
+                            <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="closeOthersAbove:" target="mhP-YY-odI" id="WJ5-OB-we0"/>
+                            </connections>
+                        </menuItem>
+                        <menuItem title="Close Others Below" id="oh4-No-zQO">
+                            <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="closeOthersBelow:" target="mhP-YY-odI" id="stV-K6-HtM"/>
+                            </connections>
+                        </menuItem>
+                    </items>
+                    <connections>
+                        <outlet property="delegate" destination="X4L-US-s8H" id="QJh-kH-pWv"/>
+                    </connections>
+                </menu>
             </objects>
             <point key="canvasLocation" x="273" y="1513"/>
         </scene>
@@ -1275,7 +1272,6 @@
         <image name="icon_save_16x16" width="16" height="16"/>
         <image name="icon_save_all_16x16" width="16" height="16"/>
         <image name="icon_search_16x16" width="16" height="16"/>
-        <image name="icon_sort_name_16x16" width="16" height="16"/>
         <image name="icon_split0_16x16" width="16" height="16"/>
         <image name="icon_split1_16x16" width="16" height="16"/>
         <image name="icon_split2_16x16" width="16" height="16"/>
@@ -1283,8 +1279,6 @@
         <image name="icon_split4_16x16" width="16" height="16"/>
         <image name="icon_split_horizontal_16x16" width="16" height="16"/>
         <image name="icon_split_vertical_16x16" width="16" height="16"/>
-        <image name="icon_symbol_16x16" width="16" height="16"/>
-        <image name="icon_symbol_tree_16x16" width="16" height="16"/>
         <image name="icon_toolbar_toggle_16x16" width="16" height="16"/>
         <image name="icon_undo_16x16" width="16" height="16"/>
         <image name="imageCell:8lr-R7-1tu:image" width="16" height="16">

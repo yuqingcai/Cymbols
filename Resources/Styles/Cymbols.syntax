@@ -31,6 +31,15 @@
         },
 
         {
+            "name" : "filename",
+            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "##43a047",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+
+        {
             "name" : "constant",
             "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",

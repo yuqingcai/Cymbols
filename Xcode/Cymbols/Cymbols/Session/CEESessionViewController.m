@@ -41,9 +41,10 @@
     [self addChildViewController:_toolbar];
     [self showToolbar:YES];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortActiveSourceBufferResponse:) name:CEENotificationSessionPortActiveSourceBuffer object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortOpenSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionActivePortResponse:) name:CEENotificationSessionActivePort object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activeSourceBufferResponse:) name:CEENotificationSessionPortActiveSourceBuffer object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(openSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activePortResponse:) name:CEENotificationSessionActivePort object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activeBufferOffsetResponse:) name:CEENotificationSessionPortSetActivedBufferOffset object:nil];
 }
 
 - (CGFloat)sheetOffset {
@@ -175,6 +176,8 @@
 }
 
 - (IBAction)newFile:(id)sender {
+    if (!_session.activedPort)
+        [_session setActivedPort:[_session createPort]];
     [_session.activedPort openUntitledSourceBuffer];
 }
 
@@ -240,14 +243,14 @@
                 [projectController openProjectFromURL:url];
         }
         else {
-            [_session.activedPort openSourceBufferWithFilePath:filePath];
+            [_session.activedPort openSourceBuffersWithFilePaths:@[filePath]];
         }
     }
 }
 
 - (IBAction)save:(id)sender {
-    CEESourceBuffer* buffer = [[_session.activedPort currentBufferReference] buffer];
-    if ([buffer stateSet:kCEESourceBufferStateFileUntitled]) {
+    CEESourceBuffer* buffer = [_session.activedPort activedSourceBuffer];
+    if ([buffer stateSet:kCEESourceBufferStateFileTemporary]) {
         NSString* fileName = [buffer.filePath lastPathComponent];
         NSString* savePath = [self filePathFromSavePanelWithFileName:fileName];
         if (savePath)
@@ -261,7 +264,7 @@
 }
 
 - (IBAction)saveAs:(id)sender {
-    CEESourceBuffer* buffer = [[_session.activedPort currentBufferReference] buffer];
+    CEESourceBuffer* buffer = [_session.activedPort activedSourceBuffer];
     NSString* fileName = [buffer.filePath lastPathComponent];
     NSString* savePath = [self filePathFromSavePanelWithFileName:fileName];
     if (savePath)
@@ -269,16 +272,18 @@
 }
 
 - (IBAction)saveAll:(id)sender {
-    for (CEESourceBuffer* buffer in [_session registeredSourceBuffers]) {
-        if ([buffer stateSet:kCEESourceBufferStateFileUntitled]) {
-            NSString* fileName = [buffer.filePath lastPathComponent];
-            NSString* savePath = [self filePathFromSavePanelWithFileName:fileName];
-            if (savePath)
-                [_session.activedPort saveSourceBuffer:buffer atPath:savePath];
-        }
-        else {
-            if ([buffer stateSet:kCEESourceBufferStateModified]) {
-                [_session.activedPort saveSourceBuffer:buffer atPath:buffer.filePath];
+    for (CEESessionPort* port in _session.ports) {
+        for (CEESourceBuffer* buffer in [port openedSourceBuffers]) {
+            if ([buffer stateSet:kCEESourceBufferStateFileTemporary]) {
+                NSString* fileName = [buffer.filePath lastPathComponent];
+                NSString* savePath = [self filePathFromSavePanelWithFileName:fileName];
+                if (savePath)
+                    [port saveSourceBuffer:buffer atPath:savePath];
+            }
+            else {
+                if ([buffer stateSet:kCEESourceBufferStateModified]) {
+                    [port saveSourceBuffer:buffer atPath:buffer.filePath];
+                }
             }
         }
     }
@@ -345,7 +350,12 @@
         [self showToolbar:NO];
 }
 
-- (void)sessionPortActiveSourceBufferResponse:(NSNotification*)notification {
+- (void)updateStateBar {
+    CEESessionPort* port = _session.activedPort;
+    if (!port)
+        return;
+    
+    NSLog(@"state bar: buffer_offset: %ld", port.active_buffer_offset);
     //CEESessionPort* port = notification.object;
     //if (port.session != _session)
     //    return;
@@ -356,27 +366,20 @@
     //[_statusBar setContent:[NSString stringWithFormat:@"Ln 1, Col1    UTF-8    LF    Space: 4    Size: %lu    Plain Text", size]];
 }
 
-- (void)sessionPortOpenSourceBufferResponse:(NSNotification*)notification {
-    //CEESessionPort* port = notification.object;
-    //if (port.session != _session)
-    //    return;
-    //CEEBufferReference* reference = port.currentReference;
-    //CEESourceBuffer* sourceBuffer = reference.buffer;
-    //CEETextStorageRef storage = sourceBuffer.storage;
-    //cee_ulong size = cee_text_storage_size_get(storage);
-    //[_statusBar setContent:[NSString stringWithFormat:@"Ln 1, Col1    UTF-8    LF    Space: 4    Size: %lu    Plain Text", size]];
+- (void)activeSourceBufferResponse:(NSNotification*)notification {
+    [self updateStateBar];
 }
 
-- (void)sessionActivePortResponse:(NSNotification*)notification {
-    //CEESession* session = notification.object;
-    //if (session != _session)
-    //    return;
-    //CEESessionPort* port = session.activedPort;
-    //CEEBufferReference* reference = port.currentReference;
-    //CEESourceBuffer* sourceBuffer = reference.buffer;
-    //CEETextStorageRef storage = sourceBuffer.storage;
-    //cee_ulong size = cee_text_storage_size_get(storage);
-    //[_statusBar setContent:[NSString stringWithFormat:@"Ln 1, Col1    UTF-8    LF    Space: 4    Size: %lu    Plain Text", size]];
+- (void)openSourceBufferResponse:(NSNotification*)notification {
+    [self updateStateBar];
+}
+
+- (void)activePortResponse:(NSNotification*)notification {
+    [self updateStateBar];
+}
+
+- (void)activeBufferOffsetResponse:(NSNotification*)notification {
+    [self updateStateBar];
 }
 
 - (IBAction)buildProject:(id)sender {

@@ -9,16 +9,23 @@
 #import <Cocoa/Cocoa.h>
 #import "CEEProject.h"
 #import "CEESourceBuffer.h"
+#import "CEENetwork.h"
+
+#define CEE_APP_HEART_BEAT_INTERVAL 0.1
+
+extern NSNotificationName CEENotificationHeartBeat;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 @property (strong) CEEProjectController* projectController;
 @property (strong) CEESourceBufferManager* sourceBufferManager;
 @property (strong) NSDictionary* configurations;
 @property (strong) CEEProject* currentProject;
+@property (strong) CEENetwork* network;
 
 - (NSString*)cymbolsHome;
 - (NSObject*)nibObjectWithClass:(Class)class fromNibNamed:(NSString*)name;
 - (NSObject*)nibObjectWithIdentifier:(NSString*)identifier fromNibNamed:(NSString*)name;
 - (NSString*)welcomeGuidePath;
+- (NSString*)serializerVersionString;
 
 @end

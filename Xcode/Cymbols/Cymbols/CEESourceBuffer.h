@@ -20,18 +20,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 extern NSNotificationName CEENotificationSourceBufferStateChanged;
 
-typedef struct _CEESymbolWrapper {
-    CEESourceSymbol* symbol_ref;
-    cee_int level;
-} CEESymbolWrapper;
-
 typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
     kCEESourceBufferStateNormal = 0,
     kCEESourceBufferStateModified = 1 << 1,
-    kCEESourceBufferStateFileUntitled = 1 << 2,
+    kCEESourceBufferStateFileTemporary = 1 << 2,
     kCEESourceBufferStateFileDeleted = 1 << 3,
     kCEESourceBufferStateReload = 1 << 4,
-    kCEESourceBufferStateFilePathChanged = 1 << 5,
+    kCEESourceBufferStateShouldSyncWhenClose = 1 << 5,
 };
 
 typedef NS_ENUM(NSUInteger, CEEBufferType) {
@@ -53,6 +48,7 @@ typedef NS_ENUM(NSUInteger, CEEBufferType) {
 @property CEESourceTokenMap* source_token_map;
 @property CEETree* prep_directive_symbol_tree;
 @property CEETree* statement_symbol_tree;
+@property (readonly)NSInteger referenceCount;
 
 @property CEEList* tokens_ref;
 @property CEESourceParserRef parser_ref;
@@ -65,9 +61,8 @@ typedef NS_ENUM(NSUInteger, CEEBufferType) {
 - (void)reload;
 - (BOOL)isFileModified;
 - (void)updateFileModifiedDate;
-- (void)referenceIncrease;
-- (void)referenceDecrease;
-
+- (void)increaseReferenceCount;
+- (void)decreaseReferenceCount;
 @end
 
 typedef enum _CEESourceBufferParserOption {
@@ -78,16 +73,16 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
                              CEESourceBufferParserOption options);
 
 @interface CEESourceBufferManager : NSObject
+@property (readonly, strong) NSMutableArray* buffers;
+@property (strong, readonly) NSString* temporaryDirectory;
 
-@property (strong) NSMutableArray* buffers;
 - (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath;
 - (CEESourceBuffer*)openUntitledSourceBuffer;
 - (void)closeSourceBuffer:(CEESourceBuffer*)buffer;
 - (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filePath;
-- (CEESourceBuffer*)getSourceBufferWithFilePath:(NSString*)filePath;
-- (void)updateSourceBuffers;
-- (BOOL)fileExistsAtPath:(NSString*)filePath;
-- (BOOL)hasModifiedBuffer;
+- (void)discardUntitleSourceBuffers;
+- (void)syncSourceBuffersFromFiles;
+- (BOOL)isTemporaryFilePath:(NSString*)filePath;
 
 @end
 

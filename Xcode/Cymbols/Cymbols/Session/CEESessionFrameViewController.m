@@ -51,8 +51,8 @@
     
     [(CEESessionFrameView*)self.view setDelegate:self];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deletePortResponse:) name:CEENotificationSessionDeletePort object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(requestTargetSymbolSelectionResponse:) name:CEENotificationSessionPortRequestTargetSymbolSelection object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setTargetSymbolResponse:) name:CEENotificationSessionPortSetTargetSymbol object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setActivedSymbolResponse:) name:CEENotificationSessionPortSetActivedSymbol object:nil];
@@ -75,17 +75,17 @@
 
 - (IBAction)close:(id)sender {
     if (_manager)
-        [_manager closeFrame:self]; //bug here...
+        [_manager closeFrame:self];
 }
 
 - (IBAction)prev:(id)sender {
     if (_port)
-        [_port prevBufferReference];
+        [_port moveBufferReferencePrev];
 }
 
 - (IBAction)next:(id)sender {
     if (_port)
-        [_port nextBufferReference];
+        [_port moveBufferReferenceNext];
 }
 
 - (void)expandTitleViewDetail:(CEETitleView *)titleView {
@@ -113,22 +113,20 @@
     [_sourceHistoryPanel orderFront:nil];
 }
 
-- (void)presentSource {
-    CEEEditViewController* viewController = nil;
-    CEESourceBuffer* buffer = [[_port currentBufferReference] buffer];
-    NSInteger paragraphIndex = [[_port currentBufferReference] paragraphIndex];
+- (CEEPresentSourceState)presentSourceBuffer {
+    CEESourceBuffer* buffer = [_port activedSourceBuffer];    
+    NSInteger offset = [[_port currentBufferReference] bufferOffset];
     
+    CEEEditViewController* viewController = nil;
     if (!buffer)
-        return;
+        return kCEEPresentSourceStateNoBuffer;
     
     if (buffer.type == kCEEBufferTypeUTF8)
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
-    else if (buffer.type == kCEEBufferTypeBinary) {
+    else if (buffer.type == kCEEBufferTypeBinary)
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDBinaryEditViewController"];
-    }
-    
-    if (!viewController)
-        return;
+    else
+        viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDNotSupportedEditViewController"];
     
     if (_editViewController) {
         [_editViewController.view removeFromSuperview];
@@ -154,10 +152,14 @@
     [viewController setIntelligence:YES];
     [viewController setPort:_port];
     [viewController setBuffer:buffer];
-    [viewController setParagraphIndex:paragraphIndex];
+    [viewController setOffset:offset];
     
-    self.title = buffer.filePath;
-    [_titlebar setTitle:self.title];
+    if ([buffer stateSet:kCEESourceBufferStateFileTemporary])
+        self.title = [buffer.filePath lastPathComponent];
+    else
+        self.title = buffer.filePath;
+    
+    return kCEEPresentSourceStateSuccess;
 }
 
 - (void)select {
@@ -176,12 +178,16 @@
     [_titlebar setTitle:self.title];
 }
 
-- (void)textBufferStateChangedResponse:(NSNotification*)notification {
-    CEESourceBuffer* buffer = [[_port currentBufferReference] buffer];
-    if (notification.object != buffer)
+- (void)sourceBufferStateChangedResponse:(NSNotification*)notification {
+    CEESourceBuffer* buffer = [_port activedSourceBuffer];
+    CEESourceBuffer* notify_buffer = notification.object;
+    if (![notify_buffer.filePath isEqualToString:buffer.filePath])
         return;
-    
-    self.title = buffer.filePath;
+        
+    if ([buffer stateSet:kCEESourceBufferStateFileTemporary])
+        self.title = [buffer.filePath lastPathComponent];
+    else
+        self.title = buffer.filePath;
     
     if ([buffer stateSet:kCEESourceBufferStateModified])
         self.title = [self.title stringByAppendingFormat:@" *"];
@@ -190,12 +196,24 @@
         self.title = [self.title stringByAppendingFormat:@" (delete)"];
 }
 
-- (void)deletePortResponse:(NSNotification*)notification {
+- (void)saveSourceBufferResponse:(NSNotification*)notification {
     if (notification.object != _port)
         return;
     
-    [_manager closeFrame:self];
+    CEESourceBuffer* buffer = [_port activedSourceBuffer];
+    
+    if ([buffer stateSet:kCEESourceBufferStateFileTemporary])
+        self.title = [buffer.filePath lastPathComponent];
+    else
+        self.title = buffer.filePath;
+    
+    if ([buffer stateSet:kCEESourceBufferStateModified])
+        self.title = [self.title stringByAppendingFormat:@" *"];
+    
+    if ([buffer stateSet:kCEESourceBufferStateFileDeleted])
+        self.title = [self.title stringByAppendingFormat:@" (delete)"];
 }
+
 
 - (void)requestTargetSymbolSelectionResponse:(NSNotification*)notification {
     if (notification.object != _port)
@@ -219,7 +237,7 @@
     NSString* filePath = [NSString stringWithUTF8String:_port.target_symbol->filepath];
     CEEList* ranges = cee_ranges_from_string(_port.target_symbol->locations);
     if (ranges) {
-        [_port openSourceBufferWithFilePath:filePath];
+        [_port openSourceBuffersWithFilePaths:@[filePath]];
         [self.editViewController highlightRanges:ranges];
         cee_list_free_full(ranges, cee_range_free);
     }
@@ -284,6 +302,4 @@
     
     [_manager selectFrame:self];
 }
-
-
 @end

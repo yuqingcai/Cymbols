@@ -13,7 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CEESourceBufferManagerViewController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, NSOpenSavePanelDelegate, CEESourceBufferSaveConfirmCellDelegate>
-
+@property (strong, nullable) NSArray* modifiedSourceBuffers;
 @end
 
 NS_ASSUME_NONNULL_END

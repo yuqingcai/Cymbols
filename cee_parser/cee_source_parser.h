@@ -203,17 +203,17 @@ void cee_source_fregment_indexes_in_range(CEESourceTokenMap* token_map,
                                           CEESourceFregment** indexes);
 CEEList* cee_source_fregment_symbols_search_by_type(CEESourceFregment* fregment,
                                                     CEESourceSymbolType type);
-CEEList* cee_source_fregment_symbols_search_by_descriptor(CEESourceFregment* fregment,
-                                                          const cee_char* descriptor);
-CEEList* cee_source_fregment_symbols_in_children_search_by_descriptor(CEESourceFregment* fregment,
-                                                                      const cee_char* descriptor);
+CEEList* cee_source_fregment_symbols_search_by_name(CEESourceFregment* fregment,
+                                                    const cee_char* name);
+CEEList* cee_source_fregment_symbols_in_children_search_by_name(CEESourceFregment* fregment,
+                                                                const cee_char* name);
 CEEList* cee_source_fregment_tree_symbols_search(CEESourceFregment* fregment,
                                                  CEESymbolMatcher matcher,
                                                  cee_pointer user_data);
 CEETokenCluster* cee_token_cluster_search_by_buffer_offset(CEEList* references,
                                                            CEESourceFregment* prep_directive,
                                                            CEESourceFregment* statement,
-                                                           cee_long buffer_offset);
+                                                           cee_long offset);
 CEEList* cee_symbols_search_by_reference(CEESourceReference* reference,
                                          CEESourceFregment* prep_directive,
                                          CEESourceFregment* statement,

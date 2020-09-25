@@ -24,7 +24,6 @@ IB_DESIGNABLE
 - (void)textViewCaretSet:(CEETextView*)textView;
 - (void)textViewSelectionChanged:(CEETextView*)textView;
 - (void)textViewDragged:(CEETextView*)textView;
-- (void)textViewCaretMove:(CEETextView*)textView;
 - (void)textViewSelectionChangedWhenCaretMove:(CEETextView*)textView;
 - (void)textViewFrameChanged:(CEETextView*)textView;
 - (void)textViewSearchText:(CEETextView*)textView;
@@ -34,6 +33,7 @@ IB_DESIGNABLE
 - (void)textViewHighlightTokenCluster:(CEETextView*)textView;
 - (void)textViewIgnoreTokenCluster:(CEETextView*)textView;
 - (void)textViewCreateContext:(CEETextView*)textView;
+- (void)textView:(CEETextView*)textView modifyMenu:(NSMenu**)menu;
 @end
 
 @class CEETextView;
@@ -49,10 +49,6 @@ IB_DESIGNABLE
 @property (strong) NSColor* caretColorMarked;
 @property (strong) NSColor* textBackgroundColorSelected;
 @property (strong) NSColor* textBackgroundColorSelectedOutline;
-@property (strong) NSColor* textBackgroundColorMarked;
-@property (strong) NSColor* textBackgroundColorMarkedOutline;
-@property (strong) NSColor* textBackgroundColorSearched;
-@property (strong) NSColor* textBackgroundColorSearchedOutline;
 @property (strong) NSColor* textBackgroundColorHighlight;
 @property (strong) NSColor* textBackgroundColorHighlightOutline;
 @property CEETextLayoutAlignment aligment;

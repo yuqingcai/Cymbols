@@ -7,13 +7,16 @@
 //
 
 #import "AppDelegate.h"
+#import "CEETitleView.h"
 #import "CEESessionReferenceController.h"
 #import "CEEFileNameCellView.h"
+#import "CEESourceBufferManagerViewController.h"
 
 @interface CEESessionReferenceController ()
 @property (strong) IBOutlet CEETitleView *titlebar;
-@property (strong) IBOutlet CEETableView *referenceTable;
+@property (strong) IBOutlet CEESessionReferenceTableView *referenceTable;
 @property (strong) NSArray* buffers;
+@property (strong) NSWindowController* sourceBufferManagerWindowController;
 @end
 
 @implementation CEESessionReferenceController
@@ -22,7 +25,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [_titlebar setTitle:@"Opened Files"];
+    [_titlebar setTitle:@"Files In Port"];
     [_referenceTable setDataSource:self];
     [_referenceTable setDelegate:self];
     [_referenceTable setColumns:1];
@@ -32,11 +35,13 @@
     [_referenceTable setEnableDrawHeader:NO];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortOpenSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionActivePortResponse:) name:CEENotificationSessionActivePort object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionDeletePortResponse:) name:CEENotificationSessionDeletePort object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(openSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activePortResponse:) name:CEENotificationSessionActivePort object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deletePortResponse:) name:CEENotificationSessionDeletePort object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPresentResponse:) name:CEENotificationSessionPresent object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(projectSettingPropertiesResponse:) name:CEENotificationProjectSettingProperties object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(presentHistoryResponse:) name:CEENotificationSessionPortPresentHistory object:nil];
 }
 
 - (void)dealloc {
@@ -47,7 +52,7 @@
     if (!_session)
         return 0;
     
-    _buffers = [_session registeredSourceBuffers];
+    _buffers = [[_session activedPort] openedSourceBuffers];
     if (_buffers)
         return _buffers.count;
     return 0;
@@ -61,7 +66,10 @@
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEESourceBuffer* buffer = _buffers[row];
     CEEFileNameCellView* cellView = [_referenceTable makeViewWithIdentifier:@"IDFileNameCellView"];
-    NSString* string = [buffer.filePath lastPathComponent];
+    NSString* string = nil;
+    
+    string = [buffer.filePath lastPathComponent];
+        
     if (column == 0) {
         if ([buffer stateSet:kCEESourceBufferStateModified])
             string = [string stringByAppendingString:@" *"];
@@ -79,18 +87,19 @@
 }
 
 - (void)highlightSelectionInReferenceTable {
-    CEESessionPort* port = _session.activedPort;
-    NSIndexSet *indexSet = nil;
-    CEEBufferReference* reference = [port currentBufferReference];
     if (!_buffers)
         return;
     
+    CEESessionPort* port = _session.activedPort;
+    NSIndexSet *indexSet = nil;
+    CEESourceBuffer* activedSourceBuffer = [port activedSourceBuffer];
     for (NSInteger i = 0; i < _buffers.count; i ++) {
-        if (reference.buffer == _buffers[i]) {
+        if (_buffers[i] == activedSourceBuffer) {
             indexSet = [NSIndexSet indexSetWithIndex:i];
             break;
         }
     }
+    
     [_referenceTable selectRowIndexes:indexSet byExtendingSelection:NO];
     [_referenceTable scrollRowToVisible:[indexSet firstIndex]];
 }
@@ -103,6 +112,7 @@
 - (IBAction)selectRow:sender {
     if (!_referenceTable.selectedRowIndexes)
         return;
+    
     NSInteger selectedRow = _referenceTable.selectedRow;
     if (selectedRow == -1)
         return ;
@@ -116,7 +126,21 @@
     [self highlightSelectionInReferenceTable];
 }
 
-- (void)sessionPortOpenSourceBufferResponse:(NSNotification*)notification {
+- (void)saveSourceBufferResponse:(NSNotification*)notification {
+    [_referenceTable reloadData];
+    [self highlightSelectionInReferenceTable];
+}
+
+- (void)openSourceBufferResponse:(NSNotification*)notification {
+    CEESessionPort* port = notification.object;
+    if (port.session != _session)
+        return;
+    
+    [_referenceTable reloadData];
+    [self highlightSelectionInReferenceTable];
+}
+
+- (void)presentHistoryResponse:(NSNotification*)notification {
     CEESessionPort* port = notification.object;
     if (port.session != _session)
         return;
@@ -124,13 +148,14 @@
     [self highlightSelectionInReferenceTable];
 }
 
-- (void)sessionActivePortResponse:(NSNotification*)notification {
+- (void)activePortResponse:(NSNotification*)notification {
     if (notification.object != _session)
         return;
+    [_referenceTable reloadData];
     [self highlightSelectionInReferenceTable];
 }
 
-- (void)sessionDeletePortResponse:(NSNotification*)notification {
+- (void)deletePortResponse:(NSNotification*)notification {
     if (notification.object != _session)
         return;
     [_referenceTable reloadData];
@@ -151,4 +176,97 @@
     [self highlightSelectionInReferenceTable];
 }
 
+- (IBAction)close:(id)sender {
+    NSInteger clickedRow = [_referenceTable clickedRow];
+    if (clickedRow == -1)
+        return ;
+    
+    CEESourceBuffer* buffer = _buffers[clickedRow];
+    [self closeBuffers:@[buffer]];
+    [_referenceTable reloadData];
+    [self highlightSelectionInReferenceTable];
+}
+
+- (IBAction)closeOthers:(id)sender {
+    NSInteger clickedRow = [_referenceTable clickedRow];
+    if (clickedRow == -1)
+        return ;
+    
+    CEESourceBuffer* selected = _buffers[clickedRow];
+    NSMutableArray* buffers = [[NSMutableArray alloc] init];
+    for (CEESourceBuffer* buffer in _buffers) {
+        if (buffer != selected)
+            [buffers addObject:buffer];
+    }
+    [self closeBuffers:buffers];
+    [_referenceTable reloadData];
+    [self highlightSelectionInReferenceTable];
+}
+
+- (IBAction)closeOthersAbove:(id)sender {
+    NSInteger clickedRow = [_referenceTable clickedRow];
+    if (clickedRow == -1 || clickedRow == 0)
+        return ;
+    
+    NSMutableArray* buffers = [[NSMutableArray alloc] init];
+    for (NSInteger i = 0; i < clickedRow; i ++)
+        [buffers addObject:_buffers[i]];
+    
+    [self closeBuffers:buffers];
+    [_referenceTable reloadData];
+    [self highlightSelectionInReferenceTable];
+}
+
+- (IBAction)closeOthersBelow:(id)sender {
+    NSInteger clickedRow = [_referenceTable clickedRow];
+    if (clickedRow == -1 || clickedRow == _buffers.count - 1)
+        return ;
+    
+    NSMutableArray* buffers = [[NSMutableArray alloc] init];
+    for (NSInteger i = clickedRow + 1; i < _buffers.count; i ++)
+        [buffers addObject:_buffers[i]];
+    
+    [self closeBuffers:buffers];
+    [_referenceTable reloadData];
+    [self highlightSelectionInReferenceTable];
+}
+
+- (void)closeBuffers:(NSArray*)buffers {
+    __block BOOL shouldClose = YES;
+    NSMutableArray* syncBuffers = nil;
+    for (CEESourceBuffer* buffer in buffers) {
+        if ([buffer stateSet:kCEESourceBufferStateShouldSyncWhenClose]) {
+            if (!syncBuffers)
+                syncBuffers = [[NSMutableArray alloc] init];
+            [syncBuffers addObject:buffer];
+        }
+    }
+    
+    if (syncBuffers) {
+        if (!_sourceBufferManagerWindowController)
+            _sourceBufferManagerWindowController = [[NSStoryboard storyboardWithName:@"SourceBufferManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceBufferManagerWindowController"];
+        CEESourceBufferManagerViewController* controller = (CEESourceBufferManagerViewController*)_sourceBufferManagerWindowController.contentViewController;
+        [controller setModifiedSourceBuffers:syncBuffers];
+        [self.view.window beginSheet:_sourceBufferManagerWindowController.window completionHandler:(^(NSInteger result) {
+            if (result == NSModalResponseCancel)
+                shouldClose = NO;
+            else
+                shouldClose = YES;
+            [NSApp stopModalWithCode:result];
+            [controller setModifiedSourceBuffers:nil];
+        })];
+        [NSApp runModalForWindow:self.view.window];
+    }
+    
+    if (shouldClose)
+        [[self.session activedPort] closeSourceBuffers:buffers];
+}
+
+- (void)menuWillOpen:(NSMenu *)menu {
+    [_referenceTable hightlightRowRect:[_referenceTable clickedRow] enable:YES];
+}
+
+- (void)menuDidClose:(NSMenu *)menu {
+    [_referenceTable hightlightRowRect:[_referenceTable clickedRow] enable:NO];
+}
 @end

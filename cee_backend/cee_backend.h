@@ -25,8 +25,8 @@ void cee_database_symbols_clean(cee_pointer db);
 cee_boolean cee_database_symbols_write(cee_pointer db,
                                        CEEList* symbols);
 
-CEEList* cee_database_symbols_search_by_descriptor(cee_pointer db,
-                                                   const cee_char* descriptor);
+CEEList* cee_database_symbols_search_by_name(cee_pointer db,
+                                             const cee_char* name);
 CEEList* cee_database_symbols_search_by_parent(cee_pointer db,
                                                const cee_char* parent);
 CEEList* cee_database_symbols_search_by_type(cee_pointer db,

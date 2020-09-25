@@ -11,73 +11,23 @@
 NSNotificationName CEENotificationSourceBufferStateChanged = @"CEENotificationSourceBufferStateChanged";
 
 @interface CEESourceBuffer()
-@property (strong) NSString* modificationDate;
-@property (readonly) NSUInteger referenceCount;
+@property (strong) NSDate* fileLastModifiedDate;
+@property (strong) NSDate* lastModifiedDate;
 @end
 
 @implementation CEESourceBuffer
 
 @synthesize state = _state;
 
-static CEESymbolWrapper* symbol_wrapper_create(CEESourceSymbol* symbol,
-                                            cee_uint level)
-{
-    CEESymbolWrapper* wrapper = cee_malloc0(sizeof(CEESymbolWrapper));
-    wrapper->symbol_ref = symbol;
-    wrapper->level = level;
-    return wrapper;
-}
-
-static void symbol_wrapper_free(cee_pointer data)
-{
-    if (!data)
-        return;
-    
-    CEESymbolWrapper* wrapper = data;
-    cee_free(wrapper);
-}
-
-static void symbol_tree_dump_to_wrappers(CEETree* tree, 
-                                         int n, 
-                                         CEEList** list)
-{
-    if (!tree)
-        return;
-    
-    CEEList* p = NULL;    
-    CEESourceSymbol* symbol = tree->data;
-    if (symbol) {
-        CEESymbolWrapper* wrapper = symbol_wrapper_create(symbol, n);
-        *list = cee_list_prepend(*list, wrapper);
-    }
-    
-    n ++;
-    if (tree->children) {
-        p = CEE_TREE_CHILDREN_FIRST(tree);
-        while (p) {
-            tree = p->data;
-            symbol_tree_dump_to_wrappers(tree, n, list);
-            p = CEE_TREE_NODE_NEXT(p);
-        }
-    }
-}
-
-static cee_int symbol_wrapper_compare(const cee_pointer a,
-                                      const cee_pointer b)
-{
-    CEESymbolWrapper* wrapper0 = (CEESymbolWrapper*)a;
-    CEESymbolWrapper* wrapper1 = (CEESymbolWrapper*)b;
-    CEESourceSymbol* symbol0 = wrapper0->symbol_ref;
-    CEESourceSymbol* symbol1 = wrapper1->symbol_ref;
-    return cee_source_symbol_location_compare(symbol0, symbol1);
-}
-
 void cee_source_buffer_parse(CEESourceBuffer* buffer,
                              CEESourceBufferParserOption options)
 {
     CEESourceParserRef parser = buffer.parser_ref;
-    if (!parser)
-        return;
+    if (!parser) {
+        buffer.parser_ref = cee_source_parser_get([buffer.filePath UTF8String]);
+        if (!parser)
+            return;
+    }
     
     cee_ulong m0 = 0;
     const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
@@ -134,13 +84,12 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
     if (options & kCEESourceBufferParserOptionCreateSymbolWrapper) {
         /** symbol wrappers create begin */
         if (buffer.symbol_wrappers)
-            cee_list_free_full(buffer.symbol_wrappers, symbol_wrapper_free);
+            cee_list_free_full(buffer.symbol_wrappers, cee_source_symbol_wrapper_free);
         
         CEEList* wrappers = NULL;
-        symbol_tree_dump_to_wrappers(buffer.prep_directive_symbol_tree, 0, &wrappers);
-        symbol_tree_dump_to_wrappers(buffer.statement_symbol_tree, 0, &wrappers);
-        
-        wrappers = cee_list_sort(wrappers, symbol_wrapper_compare);
+        cee_source_symbol_tree_dump_to_wrappers(buffer.prep_directive_symbol_tree, &wrappers);
+        cee_source_symbol_tree_dump_to_wrappers(buffer.statement_symbol_tree, &wrappers);
+        wrappers = cee_list_sort(wrappers, cee_source_symbol_wrapper_location_compare);
         buffer.symbol_wrappers = wrappers;
         /** symbol wrappers create end */
     }
@@ -151,8 +100,6 @@ static void text_buffer_modified(cee_pointer buffer,
                                  CEERange original,
                                  CEERange replacement) 
 {
-    cee_source_buffer_parse((__bridge CEESourceBuffer*)buffer,
-                            kCEESourceBufferParserOptionCreateSymbolWrapper);
     [(__bridge CEESourceBuffer*)buffer setState:kCEESourceBufferStateModified];
 }
 
@@ -161,14 +108,14 @@ static void binary_buffer_modified(cee_pointer buffer,
                                    CEERange original,
                                    CEERange replacement)
 {
-    
+    [(__bridge CEESourceBuffer*)buffer setState:kCEESourceBufferStateModified];
 }
 
 - (NSString*)UTCStringFromDate:(NSDate*)date {
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     NSTimeZone *timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
     [formatter setTimeZone:timeZone];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSString *string = [formatter stringFromDate:date];
     return string;
 }
@@ -177,7 +124,7 @@ static void binary_buffer_modified(cee_pointer buffer,
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     NSTimeZone *timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
     [formatter setTimeZone:timeZone];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSDate* date = [formatter dateFromString:string];
     return date;
 }
@@ -187,8 +134,8 @@ static void binary_buffer_modified(cee_pointer buffer,
     if (!self)
         return nil;
 
-    cee_ulong length = 0;
     _referenceCount = 0;
+    cee_ulong length = 0;
     
     if (!filePath) {
         _filePath = nil;
@@ -196,7 +143,7 @@ static void binary_buffer_modified(cee_pointer buffer,
         _storage = cee_text_storage_create((__bridge cee_pointer)self,
                                            (const cee_uchar*)"",
                                            text_buffer_modified);
-        _state = kCEESourceBufferStateFileUntitled;
+        _state = kCEESourceBufferStateFileTemporary;
     }
     else {
         _filePath = filePath;
@@ -222,17 +169,8 @@ static void binary_buffer_modified(cee_pointer buffer,
         cee_free(content);
     }
     
-    NSDate* modificationDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];
-    _modificationDate = [self UTCStringFromDate:modificationDate];
+    _fileLastModifiedDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];
     return self;
-}
-
-- (void)referenceIncrease {
-    _referenceCount ++;
-}
-
-- (void)referenceDecrease {
-    _referenceCount --;
 }
 
 - (void)dealloc {
@@ -252,7 +190,7 @@ static void binary_buffer_modified(cee_pointer buffer,
         cee_source_token_map_free(_source_token_map);
     
     if (_symbol_wrappers)
-        cee_list_free_full(_symbol_wrappers, symbol_wrapper_free);
+        cee_list_free_full(_symbol_wrappers, cee_source_symbol_wrapper_free);
     
     if (_prep_directive_symbol_tree)
         cee_tree_free(_prep_directive_symbol_tree);
@@ -265,64 +203,95 @@ static void binary_buffer_modified(cee_pointer buffer,
 }
 
 - (void)setState:(CEESourceBufferState)state {
+    cee_source_buffer_parse(self, kCEESourceBufferParserOptionCreateSymbolWrapper);   
+    if (state == kCEESourceBufferStateModified) {
+        _lastModifiedDate = [NSDate date];
+        if (self.referenceCount == 1)
+            [self setState:kCEESourceBufferStateShouldSyncWhenClose];
+    }
     _state |= state;
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferStateChanged object:self];
+}
+
+- (void)clearState:(CEESourceBufferState)state {
+    cee_source_buffer_parse(self, kCEESourceBufferParserOptionCreateSymbolWrapper);
+    _state &= ~state;
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferStateChanged object:self];
+    
+    if (state == kCEESourceBufferStateModified) {
+        if ([self stateSet:kCEESourceBufferStateShouldSyncWhenClose])
+            [self clearState:kCEESourceBufferStateShouldSyncWhenClose];
+    }
 }
 
 - (CEESourceBufferState)state {
     return _state;
 }
 
-- (void)clearState:(CEESourceBufferState)state {
-    _state &= ~state;
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferStateChanged object:self];
-}
-
 - (BOOL)stateSet:(CEESourceBufferState)state {
-    return _state & state;
+    return (_state & state) != 0;
 }
 
 - (void)reload {
     cee_uchar* content = NULL;
     cee_file_contents_get([_filePath UTF8String], &content, NULL);
     cee_text_storage_buffer_set(_storage, content);
-    cee_source_buffer_parse(self, kCEESourceBufferParserOptionCreateSymbolWrapper);
     cee_free(content);
     [self setState:kCEESourceBufferStateReload];
     [self clearState:kCEESourceBufferStateReload];
+    
+    if ([self stateSet:kCEESourceBufferStateModified])
+        [self clearState:kCEESourceBufferStateModified];
 }
 
 - (BOOL)isFileModified {
-    NSDate* date0 = [self dateFromUTFString:_modificationDate];
-    NSDate* date1 = [self dateFromUTFString:[self UTCStringFromDate:[[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate]]];
-    
-    if ([date0 compare:date1] != NSOrderedSame)
+    NSDate* date1 = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];
+    if ([_fileLastModifiedDate compare:date1] != NSOrderedSame)
         return YES;
-    
     return NO;
 }
 
 - (void)updateFileModifiedDate {
-    NSDate* modificationDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];
-    _modificationDate = [self UTCStringFromDate:modificationDate];
+    _fileLastModifiedDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];;
 }
 
+- (void)increaseReferenceCount {
+    _referenceCount ++;
+    if (_referenceCount == 1) {
+        if ([self stateSet:kCEESourceBufferStateModified])
+            [self setState:kCEESourceBufferStateShouldSyncWhenClose];
+    }
+    else if (_referenceCount > 1) {
+        if ([self stateSet:kCEESourceBufferStateShouldSyncWhenClose])
+            [self clearState:kCEESourceBufferStateShouldSyncWhenClose];
+    }
+}
+
+- (void)decreaseReferenceCount {
+    _referenceCount --;
+    if (_referenceCount == 1) {
+        if ([self stateSet:kCEESourceBufferStateModified])
+            [self setState:kCEESourceBufferStateShouldSyncWhenClose];
+    }
+}
 @end
 
 @interface CEESourceBufferManager()
-@property NSUInteger untitledIndex;
+@property NSInteger temporaryIndex;
 @end
 
 @implementation CEESourceBufferManager
-
 
 - (instancetype)init {
     self = [super init];
     if (!self)
         return nil;
-        
+    
+    _temporaryIndex = 0;
     _buffers = [[NSMutableArray alloc] init];
-    _untitledIndex = 0;
+    _temporaryDirectory = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Cymbols/Backups/Untitled"];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:_temporaryDirectory isDirectory:nil])
+        [[NSFileManager defaultManager] createDirectoryAtPath:_temporaryDirectory withIntermediateDirectories:YES attributes:nil error:nil];
     return self;
 }
 
@@ -330,54 +299,57 @@ static void binary_buffer_modified(cee_pointer buffer,
     if (!filePath || ![[NSFileManager defaultManager] fileExistsAtPath:filePath])
         return nil;
     
+    CEESourceBuffer* target = nil;
+    
     for (CEESourceBuffer* buffer in _buffers) {
-        if ([buffer.filePath isEqualToString:filePath]) {
-            [buffer referenceIncrease];
-            return buffer;
-        }
+        if ([buffer.filePath isEqualToString:filePath])
+            target = buffer;
     }
     
-    CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
-    if (!buffer)
-        return nil;
+    if (!target) {
+        target = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+        if (!target)
+            return nil;
+        [_buffers addObject:target];
+    }
     
-    [buffer referenceIncrease];
-    [_buffers addObject:buffer];
+    [target increaseReferenceCount];
     
-    return buffer;
+    return target;
 }
 
 - (CEESourceBuffer*)openUntitledSourceBuffer {
+    NSString* fileName = [NSString stringWithFormat:@"Untitled%ld", (long)_temporaryIndex];
+    NSString* filePath = [_temporaryDirectory stringByAppendingPathComponent:fileName];
     CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:nil];
-    [buffer setFilePath:[NSString stringWithFormat:@"Untitled%lu", _untitledIndex]];
-    [buffer setState:kCEESourceBufferStateFileUntitled];
-    [buffer referenceIncrease];
+    
+    [buffer setFilePath:filePath];
+    [buffer setState:kCEESourceBufferStateFileTemporary];
+    
+    [[NSString stringWithUTF8String:(const char *)cee_text_storage_buffer_get(buffer.storage)] writeToURL:[NSURL fileURLWithPath:filePath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
+    
     [_buffers addObject:buffer];
-    _untitledIndex ++;
+    _temporaryIndex ++;
+    
+    [buffer increaseReferenceCount];
     return buffer;
 }
 
 - (void)closeSourceBuffer:(CEESourceBuffer*)buffer {
-    [buffer referenceDecrease];
+    [buffer decreaseReferenceCount];
     if (!buffer.referenceCount)
         [_buffers removeObject:buffer];
-    
 }
 
 - (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filePath {
-    NSString* filePathBeforeSave = buffer.filePath;
-    
     [[NSString stringWithUTF8String:(const char *)cee_text_storage_buffer_get(buffer.storage)] writeToURL:[NSURL fileURLWithPath:filePath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
-    [buffer updateFileModifiedDate];
     
-    if (![filePathBeforeSave isEqualToString:filePath]) {
-        buffer.filePath = filePath;
-        [buffer setState:kCEESourceBufferStateFilePathChanged];
-        [buffer clearState:kCEESourceBufferStateFilePathChanged];
-    }
+    [buffer updateFileModifiedDate];
         
-    if ([buffer stateSet:kCEESourceBufferStateFileUntitled])
-        [buffer clearState:kCEESourceBufferStateFileUntitled];
+    if ([buffer stateSet:kCEESourceBufferStateFileTemporary]) {
+        [buffer clearState:kCEESourceBufferStateFileTemporary];
+        buffer.filePath = filePath;
+    }
     
     if ([buffer stateSet:kCEESourceBufferStateModified])
         [buffer clearState:kCEESourceBufferStateModified];
@@ -386,16 +358,17 @@ static void binary_buffer_modified(cee_pointer buffer,
         [buffer clearState:kCEESourceBufferStateFileDeleted];
 }
 
-- (CEESourceBuffer*)getSourceBufferWithFilePath:(NSString*)filePath {
-    for (CEESourceBuffer* buffer in _buffers)
-        if ([buffer.filePath compare:filePath options:NSLiteralSearch] == NSOrderedSame)
-            return buffer;
-    return nil;
+- (void)discardUntitleSourceBuffers {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:_temporaryDirectory];
+    NSString *file;
+    while (file = [enumerator nextObject])
+        [fileManager removeItemAtPath:[_temporaryDirectory stringByAppendingPathComponent:file] error:nil];
 }
 
-- (void)updateSourceBuffers {
+- (void)syncSourceBuffersFromFiles {
     for (CEESourceBuffer* buffer in _buffers) {
-        if (![buffer stateSet:kCEESourceBufferStateFileUntitled]) {
+        if (![buffer stateSet:kCEESourceBufferStateFileTemporary]) {
             if (![[NSFileManager defaultManager] fileExistsAtPath:buffer.filePath]) {
                 if (![buffer stateSet:kCEESourceBufferStateFileDeleted])
                     [buffer setState:kCEESourceBufferStateFileDeleted];
@@ -413,15 +386,10 @@ static void binary_buffer_modified(cee_pointer buffer,
     }
 }
 
-- (BOOL)fileExistsAtPath:(NSString*)filePath {
-    return [[NSFileManager defaultManager] fileExistsAtPath:filePath];
-}
-
-- (BOOL)hasModifiedBuffer {
-    for (CEESourceBuffer* buffer in _buffers) {
-        if (buffer.state & kCEESourceBufferStateModified)
-            return YES;
-    }
+- (BOOL)isTemporaryFilePath:(NSString*)filePath {
+    NSString* directory = [filePath stringByDeletingLastPathComponent];
+    if ([directory isEqualToString:_temporaryDirectory])
+        return YES;
     return NO;
 }
 

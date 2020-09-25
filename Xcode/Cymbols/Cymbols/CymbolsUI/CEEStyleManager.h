@@ -30,6 +30,7 @@ extern NSNotificationName CEENotificationTextHighlightStyleUpdate;
 - (void)setUserInterfaceStyle:(NSDictionary*)descriptor;
 - (void)setTextHighlightDescriptor:(NSString*)descriptor;
 - (NSImage*)filetypeIconFromFileName:(NSString*)fileName;
+- (NSImage*)filetypeIconFromFilePath:(NSString*)filePath;
 - (NSImage*)symbolIconFromSymbolType:(CEESourceSymbolType)type;
 @end
 

@@ -16,11 +16,9 @@
 @property (weak) IBOutlet CEETableView *sourceBufferTable;
 @property (strong) CEEEditViewController *editViewController;
 @property (weak) IBOutlet CEEView *sourceContentView;
-@property (strong) NSMutableArray* modifiedSourceBuffers;
-@property (strong) NSMutableArray* selectedSourceBufferIdentifiers;
+@property (strong) NSMutableArray* selectedSourceBufferFilePaths;
 @property (strong) NSString* directory;
 @property (weak) IBOutlet CEECheckBox *selectAllButton;
-
 @end
 
 @implementation CEESourceBufferManagerViewController
@@ -52,24 +50,20 @@
 
 - (void)viewDidAppear {
     [super viewDidAppear];
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* bufferManager = [delegate sourceBufferManager];
-    NSArray* buffers = [bufferManager buffers];
     
-    _modifiedSourceBuffers = [[NSMutableArray alloc] init];
-    for (CEESourceBuffer* buffer in buffers) {
-        if (buffer.state & kCEESourceBufferStateModified)
-            [_modifiedSourceBuffers addObject:buffer];
-    }
+    if (!_modifiedSourceBuffers || !_modifiedSourceBuffers.count)
+        return;
     
-    _selectedSourceBufferIdentifiers = [[NSMutableArray alloc] init];
     [_sourceBufferTable reloadData];
     
     if (!_sourceBufferTable.selectedRowIndexes ||
         _sourceBufferTable.selectedRow == -1)
-        return;    
+        return;
+    
     CEESourceBuffer* buffer = _modifiedSourceBuffers[_sourceBufferTable.selectedRow];
     [_editViewController setBuffer:buffer];
+    
+    _selectedSourceBufferFilePaths = [[NSMutableArray alloc] init];
 }
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
@@ -90,8 +84,7 @@
         
         cellView.title.stringValue = [buffer.filePath lastPathComponent];
         cellView.sourceBufferIdentifier = buffer.filePath;
-        
-        if ([self sourceBufferIsSelectedWithIdentifier:buffer.filePath])
+        if ([self sourceBufferIsSelected:buffer.filePath])
             [cellView.check setState:NSControlStateValueOn];
         else
             [cellView.check setState:NSControlStateValueOff];
@@ -106,72 +99,87 @@
 }
 
 - (IBAction)cancel:(id)sender {
-    [NSApp stopModalWithCode:NSModalResponseCancel];
+    if (self.view.window.sheetParent)
+        [self.view.window.sheetParent endSheet:self.view.window returnCode:NSModalResponseCancel];
+    if ([self.view.window isModalPanel])
+        [NSApp stopModalWithCode:NSModalResponseCancel];
+}
+
+- (CEESourceBuffer*)modifiedSourceBufferWithFilePath:(NSString*)filePath {
+    for (CEESourceBuffer* buffer in _modifiedSourceBuffers) {
+        if ([buffer.filePath isEqualToString:filePath])
+            return buffer;
+    }
+    return nil;
 }
 
 - (IBAction)save:(id)sender {
     AppDelegate* delegate = [NSApp delegate];
     CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
     
-    for (NSString* identifier in _selectedSourceBufferIdentifiers) {
-        NSString* fileName = [identifier lastPathComponent];
+    for (NSString* filePath in _selectedSourceBufferFilePaths) {
+        NSString* fileName = [filePath lastPathComponent];
         NSSavePanel* savePanel = [NSSavePanel savePanel];
         NSString * savePath = nil;
         NSURL* URL = nil;
         CEESourceBuffer* sourceBuffer = nil;
         NSModalResponse responese = NSModalResponseCancel;
         
-        if ([sourceBufferManager fileExistsAtPath:identifier]) {
-            URL = [[NSURL alloc] initFileURLWithPath:[identifier stringByDeletingLastPathComponent] isDirectory:YES];
-        }
-        else {
+        sourceBuffer = [self modifiedSourceBufferWithFilePath:filePath];
+        if (!sourceBuffer)
+            continue;
+    
+        if ([sourceBuffer stateSet:kCEESourceBufferStateFileTemporary]) {
             if (!_directory)
                 URL = [[NSURL alloc] initFileURLWithPath:NSHomeDirectory() isDirectory:YES];
             else
                 URL = [[NSURL alloc] initFileURLWithPath:_directory isDirectory:YES];
-        }
-        
-        sourceBuffer = [sourceBufferManager getSourceBufferWithFilePath:identifier];
-        if (!sourceBuffer)
-            continue;
-        
-        [savePanel setDirectoryURL:URL];
-        [savePanel setCanCreateDirectories:YES];
-        [savePanel setDelegate:self];
-        if (fileName)
+
+            [savePanel setDirectoryURL:URL];
+            [savePanel setCanCreateDirectories:YES];
+            [savePanel setDelegate:self];
             [savePanel setNameFieldStringValue:fileName];
-        else
-            [savePanel setNameFieldStringValue:@"Untitled"];
-        
-        responese = [savePanel runModal];
-        if (responese == NSModalResponseOK) {
-            savePath = [[savePanel URL] path];
-            [sourceBufferManager saveSourceBuffer:sourceBuffer atPath:savePath];
-            _directory = [savePath stringByDeletingLastPathComponent];
+            responese = [savePanel runModal];
+            if (responese == NSModalResponseOK) {
+                savePath = [[savePanel URL] path];
+                if (savePath) {
+                    [sourceBufferManager saveSourceBuffer:sourceBuffer atPath:savePath];
+                    _directory = [savePath stringByDeletingLastPathComponent];
+                }
+            }
+        }
+        else {
+            [sourceBufferManager saveSourceBuffer:sourceBuffer atPath:sourceBuffer.filePath];
         }
     }
-    
-    [NSApp stopModalWithCode:NSModalResponseOK];
+        
+    if (self.view.window.sheetParent)
+        [self.view.window.sheetParent endSheet:self.view.window returnCode:NSModalResponseOK];
+    if ([self.view.window isModalPanel])
+        [NSApp stopModalWithCode:NSModalResponseOK];
 }
 
 - (IBAction)discardAll:(id)sender {
-    [NSApp stopModalWithCode:NSModalResponseOK];
+    if (self.view.window.sheetParent)
+        [self.view.window.sheetParent endSheet:self.view.window returnCode:NSModalResponseOK];
+    if ([self.view.window isModalPanel])
+        [NSApp stopModalWithCode:NSModalResponseOK];
 }
 
 - (IBAction)selectAll:(id)sender {
-    _selectedSourceBufferIdentifiers = nil;
+    _selectedSourceBufferFilePaths = nil;
     if (_selectAllButton.state == NSOnState) {
-        _selectedSourceBufferIdentifiers = [[NSMutableArray alloc] init];
+        _selectedSourceBufferFilePaths = [[NSMutableArray alloc] init];
         for (CEESourceBuffer* buffer in _modifiedSourceBuffers)
-            [_selectedSourceBufferIdentifiers addObject:buffer.filePath];
+            [_selectedSourceBufferFilePaths addObject:buffer.filePath];
     }
     
     [_sourceBufferTable reloadData];
 }
 
-- (BOOL)sourceBufferIsSelectedWithIdentifier:(NSString*)identifier {
-    for (NSInteger i = 0; i < _selectedSourceBufferIdentifiers.count; i ++) {
-        if ([_selectedSourceBufferIdentifiers[i] compare:identifier options:NSLiteralSearch] == NSOrderedSame)
+- (BOOL)sourceBufferIsSelected:(NSString*)filePath {
+    for (NSInteger i = 0; i < _selectedSourceBufferFilePaths.count; i ++) {
+        if ([_selectedSourceBufferFilePaths[i] compare:filePath options:NSLiteralSearch] == NSOrderedSame)
             return YES;
     }
     return NO;
@@ -180,20 +188,20 @@
 - (IBAction)selectRow:sender {
     if (!_sourceBufferTable.selectedRowIndexes ||
         _sourceBufferTable.selectedRow == -1)
-        return;    
+        return;
     CEESourceBuffer* buffer = _modifiedSourceBuffers[_sourceBufferTable.selectedRow];
     [_editViewController setBuffer:buffer];
 }
 
 #pragma mark - protocol CEESourceBufferSaveConfirmCellDelegate
-- (void)sourceBufferSelect:(NSString*)identifier {
-    if (![self sourceBufferIsSelectedWithIdentifier:identifier])
-        [_selectedSourceBufferIdentifiers addObject:identifier];
+- (void)sourceBufferSelect:(NSString*)filePath {
+    if (![self sourceBufferIsSelected:filePath])
+        [_selectedSourceBufferFilePaths addObject:filePath];
 }
 
-- (void)sourceBufferDeselect:(NSString*)identifier {
-    if ([self sourceBufferIsSelectedWithIdentifier:identifier])
-        [_selectedSourceBufferIdentifiers removeObject:identifier];
+- (void)sourceBufferDeselect:(NSString*)filePath {
+    if ([self sourceBufferIsSelected:filePath])
+        [_selectedSourceBufferFilePaths removeObject:filePath];
 }
 
 @end

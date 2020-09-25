@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSUInteger columns;
 @property NSArray* columnOffsets;
 @property NSArray* columnWidths;
+@property (readonly) NSArray* rowViews;
 
 - (CGFloat)rowHeight;
 - (NSUInteger)numberOfRows;

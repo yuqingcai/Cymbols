@@ -18,7 +18,6 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 @interface AppDelegate()
 @property (strong) NSString* cymbolsHome;
 @property (strong) NSTimer* heartBeatTimer;
-@property (strong) NSWindowController* sourceBufferManagerWindowController;
 @end
 
 @implementation AppDelegate
@@ -29,12 +28,13 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     self = [super init];
     if (!self)
         return nil;
-    
+        
     cee_parsers_create();
     
     [self createHomeDirectory];
     [self configure];
     [self createHeartBeatTimer];
+    [self createNetwork];
     
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [styleManager setStyleHomeDirectory:[_cymbolsHome stringByAppendingPathComponent:@"Styles"]];
@@ -48,7 +48,7 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 }
 
 - (void)createHeartBeatTimer {
-    _heartBeatTimer = [NSTimer timerWithTimeInterval:0.1 target:self selector:@selector(heartBeat:) userInfo:nil repeats:YES];
+    _heartBeatTimer = [NSTimer timerWithTimeInterval:CEE_APP_HEART_BEAT_INTERVAL target:self selector:@selector(heartBeat:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:_heartBeatTimer forMode:NSRunLoopCommonModes];
 }
 
@@ -75,6 +75,10 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     [[NSFileManager defaultManager] copyItemAtPath:fileInBundle toPath:copyFilePath error:nil];
 }
 
+- (void)createNetwork {
+    _network = [[CEENetwork alloc] init];
+}
+
 - (NSString*)welcomeGuidePath {
     return [[_cymbolsHome stringByAppendingPathComponent:@"WelcomeGuide"] stringByAppendingPathComponent:@"WelcomeGuide"];
 }
@@ -99,8 +103,11 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     NSDocumentController* documentController = [NSDocumentController sharedDocumentController];
-    for (CEEProject* project in documentController.documents)
+    [_sourceBufferManager discardUntitleSourceBuffers];
+    for (CEEProject* project in documentController.documents) {
         [project serialize];
+        [project deleteAllSessions];
+    }
 }
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender {
@@ -144,8 +151,10 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
         [_projectController addDocument:project];
         [project makeWindowControllers];
         session = project.currentSession;
-        for (CEESessionPort* port in session.ports)
-            [port discardSourceBuffers];
+        for (CEESessionPort* port in session.ports) {
+            [port closeAllSourceBuffers];
+            [port discardReferences];
+        }
     }
     else {
         project = _projectController.currentDocument;
@@ -153,13 +162,13 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     }
     
     for (NSURL* url in urls) {
-        [project.currentSession.activedPort openSourceBufferWithFilePath:[url path]];
+        [project.currentSession.activedPort openSourceBuffersWithFilePaths:@[[url path]]];
         [_projectController noteNewRecentDocumentURL:url];
     }
 }
 
 - (void)applicationWillBecomeActive:(NSNotification *)notification {
-    [_sourceBufferManager updateSourceBuffers];
+    [_sourceBufferManager syncSourceBuffersFromFiles];
 }
 
 - (IBAction)syntaxColorChange:(id)sender {
@@ -176,26 +185,16 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
-    if ([_sourceBufferManager hasModifiedBuffer]) {
-        if (_sourceBufferManagerWindowController && [_sourceBufferManagerWindowController.window isVisible])
-            return NSTerminateCancel;
-        
-        if (!_sourceBufferManagerWindowController)
-            _sourceBufferManagerWindowController = [[NSStoryboard storyboardWithName:@"SourceBufferManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceBufferManagerWindowController"];
-        
-        NSApplicationTerminateReply terminateReply = NSTerminateCancel;
-        NSModalResponse responese = NSModalResponseCancel;
-        responese = [NSApp runModalForWindow:_sourceBufferManagerWindowController.window];
-        if (responese == NSModalResponseCancel)
-            terminateReply = NSTerminateCancel;
-        else if (responese == NSModalResponseOK)
-            terminateReply = NSTerminateNow;
-        
-        [_sourceBufferManagerWindowController close];
-        
-        return terminateReply;
+    for (CEEProject* project in _projectController.documents) {
+        for (NSWindowController* controller in project.windowControllers) {
+            if (![controller.window.delegate windowShouldClose:controller.window])
+                return NSTerminateCancel;
+        }
     }
     return NSTerminateNow;
 }
 
+- (NSString*)serializerVersionString {
+    return @"CymbolsSerializer_1_0_0";
+}
 @end

@@ -7,13 +7,12 @@
 //
 
 #import "CEEViewController.h"
-#import "CEETitleView.h"
-#import "CEETableView.h"
+#import "CEESessionReferenceTableView.h"
 #import "CEEProject.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CEESessionReferenceController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource>
+@interface CEESessionReferenceController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, NSMenuDelegate>
 @property (weak) CEESession* session;
 @end
 

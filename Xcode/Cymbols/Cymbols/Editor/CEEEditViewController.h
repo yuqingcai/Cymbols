@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CEEEditViewController : CEEViewController <CEETextViewDelegate>
 @property (strong) CEESessionPort* port;
 @property (strong) CEESourceBuffer* buffer;
-@property NSInteger paragraphIndex;
+@property NSInteger offset;
 @property BOOL editable;
 @property BOOL intelligence;
 

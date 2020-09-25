@@ -43,10 +43,6 @@ typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
 @property (strong) NSColor* caretColorMarked;
 @property (strong) NSColor* textBackgroundColorSelected;
 @property (strong) NSColor* textBackgroundColorSelectedOutline;
-@property (strong) NSColor* textBackgroundColorMarked;
-@property (strong) NSColor* textBackgroundColorMarkedOutline;
-@property (strong) NSColor* textBackgroundColorSearched;
-@property (strong) NSColor* textBackgroundColorSearchedOutline;
 @property (strong) NSColor* textBackgroundColorHighlight;
 @property (strong) NSColor* textBackgroundColorHighlightOutline;
 @property (strong) NSString* aligment;

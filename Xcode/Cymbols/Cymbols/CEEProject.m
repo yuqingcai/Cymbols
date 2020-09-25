@@ -22,7 +22,6 @@ NSNotificationName CEENotificationProjectSettingProperties = @"CEENotificationPr
 NSNotificationName CEENotificationProjectAddFilePaths = @"CEENotificationProjectAddFilePaths";
 NSNotificationName CEENotificationProjectRemoveFilePaths = @"CEENotificationProjectRemoveFilePaths";
 NSNotificationName CEENotificationSessionPortOpenSourceBuffer = @"CEENotificationSessionPortOpenSourceBuffer";
-NSNotificationName CEENotificationSessionPortSaveSourceBuffer = @"CEENotificationSessionPortSaveSourceBuffer";
 NSNotificationName CEENotificationSessionPortCloseSourceBuffer = @"CEENotificationSessionPortCloseSourceBuffer";
 NSNotificationName CEENotificationSessionPortActiveSourceBuffer = @"CEENotificationSessionPortActiveSourceBuffer";
 NSNotificationName CEENotificationSessionPresent = @"CEENotificationSessionPresent";
@@ -33,6 +32,10 @@ NSNotificationName CEENotificationSessionPortCreateContext = @"CEENotificationSe
 NSNotificationName CEENotificationSessionPortSetTargetSymbol = @"CEENotificationSessionPortSetTargetSymbol";
 NSNotificationName CEENotificationSessionPortRequestTargetSymbolSelection = @"CEENotificationSessionPortRequestTargetSymbolSelection";
 NSNotificationName CEENotificationSessionPortSetActivedSymbol = @"CEENotificationSessionPortSetActivedSymbol";
+NSNotificationName CEENotificationSessionPortPresentHistory = @"CEENotificationSessionPortPresentHistory";
+NSNotificationName CEENotificationSessionPortSaveSourceBuffer = @"CEENotificationSessionPortSaveSourceBuffer";
+NSNotificationName CEENotificationSessionPortSetActivedBufferOffset = @"CEENotificationSessionPortSetActivedBufferOffset";
+
 
 NSArray* ExclusiveFilePaths(NSArray* filePaths)
 {
@@ -100,14 +103,13 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
 
 @implementation CEEBufferReference
 
-- (instancetype)initWithSourceBuffer:(CEESourceBuffer*)buffer {
+- (instancetype)initWithFilePath:(NSString*)filePath {
     self = [super init];
     if (!self)
         return nil;
     
-    _buffer = buffer;
-    _paragraphIndex = 0;
-    
+    _filePath = filePath;
+    _bufferOffset = 0;
     return self;
 }
 
@@ -119,7 +121,7 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     if (setting) {
         setting.name = name;
         setting.path = path;
-        setting.filePaths = filePaths;
+        setting.filePathsExpanded = filePaths;
     }
     return setting;
 }
@@ -134,7 +136,7 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
 @end
 
 @interface CEESessionPort()
-@property (readonly) NSInteger bufferReferenceIndex;
+@property NSInteger bufferReferenceIndex;
 @end
 
 @implementation CEESessionPort
@@ -145,18 +147,30 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
         _bufferReferences = [[NSMutableArray alloc] init];
         _bufferReferenceIndex = -1;
         _identifier = CreateObjectID(self);
+        _openedSourceBuffers = [[NSMutableArray alloc] init];
     }
     return self;
+}
+
+- (CEESourceBuffer*)sourceBufferInReference:(CEEBufferReference*)reference {
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    
+    for (CEESourceBuffer* buffer in _openedSourceBuffers) {
+        if ([buffer.filePath isEqualToString:reference.filePath])
+            return buffer;
+    }
+    return [sourceBufferManager openSourceBufferWithFilePath:reference.filePath];
 }
 
 - (void)appendBufferReference:(CEESourceBuffer*)buffer {
     CEEBufferReference* current = [self currentBufferReference];
     if (current) {
-        if (current.buffer == buffer)
+        if ([current.filePath isEqualToString:buffer.filePath])
             return;
     }
     
-    CEEBufferReference* refernce = [[CEEBufferReference alloc] initWithSourceBuffer:buffer];
+    CEEBufferReference* refernce = [[CEEBufferReference alloc] initWithFilePath:buffer.filePath];
     if (!_bufferReferences.count) {
         [_bufferReferences addObject:refernce];
     }
@@ -172,62 +186,90 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     _bufferReferenceIndex ++;
 }
 
-- (void)nextBufferReference {
+- (void)moveBufferReferenceNext {
     if (_bufferReferenceIndex < _bufferReferences.count - 1) {
         _bufferReferenceIndex ++;
-        CEEBufferReference* reference = _bufferReferences[_bufferReferenceIndex];
-        [self setActivedSourceBuffer:reference.buffer];
+        [self presentHistory:_bufferReferences[_bufferReferenceIndex]];
     }
 }
 
-- (void)prevBufferReference {
+- (void)moveBufferReferencePrev {
     if (_bufferReferenceIndex > 0) {
         _bufferReferenceIndex --;
-        CEEBufferReference* reference = _bufferReferences[_bufferReferenceIndex];
-        [self setActivedSourceBuffer:reference.buffer];
+        [self presentHistory:_bufferReferences[_bufferReferenceIndex]];
     }
 }
 
 - (CEEBufferReference*)currentBufferReference {
     if (_bufferReferenceIndex < 0 || _bufferReferenceIndex >= _bufferReferences.count)
         return nil;
-    
     return _bufferReferences[_bufferReferenceIndex];
 }
 
-- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString*)filePath {
+- (void)presentHistory:(CEEBufferReference*)reference {
     AppDelegate* delegate = [NSApp delegate];
     CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    CEESourceBuffer* buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
-    if (buffer) {
-        if (!buffer.symbol_wrappers)
-            cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
-        [self appendBufferReference:buffer];
-        [_session registerSourceBuffer:buffer];
-        [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortOpenSourceBuffer object:self];
+    CEESourceBuffer* target = nil;
+    
+    for (NSInteger i = 0; i < _bufferReferences.count; i ++) {
+        if (reference == _bufferReferences[i])
+            _bufferReferenceIndex = i;
     }
-    return buffer;
+    
+    BOOL foundBuffer = NO;
+    reference = [self currentBufferReference];
+    for (CEESourceBuffer* buffer in _openedSourceBuffers) {
+        if ([buffer.filePath isEqualToString:reference.filePath]) {
+            foundBuffer = YES;
+            break;
+        }
+    }
+    
+    if (!foundBuffer) {
+        target = [sourceBufferManager openSourceBufferWithFilePath:reference.filePath];
+        if (target) {
+            if (!target.symbol_wrappers)
+                cee_source_buffer_parse(target, kCEESourceBufferParserOptionCreateSymbolWrapper);
+            [_openedSourceBuffers addObject:target];
+        }
+    }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortPresentHistory object:self];
 }
 
 - (NSArray*)openSourceBuffersWithFilePaths:(NSArray*)filePaths {
     AppDelegate* delegate = [NSApp delegate];
     CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    NSMutableArray* buffers = nil;
+    NSMutableArray* targets = nil;
+    
     for (NSString* filePath in filePaths) {
-        CEESourceBuffer* buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
-        if (buffer) {
-            if (!buffer.symbol_wrappers)
-                cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
-            [self appendBufferReference:buffer];
-            [_session registerSourceBuffer:buffer];
+        CEESourceBuffer* target = nil;
+        for (CEESourceBuffer* buffer in _openedSourceBuffers) {
+            if ([buffer.filePath isEqualToString:filePath]) {
+                target = buffer;
+                break;
+            }
+        }
+        
+        if (!target) {
+            target = [sourceBufferManager openSourceBufferWithFilePath:filePath];
+            [_openedSourceBuffers addObject:target];
+        }
+        
+        if (target) {
+            if (!targets)
+                targets = [[NSMutableArray alloc] init];
             
-            if (!buffers)
-                buffers = [[NSMutableArray alloc] init];
-            [buffers addObject:buffer];
+            [targets addObject:target];
+            
+            if (!target.symbol_wrappers)
+                cee_source_buffer_parse(target, kCEESourceBufferParserOptionCreateSymbolWrapper);
+            [self appendBufferReference:target];
         }
     }
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortOpenSourceBuffer object:self];
-    return buffers;
+    return targets;
 }
 
 - (CEESourceBuffer*)openUntitledSourceBuffer {
@@ -235,8 +277,8 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
     CEESourceBuffer* buffer = [sourceBufferManager openUntitledSourceBuffer];
     if (buffer) {
+        [_openedSourceBuffers addObject:buffer];
         [self appendBufferReference:buffer];
-        [_session registerSourceBuffer:buffer];
         [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortOpenSourceBuffer object:self];
     }
     return buffer;
@@ -249,46 +291,142 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortActiveSourceBuffer object:self];
 }
 
-- (void)presentHistory:(CEEBufferReference*)reference {
-    for (NSInteger i = 0; i < _bufferReferences.count; i ++) {
-        if (reference == _bufferReferences[i])
-            _bufferReferenceIndex = i;
+- (CEESourceBuffer*)activedSourceBuffer {
+    CEEBufferReference* reference = [self currentBufferReference];
+    for (CEESourceBuffer* buffer in _openedSourceBuffers)
+        if ([buffer.filePath isEqualToString:reference.filePath])
+            return buffer;
+    return nil;
+}
+
+- (CEESourceBuffer*)findNextActivedWithCloseSourceBuffers:(NSArray*)buffers {
+    CEESourceBuffer* currentActived = [self activedSourceBuffer];
+    NSInteger currentActivedIndex = [_openedSourceBuffers indexOfObject:currentActived];
+    NSInteger nextActivedIndexBeforeCurrent = -1;
+    CEESourceBuffer* nextActivedBeforeCurrent = nil;
+    NSInteger nextActivedIndexAfterCurrent = -1;
+    CEESourceBuffer* nextActivedAfterCurrent = nil;
+    
+    nextActivedIndexBeforeCurrent = currentActivedIndex - 1;
+    while (nextActivedIndexBeforeCurrent >= 0) {
+        CEESourceBuffer* buffer = [_openedSourceBuffers objectAtIndex:nextActivedIndexBeforeCurrent];
+        if (![buffers containsObject:buffer]) {
+            nextActivedBeforeCurrent = buffer;
+            break;
+        }
+        nextActivedIndexBeforeCurrent --;
     }
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortActiveSourceBuffer object:self];
+    
+    nextActivedIndexAfterCurrent = currentActivedIndex + 1;
+    while (nextActivedIndexAfterCurrent < _openedSourceBuffers.count) {
+        CEESourceBuffer* buffer = [_openedSourceBuffers objectAtIndex:nextActivedIndexAfterCurrent];
+        if (![buffers containsObject:buffer]) {
+            nextActivedAfterCurrent = buffer;
+            break;
+        }
+        nextActivedIndexAfterCurrent ++;
+    }
+    
+    return nextActivedBeforeCurrent ? nextActivedBeforeCurrent : nextActivedAfterCurrent;    
+}
+
+- (void)closeSourceBuffers:(NSArray*)buffers {    
+    CEESourceBuffer* currentActived = [self activedSourceBuffer];
+    CEESourceBuffer* nextActived = nil;
+    if ([buffers containsObject:currentActived]) 
+        nextActived = [self findNextActivedWithCloseSourceBuffers:buffers];
+    
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    for (CEESourceBuffer* buffer in buffers) {
+        [sourceBufferManager closeSourceBuffer:buffer];
+        [_openedSourceBuffers removeObject:buffer];
+    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCloseSourceBuffer object:self];
+    
+    if (nextActived)
+        [self setActivedSourceBuffer:nextActived];
+    
+    if (!_openedSourceBuffers.count)
+        [self.session deletePort:self];
+}
+
+- (void)closeAllSourceBuffers {
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    for (CEESourceBuffer* buffer in _openedSourceBuffers)
+        [sourceBufferManager closeSourceBuffer:buffer];
+    _openedSourceBuffers = [[NSMutableArray alloc] init];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCloseSourceBuffer object:self];
 }
 
 - (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filePath {
     AppDelegate* delegate = [NSApp delegate];
     CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    
+    NSString* filePathBeforeSave = buffer.filePath;
+    
+    BOOL withNewFilePath = NO;
+    if (![buffer.filePath isEqualToString:filePath])
+        withNewFilePath = YES;
+    
     [sourceBufferManager saveSourceBuffer:buffer atPath:filePath];
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSaveSourceBuffer object:self];
+    
+    if (withNewFilePath) {
+        if ([sourceBufferManager isTemporaryFilePath:filePathBeforeSave]) {
+            CEEProjectController* controller = (CEEProjectController*)[NSDocumentController sharedDocumentController];
+            [controller replaceSourceBufferReferenceFilePath:filePathBeforeSave to:filePath];
+        }
+        else {
+            [self openSourceBuffersWithFilePaths:@[filePath]];
+        }
+    }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSaveSourceBuffer object:self userInfo:@{@"sourceBuffer" : buffer}];
 }
 
 - (NSString*)serialize {
     CEEBufferReference* reference = nil;
+    CEESourceBuffer* buffer = nil;
+    
     // session port serialize start
     NSString* serializing = [NSString stringWithFormat:@"\"%@\":", self.identifier];
     serializing = [serializing stringByAppendingFormat:@"{"];
     
+    // opened buffer begin
+    serializing = [serializing stringByAppendingFormat:@"\"openedBuffers\":"];
+    serializing = [serializing stringByAppendingFormat:@"["];
+    for (int i = 0; i < _openedSourceBuffers.count; i ++) {
+        buffer = _openedSourceBuffers[i];
+        serializing = [serializing stringByAppendingFormat:@"{"];
+        serializing = [serializing stringByAppendingFormat:@"\"filePath\":\"%@\"", buffer.filePath];
+        serializing = [serializing stringByAppendingFormat:@"}"];
+        
+        if (i < _bufferReferences.count - 1)
+            serializing = [serializing stringByAppendingFormat:@","];
+    }
+    serializing = [serializing stringByAppendingFormat:@"]"];
+    // opened buffer end
+    serializing = [serializing stringByAppendingFormat:@","];
+        
     // reference index begin
     serializing = [serializing stringByAppendingFormat:@"\"bufferReferenceIndex\":\"%ld\"", _bufferReferenceIndex];
     // reference index end
-    
     serializing = [serializing stringByAppendingFormat:@","];
-    
+        
     // references begin
     serializing = [serializing stringByAppendingFormat:@"\"bufferReferences\":"];
     serializing = [serializing stringByAppendingFormat:@"["];
     for (int i = 0; i < _bufferReferences.count; i ++) {
         reference = _bufferReferences[i];
         serializing = [serializing stringByAppendingFormat:@"{"];
-        serializing = [serializing stringByAppendingFormat:@"\"filePath\":\"%@\"", reference.buffer.filePath];
+        serializing = [serializing stringByAppendingFormat:@"\"filePath\":\"%@\"", reference.filePath];
         serializing = [serializing stringByAppendingFormat:@","];
-        serializing = [serializing stringByAppendingFormat:@"\"pragraphIndex\":\"%lu\"", reference.paragraphIndex];
+        serializing = [serializing stringByAppendingFormat:@"\"bufferOffset\":\"%lu\"", reference.bufferOffset];
         serializing = [serializing stringByAppendingFormat:@"}"];
         
         if (i < _bufferReferences.count - 1)
-        serializing = [serializing stringByAppendingFormat:@","];
+            serializing = [serializing stringByAppendingFormat:@","];
             
     }
     serializing = [serializing stringByAppendingFormat:@"]"];
@@ -306,36 +444,36 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     CEESourceBuffer* buffer = nil;
     CEEBufferReference* reference = nil;
     
+    NSArray* openBufferDescriptors = descriptor[@"openedBuffers"];
+    for (NSDictionary* openBufferDescriptor in openBufferDescriptors) {
+        NSString* filePath = openBufferDescriptor[@"filePath"];
+        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
+        if (buffer)
+            [_openedSourceBuffers addObject:buffer];
+    }
+    
     NSArray* referenceDescriptors = descriptor[@"bufferReferences"];
     for (NSDictionary* referenceDescriptor in referenceDescriptors) {
         NSString* filePath = referenceDescriptor[@"filePath"];
-        NSString* paragraphIndex = referenceDescriptor[@"pragraphIndex"];
-        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
-        if (buffer) {
-            reference = [[CEEBufferReference alloc] initWithSourceBuffer:buffer];
-            [reference setParagraphIndex:[paragraphIndex integerValue]];
-            [_bufferReferences addObject:reference];
-            [_session registerSourceBuffer:buffer];
-        }
+        NSString* bufferOffset = referenceDescriptor[@"bufferOffset"];       
+        reference = [[CEEBufferReference alloc] initWithFilePath:filePath];
+        [reference setBufferOffset:[bufferOffset integerValue]];
+        [_bufferReferences addObject:reference];
     }
     
-    if (_bufferReferences.count) {
-        NSString* referenceIndexDescriptor = descriptor[@"bufferReferenceIndex"];
-        _bufferReferenceIndex = [referenceIndexDescriptor integerValue];
-        if (_bufferReferenceIndex > _bufferReferences.count - 1)
-            _bufferReferenceIndex = _bufferReferences.count - 1;
-        
-        CEEBufferReference* bufferReference = [self currentBufferReference];
-        if (bufferReference) {
-            buffer = [[self currentBufferReference] buffer];
+    NSString* referenceIndexDescriptor = descriptor[@"bufferReferenceIndex"];
+    _bufferReferenceIndex = [referenceIndexDescriptor integerValue];
+    reference = _bufferReferences[_bufferReferenceIndex];
+    for (CEESourceBuffer* buffer in _openedSourceBuffers) {
+        if ([buffer.filePath isEqualToString:reference.filePath]) {
             cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
+            break;
         }
     }
-    
     _identifier = identifier;
 }
 
-- (void)discardSourceBuffers {
+- (void)discardReferences {    
     _bufferReferences = [[NSMutableArray alloc] init];
     _bufferReferenceIndex = -1;
 }
@@ -362,7 +500,7 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     CEESourceSymbol* symbol = NULL;
     CEEList* context = NULL;
     CEEBufferReference* bufferReference = [self currentBufferReference];
-    CEESourceBuffer* buffer = [bufferReference buffer];
+    CEESourceBuffer* buffer = [self sourceBufferInReference:bufferReference];
     
     CEESourceReferenceSearchOption options = kCEESourceReferenceSearchOptionLocal | 
         kCEESourceReferenceSearchOptionGlobal;
@@ -377,10 +515,9 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     }
     else if (cluster->type == kCEETokenClusterTypeSymbol) {
         symbol = (CEESourceSymbol*)cluster->content_ref;
-        context = cee_database_symbols_search_by_descriptor(self.session.project.database, 
-                                                            symbol->descriptor);
+        context = cee_database_symbols_search_by_name(self.session.project.database,
+                                                      symbol->name);
     }
-    //cee_symbols_print(context);
     return context;
 }
 
@@ -423,6 +560,12 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSetActivedSymbol object:self];
 }
 
+
+- (void)setActivedBufferOffset:(NSInteger)offset {
+    _active_buffer_offset = offset;
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSetActivedBufferOffset object:self];
+}
+
 @end
 
 @implementation CEESession
@@ -432,12 +575,17 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _ports = [[NSMutableArray alloc] init];
         _identifier = CreateObjectID(self);
         [self setActivedPort:[self createPort]];
         [self createDescriptor:init_descriptor_template];
     }
     return self;
+}
+
+- (void)addPort:(CEESessionPort*)port {
+    if (!_ports)
+        _ports = [[NSMutableArray alloc] init];
+    [_ports addObject:port];
 }
 
 - (CEESessionPort*)createPort {
@@ -446,13 +594,24 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
         return nil;
     
     [port setSession:self];
-    [_ports addObject:port];
+    [self addPort:port];
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionCreatePort object:self];
     return port;
 }
 
 - (void)deletePort:(CEESessionPort*)port {
+    [port closeAllSourceBuffers];
     [_ports removeObject:port];
+    if (port == _activedPort)
+        _activedPort = nil;
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionDeletePort object:self];
+}
+
+- (void)deleteAllPorts {
+    for (CEESessionPort* port in _ports)
+        [port closeAllSourceBuffers];
+    _ports = nil;
+    _activedPort = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionDeletePort object:self];
 }
 
@@ -469,25 +628,16 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     return [_project getFilePathsWithCondition:condition];
 }
 
-- (void)registerSourceBuffer:(CEESourceBuffer*)buffer {
-    if (!_registeredSourceBuffers)
-        _registeredSourceBuffers = [[NSMutableArray alloc] init];
-    
-    for (CEESourceBuffer* registeredBuffer in _registeredSourceBuffers) {
-        if (registeredBuffer == buffer)
-            return;
-    }
-    
-    [_registeredSourceBuffers addObject:buffer];
-}
-
-- (void)cleanRegisteredSourceBuffers {
-    _registeredSourceBuffers = nil;
-}
-
 - (NSString*)serialize {
+    AppDelegate* delegate = [NSApp delegate];
+    
     // session serialize start
     NSString* serializing = @"{";
+    
+    // version begin
+    serializing = [serializing stringByAppendingFormat:@"\"serializer\":\"%@\"", [delegate serializerVersionString]];
+    // version end
+    serializing = [serializing stringByAppendingFormat:@","];
     
     // session window serialize begin
     serializing = [serializing stringByAppendingFormat:@"\"ui\":"];
@@ -518,12 +668,15 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     serializing = [serializing stringByAppendingFormat:@","];
     
     // active port serialize begin
-    serializing = [serializing stringByAppendingFormat:@"\"activePort\":\"%@\"", _activedPort.identifier];
+    if (_activedPort)
+        serializing = [serializing stringByAppendingFormat:@"\"activePort\":\"%@\"", _activedPort.identifier];
+    else
+        serializing = [serializing stringByAppendingFormat:@"\"activePort\":\"%@\"", @""];
     // active port serialize end
-        
+    
     serializing = [serializing stringByAppendingFormat:@"}"];
     
-    NSLog(@"%@", serializing);
+    //NSLog(@"%@", serializing);
     
     return serializing;
 }
@@ -531,13 +684,13 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
 - (void)deserialize:(NSDictionary*)dict {
     _descriptor = dict;
     
-    [_ports removeAllObjects];
+    [self deleteAllPorts];
     NSArray* portDescriptors = _descriptor[@"ports"];
     for (NSDictionary* portDescriptor in portDescriptors) {
         CEESessionPort* port = [[CEESessionPort alloc] init];
         if (port) {
             [port setSession:self];
-            [_ports addObject:port];
+            [self addPort:port];
             [port deserialize:portDescriptor];
         }
     }
@@ -647,35 +800,43 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
 - (void)createSessionWithFilePaths:(NSArray*)filePaths {
     CEESession* session = [self createSession];
     [session.project setCurrentSession:session];
-    for (NSString* filePath in filePaths)
-        [session.activedPort openSourceBufferWithFilePath:filePath];
+    [session.activedPort openSourceBuffersWithFilePaths:filePaths];
     [session createDescriptor:open_file_descriptor_template];
     [self makeWindowControllerFromSession:session];
 }
 
-- (void)deleteSessions {
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+- (void)deleteSession:(CEESession*)session {
+    [session deleteAllPorts];
     for (NSWindowController* controller in self.windowControllers) {
-        [controller close];
-        [self removeWindowController:controller];
+        if ([controller isKindOfClass:[CEESessionWindowController class]]) {
+            if (((CEESessionWindowController*)controller).session == session) {
+                [controller close];
+                [self removeWindowController:controller];
+            }
+        }
     }
-    
+    [_sessions removeObject:session];
+}
+
+- (void)deleteAllSessions {
     for (CEESession* session in _sessions) {
-        for (CEESourceBuffer* buffer in session.registeredSourceBuffers)
-            [sourceBufferManager closeSourceBuffer:buffer];
-        [session cleanRegisteredSourceBuffers];
+        [session deleteAllPorts];
+        for (NSWindowController* controller in self.windowControllers) {
+            if ([controller isKindOfClass:[CEESessionWindowController class]]) {
+                if (((CEESessionWindowController*)controller).session == session) {
+                    [controller close];
+                    [self removeWindowController:controller];
+                }
+            }
+        }
     }
-    
     _sessions = [[NSMutableArray alloc] init];
     self.currentSession = nil;
 }
 
 - (void)setProperties:(CEEProjectSetting*)properties {
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
     
-    if (!properties || !properties.name || !properties.filePaths)
+    if (!properties || !properties.name || !properties.filePathsExpanded)
         return;
     
     _properties = properties;
@@ -687,7 +848,7 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     [[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:backendPath]];
     _database = cee_database_create([backendPath UTF8String]);
     
-    NSArray* filePaths = properties.filePaths;
+    NSArray* filePaths = properties.filePathsExpanded;
     CEEList* file_paths = NULL;
     for (NSString* filePath in filePaths)
         file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
@@ -695,17 +856,15 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     cee_list_free_full(file_paths, cee_free);
     
     for (CEESession* session in self.sessions) {
-        for (CEESourceBuffer* buffer in session.registeredSourceBuffers)
-            [sourceBufferManager closeSourceBuffer:buffer];
-        [session cleanRegisteredSourceBuffers];
+        for (CEESessionPort* port in session.ports) {
+            [port closeAllSourceBuffers];
+            [port discardReferences];
+        }
     }
     
     if (filePaths) {
         for (CEESession* session in self.sessions) {
-            for (CEESessionPort* port in session.ports)
-                [port discardSourceBuffers];
-            
-            [session.activedPort openSourceBufferWithFilePath:filePaths[0]];
+            [session.activedPort openSourceBuffersWithFilePaths:@[filePaths[0]]];
         }
     }
     
@@ -720,13 +879,15 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     if (!_database)
         return nil;
     
-    NSMutableArray* filePaths = [[NSMutableArray alloc] init];
+    NSMutableArray* filePaths = nil;
     condition = [condition stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     CEEList* file_paths = cee_database_filepaths_get(_database, [condition UTF8String]);
     CEEList* p = NULL;
     p = file_paths;
     while (p) {
         cee_char* str = p->data;
+        if (!filePaths)
+            filePaths = [[NSMutableArray alloc] init];
         [filePaths addObject:[NSString stringWithUTF8String:str]];
         p = p->next;
     }
@@ -771,11 +932,14 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
     
     if (!self.database) {
         
-        for (CEESession* session in _sessions)
-            [buffers addObjectsFromArray:[session registeredSourceBuffers]];
+        for (CEESession* session in _sessions) {
+            for (CEESessionPort* port in session.ports) {
+                [buffers addObjectsFromArray:[port openedSourceBuffers]];
+            }
+        }
         
         for (CEESourceBuffer* buffer in buffers)
-            if (!(buffer.state & kCEESourceBufferStateFileUntitled))
+            if (!(buffer.state & kCEESourceBufferStateFileTemporary))
                 [filePaths addObject:buffer.filePath];
     }
     
@@ -796,7 +960,7 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
         return ;
     
     // clean the init sessions
-    [self deleteSessions];
+    [self deleteAllSessions];
     
     // create sessions from session descriptors
     descriptors = cee_database_session_descriptors_get(_database);
@@ -872,6 +1036,19 @@ NSDictionary* JSONDictionaryFromString(NSString* string)
             return project;
     }
     return nil;
+}
+
+- (void)replaceSourceBufferReferenceFilePath:(NSString*)filePath0 to:(NSString*)filePath1 {
+    for (CEEProject* project in self.documents) {
+        for (CEESession* session in project.sessions) {
+            for (CEESessionPort* port in session.ports) {
+                for (CEEBufferReference* reference in port.bufferReferences) {
+                    if ([reference.filePath isEqualToString:filePath0])
+                        reference.filePath = filePath1;
+                }
+            }
+        }
+    }
 }
 
 @end

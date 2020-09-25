@@ -60,7 +60,7 @@
     for (NSInteger i = 0; i < names.count; i ++) {
         NSString* name = names[i];
         if ([name caseInsensitiveCompare:_selected] == NSOrderedSame) {
-            NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:i];
+            //NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:i];
             //[_styleTable selectRowIndexes:indexSet byExtendingSelection:NO];
             //[_styleTable scrollRowToVisible:i];
             break;

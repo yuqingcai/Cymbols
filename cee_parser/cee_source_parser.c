@@ -57,6 +57,7 @@ static void symbol_tag_map_init(void)
     
     symbol_tag_map[kCEESourceSymbolTypeUnknow]                            = kCEETagTypeIgnore;
     symbol_tag_map[kCEESourceSymbolTypePrepDirectiveDefine]               = kCEETagTypePrepDirectiveDefine;
+    symbol_tag_map[kCEESourceSymbolTypePrepDirectiveIncludePath]          = kCEETagTypePrepFilename;
     symbol_tag_map[kCEESourceSymbolTypePrepDirectiveParameter]            = kCEETagTypePrepDirectiveDefineParameter;
     symbol_tag_map[kCEESourceSymbolTypeFunctionDeclaration]               = kCEETagTypeFunctionDeclaration;
     symbol_tag_map[kCEESourceSymbolTypeFunctionDefinition]                = kCEETagTypeFunctionDefinition;
@@ -590,7 +591,8 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                             symbol->type == kCEESourceSymbolTypeMessageDeclaration ||
                             symbol->type == kCEESourceSymbolTypeTypeDefine ||
                             symbol->type == kCEESourceSymbolTypeEnumerator ||
-                            symbol->type == kCEESourceSymbolTypePrepDirectiveDefine) {
+                            symbol->type == kCEESourceSymbolTypePrepDirectiveDefine ||
+                            symbol->type == kCEESourceSymbolTypePrepDirectiveInclude) {
                             
                             leaf = cee_tree_create();
                             leaf->data = symbol;
@@ -1003,8 +1005,8 @@ CEEList* cee_source_fregment_symbols_search_by_type(CEESourceFregment* fregment,
     return symbols;
 }
 
-CEEList* cee_source_fregment_symbols_search_by_descriptor(CEESourceFregment* fregment,
-                                                          const cee_char* descriptor)
+CEEList* cee_source_fregment_symbols_search_by_name(CEESourceFregment* fregment,
+                                                    const cee_char* name)
 {
     if (!fregment)
         return NULL;
@@ -1013,7 +1015,7 @@ CEEList* cee_source_fregment_symbols_search_by_descriptor(CEESourceFregment* fre
     CEEList* p = fregment->symbols;
     while (p) {
         CEESourceSymbol* symbol = p->data;
-        if (symbol->descriptor && !strcmp(symbol->descriptor, descriptor))
+        if (symbol->name && !strcmp(symbol->name, name))
             symbols = cee_list_prepend(symbols, symbol);
         
         p = p->next;
@@ -1021,8 +1023,8 @@ CEEList* cee_source_fregment_symbols_search_by_descriptor(CEESourceFregment* fre
     return symbols;
 }
 
-CEEList* cee_source_fregment_symbols_in_children_search_by_descriptor(CEESourceFregment* fregment,
-                                                                      const cee_char* descriptor)
+CEEList* cee_source_fregment_symbols_in_children_search_by_name(CEESourceFregment* fregment,
+                                                                const cee_char* name)
 {
     if (!fregment)
         return NULL;
@@ -1031,7 +1033,7 @@ CEEList* cee_source_fregment_symbols_in_children_search_by_descriptor(CEESourceF
     CEEList* p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
     while (p) {
         CEESourceFregment* child = p->data;
-        CEEList* q = cee_source_fregment_symbols_search_by_descriptor(child, descriptor);
+        CEEList* q = cee_source_fregment_symbols_search_by_name(child, name);
         symbols = cee_list_concat(symbols, q);
         p = SOURCE_FREGMENT_NEXT(p);
     }
@@ -1150,8 +1152,7 @@ CEEList* cee_symbols_search_by_reference(CEESourceReference* reference,
     }
     
     if (options & kCEESourceReferenceSearchOptionGlobal) {
-        p = cee_database_symbols_search_by_descriptor(database, 
-                                                      reference->descriptor);
+        p = cee_database_symbols_search_by_name(database, reference->name);
         global = cee_list_concat(global, p);
     }
     /**
@@ -1192,13 +1193,13 @@ static CEEList* local_symbols_search_by_reference(CEESourceReference* reference,
 {
     CEESourceFregment* fregment = NULL;
     CEESourceFregment* current = NULL;
-    const cee_char* descriptor = NULL;
+    const cee_char* name = NULL;
     CEEList* symbols = NULL;
     CEEList* copied = NULL;
     CEEList* p = NULL;
     
-    descriptor = reference->descriptor;
-    if (!descriptor)
+    name = reference->name;
+    if (!name)
         return NULL;
         
     current = source_fregment_from_reference_get(reference);
@@ -1206,7 +1207,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceReference* reference,
         return NULL;
     
     /** search current */
-    symbols = cee_source_fregment_symbols_search_by_descriptor(current, descriptor);
+    symbols = cee_source_fregment_symbols_search_by_name(current, name);
     if (symbols) 
         goto found;
     
@@ -1214,7 +1215,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceReference* reference,
     p = SOURCE_FREGMENT_CHILDREN_FIRST(current);
     while (p) {
         if (((CEESourceFregment*)p->data)->type & searchable_child_fregment_type) {
-            symbols = cee_source_fregment_symbols_in_children_search_by_descriptor(p->data, descriptor);
+            symbols = cee_source_fregment_symbols_in_children_search_by_name(p->data, name);
             if (symbols) 
                 goto found;
         }
@@ -1225,7 +1226,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceReference* reference,
     if (current->node) {
         p = SOURCE_FREGMENT_PREV(current->node);
         while (p) {     
-            symbols = cee_source_fregment_symbols_search_by_descriptor(p->data, descriptor);
+            symbols = cee_source_fregment_symbols_search_by_name(p->data, name);
             if (symbols) 
                 goto found;
             p = SOURCE_FREGMENT_PREV(p);
@@ -1242,7 +1243,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceReference* reference,
             break;
         
         /** search grandfather */
-        symbols = cee_source_fregment_symbols_search_by_descriptor(fregment, descriptor);
+        symbols = cee_source_fregment_symbols_search_by_name(fregment, name);
         if (symbols)
             goto found;
         
@@ -1252,7 +1253,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceReference* reference,
             if (p->data == cee_source_fregment_parent_get(current))
                 break;
             if (((CEESourceFregment*)p->data)->type & searchable_child_fregment_type) {
-                symbols = cee_source_fregment_symbols_in_children_search_by_descriptor(p->data, descriptor);
+                symbols = cee_source_fregment_symbols_in_children_search_by_name(p->data, name);
                 if (symbols) 
                     goto found;
             }
@@ -1264,7 +1265,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceReference* reference,
         if (fregment->node) {
             p = SOURCE_FREGMENT_PREV(fregment->node);
             while (p) {
-                symbols = cee_source_fregment_symbols_search_by_descriptor(p->data, descriptor);
+                symbols = cee_source_fregment_symbols_search_by_name(p->data, name);
                 if (symbols)
                     goto found;
                 
@@ -1275,8 +1276,8 @@ static CEEList* local_symbols_search_by_reference(CEESourceReference* reference,
     
 search_prep_directive:
     symbols = cee_source_fregment_tree_symbols_search(prep_directive,
-                                                      cee_source_symbol_matcher_by_descriptor,
-                                                      (cee_pointer)descriptor);
+                                                      cee_source_symbol_matcher_by_name,
+                                                      (cee_pointer)name);
     if (symbols)
         goto found;
     
@@ -1408,8 +1409,8 @@ static cee_boolean syntax_tags_create_recursive(CEESourceParserRef parser_ref,
     
     CEEList* p = NULL;
     
-    *tags = cee_list_concat(*tags, language_private_tags_create(parser_ref, fregment));
     *tags = cee_list_concat(*tags, cee_source_fregment_symbol_tags_create(fregment));
+    *tags = cee_list_concat(*tags, language_private_tags_create(parser_ref, fregment));
     
     p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
     while (p) {
@@ -1434,37 +1435,40 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
-        tag_type = kCEETagTypeIgnore;
         
-        if (parser_ref->token_type_matcher) {
-            if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypeKeyword))
-                tag_type = kCEETagTypeKeyword;
-            else if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypePrepDirective))
-                tag_type = kCEETagTypePrepDirective;
-            else if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypePunctuation))
-                tag_type = kCEETagTypePunctuation;
+        if (!(token->state & kCEETokenStateSymbolOccupied)) {
+        
+            tag_type = kCEETagTypeIgnore;
+            
+            if (parser_ref->token_type_matcher) {
+                if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypeKeyword))
+                    tag_type = kCEETagTypeKeyword;
+                else if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypePrepDirective))
+                    tag_type = kCEETagTypePrepDirective;
+                else if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypePunctuation))
+                    tag_type = kCEETagTypePunctuation;
+            }
+            
+            if (tag_type == kCEETagTypeIgnore) {
+                if (token->identifier == kCEETokenID_CONSTANT)
+                    tag_type = kCEETagTypeConstant;
+                else if (token->identifier == kCEETokenID_C_COMMENT)
+                    tag_type = kCEETagTypeComment;
+                else if (token->identifier == kCEETokenID_CPP_COMMENT)
+                    tag_type = kCEETagTypeComment;
+                else if (token->identifier == kCEETokenID_LITERAL)
+                    tag_type = kCEETagTypeLiteral;
+                else if (token->identifier == kCEETokenID_CHARACTER)
+                    tag_type = kCEETagTypeCharacter;
+            }
+            
+            if (tag_type != kCEETagTypeIgnore) {
+                range = cee_range_make(token->offset, token->length);
+                tag = cee_tag_create(tag_type, range);
+                if (tag)
+                    tags = cee_list_prepend(tags, tag);
+            }
         }
-        
-        if (tag_type == kCEETagTypeIgnore) {
-            if (token->identifier == kCEETokenID_CONSTANT)
-                tag_type = kCEETagTypeConstant;
-            else if (token->identifier == kCEETokenID_C_COMMENT)
-                tag_type = kCEETagTypeComment;
-            else if (token->identifier == kCEETokenID_CPP_COMMENT)
-                tag_type = kCEETagTypeComment;
-            else if (token->identifier == kCEETokenID_LITERAL)
-                tag_type = kCEETagTypeLiteral;
-            else if (token->identifier == kCEETokenID_CHARACTER)
-                tag_type = kCEETagTypeCharacter;
-        }
-        
-        if (tag_type != kCEETagTypeIgnore) {
-            range = cee_range_make(token->offset, token->length);
-            tag = cee_tag_create(tag_type, range);
-            if (tag)
-                tags = cee_list_prepend(tags, tag);
-        }
-        
         p = TOKEN_NEXT(p);
     }
     return tags;
@@ -1515,7 +1519,7 @@ exit:
 CEETokenCluster* cee_token_cluster_search_by_buffer_offset(CEEList* references, 
                                                            CEESourceFregment* prep_directive, 
                                                            CEESourceFregment* statement, 
-                                                           cee_long buffer_offset)
+                                                           cee_long offset)
 {
     CEETokenCluster* cluster = NULL;
     CEEList* symbols = NULL;
@@ -1528,7 +1532,7 @@ CEETokenCluster* cee_token_cluster_search_by_buffer_offset(CEEList* references,
         reference = p->data;
         ranges = cee_ranges_from_string(reference->locations);
         if (ranges) {
-            if (cee_location_in_ranges(buffer_offset, ranges))
+            if (cee_location_in_ranges(offset, ranges))
                 cluster = cee_token_cluster_create(kCEETokenClusterTypeReference, 
                                                    reference);
             cee_list_free_full(ranges, cee_range_free);
@@ -1540,7 +1544,7 @@ CEETokenCluster* cee_token_cluster_search_by_buffer_offset(CEEList* references,
     
     symbols = cee_source_fregment_tree_symbols_search(prep_directive,
                                                       cee_source_symbol_matcher_by_buffer_offset,
-                                                      CEE_INT_TO_POINTER(buffer_offset));
+                                                      CEE_INT_TO_POINTER(offset));
     if (symbols) {
         symbol = cee_list_nth_data(symbols, 0);
         cluster = cee_token_cluster_create(kCEETokenClusterTypeSymbol, 
@@ -1551,7 +1555,7 @@ CEETokenCluster* cee_token_cluster_search_by_buffer_offset(CEEList* references,
     
     symbols = cee_source_fregment_tree_symbols_search(statement,
                                                       cee_source_symbol_matcher_by_buffer_offset,
-                                                      CEE_INT_TO_POINTER(buffer_offset));
+                                                      CEE_INT_TO_POINTER(offset));
     if (symbols) {
         symbol = cee_list_nth_data(symbols, 0);
         cluster = cee_token_cluster_create(kCEETokenClusterTypeSymbol, 

@@ -33,10 +33,6 @@
     NSString* caretColorMarkedProperty = scheme.descriptor[@"caret_color_marked"];
     NSString* textBackgroundColorSelectedProperty = scheme.descriptor[@"text_background_color_selected"];
     NSString* textBackgroundColorSelectedOutlineProperty = scheme.descriptor[@"text_background_color_selected_outline"];
-    NSString* textBackgroundColorMarkedProperty = scheme.descriptor[@"text_background_color_marked"];
-    NSString* textBackgroundColorMarkedOutlineProperty = scheme.descriptor[@"text_background_color_marked_outline"];
-    NSString* textBackgroundColorSearchedProperty = scheme.descriptor[@"text_background_color_searched"];
-    NSString* textBackgroundColorSearchedOutlineProperty = scheme.descriptor[@"text_background_color_searched_outline"];
     NSString* textBackgroundColorHighlightProperty = scheme.descriptor[@"text_background_color_highlight"];
     NSString* textBackgroundColorHighlightOutlineProperty = scheme.descriptor[@"text_background_color_highlight_outline"];
     NSString* aligmentProperty = scheme.descriptor[@"aligment"];
@@ -98,18 +94,6 @@
     if (textBackgroundColorSelectedOutlineProperty)
         self.textBackgroundColorSelectedOutline = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorSelectedOutlineProperty];
     
-    if (textBackgroundColorMarkedProperty)
-        self.textBackgroundColorMarked = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorMarkedProperty];
-    
-    if (textBackgroundColorMarkedOutlineProperty)
-        self.textBackgroundColorMarkedOutline = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorMarkedOutlineProperty];
-    
-    if (textBackgroundColorSearchedProperty)
-        self.textBackgroundColorSearched = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorSearchedProperty];
-    
-    if (textBackgroundColorSearchedOutlineProperty)
-        self.textBackgroundColorSearchedOutline = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorSearchedOutlineProperty];
-            
     if (textBackgroundColorHighlightProperty)
         self.textBackgroundColorHighlight = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorHighlightProperty];
     

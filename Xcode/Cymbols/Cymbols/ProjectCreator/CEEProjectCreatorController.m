@@ -13,6 +13,7 @@
 #import "CEEButton.h"
 #import "CEEProject.h"
 #import "CEEFileNameCellView.h"
+#import "CEEFilePathCellView.h"
 
 typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     kCEEProjectSetting,
@@ -50,23 +51,24 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     [_settingView.filePathTable setDataSource:self];
     [_settingView.filePathTable setDelegate:self];
     [_settingView.filePathTable setColumns:2];
-    [_settingView.filePathTable setAllowsMultipleSelection:NO];
+    [_settingView.filePathTable setAllowsMultipleSelection:YES];
     [_settingView.saveAtButton setTarget:self];
     [_settingView.saveAtButton setAction:@selector(selectSavePath:)];
     [_settingView.addFilePathButton setTarget:self];
-    [_settingView.addFilePathButton setAction:@selector(addFilePathToSourceTable:)];
+    [_settingView.addFilePathButton setAction:@selector(addUserSelectedFilePaths:)];
     [_settingView.removeFilePathsButton setTarget:self];
-    [_settingView.removeFilePathsButton setAction:@selector(removeFilePathsFromSourceTable:)];
+    [_settingView.removeFilePathsButton setAction:@selector(removeUserSelectedFilePaths:)];
+    
     [_propertyView.filePathTable setDataSource:self];
     [_propertyView.filePathTable setDelegate:self];
     [_propertyView.filePathTable setColumns:1];
     [_propertyView.filePathTable setAllowsMultipleSelection:NO];
-    
 }
 
 - (void)viewWillAppear {
     _scene = kCEEProjectSetting;
     [self createScene:_scene];
+    [self setViewStyleState:kCEEViewStyleStateActived];
 }
 
 - (void)createScene:(CEEProjectCreateScene)scene {
@@ -84,7 +86,7 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
         _button1.title = @"Next";
     }
     else if (scene == kCEEProjectProperty) {
-        _setting.filePaths = ExpandFilePaths(_setting.filePaths);
+        _setting.filePathsExpanded = ExpandFilePaths(_setting.filePathsUserSelected);
         [_propertyView.filePathTable reloadData];
         _currentView = (CEEView*)_propertyView;
         _setting.name = _settingView.nameInput.stringValue;
@@ -92,12 +94,13 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
         
         _propertyView.projectNameLabel.stringValue = [NSString stringWithFormat:@"Project Name: %@", _setting.name];
         _propertyView.savePathLabel.stringValue = [NSString stringWithFormat:@"Project Path: %@", _setting.path];
-        _propertyView.sourceFileLabel.stringValue = [NSString stringWithFormat:@"%lu Files will be added to Project", (unsigned long)_setting.filePaths.count];
+        _propertyView.sourceFileLabel.stringValue = [NSString stringWithFormat:@"%lu Files will be added to Project", (unsigned long)_setting.filePathsExpanded.count];
         _button0.title = @"Previous";
         _button1.title = @"Complete";
     }
     
     [_currentView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_currentView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     [_currentView setStyleState:kCEEViewStyleStateActived];
     
     [self.view addSubview:_currentView];
@@ -144,28 +147,40 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
 }
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
-    if (_setting.filePaths)
-        return _setting.filePaths.count;
+    if (tableView == _settingView.filePathTable) {
+        if (_setting.filePathsUserSelected)
+            return _setting.filePathsUserSelected.count;
+    }
+    else if (tableView == _propertyView.filePathTable) {
+        if (_setting.filePathsExpanded)
+            return _setting.filePathsExpanded.count;
+        
+    }
     return 0;
 }
 
 - (NSView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     if (tableView == _settingView.filePathTable) {
+        NSString* filePath = _setting.filePathsUserSelected[row];
         if (column == 0) {
             CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFileNameCellView"];
-            cellView.title.stringValue = [_setting.filePaths[row] lastPathComponent];
+            cellView.title.stringValue = [filePath lastPathComponent];
+            [cellView.icon setImage:[styleManager filetypeIconFromFilePath:filePath]];
             return cellView;
         }
         else if (column == 1) {
-            CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFilePathCellView"];
-            cellView.title.stringValue = _setting.filePaths[row] ;
+            CEEFilePathCellView* cellView = [tableView makeViewWithIdentifier:@"IDFilePathCellView"];
+            cellView.title.stringValue = filePath;
             return cellView;
         }
     }
     else if (tableView == _propertyView.filePathTable) {
+        NSString* filePath = _setting.filePathsExpanded[row];
         if (column == 0) {
-            CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFilePathCellView"];
-            cellView.title.stringValue = _setting.filePaths[row] ;
+            CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFileNameCellView"];
+            cellView.title.stringValue = filePath;
+            [cellView.icon setImage:[styleManager filetypeIconFromFilePath:filePath]];
             return cellView;
         }
     }
@@ -214,7 +229,7 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     [NSApp runModalForWindow:[self.view window]];
 }
 
-- (IBAction)addFilePathToSourceTable:(id)sender {
+- (IBAction)addUserSelectedFilePaths:(id)sender {
     NSOpenPanel* openPanel = [NSOpenPanel openPanel];
     NSURL* URL = [[NSURL alloc] initFileURLWithPath:NSHomeDirectory() isDirectory:YES];
     [openPanel setDirectoryURL:URL];
@@ -227,10 +242,10 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
         [NSApp stopModalWithCode:result];
         if (result == NSModalResponseOK) {
             CEEProjectSetting* setting = self->_setting;
-            NSMutableArray* filePaths = [[NSMutableArray alloc] initWithArray:setting.filePaths];
+            NSMutableArray* filePaths = [[NSMutableArray alloc] initWithArray:setting.filePathsUserSelected];
             for (NSURL* URL in [openPanel URLs])
                 [filePaths addObject:[URL path]];
-            setting.filePaths = filePaths;
+            setting.filePathsUserSelected = filePaths;
         }
     })];
     
@@ -238,8 +253,8 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     [_settingView.filePathTable reloadData];
 }
 
--(IBAction)removeFilePathsFromSourceTable:(id)sender {
-    NSMutableArray* filePaths = [[NSMutableArray alloc] initWithArray:_setting.filePaths];
+-(IBAction)removeUserSelectedFilePaths:(id)sender {
+    NSMutableArray* filePaths = [[NSMutableArray alloc] initWithArray:_setting.filePathsUserSelected];
     NSMutableArray* removes = [[NSMutableArray alloc] init];
     NSUInteger i = [_settingView.filePathTable.selectedRowIndexes firstIndex];
     while (i != NSNotFound) {
@@ -250,7 +265,7 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     for (NSString* filePath in removes)
         [filePaths removeObject:filePath];
     
-    _setting.filePaths = filePaths;
+    _setting.filePathsUserSelected = filePaths;
     [_settingView.filePathTable reloadData];
 }
 
@@ -263,15 +278,13 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
 - (BOOL)tableView:(CEETableView *)tableView acceptDrop:(id<NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)dropOperation {
     
     if (tableView == _settingView.filePathTable) {
-    
-        NSMutableArray* filePaths = [[NSMutableArray alloc] initWithArray:_setting.filePaths];
-        NSArray* filepathsInPastBoard = nil;
-        filepathsInPastBoard = [info.draggingPasteboard propertyListForType:NSFilenamesPboardType];
+        NSMutableArray* filePaths = [[NSMutableArray alloc] initWithArray:_setting.filePathsUserSelected];
+        NSArray* filePathsInPastBoard = [info.draggingPasteboard propertyListForType:NSFilenamesPboardType];
         
-        for (NSString* filePath in filepathsInPastBoard)
+        for (NSString* filePath in filePathsInPastBoard)
             [filePaths addObject:filePath];
         
-        _setting.filePaths = filePaths;
+        _setting.filePathsUserSelected = filePaths;
         [_settingView.filePathTable reloadData];
         
         return YES;

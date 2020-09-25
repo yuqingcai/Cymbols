@@ -194,6 +194,12 @@
     }
 }
 
+- (NSArray*)rowViews {
+    if (self.subviews.count)
+        return self.subviews;
+    return nil;
+}
+
 - (void)updateUserInterface {
     CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
     if (!current)

@@ -262,31 +262,67 @@
                 <customObject id="76x-dZ-nfA" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <menu id="vud-lC-Ogt">
                     <items>
-                        <menuItem title="Jump To Definition" id="gX9-0S-O6U">
+                        <menuItem title="Jump To Definition" image="icon_jump_to_target_16x16" id="gX9-0S-O6U">
                             <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="jumpToTargetSymbol:" target="76x-dZ-nfA" id="ASi-ri-PPx"/>
+                            </connections>
                         </menuItem>
-                        <menuItem title="Look Up References..." id="dd5-xN-wjd">
+                        <menuItem title="Search References..." image="icon_search_16x16" id="dd5-xN-wjd">
                             <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="searchReferences:" target="76x-dZ-nfA" id="F3r-Xa-j1D"/>
+                            </connections>
                         </menuItem>
                         <menuItem isSeparatorItem="YES" id="FRj-aD-xkH"/>
-                        <menuItem title="Cut" id="LXZ-ih-NlA">
+                        <menuItem title="Cut" image="icon_cut_16x16" id="LXZ-ih-NlA">
                             <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="cut:" target="76x-dZ-nfA" id="xzZ-kq-tlz"/>
+                            </connections>
                         </menuItem>
-                        <menuItem title="Copy" id="oK9-Ih-5oh">
+                        <menuItem title="Copy" image="icon_copy_16x16" id="oK9-Ih-5oh">
                             <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="copy:" target="76x-dZ-nfA" id="fX6-xy-mAM"/>
+                            </connections>
                         </menuItem>
-                        <menuItem title="Past" id="gDD-Iz-1YT">
+                        <menuItem title="Past" image="icon_paste_16x16" id="gDD-Iz-1YT">
                             <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="paste:" target="76x-dZ-nfA" id="EDQ-9S-XDi"/>
+                            </connections>
                         </menuItem>
-                        <menuItem title="Select All" id="zCl-M3-nlh">
+                        <menuItem title="Select All" image="icon_select_16x16" id="zCl-M3-nlh">
                             <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="selectAll:" target="76x-dZ-nfA" id="JTR-7d-9GP"/>
+                            </connections>
+                        </menuItem>
+                        <menuItem title="Undo" image="icon_undo_16x16" id="kOe-VI-wcv">
+                            <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="undo:" target="76x-dZ-nfA" id="0ms-Rj-6qR"/>
+                            </connections>
+                        </menuItem>
+                        <menuItem title="Redo" image="icon_redo_16x16" id="8i5-No-hQ2">
+                            <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="redo:" target="76x-dZ-nfA" id="rl4-BX-4wy"/>
+                            </connections>
                         </menuItem>
                         <menuItem isSeparatorItem="YES" id="tVA-kD-enz"/>
-                        <menuItem title="Find Selection Next" id="0U7-JK-NC5">
+                        <menuItem title="Find Selection Next" image="icon_search_next_16x16" id="0U7-JK-NC5">
                             <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="nextSearched:" target="76x-dZ-nfA" id="tXQ-11-5DY"/>
+                            </connections>
                         </menuItem>
-                        <menuItem title="Find Selection Previous" id="rzx-en-dDb">
+                        <menuItem title="Find Selection Previous" image="icon_search_prev_16x16" id="rzx-en-dDb">
                             <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="prevSearched:" target="76x-dZ-nfA" id="mG5-X7-aAK"/>
+                            </connections>
                         </menuItem>
                     </items>
                 </menu>
@@ -308,7 +344,7 @@
                                     <constraint firstAttribute="width" constant="202" id="QiU-sy-Qe0"/>
                                 </constraints>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Binary View Not Supported Yet"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Binary View Not Supported Yet!"/>
                                 </userDefinedRuntimeAttributes>
                             </customView>
                         </subviews>
@@ -335,13 +371,52 @@
             </objects>
             <point key="canvasLocation" x="139.5" y="-383.5"/>
         </scene>
+        <!--View Controller-->
+        <scene sceneID="SnQ-Q8-4eK">
+            <objects>
+                <viewController storyboardIdentifier="IDNotSupportedEditViewController" id="M04-t0-ua6" customClass="CEEViewController" sceneMemberID="viewController">
+                    <view key="view" id="q7E-Y2-OKm" customClass="CEEView">
+                        <rect key="frame" x="0.0" y="0.0" width="575" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="le1-7G-jSk" customClass="CEETextLabel">
+                                <rect key="frame" x="226" y="138" width="124" height="25"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="124" id="5TO-Gh-uz7"/>
+                                    <constraint firstAttribute="height" constant="25" id="DjJ-wh-CSK"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Not Supported File"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="le1-7G-jSk" firstAttribute="centerY" secondItem="q7E-Y2-OKm" secondAttribute="centerY" id="Vlr-WR-l8q"/>
+                            <constraint firstItem="le1-7G-jSk" firstAttribute="centerX" secondItem="q7E-Y2-OKm" secondAttribute="centerX" id="gru-MU-td9"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <customObject id="bMX-f2-0Dm" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="139.5" y="840"/>
+        </scene>
     </scenes>
     <resources>
         <image name="icon_character_16x16" width="16" height="16"/>
         <image name="icon_close_16x16" width="16" height="16"/>
+        <image name="icon_copy_16x16" width="16" height="16"/>
+        <image name="icon_cut_16x16" width="16" height="16"/>
+        <image name="icon_jump_to_target_16x16" width="16" height="16"/>
         <image name="icon_navigate_down_16x16" width="16" height="16"/>
         <image name="icon_navigate_up_16x16" width="16" height="16"/>
+        <image name="icon_paste_16x16" width="16" height="16"/>
+        <image name="icon_redo_16x16" width="16" height="16"/>
         <image name="icon_regex_16x16" width="16" height="16"/>
-        <image name="icon_whole_word_16x16" width="16" height="16"/>
+        <image name="icon_search_16x16" width="16" height="16"/>
+        <image name="icon_search_next_16x16" width="16" height="16"/>
+        <image name="icon_search_prev_16x16" width="16" height="16"/>
+        <image name="icon_select_16x16" width="16" height="16"/>
+        <image name="icon_undo_16x16" width="16" height="16"/>
+        <image name="icon_whole_word_16x16" width="16.5" height="16"/>
     </resources>
 </document>

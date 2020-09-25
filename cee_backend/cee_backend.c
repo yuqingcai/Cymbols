@@ -173,7 +173,7 @@ static cee_boolean tables_create(sqlite3* database)
     "CREATE TABLE IF NOT EXISTS cee_source_symbols ("                  \
     "   id             INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
     "   type           INTEGER                                         ,"  \
-    "   descriptor     TEXT                                            ,"  \
+    "   name           TEXT                                            ,"  \
     "   parent         TEXT                                            ,"  \
     "   derives        TEXT                                            ,"  \
     "   protos         TEXT                                            ,"  \
@@ -190,7 +190,7 @@ static cee_boolean tables_create(sqlite3* database)
     }
     
     sql =
-    "CREATE INDEX IF NOT EXISTS cee_source_symbols_descriptor_index on cee_source_symbols (descriptor);";
+    "CREATE INDEX IF NOT EXISTS cee_source_symbols_name_index on cee_source_symbols (name);";
     if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
         fprintf(stderr, "SQL Error: %s\n", message);
         sqlite3_free(message);
@@ -471,7 +471,7 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
     sqlite3_stmt* stmt = NULL;
     char *message = NULL;
     char* sql =
-    "INSERT INTO cee_source_symbols (type, descriptor, parent, derives, protos, language, filepath, locations, fregment_range) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    "INSERT INTO cee_source_symbols (type, name, parent, derives, protos, language, filepath, locations, fregment_range) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
     int ret = SQLITE_OK;
     
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
@@ -486,7 +486,7 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
         CEESourceSymbol* symbol = p->data;
         
         sqlite3_bind_int (stmt, 1, symbol->type);
-        sqlite3_bind_text(stmt, 2, symbol->descriptor, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 2, symbol->name, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 3, symbol->parent, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 4, symbol->derives, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 5, symbol->protos, -1, SQLITE_STATIC);
@@ -510,14 +510,14 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
     return TRUE;
 }
 
-CEEList* cee_database_symbols_search_by_descriptor(cee_pointer db,
-                                                   const cee_char* descriptor)
+CEEList* cee_database_symbols_search_by_name(cee_pointer db,
+                                             const cee_char* name)
 {
-    if (!db || !descriptor)
+    if (!db || !name)
         return NULL;
     
     char* condition = NULL;
-    cee_strconcat0(&condition, "descriptor=", "'", descriptor, "'", NULL);
+    cee_strconcat0(&condition, "name=", "'", name, "'", NULL);
     CEEList* symbols = symbols_search(db, condition);
     
     cee_free(condition);
@@ -581,7 +581,7 @@ static CEEList* symbols_search(sqlite3* db,
     sqlite3_stmt* stmt;
     
     cee_strconcat0(&sql, 
-                   "SELECT type, descriptor, parent, derives, protos, language, filepath, locations fregment_range FROM cee_source_symbols WHERE ",
+                   "SELECT type, name, parent, derives, protos, language, filepath, locations fregment_range FROM cee_source_symbols WHERE ",
                    condition, 
                    ";",
                    NULL);
@@ -605,10 +605,10 @@ static CEEList* symbols_search(sqlite3* db,
         /** type */
         symbol->type = sqlite3_column_int(stmt, 0);
                 
-        /** descriptor */
+        /** name */
         text = (char*)sqlite3_column_text(stmt, 1);
         length = sqlite3_column_bytes(stmt, 1);
-        symbol->descriptor = cee_strndup(text, length);
+        symbol->name = cee_strndup(text, length);
         
         /** parent */
         text = (char*)sqlite3_column_text(stmt, 2);

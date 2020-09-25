@@ -49,6 +49,15 @@
         },
 
         {
+            "name" : "filename",
+            "font" : "font(\"Courier\", 11.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#43a047",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+
+        {
             "name" : "literal",
             "font" : "font(\"Courier\", 11.0, \"regular\", 5.0)",
             "underline" : "false",

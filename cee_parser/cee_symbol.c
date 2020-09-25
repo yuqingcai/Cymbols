@@ -5,8 +5,12 @@
 #include <assert.h>
 #include "cee_symbol.h"
 
+static void source_symbol_tree_dump_to_wrappers(CEETree* tree, 
+                                                int n, 
+                                                CEEList** list);
+
 CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
-                                          const cee_char* descriptor,
+                                          const cee_char* name,
                                           const cee_char* parent,
                                           const cee_char* derives,
                                           const cee_char* protos,
@@ -19,8 +23,8 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
     
     symbol->type = type;
     
-    if (descriptor)
-        symbol->descriptor = cee_strdup(descriptor);
+    if (name)
+        symbol->name = cee_strdup(name);
     
     if (parent)
         symbol->parent = cee_strdup(parent);
@@ -53,8 +57,8 @@ void cee_source_symbol_free(cee_pointer data)
     
     CEESourceSymbol* symbol = (CEESourceSymbol*)data;
     
-    if (symbol->descriptor)
-        cee_free(symbol->descriptor);
+    if (symbol->name)
+        cee_free(symbol->name);
     
     if (symbol->parent)
         cee_free(symbol->parent);
@@ -85,7 +89,7 @@ CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol)
     CEESourceSymbol* copy = cee_malloc0(sizeof(CEESourceSymbol));
     
     copy->type = symbol->type;
-    copy->descriptor = cee_strdup(symbol->descriptor);
+    copy->name = cee_strdup(symbol->name);
     copy->language = cee_strdup(symbol->language);
     copy->filepath = cee_strdup(symbol->filepath);
     copy->parent = cee_strdup(symbol->parent);
@@ -108,10 +112,10 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_uchar* file
     symbol->filepath = cee_strdup((cee_char*)filepath);
     symbol->type = type;
     symbol->language = cee_strdup(language);
-    symbol->descriptor = cee_string_from_token_slice(subject, 
-                                                     begin, 
-                                                     end, 
-                                                     kCEETokenStringOptionCompact);
+    symbol->name = cee_string_from_token_slice(subject,
+                                               begin,
+                                               end,
+                                               kCEETokenStringOptionDefault);
     symbol->locations = cee_ranges_string_from_token_slice(begin,
                                                            end,
                                                            kCEERangeListTypeContinue);
@@ -128,13 +132,31 @@ CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_uchar* filepath,
     symbol->filepath = cee_strdup((cee_char*)filepath);
     symbol->type = type;
     symbol->language = cee_strdup(language);
-    symbol->descriptor = cee_string_from_tokens(subject, 
-                                                TOKEN_FIRST(tokens), 
-                                                kCEETokenStringOptionCompact);
+    symbol->name = cee_string_from_tokens(subject,
+                                          TOKEN_FIRST(tokens),
+                                          kCEETokenStringOptionDefault);
     symbol->locations = cee_ranges_string_from_tokens(TOKEN_FIRST(tokens),
                                                       kCEERangeListTypeSeparate);
     return symbol;
     
+}
+
+void cee_source_symbol_name_format(cee_char* name)
+{
+    cee_size len = strlen(name);
+    cee_char* p = name;
+    cee_size num = 0;
+    while (*p) {
+        if (*p == ' ' && *(p + 1) == ' ') {
+            cee_char* q = p + 1;
+            while (*q == ' ')
+                q ++;
+            
+            num = name + len - q + 1; /** plus '\0' */
+            memmove(p + 1, q, num);
+        }
+        p ++;
+    }
 }
 
 void cee_source_symbol_print(CEESourceSymbol* symbol)
@@ -144,15 +166,15 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
         return ;
     }
     
-    const cee_char* descriptor = "?";
+    const cee_char* name = "?";
     const cee_char* protos = "?";
     const cee_char* derives = "?";
     const cee_char* filepath = "?";
     const cee_char* locations = "?";
     const cee_char* fregment_range = "?";
     
-    if (symbol->descriptor)
-        descriptor = symbol->descriptor;
+    if (symbol->name)
+        name = symbol->name;
     
     if (symbol->protos)
         protos = symbol->protos;
@@ -170,7 +192,7 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
         filepath = symbol->fregment_range;
     
     fprintf(stdout, "%s %s %s %s %s %s\n",
-            descriptor,
+            name,
             protos,
             locations,
             derives, 
@@ -294,15 +316,15 @@ cee_boolean cee_source_symbol_matcher_by_buffer_offset(cee_pointer data,
     return FALSE;
 }
 
-cee_boolean cee_source_symbol_matcher_by_descriptor(cee_pointer data,
-                                                    cee_pointer user_data)
+cee_boolean cee_source_symbol_matcher_by_name(cee_pointer data,
+                                              cee_pointer user_data)
 {
     if (!data || !user_data)
         return FALSE;
     
     CEESourceSymbol* symbol = (CEESourceSymbol*)data;
-    cee_char* descriptor = (cee_char*)user_data;
-    if (symbol->descriptor && !strcmp(symbol->descriptor, descriptor))
+    cee_char* name = (cee_char*)user_data;
+    if (symbol->name && !strcmp(symbol->name, name))
         return TRUE;
     
     return FALSE;
@@ -331,4 +353,101 @@ cee_boolean cee_source_symbol_is_definition(CEESourceSymbol* symbol)
             symbol->type == kCEESourceSymbolTypeNamespaceDefinition || 
             symbol->type == kCEESourceSymbolTypeImplementationDefinition || 
             symbol->type == kCEESourceSymbolTypeProtocolDeclaration);
+}
+
+
+CEESourceSymbolWrapper* cee_source_symbol_wrapper_create(CEESourceSymbol* symbol,
+                                                         cee_uint level)
+{
+    CEESourceSymbolWrapper* wrapper = cee_malloc0(sizeof(CEESourceSymbolWrapper));
+    wrapper->symbol_ref = symbol;
+    wrapper->level = level;
+    return wrapper;
+}
+
+void cee_source_symbol_wrapper_free(cee_pointer data)
+{
+    if (!data)
+        return;
+    
+    CEESourceSymbolWrapper* wrapper = data;
+    cee_free(wrapper);
+}
+
+void cee_source_symbol_tree_dump_to_wrappers(CEETree* tree, 
+                                             CEEList** list)
+{
+    source_symbol_tree_dump_to_wrappers(tree, 0, list);
+}
+
+static void source_symbol_tree_dump_to_wrappers(CEETree* tree, 
+                                                int n, 
+                                                CEEList** list)
+
+{
+    if (!tree)
+        return;
+    
+    CEEList* p = NULL;    
+    CEESourceSymbol* symbol = tree->data;
+    if (symbol) {
+        CEESourceSymbolWrapper* wrapper = cee_source_symbol_wrapper_create(symbol, n);
+        *list = cee_list_prepend(*list, wrapper);
+    }
+    
+    n ++;
+    if (tree->children) {
+        p = CEE_TREE_CHILDREN_FIRST(tree);
+        while (p) {
+            tree = p->data;
+            source_symbol_tree_dump_to_wrappers(tree, n, list);
+            p = CEE_TREE_NODE_NEXT(p);
+        }
+    }
+}
+
+cee_int cee_source_symbol_wrapper_location_compare(const cee_pointer a,
+                                                   const cee_pointer b)
+
+{
+    CEESourceSymbolWrapper* wrapper0 = (CEESourceSymbolWrapper*)a;
+    CEESourceSymbolWrapper* wrapper1 = (CEESourceSymbolWrapper*)b;
+    CEESourceSymbol* symbol0 = wrapper0->symbol_ref;
+    CEESourceSymbol* symbol1 = wrapper1->symbol_ref;
+    return cee_source_symbol_location_compare(symbol0, symbol1);
+}
+
+
+cee_pointer wrapper_copy(const cee_pointer src,
+                         cee_pointer data)
+{
+    CEESourceSymbolWrapper* wrapper = src;
+    return cee_source_symbol_wrapper_create(wrapper->symbol_ref, 
+                                            wrapper->level);
+}
+
+CEEList* cee_source_symbol_wrappers_copy_with_condition(CEEList* wrappers,
+                                                        const cee_char* conditoin)
+{
+    CEEList* filtered = NULL;
+    CEEList* p = NULL;
+    
+    if (!conditoin || !strcmp(conditoin, "")) {
+        filtered = cee_list_copy_deep(wrappers, wrapper_copy, NULL);
+    }
+    else {
+        p = wrappers;
+        while (p) {
+            CEESourceSymbolWrapper* wrapper = p->data;
+            CEESourceSymbol* symbol = wrapper->symbol_ref;
+            if (strstr(symbol->name, conditoin)) {
+                /** level 0 is always tree root */
+                CEESourceSymbolWrapper* copy = cee_source_symbol_wrapper_create(symbol, 1);
+                filtered = cee_list_prepend(filtered, copy);
+            }
+            p = p->next;
+        }
+        filtered = cee_list_reverse(filtered);
+    }
+    return filtered;
 }

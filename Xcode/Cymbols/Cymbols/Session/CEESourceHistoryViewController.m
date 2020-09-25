@@ -61,17 +61,11 @@
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEEBufferReference* reference = _port.bufferReferences[row];
-    CEESourceBuffer* buffer = reference.buffer;
     CEEFileNameCellView *cellView = [_historyTable makeViewWithIdentifier:@"IDFileNameCellView"];
-    NSString* string = [buffer.filePath lastPathComponent];
-    if (column == 0) {
-        if ([buffer stateSet:kCEESourceBufferStateModified])
-            string = [string stringByAppendingString:@" *"];
-        if ([buffer stateSet:kCEESourceBufferStateFileDeleted])
-            string = [string stringByAppendingString:@" (delete)"];
-    }
+    NSString* string = [reference.filePath lastPathComponent];
+    
     cellView.title.stringValue = string;
-    [cellView.icon setImage:[styleManager filetypeIconFromFileName:[buffer.filePath lastPathComponent]]];
+    [cellView.icon setImage:[styleManager filetypeIconFromFileName:[reference.filePath lastPathComponent]]];
     return cellView;
 }
 

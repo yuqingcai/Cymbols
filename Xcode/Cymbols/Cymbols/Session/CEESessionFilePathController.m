@@ -14,7 +14,7 @@
 @property (strong) IBOutlet CEETitleView *titlebar;
 @property (strong) IBOutlet CEETableView *sourceTable;
 @property (strong) NSArray* filePathsInProject;
-@property (strong) NSString* filePathCondition;
+@property (strong) NSString* filterCondition;
 @property (weak) IBOutlet CEETextField *filterInput;
 @end
 
@@ -75,7 +75,6 @@
     return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
-
 - (BOOL)tableView:(CEETableView *)tableView writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pasteboard {
     NSMutableArray *filePaths = [[NSMutableArray alloc] init];
     
@@ -124,6 +123,9 @@
         [filePaths addObject:_filePathsInProject[i]];
         i = [_sourceTable.selectedRowIndexes indexGreaterThanIndex:i];
     }
+    
+    if (!_session.activedPort)
+        [_session setActivedPort:[_session createPort]];
     [_session.activedPort openSourceBuffersWithFilePaths:filePaths];
 }
 
@@ -151,15 +153,8 @@
     [_session.project createSessionWithFilePaths:filePaths];
 }
 
-- (void)textViewTextChanged:(CEETextView *)textView {
-    if (textView == _filterInput) {
-        _filePathCondition = [_filterInput.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        [self presentPaths];
-    }
-}
-
 - (void)deserialize:(NSDictionary *)dict {
-    _filePathsInProject = [_session filePathsFilter:_filePathCondition];
+    _filePathsInProject = [_session filePathsFilter:_filterCondition];
     [_sourceTable reloadData];
 }
 
@@ -204,8 +199,15 @@
 }
 
 - (void)presentPaths {
-    _filePathsInProject = [_session filePathsFilter:_filePathCondition];
+    _filePathsInProject = [_session filePathsFilter:_filterCondition];
     [_sourceTable reloadData];
+}
+
+- (void)textViewTextChanged:(CEETextView *)textView {
+    if (textView == _filterInput) {
+        _filterCondition = [_filterInput.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        [self presentPaths];
+    }
 }
 
 @end

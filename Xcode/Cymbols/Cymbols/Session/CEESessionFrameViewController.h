@@ -12,12 +12,17 @@
 #import "CEESessionFrameView.h"
 #import "CEEProject.h"
 
+typedef NS_ENUM(NSUInteger, CEEPresentSourceState) {
+    kCEEPresentSourceStateSuccess = 0,
+    kCEEPresentSourceStateNoBuffer = 1,
+};
+
 @class CEESessionFrameManager;
 
 @interface CEESessionFrameViewController : CEEViewController <CEETitleViewDelegate, CEESessionFrameViewDelegate, NSWindowDelegate>
 @property (weak) CEESessionFrameManager* manager;
 @property (weak) CEESessionPort* port;
-- (void)presentSource;
+- (CEEPresentSourceState)presentSourceBuffer;
 - (void)select;
 - (void)deselect;
 @end

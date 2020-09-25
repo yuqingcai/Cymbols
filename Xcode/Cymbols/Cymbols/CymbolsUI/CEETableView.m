@@ -8,8 +8,6 @@
 
 #import <objc/message.h>
 #import "CEETableView.h"
-#import "CEEScroller.h"
-#import "CEEGridView.h"
 #import "CEEIdentifier.h"
 #import "cee_datetime.h"
 #import "CEETextView.h"
@@ -330,11 +328,6 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     NSMutableIndexSet* _selectedRowIndexes;
 };
 
-@property (strong) CEEScroller* verticalScroller;
-@property (strong) CEEScroller* horizontalScroller;
-@property (strong) CEETableViewHeader* header;
-@property (strong) CEETableViewHeader* headerPadding;
-@property (strong) CEEGridView* grid;
 @property NSRect contentRect;
 @property NSRect headerRect;
 @property NSRect headerPaddingRect;
@@ -1112,6 +1105,8 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     NSMutableIndexSet* selectedWhenDragging = nil;
     NSMutableIndexSet* selectedOverlap = nil;
     
+    _clickedRow = rowAtMouseDown;
+    
     if (rowAtMouseDown == -1)
         goto exit;
     
@@ -1274,6 +1269,12 @@ exit:
     [super mouseDown:event];
 }
 
+- (void)rightMouseDown:(NSEvent *)event {
+    NSPoint location0 = [self convertPoint:[event locationInWindow] fromView:nil];
+    NSInteger rowAtMouseDown = [self tableRowIndexByLocation:location0];
+    _clickedRow = rowAtMouseDown;
+    [super rightMouseDown:event];
+}
 
 - (void)startClickDetect {
     _clickTicktack = 0;

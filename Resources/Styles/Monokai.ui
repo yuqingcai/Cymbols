@@ -151,6 +151,72 @@
             "background_color" : "#252226",
         },
     },
+
+    "ClassSessionReferenceTableView [actived]" : {
+        "background_color" : "#252226",
+        
+        "IDTableViewHeader [actived]" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "#1C1A1F",
+            "divider_color" : "#4B464D",
+            "border_color" : "#4B464D",
+            "text_color" : "#EBEBEA",
+        },
+        
+        "IDTableViewHeaderPadding [actived]": {
+            "background_color" : "#1C1A1F",
+            "border_color" : "#4B464D",
+        },
+
+        "IDGridView [actived]" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "#3E4036",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+
+        "IDScrollerVertical [actived]" : {
+            "knob_color" : "#4B464D",
+            "background_color" : "#252226",
+        },
+        "IDScrollerHorizontal [actived]" : {
+            "knob_color" : "#4B464D",
+            "background_color" : "#252226",
+        },
+    },
+    
+    "ClassSessionReferenceTableView [deactived]" : {
+        "background_color" : "#252226",
+        
+        "IDTableViewHeader [deactived]" : {
+            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+            "background_color" : "#1C1A1F",
+            "divider_color" : "#4B464D",
+            "border_color" : "#4B464D",
+            "text_color" : "#EBEBEA",
+        },
+        
+        "IDTableViewHeaderPadding [deactived]": {
+            "background_color" : "#1C1A1F",
+            "border_color" : "#4B464D",
+        },
+        
+        "IDGridView [deactived]" : {
+            "row_spacing" : "0.0",
+            "grid_color" : "#252226",
+            "enable_draw_horizontal_grid" : "NO",
+            "enable_draw_vertical_grid" : "NO",
+        },
+
+        "IDScrollerVertical [deactived]" : {
+            "knob_color" : "#4B464D",
+            "background_color" : "#252226",
+        },
+        "IDScrollerHorizontal [deactived]" : {
+            "knob_color" : "#4B464D",
+            "background_color" : "#252226",
+        },
+    },
     
     "ClassTableRowView [actived]" : {
         "background_color" : "hsba(0, 0, 0, 0)",

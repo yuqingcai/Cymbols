@@ -75,18 +75,18 @@
         return @"Location info";
     
     CEESourceSymbol* symbol = cee_list_nth_data(_symbols, 0);
-    NSString* descriptor = [NSString stringWithUTF8String:symbol->descriptor];
-    return [NSString stringWithFormat:@"\"%@\" found at %d locations", descriptor, cee_list_length(_symbols)];
+    NSString* name = [NSString stringWithUTF8String:symbol->name];
+    return [NSString stringWithFormat:@"\"%@\" found at %d locations", name, cee_list_length(_symbols)];
 }
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEESymbolCellView* cellView = [tableView makeViewWithIdentifier:@"IDSymbolCellView"];
     CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)row);
-    NSString* descriptor = [NSString stringWithUTF8String:symbol->descriptor];
+    NSString* name = [NSString stringWithUTF8String:symbol->name];
     NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
     
-    cellView.title.stringValue = [NSString stringWithFormat:@"%ld %@ - line %ld", row, [filePath lastPathComponent], 0];
+    cellView.title.stringValue = [NSString stringWithFormat:@"%ld %@ - line %d", row, [filePath lastPathComponent], 0];
     [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
     return cellView;
 }
