@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2338331D22CDD554002C004E"
+               BlueprintIdentifier = "26CBE683252FECA20047771D"
                BuildableName = "Cymbols.app"
                BlueprintName = "Cymbols"
                ReferencedContainer = "container:Cymbols.xcodeproj">
@@ -44,7 +44,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2338331D22CDD554002C004E"
+            BlueprintIdentifier = "26CBE683252FECA20047771D"
             BuildableName = "Cymbols.app"
             BlueprintName = "Cymbols"
             ReferencedContainer = "container:Cymbols.xcodeproj">
@@ -61,7 +61,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2338331D22CDD554002C004E"
+            BlueprintIdentifier = "26CBE683252FECA20047771D"
             BuildableName = "Cymbols.app"
             BlueprintName = "Cymbols"
             ReferencedContainer = "container:Cymbols.xcodeproj">

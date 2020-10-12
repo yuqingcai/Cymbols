@@ -21,6 +21,7 @@ typedef struct _CEETextFallbackFontItem {
 typedef struct _CEEMacOSPlatform {
     cee_char* name;
     CEEList* attributes;
+    CEETextColorRef default_backgroundcolor;
     CEETextAttribute* attribute_map[kCEETagTypeMax];
     CEEList* fallback_font_names;
     CEEList* fallback_font_items;
@@ -41,6 +42,7 @@ static cee_boolean color_component_from_hex(const char* descriptor,
                                             CGFloat components[4]);
 static void color_free(cee_pointer color);
 static void platform_attributes_clean(CEEMacOSPlatform* platform);
+static void platform_default_background_color_clean(CEEMacOSPlatform* platform);
 static void default_plantext_attribute_create(CEEMacOSPlatform* platform);
 static CEETextAttribute* text_attribute_create_from_rule(CEEMacOSPlatform* platform,
                                                          const cJSON* rule);
@@ -245,7 +247,7 @@ static CTFontRef font_get(CEEMacOSPlatform* platform,
 {
     CEETextAttribute* attribute = platform->attribute_map[type];
     if (!attribute)
-        attribute = platform->attribute_map[kCEETagTypePlanText];
+        attribute = platform->attribute_map[kCEETagTypePlainText];
     
     CTFontRef font = (CTFontRef)attribute->font;
     
@@ -306,7 +308,7 @@ static void text_attribute_free(cee_pointer data)
 
 static CEEList* fallback_font_names_create(CEEMacOSPlatform* platform)
 {
-    CEETextAttribute* attribute = platform->attribute_map[kCEETagTypePlanText];
+    CEETextAttribute* attribute = platform->attribute_map[kCEETagTypePlainText];
     CTFontRef font = (CTFontRef)attribute->font;
         
     CEEList* names = NULL;
@@ -341,7 +343,7 @@ static CEETextGlyphRef unknow_glyph_get(CEEMacOSPlatform* platform)
     if (CFStringGetSurrogatePairForLongCharacter(codepoint, characters))
         length = 2;
     
-    CTFontRef font = font_get(platform, codepoint, kCEETagTypePlanText);
+    CTFontRef font = font_get(platform, codepoint, kCEETagTypePlainText);
     CTFontGetGlyphsForCharacters(font, characters, glyphs, length);
     return (CEETextGlyphRef)glyphs[0];
 }
@@ -357,7 +359,7 @@ static cee_float unknow_glyph_width_get(CEEMacOSPlatform* platform)
     if (CFStringGetSurrogatePairForLongCharacter(codepoint, characters))
         length = 2;
     
-    CTFontRef font = font_get(platform, codepoint, kCEETagTypePlanText);
+    CTFontRef font = font_get(platform, codepoint, kCEETagTypePlainText);
     CTFontGetGlyphsForCharacters(font, characters, glyphs, length);
     CTFontGetAdvancesForGlyphs(font, kCTFontOrientationHorizontal, glyphs, advances, 1);
     return advances[0].width;
@@ -366,27 +368,26 @@ static cee_float unknow_glyph_width_get(CEEMacOSPlatform* platform)
 static cee_float unknow_glyph_height_get(CEEMacOSPlatform* platform)
 {
     CEEUnicodePoint codepoint = CEE_UNICODE_POINT_UNKONW;
-    CTFontRef font = font_get(platform, codepoint, kCEETagTypePlanText);
+    CTFontRef font = font_get(platform, codepoint, kCEETagTypePlainText);
     return (CTFontGetDescent(font) + CTFontGetAscent(font));
 }
 
 static cee_float unknow_glyph_ascent_get(CEEMacOSPlatform* platform)
 {
     CEEUnicodePoint codepoint = CEE_UNICODE_POINT_UNKONW;
-    CTFontRef font = font_get(platform, codepoint, kCEETagTypePlanText);
+    CTFontRef font = font_get(platform, codepoint, kCEETagTypePlainText);
     return CTFontGetAscent(font);
 }
 
 static CEETextFontRef unknow_glyph_font_get(CEEMacOSPlatform* platform)
 {
     CEEUnicodePoint codepoint = CEE_UNICODE_POINT_UNKONW;
-    return (CEETextFontRef)font_get(platform, codepoint, kCEETagTypePlanText);
+    return (CEETextFontRef)font_get(platform, codepoint, kCEETagTypePlainText);
 }
 
 cee_pointer cee_text_platform_create(void)
 {
-    CEEMacOSPlatform* platform = 
-        (CEEMacOSPlatform*)cee_malloc0(sizeof(CEEMacOSPlatform));
+    CEEMacOSPlatform* platform = (CEEMacOSPlatform*)cee_malloc0(sizeof(CEEMacOSPlatform));
     platform->name = cee_strdup("MacOS");
     platform->color_space = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
     cee_text_platform_configure(platform, NULL);
@@ -411,7 +412,17 @@ void cee_text_platform_free(cee_pointer data)
     if (platform->color_space)
         CGColorSpaceRelease(platform->color_space);
     
+    if (platform->default_backgroundcolor)
+        color_free(platform->default_backgroundcolor);
+    
     cee_free(platform);
+}
+
+static void platform_default_background_color_clean(CEEMacOSPlatform* platform)
+{
+    if (platform->default_backgroundcolor)
+        color_free(platform->default_backgroundcolor);
+    platform->default_backgroundcolor = NULL;
 }
 
 const cee_char* cee_text_platform_name_get(cee_pointer platform_ref)
@@ -434,6 +445,7 @@ cee_boolean cee_text_platform_configure(cee_pointer platform_ref,
         default_plantext_attribute_create(platform);
         return TRUE;
     }
+    platform_default_background_color_clean(platform);
     
     cJSON *descriptor_object = cJSON_Parse((const char*)descriptor);
     if (!descriptor_object) {
@@ -441,6 +453,12 @@ cee_boolean cee_text_platform_configure(cee_pointer platform_ref,
         if (error_ptr != NULL)
             fprintf(stderr, "is_valid_text_platform_descriptor Error before: %s\n", error_ptr);
         return FALSE;
+    }
+        
+    const cJSON *background_color_item = cJSON_GetObjectItemCaseSensitive(descriptor_object, "backgroundcolor");
+    if (background_color_item) {
+        cee_char* string = background_color_item->valuestring;
+        platform->default_backgroundcolor = (CEETextColorRef)color_create_form_descriptor(platform, string);
     }
     
     CEEList* attributes = NULL;
@@ -454,7 +472,7 @@ cee_boolean cee_text_platform_configure(cee_pointer platform_ref,
             CEETagType tag;
             cee_char* name;
         } rule_map[] = {
-            { kCEETagTypePlanText,                         "plantext"                              },
+            { kCEETagTypePlainText,                        "plaintext"                             },
             { kCEETagTypeComment,                          "comment"                               },
             { kCEETagTypeKeyword,                          "keyword"                               },
             { kCEETagTypeConstant,                         "constant"                              },
@@ -528,7 +546,7 @@ cee_boolean cee_text_platform_configure(cee_pointer platform_ref,
             cee_list_free(tag_indexes);
 
             if (!default_attribute) {
-                if (!strcmp(name_item->valuestring, "plantext"))
+                if (!strcmp(name_item->valuestring, "plaintext"))
                     default_attribute = attribute;
             }
         }
@@ -541,8 +559,8 @@ cee_boolean cee_text_platform_configure(cee_pointer platform_ref,
     
     cJSON_Delete(descriptor_object);
     
-    if (!platform->attribute_map[kCEETagTypePlanText])
-        platform->attribute_map[kCEETagTypePlanText] = default_attribute;
+    if (!platform->attribute_map[kCEETagTypePlainText])
+        platform->attribute_map[kCEETagTypePlainText] = default_attribute;
     
     platform->attributes = attributes;
     platform->fallback_font_names = fallback_font_names_create(platform);
@@ -567,7 +585,7 @@ static void default_plantext_attribute_create(CEEMacOSPlatform* platform)
     cJSON *rule = cJSON_Parse(default_rule_descriptor);
     attribute = text_attribute_create_from_rule(platform, rule);
     attributes = cee_list_append(attributes, attribute);
-    platform->attribute_map[kCEETagTypePlanText] = attribute;
+    platform->attribute_map[kCEETagTypePlainText] = attribute;
     platform->attributes = attributes;
     platform->fallback_font_names = fallback_font_names_create(platform);
 }
@@ -704,7 +722,7 @@ cee_boolean cee_text_platform_under_line_get(cee_pointer platform_ref,
     CEEMacOSPlatform* platform = (CEEMacOSPlatform*)platform_ref;
     CEETextAttribute* attribute = platform->attribute_map[type];
     if (!attribute)
-        attribute = platform->attribute_map[kCEETagTypePlanText];
+        attribute = platform->attribute_map[kCEETagTypePlainText];
     return attribute->underline;
 }
 
@@ -726,7 +744,7 @@ CEETextColorRef cee_text_platform_fore_color_get(cee_pointer platform_ref,
     CEEMacOSPlatform* platform = (CEEMacOSPlatform*)platform_ref;
     CEETextAttribute* attribute = platform->attribute_map[type];
     if (!attribute)
-        attribute = platform->attribute_map[kCEETagTypePlanText];
+        attribute = platform->attribute_map[kCEETagTypePlainText];
     return (CEETextColorRef)attribute->forecolor;
 }
 
@@ -735,9 +753,12 @@ CEETextColorRef cee_text_platform_background_color_get(cee_pointer platform_ref,
                                                       CEETagType type)
 {
     CEEMacOSPlatform* platform = (CEEMacOSPlatform*)platform_ref;
+    if (codepoint == -1 || type == kCEETagTypeIgnore)
+        return platform->default_backgroundcolor;
+    
     CEETextAttribute* attribute = platform->attribute_map[type];
     if (!attribute)
-        attribute = platform->attribute_map[kCEETagTypePlanText];
+        attribute = platform->attribute_map[kCEETagTypePlainText];
     return (CEETextColorRef)attribute->backgroundcolor;
 }
 

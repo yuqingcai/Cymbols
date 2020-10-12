@@ -32,21 +32,23 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface CEETableViewHeader : CEEView
-@property NSUInteger columns;
 @end
 
 @interface CEETableRowView : CEEView
 @property NSInteger index;
 @end
 
-@interface CEETableView : CEEView <NSDraggingDestination, NSDraggingSource, NSPasteboardWriting>
+typedef NS_ENUM(NSInteger, CEETableViewColumnAutoresizingStyle) {
+    kCEETableViewNoColumnAutoresizing,
+    kCEETableViewUniformColumnAutoresizingStyle,
+};
 
+@interface CEETableView : CEEView <NSDraggingDestination, NSDraggingSource, NSPasteboardWriting>
 @property (strong) CEEScroller* verticalScroller;
 @property (strong) CEEScroller* horizontalScroller;
 @property (strong) CEETableViewHeader* header;
 @property (strong) CEETableViewHeader* headerPadding;
 @property (strong) CEEGridView* grid;
-
 @property BOOL enableDrawHeader;
 @property (readonly) NSInteger selectedRow;
 @property (readonly) NSIndexSet* selectedRowIndexes;
@@ -57,6 +59,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property SEL doubleAction;
 @property id target;
 @property(readonly) NSInteger clickedRow;
+@property CEETableViewColumnAutoresizingStyle columnAutoresizingStyle;
 
 - (void)reloadData;
 - (__kindof NSView*)makeViewWithIdentifier:(NSUserInterfaceItemIdentifier)identifier;
@@ -67,6 +70,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)extend;
 - (void)setDraggingSourceOperationMask:(NSDragOperation)mask forLocal:(BOOL)isLocal;
 - (NSInteger)tableRowIndexByLocation:(NSPoint)point;
+- (void)setColumnWidth:(CGFloat)width atIndex:(NSInteger)column;
+- (void)adjustHorizontalOffsetWithDelta:(CGFloat)delta;
 @end
 
 NS_ASSUME_NONNULL_END

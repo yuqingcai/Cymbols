@@ -78,11 +78,9 @@
                         <outlet property="containerView" destination="0Ah-4l-1PM" id="ZAC-ig-vOz"/>
                         <outlet property="sessionView" destination="ERx-hH-rdd" id="V96-BY-J64"/>
                         <outlet property="statusBar" destination="W1l-Ce-q5b" id="GoT-TU-iwd"/>
-                        <segue destination="yhz-5D-xoj" kind="sheet" identifier="IDUserInterfaceStyleSelectionSegue" id="vYU-Y0-H39"/>
                         <segue destination="6xp-Eq-nBo" kind="sheet" identifier="IDProjectCreatorSegue" id="7qL-y0-Ikn"/>
                         <segue destination="gcB-pd-GC0" kind="sheet" identifier="IDProjectAddFileSegue" id="e4X-CK-FOp"/>
                         <segue destination="mcz-7j-I6Y" kind="sheet" identifier="IDProjectRemoveFileSegue" id="EEr-YL-1tQ"/>
-                        <segue destination="Yqu-Cd-8t7" kind="sheet" identifier="IDTextHighlightStyleSelectionSegue" id="tiT-9y-nL6"/>
                     </connections>
                 </viewController>
                 <customObject id="2Tp-Fl-jBw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -515,67 +513,7 @@
                 </viewController>
                 <customObject id="58X-QB-Qaa" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="164" y="-343"/>
-        </scene>
-        <!--User Interface Style Selection Controller-->
-        <scene sceneID="C2c-RL-1Xg">
-            <objects>
-                <viewController storyboardIdentifier="IDUserInterfaceStyleController" id="yhz-5D-xoj" customClass="CEEUserInterfaceStyleSelectionController" sceneMemberID="viewController">
-                    <view key="view" id="exL-ao-ep0" customClass="CEEWindowContentView">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="500"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <subviews>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="qRw-YF-tna" customClass="CEEButton">
-                                <rect key="frame" x="486" y="20" width="94" height="23"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="94" id="A9h-Jv-Ork"/>
-                                    <constraint firstAttribute="height" constant="23" id="c9C-U0-Njz"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="OK"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="confirm:" target="yhz-5D-xoj" id="CB1-Gh-TPy"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="ZaP-ds-un8" customClass="CEEButton">
-                                <rect key="frame" x="384" y="19" width="94" height="23"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="94" id="V3g-iu-zYf"/>
-                                    <constraint firstAttribute="height" constant="23" id="tF9-if-Ndb"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Cancel"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="cancel:" target="yhz-5D-xoj" id="KMP-gj-4kn"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="wNg-6c-OXe" customClass="CEETableView">
-                                <rect key="frame" x="0.0" y="50" width="600" height="430"/>
-                            </customView>
-                        </subviews>
-                        <constraints>
-                            <constraint firstAttribute="trailing" secondItem="wNg-6c-OXe" secondAttribute="trailing" id="74R-UI-WzC"/>
-                            <constraint firstAttribute="trailing" secondItem="qRw-YF-tna" secondAttribute="trailing" constant="20" id="Dta-AX-hv4"/>
-                            <constraint firstItem="wNg-6c-OXe" firstAttribute="leading" secondItem="exL-ao-ep0" secondAttribute="leading" id="Ylb-ss-xsq"/>
-                            <constraint firstAttribute="bottom" secondItem="qRw-YF-tna" secondAttribute="bottom" constant="20" id="cqB-9J-mqm"/>
-                            <constraint firstItem="wNg-6c-OXe" firstAttribute="top" secondItem="exL-ao-ep0" secondAttribute="top" constant="20" id="fuN-CR-eMw"/>
-                            <constraint firstItem="ZaP-ds-un8" firstAttribute="top" secondItem="wNg-6c-OXe" secondAttribute="bottom" constant="8" id="kQU-Ug-tAj"/>
-                            <constraint firstAttribute="bottom" secondItem="ZaP-ds-un8" secondAttribute="bottom" constant="19" id="r7Y-L4-BM5"/>
-                            <constraint firstItem="qRw-YF-tna" firstAttribute="leading" secondItem="ZaP-ds-un8" secondAttribute="trailing" constant="8" id="rTN-y1-XiB"/>
-                            <constraint firstItem="qRw-YF-tna" firstAttribute="top" secondItem="wNg-6c-OXe" secondAttribute="bottom" constant="7" id="vT5-bH-6EE"/>
-                        </constraints>
-                    </view>
-                    <connections>
-                        <outlet property="cancelButton" destination="ZaP-ds-un8" id="fgI-Tx-Cry"/>
-                        <outlet property="confirmedButton" destination="qRw-YF-tna" id="KAU-yE-ENW"/>
-                        <outlet property="styleTable" destination="wNg-6c-OXe" id="rRI-jJ-6AY"/>
-                    </connections>
-                </viewController>
-                <customObject id="KCU-gx-foD" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1015" y="-744"/>
+            <point key="canvasLocation" x="164" y="-316"/>
         </scene>
         <!--Project Creator Controller-->
         <scene sceneID="0ng-wN-I8P">
@@ -626,7 +564,7 @@
                 </viewController>
                 <customObject id="CT2-i1-eMi" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1015" y="388"/>
+            <point key="canvasLocation" x="1015" y="47"/>
         </scene>
         <!--Project Add File Controller-->
         <scene sceneID="8dL-Ki-vLV">
@@ -677,7 +615,7 @@
                 </viewController>
                 <customObject id="M7s-oh-HBG" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1015" y="957"/>
+            <point key="canvasLocation" x="1015" y="616"/>
         </scene>
         <!--Project Remove File Controller-->
         <scene sceneID="gpV-dV-fI5">
@@ -728,7 +666,7 @@
                 </viewController>
                 <customObject id="pr0-pl-wMx" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1015" y="1569"/>
+            <point key="canvasLocation" x="1015" y="1413"/>
         </scene>
         <!--Session Spliter0-->
         <scene sceneID="hBr-VG-wkY">
@@ -774,7 +712,7 @@
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="250" id="rVx-Od-Wt6"/>
                                 </constraints>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="CTk-DY-dd2" customClass="CEETableView">
+                            <customView identifier="IDSessionSymbolTableView" translatesAutoresizingMaskIntoConstraints="NO" id="CTk-DY-dd2" customClass="CEETableView">
                                 <rect key="frame" x="0.0" y="29" width="250" height="246"/>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="4Zw-sT-2k4" customClass="CEETextField">
@@ -881,7 +819,7 @@
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="250" id="sT2-gy-1Gs"/>
                                 </constraints>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="bOF-Rf-GvL" customClass="CEETableView">
+                            <customView identifier="IDSessionFilePathTableView" translatesAutoresizingMaskIntoConstraints="NO" id="bOF-Rf-GvL" customClass="CEETableView">
                                 <rect key="frame" x="0.0" y="29" width="250" height="246"/>
                                 <connections>
                                     <outlet property="menu" destination="0Mg-kP-LGS" id="qp8-xi-3PV"/>
@@ -968,7 +906,7 @@
                                     <constraint firstAttribute="height" constant="25" id="vuP-yS-5XL"/>
                                 </constraints>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="clS-1W-cMR" customClass="CEESessionReferenceTableView">
+                            <customView identifier="IDSessionReferenceTableView" translatesAutoresizingMaskIntoConstraints="NO" id="clS-1W-cMR" customClass="CEESessionReferenceTableView">
                                 <rect key="frame" x="0.0" y="0.0" width="251" height="275"/>
                                 <connections>
                                     <outlet property="menu" destination="lId-bh-AJB" id="nqT-Ua-Jg4"/>
@@ -1053,6 +991,9 @@
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_toolbar_toggle_16x16"/>
                                         </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="toggleContextView:" target="q0K-Tn-m8G" id="a2S-0t-u1H"/>
+                                        </connections>
                                     </customView>
                                 </subviews>
                                 <constraints>
@@ -1187,66 +1128,6 @@
                 </viewController>
             </objects>
             <point key="canvasLocation" x="-301" y="2874"/>
-        </scene>
-        <!--Text Highlight Style Selection Controller-->
-        <scene sceneID="rHu-a9-eIN">
-            <objects>
-                <viewController storyboardIdentifier="IDTextHighlightStyleSelectionController" id="Yqu-Cd-8t7" customClass="CEETextHighlightStyleSelectionController" sceneMemberID="viewController">
-                    <view key="view" id="Sho-84-mci" customClass="CEEWindowContentView">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="500"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <subviews>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="3Cr-QO-ndM" customClass="CEEButton">
-                                <rect key="frame" x="486" y="20" width="94" height="23"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="23" id="CWS-72-oaX"/>
-                                    <constraint firstAttribute="width" constant="94" id="kmH-oT-0h5"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="OK"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="confirm:" target="Yqu-Cd-8t7" id="pXJ-tC-npO"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="59c-yc-8sp" customClass="CEEButton">
-                                <rect key="frame" x="384" y="19" width="94" height="23"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="23" id="Oog-K4-8sN"/>
-                                    <constraint firstAttribute="width" constant="94" id="cIP-Pi-kHg"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Cancel"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="cancel:" target="Yqu-Cd-8t7" id="Ahs-me-CPm"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="cQe-DG-WUO" customClass="CEETableView">
-                                <rect key="frame" x="0.0" y="50" width="600" height="430"/>
-                            </customView>
-                        </subviews>
-                        <constraints>
-                            <constraint firstAttribute="bottom" secondItem="59c-yc-8sp" secondAttribute="bottom" constant="19" id="Cte-DP-QqU"/>
-                            <constraint firstItem="3Cr-QO-ndM" firstAttribute="leading" secondItem="59c-yc-8sp" secondAttribute="trailing" constant="8" id="Jea-fd-px6"/>
-                            <constraint firstAttribute="bottom" secondItem="3Cr-QO-ndM" secondAttribute="bottom" constant="20" id="PSD-uQ-8R5"/>
-                            <constraint firstItem="3Cr-QO-ndM" firstAttribute="top" secondItem="cQe-DG-WUO" secondAttribute="bottom" constant="7" id="S9v-fn-mpa"/>
-                            <constraint firstItem="59c-yc-8sp" firstAttribute="top" secondItem="cQe-DG-WUO" secondAttribute="bottom" constant="8" id="WZS-fi-7zc"/>
-                            <constraint firstAttribute="trailing" secondItem="cQe-DG-WUO" secondAttribute="trailing" id="fin-v4-ZZq"/>
-                            <constraint firstItem="cQe-DG-WUO" firstAttribute="leading" secondItem="Sho-84-mci" secondAttribute="leading" id="gRb-tb-alT"/>
-                            <constraint firstAttribute="trailing" secondItem="3Cr-QO-ndM" secondAttribute="trailing" constant="20" id="nR7-77-ueh"/>
-                            <constraint firstItem="cQe-DG-WUO" firstAttribute="top" secondItem="Sho-84-mci" secondAttribute="top" constant="20" id="yxS-ao-KlM"/>
-                        </constraints>
-                    </view>
-                    <connections>
-                        <outlet property="cancelButton" destination="59c-yc-8sp" id="ble-dw-5Q8"/>
-                        <outlet property="confirmedButton" destination="3Cr-QO-ndM" id="l9o-aI-ewy"/>
-                        <outlet property="styleTable" destination="cQe-DG-WUO" id="RA9-cb-EKM"/>
-                    </connections>
-                </viewController>
-                <customObject id="S1a-Kd-t9L" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1015" y="-180"/>
         </scene>
     </scenes>
     <resources>

@@ -14,10 +14,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEEditViewController : CEEViewController <CEETextViewDelegate>
 @property (strong) CEESessionPort* port;
-@property (strong) CEESourceBuffer* buffer;
-@property NSInteger offset;
+@property (strong) CEESourceBuffer* _Nullable buffer;
+@property NSInteger presentedLineBufferOffset;
+@property NSInteger caretBufferOffset;
 @property BOOL editable;
 @property BOOL intelligence;
+@property BOOL wrap;
 
 - (void)highlightRanges:(CEEList*)ranges;
 @end

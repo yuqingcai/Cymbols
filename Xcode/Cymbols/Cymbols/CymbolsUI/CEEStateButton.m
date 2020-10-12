@@ -16,7 +16,7 @@
     BOOL isInside = YES;
     NSPoint location;
     
-    if (!self.enabled)
+    if (!self.isEnabled)
         return;
     
     while (keepOn) {

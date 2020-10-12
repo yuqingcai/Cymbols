@@ -18,7 +18,7 @@ typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
     kCEEViewStyleStateClicked       = 2,
     kCEEViewStyleStateDisabled      = 3,
     kCEEViewStyleStateHeighLighted  = 4,
-    kCEEViewStyleStateMax           = 5,
+    kCEEViewStyleStateMax           = 6,
 };
 
 @interface CEEUserInterfaceStyleScheme : NSObject

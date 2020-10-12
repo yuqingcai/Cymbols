@@ -998,8 +998,8 @@ void cee_text_edit_caret_move_document_end(CEETextEditRef edit)
     cee_float buffer_offset = edit->caret.buffer_offset;
     CEETextStorageRef storage = edit->storage_ref;
     cee_long nb_paragraph = cee_text_storage_paragraph_count_get(storage);
-    cee_long last_paragraph = cee_text_storage_paragraph_by_index(storage,
-                                                                  nb_paragraph - 1);
+    cee_long last_paragraph = cee_text_storage_buffer_offset_by_paragraph_index(storage,
+                                                                                nb_paragraph - 1);
     
     layout_adjust_to_buffer_offset_if_need(edit, buffer_offset);
     
@@ -1234,8 +1234,8 @@ void cee_text_edit_caret_move_document_end_selection(CEETextEditRef edit)
     cee_float buffer_offset = edit->caret.buffer_offset;
     CEETextStorageRef storage = edit->storage_ref;
     cee_long nb_paragraph = cee_text_storage_paragraph_count_get(storage);
-    cee_long last_paragraph = cee_text_storage_paragraph_by_index(storage,
-                                                                  nb_paragraph - 1);
+    cee_long last_paragraph = cee_text_storage_buffer_offset_by_paragraph_index(storage,
+                                                                                nb_paragraph - 1);
     layout_adjust_to_buffer_offset_if_need(edit, buffer_offset);
     
     buffer_offset = cee_text_storage_paragraph_end_get(storage,
@@ -2142,6 +2142,24 @@ void cee_text_edit_caret_position_set(CEETextEditRef edit,
     layout_adjust_to_buffer_offset_if_need(edit, edit->caret.buffer_offset);
 }
 
+void cee_text_edit_caret_buffer_offset_set(CEETextEditRef edit,
+                                           cee_long buffer_offset)
+{
+    if (!edit)
+        return;
+    
+    cee_long paragraph = -1;
+    CEETextStorageRef storage = edit->storage_ref;
+    edit->caret.buffer_offset = buffer_offset;
+    paragraph = cee_text_storage_paragraph_beginning_get(storage,
+                                                         edit->caret.buffer_offset);
+    edit->caret.character_index =
+        cee_text_storage_character_index_in_paragraph(storage,
+                                                      paragraph,
+                                                      edit->caret.buffer_offset);
+    layout_adjust_to_buffer_offset_if_need(edit, edit->caret.buffer_offset);
+}
+
 cee_long cee_text_edit_caret_buffer_offset_get(CEETextEditRef edit)
 {
     if (!edit)
@@ -2322,7 +2340,7 @@ static void highlight_discard(CEETextEdit* edit)
 cee_boolean cee_text_edit_search(CEETextEditRef edit,
                                  cee_char* subject,
                                  cee_boolean regex,
-                                 cee_boolean insensitive,
+                                 cee_boolean sensitive,
                                  CEEStringSearchMode mode,
                                  cee_boolean* timeout)
 {
@@ -2344,7 +2362,7 @@ cee_boolean cee_text_edit_search(CEETextEditRef edit,
     else {
         search->ranges = cee_str_search((const cee_char*)buffer, 
                                         search->subject, 
-                                        insensitive, 
+                                        sensitive, 
                                         mode);
     }
     
@@ -2435,8 +2453,7 @@ void cee_text_edit_mark_text(CEETextEditRef edit,
     cee_text_storage_buffer_replace(storage, range, str, NULL, &length);
     edit->marked.range = cee_range_make(range.location, length);
     
-    edit->caret.buffer_offset = edit->marked.range.location +
-        edit->marked.range.length;
+    edit->caret.buffer_offset = edit->marked.range.location + edit->marked.range.length;
     paragraph = cee_text_storage_paragraph_beginning_get(storage,
                                                          edit->caret.buffer_offset);
     edit->caret.character_index =
@@ -2532,7 +2549,6 @@ void cee_text_edit_modified_update(CEETextEditRef edit)
     cee_ulong nb_paragraph = cee_text_storage_paragraph_count_get(storage);
     
     selection_discard(edit);
-    marked_discard(edit);
     
     if (index >= nb_paragraph) {
         index = 0;
@@ -2664,4 +2680,32 @@ void cee_text_edit_scroll_to_pragraph(CEETextEditRef edit,
                                       cee_long index)
 {
     layout_vertical_adjust_to_pragraph_index(edit, index, -1);
+}
+
+
+cee_long cee_text_edit_character_index_in_paragraph_by_buffer_offset_get(CEETextEditRef edit,
+                                                                         cee_long buffer_offset)
+{
+    if (!edit)
+        return -1;
+    
+    CEETextStorageRef storage = edit->storage_ref;
+    cee_long paragraph = cee_text_storage_paragraph_beginning_get(storage, 
+                                                                  buffer_offset);
+    cee_long character_index = cee_text_storage_character_index_in_paragraph(storage,
+                                                                             paragraph,
+                                                                             buffer_offset);
+    return character_index;
+}
+
+cee_long cee_text_edit_paragraph_index_by_buffer_offset_get(CEETextEditRef edit,
+                                                            cee_long buffer_offset)
+{
+    if (!edit)
+        return -1;
+    
+    CEETextStorageRef storage = edit->storage_ref;
+    cee_long paragraph = cee_text_storage_paragraph_index_get(storage, 
+                                                              buffer_offset);
+    return paragraph;
 }

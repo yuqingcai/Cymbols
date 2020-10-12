@@ -16,7 +16,6 @@ NS_ASSUME_NONNULL_BEGIN
     CEEViewStyleState _styleState;
 }
 @property NSPointerArray* userInterfaceStyles;
-@property BOOL enabled;
 - (void)initProperties;
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint;
 @end

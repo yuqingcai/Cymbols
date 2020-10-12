@@ -390,11 +390,11 @@
     
     if (self.childViewControllers.count)
         [self selectFrame:self.childViewControllers.lastObject];
+    else
+        _selectedFrame = nil;
 }
 
 - (void)selectFrame:(CEESessionFrameViewController*)frame {
-    if (frame.port == [_session activedPort])
-        return;
     
     for (CEESessionFrameViewController* controller in self.childViewControllers)
         [controller deselect];
@@ -410,6 +410,8 @@
     
     if (region == kCEEViewRegionNone || !frame)
         return;
+    
+    [self.session.project addSecurityBookmarksWithFilePaths:filePaths];
     
     if (region == kCEEViewRegionEntire) {
         [frame.port openSourceBuffersWithFilePaths:filePaths];
@@ -525,6 +527,10 @@
     [self openSourceBufferResponse:notification];
 }
 
+- (void)activeSourceBufferResponse:(NSNotification*)notification {
+    [self openSourceBufferResponse:notification];
+}
+
 - (void)deletePortResponse:(NSNotification*)notification {
     if (notification.object != _session)
         return;
@@ -562,10 +568,6 @@
     NSString* prefix = CreateObjectIDPrefix(frame);
     NSString* identifier = CreateObjectIDWithPrefixAndSuffix(prefix, suffix);
     return identifier;
-}
-
-- (void)activeSourceBufferResponse:(NSNotification*)notification {
-    [self openSourceBufferResponse:notification];
 }
 
 - (NSString*)serialize {
@@ -757,6 +759,8 @@
     
     if (!_session.activedPort)
         [_session setActivedPort:[_session createPort]];
+    
+    [self.session.project addSecurityBookmarksWithFilePaths:filePaths];
     
     [frame setPort:_session.activedPort];
     [frame setIdentifier:[self frame:frame identifierFromPort:_session.activedPort]];

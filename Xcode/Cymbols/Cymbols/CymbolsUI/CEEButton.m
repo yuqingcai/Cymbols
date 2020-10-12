@@ -32,27 +32,69 @@
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
     
-    NSSize frameSize = self.frame.size;
-    NSRect rect = NSMakeRect((self.borderWidth / 2.0),
-                             (self.borderWidth / 2.0),
-                             frameSize.width - self.borderWidth,
-                             frameSize.height - self.borderWidth);
-    NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:self.cornerRadius yRadius:self.cornerRadius];
+    NSFont* font = self.font;
+    NSColor* backgroundColor = self.backgroundColor;
+    NSColor* borderColor = self.borderColor;
+    NSColor* textColor = self.textColor;
+    NSColor* iconColor = self.iconColor;
+    NSShadow* textShadow = self.textShadow;
+    NSGradient* gradient = self.gradient;
+    CGFloat gradientAngle = self.gradientAngle;
+    CGFloat borderWidth = self.borderWidth;
+    CGFloat cornerRadius = self.cornerRadius;
     
-    if (self.gradient) {
-        [self.gradient drawInBezierPath:path angle:self.gradientAngle];
+    if (!self.isEnabled) {
+        CEEUserInterfaceStyle* disableStyle = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:kCEEViewStyleStateDisabled];
+        if (disableStyle) {
+            
+            if (disableStyle.font)
+                font = disableStyle.font;
+            
+            if (disableStyle.backgroundColor)
+                backgroundColor = disableStyle.backgroundColor;
+            
+            if (disableStyle.borderColor)
+                borderColor = disableStyle.borderColor;
+            
+            if (disableStyle.textColor)
+                textColor = disableStyle.textColor;
+            
+            if (disableStyle.textShadow)
+                textShadow = disableStyle.textShadow;
+            
+            if (disableStyle.gradient)
+                gradient = disableStyle.gradient;
+            
+            if (disableStyle.iconColor)
+                iconColor = disableStyle.iconColor;
+            
+            gradientAngle = disableStyle.gradientAngle;
+            borderWidth = disableStyle.borderWidth;
+            cornerRadius = disableStyle.cornerRadius;
+        }
+    }
+    
+    NSSize frameSize = self.frame.size;
+    NSRect rect = NSMakeRect((borderWidth / 2.0),
+                             (borderWidth / 2.0),
+                             frameSize.width - borderWidth,
+                             frameSize.height - borderWidth);
+    NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:cornerRadius yRadius:cornerRadius];
+    
+    if (gradient) {
+        [gradient drawInBezierPath:path angle:gradientAngle];
     }
     else {
-        if (self.backgroundColor) {
-            [self.backgroundColor setFill];
+        if (backgroundColor) {
+            [backgroundColor setFill];
             [path fill];
         }
     }
     
-    if (self.borderWidth >= FLT_EPSILON) {
-        [path setLineWidth:self.borderWidth];
-        if (self.borderColor) {
-            [self.borderColor setStroke];
+    if (borderWidth >= FLT_EPSILON) {
+        [path setLineWidth:borderWidth];
+        if (borderColor) {
+            [borderColor setStroke];
             [path stroke];
         }
     }
@@ -60,11 +102,11 @@
     if ([_title compare:@""] != NSOrderedSame) {
         NSMutableDictionary* attributes = [[NSMutableDictionary alloc] init];
         
-        [attributes setValue:self.font forKey:NSFontAttributeName];
-        [attributes setValue:self.textColor forKey:NSForegroundColorAttributeName];
+        [attributes setValue:font forKey:NSFontAttributeName];
+        [attributes setValue:textColor forKey:NSForegroundColorAttributeName];
         
-        if (self.textShadow)
-            [attributes setValue:self.textShadow forKey:NSShadowAttributeName];
+        if (textShadow)
+            [attributes setValue:textShadow forKey:NSShadowAttributeName];
         
         NSAttributedString *drawingString = [[NSAttributedString alloc] initWithString:_title attributes:attributes];
         NSSize drawingSize = [drawingString size];
@@ -84,7 +126,7 @@
         }
         
         CGFloat width = drawingSize.width;
-        CGFloat height = self.font.ascender + self.font.descender;
+        CGFloat height = font.ascender + font.descender;
         CGFloat x = (rect.size.width - drawingSize.width) / 2.0;
         CGFloat y = (rect.size.height - height) / 2.0;
         NSRect drawRect = NSMakeRect(x, y, width, height);
@@ -92,8 +134,8 @@
     }
     
     if (_icon) {
-        if (_iconColor)
-            _icon = [self tintedImage:_icon withColor:_iconColor];
+        if (iconColor)
+            _icon = [self tintedImage:_icon withColor:iconColor];
         CGFloat iconWidth = _icon.size.width;
         CGFloat iconHeight = _icon.size.height;
         CGRect r0 = CGRectMake(0, 0, iconWidth, iconHeight);
@@ -109,7 +151,7 @@
     BOOL isInside = YES;
     NSPoint location;
     
-    if (!self.enabled)
+    if (!self.isEnabled)
         return;
     
     self.state = NSOnState;
@@ -143,6 +185,9 @@
 }
 
 - (void)setState:(NSControlStateValue)state {
+    if (!self.isEnabled)
+        return ;
+    
     _state = state;
     if (_state == NSOnState)
         [self setStyleState:kCEEViewStyleStateClicked];

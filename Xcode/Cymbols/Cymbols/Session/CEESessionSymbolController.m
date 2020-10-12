@@ -18,6 +18,8 @@
 @property (strong) CEESourceBuffer* buffer;
 @property (strong) NSString* filterCondition;
 @property CEEList* symbol_wrappers;
+@property (strong) NSTimer* updateSymbolsTimer;
+@property BOOL shouldUpdate;
 @end
 
 @implementation CEESessionSymbolController
@@ -32,17 +34,28 @@
     [_symbolTable setTarget:self];
     [_symbolTable setAction:@selector(selectRow:)];
     [_symbolTable setEnableDrawHeader:NO];
+    [_symbolTable setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
     [_filterInput setDelegate:self];
-
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
+    
+    _shouldUpdate = NO;
+    _updateSymbolsTimer = [NSTimer timerWithTimeInterval:0.5 target:self selector:@selector(updateSymbols:) userInfo:nil repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:_updateSymbolsTimer forMode:NSRunLoopCommonModes];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferParsedResponse:) name:CEENotificationSourceBufferParsed object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(openSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activeSourceBufferResponse:) name:CEENotificationSessionPortActiveSourceBuffer object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activeSourceBufferResponse:) name:CEENotificationSessionPortActiveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activePortResponse:) name:CEENotificationSessionActivePort object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deletePortResponse:) name:CEENotificationSessionDeletePort object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPresentResponse:) name:CEENotificationSessionPresent object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(projectSettingPropertiesResponse:) name:CEENotificationProjectSettingProperties object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(presentHistoryResponse:) name:CEENotificationSessionPortPresentHistory object:nil];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferReloadResponse:) name:CEENotificationSourceBufferReload object:nil];
+}
+
+- (void)updateSymbols:(NSTimer *)timer {
+    if (_shouldUpdate)
+        [self presentSymbols];
+    _shouldUpdate = NO;
 }
 
 - (void)dealloc {
@@ -50,6 +63,11 @@
     if (_symbol_wrappers)
         cee_list_free_full(_symbol_wrappers, cee_source_symbol_wrapper_free);
     _symbol_wrappers = NULL;
+    
+    if (_updateSymbolsTimer) {
+        [_updateSymbolsTimer invalidate];
+        _updateSymbolsTimer = nil;
+    }
 }
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
@@ -108,10 +126,10 @@
     [self presentSymbols];
 }
 
-- (void)sourceBufferStateChangedResponse:(NSNotification*)notification {
+- (void)sourceBufferParsedResponse:(NSNotification*)notification {
     if (notification.object != _buffer)
         return;
-    [self presentSymbols];
+    _shouldUpdate = YES;
 }
 
 - (void)openSourceBufferResponse:(NSNotification*)notification {
@@ -173,6 +191,13 @@
         return;
     
     _buffer = [_port activedSourceBuffer];
+    [self presentSymbols];
+}
+
+- (void)sourceBufferReloadResponse:(NSNotification*)notification {
+    if (notification.object != _buffer)
+        return;
+    
     [self presentSymbols];
 }
 

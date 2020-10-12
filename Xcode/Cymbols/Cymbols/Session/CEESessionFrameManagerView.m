@@ -7,11 +7,11 @@
 //
 
 #import "CEESessionFrameManagerView.h"
+#import "CEEImageView.h"
 
 @interface CEESessionFrameManagerView()
 @property CGFloat kern;
-@property CGFloat iconWidth;
-@property CGFloat iconHeight;
+@property NSImage* icon;
 @property (strong) CEEHighlightView *highlightView;
 @end
 
@@ -20,6 +20,8 @@
 - (void)initProperties {
     [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
     _kern = 0.22;
+    _icon = [NSImage imageNamed:@"cymbols_logo"];
+    _iconColor = [NSColor grayColor];
 }
 
 - (void)highlight:(BOOL)enable {
@@ -106,21 +108,49 @@
         [_delegate createInitFrameViewWithFilePaths:[pasteboard propertyListForType:NSFilenamesPboardType]];
 }
 
+- (void)updateUserInterface {
+    CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];
+    if (!current)
+        return;
+    
+    if (current.font)
+        self.font = current.font;
+    
+    if (current.backgroundColor)
+        self.backgroundColor = current.backgroundColor;
+    
+    if (current.borderColor)
+        self.borderColor = current.borderColor;
+    
+    if (current.dividerColor)
+        self.dividerColor = current.dividerColor;
+    
+    if (current.textColor)
+        self.textColor = current.textColor;
+    
+    if (current.textShadow)
+        self.textShadow = current.textShadow;
+    
+    if (current.gradient)
+        self.gradient = current.gradient;
+    
+    self.gradientAngle = current.gradientAngle;
+    
+    if (current.borders)
+        self.borders = current.borders;
+    
+    self.borderWidth = current.borderWidth;
+    self.cornerRadius = current.cornerRadius;
+    self.iconColor = current.iconColor;
+}
+
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
-    
-    //NSMutableDictionary* attributes = [[NSMutableDictionary alloc] init];
-    //[attributes setValue:self.font forKey:NSFontAttributeName];
-    //[attributes setValue:self.textColor forKey:NSForegroundColorAttributeName];
-    //[attributes setValue: @(_kern) forKey:NSKernAttributeName];
-    //
-    //NSString* string = @"Cymbols";
-    //NSAttributedString *drawingString = [[NSAttributedString alloc] initWithString:string attributes:attributes];
-    //NSSize drawingSize = [drawingString size];
-    //NSRect rect = dirtyRect;
-    //rect.origin.x = (rect.size.width - drawingSize.width) / 2.0;
-    //rect.origin.y = (rect.size.height - drawingSize.height) / 2.0;
-    //[drawingString drawWithRect:rect options:0 context:nil];
+    NSColor* tintedColor = self.iconColor;
+    _icon = [self tintedImage:_icon withColor:tintedColor];
+    CGFloat x = (self.frame.size.width - _icon.size.width) / 2.0;
+    CGFloat y = (self.frame.size.height - _icon.size.height) / 2.0;
+    [_icon drawAtPoint:NSMakePoint(x, y) fromRect:NSZeroRect operation:NSCompositingOperationCopy fraction:1.0];
 }
 
 @end

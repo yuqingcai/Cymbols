@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Window Controller-->
+        <scene sceneID="C9E-cu-aYQ">
+            <objects>
+                <windowController storyboardIdentifier="IDUserInterfaceStyleSelectionWindowController" id="j4y-te-aoa" customClass="CEEWindowController" sceneMemberID="viewController">
+                    <window key="window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" titlebarAppearsTransparent="YES" id="NID-sQ-8zf" customClass="CEEWindow">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES" fullSizeContentView="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="425" y="461" width="640" height="480"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
+                        <connections>
+                            <outlet property="delegate" destination="j4y-te-aoa" id="pjw-5v-PJv"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="AOI-Cb-eo7" kind="relationship" relationship="window.shadowedContentViewController" id="IZP-fr-Ukw"/>
+                    </connections>
+                </windowController>
+                <customObject id="9RM-P6-qWq" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="533" y="-767.5"/>
+        </scene>
+        <!--User Interface Style Selection Controller-->
+        <scene sceneID="YLY-UK-CCN">
+            <objects>
+                <viewController id="AOI-Cb-eo7" customClass="CEEUserInterfaceStyleSelectionController" sceneMemberID="viewController">
+                    <view key="view" id="Gdc-Jk-sQC" customClass="CEEWindowContentView">
+                        <rect key="frame" x="0.0" y="0.0" width="640" height="480"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="LxE-uC-77B" customClass="CEEButton">
+                                <rect key="frame" x="526" y="20" width="94" height="23"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="23" id="ZzI-FM-nWJ"/>
+                                    <constraint firstAttribute="width" constant="94" id="qCh-KK-L3l"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="OK"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="confirm:" target="AOI-Cb-eo7" id="ncl-WN-RBq"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="ZGp-Ul-TgQ" customClass="CEEButton">
+                                <rect key="frame" x="424" y="20" width="94" height="23"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="23" id="8Wx-ge-zBG"/>
+                                    <constraint firstAttribute="width" constant="94" id="yFE-2e-Dvx"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Cancel"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="cancel:" target="AOI-Cb-eo7" id="UgW-QT-qeT"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="pNY-wT-Ep5" customClass="CEETextTitle">
+                                <rect key="frame" x="20" y="428" width="163" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="20" id="SDf-bo-htu"/>
+                                    <constraint firstAttribute="width" constant="163" id="tup-ed-fmq"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="UserInterface Styles"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="AAd-Bu-Qhl" customClass="CEEContainerView">
+                                <rect key="frame" x="20" y="63" width="600" height="357"/>
+                                <subviews>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="yqG-eZ-yMC" customClass="CEETableView">
+                                        <rect key="frame" x="1" y="1" width="598" height="355"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="400" id="GNC-ld-bl1"/>
+                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="300" id="Hvg-4A-7nf"/>
+                                        </constraints>
+                                    </customView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="yqG-eZ-yMC" secondAttribute="trailing" constant="1" id="Ilh-X7-Noj"/>
+                                    <constraint firstAttribute="bottom" secondItem="yqG-eZ-yMC" secondAttribute="bottom" constant="1" id="oOB-gM-VT3"/>
+                                    <constraint firstItem="yqG-eZ-yMC" firstAttribute="leading" secondItem="AAd-Bu-Qhl" secondAttribute="leading" constant="1" id="qRe-2A-WRp"/>
+                                    <constraint firstItem="yqG-eZ-yMC" firstAttribute="top" secondItem="AAd-Bu-Qhl" secondAttribute="top" constant="1" id="spD-uK-mkk"/>
+                                </constraints>
+                            </customView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="LxE-uC-77B" secondAttribute="trailing" constant="20" id="01u-Bq-Nks"/>
+                            <constraint firstItem="LxE-uC-77B" firstAttribute="leading" secondItem="ZGp-Ul-TgQ" secondAttribute="trailing" constant="8" id="2PH-0V-f9K"/>
+                            <constraint firstAttribute="trailing" secondItem="AAd-Bu-Qhl" secondAttribute="trailing" constant="20" id="2eD-ef-btH"/>
+                            <constraint firstItem="LxE-uC-77B" firstAttribute="top" secondItem="AAd-Bu-Qhl" secondAttribute="bottom" constant="20" id="AdM-yX-2RX"/>
+                            <constraint firstItem="AAd-Bu-Qhl" firstAttribute="leading" secondItem="Gdc-Jk-sQC" secondAttribute="leading" constant="20" id="IWv-hW-vry"/>
+                            <constraint firstItem="pNY-wT-Ep5" firstAttribute="leading" secondItem="Gdc-Jk-sQC" secondAttribute="leading" constant="20" id="LLk-NW-CCj"/>
+                            <constraint firstAttribute="bottom" secondItem="LxE-uC-77B" secondAttribute="bottom" constant="20" id="Wfw-TG-PQ4"/>
+                            <constraint firstItem="AAd-Bu-Qhl" firstAttribute="top" secondItem="pNY-wT-Ep5" secondAttribute="bottom" constant="8" id="cRb-3i-hjM"/>
+                            <constraint firstAttribute="bottom" secondItem="ZGp-Ul-TgQ" secondAttribute="bottom" constant="20" id="lCO-yZ-PoY"/>
+                            <constraint firstItem="pNY-wT-Ep5" firstAttribute="top" secondItem="Gdc-Jk-sQC" secondAttribute="top" constant="32" id="z7a-qC-2Mr"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="cancelButton" destination="ZGp-Ul-TgQ" id="h7G-H4-Tj6"/>
+                        <outlet property="confirmedButton" destination="LxE-uC-77B" id="0Cc-v4-LY3"/>
+                        <outlet property="styleTable" destination="yqG-eZ-yMC" id="2nC-34-fZh"/>
+                    </connections>
+                </viewController>
+                <customObject id="tYT-gr-us4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="533" y="-144"/>
+        </scene>
+        <!--Window Controller-->
+        <scene sceneID="w65-Ki-y4l">
+            <objects>
+                <windowController storyboardIdentifier="IDTextHighlightStyleSelectionWindowController" id="A8A-XS-Wa5" customClass="CEEWindowController" sceneMemberID="viewController">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" titlebarAppearsTransparent="YES" id="SPC-4R-BVZ" customClass="CEEWindow">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES" fullSizeContentView="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="425" y="461" width="640" height="480"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
+                        <connections>
+                            <outlet property="delegate" destination="A8A-XS-Wa5" id="N0O-Eh-InF"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="l1t-PG-nS7" kind="relationship" relationship="window.shadowedContentViewController" id="JrC-oP-3bK"/>
+                    </connections>
+                </windowController>
+                <customObject id="zYW-53-QMV" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1332" y="-768"/>
+        </scene>
+        <!--Text Highlight Style Selection Controller-->
+        <scene sceneID="cyH-kp-0p4">
+            <objects>
+                <viewController id="l1t-PG-nS7" customClass="CEETextHighlightStyleSelectionController" sceneMemberID="viewController">
+                    <view key="view" id="GTb-TX-3tC" customClass="CEEWindowContentView">
+                        <rect key="frame" x="0.0" y="0.0" width="640" height="480"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="W0r-vS-EzR" customClass="CEEButton">
+                                <rect key="frame" x="526" y="20" width="94" height="23"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="23" id="cbi-M9-LDt"/>
+                                    <constraint firstAttribute="width" constant="94" id="enk-0A-OcE"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="OK"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="confirm:" target="l1t-PG-nS7" id="LaB-QK-StZ"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Ru3-5r-Ov1" customClass="CEEContainerView">
+                                <rect key="frame" x="20" y="63" width="600" height="361"/>
+                                <subviews>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="OYp-BM-Fwf" customClass="CEETableView">
+                                        <rect key="frame" x="1" y="1" width="598" height="359"/>
+                                    </customView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="OYp-BM-Fwf" firstAttribute="leading" secondItem="Ru3-5r-Ov1" secondAttribute="leading" constant="1" id="6Ax-dB-zzM"/>
+                                    <constraint firstItem="OYp-BM-Fwf" firstAttribute="top" secondItem="Ru3-5r-Ov1" secondAttribute="top" constant="1" id="75A-bq-ZbD"/>
+                                    <constraint firstAttribute="bottom" secondItem="OYp-BM-Fwf" secondAttribute="bottom" constant="1" id="D5Q-Ci-Rgt"/>
+                                    <constraint firstAttribute="trailing" secondItem="OYp-BM-Fwf" secondAttribute="trailing" constant="1" id="Mo2-y1-cVL"/>
+                                </constraints>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Jvq-D9-Yxs" customClass="CEETextTitle">
+                                <rect key="frame" x="20" y="432" width="163" height="28"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="163" id="GKX-Dz-qF5"/>
+                                    <constraint firstAttribute="height" constant="28" id="TDq-Zz-oNC"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Syntax Highlight Styles"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="NBy-8b-J8a" customClass="CEEButton">
+                                <rect key="frame" x="424" y="20" width="94" height="23"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="23" id="X2E-tk-Jip"/>
+                                    <constraint firstAttribute="width" constant="94" id="u6U-KO-AYp"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Cancel"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="cancel:" target="l1t-PG-nS7" id="In5-qQ-CWX"/>
+                                </connections>
+                            </customView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="W0r-vS-EzR" secondAttribute="bottom" constant="20" id="1FA-9W-pAV"/>
+                            <constraint firstAttribute="trailing" secondItem="Ru3-5r-Ov1" secondAttribute="trailing" constant="20" id="2RY-lL-eNc"/>
+                            <constraint firstItem="Ru3-5r-Ov1" firstAttribute="leading" secondItem="GTb-TX-3tC" secondAttribute="leading" constant="20" id="FFT-N3-kn9"/>
+                            <constraint firstAttribute="bottom" secondItem="NBy-8b-J8a" secondAttribute="bottom" constant="20" id="LHy-sK-eGX"/>
+                            <constraint firstItem="W0r-vS-EzR" firstAttribute="top" secondItem="Ru3-5r-Ov1" secondAttribute="bottom" constant="20" id="P1z-ft-eRV"/>
+                            <constraint firstItem="Jvq-D9-Yxs" firstAttribute="top" secondItem="GTb-TX-3tC" secondAttribute="top" constant="20" id="QkF-Ku-unJ"/>
+                            <constraint firstAttribute="trailing" secondItem="W0r-vS-EzR" secondAttribute="trailing" constant="20" id="dHK-EI-p9D"/>
+                            <constraint firstItem="W0r-vS-EzR" firstAttribute="leading" secondItem="NBy-8b-J8a" secondAttribute="trailing" constant="8" id="dhT-u2-grd"/>
+                            <constraint firstItem="Ru3-5r-Ov1" firstAttribute="top" secondItem="Jvq-D9-Yxs" secondAttribute="bottom" constant="8" id="iut-3c-6Mz"/>
+                            <constraint firstItem="Jvq-D9-Yxs" firstAttribute="leading" secondItem="GTb-TX-3tC" secondAttribute="leading" constant="20" id="vdG-u5-nE0"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="cancelButton" destination="NBy-8b-J8a" id="dVV-nx-OEO"/>
+                        <outlet property="confirmedButton" destination="W0r-vS-EzR" id="85F-Ty-dwf"/>
+                        <outlet property="styleTable" destination="OYp-BM-Fwf" id="3Ak-DB-1ZL"/>
+                    </connections>
+                </viewController>
+                <customObject id="sPr-Nx-dSn" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1332" y="-144"/>
+        </scene>
+    </scenes>
+</document>

@@ -258,6 +258,8 @@ static int character(cee_long offset,
 "_Nullable"                                 RETURN_TOKEN_ID(kCEETokenID__NULLABLE                  )
 "nonnull"                                   RETURN_TOKEN_ID(kCEETokenID_NONNULL                    )
 "nullable"                                  RETURN_TOKEN_ID(kCEETokenID_NULLABLE                   )
+"NS_ENUM"                                   RETURN_TOKEN_ID(kCEETokenID_NS_ENUM                    )
+"NS_OPTIONS"                                RETURN_TOKEN_ID(kCEETokenID_NS_OPTIONS                 )
 "/*"                                        RETURN_TOKEN_ID(kCEETokenID_C_COMMENT                  )
 "//"                                        RETURN_TOKEN_ID(kCEETokenID_CPP_COMMENT                )
 "\""                                        RETURN_TOKEN_ID(kCEETokenID_LITERAL                    )

@@ -5,11 +5,13 @@
 #include <assert.h>
 #include "cee_reference.h"
 
-CEESourceReference* cee_reference_create(const cee_uchar* subject,
-                                         CEEList* tokens,
-                                         CEESourceReferenceType type)
+CEESourceSymbolReference* cee_source_symbol_reference_create(const cee_char* filepath,
+                                                             const cee_uchar* subject,
+                                                             CEEList* tokens,
+                                                             CEESourceReferenceType type)
 {
-    CEESourceReference* reference = cee_malloc0(sizeof(CEESourceReference));
+    CEESourceSymbolReference* reference = cee_malloc0(sizeof(CEESourceSymbolReference));
+    reference->filepath = cee_strdup(filepath);
     reference->type = type;
     reference->tokens_ref = tokens;
     reference->name = cee_string_from_tokens(subject,
@@ -20,11 +22,14 @@ CEESourceReference* cee_reference_create(const cee_uchar* subject,
     return reference;
 }
 
-void cee_reference_free(cee_pointer data)
+void cee_source_symbol_reference_free(cee_pointer data)
 {
     if (!data)
         return;
-    CEESourceReference* reference = (CEESourceReference*)data;
+    CEESourceSymbolReference* reference = (CEESourceSymbolReference*)data;
+    
+    if (reference->filepath)
+        cee_free(reference->filepath);
     
     if (reference->tokens_ref)
         cee_list_free(reference->tokens_ref);
@@ -39,15 +44,19 @@ void cee_reference_free(cee_pointer data)
 }
 
 
-void cee_reference_print(CEESourceReference* reference)
+void cee_source_symbol_reference_print(CEESourceSymbolReference* reference)
 {
     if (!reference) {
         fprintf(stdout, "reference dump error: reference is NULL\n");
         return ;
     }
     
+    const cee_char* filepath = "?";
     const cee_char* name = "?";
     const cee_char* locations = "?";
+    
+    if (reference->filepath)
+        filepath = reference->filepath;
     
     if (reference->name)
         name = reference->name;
@@ -55,19 +64,20 @@ void cee_reference_print(CEESourceReference* reference)
     if (reference->locations)
         locations = reference->locations;
     
-    fprintf(stdout, "%s %s\n",
+    fprintf(stdout, "%s %s %s\n",
             name,
-            locations);
+            locations,
+            filepath);
 }
 
-void cee_references_print(CEEList* references)
+void cee_source_symbol_references_print(CEEList* references)
 {
     CEEList* p = NULL;
-    CEESourceReference* reference = NULL;
+    CEESourceSymbolReference* reference = NULL;
     p = references;
     while (p) {
         reference = p->data;
-        cee_reference_print(reference);
+        cee_source_symbol_reference_print(reference);
         p = p->next;
     }
 }

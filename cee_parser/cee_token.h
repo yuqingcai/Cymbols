@@ -315,7 +315,8 @@ typedef enum _CEETokenID {
     kCEETokenID_NONNULL,
     kCEETokenID_NULLABLE,
     kCEETokenID___KIND_OF,
-    
+    kCEETokenID_NS_ENUM,
+    kCEETokenID_NS_OPTIONS,
     
     kCEETokenID_END
 } CEETokenID;

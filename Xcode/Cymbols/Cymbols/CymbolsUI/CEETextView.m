@@ -428,6 +428,11 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChanged:)])
             [_delegate textViewSelectionChanged:self];
         
+        if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+            [_delegate textViewCaretSet:self];
+        
+        [self setNeedsDisplay:YES];
+        
         return;
     }
     if (event.clickCount == 3) {
@@ -438,11 +443,16 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChanged:)])
             [_delegate textViewSelectionChanged:self];
         
+        if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
+            [_delegate textViewCaretSet:self];
+        
+        [self setNeedsDisplay:YES];
+        
         return;
     }
     
     cee_text_edit_caret_position_set(_edit, p);
-        
+    
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
     
@@ -805,6 +815,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     cee_boolean under_line = FALSE;
     CEETextLayoutRef layout = NULL;
     CGRect rect;
+    cee_pointer layout_platform = NULL;
     
     layout = cee_text_edit_layout(_edit);
     if (!layout)
@@ -813,6 +824,17 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     context = (CGContextRef)[[NSGraphicsContext currentContext] CGContext];
     CGContextSaveGState(context);
     CGContextSetTextPosition(context, 0.0, 0.0);
+    
+    layout_platform = cee_text_layout_platform_get(layout);
+    background_color = (CGColorRef)cee_text_layout_platform_background_color_get(layout_platform);
+    if (background_color) {
+        CGContextSetFillColorWithColor(context, background_color);
+        rect = CGRectMake(0.0,
+                          0.0,
+                          self.frame.size.width,
+                          self.frame.size.width);
+        CGContextFillRect(context, rect);
+    }
     
     //[self drawPageGuideLine];
     [self drawSelectionRegion];
@@ -824,6 +846,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         [self drawSearchedRegions];
         [self drawSearchedHighlightRegion];
     }
+    
     
     caret_offset = cee_text_edit_caret_buffer_offset_get(_edit);
     p = cee_text_layout_lines_get(layout);
@@ -850,10 +873,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
             under_line = cee_text_unit_under_line_get(unit);
             position = [self viewPointFromLayoutPoint:position];
             
-            if (self.window.firstResponder == self && 
-                _editable && 
-                self.styleState == kCEEViewStyleStateActived && 
-                buffer_offset == caret_offset)
+            if (self.window.firstResponder == self &&  _editable &&
+                self.styleState == kCEEViewStyleStateActived && buffer_offset == caret_offset)
                 [self drawCaretAtUnit:unit inLine:line];
             
             if (background_color) {

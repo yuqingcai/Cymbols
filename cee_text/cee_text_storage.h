@@ -10,6 +10,7 @@ extern "C" {
 #include "cee_text_modify.h"
 
 typedef enum _CEETextStorageLineBreakType {
+    kCEETextStorageLineBreakTypeUnknow,
     kCEETextStorageLineBreakTypeLF,
     kCEETextStorageLineBreakTypeCR,
     kCEETextStorageLineBreakTypeCRLF,
@@ -38,9 +39,11 @@ void cee_text_storage_buffer_set(CEETextStorageRef storage,
                                  const cee_uchar* string);
 const cee_uchar* cee_text_storage_buffer_get(CEETextStorageRef storage);
 cee_ulong cee_text_storage_size_get(CEETextStorageRef storage);
+cee_ulong cee_text_storage_character_count_get(CEETextStorageRef storage);
 cee_ulong cee_text_storage_max_paragraph_length_get(CEETextStorageRef storage);
 cee_ulong cee_text_storage_paragraph_count_get(CEETextStorageRef storage);
-cee_ulong cee_text_storage_line_break_length(CEETextStorageRef storage);
+cee_ulong cee_text_storage_line_break_length_get(CEETextStorageRef storage);
+CEETextStorageLineBreakType cee_text_storage_line_break_type_get(CEETextStorageRef storage);
 cee_long cee_text_storage_buffer_character_next(CEETextStorageRef storage,
                                                 cee_long current,
                                                 CEEUnicodePoint* codepoint,
@@ -55,8 +58,8 @@ cee_long cee_text_storage_buffer_word_prev(CEETextStorageRef storage,
                                            cee_long buffer_offset);
 cee_long cee_text_storage_paragraph_index_get(CEETextStorageRef storage,
                                               cee_long buffer_offset);
-cee_long cee_text_storage_paragraph_by_index(CEETextStorageRef storage,
-                                             cee_long index);
+cee_long cee_text_storage_buffer_offset_by_paragraph_index(CEETextStorageRef storage,
+                                                           cee_long index);
 cee_long cee_text_storage_paragraph_beginning_get(CEETextStorageRef storage,
                                                   cee_long buffer_offset);
 cee_long cee_text_storage_paragraph_end_get(CEETextStorageRef storage,

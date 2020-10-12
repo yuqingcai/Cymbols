@@ -113,9 +113,28 @@
     return nil;
 }
 
-- (IBAction)save:(id)sender {
+- (BOOL)project:(CEEProject*)project SecuritySaveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {
     AppDelegate* delegate = [NSApp delegate];
     CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    NSArray* bookmarks = nil;
+    BOOL ret = NO;
+    if (access([filePath UTF8String], W_OK) != 0) {
+        bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
+        if (bookmarks) {
+            [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
+            ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
+            [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
+        }
+    }
+    else {
+        ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
+    }
+    return ret;
+}
+
+- (IBAction)save:(id)sender {
+    CEEProjectController* projectController = [NSDocumentController sharedDocumentController];
+    CEEProject* project = [projectController currentDocument];
     
     for (NSString* filePath in _selectedSourceBufferFilePaths) {
         NSString* fileName = [filePath lastPathComponent];
@@ -140,16 +159,18 @@
             [savePanel setDelegate:self];
             [savePanel setNameFieldStringValue:fileName];
             responese = [savePanel runModal];
+            
             if (responese == NSModalResponseOK) {
                 savePath = [[savePanel URL] path];
                 if (savePath) {
-                    [sourceBufferManager saveSourceBuffer:sourceBuffer atPath:savePath];
+                    [project addSecurityBookmarksWithFilePaths:@[savePath]];
+                    [self project:project SecuritySaveSourceBuffer:sourceBuffer atFilePath:savePath];
                     _directory = [savePath stringByDeletingLastPathComponent];
                 }
             }
         }
         else {
-            [sourceBufferManager saveSourceBuffer:sourceBuffer atPath:sourceBuffer.filePath];
+            [self project:project SecuritySaveSourceBuffer:sourceBuffer atFilePath:sourceBuffer.filePath];
         }
     }
         

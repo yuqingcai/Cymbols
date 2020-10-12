@@ -38,6 +38,30 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortCreateContextResponse:) name:CEENotificationSessionPortCreateContext object:nil];
 }
 
+- (void)viewWillAppear {
+    [super viewWillAppear];
+    
+    _port = _session.activedPort;
+    
+    [self createContextSymbols];
+    
+    if (!_context_symbols)
+        return;
+    
+    if (cee_list_length(_context_symbols) > 1) {
+        [self showContextTable];
+        [_contextTable reloadData];
+    }
+    else {
+        [self showEditor];
+        CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, 0);
+        NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
+        [self presentContextBufferWithSymbol:symbol];
+        [_titlebar setTitle:filePath];
+    }
+    
+}
+
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     if (_context_symbols)
@@ -49,7 +73,6 @@
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     _contextTable = [[CEETableView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 300, 100.0)];
     [_contextTable setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [_contextTable setIdentifier:@"IDSessionContextTableView"];
     [_contextTable setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     [_contextTable setDelegate:self];
     [_contextTable setDataSource:self];
@@ -57,6 +80,7 @@
     [_contextTable setEnableDrawHeader:YES];
     [_contextTable setTarget:self];
     [_contextTable setAction:@selector(selectRow:)];
+    [_contextTable setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
     
     _editViewController =  [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
     [_editViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -251,7 +275,7 @@
     CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, (cee_int)row);
     NSString* name = [NSString stringWithUTF8String:symbol->name];
     NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-    cellView.title.stringValue = [NSString stringWithFormat:@"%@ [%@]", [filePath lastPathComponent], filePath];
+    cellView.title.stringValue = [NSString stringWithFormat:@"%@", [filePath lastPathComponent]];
     [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
     return cellView;
 }
@@ -270,8 +294,14 @@
     NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
     [self presentContextBufferWithSymbol:symbol];
     [_titlebar setTitle:filePath];
+}
+
+- (void)updateContentViewStyleConfiguration {
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    [self.view setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     
-    
+    if (!_contextTable.superview)
+        [_contextTable setStyleConfiguration:[styleManager userInterfaceConfiguration]];
 }
 
 @end

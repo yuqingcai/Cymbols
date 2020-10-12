@@ -97,9 +97,9 @@
         "border_width" : "1.0",
         "icon_color" : "#B4B4B4",
     },
-    
+        
     "ClassTableView [actived]" : {
-        "background_color" : "#F5F5F5",
+        "background_color" : "#FFFFFF",
         
         "IDTableViewHeader [actived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -123,16 +123,16 @@
 
         "IDScrollerVertical [actived]" : {
             "knob_color" : "#B4B4B4",
-            "background_color" : "#F5F5F5",
+            "background_color" : "#FFFFFF",
         },
         "IDScrollerHorizontal [actived]" : {
             "knob_color" : "#B4B4B4",
-            "background_color" : "#F5F5F5",
+            "background_color" : "#FFFFFF",
         },
     },
     
     "ClassTableView [deactived]" : {
-        "background_color" : "#F5F5F5",
+        "background_color" : "#FFFFFF",
         
         "IDTableViewHeader [deactived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -156,77 +156,11 @@
 
         "IDScrollerVertical [deactived]" : {
             "knob_color" : "#B4B4B4",
-            "background_color" : "#F5F5F5",
+            "background_color" : "#FFFFFF",
         },
         "IDScrollerHorizontal [deactived]" : {
             "knob_color" : "#B4B4B4",
-            "background_color" : "#F5F5F5",
-        },
-    },
-    
-    "ClassSessionReferenceTableView [actived]" : {
-        "background_color" : "#F5F5F5",
-        
-        "IDTableViewHeader [actived]" : {
-            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-            "background_color" : "#F5F5F5",
-            "divider_color" : "#E0E0E0",
-            "border_color" : "#E0E0E0",
-            "text_color" : "#757575",
-        },
-        
-        "IDTableViewHeaderPadding [actived]": {
-            "background_color" : "#F5F5F5",
-            "border_color" : "#E0E0E0",
-        },
-        
-        "IDGridView [actived]" : {
-            "row_spacing" : "0.0",
-            "grid_color" : "#E0E0E0",
-            "enable_draw_horizontal_grid" : "NO",
-            "enable_draw_vertical_grid" : "NO",
-        },
-
-        "IDScrollerVertical [actived]" : {
-            "knob_color" : "#B4B4B4",
-            "background_color" : "#F5F5F5",
-        },
-        "IDScrollerHorizontal [actived]" : {
-            "knob_color" : "#B4B4B4",
-            "background_color" : "#F5F5F5",
-        },
-    },
-    
-    "ClassSessionReferenceTableView [deactived]" : {
-        "background_color" : "#F5F5F5",
-        
-        "IDTableViewHeader [deactived]" : {
-            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-            "background_color" : "#F5F5F5",
-            "divider_color" : "#E0E0E0",
-            "border_color" : "#E0E0E0",
-            "text_color" : "#757575",
-        },
-        
-        "IDTableViewHeaderPadding [deactived]": {
-            "background_color" : "#F5F5F5",
-            "border_color" : "#E0E0E0",
-        },
-        
-        "IDGridView [deactived]" : {
-            "row_spacing" : "0.0",
-            "grid_color" : "#E0E0E0",
-            "enable_draw_horizontal_grid" : "NO",
-            "enable_draw_vertical_grid" : "NO",
-        },
-
-        "IDScrollerVertical [deactived]" : {
-            "knob_color" : "#B4B4B4",
-            "background_color" : "#F5F5F5",
-        },
-        "IDScrollerHorizontal [deactived]" : {
-            "knob_color" : "#B4B4B4",
-            "background_color" : "#F5F5F5",
+            "background_color" : "#FFFFFF",
         },
     },
     
@@ -390,9 +324,9 @@
     "ClassCheckBox [disabled]" : {
         "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
         "text_color" : "#757575",
-        "box_outline_color" : "#757575",
+        "box_outline_color" : "#BFBFBF",
         "box_background_color" : "#CCCCCC",
-        "box_content_color" : "#757575",
+        "box_content_color" : "#ABABAB",
         "box_background_color_checked" : "#CCCCCC",
     },
       
@@ -472,6 +406,24 @@
         "aligment" : "left",
     },
     
+    "ClassTextTitle [actived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"bold\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "ClassTextTitle [deactived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"bold\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "ClassTextTitle [highlighted]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"bold\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
     "ClassTextView [actived]" : {
         "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
         "text_color" : "#4D4D4D",
@@ -546,8 +498,116 @@
         "aligment" : "left",
     },
     
-    "IDProjectProcessSymbolTableView [actived]" : {
+    "ClassBinaryView [actived]" : {
+        "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+        "text_color" : "#4D4D4D",
         "background_color" : "#FFFFFF",
+        "caret_color" : "#4D4D4D",
+        "caret_color_marked" : "#4D4D4D",
+        "text_background_color_selected" : "#bbdefb",
+        "text_background_color_selected_outline" : "#42a5f5",
+        "text_background_color_highlight" : "#ffeb3b",
+        "text_background_color_highlight_outline" : "#ffeb3b",
+        "aligment" : "left",
+        "IDVerticalScroller [actived]" : {
+            "knob_color" : "#B4B4B4",
+            "background_color" : "#FFFFFF",
+        },
+        "IDHorizontalScroller [actived]" : {
+            "knob_color" : "#B4B4B4",
+            "background_color" : "#FFFFFF",
+        },
+    },
+    
+    "ClassBinaryView [deactived]" : {
+        "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+        "text_color" : "#4D4D4D",
+        "background_color" : "#FFFFFF",
+        "caret_color" : "#4D4D4D",
+        "caret_color_marked" : "#4D4D4D",
+        "text_background_color_selected" : "#EEEEEE",
+        "text_background_color_selected_outline" : "#ABABAB",
+        "text_background_color_highlight" : "#ffeb3b",
+        "text_background_color_highlight_outline" : "#ffeb3b",
+        "aligment" : "left",
+        "IDVerticalScroller [deactived]" : {
+            "knob_color" : "#B4B4B4",
+            "background_color" : "#FFFFFF",
+        },
+        "IDHorizontalScroller [deactived]" : {
+            "knob_color" : "#B4B4B4",
+            "background_color" : "#FFFFFF",
+        },
+    },
+    
+    "IDSessionSymbolTableView [actived]" : {
+         "background_color" : "#F5F5F5",
+         
+         "IDTableViewHeader [actived]" : {
+             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+             "background_color" : "#F5F5F5",
+             "divider_color" : "#E0E0E0",
+             "border_color" : "#E0E0E0",
+             "text_color" : "#757575",
+         },
+         
+         "IDTableViewHeaderPadding [actived]": {
+             "background_color" : "#F5F5F5",
+             "border_color" : "#E0E0E0",
+         },
+         
+         "IDGridView [actived]" : {
+             "row_spacing" : "0.0",
+             "grid_color" : "#E0E0E0",
+             "enable_draw_horizontal_grid" : "NO",
+             "enable_draw_vertical_grid" : "NO",
+         },
+
+         "IDScrollerVertical [actived]" : {
+             "knob_color" : "#B4B4B4",
+             "background_color" : "#F5F5F5",
+         },
+         "IDScrollerHorizontal [actived]" : {
+             "knob_color" : "#B4B4B4",
+             "background_color" : "#F5F5F5",
+         },
+     },
+     
+     "IDSessionSymbolTableView [deactived]" : {
+         "background_color" : "#F5F5F5",
+         
+         "IDTableViewHeader [deactived]" : {
+             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+             "background_color" : "#F5F5F5",
+             "divider_color" : "#E0E0E0",
+             "border_color" : "#E0E0E0",
+             "text_color" : "#757575",
+         },
+         
+         "IDTableViewHeaderPadding [deactived]": {
+             "background_color" : "#F5F5F5",
+             "border_color" : "#E0E0E0",
+         },
+         
+         "IDGridView [deactived]" : {
+             "row_spacing" : "0.0",
+             "grid_color" : "#E0E0E0",
+             "enable_draw_horizontal_grid" : "NO",
+             "enable_draw_vertical_grid" : "NO",
+         },
+
+         "IDScrollerVertical [deactived]" : {
+             "knob_color" : "#B4B4B4",
+             "background_color" : "#F5F5F5",
+         },
+         "IDScrollerHorizontal [deactived]" : {
+             "knob_color" : "#B4B4B4",
+             "background_color" : "#F5F5F5",
+         },
+     },
+    
+    "IDSessionReferenceTableView [actived]" : {
+        "background_color" : "#F5F5F5",
         
         "IDTableViewHeader [actived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -571,16 +631,16 @@
 
         "IDScrollerVertical [actived]" : {
             "knob_color" : "#B4B4B4",
-            "background_color" : "#FFFFFF",
+            "background_color" : "#F5F5F5",
         },
         "IDScrollerHorizontal [actived]" : {
             "knob_color" : "#B4B4B4",
-            "background_color" : "#FFFFFF",
+            "background_color" : "#F5F5F5",
         },
     },
     
-    "IDProjectProcessSymbolTableView [deactived]" : {
-        "background_color" : "#FFFFFF",
+    "IDSessionReferenceTableView [deactived]" : {
+        "background_color" : "#F5F5F5",
         
         "IDTableViewHeader [deactived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -604,79 +664,79 @@
 
         "IDScrollerVertical [deactived]" : {
             "knob_color" : "#B4B4B4",
-            "background_color" : "#FFFFFF",
+            "background_color" : "#F5F5F5",
         },
         "IDScrollerHorizontal [deactived]" : {
             "knob_color" : "#B4B4B4",
-            "background_color" : "#FFFFFF",
+            "background_color" : "#F5F5F5",
         },
     },
     
-    "IDSessionContextTableView [actived]" : {
-        "background_color" : "#FFFFFF",
-        
-        "IDTableViewHeader [actived]" : {
-            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-            "background_color" : "#F5F5F5",
-            "divider_color" : "#E0E0E0",
-            "border_color" : "#E0E0E0",
-            "text_color" : "#757575",
-        },
-        
-        "IDTableViewHeaderPadding [actived]": {
-            "background_color" : "#F5F5F5",
-            "border_color" : "#E0E0E0",
-        },
-        
-        "IDGridView [actived]" : {
-            "row_spacing" : "0.0",
-            "grid_color" : "#E0E0E0",
-            "enable_draw_horizontal_grid" : "NO",
-            "enable_draw_vertical_grid" : "NO",
-        },
+    "IDSessionFilePathTableView [actived]" : {
+         "background_color" : "#F5F5F5",
+         
+         "IDTableViewHeader [actived]" : {
+             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+             "background_color" : "#F5F5F5",
+             "divider_color" : "#E0E0E0",
+             "border_color" : "#E0E0E0",
+             "text_color" : "#757575",
+         },
+         
+         "IDTableViewHeaderPadding [actived]": {
+             "background_color" : "#F5F5F5",
+             "border_color" : "#E0E0E0",
+         },
+         
+         "IDGridView [actived]" : {
+             "row_spacing" : "0.0",
+             "grid_color" : "#E0E0E0",
+             "enable_draw_horizontal_grid" : "NO",
+             "enable_draw_vertical_grid" : "NO",
+         },
 
-        "IDScrollerVertical [actived]" : {
-            "knob_color" : "#B4B4B4",
-            "background_color" : "#FFFFFF",
-        },
-        "IDScrollerHorizontal [actived]" : {
-            "knob_color" : "#B4B4B4",
-            "background_color" : "#FFFFFF",
-        },
-    },
-    
-    "IDSessionContextTableView [deactived]" : {
-        "background_color" : "#FFFFFF",
-        
-        "IDTableViewHeader [deactived]" : {
-            "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-            "background_color" : "#F5F5F5",
-            "divider_color" : "#E0E0E0",
-            "border_color" : "#E0E0E0",
-            "text_color" : "#757575",
-        },
-        
-        "IDTableViewHeaderPadding [deactived]": {
-            "background_color" : "#F5F5F5",
-            "border_color" : "#E0E0E0",
-        },
-        
-        "IDGridView [deactived]" : {
-            "row_spacing" : "0.0",
-            "grid_color" : "#E0E0E0",
-            "enable_draw_horizontal_grid" : "NO",
-            "enable_draw_vertical_grid" : "NO",
-        },
+         "IDScrollerVertical [actived]" : {
+             "knob_color" : "#B4B4B4",
+             "background_color" : "#F5F5F5",
+         },
+         "IDScrollerHorizontal [actived]" : {
+             "knob_color" : "#B4B4B4",
+             "background_color" : "#F5F5F5",
+         },
+     },
+     
+     "IDSessionFilePathTableView [deactived]" : {
+         "background_color" : "#F5F5F5",
+         
+         "IDTableViewHeader [deactived]" : {
+             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+             "background_color" : "#F5F5F5",
+             "divider_color" : "#E0E0E0",
+             "border_color" : "#E0E0E0",
+             "text_color" : "#757575",
+         },
+         
+         "IDTableViewHeaderPadding [deactived]": {
+             "background_color" : "#F5F5F5",
+             "border_color" : "#E0E0E0",
+         },
+         
+         "IDGridView [deactived]" : {
+             "row_spacing" : "0.0",
+             "grid_color" : "#E0E0E0",
+             "enable_draw_horizontal_grid" : "NO",
+             "enable_draw_vertical_grid" : "NO",
+         },
 
-        "IDScrollerVertical [deactived]" : {
-            "knob_color" : "#B4B4B4",
-            "background_color" : "#FFFFFF",
-        },
-        "IDScrollerHorizontal [deactived]" : {
-            "knob_color" : "#B4B4B4",
-            "background_color" : "#FFFFFF",
-        },
-    },
+         "IDScrollerVertical [deactived]" : {
+             "knob_color" : "#B4B4B4",
+             "background_color" : "#F5F5F5",
+         },
+         "IDScrollerHorizontal [deactived]" : {
+             "knob_color" : "#B4B4B4",
+             "background_color" : "#F5F5F5",
+         },
+     },
     
     "IDSessionContextView [actived]" : {
         "background_color" : "#FFFFFF",
@@ -686,5 +746,12 @@
         "background_color" : "#FFFFFF",
     },
     
+    "ClassSessionFrameManagerView [actived]" : {
+        "icon_color" : "#E0E0E0",
+    },
+    
+    "ClassSessionFrameManagerView [deactived]" : {
+        "icon_color" : "#E0E0E0",
+    },
     
 }

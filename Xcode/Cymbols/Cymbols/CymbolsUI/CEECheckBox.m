@@ -21,27 +21,88 @@
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
+    NSFont* font = self.font;
+    NSColor* backgroundColor = self.backgroundColor;
+    NSColor* borderColor = self.borderColor;
+    NSColor* textColor = self.textColor;
+    NSColor* iconColor = self.iconColor;
+    NSShadow* textShadow = self.textShadow;
+    NSGradient* gradient = self.gradient;
+    CGFloat gradientAngle = self.gradientAngle;
+    CGFloat borderWidth = self.borderWidth;
+    CGFloat cornerRadius = self.cornerRadius;
+    NSColor* boxOutlineColor = self.boxOutlineColor;
+    NSColor* boxBackgroundColor = self.boxBackgroundColor;
+    NSColor* boxBackgroundColorChecked = self.boxBackgroundColorChecked;
+    NSColor* boxContentColor = self.boxContentColor;
+    
+    if (!self.isEnabled) {
+        CEEUserInterfaceStyle* disableStyle = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:kCEEViewStyleStateDisabled];
+        if (disableStyle) {
+            if (disableStyle.font)
+                font = disableStyle.font;
+            
+            if (disableStyle.backgroundColor)
+                backgroundColor = disableStyle.backgroundColor;
+            
+            if (disableStyle.borderColor)
+                borderColor = disableStyle.borderColor;
+            
+            if (disableStyle.textColor)
+                textColor = disableStyle.textColor;
+            
+            if (disableStyle.textShadow)
+                textShadow = disableStyle.textShadow;
+            
+            if (disableStyle.gradient)
+                gradient = disableStyle.gradient;
+            
+            gradientAngle = disableStyle.gradientAngle;
+            borderWidth = disableStyle.borderWidth;
+            
+            if (disableStyle.iconColor)
+                iconColor = disableStyle.iconColor;
+            
+            cornerRadius = disableStyle.cornerRadius;
+                
+            if (disableStyle.boxOutlineColor)
+                boxOutlineColor = disableStyle.boxOutlineColor;
+            
+            if (disableStyle.boxBackgroundColor)
+                boxBackgroundColor = disableStyle.boxBackgroundColor;
+            
+            if (disableStyle.boxBackgroundColorChecked)
+                boxBackgroundColorChecked = disableStyle.boxBackgroundColorChecked;
+            
+            if (disableStyle.boxContentColor)
+                boxContentColor = disableStyle.boxContentColor;
+        }
+    }
+    borderWidth = 0.0;
+    backgroundColor = [NSColor clearColor];
+    
+    
     NSSize frameSize = self.frame.size;
-    NSRect rect = NSMakeRect((self.borderWidth / 2.0),
-                             (self.borderWidth / 2.0),
-                             frameSize.width - self.borderWidth,
-                             frameSize.height - self.borderWidth);    
+    NSRect rect = NSMakeRect((borderWidth / 2.0),
+                             (borderWidth / 2.0),
+                             frameSize.width - borderWidth,
+                             frameSize.height - borderWidth);    
     CGFloat base = rect.origin.y + rect.size.height / 2.0;
-    NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:self.cornerRadius yRadius:self.cornerRadius];
-    if (self.gradient) {
-        [self.gradient drawInBezierPath:path angle:self.gradientAngle];
+    NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:cornerRadius yRadius:cornerRadius];
+    if (gradient) {
+        [gradient drawInBezierPath:path angle:gradientAngle];
     }
     else {
-        if (self.backgroundColor) {
-            [self.backgroundColor setFill];
+        if (backgroundColor) {
+            [backgroundColor setFill];
             [path fill];
         }
     }
     
-    if (self.borderWidth >= FLT_EPSILON) {
-        [path setLineWidth:self.borderWidth];
-        if (self.borderColor) {
-            [self.borderColor setStroke];
+    if (borderWidth >= FLT_EPSILON) {
+        [path setLineWidth:borderWidth];
+        if (borderColor) {
+            [borderColor setStroke];
             [path stroke];
         }
     }
@@ -56,8 +117,8 @@
     CGFloat boxCornerRadius = 1.0;
     path = [NSBezierPath bezierPathWithRoundedRect:boxRect xRadius:boxCornerRadius yRadius:boxCornerRadius];
     [path setLineWidth:boxLineWidth];
-    if (_boxOutlineColor) {
-        [_boxOutlineColor setStroke];
+    if (boxOutlineColor) {
+        [boxOutlineColor setStroke];
         [path stroke];
     }
     
@@ -67,16 +128,17 @@
                                     boxSize - boxLineWidth);
     path = [NSBezierPath bezierPathWithRoundedRect:contentRect xRadius:boxCornerRadius yRadius:boxCornerRadius];
     
+    
     if (self.state == NSOnState) {
-        if (_boxBackgroundColorChecked) {
-            [_boxBackgroundColorChecked setFill];
+        if (boxBackgroundColorChecked) {
+            [boxBackgroundColorChecked setFill];
             [path fill];
         }
         // draw the tick
-        if (_boxContentColor) {
+        if (boxContentColor) {
             path = [[NSBezierPath alloc] init];
             [path setLineWidth:1.5];
-            [_boxContentColor setStroke];
+            [boxContentColor setStroke];
             NSPoint p0 = NSMakePoint(boxRect.origin.x, boxRect.origin.y);
             NSPoint p1 = NSMakePoint(p0.x + 3, p0.y + 7);
             NSPoint p2 = NSMakePoint(p0.x + 5, p0.y + 4);
@@ -88,8 +150,8 @@
         }
     }
     else {
-        if (_boxBackgroundColor) {
-            [_boxBackgroundColor setFill];
+        if (boxBackgroundColor) {
+            [boxBackgroundColor setFill];
             [path fill];
         }
     }
@@ -97,11 +159,11 @@
     if ([self.title compare:@""] != NSOrderedSame) {
         NSMutableDictionary* attributes = [[NSMutableDictionary alloc] init];
         
-        [attributes setValue:self.font forKey:NSFontAttributeName];
-        [attributes setValue:self.textColor forKey:NSForegroundColorAttributeName];
+        [attributes setValue:font forKey:NSFontAttributeName];
+        [attributes setValue:textColor forKey:NSForegroundColorAttributeName];
         
-        if (self.textShadow)
-            [attributes setValue:self.textShadow forKey:NSShadowAttributeName];
+        if (textShadow)
+            [attributes setValue:textShadow forKey:NSShadowAttributeName];
         
         NSAttributedString *drawingString = [[NSAttributedString alloc] initWithString:self.title attributes:attributes];
         NSSize drawingSize = [drawingString size];
@@ -124,7 +186,7 @@
         }
         
         CGFloat width = drawingSize.width;
-        CGFloat height = self.font.ascender + self.font.descender;
+        CGFloat height = font.ascender + font.descender;
         CGFloat x = titleRect.origin.x;
         CGFloat y = titleRect.origin.y + ((titleRect.size.height - height) / 2.0);
         NSRect drawRect = NSMakeRect(x, y, width, height);

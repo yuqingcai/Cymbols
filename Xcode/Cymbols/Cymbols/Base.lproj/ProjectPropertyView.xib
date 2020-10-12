@@ -31,7 +31,7 @@
                         <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Project Name"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="nea-9B-qMV" customClass="CEETextLabel">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="nea-9B-qMV" customClass="CEETextTitle">
                     <rect key="frame" x="20" y="468" width="560" height="23"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="23" id="x8Q-Mn-Lg6"/>

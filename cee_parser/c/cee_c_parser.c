@@ -309,6 +309,20 @@ typedef enum _CProtosTranslateState {
     kCProtosTranslateStateMax,
 } CProtosTranslateState;
 
+typedef enum _ObjectiveCEnumDefinitionTranslateState {
+    kObjectiveCEnumDefinitionTranslateStateInit,
+    kObjectiveCEnumDefinitionTranslateStateEnum,
+    kObjectiveCEnumDefinitionTranslateStateOPtions,
+    kObjectiveCEnumDefinitionTranslateStateParameterList,
+    kObjectiveCEnumDefinitionTranslateStateTypeSpecifier,
+    kObjectiveCEnumDefinitionTranslateStateComma,
+    kObjectiveCEnumDefinitionTranslateStateIdentifier,
+    kObjectiveCEnumDefinitionTranslateStateParameterListEnd,
+    kObjectiveCEnumDefinitionTranslateStateCommit,
+    kObjectiveCEnumDefinitionTranslateStateError,
+    kObjectiveCEnumDefinitionTranslateStateMax,
+} ObjectiveCEnumDefinitionTranslateState;
+
 typedef cee_boolean (*ParseTrap)(CEESourceFregment*, 
                                  CEEList**);
 
@@ -347,6 +361,7 @@ static cee_short c_prep_directive_define_translate_table[kCPrepDirectiveDefineTr
 static cee_short c_namespace_definition_translate_table[kCNamespaceDefinitionTranslateStateMax][CEETokenID_MAX];
 static cee_short c_protos_translate_table[kCProtosTranslateStateMax][CEETokenID_MAX];
 static cee_short c_extern_block_translate_table[kCExternBlockTranslateStateMax][CEETokenID_MAX];
+static cee_short objective_c_enum_definition_translate_table[kObjectiveCEnumDefinitionTranslateStateMax][CEETokenID_MAX];
 
 static cee_boolean token_id_is_prep_directive(CEETokenID identifier);
 static cee_boolean token_id_is_prep_directive_condition(CEETokenID identifier);
@@ -409,6 +424,8 @@ static CEEList* enumerators_extract(CEEList* tokens,
                                     const cee_uchar* subject);
 static cee_boolean c_union_definition_trap(CEESourceFregment* fregment,
                                            CEEList** pp);
+static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
+                                                    CEEList** pp);
 static cee_boolean c_statement_block_parse(CEESourceFregment* fregment);
 static void c_function_definition_translate_table_init(void);
 static cee_boolean c_function_definition_parse(CEESourceFregment* fregment);
@@ -526,7 +543,8 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    CEESourceFregment* statement,
                                    CEERange range,
                                    CEEList** references);
-static cee_boolean references_in_source_fregment_parse(CEESourceFregment* fregment,
+static cee_boolean references_in_source_fregment_parse(const cee_uchar* filepath,
+                                                       CEESourceFregment* fregment,
                                                        const cee_uchar* subject,
                                                        CEESourceFregment* prep_directive,
                                                        CEESourceFregment* statement,
@@ -534,7 +552,8 @@ static cee_boolean references_in_source_fregment_parse(CEESourceFregment* fregme
                                                        CEEList** references);
 static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregment,
                                                         const cee_uchar* subject);
-static void c_reference_fregment_parse(CEESourceFregment* fregment,
+static void c_reference_fregment_parse(const cee_uchar* filepath,
+                                       CEESourceFregment* fregment,
                                        const cee_uchar* subject,
                                        CEESourceFregment* prep_directive,
                                        CEESourceFregment* statement,
@@ -833,6 +852,8 @@ static void c_token_type_map_init(void)
     c_token_identifier_type_map[kCEETokenID_NONNULL]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
     c_token_identifier_type_map[kCEETokenID_NULLABLE]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
     c_token_identifier_type_map[kCEETokenID___KIND_OF]                    = kCEETokenIdentifierTypeKeyword;
+    c_token_identifier_type_map[kCEETokenID_NS_ENUM]                      = kCEETokenIdentifierTypeKeyword;
+    c_token_identifier_type_map[kCEETokenID_NS_OPTIONS]                   = kCEETokenIdentifierTypeKeyword;
 }
 
 static cee_boolean token_id_is_prep_directive(CEETokenID identifier)
@@ -1241,7 +1262,7 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
     
     
 #ifdef DEBUG_PREP_DIRECTIVE
-    cee_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
@@ -1347,7 +1368,7 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
         cee_list_free(q);
         
 #ifdef DEBUG_PREP_DIRECTIVE
-    cee_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
@@ -1388,7 +1409,7 @@ static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
     }
         
 #ifdef DEBUG_PREP_DIRECTIVE
-    cee_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
@@ -1831,7 +1852,7 @@ static cee_boolean c_class_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
     
 #ifdef DEBUG_CLASS
-    cee_symbol_print(definition);
+    cee_source_symbol_print(definition);
 #endif
     return TRUE;
 }
@@ -1851,7 +1872,7 @@ static cee_boolean c_enum_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
         
 #ifdef DEBUG_ENUM
-    cee_symbol_print(definition);
+    cee_source_symbol_print(definition);
 #endif
     return TRUE;
 }
@@ -1916,7 +1937,7 @@ static CEEList* enumerators_extract(CEEList* tokens,
     }
     
 #ifdef DEBUG_ENUM
-    cee_symbols_print(enumerators);
+    cee_source_symbols_print(enumerators);
 #endif
     
     return enumerators;
@@ -1937,9 +1958,94 @@ static cee_boolean c_union_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
         
 #ifdef DEBUG_UNION
-    cee_symbol_print(definition);
+    cee_source_symbol_print(definition);
 #endif
     return FALSE;
+}
+
+static void objective_c_enum_definition_translate_table_init(void)
+{
+    /**
+     *                      NS_EMUM     NS_OPTIONS      (               )                   {           others
+     *  Init                Enum        OPtions         Error           Error               Error       Error
+     *  Enum                Error       Error           ParameterList   Error               Error       Error
+     *  OPtions             Error       Error           ParameterList   Error               Error       Error
+     *  ParameterList       Error       Error           Error           ParameterListEnd    Error       Error
+     *  ParameterListEnd    Error       Error           Error           Error               Commit      Error
+     *
+     */
+    TRANSLATE_STATE_INI(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateMax                         , kObjectiveCEnumDefinitionTranslateStateError                                                           );
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateInit                        , kCEETokenID_NS_ENUM                           , kObjectiveCEnumDefinitionTranslateStateEnum            );
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateInit                        , kCEETokenID_NS_OPTIONS                        , kObjectiveCEnumDefinitionTranslateStateOPtions         );
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateEnum                        , '('                                           , kObjectiveCEnumDefinitionTranslateStateParameterList   );
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateOPtions                     , '('                                           , kObjectiveCEnumDefinitionTranslateStateParameterList   );
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateParameterList               , ')'                                           , kObjectiveCEnumDefinitionTranslateStateParameterListEnd);
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateParameterListEnd            , '{'                                           , kObjectiveCEnumDefinitionTranslateStateCommit          );
+}
+
+static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
+                                                    CEEList** pp)
+{
+    cee_boolean ret = FALSE;
+    CEESourceSymbol* definition = NULL;
+    CEEList* p = *pp;
+    CEEList* r = NULL;
+    CEEToken* token = NULL;
+    CEEList* parameter_list = NULL;
+    CEESourceFregment* child = NULL;
+    ObjectiveCEnumDefinitionTranslateState current = kObjectiveCEnumDefinitionTranslateStateInit;
+    ObjectiveCEnumDefinitionTranslateState prev = kObjectiveCEnumDefinitionTranslateStateInit;
+    
+    while (p) {
+        token = p->data;
+        
+        prev = current;
+        current = objective_c_enum_definition_translate_table[current][token->identifier];
+        
+        if (current == kObjectiveCEnumDefinitionTranslateStateParameterList) {
+            parameter_list = p;
+        }
+        else if (current == kObjectiveCEnumDefinitionTranslateStateCommit) {
+            break;
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    
+    if (current == kObjectiveCEnumDefinitionTranslateStateCommit) {
+        if (parameter_list) {
+            child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
+            if (child) {
+                child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
+                r = child->tokens_last;
+                while (r) {
+                    token = r->data;
+                    if (token->identifier == kCEETokenID_IDENTIFIER)
+                        break;
+                    r = TOKEN_PREV(r);
+                }
+            }
+        }
+        
+        definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
+                                                               fregment->subject_ref,
+                                                               r,
+                                                               r,
+                                                               kCEESourceSymbolTypeEnumDefinition,
+                                                               "c");
+        cee_token_slice_state_mark(r, r, kCEETokenStateSymbolOccupied);
+        fregment->symbols = cee_list_prepend(fregment->symbols, definition);
+        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeEnumDefinition);
+        ret = TRUE;
+    }
+    
+    *pp = NULL;
+    
+#ifdef DEBUG_ENUM
+    cee_source_symbol_print(definition);
+#endif
+    
+    return TRUE;
 }
 
 static cee_boolean c_statement_block_parse(CEESourceFregment* fregment)
@@ -2268,7 +2374,7 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
     
 #ifdef DEBUG_FUNCTION_DEFINITION
-    cee_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fregment->symbols);
 #endif
     
     return TRUE;
@@ -2501,7 +2607,7 @@ static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
         cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeDeclaration);
     
 #ifdef DEBUG_FUNCTION_DEFINITION
-    cee_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fregment->symbols);
 #endif
 
     return TRUE;    
@@ -2575,19 +2681,20 @@ static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment
 static void objective_c_message_definition_translate_table_init(void)
 {
     /**
-     *                       -           identifier  (               )                   :           {          others
-     *  Init                 Message     Error       Error           Error               Error       Error      Error
-     *  Message              Error       Error       ReturnType      Error               Error       Error      Error
-     *  ReturnType           Error       Error       Error           ReturnTypeEnd       Error       Error      Error
-     *  ReturnTypeEnd        Error       Component   Error           Error               Error       Error      Error
-     *  Component            Error       Error       Error           Error               Colon       Commit     Error
-     *  Colon                Error       Error       ParameterType   Error               Error       Error      Error
-     *  ParameterType        Error       Error       Error           ParameterTypeEnd    Error       Error      Error
-     *  ParameterTypeEnd     Error       Parameter   Error           Error               Error       Error      Error
-     *  Parameter            Error       Component   Error           Error               Error       Commit     Error
+     *                       -           +          identifier  (               )                   :           {          others
+     *  Init                 Message     Message    Error       Error           Error               Error       Error      Error
+     *  Message              Error       Error      Error       ReturnType      Error               Error       Error      Error
+     *  ReturnType           Error       Error      Error       Error           ReturnTypeEnd       Error       Error      Error
+     *  ReturnTypeEnd        Error       Error      Component   Error           Error               Error       Error      Error
+     *  Component            Error       Error      Error       Error           Error               Colon       Commit     Error
+     *  Colon                Error       Error      Error       ParameterType   Error               Error       Error      Error
+     *  ParameterType        Error       Error      Error       Error           ParameterTypeEnd    Error       Error      Error
+     *  ParameterTypeEnd     Error       Error      Parameter   Error           Error               Error       Error      Error
+     *  Parameter            Error       Error      Component   Error           Error               Error       Commit     Error
      */
     TRANSLATE_STATE_INI(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateMax               , kObjectiveCMessageDefinitionTranslateStateError                                                                   );
     TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateInit              , '-'                                               , kObjectiveCMessageDefinitionTranslateStateMessage             );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateInit              , '+'                                               , kObjectiveCMessageDefinitionTranslateStateMessage             );
     TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateMessage           , '('                                               , kObjectiveCMessageDefinitionTranslateStateReturnType          );
     TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateReturnType        , ')'                                               , kObjectiveCMessageDefinitionTranslateStateReturnTypeEnd       );
     TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateReturnTypeEnd     , kCEETokenID_IDENTIFIER                            , kObjectiveCMessageDefinitionTranslateStateComponent           );
@@ -2682,7 +2789,7 @@ static cee_boolean objective_c_message_definition_parse(CEESourceFregment* fregm
 
     
 #ifdef DEBUG_MESSAGE_DEFINITION
-    cee_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fregment->symbols);
 #endif   
     return ret;
 }
@@ -2803,7 +2910,7 @@ static cee_boolean objective_c_property_declaration_parse(CEESourceFregment* fre
     }
     
 #ifdef DEBUG_PROPERTY_DECLARATION
-    cee_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
@@ -2812,22 +2919,22 @@ static cee_boolean objective_c_property_declaration_parse(CEESourceFregment* fre
 static void objective_c_message_declaration_translate_table_init(void)
 {
     /**
-     *                      @optional   @required       -           identifier  (               )                   :           ;           others
-     *  Init                Init        Init            Message     Error       Error           Error               Error       Terminate   Error
-     *  Message             Error       Error           Error       Error       ReturnType      Error               Error       Error       Error
-     *  ReturnType          Error       Error           Error       Error       Error           ReturnTypeEnd       Error       Error       Error
-     *  ReturnTypeEnd       Error       Error           Error       Component   Error           Error               Error       Error       Error
-     *  Component           Error       Error           Error       Error       Error           Error               Colon       Terminate   Error
-     *  Colon               Error       Error           Error       Error       ParameterType   Error               Error       Error       Error
-     *  ParameterType       Error       Error           Error       Error       Error           ParameterTypeEnd    Error       Error       Error
-     *  ParameterTypeEnd    Error       Error           Error       Parameter   Error           Error               Error       Error       Error
-     *  Parameter           Error       Error           Error       Component   Error           Error               Error       Terminate   Error 
+     *                      @optional   @required       -           +           identifier  (               )                   :           ;           others
+     *  Init                Init        Init            Message     Message     Error       Error           Error               Error       Terminate   Error
+     *  Message             Error       Error           Error       Error       Error       ReturnType      Error               Error       Error       Error
+     *  ReturnType          Error       Error           Error       Error       Error       Error           ReturnTypeEnd       Error       Error       Error
+     *  ReturnTypeEnd       Error       Error           Error       Error       Component   Error           Error               Error       Error       Error
+     *  Component           Error       Error           Error       Error       Error       Error           Error               Colon       Terminate   Error
+     *  Colon               Error       Error           Error       Error       Error       ParameterType   Error               Error       Error       Error
+     *  ParameterType       Error       Error           Error       Error       Error       Error           ParameterTypeEnd    Error       Error       Error
+     *  ParameterTypeEnd    Error       Error           Error       Error       Parameter   Error           Error               Error       Error       Error
+     *  Parameter           Error       Error           Error       Error       Component   Error           Error               Error       Terminate   Error
      */
     TRANSLATE_STATE_INI(objective_c_message_declaration_translate_table, kObjectiveCMessageDeclarationTranslateStateMax                 , kObjectiveCMessageDeclarationTranslateStateError                                          );
     TRANSLATE_STATE_SET(objective_c_message_declaration_translate_table, kObjectiveCMessageDeclarationTranslateStateInit                , kCEETokenID_AT_OPTIONAL   , kObjectiveCMessageDeclarationTranslateStateInit               );
     TRANSLATE_STATE_SET(objective_c_message_declaration_translate_table, kObjectiveCMessageDeclarationTranslateStateInit                , kCEETokenID_AT_REQUIRED   , kObjectiveCMessageDeclarationTranslateStateInit               );
     TRANSLATE_STATE_SET(objective_c_message_declaration_translate_table, kObjectiveCMessageDeclarationTranslateStateInit                , '-'                       , kObjectiveCMessageDeclarationTranslateStateMessage            );
-    TRANSLATE_STATE_SET(objective_c_message_declaration_translate_table, kObjectiveCMessageDeclarationTranslateStateInit                , '-'                       , kObjectiveCMessageDeclarationTranslateStateMessage            );
+    TRANSLATE_STATE_SET(objective_c_message_declaration_translate_table, kObjectiveCMessageDeclarationTranslateStateInit                , '+'                       , kObjectiveCMessageDeclarationTranslateStateMessage            );
     TRANSLATE_STATE_SET(objective_c_message_declaration_translate_table, kObjectiveCMessageDeclarationTranslateStateInit                , ';'                       , kObjectiveCMessageDeclarationTranslateStateTerminate          );
     TRANSLATE_STATE_SET(objective_c_message_declaration_translate_table, kObjectiveCMessageDeclarationTranslateStateMessage             , '('                       , kObjectiveCMessageDeclarationTranslateStateReturnType         );
     TRANSLATE_STATE_SET(objective_c_message_declaration_translate_table, kObjectiveCMessageDeclarationTranslateStateReturnType          , ')'                       , kObjectiveCMessageDeclarationTranslateStateReturnTypeEnd      );
@@ -2848,8 +2955,7 @@ static cee_boolean objective_c_message_declaration_parse(CEESourceFregment* freg
     CEESourceSymbol* declaration = NULL;
     CEEList* p = NULL;
     CEEToken* token = NULL;
-    ObjectiveCMessageDeclarationTranslateState current = 
-        kObjectiveCMessageDeclarationTranslateStateInit;
+    ObjectiveCMessageDeclarationTranslateState current = kObjectiveCMessageDeclarationTranslateStateInit;
     CEEList* components = NULL;
     CEEList* parameters = NULL;
     CEEList* q = NULL;
@@ -2923,7 +3029,7 @@ static cee_boolean objective_c_message_declaration_parse(CEESourceFregment* freg
     }
 
 #ifdef DEBUG_MESSAGE_DECLARATION
-    cee_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fregment->symbols);
 #endif
     return ret;
 }
@@ -3676,7 +3782,7 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
     }
     
 #ifdef DEBUG_DECLARATION
-    cee_symbols_print(declarations);
+    cee_source_symbols_print(declarations);
 #endif
     
     return ret;
@@ -4019,7 +4125,7 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
     
 #ifdef DEBUG_NAMESPACE
-    cee_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
@@ -4033,13 +4139,13 @@ static void c_extern_block_translate_table_init(void)
      *  Extern          Error   Identifier   Identifier     Error   Error
      *  Identifier      Error   Identifier   Identifier     Commit  Error
      */
-    TRANSLATE_STATE_INI(c_extern_block_translate_table,     kCExternBlockTranslateStateMax              , kCExternBlockTranslateStateError                                                  );
+    TRANSLATE_STATE_INI(c_extern_block_translate_table,     kCExternBlockTranslateStateMax              , kCExternBlockTranslateStateError                                                );
     TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateInit             , kCEETokenID_EXTERN              , kCExternBlockTranslateStateExtern             );
     TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateExtern           , kCEETokenID_LITERAL             , kCExternBlockTranslateStateIdentifier         );
     TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateExtern           , kCEETokenID_IDENTIFIER          , kCExternBlockTranslateStateIdentifier         );
     TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateIdentifier       , kCEETokenID_LITERAL             , kCExternBlockTranslateStateIdentifier         );
     TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateIdentifier       , kCEETokenID_IDENTIFIER          , kCExternBlockTranslateStateIdentifier         );
-    TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateIdentifier       , '{'                               , kCExternBlockTranslateStateCommit             );
+    TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateIdentifier       , '{'                             , kCExternBlockTranslateStateCommit             );
 }
 
 static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
@@ -4099,7 +4205,7 @@ static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
     }
     
 #ifdef DEBUG_DECLARATION
-    cee_symbol_print(extern_block);
+    cee_source_symbol_print(extern_block);
 #endif
     
     return ret;
@@ -4216,7 +4322,7 @@ static void label_parse(CEECParser* parser)
     }
     
 #ifdef DEBUG_LABEL
-    cee_symbol_print(declaration);
+    cee_source_symbol_print(declaration);
 #endif
     
 }
@@ -4467,7 +4573,7 @@ exit:
         cee_list_free(derives);
     
 #ifdef DEBUG_INTERFACE
-    cee_symbol_print(interface);
+    cee_source_symbol_print(interface);
 #endif
     
     return interface;
@@ -4530,7 +4636,7 @@ static CEESourceSymbol* objective_c_implementation_extract(CEEList* tokens,
     
 exit:
 #ifdef DEBUG_IMPLEMENTATION
-    cee_symbol_print(implementation);
+    cee_source_symbol_print(implementation);
 #endif
     
     return implementation;
@@ -4569,7 +4675,7 @@ static CEESourceSymbol* objective_c_protocol_extract(CEEList* tokens,
     cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
 exit:
 #ifdef DEBUG_PROTOCOL
-    cee_symbol_print(protocol);
+    cee_source_symbol_print(protocol);
 #endif
     
     return protocol;
@@ -4623,6 +4729,8 @@ static void parser_block_header_trap_init(CEECParser* parser)
     parser->block_header_traps[kCEETokenID_STRUCT] = c_class_definition_trap;
     parser->block_header_traps[kCEETokenID_ENUM] = c_enum_definition_trap;
     parser->block_header_traps[kCEETokenID_UNION] = c_union_definition_trap;
+    parser->block_header_traps[kCEETokenID_NS_ENUM] = objective_c_enum_definition_trap;
+    parser->block_header_traps[kCEETokenID_NS_OPTIONS] = objective_c_enum_definition_trap;
     parser->block_header_traps[kCEETokenID_NAMESPACE] = c_namespace_definition_trap;
 }
 
@@ -4654,6 +4762,7 @@ CEESourceParserRef cee_c_parser_create(const cee_char* identifier)
     c_namespace_definition_translate_table_init();
     c_protos_translate_table_init();
     c_extern_block_translate_table_init();
+    objective_c_enum_definition_translate_table_init();
     
     parser->imp = c;
         
@@ -4807,6 +4916,9 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
     CEEToken* token = NULL;
     CEESourceTokenMap* map = NULL;
     CEEList* tokens = NULL;
+    
+    if (!subject)
+        return FALSE;
     
     map = cee_source_token_map_create(subject);
     cee_lexer_c_buffer_create(subject);
@@ -4978,7 +5090,8 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
         while (p) {
             fregment = p->data;
             
-            if (!references_in_source_fregment_parse(fregment, 
+            if (!references_in_source_fregment_parse(filepath,
+                                                     fregment, 
                                                      subject, 
                                                      prep_directive,
                                                      statement,
@@ -4993,7 +5106,8 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
     return TRUE;
 }
 
-static cee_boolean references_in_source_fregment_parse(CEESourceFregment* fregment,
+static cee_boolean references_in_source_fregment_parse(const cee_uchar* filepath,
+                                                       CEESourceFregment* fregment,
                                                        const cee_uchar* subject,
                                                        CEESourceFregment* prep_directive,
                                                        CEESourceFregment* statement,
@@ -5007,7 +5121,8 @@ static cee_boolean references_in_source_fregment_parse(CEESourceFregment* fregme
         return FALSE;
     
     reference_fregment = c_referernce_fregment_convert(fregment, subject);
-    c_reference_fregment_parse(reference_fregment, 
+    c_reference_fregment_parse(filepath,
+                               reference_fregment, 
                                subject, 
                                prep_directive,
                                statement,
@@ -5017,7 +5132,8 @@ static cee_boolean references_in_source_fregment_parse(CEESourceFregment* fregme
     
     p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
     while (p) {
-        if (!references_in_source_fregment_parse(p->data, 
+        if (!references_in_source_fregment_parse(filepath,
+                                                 p->data, 
                                                  subject, 
                                                  prep_directive,
                                                  statement,
@@ -5119,14 +5235,15 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
     return current;
 }
 
-static void c_reference_fregment_parse(CEESourceFregment* fregment,
+static void c_reference_fregment_parse(const cee_uchar* filepath,
+                                       CEESourceFregment* fregment,
                                        const cee_uchar* subject,
                                        CEESourceFregment* prep_directive,
                                        CEESourceFregment* statement,
                                        CEEList** references)
 {
     CEEList* p = NULL;
-    CEESourceReference* reference = NULL;
+    CEESourceSymbolReference* reference = NULL;
     CEEList* sub = NULL;
     CEEList* objective_c_message = NULL;
     CEESourceReferenceType type = kCEESourceReferenceTypeUnknow;
@@ -5173,7 +5290,10 @@ static void c_reference_fregment_parse(CEESourceFregment* fregment,
         }
         
         if (sub) {
-            reference = cee_reference_create(subject, sub, type);
+            reference = cee_source_symbol_reference_create((const cee_char*)filepath,
+                                                           subject, 
+                                                           sub, 
+                                                           type);
             *references = cee_list_prepend(*references, reference);
             type = kCEESourceReferenceTypeUnknow;
             reference = NULL;
@@ -5183,16 +5303,18 @@ static void c_reference_fregment_parse(CEESourceFregment* fregment,
     
     if (objective_c_message) {
         type = kCEESourceReferenceTypeUnknow;
-        reference = cee_reference_create(subject, 
-                                         objective_c_message, 
-                                         type);
+        reference = cee_source_symbol_reference_create((const cee_char*)filepath,
+                                                       subject, 
+                                                       objective_c_message, 
+                                                       type);
         *references = cee_list_prepend(*references, reference);
         objective_c_message = NULL;
     }
     
     p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
     while (p) {
-        c_reference_fregment_parse(p->data, 
+        c_reference_fregment_parse(filepath,
+                                   p->data, 
                                    subject, 
                                    prep_directive, 
                                    statement, 

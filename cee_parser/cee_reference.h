@@ -28,19 +28,21 @@ typedef enum _CEESourceReferenceSearchOption {
     kCEESourceReferenceSearchOptionGlobal = 0x1 << 1
 } CEESourceReferenceSearchOption;
 
-typedef struct _CEESourceReference {
+typedef struct _CEESourceSymbolReference {
     CEESourceReferenceType type;
+    cee_char* filepath;
     CEEList* tokens_ref;
     cee_char* name;
     cee_char* locations;
-} CEESourceReference;
+} CEESourceSymbolReference;
 
-CEESourceReference* cee_reference_create(const cee_uchar* subject,
-                                         CEEList* tokens,
-                                         CEESourceReferenceType type);
-void cee_reference_free(cee_pointer data);
-void cee_reference_print(CEESourceReference* reference);
-void cee_references_print(CEEList* references);
+CEESourceSymbolReference* cee_source_symbol_reference_create(const cee_char* filepath,
+                                                             const cee_uchar* subject,
+                                                             CEEList* tokens,
+                                                             CEESourceReferenceType type);
+void cee_source_symbol_reference_free(cee_pointer data);
+void cee_source_symbol_reference_print(CEESourceSymbolReference* reference);
+void cee_source_symbol_references_print(CEEList* references);
 
 #ifdef __cplusplus
 }

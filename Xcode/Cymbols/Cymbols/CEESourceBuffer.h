@@ -19,19 +19,21 @@
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSNotificationName CEENotificationSourceBufferStateChanged;
+extern NSNotificationName CEENotificationSourceBufferReload;
+extern NSNotificationName CEENotificationSourceBufferSaved;
+extern NSNotificationName CEENotificationSourceBufferParsed;
 
 typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
     kCEESourceBufferStateNormal = 0,
     kCEESourceBufferStateModified = 1 << 1,
     kCEESourceBufferStateFileTemporary = 1 << 2,
     kCEESourceBufferStateFileDeleted = 1 << 3,
-    kCEESourceBufferStateReload = 1 << 4,
-    kCEESourceBufferStateShouldSyncWhenClose = 1 << 5,
+    kCEESourceBufferStateShouldSyncWhenClose = 1 << 4,
 };
 
-typedef NS_ENUM(NSUInteger, CEEBufferType) {
-    kCEEBufferTypeUTF8 = 0,
-    kCEEBufferTypeBinary = 1,
+typedef NS_ENUM(NSUInteger, CEEBufferEncodeType) {
+    kCEEBufferEncodeTypeUTF8 = 0,
+    kCEEBufferEncodeTypeBinary = 1,
 };
 
 @class CEEProject;
@@ -39,8 +41,8 @@ typedef NS_ENUM(NSUInteger, CEEBufferType) {
 @interface CEESourceBuffer : NSObject
 
 @property (strong) NSString* filePath;
-@property CEEBufferType type;
-@property CEETextStorageRef storage;
+@property CEEBufferEncodeType encodeType;
+@property cee_pointer storage;
 @property CEESourceBufferState state;
 @property CEESourceFregment* comment;
 @property CEESourceFregment* prep_directive;
@@ -49,7 +51,6 @@ typedef NS_ENUM(NSUInteger, CEEBufferType) {
 @property CEETree* prep_directive_symbol_tree;
 @property CEETree* statement_symbol_tree;
 @property (readonly)NSInteger referenceCount;
-
 @property CEEList* tokens_ref;
 @property CEESourceParserRef parser_ref;
 @property CEEList* symbol_wrappers;
@@ -79,11 +80,12 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
 - (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath;
 - (CEESourceBuffer*)openUntitledSourceBuffer;
 - (void)closeSourceBuffer:(CEESourceBuffer*)buffer;
-- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filePath;
+- (BOOL)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath;
+- (NSArray*)untitleSourceBuffersFilePaths;
 - (void)discardUntitleSourceBuffers;
 - (void)syncSourceBuffersFromFiles;
 - (BOOL)isTemporaryFilePath:(NSString*)filePath;
-
+- (NSString*)sourceType:(CEESourceBuffer*)buffer;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -746,6 +746,9 @@ CEEList* cee_token_is_identifier_before(CEEList* p,
 
 CEESourceTokenMap* cee_source_token_map_create(const cee_uchar* subject)
 {
+    if (!subject)
+        return NULL;
+    
     CEESourceTokenMap* token_map = cee_malloc0(sizeof(CEESourceTokenMap));
     token_map->length = strlen((const cee_char*)subject) + 1; /** length contain NULL terminater */
     token_map->map = (cee_pointer*)cee_malloc0(sizeof(cee_pointer) * token_map->length);

@@ -14,16 +14,16 @@ static void source_fregment_round_bracket_list_expand(CEESourceFregment* fregmen
                                                       CEEList** tokens);
 static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                                          CEETree* tree);
-static CEEList* local_symbols_search_by_reference(CEESourceReference* reference,
+static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* reference,
                                                   CEESourceFregment* statement,
                                                   CEESourceFregment* prep_directive,
                                                   CEESourceFregmentType searchable_child_fregment_type);
-static CEESourceFregment* source_fregment_from_reference_get(CEESourceReference* reference);
+static CEESourceFregment* source_fregment_from_reference_get(CEESourceSymbolReference* reference);
 static void source_fregment_tree_symbols_search_recursive(CEESourceFregment* fregment,
                                                           CEESymbolMatcher matcher,
                                                           cee_pointer user_data,
                                                           CEEList** searched);
-static CEEList* reference_tags_create(CEESourceReference* reference,
+static CEEList* reference_tags_create(CEESourceSymbolReference* reference,
                                       CEESourceFregment* prep_directive,
                                       CEESourceFregment* statement,
                                       cee_pointer database);
@@ -155,7 +155,7 @@ cee_boolean cee_source_symbol_parse(CEESourceParserRef parser_ref,
                                     CEEList** tokens_ref,
                                     CEESourceTokenMap** source_token_map)
 {
-    if (!parser_ref->symbol_parse)
+    if (!parser_ref || !parser_ref->symbol_parse)
         return FALSE;
     
     return parser_ref->symbol_parse(parser_ref, 
@@ -177,7 +177,7 @@ cee_boolean cee_source_reference_parse(CEESourceParserRef parser_ref,
                                        CEERange range,
                                        CEEList** references)
 {
-    if (!parser_ref->reference_parse)
+    if (!parser_ref || !parser_ref->reference_parse)
         return FALSE;
     
     return parser_ref->reference_parse(parser_ref,
@@ -948,7 +948,7 @@ void cee_source_fregment_indexes_in_range(CEESourceTokenMap* token_map,
     CEEToken* token = NULL;
     CEESourceFregment* fregment = NULL;
     
-    if (!token_map)
+    if (!token_map || range.length == 0)
         return;
     
     if (range.location >= token_map->length || 
@@ -1132,7 +1132,7 @@ static void source_fregment_tree_symbols_search_recursive(CEESourceFregment* fre
     }
 }
 
-CEEList* cee_symbols_search_by_reference(CEESourceReference* reference,
+CEEList* cee_symbols_search_by_reference(CEESourceSymbolReference* reference,
                                          CEESourceFregment* prep_directive,
                                          CEESourceFregment* statement,
                                          cee_pointer database,
@@ -1186,7 +1186,7 @@ CEEList* cee_symbols_search_by_reference(CEESourceReference* reference,
     return symbols;
 }
 
-static CEEList* local_symbols_search_by_reference(CEESourceReference* reference,
+static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* reference,
                                                   CEESourceFregment* prep_directive,
                                                   CEESourceFregment* statement,
                                                   CEESourceFregmentType searchable_child_fregment_type)
@@ -1293,7 +1293,7 @@ found:
     return copied;
 }
 
-static CEESourceFregment* source_fregment_from_reference_get(CEESourceReference* reference)
+static CEESourceFregment* source_fregment_from_reference_get(CEESourceSymbolReference* reference)
 {
     if (!reference->tokens_ref)
         return NULL;
@@ -1474,7 +1474,7 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
     return tags;
 }
 
-static CEEList* reference_tags_create(CEESourceReference* reference,
+static CEEList* reference_tags_create(CEESourceSymbolReference* reference,
                                       CEESourceFregment* prep_directive,
                                       CEESourceFregment* statement,
                                       cee_pointer database)
@@ -1524,7 +1524,7 @@ CEETokenCluster* cee_token_cluster_search_by_buffer_offset(CEEList* references,
     CEETokenCluster* cluster = NULL;
     CEEList* symbols = NULL;
     CEESourceSymbol* symbol = NULL;
-    CEESourceReference* reference = NULL;
+    CEESourceSymbolReference* reference = NULL;
     CEEList* ranges = NULL;
     CEEList* p = references;
     

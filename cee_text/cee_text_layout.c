@@ -345,7 +345,7 @@ static cee_float white_space_width_get(CEETextLayout* layout)
 {
     return cee_text_platform_width_get(layout->platform_ref,
                                        CEE_UNICODE_POINT_SP,
-                                       kCEETagTypePlanText);
+                                       kCEETagTypePlainText);
 }
 
 static cee_float tab_placeholder_width_get(CEETextLine* line)
@@ -382,7 +382,7 @@ static CEETextUnit* unit_create(CEETextLine* line,
 {
     CEETextLayout* layout = line->layout_ref;
     cee_pointer platform = layout->platform_ref;
-    CEETagType type = kCEETagTypePlanText;
+    CEETagType type = kCEETagTypePlainText;
     CEETag* tag = NULL;
     CEETextUnit* unit = cee_malloc0(sizeof(CEETextUnit));
     CEEUnicodePointType codepoint_type = cee_codec_unicode_point_type(codepoint);
@@ -398,13 +398,13 @@ static CEETextUnit* unit_create(CEETextLine* line,
     
     assert(platform);
     
-    type = kCEETagTypePlanText;
+    type = kCEETagTypePlainText;
     if (tinted) {
         tag = cee_text_layout_tag_get(layout, buffer_offset);
         if (tag)
             type = tag->type;
         else
-            type = kCEETagTypePlanText;
+            type = kCEETagTypePlainText;
     }
     
     if (codepoint_type == kCEEUnicodePointTypeControl) {
@@ -528,6 +528,15 @@ void cee_text_layout_platform_set(CEETextLayoutRef layout,
     layout->platform_ref = platform;
 }
 
+cee_pointer cee_text_layout_platform_get(CEETextLayoutRef layout) {
+    return layout->platform_ref;
+}
+
+CEETextColorRef cee_text_layout_platform_background_color_get(cee_pointer platform)
+{
+    return cee_text_platform_background_color_get(platform, -1, 0);
+}
+
 static void text_layout(CEETextLayoutRef layout,
                         cee_boolean tinted)
 {
@@ -536,17 +545,18 @@ static void text_layout(CEETextLayoutRef layout,
     CEEUnicodePoint codepoint = CEE_UNICODE_POINT_INVALID;
     cee_size length = 0;
     cee_long paragraph_index = layout->paragraph_index;
-    cee_long current = cee_text_storage_paragraph_by_index(layout->storage_ref,
-                                                           paragraph_index);
+    cee_long current = cee_text_storage_buffer_offset_by_paragraph_index(layout->storage_ref,
+                                                                         paragraph_index);
     cee_long next = -1;
     CEETextLine* line = NULL;
     CEETextUnit* unit = NULL;
     
+    if (layout->lines)
+        cee_list_free_full(layout->lines, line_free);
+    
     if (current == -1 || !cee_text_storage_buffer_get(storage))
         return;
     
-    if (layout->lines)
-        cee_list_free_full(layout->lines, line_free);
     layout->lines = NULL;
     layout->anchor = layout->top_margin;
     layout->terminate = FALSE;
@@ -631,7 +641,7 @@ void cee_text_layout_run(CEETextLayoutRef layout)
     head_unit = cee_text_layout_head_unit_get(layout);
     tail_unit = cee_text_layout_tail_unit_get(layout);
     offset = cee_text_unit_buffer_offset_get(head_unit);
-    length = cee_text_unit_buffer_offset_get(tail_unit) + 
+    length = cee_text_unit_buffer_offset_get(tail_unit) +
         cee_text_unit_buffer_length_get(tail_unit) -
         cee_text_unit_buffer_offset_get(head_unit);
     range = cee_range_make(offset, length);
@@ -653,7 +663,7 @@ void cee_text_layout_run(CEETextLayoutRef layout)
 cee_boolean cee_text_layout_paragraph_index_is_invalid(CEETextLayoutRef layout)
 {
     CEETextStorageRef storage = layout->storage_ref;
-    if (cee_text_storage_paragraph_by_index(storage, layout->paragraph_index) == -1)
+    if (cee_text_storage_buffer_offset_by_paragraph_index(storage, layout->paragraph_index) == -1)
         return TRUE;
     
     return FALSE;

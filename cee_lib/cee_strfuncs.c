@@ -739,14 +739,16 @@ CEEList* cee_str_search(const cee_char* string,
                         cee_boolean sensitive,
                         CEEStringSearchMode mode)
 {
+    if (!string || !target)
+        return NULL;
+    
     CEEList* ranges = NULL;
     CEERange* range = NULL;
     cee_ulong string_length = strlen(string);
     cee_ulong target_length = strlen(target);
     cee_long i = 0;
     cee_boolean found = FALSE;
-    
-        
+            
     if (!string || !target || 
         !string_length || 
         !target_length ||

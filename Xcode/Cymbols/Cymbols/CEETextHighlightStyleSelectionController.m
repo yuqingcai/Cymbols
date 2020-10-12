@@ -5,8 +5,10 @@
 //  Created by caiyuqing on 2019/7/13.
 //  Copyright © 2019 Lazycatdesign. All rights reserved.
 //
-#import "CEETextHighlightStyleSelectionController.h"
+#import "AppDelegate.h"
 #import "CEEStyleManager.h"
+#import "CEETextHighlightStyleSelectionController.h"
+#import "CEEFileNameCellView.h"
 #import "CEEButton.h"
 
 @interface CEETextHighlightStyleSelectionController ()
@@ -28,11 +30,6 @@
     [_styleTable reloadData];
 }
 
-- (void)viewWillAppear {
-    //if ([self.view conformsToProtocol:@protocol(CEEUIStatesable)])
-    //    [(id<CEEUIStatesable>)self.view clearState:kCEEUIStateActived];
-}
-
 - (void)viewDidAppear {
     [super viewDidAppear];
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
@@ -41,14 +38,17 @@
 }
 
 - (IBAction)confirm:(id)sender {
-    [self dismissController:self];
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    AppDelegate* delegate = [NSApp delegate];
+    [delegate setConfiguration:@"SyntaxStyle" value:[styleManager textHighlightStyleName]];
+    [NSApp stopModalWithCode:NSModalResponseOK];
 }
 
 - (IBAction)cancel:(id)sender {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [self highlightSelectionInStyleTable];
     [styleManager setTextHighlightStyleName:_selected];
-    [self dismissController:self];
+    [NSApp stopModalWithCode:NSModalResponseCancel];
 }
 
 - (void)highlightSelectionInStyleTable {
@@ -60,28 +60,37 @@
     for (NSInteger i = 0; i < names.count; i ++) {
         NSString* name = names[i];
         if ([name caseInsensitiveCompare:_selected] == NSOrderedSame) {
-            //NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:i];
-            //[_styleTable selectRowIndexes:indexSet byExtendingSelection:NO];
-            //[_styleTable scrollRowToVisible:i];
+            NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:i];
+            [_styleTable selectRowIndexes:indexSet byExtendingSelection:NO];
+            [_styleTable scrollRowToVisible:i];
             break;
         }
     }
 }
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
-    return 0;
-}
-
-- (CEEView*)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
-    return nil;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView cellViewWithIdentifier:(NSString*)identifier {
-    return nil;
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    NSArray* names = [styleManager textHighlightStyleNames];
+    return names.count;
 }
 
 - (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column {
     return @"Style Name";
+}
+
+- (CEEView*)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    NSArray* names = [styleManager textHighlightStyleNames];
+    CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFileNameCellView"];
+    NSString* fileName = names[row];
+    cellView.title.stringValue = fileName;
+    [cellView.icon setImage:[styleManager filetypeIconFromFileName:fileName]];
+    return cellView;
+}
+
+- (CEEView *)tableView:(nonnull CEETableView *)tableView viewWithIdentifier:( NSString *)identifier {
+    AppDelegate* delegate = [NSApp delegate];
+    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (void)selectStyle:(id)sender {
@@ -91,5 +100,6 @@
     NSString* name = [names objectAtIndex:i];
     [styleManager setTextHighlightStyleName:name];
 }
+
 
 @end

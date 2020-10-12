@@ -6,6 +6,8 @@ static cee_boolean tables_existed(sqlite3* db);
 static cee_boolean tables_create(sqlite3* db);
 static CEEList* validate_filepaths(cee_pointer db,
                                    CEEList* filepaths);
+static CEEList* validate_filepaths_user_selected(cee_pointer db,
+                                                 CEEList* filepaths);
 static cee_pointer filepath_list_copy(const cee_pointer src,
                                cee_pointer data);
 static CEEList* symbols_search(sqlite3* db,
@@ -58,6 +60,13 @@ cee_pointer cee_database_open(const cee_char* path)
     return database;
 }
 
+void cee_database_close(cee_pointer db)
+{
+    if (!db)
+        return;
+    
+    sqlite3_close(db);
+}
 
 static cee_boolean tables_existed(sqlite3* database)
 {
@@ -71,7 +80,6 @@ static cee_boolean tables_existed(sqlite3* database)
         fprintf(stdout, "SQL Error");
         return FALSE;
     }
-    
     do {
         if (sqlite3_step(stmt) != SQLITE_ROW)
             break;
@@ -126,6 +134,34 @@ static cee_boolean tables_existed(sqlite3* database)
     } while (1);
     sqlite3_finalize(stmt);
     
+    existed = FALSE;
+    sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='cee_security_bookmarks'";
+    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "SQL Error");
+        return existed;
+    }
+    do {
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            break;
+        existed = TRUE;
+    } while (1);
+    sqlite3_finalize(stmt);
+    if (!existed)
+        return FALSE;
+    
+    
+    existed = FALSE;
+    sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='cee_project_file_paths_user_selected'";
+    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "SQL Error");
+        return existed;
+    }
+    do {
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            break;
+        existed = TRUE;
+    } while (1);
+    sqlite3_finalize(stmt);
     if (!existed)
         return FALSE;
     
@@ -197,6 +233,29 @@ static cee_boolean tables_create(sqlite3* database)
         return FALSE;
     }
     
+    sql =
+    "CREATE TABLE IF NOT EXISTS cee_security_bookmarks ("                  \
+    "   id             INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
+    "   filepath       TEXT UNIQUE                            NOT NULL ,"  \
+    "   content        TEXT                                   NOT NULL  "  \
+    ");";
+    
+    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+        return FALSE;
+    }
+    
+    sql =
+    "CREATE TABLE IF NOT EXISTS cee_project_file_paths_user_selected ("    \
+    "   id             INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
+    "   filepath       TEXT UNIQUE                            NOT NULL "   \
+    ");";
+    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+        return FALSE;
+    }
     return TRUE;
 }
 
@@ -209,7 +268,7 @@ CEEList* cee_database_session_descriptors_get(cee_pointer db)
     cee_char* descriptor = NULL;
     char* str = NULL;
     cee_ulong length = 0;
-    const char* sql =
+    const char* sql = 
     "SELECT descriptor FROM cee_project_sessions;";
     
     sqlite3_stmt* stmt = NULL;
@@ -366,6 +425,40 @@ static CEEList* validate_filepaths(cee_pointer db,
     return validateds;
 }
 
+static CEEList* validate_filepaths_user_selected(cee_pointer db,
+                                                 CEEList* filepaths)
+{
+    CEEList* existeds = NULL;
+    CEEList* validateds = NULL;
+    CEEList* p = NULL;
+    CEEList* q = NULL;
+    
+    existeds = cee_database_filepaths_user_selected_get(db);
+    if (!existeds)
+        return cee_list_copy_deep(filepaths, 
+                                  filepath_list_copy, 
+                                  NULL);
+    
+    p = filepaths;
+    while (p) {
+        cee_boolean found = FALSE;
+        q = existeds;
+        while (q) {
+            if (!cee_strcmp(p->data, q->data, TRUE)) {
+                found = TRUE;
+                break;
+            }
+            q = q->next;
+        }
+        if (!found)
+            validateds = cee_list_prepend(validateds, cee_strdup(p->data));
+        p = p->next;
+    }
+    
+    return validateds;
+}
+
+
 static cee_pointer filepath_list_copy(const cee_pointer src,
                                       cee_pointer data)
 {
@@ -442,7 +535,6 @@ cee_boolean cee_database_filepaths_remove(cee_pointer db,
         p = p->next;
     }
     
-    
     sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &message);
     sqlite3_finalize(stmt);
     
@@ -456,6 +548,21 @@ void cee_database_symbols_clean(cee_pointer db)
         
     char *message = NULL;
     char* sql = "DELETE FROM cee_source_symbols;";
+    if (sqlite3_exec(db, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+    }
+}
+
+void cee_database_symbols_from_source_clean(cee_pointer db,
+                                            const cee_char* filepath)
+{
+    if (!db || !filepath)
+        return;
+    
+    char sql[4096];
+    char *message = NULL;
+    sprintf(sql, "DELETE FROM cee_source_symbols WHERE filepath=\"%s\";", filepath);
     if (sqlite3_exec(db, sql, NULL, NULL, &message) != SQLITE_OK) {
         fprintf(stderr, "SQL Error: %s\n", message);
         sqlite3_free(message);
@@ -676,4 +783,166 @@ cee_boolean cee_database_symbols_delete_by_filepath(cee_pointer db,
     }
     
     return TRUE;
+}
+
+cee_boolean cee_database_security_bookmark_append(cee_pointer db,
+                                                  const cee_char* filepath,
+                                                  const cee_char* content)
+{
+    if (!db)
+        return FALSE;
+    
+    cee_boolean ret = TRUE;
+    sqlite3_stmt* stmt = NULL;
+    char* sql =
+    "INSERT INTO cee_security_bookmarks (filepath, content) VALUES (?, ?);";
+    
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "error");
+        return FALSE;
+    }
+    
+    sqlite3_bind_text(stmt, 1, filepath, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, content, -1, SQLITE_STATIC);
+    
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+        ret = FALSE;
+    
+    sqlite3_reset(stmt);
+    sqlite3_clear_bindings(stmt);
+    sqlite3_finalize(stmt);
+    
+    return ret;
+}
+
+cee_boolean cee_database_security_bookmark_remove(cee_pointer db,
+                                                  const cee_char* filepath)
+{
+    if (!db || !filepath)
+        return FALSE;
+    
+    cee_boolean ret = TRUE;
+    sqlite3_stmt* stmt = NULL;
+    char* sql =
+    "DELETE FROM cee_security_bookmarks WHERE filepath=?;";
+    
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "error");
+        return FALSE;
+    }
+    
+    sqlite3_bind_text(stmt, 1, filepath, -1, SQLITE_STATIC);
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+        ret = FALSE;
+    
+    sqlite3_reset(stmt);
+    sqlite3_clear_bindings(stmt);
+    sqlite3_finalize(stmt);
+    
+    return ret;
+}
+
+cee_char* cee_database_security_bookmark_content_get(cee_pointer db,
+                                                     const cee_char* filepath)
+{
+    if (!db || !filepath)
+        return NULL;
+    
+    char sql[4096];
+    char* str = NULL;
+    cee_ulong length = 0;
+    sqlite3_stmt* stmt = NULL;
+    sprintf(sql, "SELECT content FROM cee_security_bookmarks WHERE filepath=\"%s\";", filepath);
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        return NULL;
+
+    if (sqlite3_step(stmt) != SQLITE_ROW)
+        return NULL;
+    
+    str = (char*)sqlite3_column_text(stmt, 0);
+    length = sqlite3_column_bytes(stmt, 0);
+    if (!str)
+        return NULL;
+    
+    return cee_strndup(str, length);
+}
+
+
+cee_boolean cee_database_filepaths_user_selected_append(cee_pointer db,
+                                                        CEEList* filepaths)
+{
+    if (!db)
+        return FALSE;
+    
+    CEEList* validateds = validate_filepaths_user_selected(db, filepaths);
+    if (!validateds)
+        return FALSE;
+    
+    cee_char* filepath = NULL;
+    CEEList* p = NULL;
+    sqlite3_stmt* stmt = NULL;
+    char *message = NULL;
+    char* sql =
+    "INSERT INTO cee_project_file_paths_user_selected (filepath) VALUES (?);";
+    
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "error");
+        return FALSE;
+    }
+    
+    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &message);
+    p = validateds;
+    while (p) {
+        filepath = p->data;
+        if (filepath) {
+            sqlite3_bind_text(stmt, 1, filepath, -1, SQLITE_STATIC);
+            
+            if (sqlite3_step(stmt) != SQLITE_DONE)
+                break;
+            
+            sqlite3_reset(stmt);
+            sqlite3_clear_bindings(stmt);
+        }
+        p = p->next;
+    }
+    
+    sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &message);
+    sqlite3_finalize(stmt);
+    
+    cee_list_free_full(validateds, cee_free);
+    
+    return TRUE;
+}
+
+CEEList* cee_database_filepaths_user_selected_get(cee_pointer db)
+{
+    
+    if (!db)
+        return NULL;
+    
+    CEEList* filepaths = NULL;
+    char sql[4096];
+    char* str = NULL;
+    cee_ulong length = 0;
+    sqlite3_stmt* stmt = NULL;
+    
+    sprintf(sql, "SELECT filepath FROM cee_project_file_paths_user_selected;");
+    
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        return NULL;
+    
+    do {
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            break;
+        
+        str = (char*)sqlite3_column_text(stmt, 0);
+        length = sqlite3_column_bytes(stmt, 0);
+        filepaths = cee_list_prepend(filepaths, cee_strndup(str, length));
+        
+    } while (1);
+    sqlite3_finalize(stmt);
+    
+    filepaths = cee_list_reverse(filepaths);
+    
+    return filepaths;
 }

@@ -21,4 +21,10 @@
     return self;
 }
 
+- (void)close {
+    if ([self isModalPanel])
+        [NSApp stopModalWithCode:NSModalResponseOK];
+    [super close];
+}
+
 @end

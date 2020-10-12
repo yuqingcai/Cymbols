@@ -9,13 +9,13 @@
     {
       "size" : "16x16",
       "idiom" : "mac",
-      "filename" : "logo_butterfly_16x16@2x.png",
+      "filename" : "logo_butterfly_16x16@2x-1.png",
       "scale" : "2x"
     },
     {
       "size" : "32x32",
       "idiom" : "mac",
-      "filename" : "logo_butterfly_16x16@2x-1.png",
+      "filename" : "logo_butterfly_16x16@2x.png",
       "scale" : "1x"
     },
     {
@@ -33,25 +33,25 @@
     {
       "size" : "128x128",
       "idiom" : "mac",
-      "filename" : "logo_butterfly_128x128@2x.png",
+      "filename" : "logo_butterfly_128x128@2x-1.png",
       "scale" : "2x"
     },
     {
       "size" : "256x256",
       "idiom" : "mac",
-      "filename" : "logo_butterfly_128x128@2x-1.png",
+      "filename" : "logo_butterfly_128x128@2x.png",
       "scale" : "1x"
     },
     {
       "size" : "256x256",
       "idiom" : "mac",
-      "filename" : "logo_butterfly_256x256@2x.png",
+      "filename" : "logo_butterfly_256x256@2x-1.png",
       "scale" : "2x"
     },
     {
       "size" : "512x512",
       "idiom" : "mac",
-      "filename" : "logo_butterfly_256x256@2x-1.png",
+      "filename" : "logo_butterfly_256x256@2x.png",
       "scale" : "1x"
     },
     {

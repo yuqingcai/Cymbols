@@ -27,6 +27,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray*)removeAllRowViews;
 - (NSArray*)removeRowViews:(NSUInteger)numberOfRowViews;
 - (__kindof NSView*)cellViewInRow:(NSUInteger)row column:(NSUInteger)column;
+- (void)setColumnOffsets:(NSArray *)columnOffsets;
+- (void)setColumnWidths:(NSArray *)columnWidths;
 @end
 
 NS_ASSUME_NONNULL_END

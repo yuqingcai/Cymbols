@@ -126,6 +126,7 @@ typedef NS_ENUM(NSInteger, CEEProjectAddFileScene) {
         [self createScene:_scene];
     }
     else if (_scene == kCEEFileConfirm) {
+        [self.session.project addSecurityBookmarksWithFilePaths:_filePathsExpand];
         [self.session.project addFilePaths:_filePathsExpand];
         [self dismissController:self];
     }

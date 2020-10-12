@@ -402,7 +402,8 @@ cee_int cee_text_storage_buffer_replace(CEETextStorageRef storage,
                                         cee_uchar** out,
                                         cee_ulong* length)
 {
-    assert(storage && storage->buffer && in);
+    if (!storage || (!storage->buffer && !in))
+        return 0;
     
     cee_ulong replace_paragraph_count = 0;
     cee_ulong src_paragraph_count = 0;
@@ -473,40 +474,63 @@ cee_int cee_text_storage_buffer_replace(CEETextStorageRef storage,
 
 const cee_uchar* cee_text_storage_buffer_get(CEETextStorageRef storage)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return NULL;
+    
     return storage->buffer;
 }
 
 cee_ulong cee_text_storage_size_get(CEETextStorageRef storage)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     return storage->size;
+}
+
+cee_ulong cee_text_storage_character_count_get(CEETextStorageRef storage) {
+    if (!storage || !storage->buffer)
+        return 0;
+    return cee_codec_utf8_nb_codepoint(storage->buffer, 0);
 }
 
 cee_ulong cee_text_storage_max_paragraph_length_get(CEETextStorageRef storage)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     return storage->max_paragraph_length;
 }
 
 cee_ulong cee_text_storage_paragraph_count_get(CEETextStorageRef storage)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     return storage->nb_paragraph;
 }
 
-cee_ulong cee_text_storage_line_break_length(CEETextStorageRef storage)
+cee_ulong cee_text_storage_line_break_length_get(CEETextStorageRef storage)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
+    
     switch (storage->line_break_type) {
         case kCEETextStorageLineBreakTypeCR:
         case kCEETextStorageLineBreakTypeLF:
             return 1;
         case kCEETextStorageLineBreakTypeCRLF:
             return 2;
+        default:
+            return 0;
     }
+    return 0;
 }
 
+CEETextStorageLineBreakType cee_text_storage_line_break_type_get(CEETextStorageRef storage)
+{
+    if (!storage || !storage->buffer)
+        return kCEETextStorageLineBreakTypeUnknow;
+    
+    return storage->line_break_type;
+}
 /**
  *  when return value equal -1, that means "current" is the end of storage
  */
@@ -515,7 +539,9 @@ cee_long cee_text_storage_buffer_character_next(CEETextStorageRef storage,
                                                 CEEUnicodePoint* codepoint,
                                                 cee_ulong* length)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
+    
     return storage_buffer_decode_next(storage->buffer,
                                       current,
                                       codepoint,
@@ -529,7 +555,9 @@ cee_long cee_text_storage_buffer_character_prev(CEETextStorageRef storage,
                                                 CEEUnicodePoint* codepoint,
                                                 cee_ulong* length)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
+    
     return storage_buffer_decode_prev(storage->buffer, 
                                       current, 
                                       codepoint, 
@@ -539,7 +567,8 @@ cee_long cee_text_storage_buffer_character_prev(CEETextStorageRef storage,
 cee_long cee_text_storage_buffer_word_next(CEETextStorageRef storage,
                                            cee_long buffer_offset)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     
     const cee_uchar* buffer = storage->buffer;
     cee_long current = buffer_offset;
@@ -602,7 +631,8 @@ cee_long cee_text_storage_buffer_word_next(CEETextStorageRef storage,
 cee_long cee_text_storage_buffer_word_prev(CEETextStorageRef storage,
                                            cee_long buffer_offset)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     
     const cee_uchar* buffer = storage->buffer;
     cee_long current = buffer_offset;
@@ -665,7 +695,8 @@ cee_long cee_text_storage_buffer_word_prev(CEETextStorageRef storage,
 cee_long cee_text_storage_paragraph_index_get(CEETextStorageRef storage,
                                               cee_long buffer_offset)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     
     cee_uchar ln = line_break_codepoint_get(storage);
     cee_ulong i = 0;
@@ -686,10 +717,11 @@ cee_long cee_text_storage_paragraph_index_get(CEETextStorageRef storage,
     return i;
 }
 
-cee_long cee_text_storage_paragraph_by_index(CEETextStorageRef storage,
-                                             cee_long index)
-{    
-    assert(storage);
+cee_long cee_text_storage_buffer_offset_by_paragraph_index(CEETextStorageRef storage,
+                                                           cee_long index)
+{
+    if (!storage || !storage->buffer)
+        return 0;
     
     cee_uchar ln = line_break_codepoint_get(storage);
     cee_long current = 0;
@@ -720,14 +752,16 @@ cee_long cee_text_storage_paragraph_by_index(CEETextStorageRef storage,
 cee_long cee_text_storage_paragraph_beginning_get(CEETextStorageRef storage,
                                                   cee_long buffer_offset)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     return storage_paragraph_beginning_get(storage->buffer, buffer_offset);
 }
 
 cee_long cee_text_storage_paragraph_end_get(CEETextStorageRef storage,
                                             cee_long buffer_offset)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     return storage_paragraph_end_get(storage->buffer, buffer_offset);
 }
 
@@ -738,7 +772,8 @@ cee_long cee_text_storage_paragraph_end_get(CEETextStorageRef storage,
 cee_long cee_text_storage_paragraph_prev_get(CEETextStorageRef storage,
                                              cee_long buffer_offset)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     
     cee_long prev = -1;
     buffer_offset = cee_codec_utf8_encoded_byte0_get(storage->buffer, 
@@ -764,7 +799,8 @@ cee_long cee_text_storage_paragraph_prev_get(CEETextStorageRef storage,
 cee_long cee_text_storage_paragraph_next_get(CEETextStorageRef storage,
                                              cee_long buffer_offset)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     
     cee_long next = -1;
     buffer_offset = cee_codec_utf8_encoded_byte0_get(storage->buffer, 
@@ -788,7 +824,8 @@ cee_long cee_text_storage_character_index_in_paragraph(CEETextStorageRef storage
                                                        cee_long paragraph,
                                                        cee_long buffer_offset)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     
     cee_long current = paragraph;
     cee_long i = 0;
@@ -811,7 +848,8 @@ cee_long cee_text_storage_character_index_in_paragraph(CEETextStorageRef storage
 cee_long cee_text_storage_character_count_in_paragraph(CEETextStorageRef storage,
                                                        cee_long paragraph)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     
     cee_long current = paragraph;
     CEEUnicodePoint codepoint = CEE_UNICODE_POINT_INVALID;
@@ -836,7 +874,8 @@ cee_long cee_text_storage_buffer_offset_by_character_index(CEETextStorageRef sto
                                                            cee_long paragraph,
                                                            cee_long index)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return 0;
     
     cee_long current = paragraph;
     cee_long i = 0;
@@ -858,7 +897,8 @@ cee_long cee_text_storage_buffer_offset_by_character_index(CEETextStorageRef sto
 void cee_text_storage_modify_logger_create(CEETextStorageRef storage,
                                            void (*modify_free)(cee_pointer))
 {
-    assert(modify_free);
+    if (!storage || !storage->buffer)
+        return;
     
     if (!storage->modify_logger)
         storage->modify_logger = cee_text_modify_logger_create(modify_free);
@@ -893,7 +933,9 @@ void cee_text_storage_modify_clear(CEETextStorageRef storage)
 CEERange cee_text_storage_word_get(CEETextStorageRef storage,
                                    cee_long buffer_offset)
 {
-    assert(storage);
+    if (!storage || !storage->buffer)
+        return cee_range_make(0, 0);
+    
     CEERange range = cee_range_make(0, 0);
     const cee_uchar* buffer = storage->buffer;
     cee_long current = buffer_offset;

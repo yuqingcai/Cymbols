@@ -9,6 +9,9 @@
 #import "CEESourceBuffer.h"
 
 NSNotificationName CEENotificationSourceBufferStateChanged = @"CEENotificationSourceBufferStateChanged";
+NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBufferReload";
+NSNotificationName CEENotificationSourceBufferSaved = @"CEENotificationSourceBufferSaved";
+NSNotificationName CEENotificationSourceBufferParsed = @"CEENotificationSourceBufferParsed";
 
 @interface CEESourceBuffer()
 @property (strong) NSDate* fileLastModifiedDate;
@@ -22,14 +25,13 @@ NSNotificationName CEENotificationSourceBufferStateChanged = @"CEENotificationSo
 void cee_source_buffer_parse(CEESourceBuffer* buffer,
                              CEESourceBufferParserOption options)
 {
-    CEESourceParserRef parser = buffer.parser_ref;
-    if (!parser) {
+    if (!buffer.parser_ref) {
         buffer.parser_ref = cee_source_parser_get([buffer.filePath UTF8String]);
-        if (!parser)
+        if (!buffer.parser_ref)
             return;
     }
     
-    cee_ulong m0 = 0;
+    //cee_ulong m0 = 0;
     const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
     CEESourceFregment* statement = NULL;
     CEESourceFregment* prep_directive = NULL;
@@ -37,7 +39,7 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
     CEEList* tokens_ref = NULL;
     CEESourceTokenMap* source_token_map = NULL;
     
-    m0 = cee_timestamp_ms();
+    //m0 = cee_timestamp_ms();
     /** parse buffer begin */
     if (buffer.comment)
         cee_source_fregment_free_full(buffer.comment);
@@ -60,7 +62,7 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
     if (buffer.statement_symbol_tree)
         cee_tree_free(buffer.statement_symbol_tree);
     
-    cee_source_symbol_parse(parser, 
+    cee_source_symbol_parse(buffer.parser_ref,
                             (const cee_uchar*)[buffer.filePath UTF8String],
                             subject, 
                             &prep_directive,
@@ -78,8 +80,8 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
     buffer.statement_symbol_tree = cee_source_fregment_symbol_tree_create(buffer.statement);
     
     /** parse buffer end */
-    cee_ulong m1 = cee_timestamp_ms();
-    fprintf(stdout, "\nbuffer_parse cost: %lu ms\n", m1 - m0);
+    //cee_ulong m1 = cee_timestamp_ms();
+    //fprintf(stdout, "\nbuffer_parse cost: %lu ms\n", m1 - m0);
     
     if (options & kCEESourceBufferParserOptionCreateSymbolWrapper) {
         /** symbol wrappers create begin */
@@ -93,6 +95,7 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
         buffer.symbol_wrappers = wrappers;
         /** symbol wrappers create end */
     }
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferParsed object:buffer];
 }
 
 static void text_buffer_modified(cee_pointer buffer, 
@@ -139,7 +142,7 @@ static void binary_buffer_modified(cee_pointer buffer,
     
     if (!filePath) {
         _filePath = nil;
-        _type = kCEEBufferTypeUTF8;
+        _encodeType = kCEEBufferEncodeTypeUTF8;
         _storage = cee_text_storage_create((__bridge cee_pointer)self,
                                            (const cee_uchar*)"",
                                            text_buffer_modified);
@@ -151,14 +154,13 @@ static void binary_buffer_modified(cee_pointer buffer,
         cee_file_contents_get([_filePath UTF8String], &content, &length);
         
         if (cee_codec_encoding_utf8(content, length)) {
-            _type = kCEEBufferTypeUTF8;
+            _encodeType = kCEEBufferEncodeTypeUTF8;
             _storage = cee_text_storage_create((__bridge cee_pointer)self,
                                                content,
                                                text_buffer_modified);
-            _parser_ref = cee_source_parser_get([_filePath UTF8String]);
         }
         else {
-            _type = kCEEBufferTypeBinary;
+            _encodeType = kCEEBufferEncodeTypeBinary;
             _storage = cee_binary_storage_create((__bridge cee_pointer)self,
                                                  content,
                                                  length,
@@ -168,7 +170,6 @@ static void binary_buffer_modified(cee_pointer buffer,
         
         cee_free(content);
     }
-    
     _fileLastModifiedDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];
     return self;
 }
@@ -198,13 +199,19 @@ static void binary_buffer_modified(cee_pointer buffer,
     if (_statement_symbol_tree)
         cee_tree_free(_statement_symbol_tree);
     
-    if (_storage)
-        cee_text_storage_free(_storage);
+    if (_storage) {
+        if (_encodeType == kCEEBufferEncodeTypeUTF8)
+            cee_text_storage_free(_storage);
+        else if (_encodeType == kCEEBufferEncodeTypeBinary)
+            cee_binary_storage_free(_storage);
+        else
+            assert(0);
+    }
 }
 
 - (void)setState:(CEESourceBufferState)state {
-    cee_source_buffer_parse(self, kCEESourceBufferParserOptionCreateSymbolWrapper);   
     if (state == kCEESourceBufferStateModified) {
+        cee_source_buffer_parse(self, kCEESourceBufferParserOptionCreateSymbolWrapper);
         _lastModifiedDate = [NSDate date];
         if (self.referenceCount == 1)
             [self setState:kCEESourceBufferStateShouldSyncWhenClose];
@@ -214,14 +221,12 @@ static void binary_buffer_modified(cee_pointer buffer,
 }
 
 - (void)clearState:(CEESourceBufferState)state {
-    cee_source_buffer_parse(self, kCEESourceBufferParserOptionCreateSymbolWrapper);
-    _state &= ~state;
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferStateChanged object:self];
-    
     if (state == kCEESourceBufferStateModified) {
         if ([self stateSet:kCEESourceBufferStateShouldSyncWhenClose])
             [self clearState:kCEESourceBufferStateShouldSyncWhenClose];
     }
+    _state &= ~state;
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferStateChanged object:self];
 }
 
 - (CEESourceBufferState)state {
@@ -234,11 +239,17 @@ static void binary_buffer_modified(cee_pointer buffer,
 
 - (void)reload {
     cee_uchar* content = NULL;
+            
     cee_file_contents_get([_filePath UTF8String], &content, NULL);
     cee_text_storage_buffer_set(_storage, content);
     cee_free(content);
-    [self setState:kCEESourceBufferStateReload];
-    [self clearState:kCEESourceBufferStateReload];
+    
+    /**
+     * source file may be updated from another application, when reload
+     * the source buffer, parse it.
+     */
+    cee_source_buffer_parse(self, kCEESourceBufferParserOptionCreateSymbolWrapper);
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferReload object:self];
     
     if ([self stateSet:kCEESourceBufferStateModified])
         [self clearState:kCEESourceBufferStateModified];
@@ -252,7 +263,7 @@ static void binary_buffer_modified(cee_pointer buffer,
 }
 
 - (void)updateFileModifiedDate {
-    _fileLastModifiedDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];;
+    _fileLastModifiedDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];
 }
 
 - (void)increaseReferenceCount {
@@ -274,6 +285,7 @@ static void binary_buffer_modified(cee_pointer buffer,
             [self setState:kCEESourceBufferStateShouldSyncWhenClose];
     }
 }
+
 @end
 
 @interface CEESourceBufferManager()
@@ -289,10 +301,16 @@ static void binary_buffer_modified(cee_pointer buffer,
     
     _temporaryIndex = 0;
     _buffers = [[NSMutableArray alloc] init];
-    _temporaryDirectory = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Cymbols/Backups/Untitled"];
+    [self createTemporyDirectory];
+    return self;
+}
+
+- (void)createTemporyDirectory {
+    NSArray* searchPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+    NSString* applicationSupportDirectory = [searchPaths firstObject];
+    _temporaryDirectory = [applicationSupportDirectory stringByAppendingPathComponent:@"Cymbols/Backups/Untitled"];
     if (![[NSFileManager defaultManager] fileExistsAtPath:_temporaryDirectory isDirectory:nil])
         [[NSFileManager defaultManager] createDirectoryAtPath:_temporaryDirectory withIntermediateDirectories:YES attributes:nil error:nil];
-    return self;
 }
 
 - (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString*)filePath {
@@ -341,11 +359,20 @@ static void binary_buffer_modified(cee_pointer buffer,
         [_buffers removeObject:buffer];
 }
 
-- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filePath {
+- (BOOL)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {
     [[NSString stringWithUTF8String:(const char *)cee_text_storage_buffer_get(buffer.storage)] writeToURL:[NSURL fileURLWithPath:filePath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
     
+
+    BOOL shouldParsed = NO;
+    /** when a source buffer filename extension is changed,
+     *  that means another parser is selected, we need to
+     *  parse it again.
+     */
+    if (![buffer.filePath isEqualToString:filePath])
+        shouldParsed = YES;
+    
     [buffer updateFileModifiedDate];
-        
+    
     if ([buffer stateSet:kCEESourceBufferStateFileTemporary]) {
         [buffer clearState:kCEESourceBufferStateFileTemporary];
         buffer.filePath = filePath;
@@ -356,14 +383,35 @@ static void binary_buffer_modified(cee_pointer buffer,
     
     if ([buffer stateSet:kCEESourceBufferStateFileDeleted])
         [buffer clearState:kCEESourceBufferStateFileDeleted];
+    
+    if (shouldParsed)
+        cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferSaved object:buffer];
+    
+    return YES;
 }
 
 - (void)discardUntitleSourceBuffers {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:_temporaryDirectory];
-    NSString *file;
-    while (file = [enumerator nextObject])
-        [fileManager removeItemAtPath:[_temporaryDirectory stringByAppendingPathComponent:file] error:nil];
+    NSString *fileName;
+    while (fileName = [enumerator nextObject])
+        [fileManager removeItemAtPath:[_temporaryDirectory stringByAppendingPathComponent:fileName] error:nil];
+}
+
+- (NSArray*)untitleSourceBuffersFilePaths {
+    NSMutableArray* filePaths = nil;
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:_temporaryDirectory];
+    NSString *fileName;
+    while (fileName = [enumerator nextObject]) {
+        NSString* filePath = [_temporaryDirectory stringByAppendingPathComponent:fileName];
+        if (!filePaths)
+            filePaths = [[NSMutableArray alloc] init];
+        [filePaths addObject:filePath];
+    }
+    return filePaths;
 }
 
 - (void)syncSourceBuffersFromFiles {
@@ -391,6 +439,61 @@ static void binary_buffer_modified(cee_pointer buffer,
     if ([directory isEqualToString:_temporaryDirectory])
         return YES;
     return NO;
+}
+
+- (NSString*)sourceType:(CEESourceBuffer*)buffer {
+    NSString* fileName = [buffer.filePath lastPathComponent];
+    NSString* extension = [buffer.filePath pathExtension];
+    
+    if (buffer.encodeType == kCEEBufferEncodeTypeBinary)
+        return @"Binary File";
+    
+    if (![extension isEqualToString:@""]) {
+        if ([extension compare:@"c" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"C";
+        
+        if ([extension compare:@"CC" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+            [extension compare:@"C++" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+            [extension compare:@"CPP" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"C++";
+        
+        if ([extension compare:@"m" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"Objective C";
+        
+        if ([extension compare:@"mm" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"Objective C++";
+        
+        if ([extension compare:@"h" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+            [extension compare:@"hh" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+            [extension compare:@"hpp" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+            [extension compare:@"hxx" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"C Source Header";
+        
+        if ([extension compare:@"Java" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"Java";
+        
+        if ([extension compare:@"swift" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"Swift";
+        
+        if ([extension compare:@"js" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"JavaScript";
+        
+        if ([extension compare:@"HTML" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"HTML";
+        
+        if ([extension compare:@"asm" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+            [extension compare:@"s" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"Assembly";
+        
+        if ([extension compare:@"cs" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"C Sharp";
+        
+    }
+    else {
+        if ([fileName compare:@"Makefile" options:NSCaseInsensitiveSearch] == NSOrderedSame)
+            return @"Makefile";
+    }
+    return @"Plain Text";
 }
 
 @end

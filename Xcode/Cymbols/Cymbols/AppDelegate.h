@@ -18,7 +18,7 @@ extern NSNotificationName CEENotificationHeartBeat;
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 @property (strong) CEEProjectController* projectController;
 @property (strong) CEESourceBufferManager* sourceBufferManager;
-@property (strong) NSDictionary* configurations;
+@property (strong, readonly) NSDictionary* configurations;
 @property (strong) CEEProject* currentProject;
 @property (strong) CEENetwork* network;
 
@@ -27,5 +27,5 @@ extern NSNotificationName CEENotificationHeartBeat;
 - (NSObject*)nibObjectWithIdentifier:(NSString*)identifier fromNibNamed:(NSString*)name;
 - (NSString*)welcomeGuidePath;
 - (NSString*)serializerVersionString;
-
+- (void)setConfiguration:(NSString*)configuration value:(NSString*)value;
 @end

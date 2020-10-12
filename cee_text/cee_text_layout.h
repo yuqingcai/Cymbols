@@ -40,6 +40,8 @@ void cee_text_layout_aligment_set(CEETextLayoutRef layout,
                                   CEETextLayoutAlignment aligment);
 void cee_text_layout_platform_set(CEETextLayoutRef layout,
                                   cee_pointer platform);
+cee_pointer cee_text_layout_platform_get(CEETextLayoutRef layout);
+CEETextColorRef cee_text_layout_platform_background_color_get(cee_pointer platform);
 void cee_text_layout_run(CEETextLayoutRef layout);
 cee_boolean cee_text_layout_paragraph_index_is_invalid(CEETextLayoutRef layout);
 void cee_text_layout_free(CEETextLayoutRef layout);

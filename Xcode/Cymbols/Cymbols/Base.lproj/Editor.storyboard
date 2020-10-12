@@ -337,22 +337,23 @@
                         <rect key="frame" x="0.0" y="0.0" width="575" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <customView misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mqe-VX-937" customClass="CEETextLabel">
-                                <rect key="frame" x="186" y="137" width="202" height="26"/>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Mma-Rl-QK5" customClass="CEEBinaryView">
+                                <rect key="frame" x="0.0" y="0.0" width="575" height="300"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="26" id="1BI-Dl-Mq5"/>
-                                    <constraint firstAttribute="width" constant="202" id="QiU-sy-Qe0"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="DXa-DW-adL"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Binary View Not Supported Yet!"/>
-                                </userDefinedRuntimeAttributes>
                             </customView>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="mqe-VX-937" firstAttribute="centerX" secondItem="gtF-WN-pEo" secondAttribute="centerX" id="1fQ-G4-0Gc"/>
-                            <constraint firstItem="mqe-VX-937" firstAttribute="centerY" secondItem="gtF-WN-pEo" secondAttribute="centerY" id="mjF-vt-kQp"/>
+                            <constraint firstItem="Mma-Rl-QK5" firstAttribute="top" secondItem="gtF-WN-pEo" secondAttribute="top" id="JMd-lv-xGV"/>
+                            <constraint firstAttribute="trailing" secondItem="Mma-Rl-QK5" secondAttribute="trailing" id="b6J-yC-HEk"/>
+                            <constraint firstItem="Mma-Rl-QK5" firstAttribute="leading" secondItem="gtF-WN-pEo" secondAttribute="leading" id="o7X-z8-Tso"/>
+                            <constraint firstAttribute="bottom" secondItem="Mma-Rl-QK5" secondAttribute="bottom" id="pAs-ud-evE"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="binaryView" destination="Mma-Rl-QK5" id="DrO-xz-7sh"/>
+                    </connections>
                 </viewController>
                 <customObject id="0Ms-NA-Adc" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

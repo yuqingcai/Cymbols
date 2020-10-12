@@ -86,6 +86,9 @@ void cee_source_symbol_free(cee_pointer data)
 
 CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol)
 {
+    if (!symbol)
+        return NULL;
+    
     CEESourceSymbol* copy = cee_malloc0(sizeof(CEESourceSymbol));
     
     copy->type = symbol->type;

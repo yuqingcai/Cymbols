@@ -8,7 +8,7 @@ extern "C" {
 #include "cee_lib.h"
 
 typedef enum _CEETagType {
-    kCEETagTypePlanText = 0,
+    kCEETagTypePlainText = 0,
     kCEETagTypeKeyword,
     kCEETagTypeComment,
     kCEETagTypeConstant,

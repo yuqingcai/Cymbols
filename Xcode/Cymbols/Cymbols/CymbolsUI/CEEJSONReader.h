@@ -11,9 +11,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEJSONReader : NSObject
-+ (NSString*)stringFromFile:(NSString*)filepath;
-+ (NSData*)dataFromFile:(NSString*)filepath;
-+ (id)objectFromFile:(NSString*)filepath;
++ (NSString*)stringFromFile:(NSString*)filePath;
++ (NSData*)dataFromFile:(NSString*)filePath;
++ (id)objectFromFile:(NSString*)filePath;
++ (BOOL)object:(id)object toFile:(NSString*)filePath;
 @end
 
 NS_ASSUME_NONNULL_END

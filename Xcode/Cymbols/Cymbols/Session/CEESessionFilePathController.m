@@ -33,8 +33,9 @@
     [_sourceTable setDoubleAction:@selector(openFiles:)];
     [_sourceTable setAllowsMultipleSelection:YES];
     [_sourceTable setEnableDrawHeader:NO];
-    [_filterInput setDelegate:self];
+    [_sourceTable setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
     [_sourceTable registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+    [_filterInput setDelegate:self];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addFilePathsResponse:) name:CEENotificationProjectAddFilePaths object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeFilePathsResponse:) name:CEENotificationProjectRemoveFilePaths object:nil];

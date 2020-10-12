@@ -8,6 +8,11 @@
 
 #import "CEESessionView.h"
 
+@interface CEESessionView ()
+@property NSRect mouseActionRegion;
+@property CGFloat mouseActionRegionHeight;
+@end
+
 @implementation CEESessionView
 
 @synthesize seperateLineTopSpace = _seperateLineTopSpace;
@@ -15,6 +20,15 @@
 - (void)initProperties {
     _seperateLineSize = 1.0;
     _seperateLineTopSpace = 0.0;
+    _mouseActionRegionHeight = 24.0;
+}
+
+- (void)setFrame:(NSRect)frame {
+    [super setFrame:frame];
+    _mouseActionRegion = NSMakeRect(0.0,
+                                    self.frame.size.height - _mouseActionRegionHeight,
+                                    self.frame.size.width,
+                                    _mouseActionRegionHeight);
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
@@ -36,6 +50,16 @@
 
 - (CGFloat)seperateLineTopSpace {
     return _seperateLineTopSpace;
+}
+
+- (void)mouseDown:(NSEvent *)event {
+    if (event.clickCount == 2) {
+        NSPoint point = event.locationInWindow;
+        point = [self convertPoint:point fromView:nil];
+        if (NSPointInRect(point, _mouseActionRegion))
+            [self.window zoom:self];
+    }
+    [super mouseDown:event];
 }
 
 @end

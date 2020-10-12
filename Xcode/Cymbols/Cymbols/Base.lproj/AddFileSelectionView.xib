@@ -49,7 +49,7 @@
                         <constraint firstAttribute="height" constant="24" id="X9t-ty-SAA"/>
                     </constraints>
                 </customView>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="SA3-4Q-t8g" customClass="CEETextLabel">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="SA3-4Q-t8g" customClass="CEETextTitle">
                     <rect key="frame" x="20" y="440" width="560" height="24"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="24" id="U74-Xy-rvj"/>

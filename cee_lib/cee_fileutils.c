@@ -284,6 +284,9 @@ cee_int cee_dir_remove_rf(const cee_char* path)
 
 cee_char* cee_path_basename(const cee_char* path)
 {
+    if (!path)
+        return NULL;
+    
     cee_long i = strlen(path)-1;
     cee_char spliter = '/';
     

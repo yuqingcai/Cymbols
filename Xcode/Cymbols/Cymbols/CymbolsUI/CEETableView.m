@@ -21,91 +21,60 @@
 @private
     CGFloat _cursorRectWidth;
 }
-@property (strong) NSMutableArray* columnWidths;
-@property CGFloat horizontalOffset;
-@property (nullable, weak) id target;
+
 @property (nullable) SEL dragDividerAction;
 @property (strong) NSArray* titles;
-@property CGFloat miniColumnWidth;
-- (void)setColumns:(NSUInteger)columns;
-- (CGFloat)columnsWidth;
-- (NSArray*)columnOffsets;
+@property CEETableView* tableView;
+@property (strong) NSArray* columnWidths;
+@property (strong) NSArray* columnOffsets;
 - (void)setColumnTitles:(NSArray*)titles;
 @end
 
 @implementation CEETableViewHeader
 
-@synthesize horizontalOffset = _horizontalOffset;
-@synthesize columns = _columns;
+@synthesize columnWidths = _columnWidths;
+@synthesize columnOffsets = _columnOffsets;
+
 
 - (void)initProperties {
     [super initProperties];
     self.borderWidth = 1.0;
     self.borders = @"bottom";
     self.dividerColor = [NSColor gridColor];
-    _horizontalOffset = 0.0;
     _cursorRectWidth = 4.0;
-    
-}
-
-- (void)setColumns:(NSUInteger)columns {
-    _columns = columns;
-    CGFloat width = self.frame.size.width / columns;
-    _columnWidths = [[NSMutableArray alloc] init];
-    for (int i = 0; i < columns; i ++)
-        [_columnWidths addObject:[NSNumber numberWithFloat:width]];
-    [self.window invalidateCursorRectsForView:self];
-}
-
-- (NSUInteger)columns {
-    return _columns;
-}
-
-- (CGFloat)columnsWidth {
-    CGFloat width = 0;
-    for (int i = 0; i < _columnWidths.count; i ++)
-        width += [_columnWidths[i] floatValue];
-    return width;
-}
-
-- (NSArray*)columnOffsets {
-    CGFloat offset = 0.0;
-    CGFloat x = 0.0;
-    NSMutableArray* offsets = [[NSMutableArray alloc] init];
-    for (NSInteger i = 0; i < _columnWidths.count; i ++) {
-        if (i > 0)
-            x += [_columnWidths[i-1] floatValue];
-        offset = x + _horizontalOffset;
-        [offsets addObject:[NSNumber numberWithFloat:offset]];
-    }
-    return offsets;
 }
 
 - (NSRect)titleRect:(NSInteger)index {
-    CGFloat offset = [[self columnOffsets][index] floatValue];
-    CGFloat width = [[self columnWidths][index] floatValue];
-    NSRect rect = NSMakeRect(offset, 
-                             self.borderWidth, 
-                             width, 
+    if (!_tableView)
+        return NSMakeRect(0.0, 0.0, 0.0, 0.0);
+        
+    CGFloat offset = [_columnOffsets[index] floatValue];
+    CGFloat width = [_columnWidths[index] floatValue];
+    NSRect rect = NSMakeRect(offset,
+                             self.borderWidth,
+                             width,
                              self.frame.size.height - self.borderWidth * 2);
     
     rect.origin.x += self.font.pointSize;
     rect.size.width -= self.font.pointSize*2;
-    
     return rect;
 }
 
 - (NSArray*)dividerRects {
+    if (!_tableView)
+        return nil;
+    
     NSMutableArray* rects = [[NSMutableArray alloc] init];
     NSRect rect;
     CGFloat width = 0.0;
     CGFloat x = 0.0;
+    CGFloat horizontalOffset = [_columnOffsets[0] floatValue];
     for (NSInteger i = 0; i < _columnWidths.count; i ++) {
         width += [_columnWidths[i] floatValue];
-        x = _horizontalOffset + width;
+        x = horizontalOffset + width;
         rect = NSMakeRect(x - _cursorRectWidth,
-                          self.borderWidth, 
-                          _cursorRectWidth * 2, 
+                          self.borderWidth,
+                          _cursorRectWidth * 2,
                           self.frame.size.height - self.borderWidth * 2);
         [rects addObject:NSStringFromRect(rect)];
     }
@@ -119,29 +88,6 @@
         [self addCursorRect:NSRectFromString(rect) cursor:[NSCursor resizeLeftRightCursor]];
 }
 
-- (BOOL)adjustWidthOfColumn:(NSInteger)index withDelta:(CGFloat)delta {
-    
-    if (index < 0 || index >= _columnWidths.count)
-        return NO;
-    
-    CGFloat width = [_columnWidths[index] floatValue];
-    if (width + delta <= MIN_COLUMN_WIDTH)
-        return NO;
-    
-    _columnWidths[index] = @(width + delta);
-    
-    if (delta < 0.0 && _horizontalOffset < 0.0) {
-        _horizontalOffset += -delta;
-        if (_horizontalOffset > 0.0)
-            _horizontalOffset = 0.0;
-    }
-    
-    [self setNeedsDisplay:YES];
-    [self.window invalidateCursorRectsForView:self];
-    
-    return YES;
-}
-
 - (void)mouseDown:(NSEvent *)event {
     BOOL keepOn = YES;
     NSPoint location0;
@@ -149,9 +95,9 @@
     NSArray* dividerRects;
     NSRect draggingDividerRect;
     NSInteger draggingDividerIndex = -1;
-    
+
     location0 = [self convertPoint:[event locationInWindow] fromView:nil];
-    
+
     // dragging column divider
     dividerRects = [self dividerRects];
     for (NSInteger i = 0; i < dividerRects.count; i ++) {
@@ -161,13 +107,13 @@
             draggingDividerRect = dividerRect;
         }
     }
-    
+
     while (keepOn) {
         NSEventMask eventMask = NSEventMaskLeftMouseUp | NSEventMaskLeftMouseDragged;
         event = [self.window nextEventMatchingMask:eventMask];
         NSPoint location1 = [self convertPoint:[event locationInWindow] fromView:nil];
         CGFloat delta = location1.x - location0.x;
-        
+
         switch ([event type]) {
             case NSEventTypeLeftMouseDragged:
                 // dragging column divider
@@ -175,8 +121,8 @@
                     if (dividerDrageable) {
                         if ([self adjustWidthOfColumn:draggingDividerIndex withDelta:delta]) {
                             draggingDividerRect.origin.x += delta;
-                            if (_dragDividerAction && _target)
-                                ((void (*)(id, SEL,typeof(self)))objc_msgSend)(_target, _dragDividerAction, self);
+                            if (_dragDividerAction && _tableView)
+                                ((void (*)(id, SEL,typeof(self)))objc_msgSend)(_tableView, _dragDividerAction, self);
                         }
                         else {
                             dividerDrageable = NO;
@@ -188,11 +134,11 @@
                     }
                 } // end of dragging column divider
                 break;
-                
+
             case NSEventTypeLeftMouseUp:
                 keepOn = NO;
                 break;
-                
+
             default:
                 //Ignore any other kind of event.
                 break;
@@ -201,19 +147,47 @@
     }
 }
 
+- (BOOL)adjustWidthOfColumn:(NSInteger)index withDelta:(CGFloat)delta {
+    if (!_tableView)
+        return NO;
+    
+    if (index < 0 || index >= _columnWidths.count)
+        return NO;
+    
+    CGFloat width = [_columnWidths[index] floatValue];
+    if (width + delta <= MIN_COLUMN_WIDTH)
+        return NO;
+    
+    [self.tableView setColumnWidth:(width + delta) atIndex:index];
+    
+    if (delta < 0.0)
+        [self.tableView adjustHorizontalOffsetWithDelta:delta];
+    
+    [self.window invalidateCursorRectsForView:self];
+    return YES;
+}
+
 - (void)setColumnTitles:(NSArray*)titles {
     _titles = titles;
     [self setNeedsDisplay:YES];
 }
 
-- (void)setHorizontalOffset:(CGFloat)offset {
-    _horizontalOffset = offset;
+- (void)setColumnWidths:(NSArray *)columnWidths {
+    _columnWidths = columnWidths;
     [self setNeedsDisplay:YES];
-    [self.window invalidateCursorRectsForView:self];
 }
 
-- (CGFloat)horizontalOffset {
-    return _horizontalOffset;
+- (NSArray*)columnWidths {
+    return _columnWidths;
+}
+
+- (void)setColumnOffsets:(NSArray *)columnOffsets {
+    _columnOffsets = columnOffsets;
+    [self setNeedsDisplay:YES];
+}
+
+- (NSArray*)columnOffsets {
+    return _columnOffsets;
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
@@ -230,11 +204,15 @@
     if (self.dividerColor)
         [self.dividerColor setStroke];
     
+    if (!self.tableView)
+        return ;
+    
     // draw dividers
     CGFloat width = 0.0;
+    CGFloat horizontalOffset = [_columnOffsets[0] floatValue];
     for (int i = 0; i < _columnWidths.count; i ++) {
         width += [_columnWidths[i] floatValue];
-        dividerOffset = _horizontalOffset + width;
+        dividerOffset = horizontalOffset + width;
         path = [NSBezierPath bezierPath];
         [path setLineWidth: lineWidth];
         [path moveToPoint: CGPointMake(dividerOffset, dividerInterval)];
@@ -244,8 +222,9 @@
     // draw dividers end
 }
 
+
 - (void)drawTitles {
-    if (!_titles)
+    if (!_titles || !_tableView)
         return;
     
     for (int i = 0; i < _columnWidths.count; i ++) {
@@ -328,6 +307,10 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     NSMutableIndexSet* _selectedRowIndexes;
 };
 
+@property (strong) NSMutableArray* columnWidths;
+@property NSUInteger columns;
+@property CGFloat horizontalOffset;
+@property CGFloat miniColumnWidth;
 @property NSRect contentRect;
 @property NSRect headerRect;
 @property NSRect headerPaddingRect;
@@ -350,12 +333,16 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 @property NSMutableArray* cellViewBuffer;
 @property BOOL clickDetect;
 @property NSMutableIndexSet* selectedRowIndexesClip;
+- (CGFloat)columnsWidth;
+- (NSArray*)columnOffsets;
 @end
 
 @implementation CEETableView
 
 @synthesize selectedRowIndexes = _selectedRowIndexes;
 @synthesize enableDrawHeader = _enableDrawHeader;
+@synthesize columnAutoresizingStyle = _columnAutoresizingStyle;
+@synthesize columns = _columns;
 
 - (void)initProperties {
     [super initProperties];
@@ -369,6 +356,8 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     _updateColumn = -1;
     _allowsMultipleSelection = NO;
     _enableDrawHeader = NO;
+    _columnAutoresizingStyle = kCEETableViewNoColumnAutoresizing;
+    _horizontalOffset = 0.0;
     self.borderWidth = 0.0;
     [self createComponents];
     [self enableComponents: kComponentStateHeader | kComponentStateGrid];
@@ -393,6 +382,14 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 
 - (BOOL)enableDrawHeader {
     return _enableDrawHeader;
+}
+
+- (void)setColumnAutoresizingStyle:(CEETableViewColumnAutoresizingStyle)columnAutoresizingStyle {
+    _columnAutoresizingStyle = columnAutoresizingStyle;
+}
+
+- (CEETableViewColumnAutoresizingStyle)columnAutoresizingStyle {
+    return _columnAutoresizingStyle;
 }
 
 - (void)createComponents {
@@ -426,7 +423,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     NSRect frame = NSMakeRect(0, 0, 0, 0);
     _header = [[CEETableViewHeader alloc] initWithFrame:frame];
     [_header setAutoresizingMask:NSViewWidthSizable];
-    [_header setTarget: self];
+    [_header setTableView: self];
     [_header setDragDividerAction:@selector(dragHeaderDivider:)];
     [_header setIdentifier:[self createComponentIdentifier:@"IDTableViewHeader"]];
 }
@@ -726,11 +723,20 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         [_horizontalScroller setFrame:_horizontalScrollerRect];
 }
 
-- (void)setFrameSize:(NSSize)size {
-    CGFloat deltaWidth = size.width - self.frame.size.width;
-    [super setFrameSize:size];
+- (void)setFrameSize:(NSSize)newSize {
+    CGFloat delta = newSize.width - self.frame.size.width;
+    [super setFrameSize:newSize];
+    
+    if (_columnAutoresizingStyle == kCEETableViewUniformColumnAutoresizingStyle) {
+        [self updateColumnWidthsFromFrameSizeWithDelta:delta];
+        [_header setColumnOffsets:[self columnOffsets]];
+        [_header setColumnWidths:[self columnWidths]];
+        [_grid setColumnOffsets:[self columnOffsets]];
+        [_grid setColumnWidths:[self columnWidths]];
+    }
+    
     [self adjustHorizontalScroller];
-    [self adjustHorizontalOffsetWithDelta:deltaWidth];
+    [self adjustHorizontalOffsetWithDelta:delta];
     [self gridAdjustRows];
     [self tintedGridRowViews];
     [self adjustVerticalScroller];
@@ -738,13 +744,15 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 
 - (void)dragHeaderDivider:(id)sender {
     [self adjustHorizontalScroller];
-    [_grid setColumnOffsets:[_header columnOffsets]];
-    [_grid setColumnWidths:[_header columnWidths]];
+    [_header setColumnOffsets:[self columnOffsets]];
+    [_header setColumnWidths:[self columnWidths]];
+    [_grid setColumnOffsets:self.columnOffsets];
+    [_grid setColumnWidths:self.columnWidths];
     [self tintedGridRowViews];
 }
 
 - (void)adjustHorizontalScroller {
-    CGFloat diff = [_header columnsWidth] - _header.frame.size.width;
+    CGFloat diff = [self columnsWidth] - self.frame.size.width;
     if (diff > FLT_EPSILON) {
         if (!(_componentState & kComponentStateHorizontalScroller))
             [self enableComponents:kComponentStateHorizontalScroller];
@@ -768,6 +776,17 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         if (_componentState & kComponentStateVerticalScroller)
             [self disableComponents:kComponentStateVerticalScroller];
     }
+}
+
+- (CGFloat)columnsWidth {
+    CGFloat width = 0;
+    for (int i = 0; i < _columnWidths.count; i ++)
+        width += [_columnWidths[i] floatValue];
+    return width;
+}
+
+- (void)setColumnWidth:(CGFloat)width atIndex:(NSInteger)column {
+    _columnWidths[column] = @(width);
 }
 
 - (void)gridAdjustRows {
@@ -846,24 +865,44 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 }
 
 - (void)adjustHorizontalOffsetWithDelta:(CGFloat)delta {
-    CGFloat horizontalOffset = _header.horizontalOffset;
-    if (delta > 0.0 && horizontalOffset < 0.0) {
-        horizontalOffset += delta;
-        if (horizontalOffset > 0.0)
-            horizontalOffset = 0;
-        [_header setHorizontalOffset:horizontalOffset];
-        [_grid setColumnOffsets:[_header columnOffsets]];
+    if (_horizontalOffset < 0.0) {
+        if (delta > 0.0) {
+            _horizontalOffset += delta;
+            if (_horizontalOffset > 0.0)
+                _horizontalOffset = 0;
+        }
+        else if (delta < 0.0) {
+            _horizontalOffset += -delta;
+            if (_horizontalOffset > 0.0)
+                _horizontalOffset = 0.0;
+        }
+        
+        [_header setColumnOffsets:[self columnOffsets]];
+        [_grid setColumnOffsets:[self columnOffsets]];
         [_horizontalScroller setFloatValue:[self horizontalScrollerOffset]];
     }
 }
 
+- (NSArray*)columnOffsets {
+    CGFloat offset = 0.0;
+    CGFloat x = 0.0;
+    NSMutableArray* offsets = [[NSMutableArray alloc] init];
+    for (NSInteger i = 0; i < _columnWidths.count; i ++) {
+        if (i > 0)
+            x += [_columnWidths[i-1] floatValue];
+        offset = x + _horizontalOffset;
+        [offsets addObject:[NSNumber numberWithFloat:offset]];
+    }
+    return offsets;
+}
+
 - (void)horizontalScroll:(id)sender {
-    // adjust header
-    CGFloat diff = [_header columnsWidth] - _header.frame.size.width;
-    if (diff > FLT_EPSILON) 
-        [_header setHorizontalOffset:-(_horizontalScroller.floatValue * diff)];   
-    // redraw row list
-    [_grid setColumnOffsets:[_header columnOffsets]];
+    CGFloat diff = [self columnsWidth] - self.frame.size.width;
+    if (diff > FLT_EPSILON) {
+        _horizontalOffset = -(_horizontalScroller.floatValue * diff);
+        [_header setColumnOffsets:[self columnOffsets]];
+        [_grid setColumnOffsets:[self columnOffsets]];
+    }
 }
 
 - (void)verticalScroll:(id)sender {
@@ -876,14 +915,14 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 }
 
 - (CGFloat)horizontalScrollerOffset {
-    CGFloat diff = [_header columnsWidth] - _header.frame.size.width;
+    CGFloat diff = [self columnsWidth] - self.frame.size.width;
     if (diff > FLT_EPSILON)
-        return (-_header.horizontalOffset) / diff;
+        return (-_horizontalOffset) / diff;
     return 0.0;
 }
 
 - (CGFloat)horizontalScrollerProportion {
-    return (_header.frame.size.width / [_header columnsWidth]);
+    return (self.frame.size.width / [self columnsWidth]);
 }
 
 - (CGFloat)verticalScrollerProportion {
@@ -912,7 +951,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     NSString* title = nil;
     if ([_delegate respondsToSelector:@selector(tableView:titleForColumn:)]) {
         NSMutableArray* titles = [[NSMutableArray alloc] init];
-        for (int i = 0; i < _header.columns; i ++) {
+        for (int i = 0; i < _columns; i ++) {
             title = [_delegate tableView:self titleForColumn:i];
             [titles addObject:title];
         }
@@ -951,8 +990,8 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     //NSLog(@"recycle cost: %lu ms", m1 - m0);
     
     //m0 = cee_timestamp_ms();
-    [_grid setColumnOffsets:[_header columnOffsets]];
-    [_grid setColumnWidths:[_header columnWidths]];
+    [_grid setColumnOffsets:[self columnOffsets]];
+    [_grid setColumnWidths:[self columnWidths]];
     //m1 = cee_timestamp_ms();
     //NSLog(@"adjust column offsets and widths cost: %lu ms", m1 - m0);
     
@@ -1380,14 +1419,36 @@ exit:
 }
 
 - (void)setColumns:(NSUInteger)columns {
-    if (_header)
-        [_header setColumns:columns];
-    if (_grid)
+    _columns = columns;
+    [self initColumnWidths];
+    if (_grid) {
         [_grid setColumns:columns];
+        [_grid setColumnWidths:[self columnWidths]];
+        [_grid setColumnOffsets:[self columnOffsets]];
+    }
+    if (_header) {
+        [_header setColumnWidths:[self columnWidths]];
+        [_header setColumnOffsets:[self columnOffsets]];
+    }
+}
+
+- (void)initColumnWidths {
+    CGFloat width = self.frame.size.width / _columns;
+    _columnWidths = [[NSMutableArray alloc] init];
+    for (NSInteger i = 0; i < _columns; i ++)
+        [_columnWidths addObject:[NSNumber numberWithFloat:width]];
+}
+
+- (void)updateColumnWidthsFromFrameSizeWithDelta:(CGFloat)delta {
+    for (NSInteger i = 0; i < _columnWidths.count; i ++) {
+        CGFloat width = [_columnWidths[i] floatValue];
+        width += (delta / _columnWidths.count);
+        _columnWidths[i] = [NSNumber numberWithFloat:width];
+    }
 }
 
 - (NSUInteger)columns {
-    return _grid.columns;
+    return _columns;
 }
 
 - (ScrollDirection)scrollDirection:(NSPoint)point {
@@ -1491,7 +1552,7 @@ exit:
         }
     }
     
-    if ([_header columnsWidth] - _header.frame.size.width > FLT_EPSILON) {
+    if ([self columnsWidth] - self.frame.size.width > FLT_EPSILON) {
         if (event.scrollingDeltaX < 0.0)
             [self scrollLeft];
         else if (event.scrollingDeltaX > 0.0)
@@ -1570,31 +1631,31 @@ exit:
 }
 
 - (void)scrollLeft {
-    CGFloat diff = [_header columnsWidth] - _header.frame.size.width;
+    CGFloat diff = [self columnsWidth] - self.frame.size.width;
     if (diff > 0.0) {
         if (fabs(1.0 - _horizontalScroller.knobProportion) > FLT_EPSILON &&
             _horizontalScroller.floatValue > FLT_EPSILON) {
             _horizontalScroller.floatValue -= 0.2;
             if (_horizontalScroller.floatValue < 0.0)
                 _horizontalScroller.floatValue = 0.0;
-            [_header setHorizontalOffset:-(_horizontalScroller.floatValue * diff)];
-            [_grid setColumnOffsets:[_header columnOffsets]];
-            [_grid setColumnWidths:[_header columnWidths]];
+            [_header setColumnOffsets:[self columnOffsets]];
+            [_grid setColumnOffsets:[self columnOffsets]];
+            //[_grid setColumnWidths:[self columnWidths]];
         }
     }
 }
 
 - (void)scrollRight {
-    CGFloat diff = [_header columnsWidth] - _header.frame.size.width;
+    CGFloat diff = [self columnsWidth] - self.frame.size.width;
     if (diff > 0.0) {
         if (fabs(1.0 - _horizontalScroller.knobProportion) > FLT_EPSILON &&
             fabs(1.0 - _horizontalScroller.floatValue) > FLT_EPSILON) {
             _horizontalScroller.floatValue += 0.2;
             if (_horizontalScroller.floatValue > 1.0)
                 _horizontalScroller.floatValue = 1.0;
-            [_header setHorizontalOffset:-(_horizontalScroller.floatValue * diff)];
-            [_grid setColumnOffsets:[_header columnOffsets]];
-            [_grid setColumnWidths:[_header columnWidths]];
+            [_header setColumnOffsets:[self columnOffsets]];
+            [_grid setColumnOffsets:[self columnOffsets]];
+            //[_grid setColumnWidths:[self columnWidths]];
         }
     }
 }
@@ -1676,6 +1737,21 @@ exit:
 
     self.gradientAngle = current.gradientAngle;
     self.cornerRadius = current.cornerRadius;
+}
+
+- (void)setStyleConfiguration:(CEEUserInterfaceStyleConfiguration *)configuration {
+    [super setStyleConfiguration:configuration];
+    [_header setStyleConfiguration:configuration];
+    [_verticalScroller setStyleConfiguration:configuration];
+    [_horizontalScroller setStyleConfiguration:configuration];
+    [_grid setStyleConfiguration:configuration];
+    
+    for (CEETableRowView* view in _rowViewBuffer)
+        [view setStyleConfiguration:configuration];
+    
+    for (CEEView* view in _cellViewBuffer)
+        [view setStyleConfiguration:configuration];
+    
 }
 
 #pragma mark - protocol NSDraggingDestination

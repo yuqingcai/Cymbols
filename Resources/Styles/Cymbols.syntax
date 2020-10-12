@@ -1,10 +1,12 @@
 // this is a Cymbols configuration file
 {
-    "name" : "Default",
+    "description" : "cymbols_syntax_configuration",
+    "name" : "Cymbols",
+    "backgroundcolor" : "#FFFFFF",
     
     "rules" : [
         {
-            "name" : "plantext",
+            "name" : "plaintext",
             "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",

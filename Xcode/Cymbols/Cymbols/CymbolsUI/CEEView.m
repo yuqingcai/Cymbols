@@ -7,6 +7,7 @@
 //
 
 #import "CEEView.h"
+#import "CEETableView.h"
 
 @implementation CEEHighlightView
 @end
@@ -88,7 +89,8 @@
     }
     
     NSSize frameSize = self.frame.size;
-    NSRect contentRect = NSMakeRect(0.0, 0.0,
+    NSRect contentRect = NSMakeRect(0.0,
+                                    0.0,
                              frameSize.width,
                              frameSize.height);
         
@@ -145,7 +147,7 @@
     }
 }
 
-- (void)setStyleConfiguration:(CEEUserInterfaceStyleConfiguration*)configuration {
+- (void)setStyleConfiguration:(CEEUserInterfaceStyleConfiguration*)configuration {    
     _styleConfiguration = configuration;
     [configuration configureView:self];
     [super setStyleConfiguration:configuration];
@@ -251,8 +253,7 @@
     
     if (current.borders)
         self.borders = current.borders;
-    
-    
+        
     self.borderWidth = current.borderWidth;
     self.cornerRadius = current.cornerRadius;
 }

@@ -14,7 +14,6 @@
 #import "CEESourceHistoryViewController.h"
 #import "CEEPopupPanel.h"
 #import "CEEIdentifier.h"
-#import "CEEProjectContextViewController.h"
 
 @interface CEESessionFrameViewController()
 @property (weak) IBOutlet CEETitleView *titlebar;
@@ -53,7 +52,6 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(requestTargetSymbolSelectionResponse:) name:CEENotificationSessionPortRequestTargetSymbolSelection object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setTargetSymbolResponse:) name:CEENotificationSessionPortSetTargetSymbol object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setActivedSymbolResponse:) name:CEENotificationSessionPortSetActivedSymbol object:nil];
 }
@@ -114,16 +112,26 @@
 }
 
 - (CEEPresentSourceState)presentSourceBuffer {
-    CEESourceBuffer* buffer = [_port activedSourceBuffer];    
-    NSInteger offset = [[_port currentBufferReference] bufferOffset];
-    
-    CEEEditViewController* viewController = nil;
+    CEESourceBuffer* buffer = [_port activedSourceBuffer];
     if (!buffer)
         return kCEEPresentSourceStateNoBuffer;
     
-    if (buffer.type == kCEEBufferTypeUTF8)
+    NSInteger presentedLineBufferOffset = [[_port currentBufferReference] presentedLineBufferOffset];
+    NSInteger caretBufferOffset = [[_port currentBufferReference] caretBufferOffset];
+    //CEETextStorageRef storage = buffer.storage;
+    //cee_size size = cee_text_storage_size_get(storage);
+    //if (presentedLineBufferOffset >= size)
+    //    presentedLineBufferOffset = 0;
+    //[[_port currentBufferReference] setPresentedLineBufferOffset:presentedLineBufferOffset];
+    //if (caretBufferOffset >= size)
+    //    caretBufferOffset = 0;
+    //[[_port currentBufferReference] setCaretBufferOffset:caretBufferOffset];
+        
+    CEEEditViewController* viewController = nil;
+    
+    if (buffer.encodeType == kCEEBufferEncodeTypeUTF8)
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
-    else if (buffer.type == kCEEBufferTypeBinary)
+    else if (buffer.encodeType == kCEEBufferEncodeTypeBinary)
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDBinaryEditViewController"];
     else
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDNotSupportedEditViewController"];
@@ -152,7 +160,8 @@
     [viewController setIntelligence:YES];
     [viewController setPort:_port];
     [viewController setBuffer:buffer];
-    [viewController setOffset:offset];
+    [viewController setCaretBufferOffset:caretBufferOffset];
+    [viewController setPresentedLineBufferOffset:presentedLineBufferOffset];
     
     if ([buffer stateSet:kCEESourceBufferStateFileTemporary])
         self.title = [buffer.filePath lastPathComponent];
@@ -183,7 +192,7 @@
     CEESourceBuffer* notify_buffer = notification.object;
     if (![notify_buffer.filePath isEqualToString:buffer.filePath])
         return;
-        
+    
     if ([buffer stateSet:kCEESourceBufferStateFileTemporary])
         self.title = [buffer.filePath lastPathComponent];
     else
@@ -212,22 +221,6 @@
     
     if ([buffer stateSet:kCEESourceBufferStateFileDeleted])
         self.title = [self.title stringByAppendingFormat:@" (delete)"];
-}
-
-
-- (void)requestTargetSymbolSelectionResponse:(NSNotification*)notification {
-    if (notification.object != _port)
-        return;
-    
-    NSWindowController* contextWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectContextWindowController"];
-    NSModalResponse responese = NSModalResponseCancel;
-    responese = [NSApp runModalForWindow:contextWindowController.window];
-    if (responese == NSModalResponseOK) {
-        CEEProjectContextViewController* contextViewController = (CEEProjectContextViewController*)contextWindowController.contentViewController;
-        CEESourceSymbol* selection = contextViewController.selectedSymbol;
-        [_port setTargetSourceSymbol:selection];
-    }
-    [contextWindowController close];
 }
 
 - (void)setTargetSymbolResponse:(NSNotification*)notification {

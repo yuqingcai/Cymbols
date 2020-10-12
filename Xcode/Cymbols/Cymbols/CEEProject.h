@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "CEESerialization.h"
 #import "CEESourceBuffer.h"
+#import "CEESearcher.h"
 
 extern NSNotificationName CEENotificationProjectSettingProperties;
 extern NSNotificationName CEENotificationProjectAddFilePaths;
@@ -26,7 +27,8 @@ extern NSNotificationName CEENotificationSessionPortRequestTargetSymbolSelection
 extern NSNotificationName CEENotificationSessionPortSetActivedSymbol;
 extern NSNotificationName CEENotificationSessionPortPresentHistory;
 extern NSNotificationName CEENotificationSessionPortSaveSourceBuffer;
-extern NSNotificationName CEENotificationSessionPortSetActivedBufferOffset;
+extern NSNotificationName CEENotificationSessionPortSetDescriptor;
+extern NSNotificationName CEENotificationSessionPortSearchReference;
 
 @class CEEProject;
 @class CEESession;
@@ -42,12 +44,22 @@ NSDictionary* JSONDictionaryFromString(NSString* string);
 @property (strong) NSArray* filePathsUserSelected;
 @property (strong) NSArray* filePathsExpanded;
 - (NSString*)databasePath;
-
++ (CEEProjectSetting*)projectSettingWithName:(NSString*)name path:(NSString*)path filePaths:(NSArray*)filePaths filePathsUserSelected:(NSArray*)filePathsUserSelected;
 @end
 
-@interface CEEBufferReference : NSObject
+@interface CEESecurityBookmark : NSObject
+@property (strong) NSString* filePath;
+@property (strong) NSString* content;
+- (instancetype)initWithFilePath:(NSString*)filePath;
+@end
+
+CEESecurityBookmark* CreateBookmarkWithFilePath(NSString* filePath);
+NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
+
+@interface CEESourceBufferReferenceContext : NSObject
 @property NSString* filePath;
-@property NSInteger bufferOffset;
+@property NSInteger presentedLineBufferOffset;
+@property NSInteger caretBufferOffset;
 - (instancetype)initWithFilePath:(NSString*)filePath;
 @end
 
@@ -59,26 +71,25 @@ NSDictionary* JSONDictionaryFromString(NSString* string);
 @property (readonly) CEEList* context;
 @property (readonly) CEESourceSymbol* target_symbol;
 @property (readonly) CEESourceSymbol* actived_symbol;
-@property (readonly) NSInteger active_buffer_offset;
+@property NSString* descriptor;
 
 - (void)moveBufferReferenceNext;
 - (void)moveBufferReferencePrev;
-- (CEEBufferReference*)currentBufferReference;
+- (CEESourceBufferReferenceContext*)currentBufferReference;
 - (void)setActivedSourceBuffer:(CEESourceBuffer*)buffer;
 - (CEESourceBuffer*)activedSourceBuffer;
-
-- (void)presentHistory:(CEEBufferReference*)reference;
+- (void)presentHistory:(CEESourceBufferReferenceContext*)reference;
 - (NSArray*)openSourceBuffersWithFilePaths:(NSArray*)filePaths;
 - (CEESourceBuffer*)openUntitledSourceBuffer;
-- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atPath:(NSString*)filePath;
+- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath;
 - (void)closeSourceBuffers:(NSArray*)buffers;
 - (void)closeAllSourceBuffers;
 - (void)discardReferences;
 - (void)createContextByCluster:(CEETokenCluster*)cluster;
 - (void)jumpToTargetSymbolByCluster:(CEETokenCluster*)cluster;
+- (void)searchReferencesByCluster:(CEETokenCluster*)cluster;
 - (void)setTargetSourceSymbol:(CEESourceSymbol*)symbol;
 - (void)setActivedSourceSymbol:(CEESourceSymbol*)symbol;
-- (void)setActivedBufferOffset:(NSInteger)offset;
 @end
 
 @interface CEESession : NSObject <CEESerialization>
@@ -94,7 +105,6 @@ NSDictionary* JSONDictionaryFromString(NSString* string);
 - (NSArray*)filePathsFilter:(NSString*)condition;
 - (NSString*)serialize;
 - (void)deserialize:(NSDictionary*)dict;
-
 @end
 
 @interface CEEProject : NSDocument
@@ -102,6 +112,7 @@ NSDictionary* JSONDictionaryFromString(NSString* string);
 @property (strong) CEESession* currentSession;
 @property (readonly) cee_pointer database;
 @property (strong) CEEProjectSetting* properties;
+@property (strong, readonly) CEEProjectSearcher* searcher;
 
 - (void)serialize;
 - (void)createSessionWithFilePaths:(NSArray*)filePaths;
@@ -111,6 +122,12 @@ NSDictionary* JSONDictionaryFromString(NSString* string);
 - (CEEProjectSetting*)createEmptyProjectSetting;
 - (void)deleteSession:(CEESession*)session;
 - (void)deleteAllSessions;
+- (void)syncSourceSymbols:(CEESourceBuffer*)buffer;
+- (void)addSecurityBookmarksWithFilePaths:(NSArray*)filePaths;
+- (void)removeSecurityBookmarksWithFilePaths:(NSArray*)filePaths;
+- (NSArray*)getSecurityBookmarksWithFilePaths:(NSArray*)filePaths;
+- (void)startAccessSecurityScopedResourcesWithBookmarks:(NSArray*)bookmarks;
+- (void)stopAccessSecurityScopedResourcesWithBookmarks:(NSArray*)bookmarks;
 @end
 
 @interface CEEProjectController : NSDocumentController
@@ -118,4 +135,3 @@ NSDictionary* JSONDictionaryFromString(NSString* string);
 - (CEEProject*)openProjectFromURL:(NSURL*)url;
 - (void)replaceSourceBufferReferenceFilePath:(NSString*)filePath0 to:(NSString*)filePath1;
 @end
-

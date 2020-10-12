@@ -29,13 +29,13 @@
                                                     <menuItem title="User Interface Styles..." id="H8D-5c-Z7G">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
-                                                            <action selector="toggleUserInterfaceStyleSelectionController:" target="Ady-hI-5gd" id="cxj-cy-d9h"/>
+                                                            <action selector="toggleUserInterfaceStyleSelection:" target="Ady-hI-5gd" id="fdO-ne-c9A"/>
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem title="Syntax Styles..." id="LWl-Lf-YVq">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
-                                                            <action selector="toggleTextHighlightStyleSelectionController:" target="Ady-hI-5gd" id="668-Gl-Iv5"/>
+                                                            <action selector="toggleTextHighlightStyleSelection:" target="Ady-hI-5gd" id="OaY-eU-L9C"/>
                                                         </connections>
                                                     </menuItem>
                                                 </items>

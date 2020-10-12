@@ -73,8 +73,8 @@
                                     <action selector="discardAll:" target="HvY-8q-DBX" id="czX-y5-PMa"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Tl2-TD-1g0" customClass="CEETextLabel">
-                                <rect key="frame" x="20" y="463" width="664" height="23"/>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Tl2-TD-1g0" customClass="CEETextTitle">
+                                <rect key="frame" x="20" y="461" width="664" height="23"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="23" id="9DF-EY-K6Y"/>
                                 </constraints>
@@ -83,17 +83,17 @@
                                 </userDefinedRuntimeAttributes>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="Qx8-fU-GTd" customClass="CEEContainerView">
-                                <rect key="frame" x="24" y="63" width="656" height="390"/>
+                                <rect key="frame" x="24" y="63" width="656" height="386"/>
                                 <subviews>
                                     <splitView arrangesAllSubviews="NO" dividerStyle="thin" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AIu-ba-bbg" customClass="CEESplitView">
-                                        <rect key="frame" x="1" y="1" width="654" height="388"/>
+                                        <rect key="frame" x="1" y="1" width="654" height="384"/>
                                         <subviews>
                                             <customView fixedFrame="YES" id="1SN-cP-sDG" customClass="CEETableView">
-                                                <rect key="frame" x="0.0" y="0.0" width="206" height="388"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="206" height="384"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             </customView>
                                             <customView identifier="IDSaveModifiedBuffersSourceContentView" fixedFrame="YES" id="DIU-FX-7aB" customClass="CEEView">
-                                                <rect key="frame" x="207" y="0.0" width="447" height="388"/>
+                                                <rect key="frame" x="207" y="0.0" width="447" height="384"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                             </customView>
                                         </subviews>
@@ -129,14 +129,14 @@
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="6wu-rV-y8v" secondAttribute="bottom" constant="20" id="65c-RF-Ubl"/>
                             <constraint firstItem="8ER-e0-ja2" firstAttribute="top" secondItem="Qx8-fU-GTd" secondAttribute="bottom" constant="20" id="7dV-ju-O6B"/>
-                            <constraint firstItem="Qx8-fU-GTd" firstAttribute="top" secondItem="Tl2-TD-1g0" secondAttribute="bottom" constant="10" id="GIh-dR-Gnc"/>
+                            <constraint firstItem="Qx8-fU-GTd" firstAttribute="top" secondItem="Tl2-TD-1g0" secondAttribute="bottom" constant="12" id="GIh-dR-Gnc"/>
                             <constraint firstItem="Tl2-TD-1g0" firstAttribute="leading" secondItem="oH0-m7-mbz" secondAttribute="leading" constant="20" id="H0q-ZS-Hgf"/>
                             <constraint firstAttribute="trailing" secondItem="Tl2-TD-1g0" secondAttribute="trailing" constant="20" id="ISe-PF-Gm2"/>
                             <constraint firstAttribute="bottom" secondItem="8ER-e0-ja2" secondAttribute="bottom" constant="20" id="JPc-Te-l65"/>
                             <constraint firstItem="Egb-dl-zYj" firstAttribute="leading" secondItem="8ER-e0-ja2" secondAttribute="trailing" constant="8" id="L17-gB-lTa"/>
                             <constraint firstAttribute="bottom" secondItem="swE-h0-lad" secondAttribute="bottom" constant="20" id="PBo-8f-mlg"/>
                             <constraint firstAttribute="bottom" secondItem="Egb-dl-zYj" secondAttribute="bottom" constant="20" id="Qlu-So-BeW"/>
-                            <constraint firstItem="Tl2-TD-1g0" firstAttribute="top" secondItem="oH0-m7-mbz" secondAttribute="top" constant="10" id="UL0-7n-4bt"/>
+                            <constraint firstItem="Tl2-TD-1g0" firstAttribute="top" secondItem="oH0-m7-mbz" secondAttribute="top" constant="12" id="UL0-7n-4bt"/>
                             <constraint firstItem="swE-h0-lad" firstAttribute="leading" secondItem="oH0-m7-mbz" secondAttribute="leading" constant="24" id="VoH-I2-iWO"/>
                             <constraint firstAttribute="trailing" secondItem="Qx8-fU-GTd" secondAttribute="trailing" constant="24" id="abq-Cz-pg7"/>
                             <constraint firstItem="Qx8-fU-GTd" firstAttribute="leading" secondItem="oH0-m7-mbz" secondAttribute="leading" constant="24" id="bdi-mg-kN7"/>

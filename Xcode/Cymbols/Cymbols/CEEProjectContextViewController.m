@@ -26,29 +26,42 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do view setup here.
+    
     [_symbolTable setDataSource:self];
     [_symbolTable setDelegate:self];
     [_symbolTable setTarget:self];
     [_symbolTable setAction:@selector(selectRow:)];
     [_symbolTable setEnableDrawHeader:YES];
     
+    [_titlebar setTranslatesAutoresizingMaskIntoConstraints:NO];
+    
     _editViewController =  [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
     [_editViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
     [_sourceContentView addSubview:_editViewController.view];
-    [_editViewController setIntelligence:YES];
     
     NSDictionary *views = @{
                             @"titlebar" : _titlebar,
                             @"editView" : _editViewController.view,
                             };
-    NSArray *constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[editView]-0-|" options:0 metrics:nil views:views];
-    NSArray *constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[editView]-0-|" options:0 metrics:nil views:views];
+    
+    NSDictionary* metrics = @{
+                @"titleHeight" : @(25),
+                };
+    
+    NSArray *constraintsH = nil;
+    NSArray *constraintsV = nil;
+    
+    constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[editView]-0-|" options:0 metrics:nil views:views];
     [self.view addConstraints:constraintsH];
+    constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[titlebar]-0-|" options:0 metrics:nil views:views];
+    [self.view addConstraints:constraintsH];
+    
+    constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar(==titleHeight)]-0-[editView]-0-|" options:0 metrics:metrics views:views];
     [self.view addConstraints:constraintsV];
     
     [_editViewController setEditable:NO];
     [_editViewController setIntelligence:NO];
+    [_editViewController setWrap:YES];
 }
 
 - (void)viewDidAppear {
@@ -83,9 +96,7 @@
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEESymbolCellView* cellView = [tableView makeViewWithIdentifier:@"IDSymbolCellView"];
     CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)row);
-    NSString* name = [NSString stringWithUTF8String:symbol->name];
     NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-    
     cellView.title.stringValue = [NSString stringWithFormat:@"%ld %@ - line %d", row, [filePath lastPathComponent], 0];
     [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
     return cellView;
@@ -102,7 +113,7 @@
     CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)_symbolTable.selectedRow);
     NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
     CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
-    cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
+    cee_source_buffer_parse(buffer, 0);
     [_editViewController setBuffer:buffer];
     CEEList* ranges = cee_ranges_from_string(symbol->locations);
     if (ranges) {

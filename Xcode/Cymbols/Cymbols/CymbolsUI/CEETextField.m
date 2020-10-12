@@ -60,5 +60,4 @@ NSNotificationName CEENotificationTextViewNewline = @"CEENotificationTextViewNew
     return YES;
 }
 
-
 @end

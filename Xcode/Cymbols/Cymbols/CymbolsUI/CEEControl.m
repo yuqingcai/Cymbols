@@ -10,8 +10,6 @@
 
 @implementation CEEControl
 
-@synthesize enabled = _enabled;
-
 - (void)initProperties {
     _styleState = kCEEViewStyleStateActived;
     [self setEnabled:YES];
@@ -48,20 +46,6 @@
     return self;
 }
 
-- (void)setEnabled:(BOOL)enabled {
-    _enabled = enabled;
-    if (!enabled)
-        [self setStyleState:kCEEViewStyleStateDisabled];
-    else
-        [self setStyleState:kCEEViewStyleStateActived];
-    
-    [super setEnabled:enabled];
-}
-
-- (BOOL)enabled {
-    return _enabled;
-}
-
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint {
     NSImage *tintedImage = [image copy];
     if (tint) {
@@ -74,7 +58,7 @@
     return tintedImage;
 }
 
-- (void)setStyleState:(CEEViewStyleState)state {
+- (void)setStyleState:(CEEViewStyleState)state {    
     _styleState = state;
     [super setStyleState:state];
 }

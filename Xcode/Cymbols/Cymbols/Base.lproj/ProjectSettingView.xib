@@ -38,7 +38,7 @@
                         <constraint firstAttribute="height" constant="24" id="7qj-hP-9d6"/>
                     </constraints>
                 </customView>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="w9P-Lo-li0" customClass="CEETextLabel">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="w9P-Lo-li0" customClass="CEETextTitle">
                     <rect key="frame" x="20" y="460" width="124" height="24"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="24" id="Ib3-Ih-4wR"/>
@@ -161,11 +161,11 @@
                 <constraint firstAttribute="bottom" secondItem="qo6-mS-OmK" secondAttribute="bottom" id="wNG-DR-PjQ"/>
             </constraints>
             <connections>
-                <outlet property="addFilePathButton" destination="qo6-mS-OmK" id="za1-UI-e2F"/>
-                <outlet property="filePathTable" destination="XGl-be-vic" id="rvF-dN-HLl"/>
+                <outlet property="addFilePathButton" destination="qo6-mS-OmK" id="t14-nC-jpj"/>
+                <outlet property="filePathTable" destination="XGl-be-vic" id="Bg1-Bv-RbI"/>
                 <outlet property="nameInput" destination="OFt-FS-1Bm" id="M1J-rF-7kg"/>
                 <outlet property="projectNameLabel" destination="Nq6-Dd-10K" id="AS6-lA-qAe"/>
-                <outlet property="removeFilePathsButton" destination="a32-f4-9IG" id="8QQ-WU-0Ut"/>
+                <outlet property="removeFilePathsButton" destination="a32-f4-9IG" id="dG1-hV-uQZ"/>
                 <outlet property="saveAtButton" destination="G7j-6Z-aBD" id="ozI-X1-Cmy"/>
                 <outlet property="savePathInput" destination="rqJ-OA-JOu" id="ScA-Q8-ud1"/>
             </connections>

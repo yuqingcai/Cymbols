@@ -214,7 +214,7 @@ CEETokenCluster* cee_token_cluster_search_by_buffer_offset(CEEList* references,
                                                            CEESourceFregment* prep_directive,
                                                            CEESourceFregment* statement,
                                                            cee_long offset);
-CEEList* cee_symbols_search_by_reference(CEESourceReference* reference,
+CEEList* cee_symbols_search_by_reference(CEESourceSymbolReference* reference,
                                          CEESourceFregment* prep_directive,
                                          CEESourceFregment* statement,
                                          cee_pointer database,

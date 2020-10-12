@@ -118,7 +118,7 @@ static CEEStyleManager* gStyleManager = nil;
 }
 
 - (void)setUserInterfaceStyleName:(NSString *)name {
-    _userInterfaceStyleName = name;    
+    _userInterfaceStyleName = name;
     NSString* filepath = [[self homeDirectory] stringByAppendingPathComponent:[_userInterfaceStyleName stringByAppendingPathExtension:@"ui"]];
     NSDictionary* descriptor = [CEEJSONReader objectFromFile:filepath];
     [_userInterfaceConfiguration setDescriptor:descriptor];

@@ -60,7 +60,7 @@
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    CEEBufferReference* reference = _port.bufferReferences[row];
+    CEESourceBufferReferenceContext* reference = _port.bufferReferences[row];
     CEEFileNameCellView *cellView = [_historyTable makeViewWithIdentifier:@"IDFileNameCellView"];
     NSString* string = [reference.filePath lastPathComponent];
     
@@ -77,7 +77,7 @@
 
 - (void)highlightSelectionInHistoryTable {    
     NSIndexSet *indexSet = nil;
-    CEEBufferReference* reference = [_port currentBufferReference];
+    CEESourceBufferReferenceContext* reference = [_port currentBufferReference];
     NSArray* references = [_port bufferReferences];
     for (NSInteger i = 0; i < references.count; i ++) {
         if (reference == references[i]) {

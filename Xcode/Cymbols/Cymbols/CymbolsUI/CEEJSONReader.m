@@ -9,8 +9,8 @@
 #import "CEEJSONReader.h"
 
 @implementation CEEJSONReader
-+ (NSString*)stringFromFile:(NSString*)filepath {
-    NSString* string = [NSString stringWithContentsOfFile:filepath encoding:NSUTF8StringEncoding error:nil];
++ (NSString*)stringFromFile:(NSString*)filePath {
+    NSString* string = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
     NSRegularExpressionOptions options = NSRegularExpressionDotMatchesLineSeparators |
                                         NSRegularExpressionCaseInsensitive |
                                         NSRegularExpressionAnchorsMatchLines;
@@ -29,16 +29,32 @@
     return string;
 }
 
-+ (NSData*)dataFromFile:(NSString*)filepath {
-    NSString* string = [CEEJSONReader stringFromFile:filepath];
++ (NSData*)dataFromFile:(NSString*)filePath {
+    NSString* string = [CEEJSONReader stringFromFile:filePath];
     NSData* data = [string dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
     return data;
 }
 
-+ (id)objectFromFile:(NSString*)filepath {
-    NSString* string = [CEEJSONReader stringFromFile:filepath];
++ (id)objectFromFile:(NSString*)filePath {
+    NSString* string = [CEEJSONReader stringFromFile:filePath];
     NSData* data = [string dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
     return [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
 }
 
++ (BOOL)object:(id)object toFile:(NSString*)filePath {
+    NSError* error = nil;
+    NSData* data = nil;
+    NSString* string = nil;
+    
+    if (![object isKindOfClass:[NSDictionary class]])
+        return NO;
+    
+    data = [NSJSONSerialization dataWithJSONObject:object options:NSJSONWritingPrettyPrinted error:&error];
+    if (!data)
+        return NO;
+    
+    string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    [string writeToURL:[NSURL fileURLWithPath:filePath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
+    return YES;
+}
 @end

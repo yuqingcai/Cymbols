@@ -1,10 +1,12 @@
 // this is a Cymbols configuration file
 {
+    "description" : "cymbols_syntax_configuration",
     "name" : "Monokai",
+    "backgroundcolor" : "#2C292D",
     
     "rules" : [
         {
-            "name" : "plantext",
+            "name" : "plaintext",
             "font" : "font(\"Courier\", 11.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
@@ -20,7 +22,7 @@
             "forecolor" : "#AAA1AD",
             "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
-
+        
         {
             "name" : "keyword",
             "font" : "font(\"Courier\", 11.0, \"regular\", 5.0)",
@@ -164,16 +166,7 @@
             "forecolor" : "#FDF9F3",
             "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
-        
-        {
-            "name" : "protocol",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "FDF9F3",
-            "backgroundcolor" : "hsba(0, 0, 0, 0)"
-        },
-        
+                
         {
             "name" : "enumerator",
             "font" : "font(\"Courier\", 11.0, \"regular\", 5.0)",

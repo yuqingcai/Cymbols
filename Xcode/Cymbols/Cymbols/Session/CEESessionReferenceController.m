@@ -25,7 +25,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [_titlebar setTitle:@"Files In Port"];
+    [_titlebar setTitle:@"Files Opened"];
     [_referenceTable setDataSource:self];
     [_referenceTable setDelegate:self];
     [_referenceTable setColumns:1];
@@ -33,6 +33,7 @@
     [_referenceTable setAction:@selector(selectRow:)];
     [_referenceTable setAllowsMultipleSelection:NO];
     [_referenceTable setEnableDrawHeader:NO];
+    [_referenceTable setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];

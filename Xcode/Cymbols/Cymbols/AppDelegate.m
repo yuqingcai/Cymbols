@@ -18,6 +18,7 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 @interface AppDelegate()
 @property (strong) NSString* cymbolsHome;
 @property (strong) NSTimer* heartBeatTimer;
+@property (strong) NSMutableDictionary* activedConfigurations;
 @end
 
 @implementation AppDelegate
@@ -38,8 +39,8 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [styleManager setStyleHomeDirectory:[_cymbolsHome stringByAppendingPathComponent:@"Styles"]];
-    styleManager.userInterfaceStyleName = _configurations[@"UIStyle"];
-    styleManager.textHighlightStyleName = _configurations[@"SyntaxStyle"];
+    styleManager.userInterfaceStyleName = _activedConfigurations[@"UIStyle"];
+    styleManager.textHighlightStyleName = _activedConfigurations[@"SyntaxStyle"];
     
     _sourceBufferManager = [[CEESourceBufferManager alloc] init];
     _projectController = [[CEEProjectController alloc] init];
@@ -85,7 +86,8 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 
 - (void)configure {
     NSString* filepath = [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
-    _configurations = [CEEJSONReader objectFromFile:filepath];
+    _activedConfigurations = [CEEJSONReader objectFromFile:filepath];
+    _configurations = _activedConfigurations;
 }
 
 - (void)dealloc {
@@ -103,11 +105,13 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     NSDocumentController* documentController = [NSDocumentController sharedDocumentController];
-    [_sourceBufferManager discardUntitleSourceBuffers];
     for (CEEProject* project in documentController.documents) {
+        NSArray* untiledSourceBufferFilePaths = [_sourceBufferManager untitleSourceBuffersFilePaths];
+        [project removeSecurityBookmarksWithFilePaths:untiledSourceBufferFilePaths];
         [project serialize];
         [project deleteAllSessions];
     }
+    [_sourceBufferManager discardUntitleSourceBuffers];
 }
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender {
@@ -197,4 +201,12 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 - (NSString*)serializerVersionString {
     return @"CymbolsSerializer_1_0_0";
 }
+
+- (void)setConfiguration:(NSString*)configuration value:(NSString*)value {
+    [_activedConfigurations setValue:value forKey:configuration];
+    _configurations = _activedConfigurations;
+    NSString* filepath = [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
+    [CEEJSONReader object:_activedConfigurations toFile:filepath];
+}
+
 @end
