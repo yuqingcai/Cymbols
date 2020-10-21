@@ -21,7 +21,6 @@ NS_ASSUME_NONNULL_BEGIN
 extern NSNotificationName CEENotificationSourceBufferStateChanged;
 extern NSNotificationName CEENotificationSourceBufferReload;
 extern NSNotificationName CEENotificationSourceBufferSaved;
-extern NSNotificationName CEENotificationSourceBufferParsed;
 
 typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
     kCEESourceBufferStateNormal = 0,
@@ -81,7 +80,6 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
 - (CEESourceBuffer*)openUntitledSourceBuffer;
 - (void)closeSourceBuffer:(CEESourceBuffer*)buffer;
 - (BOOL)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath;
-- (NSArray*)untitleSourceBuffersFilePaths;
 - (void)discardUntitleSourceBuffers;
 - (void)syncSourceBuffersFromFiles;
 - (BOOL)isTemporaryFilePath:(NSString*)filePath;

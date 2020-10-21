@@ -31,6 +31,7 @@
     [_symbolTable setDelegate:self];
     [_symbolTable setTarget:self];
     [_symbolTable setAction:@selector(selectRow:)];
+    [_symbolTable setDoubleAction:@selector(selectItem:)];
     [_symbolTable setEnableDrawHeader:YES];
     
     [_titlebar setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -122,6 +123,13 @@
     }
     [_titlebar setTitle:filePath];
     return;
+}
+
+- (IBAction)selectItem:(id)sender {
+    if (_symbols)
+        _selectedSymbol = cee_list_nth_data(_symbols, (cee_int)_symbolTable.selectedRow);
+    
+    [NSApp stopModalWithCode:NSModalResponseOK];
 }
 
 - (IBAction)select:(id)sender {

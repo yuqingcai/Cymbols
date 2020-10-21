@@ -74,7 +74,6 @@
     return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
-
 - (void)highlightSelectionInHistoryTable {    
     NSIndexSet *indexSet = nil;
     CEESourceBufferReferenceContext* reference = [_port currentBufferReference];

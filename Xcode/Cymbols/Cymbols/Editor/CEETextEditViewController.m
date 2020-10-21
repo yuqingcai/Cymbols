@@ -41,9 +41,7 @@
 @property BOOL searchMarchWord;
 @property BOOL searchTimeout;
 @property BOOL searchTextWhenModifing;
-
 @property CEEList* symbolReferences;
-
 @end
 
 static CEEList* buffer_tags_generate(cee_pointer generator,
@@ -69,7 +67,8 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
                                range, 
                                &symbolReferences);
     if (controller.symbolReferences)
-        cee_list_free_full(controller.symbolReferences, cee_source_symbol_reference_free);
+        cee_list_free_full(controller.symbolReferences, 
+                           cee_source_symbol_reference_free);
     controller.symbolReferences = symbolReferences;
     
     tags = cee_source_tags_create(buffer.parser_ref, 
@@ -130,7 +129,6 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [_textView setStorage:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferParsedResponse:) name:CEENotificationSourceBufferParsed object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textHighlightStyleResponse:) name:CEENotificationTextHighlightStyleUpdate object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferReloadResponse:) name:CEENotificationSourceBufferReload object:nil];
@@ -499,6 +497,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
         if (self.view.window.firstResponder == _textView && 
             [self.view.window isKeyWindow])
             return;
+        
         cee_text_edit_modified_update(_textView.edit);
     }
     else {
@@ -508,21 +507,6 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [_textView setNeedsDisplay:YES];
     [self adjustScrollers];
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
-}
-
-- (void)sourceBufferParsedResponse:(NSNotification*)notification {
-    CEESourceBuffer* buffer = notification.object;
-    if (buffer != self.buffer)
-        return;
-    
-    if (_searchingText && _searchTextWhenModifing)
-        [self searchText];
-    
-    cee_text_edit_modified_update(_textView.edit);
-    [_textView setNeedsDisplay:YES];
-    [self adjustScrollers];
-    [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
-    
 }
 
 - (void)sourceBufferReloadResponse:(NSNotification*)notification {
@@ -674,7 +658,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
                                                                           self.buffer.statement,
                                                                           offset);
     
-    [self.port jumpToTargetSymbolByCluster:cluster];
+    [self.port jumpToSourceSymbolByCluster:cluster];
     cee_token_cluster_free(cluster);
     return;
 }
@@ -746,6 +730,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 
 - (BOOL)filePathIsSource:(NSString*)filePath {
     NSString* extension = [filePath pathExtension];
+    
     if ([extension compare:@"c" options:NSCaseInsensitiveSearch] == NSOrderedSame || 
         [extension compare:@"cpp" options:NSCaseInsensitiveSearch] == NSOrderedSame || 
         [extension compare:@"cc" options:NSCaseInsensitiveSearch] == NSOrderedSame || 

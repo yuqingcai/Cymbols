@@ -195,7 +195,6 @@ static void line_wrap(CEETextLine* line,
     line->nb_unit --;
     line->anchor -= unit->bounds.size.width;
     cee_list_free_full(p, unit_free);
-    
 }
 
 static void layout_carrage_return(CEETextLayout* layout)
@@ -576,7 +575,6 @@ static void text_layout(CEETextLayoutRef layout,
                                                       current,
                                                       &codepoint,
                                                       &length);
-        
         if (codepoint == CEE_UNICODE_POINT_NUL)
             layout->terminate = TRUE;
         else if (codepoint == CEE_UNICODE_POINT_LF)
@@ -589,9 +587,13 @@ static void text_layout(CEETextLayoutRef layout,
         if (line_clipped_horizontal(line)) {
             line_units_reverse(line);
             line_wrap(line, &current);
+            
+            if (layout->terminate)
+                layout->terminate = FALSE;
+            
             layout_append_line(line);
             
-            if (line_clipped_vertical(line) || layout->terminate)
+            if (line_clipped_vertical(line))
                 break;
             
             line = NULL;
@@ -883,8 +885,9 @@ CEETextUnitRef cee_text_unit_get_by_location(CEETextLayoutRef layout,
     CEETextUnitRef target_unit = NULL;
     CEERect line_bounds;
     CEERect rect;
+    CEEList* p = NULL;
     
-    CEEList* p = cee_text_layout_lines_get(layout);
+    p = cee_text_layout_lines_get(layout);
     line = cee_list_first(p)->data;
     rect = cee_text_line_box_get(line);
     if (location.y < rect.origin.y)
@@ -915,13 +918,34 @@ CEETextUnitRef cee_text_unit_get_by_location(CEETextLayoutRef layout,
         return NULL;
     
     line_bounds = cee_text_line_bounds_get(target_line);
-    
     p = cee_text_line_units_get(target_line);
     unit = cee_list_last(p)->data;
     rect = cee_text_unit_box_get(unit);
     rect.origin.x += line_bounds.origin.x;
-    if (location.x > rect.origin.x + rect.size.width)
-        target_unit = unit;
+
+    /**
+     * if location point to the last unit in target_line,
+     * the first unit of the next_line(if existed) is the
+     * target_unit, if there's no_next line existed, that
+     * mean unit is the target_unit
+     */
+    if (location.x > rect.origin.x + rect.size.width) {
+        CEEUnicodePoint codepoint = cee_text_unit_codepoint_get(unit);
+        if (codepoint == CEE_UNICODE_POINT_LF) {
+            target_unit = unit;
+        }
+        else {
+            CEETextLineRef next_line = cee_text_layout_line_next(layout, target_line);
+            if (next_line) {
+                CEEList* q = cee_text_line_units_get(next_line);
+                if (q)
+                    target_unit = cee_list_first(q)->data;
+            }
+            else {
+                target_unit = cee_list_last(p)->data;
+            }
+        }
+    }
     
     if (!target_unit) {
         unit = cee_list_first(p)->data;
@@ -937,7 +961,7 @@ CEETextUnitRef cee_text_unit_get_by_location(CEETextLayoutRef layout,
             rect = cee_text_unit_box_get(unit);
             rect.origin.x += line_bounds.origin.x;
             
-            if (location.x > rect.origin.x && location.x < 
+            if (location.x > rect.origin.x && location.x <
                 rect.origin.x + rect.size.width / 2.0) {
                 target_unit = unit;
                 break;
@@ -951,11 +975,9 @@ CEETextUnitRef cee_text_unit_get_by_location(CEETextLayoutRef layout,
                 
                 break;
             }
-            
             p = p->next;
         }
     }
-    
     return target_unit;
 }
 
@@ -1118,6 +1140,38 @@ CEETextLineRef cee_text_line_get_by_offset(CEETextLayoutRef layout,
     if (line_node)
         return line_node->data;
     
+    return NULL;
+}
+
+CEETextLineRef cee_text_layout_line_next(CEETextLayoutRef layout,
+                                         CEETextLineRef line)
+{
+    CEEList* p = cee_text_layout_lines_get(layout);
+    while (p) {
+        if (p->data == line) {
+            if (p->next)
+                return p->next->data;
+            else
+                return NULL;
+        }
+        p = p->next;
+    }
+    return NULL;
+}
+
+CEETextLineRef ee_text_layout_line_prev(CEETextLayoutRef layout,
+                                        CEETextLineRef line)
+{
+    CEEList* p = cee_text_layout_lines_get(layout);
+    while (p) {
+        if (p->data == line) {
+            if (p->prev)
+                return p->next->data;
+            else
+                return NULL;
+        }
+        p = p->next;
+    }
     return NULL;
 }
 

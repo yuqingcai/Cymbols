@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "CEESessionFilePathController.h"
 #import "CEEFileNameCellView.h"
+#import "CEETitlebarButton.h"
 
 @interface CEESessionFilePathController ()
 @property (strong) IBOutlet CEETitleView *titlebar;
@@ -16,6 +17,9 @@
 @property (strong) NSArray* filePathsInProject;
 @property (strong) NSString* filterCondition;
 @property (weak) IBOutlet CEETextField *filterInput;
+@property (weak) IBOutlet CEETitlebarButton *addSourceButton;
+@property (weak) IBOutlet CEETitlebarButton *removeSourceButton;
+
 @end
 
 @implementation CEESessionFilePathController
@@ -180,6 +184,12 @@
     if (notification.object != _session.project)
         return;
     
+    BOOL hidden = YES;
+    if (_session.project.database)
+        hidden = NO;
+    [_addSourceButton setHidden:hidden];
+    [_removeSourceButton setHidden:hidden];
+    
     [self presentPaths];
     [self presentTitle];
 }
@@ -187,6 +197,12 @@
 - (void)projectSettingPropertiesResponse:(NSNotification*)notification {
     if ([notification object] != self.session.project)
         return;
+    
+    BOOL hidden = YES;
+    if (_session.project.database)
+        hidden = NO;
+    [_addSourceButton setHidden:hidden];
+    [_removeSourceButton setHidden:hidden];
     
     [self presentPaths];
     [self presentTitle];

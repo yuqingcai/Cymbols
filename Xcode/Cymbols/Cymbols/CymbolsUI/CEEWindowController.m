@@ -14,6 +14,12 @@
 @implementation CEEWindowController
 
 - (void)initProperties {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateContentViewStyle:) name:CEENotificationUserInterfaceStyleUpdate object:nil];
+}
+
+- (void)updateContentViewStyle:(NSNotification*)notification {
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    [self.contentViewController setViewStyleConfiguration:[styleManager userInterfaceConfiguration]];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder {

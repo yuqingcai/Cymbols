@@ -49,6 +49,7 @@
     [_resultTable setDelegate:self];
     [_resultTable setTarget:self];
     [_resultTable setAction:@selector(selectRow:)];
+    [_resultTable setDoubleAction:@selector(selectItem:)];
     [_resultTable setEnableDrawHeader:YES];
     
     [_targetInput setDelegate:self];
@@ -109,6 +110,7 @@
     [_resultTable reloadData];
     _isSearching = NO;
     _cancel = NO;
+    _selectedResult = nil;
     
     if (_autoStart)
         [self search:nil];
@@ -534,6 +536,13 @@
     [_titlebar setTitle:result.filePath];
     return;
 }
+
+- (IBAction)selectItem:(id)sender {
+    if (_project.searcher.results)
+        _selectedResult = _project.searcher.results[(cee_int)_resultTable.selectedRow];
+    [NSApp stopModalWithCode:NSModalResponseOK];
+}
+
 
 - (void)textViewTextChanged:(CEETextView *)textView {
     if (textView == _targetInput)

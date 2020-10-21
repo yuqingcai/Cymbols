@@ -12,6 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEProjectParseViewController : CEEViewController
+@property BOOL sync;
 @end
 
 NS_ASSUME_NONNULL_END

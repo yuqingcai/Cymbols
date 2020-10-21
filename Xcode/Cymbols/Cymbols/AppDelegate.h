@@ -27,5 +27,6 @@ extern NSNotificationName CEENotificationHeartBeat;
 - (NSObject*)nibObjectWithIdentifier:(NSString*)identifier fromNibNamed:(NSString*)name;
 - (NSString*)welcomeGuidePath;
 - (NSString*)serializerVersionString;
+- (NSString*)infoString;
 - (void)setConfiguration:(NSString*)configuration value:(NSString*)value;
 @end

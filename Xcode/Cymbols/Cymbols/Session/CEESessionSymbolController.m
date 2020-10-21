@@ -41,7 +41,7 @@
     _updateSymbolsTimer = [NSTimer timerWithTimeInterval:0.5 target:self selector:@selector(updateSymbols:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:_updateSymbolsTimer forMode:NSRunLoopCommonModes];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferParsedResponse:) name:CEENotificationSourceBufferParsed object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(openSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activeSourceBufferResponse:) name:CEENotificationSessionPortActiveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activePortResponse:) name:CEENotificationSessionActivePort object:nil];
@@ -117,7 +117,7 @@
     
     CEESourceSymbolWrapper* wrapper = cee_list_nth_data(_symbol_wrappers, 
                                                         (cee_uint)_symbolTable.selectedRow);
-    [_session.activedPort setActivedSourceSymbol:wrapper->symbol_ref];
+    [_session.activedPort setSelectedSourceSymbol:wrapper->symbol_ref];
 }
 
 - (void)deserialize:(NSDictionary *)dict {
@@ -126,10 +126,11 @@
     [self presentSymbols];
 }
 
-- (void)sourceBufferParsedResponse:(NSNotification*)notification {
+- (void)sourceBufferStateChangedResponse:(NSNotification*)notification {
     if (notification.object != _buffer)
         return;
-    _shouldUpdate = YES;
+    if ([_buffer stateSet:kCEESourceBufferStateModified])
+        _shouldUpdate = YES;
 }
 
 - (void)openSourceBufferResponse:(NSNotification*)notification {

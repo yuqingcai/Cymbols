@@ -793,6 +793,14 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [path stroke];
 }
 
+- (void)drawUnitRect:(NSRect)rect {
+    NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:1.0 yRadius:1.0];
+    [[NSColor colorWithRed:1.0 green:0.0 blue:0.0 alpha:0.3] setStroke];
+    [[NSColor colorWithRed:1.0 green:0.0 blue:0.0 alpha:0.2] setFill];
+    [path stroke];
+    [path fill];
+}
+
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
     
@@ -877,15 +885,18 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                 self.styleState == kCEEViewStyleStateActived && buffer_offset == caret_offset)
                 [self drawCaretAtUnit:unit inLine:line];
             
+            rect = CGRectMake(position.x,
+                              position.y - (unit_bounds.size.height - ascent),
+                              unit_bounds.size.width,
+                              unit_bounds.size.height);
+            
             if (background_color) {
                 CGContextSetFillColorWithColor(context, background_color);
-                rect = CGRectMake(position.x, 
-                                  position.y - (unit_bounds.size.height - ascent), 
-                                  unit_bounds.size.width, 
-                                  unit_bounds.size.height);
                 CGContextFillRect(context, rect);
             }
             
+            //[self drawUnitRect:rect];
+                        
             if (glyph) {
                 CGContextSetFillColorWithColor(context, fore_color);
                 CGContextSetStrokeColorWithColor(context, fore_color);

@@ -134,15 +134,17 @@
     }
     
     if (_icon) {
+        NSImage* tintedIcon = [_icon copy];
         if (iconColor)
-            _icon = [self tintedImage:_icon withColor:iconColor];
-        CGFloat iconWidth = _icon.size.width;
-        CGFloat iconHeight = _icon.size.height;
+            tintedIcon = [self tintedImage:tintedIcon withColor:iconColor];
+                    
+        CGFloat iconWidth = tintedIcon.size.width;
+        CGFloat iconHeight = tintedIcon.size.height;
         CGRect r0 = CGRectMake(0, 0, iconWidth, iconHeight);
         CGFloat offsetX = (self.frame.size.width - iconWidth) / 2.0;
         CGFloat offsetY = (self.frame.size.height - iconHeight) / 2.0;
         CGPoint p0 = CGPointMake(offsetX, offsetY);
-        [_icon drawAtPoint:p0 fromRect:r0 operation:NSCompositingOperationSourceOver fraction:1.0];
+        [tintedIcon drawAtPoint:p0 fromRect:r0 operation:NSCompositingOperationSourceOver fraction:1.0];
     }
 }
 

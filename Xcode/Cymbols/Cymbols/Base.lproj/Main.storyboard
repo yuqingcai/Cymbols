@@ -188,6 +188,30 @@
                                     </items>
                                 </menu>
                             </menuItem>
+                            <menuItem title="Project" id="RNH-l4-dly">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Project" id="Axi-CX-u9f">
+                                    <items>
+                                        <menuItem title="Build" keyEquivalent="b" id="HCn-zV-Wbd">
+                                            <connections>
+                                                <action selector="buildProject:" target="Ady-hI-5gd" id="tvX-z2-bkt"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Sync" keyEquivalent="r" id="Hoh-ov-4GA">
+                                            <connections>
+                                                <action selector="syncProject:" target="Ady-hI-5gd" id="dg2-nK-mV4"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Clean" keyEquivalent="K" id="MEz-TK-PCx">
+                                            <connections>
+                                                <action selector="cleanProject:" target="Ady-hI-5gd" id="7ib-hW-BrT"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="TZP-lo-Ap5"/>
+                                        <menuItem title="Build Project Report" keyEquivalent="R" id="4ay-SX-3TH"/>
+                                    </items>
+                                </menu>
+                            </menuItem>
                             <menuItem title="Find" id="xiL-YO-LCe" userLabel="Find">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Find" id="Rm4-R2-3JA">

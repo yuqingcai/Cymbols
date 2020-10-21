@@ -36,6 +36,7 @@
     [_titlebar setTitle:@"Context"];
     [self createSubviews];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortCreateContextResponse:) name:CEENotificationSessionPortCreateContext object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateViewStyleConfiguration:) name:CEENotificationUserInterfaceStyleUpdate object:nil];
 }
 
 - (void)viewWillAppear {
@@ -296,12 +297,15 @@
     [_titlebar setTitle:filePath];
 }
 
-- (void)updateContentViewStyleConfiguration {
+- (void)updateViewStyleConfiguration:(NSNotification*)notification {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [self.view setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     
     if (!_contextTable.superview)
         [_contextTable setStyleConfiguration:[styleManager userInterfaceConfiguration]];
+    
+    if (!_editViewController.view.superview)
+        [_editViewController setViewStyleConfiguration:[styleManager userInterfaceConfiguration]];
 }
 
 @end

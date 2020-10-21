@@ -113,7 +113,7 @@
     return nil;
 }
 
-- (BOOL)project:(CEEProject*)project SecuritySaveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {
+- (BOOL)project:(CEEProject*)project securitySaveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {
     AppDelegate* delegate = [NSApp delegate];
     CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
     NSArray* bookmarks = nil;
@@ -135,25 +135,28 @@
 - (IBAction)save:(id)sender {
     CEEProjectController* projectController = [NSDocumentController sharedDocumentController];
     CEEProject* project = [projectController currentDocument];
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
     
     for (NSString* filePath in _selectedSourceBufferFilePaths) {
         NSString* fileName = [filePath lastPathComponent];
         NSSavePanel* savePanel = [NSSavePanel savePanel];
         NSString * savePath = nil;
         NSURL* URL = nil;
-        CEESourceBuffer* sourceBuffer = nil;
+        CEESourceBuffer* buffer = nil;
         NSModalResponse responese = NSModalResponseCancel;
         
-        sourceBuffer = [self modifiedSourceBufferWithFilePath:filePath];
-        if (!sourceBuffer)
+        buffer = [self modifiedSourceBufferWithFilePath:filePath];
+        if (!buffer)
             continue;
     
-        if ([sourceBuffer stateSet:kCEESourceBufferStateFileTemporary]) {
+        if ([buffer stateSet:kCEESourceBufferStateFileTemporary]) {
             if (!_directory)
                 URL = [[NSURL alloc] initFileURLWithPath:NSHomeDirectory() isDirectory:YES];
             else
                 URL = [[NSURL alloc] initFileURLWithPath:_directory isDirectory:YES];
 
+            NSString* filePathBeforeSave = buffer.filePath;
             [savePanel setDirectoryURL:URL];
             [savePanel setCanCreateDirectories:YES];
             [savePanel setDelegate:self];
@@ -163,17 +166,25 @@
             if (responese == NSModalResponseOK) {
                 savePath = [[savePanel URL] path];
                 if (savePath) {
+                    BOOL ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:savePath];
+                    if (!ret) {
+                        NSLog(@"Save Source Buffer Failed!");
+                        continue;
+                    }
                     [project addSecurityBookmarksWithFilePaths:@[savePath]];
-                    [self project:project SecuritySaveSourceBuffer:sourceBuffer atFilePath:savePath];
+                    CEEProjectController* controller = (CEEProjectController*)[NSDocumentController sharedDocumentController];
+                    [controller replaceSourceBufferReferenceFilePath:filePathBeforeSave to:savePath];
                     _directory = [savePath stringByDeletingLastPathComponent];
                 }
             }
         }
         else {
-            [self project:project SecuritySaveSourceBuffer:sourceBuffer atFilePath:sourceBuffer.filePath];
+            [self project:project securitySaveSourceBuffer:buffer atFilePath:buffer.filePath];
         }
-    }
         
+        [project syncSourceSymbols:buffer];
+    }
+    
     if (self.view.window.sheetParent)
         [self.view.window.sheetParent endSheet:self.view.window returnCode:NSModalResponseOK];
     if ([self.view.window isModalPanel])

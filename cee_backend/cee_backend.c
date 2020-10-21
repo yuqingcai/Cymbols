@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "cee_backend.h"
 
+#define SQL_MAX_LENGTH  4096
+
 static cee_boolean tables_existed(sqlite3* db);
 static cee_boolean tables_create(sqlite3* db);
 static CEEList* validate_filepaths(cee_pointer db,
@@ -74,8 +76,9 @@ static cee_boolean tables_existed(sqlite3* database)
     sqlite3_stmt* stmt = NULL;
     const char* sql = NULL;
     
-    sql =
-    "SELECT name FROM sqlite_master WHERE type='table' AND name='cee_project_file_paths'";
+    /** cee_application_info */
+    existed = FALSE;
+    sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='cee_application_info'";
     if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
         fprintf(stdout, "SQL Error");
         return FALSE;
@@ -86,13 +89,49 @@ static cee_boolean tables_existed(sqlite3* database)
         existed = TRUE;
     } while (1);
     sqlite3_finalize(stmt);
-    
-    if (!existed)
+    if (!existed) {
+        fprintf(stdout, "ERROR: cee_application_info table not existed!");
         return FALSE;
+    }
+    
+    /** cee_project_sessions table*/
+    existed = FALSE;
+    sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='cee_project_sessions'";
+    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "SQL Error");
+        return FALSE;
+    }
+    do {
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            break;
+        existed = TRUE;
+    } while (1);
+    sqlite3_finalize(stmt);
+    if (!existed) {
+        fprintf(stdout, "ERROR: cee_project_sessions table not existed!");
+        return FALSE;
+    }
+    
+    /** cee_project_file_paths table*/
+    existed = FALSE;
+    sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='cee_project_file_paths'";
+    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "SQL Error");
+        return FALSE;
+    }
+    do {
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            break;
+        existed = TRUE;
+    } while (1);
+    sqlite3_finalize(stmt);
+    if (!existed) {
+        fprintf(stdout, "ERROR: cee_project_file_paths table not existed!");
+        return FALSE;
+    }
     
     existed = FALSE;
-    sql =
-    "SELECT name FROM sqlite_master WHERE type='table' AND name='cee_project_sessions'";
+    sql = "SELECT name FROM sqlite_master WHERE type='index' AND name='project_file_name_index'";
     if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
         fprintf(stdout, "SQL Error");
         return FALSE;
@@ -103,13 +142,13 @@ static cee_boolean tables_existed(sqlite3* database)
         existed = TRUE;
     } while (1);
     sqlite3_finalize(stmt);
-    
-    if (!existed)
+    if (!existed) {
+        fprintf(stdout, "ERROR: project_file_name_index index not existed!");
         return FALSE;
+    }
     
     existed = FALSE;
-    sql =
-    "SELECT name FROM sqlite_master WHERE type='index' AND name='project_file_paths_name_index'";
+    sql = "SELECT name FROM sqlite_master WHERE type='index' AND name='project_file_path_index'";
     if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
         fprintf(stdout, "SQL Error");
         return FALSE;
@@ -120,7 +159,12 @@ static cee_boolean tables_existed(sqlite3* database)
         existed = TRUE;
     } while (1);
     sqlite3_finalize(stmt);
+    if (!existed) {
+        fprintf(stdout, "ERROR: project_file_path_index index not existed!");
+        return FALSE;
+    }
     
+    /** cee_source_symbols table*/
     existed = FALSE;
     sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='cee_source_symbols'";
     if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
@@ -133,7 +177,63 @@ static cee_boolean tables_existed(sqlite3* database)
         existed = TRUE;
     } while (1);
     sqlite3_finalize(stmt);
+    if (!existed) {
+        fprintf(stdout, "ERROR: cee_source_symbols table not existed!");
+        return FALSE;
+    }
     
+    existed = FALSE;
+    sql = "SELECT name FROM sqlite_master WHERE type='index' AND name='cee_source_symbols_name_index'";
+    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "SQL Error");
+        return FALSE;
+    }
+    do {
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            break;
+        existed = TRUE;
+    } while (1);
+    sqlite3_finalize(stmt);
+    if (!existed) {
+        fprintf(stdout, "ERROR: cee_source_symbols_name_index index not existed!");
+        return FALSE;
+    }
+    
+    existed = FALSE;
+    sql = "SELECT name FROM sqlite_master WHERE type='index' AND name='cee_source_symbols_filepath_index'";
+    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "SQL Error");
+        return FALSE;
+    }
+    do {
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            break;
+        existed = TRUE;
+    } while (1);
+    sqlite3_finalize(stmt);
+    if (!existed) {
+        fprintf(stdout, "ERROR: cee_source_symbols_filepath_index index not existed!");
+        return FALSE;
+    }
+    
+    existed = FALSE;
+    sql = "SELECT name FROM sqlite_master WHERE type='index' AND name='cee_source_symbols_parent_index'";
+    if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "SQL Error");
+        return FALSE;
+    }
+    do {
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            break;
+        existed = TRUE;
+    } while (1);
+    sqlite3_finalize(stmt);
+    if (!existed) {
+        fprintf(stdout, "ERROR: cee_source_symbols_parent_index index not existed!");
+        return FALSE;
+    }
+    
+    /** cee_security_bookmarks table*/
     existed = FALSE;
     sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='cee_security_bookmarks'";
     if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
@@ -146,10 +246,12 @@ static cee_boolean tables_existed(sqlite3* database)
         existed = TRUE;
     } while (1);
     sqlite3_finalize(stmt);
-    if (!existed)
+    if (!existed) {
+        fprintf(stdout, "ERROR: cee_security_bookmarks table not existed!");
         return FALSE;
+    }
     
-    
+    /** cee_project_file_paths_user_selected table*/
     existed = FALSE;
     sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='cee_project_file_paths_user_selected'";
     if (sqlite3_prepare_v2(database, sql, -1, &stmt, NULL) != SQLITE_OK) {
@@ -162,8 +264,10 @@ static cee_boolean tables_existed(sqlite3* database)
         existed = TRUE;
     } while (1);
     sqlite3_finalize(stmt);
-    if (!existed)
+    if (!existed) {
+        fprintf(stdout, "ERROR: cee_project_file_paths_user_selected table not existed!");
         return FALSE;
+    }
     
     return TRUE;
 }
@@ -173,28 +277,9 @@ static cee_boolean tables_create(sqlite3* database)
     char *message = NULL;
     const char* sql = NULL;
     
+    /** cee_application_info */
     sql =
-    "CREATE TABLE IF NOT EXISTS cee_project_file_paths ("                  \
-    "   id             INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
-    "   name           TEXT                                   NOT NULL ,"  \
-    "   path           TEXT                                   NOT NULL "   \
-    ");";
-    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
-        fprintf(stderr, "SQL Error: %s\n", message);
-        sqlite3_free(message);
-        return FALSE;
-    }
-    
-    sql =
-    "CREATE INDEX IF NOT EXISTS project_file_paths_name_index on cee_project_file_paths (name);";
-    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
-        fprintf(stderr, "SQL Error: %s\n", message);
-        sqlite3_free(message);
-        return FALSE;
-    }
-    
-    sql =
-    "CREATE TABLE IF NOT EXISTS cee_project_sessions ("                         \
+    "CREATE TABLE IF NOT EXISTS cee_application_info ("                        \
     "   id                 INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
     "   descriptor         TEXT                                            "   \
     ");";
@@ -204,7 +289,51 @@ static cee_boolean tables_create(sqlite3* database)
         return FALSE;
     }
     
+    /** cee_project_sessions table*/
+    sql =
+    "CREATE TABLE IF NOT EXISTS cee_project_sessions ("                        \
+    "   id                 INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
+    "   descriptor         TEXT                                            "   \
+    ");";
+    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+        return FALSE;
+    }
     
+    /** cee_project_file_paths table*/
+    sql =
+    "CREATE TABLE IF NOT EXISTS cee_project_file_paths ("                      \
+    "   id                  INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ," \
+    "   name                TEXT                                   NOT NULL ," \
+    "   filepath            TEXT                                   NOT NULL ," \
+    "   symbols_count       INTEGER                                NOT NULL ," \
+    "   last_parsed_time    TEXT                                             " \
+    ");";
+    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+        return FALSE;
+    }
+    
+    sql =
+    "CREATE INDEX IF NOT EXISTS project_file_name_index on cee_project_file_paths (name);";
+    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+        return FALSE;
+    }
+    
+    sql =
+    "CREATE INDEX IF NOT EXISTS project_file_path_index on cee_project_file_paths (filepath);";
+    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+        return FALSE;
+    }
+    
+    
+    /** cee_source_symbols table*/
     sql =
     "CREATE TABLE IF NOT EXISTS cee_source_symbols ("                  \
     "   id             INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
@@ -234,6 +363,24 @@ static cee_boolean tables_create(sqlite3* database)
     }
     
     sql =
+    "CREATE INDEX IF NOT EXISTS cee_source_symbols_filepath_index on cee_source_symbols (filepath);";
+    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+        return FALSE;
+    }
+    
+    sql =
+    "CREATE INDEX IF NOT EXISTS cee_source_symbols_parent_index on cee_source_symbols (parent);";
+    if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
+        fprintf(stderr, "SQL Error: %s\n", message);
+        sqlite3_free(message);
+        return FALSE;
+    }
+    
+    
+    /** cee_security_bookmarks table*/
+    sql =
     "CREATE TABLE IF NOT EXISTS cee_security_bookmarks ("                  \
     "   id             INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
     "   filepath       TEXT UNIQUE                            NOT NULL ,"  \
@@ -246,6 +393,7 @@ static cee_boolean tables_create(sqlite3* database)
         return FALSE;
     }
     
+    /** cee_project_file_paths_user_selected table*/
     sql =
     "CREATE TABLE IF NOT EXISTS cee_project_file_paths_user_selected ("    \
     "   id             INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
@@ -256,7 +404,60 @@ static cee_boolean tables_create(sqlite3* database)
         sqlite3_free(message);
         return FALSE;
     }
+        
     return TRUE;
+}
+
+void cee_database_application_info_set(sqlite3* db,
+                                       const cee_char* descriptor)
+{
+    if (!db || !descriptor)
+        return ;
+    
+    cee_boolean ret = TRUE;
+    sqlite3_stmt* stmt = NULL;
+    char* sql =
+    "INSERT INTO cee_application_info (descriptor) VALUES (?);";
+    
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stdout, "error");
+        return;
+    }
+    
+    sqlite3_bind_text(stmt, 1, descriptor, -1, SQLITE_STATIC);
+    
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+        ret = FALSE;
+    
+    sqlite3_reset(stmt);
+    sqlite3_clear_bindings(stmt);
+    sqlite3_finalize(stmt);
+    
+    return;
+}
+
+cee_char* cee_database_application_info_get(sqlite3* db)
+{
+    if (!db )
+        return NULL;
+    
+    char* str = NULL;
+    cee_ulong length = 0;
+    sqlite3_stmt* stmt = NULL;
+    
+    char* sql = "SELECT descriptor FROM cee_application_info;";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        return NULL;
+
+    if (sqlite3_step(stmt) != SQLITE_ROW)
+        return NULL;
+    
+    str = (char*)sqlite3_column_text(stmt, 0);
+    length = sqlite3_column_bytes(stmt, 0);
+    if (!str)
+        return NULL;
+    
+    return cee_strndup(str, length);
 }
 
 CEEList* cee_database_session_descriptors_get(cee_pointer db)
@@ -356,7 +557,7 @@ cee_boolean cee_database_filepaths_append(cee_pointer db,
     sqlite3_stmt* stmt = NULL;
     char *message = NULL;
     char* sql =
-    "INSERT INTO cee_project_file_paths (name, path) VALUES (?, ?);";
+    "INSERT INTO cee_project_file_paths (name, filepath, symbols_count) VALUES (?, ?, ?);";
     
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         fprintf(stdout, "error");
@@ -371,6 +572,7 @@ cee_boolean cee_database_filepaths_append(cee_pointer db,
         if (filename) {
             sqlite3_bind_text(stmt, 1, filename, -1, SQLITE_STATIC);
             sqlite3_bind_text(stmt, 2, filepath, -1, SQLITE_STATIC);
+            sqlite3_bind_int(stmt, 3, 0);
             
             if (sqlite3_step(stmt) != SQLITE_DONE) {
                 cee_free(filename);
@@ -472,17 +674,17 @@ CEEList* cee_database_filepaths_get(cee_pointer db,
         return NULL;
     
     CEEList* filepaths = NULL;
-    char sql[4096];
+    char sql[SQL_MAX_LENGTH];
     char* str = NULL;
     cee_ulong length = 0;
     sqlite3_stmt* stmt = NULL;
     
     if (condition)
         sprintf(sql, 
-                "SELECT path, name FROM cee_project_file_paths WHERE name LIKE \"%%%s%%\" ORDER BY name ASC;",
+                "SELECT filepath, name FROM cee_project_file_paths WHERE name LIKE \"%%%s%%\" ORDER BY name ASC;",
                 condition);
     else
-        sprintf(sql, "SELECT path, name FROM cee_project_file_paths ORDER BY name ASC;");
+        sprintf(sql, "SELECT filepath, name FROM cee_project_file_paths ORDER BY name ASC;");
             
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
         return NULL;
@@ -503,6 +705,99 @@ CEEList* cee_database_filepaths_get(cee_pointer db,
     return filepaths;
 }
 
+cee_boolean cee_database_filepath_last_parsed_time_set(cee_pointer db,
+                                                       const cee_char* filepath,
+                                                       const cee_char* time_str)
+{
+    if (!db || !filepath)
+        return FALSE;
+    
+    char sql[SQL_MAX_LENGTH];
+    sqlite3_stmt* stmt = NULL;
+    
+    if (!time_str)
+        sprintf(sql, "UPDATE cee_project_file_paths set last_parsed_time=NULL WHERE filepath=\"%s\";",
+                filepath);
+    else
+        sprintf(sql, "UPDATE cee_project_file_paths set last_parsed_time=\"%s\" WHERE filepath=\"%s\";",
+                time_str,
+                filepath);
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        return FALSE;
+    
+    if (sqlite3_step(stmt) != SQLITE_ROW)
+        return FALSE;
+    
+    return TRUE;
+}
+
+cee_char* cee_database_filepath_last_parsed_time_get(cee_pointer db,
+                                                     const cee_char* filepath)
+{
+    if (!db || !filepath)
+        return NULL;
+        
+    char sql[SQL_MAX_LENGTH];
+    char* str = NULL;
+    cee_ulong length = 0;
+    sqlite3_stmt* stmt = NULL;
+    sprintf(sql, "SELECT last_parsed_time FROM cee_project_file_paths WHERE filepath=\"%s\";", filepath);
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        return NULL;
+    
+    if (sqlite3_step(stmt) != SQLITE_ROW)
+        return NULL;
+    
+    str = (char*)sqlite3_column_text(stmt, 0);
+    length = sqlite3_column_bytes(stmt, 0);
+    if (!str)
+        return NULL;
+    
+    return cee_strndup(str, length);
+}
+
+cee_boolean cee_database_filepath_symbols_count_set(cee_pointer db,
+                                                    const cee_char* filepath,
+                                                    cee_int symbols_count)
+{
+    if (!db || !filepath)
+        return FALSE;
+    
+    char sql[SQL_MAX_LENGTH];
+    sqlite3_stmt* stmt = NULL;
+    sprintf(sql, "UPDATE cee_project_file_paths set symbols_count=%d WHERE filepath=\"%s\";", 
+            symbols_count,
+            filepath);
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        return FALSE;
+    
+    if (sqlite3_step(stmt) != SQLITE_ROW)
+        return FALSE;
+    
+    return TRUE;
+}
+
+cee_int cee_database_filepath_symbols_count_get(cee_pointer db,
+                                                const cee_char* filepath)
+{
+    if (!db || !filepath)
+        return -1;
+        
+    char sql[SQL_MAX_LENGTH];
+    sqlite3_stmt* stmt = NULL;
+    cee_int symbols_count = 0;
+    sprintf(sql, "SELECT symbols_count FROM cee_project_file_paths WHERE filepath=\"%s\";", filepath);
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        return -1;
+    
+    if (sqlite3_step(stmt) != SQLITE_ROW)
+        return -1;
+    
+    symbols_count = sqlite3_column_int(stmt, 0);
+    return symbols_count;
+    
+}
+
 cee_boolean cee_database_filepaths_remove(cee_pointer db,
                                           CEEList* filepaths)
 {
@@ -513,7 +808,7 @@ cee_boolean cee_database_filepaths_remove(cee_pointer db,
     sqlite3_stmt* stmt = NULL;
     char *message = NULL;
     char* sql =
-    "DELETE FROM cee_project_file_paths WHERE path=?;";
+    "DELETE FROM cee_project_file_paths WHERE filepath=?;";
     
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         fprintf(stdout, "error");
@@ -541,7 +836,7 @@ cee_boolean cee_database_filepaths_remove(cee_pointer db,
     return TRUE;
 }
 
-void cee_database_symbols_clean(cee_pointer db)
+void cee_database_symbols_delete(cee_pointer db)
 {
     if (!db)
         return;
@@ -552,17 +847,7 @@ void cee_database_symbols_clean(cee_pointer db)
         fprintf(stderr, "SQL Error: %s\n", message);
         sqlite3_free(message);
     }
-}
-
-void cee_database_symbols_from_source_clean(cee_pointer db,
-                                            const cee_char* filepath)
-{
-    if (!db || !filepath)
-        return;
-    
-    char sql[4096];
-    char *message = NULL;
-    sprintf(sql, "DELETE FROM cee_source_symbols WHERE filepath=\"%s\";", filepath);
+    sql = "UPDATE cee_project_file_paths set last_parsed_time=NULL;";
     if (sqlite3_exec(db, sql, NULL, NULL, &message) != SQLITE_OK) {
         fprintf(stderr, "SQL Error: %s\n", message);
         sqlite3_free(message);
@@ -768,20 +1053,15 @@ cee_boolean cee_database_symbols_delete_by_filepath(cee_pointer db,
     if (!db || !filepath)
         return FALSE;
     
+    char sql[SQL_MAX_LENGTH];
     char *message = NULL;
-    char* sql = NULL;
-    cee_strconcat0(&sql, 
-                   "DELETE FROM cee_source_symbols WHERE filepath=",
-                   filepath,
-                   ";",
-                   NULL);
-    
+    sprintf(sql, "DELETE FROM cee_source_symbols WHERE filepath=\"%s\";", filepath);
     if (sqlite3_exec(db, sql, NULL, NULL, &message) != SQLITE_OK) {
         fprintf(stderr, "SQL Error: %s\n", message);
         sqlite3_free(message);
-        return FALSE;
     }
-    
+    cee_database_filepath_last_parsed_time_set(db, filepath, NULL);
+    cee_database_filepath_symbols_count_set(db, filepath, 0);
     return TRUE;
 }
 
@@ -848,7 +1128,7 @@ cee_char* cee_database_security_bookmark_content_get(cee_pointer db,
     if (!db || !filepath)
         return NULL;
     
-    char sql[4096];
+    char sql[SQL_MAX_LENGTH];
     char* str = NULL;
     cee_ulong length = 0;
     sqlite3_stmt* stmt = NULL;
@@ -921,7 +1201,7 @@ CEEList* cee_database_filepaths_user_selected_get(cee_pointer db)
         return NULL;
     
     CEEList* filepaths = NULL;
-    char sql[4096];
+    char sql[SQL_MAX_LENGTH];
     char* str = NULL;
     cee_ulong length = 0;
     sqlite3_stmt* stmt = NULL;
@@ -945,4 +1225,69 @@ CEEList* cee_database_filepaths_user_selected_get(cee_pointer db)
     filepaths = cee_list_reverse(filepaths);
     
     return filepaths;
+}
+
+CEEProjectFilePathEntryInfo* cee_project_file_path_entry_info_create()
+{
+    return (CEEProjectFilePathEntryInfo*)cee_malloc0(sizeof(CEEProjectFilePathEntryInfo));
+}
+
+void cee_project_file_path_entry_info_free(cee_pointer data)
+{
+    if (!data)
+        return;
+    
+    CEEProjectFilePathEntryInfo* info = (CEEProjectFilePathEntryInfo*)data;
+    
+    if (info->file_path)
+        cee_free(info->file_path);
+    
+    if (info->last_parsed_time)
+        cee_free(info->last_parsed_time);
+    
+    cee_free(info);
+}
+
+CEEList* cee_database_filepath_entry_infos_get(cee_pointer db)
+{
+    
+    if (!db)
+        return NULL;
+    
+    CEEList* infos = NULL;
+    
+    char sql[SQL_MAX_LENGTH];
+    char* str = NULL;
+    cee_ulong length = 0;
+    sqlite3_stmt* stmt = NULL;
+    
+    sprintf(sql, "SELECT filepath, name, last_parsed_time, symbols_count FROM cee_project_file_paths ORDER BY name ASC;");
+            
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        return NULL;
+    
+    do {
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            break;
+        
+        CEEProjectFilePathEntryInfo* info = cee_project_file_path_entry_info_create();
+        
+        str = (char*)sqlite3_column_text(stmt, 0);
+        length = sqlite3_column_bytes(stmt, 0);
+        info->file_path = cee_strndup(str, length);
+        
+        str = (char*)sqlite3_column_text(stmt, 2);
+        length = sqlite3_column_bytes(stmt, 2);
+        info->last_parsed_time = cee_strndup(str, length);
+        
+        info->symbol_count = sqlite3_column_int(stmt, 3);
+        
+        infos = cee_list_prepend(infos, info);
+        
+    } while (1);
+    sqlite3_finalize(stmt);
+    
+    infos = cee_list_reverse(infos);
+    
+    return infos;
 }

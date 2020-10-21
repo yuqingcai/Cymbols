@@ -29,7 +29,6 @@
 @property (weak) CEESessionSpliter0* spliter;
 @property CGFloat titleHeight;
 @property (strong) NSWindowController* projectParseWindowController;
-@property (strong) NSWindowController* projectSyncWindowController;
 @property (strong) NSWindowController* projectCleanWindowController;
 @property (strong) NSWindowController* projectSearchWindowController;
 @property (strong) NSWindowController* contextWindowController;
@@ -59,7 +58,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChanged:) name:CEENotificationSourceBufferStateChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPresentResponse:) name:CEENotificationSessionPresent object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferCloseResponse:) name:CEENotificationSessionPortCloseSourceBuffer object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(requestTargetSymbolSelectionResponse:) name:CEENotificationSessionPortRequestTargetSymbolSelection object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(requestJumpSourcePointSelectionResponse:) name:CEENotificationSessionPortRequestJumpSourcePointSelection object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(searchReferenceResponse:) name:CEENotificationSessionPortSearchReference object:nil];
 }
 
@@ -392,6 +391,22 @@
     if (notification.object != _session.activedPort)
         return;
     [self updateStatusBar];
+    [self autoShowReferenceListWhenOpenedSourceBufferIsMultiple];
+}
+
+- (void)autoShowReferenceListWhenOpenedSourceBufferIsMultiple {
+    if (_session.project.database ||
+        _session.activedPort.openedSourceBuffers.count <= 1)
+        return;
+        
+    AppDelegate* delegate = [NSApp delegate];
+    NSDictionary* configurations = delegate.configurations;
+    if (configurations[@"show_opened_files_list"]) {
+        NSString* configuration = configurations[@"show_opened_files_list"];
+        if ([configuration compare:@"auto" options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+            [_spliter showReferenceView:YES];
+        }
+    }
 }
 
 - (void)activePortResponse:(NSNotification*)notification {
@@ -420,6 +435,7 @@
     if (notification.object != _session.project)
         return;
     [self updateStatusBar];
+    [self autoShowReferenceListWhenOpenedSourceBufferIsMultiple];
 }
 
 - (void)sourceBufferCloseResponse:(NSNotification*)notification {
@@ -432,8 +448,8 @@
 - (IBAction)buildProject:(id)sender {
     if (!_projectParseWindowController)
         _projectParseWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectParseWindowController"];
-    //NSModalResponse responese = [NSApp runModalForWindow:_projectParseWindowController.window];
-    //[_projectParseWindowController close];
+    CEEProjectParseViewController* controller = (CEEProjectParseViewController*)_projectParseWindowController.contentViewController;
+    controller.sync = NO;
     [self.view.window beginSheet:_projectParseWindowController.window completionHandler:(^(NSInteger result) {
         [NSApp stopModalWithCode:result];
     })];
@@ -441,10 +457,11 @@
 }
 
 - (IBAction)syncProject:(id)sender {
-    if (!_projectSyncWindowController)
-        _projectSyncWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSyncWindowController"];
-    
-    [self.view.window beginSheet:_projectSyncWindowController.window completionHandler:(^(NSInteger result) {
+    if (!_projectParseWindowController)
+        _projectParseWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectParseWindowController"];
+    CEEProjectParseViewController* controller = (CEEProjectParseViewController*)_projectParseWindowController.contentViewController;
+    controller.sync = YES;
+    [self.view.window beginSheet:_projectParseWindowController.window completionHandler:(^(NSInteger result) {
         [NSApp stopModalWithCode:result];
     })];
     [NSApp runModalForWindow:self.view.window];
@@ -460,30 +477,51 @@
     [NSApp runModalForWindow:self.view.window];
 }
 
-- (void)requestTargetSymbolSelectionResponse:(NSNotification*)notification {
+- (void)requestJumpSourcePointSelectionResponse:(NSNotification*)notification {
     CEESessionPort* port = notification.object;
     if (port.session != _session)
         return;
      
     if (!_contextWindowController)
         _contextWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectContextWindowController"];
-    NSModalResponse responese = NSModalResponseCancel;
-    responese = [NSApp runModalForWindow:_contextWindowController.window];
+    NSModalResponse responese = [NSApp runModalForWindow:_contextWindowController.window];
     if (responese == NSModalResponseOK) {
         CEEProjectContextViewController* contextViewController = (CEEProjectContextViewController*)_contextWindowController.contentViewController;
-        CEESourceSymbol* selection = contextViewController.selectedSymbol;
-        [port setTargetSourceSymbol:selection];
+        if (contextViewController.selectedSymbol) {
+            CEESourceSymbol* symbol = contextViewController.selectedSymbol;
+            CEESourcePoint* sourcePoint = [[CEESourcePoint alloc] initWithFilePath:[NSString stringWithUTF8String:symbol->filepath] andLocations:[NSString stringWithUTF8String:symbol->locations]];
+            [port jumpToSourcePoint:sourcePoint];
+        }
     }
     [_contextWindowController close];
 }
 
 - (void)searchReferenceResponse:(NSNotification*)notification {
     CEESessionPort* port = notification.object;
-    if (port.session != _session || !notification.userInfo)
+    if (port.session != _session)
         return;
+        
+    if (!_projectSearchWindowController)
+        _projectSearchWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSearchWindowController"];
     
-    NSString* referenceString = notification.userInfo[@"referenceString"];
-    if (!referenceString)
+    CEEProjectSearchViewController* projectSearchViewController = (CEEProjectSearchViewController*)_projectSearchWindowController.contentViewController;
+    
+    [projectSearchViewController setAutoStart:YES];
+    NSModalResponse responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
+    if (responese == NSModalResponseOK) {
+        if (projectSearchViewController.selectedResult) {
+            CEESearchResult* result = projectSearchViewController.selectedResult;
+            CEESourcePoint* sourcePoint = [[CEESourcePoint alloc] initWithFilePath:result.filePath andLocations:result.locations];
+            [port jumpToSourcePoint:sourcePoint];
+        }
+    }
+    [projectSearchViewController setAutoStart:NO];
+    [_projectSearchWindowController close];
+}
+
+- (IBAction)searchInProject:(id)sender {
+    CEESessionPort* port = _session.activedPort;
+    if (!port)
         return;
     
     if (!_projectSearchWindowController)
@@ -491,20 +529,13 @@
     
     CEEProjectSearchViewController* projectSearchViewController = (CEEProjectSearchViewController*)_projectSearchWindowController.contentViewController;
     
-    [projectSearchViewController setAutoStart:YES];
-    NSModalResponse responese = NSModalResponseCancel;
-    responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
-    [projectSearchViewController setAutoStart:NO];
-    [_projectSearchWindowController close];
-    
-}
-
-- (IBAction)searchInProject:(id)sender {
-    if (!_projectSearchWindowController)
-        _projectSearchWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSearchWindowController"];
-    NSModalResponse responese = NSModalResponseCancel;
-    responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
+    NSModalResponse responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
     if (responese == NSModalResponseOK) {
+        if (projectSearchViewController.selectedResult) {
+            CEESearchResult* result = projectSearchViewController.selectedResult;
+            CEESourcePoint* sourcePoint = [[CEESourcePoint alloc] initWithFilePath:result.filePath andLocations:result.locations];
+            [port jumpToSourcePoint:sourcePoint];
+        }
     }
     [_projectSearchWindowController close];    
 }

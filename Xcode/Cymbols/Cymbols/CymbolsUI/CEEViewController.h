@@ -15,7 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEViewController : NSViewController <CEESerialization>
 - (void)initProperties;
-- (void)updateContentViewStyleConfiguration;
 @end
 
 NS_ASSUME_NONNULL_END

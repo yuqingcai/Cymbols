@@ -16,6 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)toggleSymbolView;
 - (void)toggleReferenceView;
 - (void)togglePathView;
+- (void)showSymbolView:(BOOL)shown;
+- (void)showReferenceView:(BOOL)shown;
+- (void)showPathView:(BOOL)shown;
 @end
 
 NS_ASSUME_NONNULL_END

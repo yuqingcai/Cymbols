@@ -41,4 +41,17 @@
     [self toggleViewByIdentifier:@"IDSessionFilePathController"];
 }
 
+- (void)showSymbolView:(BOOL)shown {
+    [self showView:shown byIdentifier:@"IDSessionSymbolController"];
+}
+
+- (void)showReferenceView:(BOOL)shown {
+    [self showView:shown byIdentifier:@"IDSessionReferenceController"];
+}
+
+- (void)showPathView:(BOOL)shown {
+    [self showView:shown byIdentifier:@"IDSessionFilePathController"];
+}
+
+
 @end

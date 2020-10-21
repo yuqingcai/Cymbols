@@ -25,8 +25,14 @@ cee_char* cee_time_to_iso8601(time_t t)
 {
     cee_char* str = (cee_char*)cee_malloc0(sizeof(cee_char)*MAX_TIME_STRING);
     struct tm* timeinfo = localtime(&t);
-    sprintf(str, "%d-%d-%dT%d:%d:%dZ", timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,
-            timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+    sprintf(str,
+            "%d-%d-%dT%d:%d:%dZ",
+            timeinfo->tm_year + 1900,
+            timeinfo->tm_mon + 1,
+            timeinfo->tm_mday,
+            timeinfo->tm_hour,
+            timeinfo->tm_min,
+            timeinfo->tm_sec);
     
     return str;
 }

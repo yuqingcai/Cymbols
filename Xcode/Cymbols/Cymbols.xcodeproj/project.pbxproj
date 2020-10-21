@@ -238,7 +238,6 @@
 		269204CE252FF5A000D6E2DC /* CEESourceBufferManagerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204CC252FF5A000D6E2DC /* CEESourceBufferManagerViewController.m */; };
 		269204D9252FF5BC00D6E2DC /* CEEProjectCleanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204D0252FF5BB00D6E2DC /* CEEProjectCleanViewController.m */; };
 		269204DA252FF5BC00D6E2DC /* CEEProjectSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204D5252FF5BC00D6E2DC /* CEEProjectSearchViewController.m */; };
-		269204DB252FF5BC00D6E2DC /* CEEProjectSyncViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204D6252FF5BC00D6E2DC /* CEEProjectSyncViewController.m */; };
 		269204DC252FF5BC00D6E2DC /* CEEProjectContextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204D7252FF5BC00D6E2DC /* CEEProjectContextViewController.m */; };
 		269204DD252FF5BC00D6E2DC /* CEEProjectParseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204D8252FF5BC00D6E2DC /* CEEProjectParseViewController.m */; };
 		269204E0252FF5E800D6E2DC /* CEENetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204DE252FF5E800D6E2DC /* CEENetwork.m */; };
@@ -261,7 +260,9 @@
 		26920511252FF71400D6E2DC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2667ECFB25037D8000ED5010 /* Assets.xcassets */; };
 		2693B21C2530015200D21FD3 /* Cymbols.cfg in Resources */ = {isa = PBXBuildFile; fileRef = 2693B21B2530015200D21FD3 /* Cymbols.cfg */; };
 		2693B227253001D700D21FD3 /* Styles in Resources */ = {isa = PBXBuildFile; fileRef = 2693B226253001D700D21FD3 /* Styles */; };
+		269F9657253DB22500D8808A /* CEESourcePoint.m in Sources */ = {isa = PBXBuildFile; fileRef = 269F9656253DB22500D8808A /* CEESourcePoint.m */; };
 		26A7FA57253057C600E56E94 /* libpcre.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A7FA552530578A00E56E94 /* libpcre.a */; };
+		26BC7E7B2539301900AD8992 /* icon_alert_32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -645,11 +646,9 @@
 		269204CF252FF5BB00D6E2DC /* CEEProjectCleanViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectCleanViewController.h; sourceTree = "<group>"; };
 		269204D0252FF5BB00D6E2DC /* CEEProjectCleanViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectCleanViewController.m; sourceTree = "<group>"; };
 		269204D1252FF5BB00D6E2DC /* CEEProjectSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectSearchViewController.h; sourceTree = "<group>"; };
-		269204D2252FF5BB00D6E2DC /* CEEProjectSyncViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectSyncViewController.h; sourceTree = "<group>"; };
 		269204D3252FF5BB00D6E2DC /* CEEProjectContextViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectContextViewController.h; sourceTree = "<group>"; };
 		269204D4252FF5BC00D6E2DC /* CEEProjectParseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectParseViewController.h; sourceTree = "<group>"; };
 		269204D5252FF5BC00D6E2DC /* CEEProjectSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectSearchViewController.m; sourceTree = "<group>"; };
-		269204D6252FF5BC00D6E2DC /* CEEProjectSyncViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectSyncViewController.m; sourceTree = "<group>"; };
 		269204D7252FF5BC00D6E2DC /* CEEProjectContextViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectContextViewController.m; sourceTree = "<group>"; };
 		269204D8252FF5BC00D6E2DC /* CEEProjectParseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectParseViewController.m; sourceTree = "<group>"; };
 		269204DE252FF5E800D6E2DC /* CEENetwork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEENetwork.m; sourceTree = "<group>"; };
@@ -673,7 +672,10 @@
 		2692050E252FF6AD00D6E2DC /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2693B21B2530015200D21FD3 /* Cymbols.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cymbols.cfg; path = ../../../../Resources/Cymbols.cfg; sourceTree = "<group>"; };
 		2693B226253001D700D21FD3 /* Styles */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Styles; path = ../../../../Resources/Styles; sourceTree = "<group>"; };
+		269F9655253DB22500D8808A /* CEESourcePoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEESourcePoint.h; sourceTree = "<group>"; };
+		269F9656253DB22500D8808A /* CEESourcePoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESourcePoint.m; sourceTree = "<group>"; };
 		26A7FA552530578A00E56E94 /* libpcre.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpcre.a; path = ../libpcre.a; sourceTree = "<group>"; };
+		26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_alert_32x32@2x.png"; sourceTree = "<group>"; };
 		26CBE684252FECA20047771D /* Cymbols.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cymbols.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -734,6 +736,8 @@
 				269204C4252FF57500D6E2DC /* CEEProject.h */,
 				269204C3252FF57400D6E2DC /* CEEProject.m */,
 				269204C6252FF58200D6E2DC /* CEESearcher.h */,
+				269F9655253DB22500D8808A /* CEESourcePoint.h */,
+				269F9656253DB22500D8808A /* CEESourcePoint.m */,
 				269204C7252FF58200D6E2DC /* CEESearcher.m */,
 				269204CA252FF58F00D6E2DC /* CEESourceBuffer.h */,
 				269204C9252FF58F00D6E2DC /* CEESourceBuffer.m */,
@@ -745,8 +749,6 @@
 				2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */,
 				269204D4252FF5BC00D6E2DC /* CEEProjectParseViewController.h */,
 				269204D8252FF5BC00D6E2DC /* CEEProjectParseViewController.m */,
-				269204D2252FF5BB00D6E2DC /* CEEProjectSyncViewController.h */,
-				269204D6252FF5BC00D6E2DC /* CEEProjectSyncViewController.m */,
 				269204CF252FF5BB00D6E2DC /* CEEProjectCleanViewController.h */,
 				269204D0252FF5BB00D6E2DC /* CEEProjectCleanViewController.m */,
 				269204D1252FF5BB00D6E2DC /* CEEProjectSearchViewController.h */,
@@ -758,16 +760,16 @@
 				269204E2252FF5F100D6E2DC /* AppDelegate.h */,
 				269204E1252FF5F100D6E2DC /* AppDelegate.m */,
 				2667ECFB25037D8000ED5010 /* Assets.xcassets */,
+				269204F4252FF60200D6E2DC /* Main.storyboard */,
+				269204EC252FF60100D6E2DC /* Session.storyboard */,
 				269204FC252FF60300D6E2DC /* AddFileSelectionView.xib */,
 				269204F6252FF60200D6E2DC /* AutoComplete.storyboard */,
 				269204F8252FF60200D6E2DC /* Editor.storyboard */,
 				269204FA252FF60200D6E2DC /* FilePathConfirmView.xib */,
-				269204F4252FF60200D6E2DC /* Main.storyboard */,
 				269204F2252FF60200D6E2DC /* ProjectProcess.storyboard */,
 				269204F0252FF60100D6E2DC /* ProjectPropertyView.xib */,
 				269204E8252FF60100D6E2DC /* ProjectSettingView.xib */,
 				269204EA252FF60100D6E2DC /* RemoveFileSelectionView.xib */,
-				269204EC252FF60100D6E2DC /* Session.storyboard */,
 				269204FE252FF60300D6E2DC /* SourceBufferManager.storyboard */,
 				269204E4252FF60000D6E2DC /* SourceHistory.storyboard */,
 				269204E6252FF60000D6E2DC /* TableCellViews.xib */,
@@ -956,6 +958,7 @@
 		269202E4252FF3E300D6E2DC /* 2x */ = {
 			isa = PBXGroup;
 			children = (
+				26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */,
 				269202E5252FF3E300D6E2DC /* cymbols_logo@2x.png */,
 				269202E6252FF3E300D6E2DC /* icon_add_16x16@2x.png */,
 				269202E7252FF3E300D6E2DC /* icon_broom_16x16@2x.png */,
@@ -1152,10 +1155,10 @@
 		26920449252FF50300D6E2DC /* Editor */ = {
 			isa = PBXGroup;
 			children = (
-				2692044A252FF50300D6E2DC /* CEEBinaryEditViewController.h */,
-				2692044B252FF50300D6E2DC /* CEEBinaryEditViewController.m */,
 				2692044C252FF50300D6E2DC /* CEEEditViewController.h */,
 				2692044D252FF50300D6E2DC /* CEEEditViewController.m */,
+				2692044A252FF50300D6E2DC /* CEEBinaryEditViewController.h */,
+				2692044B252FF50300D6E2DC /* CEEBinaryEditViewController.m */,
 				2692044E252FF50300D6E2DC /* CEEMarkdownViewController.h */,
 				2692044F252FF50300D6E2DC /* CEEMarkdownViewController.m */,
 				26920450252FF50300D6E2DC /* CEETextEditViewController.h */,
@@ -1180,10 +1183,10 @@
 				26920480252FF51A00D6E2DC /* CEESessionWindowController.m */,
 				2692047D252FF51A00D6E2DC /* CEESessionViewController.h */,
 				2692047E252FF51A00D6E2DC /* CEESessionViewController.m */,
-				2692047B252FF51A00D6E2DC /* CEESessionView.h */,
-				2692047C252FF51A00D6E2DC /* CEESessionView.m */,
 				26920479252FF51A00D6E2DC /* CEESessionToolbar.h */,
 				2692047A252FF51A00D6E2DC /* CEESessionToolbar.m */,
+				2692047B252FF51A00D6E2DC /* CEESessionView.h */,
+				2692047C252FF51A00D6E2DC /* CEESessionView.m */,
 				26920471252FF51A00D6E2DC /* CEESessionSpliter0.h */,
 				26920472252FF51A00D6E2DC /* CEESessionSpliter0.m */,
 				26920473252FF51A00D6E2DC /* CEESessionSpliter1.h */,
@@ -1351,6 +1354,7 @@
 				26920373252FF3E400D6E2DC /* icon_file_type_objective_c_16x16@2x.png in Resources */,
 				2692038A252FF3E400D6E2DC /* icon_open_file_16x16@2x.png in Resources */,
 				2647CE3925309A1700970FE4 /* WelcomeGuide in Resources */,
+				26BC7E7B2539301900AD8992 /* icon_alert_32x32@2x.png in Resources */,
 				26920362252FF3E400D6E2DC /* icon_enum_definition_16x16@2x.png in Resources */,
 				26920394252FF3E400D6E2DC /* icon_relation_16x16@2x.png in Resources */,
 				26920376252FF3E400D6E2DC /* icon_file_type_text_16x16@2x.png in Resources */,
@@ -1481,6 +1485,7 @@
 				269204E0252FF5E800D6E2DC /* CEENetwork.m in Sources */,
 				269204BD252FF54000D6E2DC /* CEEFilePathCellView.m in Sources */,
 				2692043D252FF4F400D6E2DC /* CEEToolbarButton.m in Sources */,
+				269F9657253DB22500D8808A /* CEESourcePoint.m in Sources */,
 				26920430252FF4F400D6E2DC /* CEESplitView.m in Sources */,
 				269204E3252FF5F200D6E2DC /* AppDelegate.m in Sources */,
 				269204C8252FF58200D6E2DC /* CEESearcher.m in Sources */,
@@ -1530,7 +1535,6 @@
 				269204CB252FF58F00D6E2DC /* CEESourceBuffer.m in Sources */,
 				26920441252FF4F400D6E2DC /* CEEWindow.m in Sources */,
 				2692042C252FF4F400D6E2DC /* CEELineNumberView.m in Sources */,
-				269204DB252FF5BC00D6E2DC /* CEEProjectSyncViewController.m in Sources */,
 				26920459252FF50E00D6E2DC /* CEEAutoCompleteViewController.m in Sources */,
 				26920494252FF51A00D6E2DC /* CEESessionViewController.m in Sources */,
 				2692043F252FF4F400D6E2DC /* CEEView.m in Sources */,
@@ -1831,7 +1835,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 6;
+				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
 				HEADER_SEARCH_PATHS = /usr/local/include;
@@ -1857,7 +1862,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 6;
+				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
 				HEADER_SEARCH_PATHS = /usr/local/include;

@@ -52,8 +52,8 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setTargetSymbolResponse:) name:CEENotificationSessionPortSetTargetSymbol object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setActivedSymbolResponse:) name:CEENotificationSessionPortSetActivedSymbol object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setSelectedSymbolResponse:) name:CEENotificationSessionPortSetSelectedSymbol object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToSourcePointResponse:) name:CEENotificationSessionPortJumpToSourcePoint object:nil];
 }
 
 - (BOOL)becomeFirstResponder {
@@ -99,7 +99,7 @@
     //[_titleDetail orderOut:self];
 }
 
-- (IBAction)presentHistory:(id)sender {
+- (IBAction)presentHistoryList:(id)sender {
     NSPoint point0 = [self.titlebar convertPoint:_bufferListButton.frame.origin toView:nil];    
     NSPoint point1 = [self.view convertPoint:_titlebar.frame.origin toView:nil];
     point1 = [self.view.window convertPointToScreen:point1];
@@ -223,12 +223,12 @@
         self.title = [self.title stringByAppendingFormat:@" (delete)"];
 }
 
-- (void)setTargetSymbolResponse:(NSNotification*)notification {
-    if (notification.object != _port || !_port.target_symbol)
+- (void)jumpToSourcePointResponse:(NSNotification*)notification {
+    if (notification.object != _port || !_port.jumpPoint)
         return;
     
-    NSString* filePath = [NSString stringWithUTF8String:_port.target_symbol->filepath];
-    CEEList* ranges = cee_ranges_from_string(_port.target_symbol->locations);
+    NSString* filePath = _port.jumpPoint.filePath;
+    CEEList* ranges = cee_ranges_from_string([_port.jumpPoint.locations UTF8String]);
     if (ranges) {
         [_port openSourceBuffersWithFilePaths:@[filePath]];
         [self.editViewController highlightRanges:ranges];
@@ -236,11 +236,11 @@
     }
 }
 
-- (void)setActivedSymbolResponse:(NSNotification*)notification {
-    if (notification.object != _port || !_port.actived_symbol)
+- (void)setSelectedSymbolResponse:(NSNotification*)notification {
+    if (notification.object != _port || !_port.selected_symbol)
         return;
     
-    CEEList* ranges = cee_ranges_from_string(_port.actived_symbol->locations);
+    CEEList* ranges = cee_ranges_from_string(_port.selected_symbol->locations);
     if (ranges) {
         [self.editViewController highlightRanges:ranges];
         cee_list_free_full(ranges, cee_range_free);

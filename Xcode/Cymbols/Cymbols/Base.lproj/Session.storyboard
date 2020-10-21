@@ -15,7 +15,7 @@
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="193" y="240" width="450" height="300"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
-                        <value key="minSize" type="size" width="800" height="600"/>
+                        <value key="minSize" type="size" width="770" height="400"/>
                         <connections>
                             <outlet property="delegate" destination="jGA-0Y-lOj" id="98r-iN-zZc"/>
                         </connections>
@@ -117,10 +117,10 @@
             <objects>
                 <viewController identifier="IDSessionToolbar" storyboardIdentifier="IDSessionToolbar" id="8TF-CE-DG2" customClass="CEESessionToolbar" sceneMemberID="viewController">
                     <view key="view" identifier="IDToolbarView" id="mrd-td-8Li" customClass="CEEToolbarView">
-                        <rect key="frame" x="0.0" y="0.0" width="800" height="32"/>
+                        <rect key="frame" x="0.0" y="0.0" width="770" height="32"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="evb-6e-BtH" customClass="CEEToolbarButton">
+                            <customView toolTip="Crate New File" translatesAutoresizingMaskIntoConstraints="NO" id="evb-6e-BtH" customClass="CEEToolbarButton">
                                 <rect key="frame" x="0.0" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="0Yf-LN-M93"/>
@@ -133,7 +133,7 @@
                                     <action selector="newFile:" target="58X-QB-Qaa" id="reI-Uf-SCR"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="TfV-XX-LR8" customClass="CEEToolbarButton">
+                            <customView toolTip="Open Files" translatesAutoresizingMaskIntoConstraints="NO" id="TfV-XX-LR8" customClass="CEEToolbarButton">
                                 <rect key="frame" x="64" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="g8G-RI-4IQ"/>
@@ -146,7 +146,7 @@
                                     <action selector="openFiles:" target="58X-QB-Qaa" id="muO-dY-Z7W"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="K1J-26-ThQ" customClass="CEEToolbarButton">
+                            <customView toolTip="Save File" translatesAutoresizingMaskIntoConstraints="NO" id="K1J-26-ThQ" customClass="CEEToolbarButton">
                                 <rect key="frame" x="96" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="T3N-CW-icZ"/>
@@ -159,7 +159,7 @@
                                     <action selector="save:" target="58X-QB-Qaa" id="lWW-ih-deY"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="p1q-IR-bIj" customClass="CEEToolbarButton">
+                            <customView toolTip="Save As" translatesAutoresizingMaskIntoConstraints="NO" id="p1q-IR-bIj" customClass="CEEToolbarButton">
                                 <rect key="frame" x="128" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="UIF-ah-Bsx"/>
@@ -172,7 +172,7 @@
                                     <action selector="saveAll:" target="58X-QB-Qaa" id="Uct-L4-24O"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="k6z-Mf-LyB" customClass="CEEToolbarButton">
+                            <customView toolTip="Copy" translatesAutoresizingMaskIntoConstraints="NO" id="k6z-Mf-LyB" customClass="CEEToolbarButton">
                                 <rect key="frame" x="160" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="I1m-Th-vUZ"/>
@@ -185,7 +185,7 @@
                                     <action selector="copy:" target="58X-QB-Qaa" id="LeF-dj-bQR"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="eBq-Jx-txP" customClass="CEEToolbarButton">
+                            <customView toolTip="Cut" translatesAutoresizingMaskIntoConstraints="NO" id="eBq-Jx-txP" customClass="CEEToolbarButton">
                                 <rect key="frame" x="192" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="G5M-ie-iAx"/>
@@ -198,7 +198,7 @@
                                     <action selector="cut:" target="58X-QB-Qaa" id="nGz-6d-1eW"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="lJj-dI-83q" customClass="CEEToolbarButton">
+                            <customView toolTip="Paste" translatesAutoresizingMaskIntoConstraints="NO" id="lJj-dI-83q" customClass="CEEToolbarButton">
                                 <rect key="frame" x="224" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="0T5-cR-Kw7"/>
@@ -211,7 +211,7 @@
                                     <action selector="paste:" target="58X-QB-Qaa" id="zyN-zs-1at"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="6lh-hA-ZOK" customClass="CEEToolbarButton">
+                            <customView toolTip="Search" translatesAutoresizingMaskIntoConstraints="NO" id="6lh-hA-ZOK" customClass="CEEToolbarButton">
                                 <rect key="frame" x="256" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="Uy4-kA-B7G"/>
@@ -224,7 +224,7 @@
                                     <action selector="search:" target="58X-QB-Qaa" id="5QY-Y0-Kbn"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Aav-vb-zjK" customClass="CEEToolbarButton">
+                            <customView toolTip="Undo" translatesAutoresizingMaskIntoConstraints="NO" id="Aav-vb-zjK" customClass="CEEToolbarButton">
                                 <rect key="frame" x="288" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="2UR-17-4ut"/>
@@ -237,8 +237,8 @@
                                     <action selector="undo:" target="58X-QB-Qaa" id="3pQ-hl-abf"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="U1r-k6-7pm" customClass="CEEToolbarButton">
-                                <rect key="frame" x="768" y="0.0" width="32" height="32"/>
+                            <customView toolTip="Show Project Files" translatesAutoresizingMaskIntoConstraints="NO" id="U1r-k6-7pm" customClass="CEEToolbarButton">
+                                <rect key="frame" x="738" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="Xff-L1-n1H"/>
                                     <constraint firstAttribute="width" constant="32" id="e0P-zL-tnV"/>
@@ -250,7 +250,7 @@
                                     <action selector="togglePathView:" target="58X-QB-Qaa" id="unG-ML-Acm"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="94m-a3-k78" customClass="CEEToolbarButton">
+                            <customView toolTip="Crate New Project" translatesAutoresizingMaskIntoConstraints="NO" id="94m-a3-k78" customClass="CEEToolbarButton">
                                 <rect key="frame" x="32" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="Tqw-aH-CQc"/>
@@ -263,7 +263,7 @@
                                     <action selector="newProject:" target="58X-QB-Qaa" id="cGU-PK-At1"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="jZz-xn-KHB" customClass="CEEToolbarButton">
+                            <customView toolTip="Redo" translatesAutoresizingMaskIntoConstraints="NO" id="jZz-xn-KHB" customClass="CEEToolbarButton">
                                 <rect key="frame" x="320" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="mYt-dV-Bgq"/>
@@ -276,7 +276,7 @@
                                     <action selector="redo:" target="58X-QB-Qaa" id="YPw-OT-tMa"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="5Yn-wp-tUo" customClass="CEEToolbarButton">
+                            <customView toolTip="Build Project" translatesAutoresizingMaskIntoConstraints="NO" id="5Yn-wp-tUo" customClass="CEEToolbarButton">
                                 <rect key="frame" x="352" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="1ML-Iw-VbO"/>
@@ -289,21 +289,8 @@
                                     <action selector="buildProject:" target="58X-QB-Qaa" id="a5n-AH-agq"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="LCH-Kc-22T" customClass="CEEToolbarButton">
+                            <customView toolTip="Sync Project" translatesAutoresizingMaskIntoConstraints="NO" id="GTz-0R-5TH" customClass="CEEToolbarButton">
                                 <rect key="frame" x="384" y="0.0" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="32" id="7bk-t9-rf2"/>
-                                    <constraint firstAttribute="height" constant="32" id="oLG-ED-aJv"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_database_clean_16x16"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="cleanProject:" target="58X-QB-Qaa" id="Alo-sY-1Ma"/>
-                                </connections>
-                            </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="GTz-0R-5TH" customClass="CEEToolbarButton">
-                                <rect key="frame" x="416" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="5Li-y0-4sm"/>
                                     <constraint firstAttribute="height" constant="32" id="96f-NH-Eqz"/>
@@ -315,7 +302,7 @@
                                     <action selector="syncProject:" target="58X-QB-Qaa" id="myy-Nf-h9V"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="6PV-Fp-skh" customClass="CEEToolbarButton">
+                            <customView toolTip="Search In Project" translatesAutoresizingMaskIntoConstraints="NO" id="6PV-Fp-skh" customClass="CEEToolbarButton">
                                 <rect key="frame" x="448" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="NHI-qe-fAn"/>
@@ -328,8 +315,8 @@
                                     <action selector="searchInProject:" target="58X-QB-Qaa" id="JJn-kd-NN9"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="iqa-Ap-IuI" customClass="CEEToolbarButton">
-                                <rect key="frame" x="576" y="0.0" width="32" height="32"/>
+                            <customView toolTip="Split Horizontal" translatesAutoresizingMaskIntoConstraints="NO" id="iqa-Ap-IuI" customClass="CEEToolbarButton">
+                                <rect key="frame" x="546" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="ZQs-gO-j4S"/>
                                     <constraint firstAttribute="height" constant="32" id="kUx-d7-cC6"/>
@@ -341,8 +328,8 @@
                                     <action selector="splitHorizontally:" target="58X-QB-Qaa" id="M52-Ie-jJl"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="EYJ-kY-l20" customClass="CEEToolbarButton">
-                                <rect key="frame" x="608" y="0.0" width="32" height="32"/>
+                            <customView toolTip="Split Vertical" translatesAutoresizingMaskIntoConstraints="NO" id="EYJ-kY-l20" customClass="CEEToolbarButton">
+                                <rect key="frame" x="578" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="ocT-05-tov"/>
                                     <constraint firstAttribute="height" constant="32" id="xo3-Oa-w6C"/>
@@ -354,8 +341,8 @@
                                     <action selector="splitVertically:" target="58X-QB-Qaa" id="dbR-gQ-5EA"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="pV6-My-NWN" customClass="CEEToolbarButton">
-                                <rect key="frame" x="640" y="0.0" width="32" height="32"/>
+                            <customView toolTip="Show Toolbar" translatesAutoresizingMaskIntoConstraints="NO" id="pV6-My-NWN" customClass="CEEToolbarButton">
+                                <rect key="frame" x="610" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="oGU-DU-YB6"/>
                                     <constraint firstAttribute="width" constant="32" id="zNQ-Iv-Gpr"/>
@@ -367,8 +354,8 @@
                                     <action selector="toggleToolbar:" target="58X-QB-Qaa" id="DCS-BZ-K2P"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Fss-kx-dAK" customClass="CEEToolbarButton">
-                                <rect key="frame" x="704" y="0.0" width="32" height="32"/>
+                            <customView toolTip="Show Outline" translatesAutoresizingMaskIntoConstraints="NO" id="Fss-kx-dAK" customClass="CEEToolbarButton">
+                                <rect key="frame" x="674" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="T89-Lv-9G3"/>
                                     <constraint firstAttribute="width" constant="32" id="eqC-gp-jdi"/>
@@ -380,8 +367,8 @@
                                     <action selector="toggleSymbolView:" target="58X-QB-Qaa" id="eci-Pm-EYm"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="CLK-26-66d" customClass="CEEToolbarButton">
-                                <rect key="frame" x="672" y="0.0" width="32" height="32"/>
+                            <customView toolTip="Show Context" translatesAutoresizingMaskIntoConstraints="NO" id="CLK-26-66d" customClass="CEEToolbarButton">
+                                <rect key="frame" x="642" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="KzW-iN-8SS"/>
                                     <constraint firstAttribute="width" constant="32" id="yPm-qf-1ax"/>
@@ -393,8 +380,8 @@
                                     <action selector="toggleContextView:" target="58X-QB-Qaa" id="pcr-83-E16"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="bsw-vG-zsi" customClass="CEEToolbarButton">
-                                <rect key="frame" x="512" y="0.0" width="32" height="32"/>
+                            <customView toolTip="New Window" translatesAutoresizingMaskIntoConstraints="NO" id="bsw-vG-zsi" customClass="CEEToolbarButton">
+                                <rect key="frame" x="482" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="FOn-J9-a2F"/>
                                     <constraint firstAttribute="width" constant="32" id="yND-CT-uhy"/>
@@ -406,8 +393,8 @@
                                     <action selector="newWindow:" target="58X-QB-Qaa" id="r56-1f-4en"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="VYt-MC-ecp" customClass="CEEToolbarButton">
-                                <rect key="frame" x="544" y="0.0" width="32" height="32"/>
+                            <customView toolTip="List All Windows" translatesAutoresizingMaskIntoConstraints="NO" id="VYt-MC-ecp" customClass="CEEToolbarButton">
+                                <rect key="frame" x="514" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="32" id="C5e-BI-DIu"/>
                                     <constraint firstAttribute="width" constant="32" id="Tfw-9L-TZV"/>
@@ -419,8 +406,8 @@
                                     <action selector="listWindows:" target="58X-QB-Qaa" id="6qa-Qg-PiY"/>
                                 </connections>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="16U-GW-w9h" customClass="CEEToolbarButton">
-                                <rect key="frame" x="736" y="0.0" width="32" height="32"/>
+                            <customView toolTip="Show Opened Files" translatesAutoresizingMaskIntoConstraints="NO" id="16U-GW-w9h" customClass="CEEToolbarButton">
+                                <rect key="frame" x="706" y="0.0" width="32" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="32" id="WK1-rP-PY7"/>
                                     <constraint firstAttribute="height" constant="32" id="tHt-KB-16S"/>
@@ -432,6 +419,19 @@
                                     <action selector="toggleReferenceView:" target="58X-QB-Qaa" id="hIK-7j-chv"/>
                                 </connections>
                             </customView>
+                            <customView toolTip="Clean Project" translatesAutoresizingMaskIntoConstraints="NO" id="LCH-Kc-22T" customClass="CEEToolbarButton">
+                                <rect key="frame" x="416" y="0.0" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="32" id="7bk-t9-rf2"/>
+                                    <constraint firstAttribute="height" constant="32" id="oLG-ED-aJv"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_database_clean_16x16"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="cleanProject:" target="58X-QB-Qaa" id="Alo-sY-1Ma"/>
+                                </connections>
+                            </customView>
                         </subviews>
                         <constraints>
                             <constraint firstItem="Aav-vb-zjK" firstAttribute="leading" secondItem="6lh-hA-ZOK" secondAttribute="trailing" id="17E-RW-KX4"/>
@@ -439,7 +439,6 @@
                             <constraint firstItem="iqa-Ap-IuI" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="47R-gE-CGe"/>
                             <constraint firstAttribute="trailing" secondItem="U1r-k6-7pm" secondAttribute="trailing" id="5jH-gu-RDS"/>
                             <constraint firstItem="evb-6e-BtH" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="8te-bM-UFn"/>
-                            <constraint firstItem="GTz-0R-5TH" firstAttribute="leading" secondItem="LCH-Kc-22T" secondAttribute="trailing" id="AS9-nj-2h7"/>
                             <constraint firstItem="6lh-hA-ZOK" firstAttribute="leading" secondItem="lJj-dI-83q" secondAttribute="trailing" id="BBa-lG-5aa"/>
                             <constraint firstItem="6PV-Fp-skh" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="Bx2-5i-1Ug"/>
                             <constraint firstItem="LCH-Kc-22T" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="DUz-el-LdL"/>
@@ -448,9 +447,10 @@
                             <constraint firstItem="pV6-My-NWN" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="Mb5-Qj-ZXF"/>
                             <constraint firstItem="5Yn-wp-tUo" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="OG3-Jm-AeN"/>
                             <constraint firstItem="VYt-MC-ecp" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="Op9-i0-Fmb"/>
+                            <constraint firstItem="LCH-Kc-22T" firstAttribute="leading" secondItem="GTz-0R-5TH" secondAttribute="trailing" id="PZs-nU-y0b"/>
                             <constraint firstItem="lJj-dI-83q" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="QLl-fx-2ob"/>
                             <constraint firstItem="Fss-kx-dAK" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="RE9-14-gBp"/>
-                            <constraint firstItem="6PV-Fp-skh" firstAttribute="leading" secondItem="GTz-0R-5TH" secondAttribute="trailing" id="RFw-Hb-Ugv"/>
+                            <constraint firstItem="6PV-Fp-skh" firstAttribute="leading" secondItem="LCH-Kc-22T" secondAttribute="trailing" id="RuN-7T-iFi"/>
                             <constraint firstItem="jZz-xn-KHB" firstAttribute="leading" secondItem="Aav-vb-zjK" secondAttribute="trailing" id="UDH-RB-YtT"/>
                             <constraint firstItem="VYt-MC-ecp" firstAttribute="leading" secondItem="bsw-vG-zsi" secondAttribute="trailing" id="WEa-gD-kas"/>
                             <constraint firstItem="U1r-k6-7pm" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="WWD-yM-p7e"/>
@@ -461,7 +461,7 @@
                             <constraint firstItem="jZz-xn-KHB" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="Zbl-pq-4hg"/>
                             <constraint firstItem="TfV-XX-LR8" firstAttribute="leading" secondItem="94m-a3-k78" secondAttribute="trailing" id="Zia-Nc-6oc"/>
                             <constraint firstItem="Fss-kx-dAK" firstAttribute="leading" secondItem="CLK-26-66d" secondAttribute="trailing" id="ajp-P2-qZc"/>
-                            <constraint firstItem="LCH-Kc-22T" firstAttribute="leading" secondItem="5Yn-wp-tUo" secondAttribute="trailing" id="axk-9P-xa0"/>
+                            <constraint firstItem="GTz-0R-5TH" firstAttribute="leading" secondItem="5Yn-wp-tUo" secondAttribute="trailing" id="dTt-X8-AFC"/>
                             <constraint firstItem="k6z-Mf-LyB" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="db5-q1-0a0"/>
                             <constraint firstItem="94m-a3-k78" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="dko-Z5-CL6"/>
                             <constraint firstItem="eBq-Jx-txP" firstAttribute="top" secondItem="mrd-td-8Li" secondAttribute="top" id="du9-lh-4Dr"/>
@@ -846,7 +846,9 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="addSourceButton" destination="YDf-kJ-1Yl" id="FFi-Mc-B87"/>
                         <outlet property="filterInput" destination="jFl-ek-Wio" id="lAN-vS-tqd"/>
+                        <outlet property="removeSourceButton" destination="b4n-sQ-asi" id="DrZ-IV-gll"/>
                         <outlet property="sourceTable" destination="bOF-Rf-GvL" id="Vji-eA-pkH"/>
                         <outlet property="titlebar" destination="JV5-ZL-u9t" id="BDa-du-fWb"/>
                     </connections>
@@ -953,6 +955,13 @@
                             <modifierMask key="keyEquivalentModifierMask"/>
                             <connections>
                                 <action selector="closeOthersBelow:" target="mhP-YY-odI" id="stV-K6-HtM"/>
+                            </connections>
+                        </menuItem>
+                        <menuItem isSeparatorItem="YES" id="vf4-Rx-8fi"/>
+                        <menuItem title="Clean Symbols in Database" id="bgf-4S-LKO">
+                            <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="cleanSymbols:" target="mhP-YY-odI" id="dnK-Qo-UK5"/>
                             </connections>
                         </menuItem>
                     </items>
@@ -1094,7 +1103,7 @@
                                             <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_sand_clock_16x16"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
-                                            <action selector="presentHistory:" target="FWh-fC-5af" id="lyd-7k-hVI"/>
+                                            <action selector="presentHistoryList:" target="FWh-fC-5af" id="35M-h9-nta"/>
                                         </connections>
                                     </customView>
                                 </subviews>

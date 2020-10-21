@@ -197,7 +197,8 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
         else {
             _isMACAddressFound = YES;
             printf("This system's built-in MAC address is %02x:%02x:%02x:%02x:%02x:%02x.\n",
-                    _MACAddress[0], _MACAddress[1], _MACAddress[2], _MACAddress[3], _MACAddress[4], _MACAddress[5]);
+                    _MACAddress[0], _MACAddress[1], _MACAddress[2], 
+                   _MACAddress[3], _MACAddress[4], _MACAddress[5]);
         }
     }
        

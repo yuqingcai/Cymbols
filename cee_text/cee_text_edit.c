@@ -2150,6 +2150,10 @@ void cee_text_edit_caret_buffer_offset_set(CEETextEditRef edit,
     
     cee_long paragraph = -1;
     CEETextStorageRef storage = edit->storage_ref;
+    cee_size length = cee_text_storage_size_get(edit->storage_ref);
+    if (buffer_offset >= length)
+        buffer_offset = 0;
+    
     edit->caret.buffer_offset = buffer_offset;
     paragraph = cee_text_storage_paragraph_beginning_get(storage,
                                                          edit->caret.buffer_offset);
@@ -2288,11 +2292,10 @@ void cee_text_edit_selection_complete_position_set(CEETextEditRef edit,
     CEETextUnitRef unit = cee_text_unit_get_by_location(edit->layout, position);
     if (!unit)
         return;
-    
+        
     cee_long offset = cee_text_unit_buffer_offset_get(unit);
     selection_complete(edit, offset);
 }
-
 
 static void caret_discard(CEETextEdit* edit)
 {

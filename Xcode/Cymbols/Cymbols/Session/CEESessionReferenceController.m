@@ -122,6 +122,19 @@
     [_session.activedPort setActivedSourceBuffer:buffer];
 }
 
+- (IBAction)cleanSymbols:(id)sender {
+    if (!_referenceTable.selectedRowIndexes)
+        return;
+    
+    NSInteger selectedRow = _referenceTable.selectedRow;
+    if (selectedRow == -1)
+        return ;
+    
+    CEESourceBuffer* buffer = _buffers[selectedRow];
+    cee_database_symbols_delete_by_filepath(_session.project.database,
+                                            [buffer.filePath UTF8String]);
+}
+
 - (void)sourceBufferStateChangedResponse:(NSNotification*)notification {
     [_referenceTable reloadData];
     [self highlightSelectionInReferenceTable];

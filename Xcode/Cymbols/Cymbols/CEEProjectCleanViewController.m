@@ -28,7 +28,7 @@
     _project = [projectController currentDocument];
     
     if (_project)
-        cee_database_symbols_clean(_project.database);
+        cee_database_symbols_delete(_project.database);
     
     if (self.view.window.sheetParent)
         [self.view.window.sheetParent endSheet:self.view.window returnCode:NSModalResponseOK];

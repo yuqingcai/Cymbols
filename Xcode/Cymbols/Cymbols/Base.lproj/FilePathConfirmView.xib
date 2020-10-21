@@ -13,7 +13,7 @@
             <rect key="frame" x="0.0" y="0.0" width="555" height="441"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="vBB-AC-Fae" customClass="CEETextLabel">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="vBB-AC-Fae" customClass="CEETextTitle">
                     <rect key="frame" x="20" y="397" width="515" height="24"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="24" id="DBI-hf-NDh"/>

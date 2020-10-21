@@ -10,6 +10,7 @@
 #import "CEESerialization.h"
 #import "CEESourceBuffer.h"
 #import "CEESearcher.h"
+#import "CEESourcePoint.h"
 
 extern NSNotificationName CEENotificationProjectSettingProperties;
 extern NSNotificationName CEENotificationProjectAddFilePaths;
@@ -22,9 +23,9 @@ extern NSNotificationName CEENotificationSessionCreatePort;
 extern NSNotificationName CEENotificationSessionActivePort;
 extern NSNotificationName CEENotificationSessionDeletePort;
 extern NSNotificationName CEENotificationSessionPortCreateContext;
-extern NSNotificationName CEENotificationSessionPortSetTargetSymbol;
-extern NSNotificationName CEENotificationSessionPortRequestTargetSymbolSelection;
-extern NSNotificationName CEENotificationSessionPortSetActivedSymbol;
+extern NSNotificationName CEENotificationSessionPortJumpToSourcePoint;
+extern NSNotificationName CEENotificationSessionPortRequestJumpSourcePointSelection;
+extern NSNotificationName CEENotificationSessionPortSetSelectedSymbol;
 extern NSNotificationName CEENotificationSessionPortPresentHistory;
 extern NSNotificationName CEENotificationSessionPortSaveSourceBuffer;
 extern NSNotificationName CEENotificationSessionPortSetDescriptor;
@@ -69,8 +70,8 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 @property (strong, readonly) NSMutableArray* bufferReferences;
 @property (strong, readonly) NSMutableArray* openedSourceBuffers;
 @property (readonly) CEEList* context;
-@property (readonly) CEESourceSymbol* target_symbol;
-@property (readonly) CEESourceSymbol* actived_symbol;
+@property (readonly) CEESourceSymbol* selected_symbol;
+@property (readonly) CEESourcePoint* jumpPoint;
 @property NSString* descriptor;
 
 - (void)moveBufferReferenceNext;
@@ -86,10 +87,10 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 - (void)closeAllSourceBuffers;
 - (void)discardReferences;
 - (void)createContextByCluster:(CEETokenCluster*)cluster;
-- (void)jumpToTargetSymbolByCluster:(CEETokenCluster*)cluster;
+- (void)setSelectedSourceSymbol:(CEESourceSymbol*)symbol;
 - (void)searchReferencesByCluster:(CEETokenCluster*)cluster;
-- (void)setTargetSourceSymbol:(CEESourceSymbol*)symbol;
-- (void)setActivedSourceSymbol:(CEESourceSymbol*)symbol;
+- (void)jumpToSourceSymbolByCluster:(CEETokenCluster*)cluster;
+- (void)jumpToSourcePoint:(CEESourcePoint*)sourcePoint;
 @end
 
 @interface CEESession : NSObject <CEESerialization>
@@ -108,7 +109,7 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 @end
 
 @interface CEEProject : NSDocument
-@property (strong) NSMutableArray* sessions;
+@property (strong, readonly) NSMutableArray* sessions;
 @property (strong) CEESession* currentSession;
 @property (readonly) cee_pointer database;
 @property (strong) CEEProjectSetting* properties;
@@ -120,7 +121,6 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 - (void)addFilePaths:(NSArray*)filePaths;
 - (void)removeFilePaths:(NSArray*)filePaths;
 - (CEEProjectSetting*)createEmptyProjectSetting;
-- (void)deleteSession:(CEESession*)session;
 - (void)deleteAllSessions;
 - (void)syncSourceSymbols:(CEESourceBuffer*)buffer;
 - (void)addSecurityBookmarksWithFilePaths:(NSArray*)filePaths;

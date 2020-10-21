@@ -106,10 +106,9 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     NSDocumentController* documentController = [NSDocumentController sharedDocumentController];
     for (CEEProject* project in documentController.documents) {
-        NSArray* untiledSourceBufferFilePaths = [_sourceBufferManager untitleSourceBuffersFilePaths];
-        [project removeSecurityBookmarksWithFilePaths:untiledSourceBufferFilePaths];
         [project serialize];
         [project deleteAllSessions];
+        [project close];
     }
     [_sourceBufferManager discardUntitleSourceBuffers];
 }
@@ -200,6 +199,10 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 
 - (NSString*)serializerVersionString {
     return @"CymbolsSerializer_1_0_0";
+}
+
+- (NSString*)infoString {
+    return @"CymbolsApplication_1_0_0";
 }
 
 - (void)setConfiguration:(NSString*)configuration value:(NSString*)value {

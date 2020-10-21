@@ -11,7 +11,6 @@
 NSNotificationName CEENotificationSourceBufferStateChanged = @"CEENotificationSourceBufferStateChanged";
 NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBufferReload";
 NSNotificationName CEENotificationSourceBufferSaved = @"CEENotificationSourceBufferSaved";
-NSNotificationName CEENotificationSourceBufferParsed = @"CEENotificationSourceBufferParsed";
 
 @interface CEESourceBuffer()
 @property (strong) NSDate* fileLastModifiedDate;
@@ -22,6 +21,9 @@ NSNotificationName CEENotificationSourceBufferParsed = @"CEENotificationSourceBu
 
 @synthesize state = _state;
 
+// Don't post any notification in this functon, this function can be called in
+// a async background queue, notification may effect an UI operation which should 
+// be in main_queue
 void cee_source_buffer_parse(CEESourceBuffer* buffer,
                              CEESourceBufferParserOption options)
 {
@@ -40,7 +42,7 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
     CEESourceTokenMap* source_token_map = NULL;
     
     //m0 = cee_timestamp_ms();
-    /** parse buffer begin */
+    // parse buffer begin
     if (buffer.comment)
         cee_source_fregment_free_full(buffer.comment);
 
@@ -76,26 +78,30 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
     buffer.statement = statement;
     buffer.tokens_ref = tokens_ref;
     buffer.source_token_map = source_token_map;
-    buffer.prep_directive_symbol_tree = cee_source_fregment_symbol_tree_create(buffer.prep_directive);
-    buffer.statement_symbol_tree = cee_source_fregment_symbol_tree_create(buffer.statement);
-    
-    /** parse buffer end */
+    buffer.prep_directive_symbol_tree = 
+        cee_source_fregment_symbol_tree_create(buffer.prep_directive);
+    buffer.statement_symbol_tree = 
+        cee_source_fregment_symbol_tree_create(buffer.statement);
+    // parse buffer end
     //cee_ulong m1 = cee_timestamp_ms();
     //fprintf(stdout, "\nbuffer_parse cost: %lu ms\n", m1 - m0);
     
     if (options & kCEESourceBufferParserOptionCreateSymbolWrapper) {
-        /** symbol wrappers create begin */
+        // symbol wrappers create begin
         if (buffer.symbol_wrappers)
-            cee_list_free_full(buffer.symbol_wrappers, cee_source_symbol_wrapper_free);
+            cee_list_free_full(buffer.symbol_wrappers, 
+                               cee_source_symbol_wrapper_free);
         
         CEEList* wrappers = NULL;
-        cee_source_symbol_tree_dump_to_wrappers(buffer.prep_directive_symbol_tree, &wrappers);
-        cee_source_symbol_tree_dump_to_wrappers(buffer.statement_symbol_tree, &wrappers);
-        wrappers = cee_list_sort(wrappers, cee_source_symbol_wrapper_location_compare);
+        cee_source_symbol_tree_dump_to_wrappers(buffer.prep_directive_symbol_tree, 
+                                                &wrappers);
+        cee_source_symbol_tree_dump_to_wrappers(buffer.statement_symbol_tree, 
+                                                &wrappers);
+        wrappers = cee_list_sort(wrappers, 
+                                 cee_source_symbol_wrapper_location_compare);
         buffer.symbol_wrappers = wrappers;
-        /** symbol wrappers create end */
+        // symbol wrappers create end
     }
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSourceBufferParsed object:buffer];
 }
 
 static void text_buffer_modified(cee_pointer buffer, 
@@ -398,20 +404,6 @@ static void binary_buffer_modified(cee_pointer buffer,
     NSString *fileName;
     while (fileName = [enumerator nextObject])
         [fileManager removeItemAtPath:[_temporaryDirectory stringByAppendingPathComponent:fileName] error:nil];
-}
-
-- (NSArray*)untitleSourceBuffersFilePaths {
-    NSMutableArray* filePaths = nil;
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:_temporaryDirectory];
-    NSString *fileName;
-    while (fileName = [enumerator nextObject]) {
-        NSString* filePath = [_temporaryDirectory stringByAppendingPathComponent:fileName];
-        if (!filePaths)
-            filePaths = [[NSMutableArray alloc] init];
-        [filePaths addObject:filePath];
-    }
-    return filePaths;
 }
 
 - (void)syncSourceBuffersFromFiles {

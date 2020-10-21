@@ -14,7 +14,6 @@
 @implementation CEEViewController
 
 - (void)initProperties {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateContentViewStyle:) name:CEENotificationUserInterfaceStyleUpdate object:nil];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
@@ -47,19 +46,11 @@
     return self;
 }
 
-- (void)updateContentViewStyle:(NSNotification*)notification {
-    [self updateContentViewStyleConfiguration];
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self updateContentViewStyleConfiguration];
-    [self.view setStyleState:kCEEViewStyleStateActived];
-}
-
-- (void)updateContentViewStyleConfiguration {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [self.view setStyleConfiguration:[styleManager userInterfaceConfiguration]];
+    [self.view setStyleState:kCEEViewStyleStateActived];
 }
 
 - (NSString*)serialize {

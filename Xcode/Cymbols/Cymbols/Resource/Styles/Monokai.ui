@@ -88,8 +88,6 @@
 
     "ClassTableView [actived]" : {
         "background_color" : "#252226",
-        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-        "text_color" : "#EBEBEA",
         
         "IDTableViewHeader [actived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -123,8 +121,6 @@
     
     "ClassTableView [deactived]" : {
         "background_color" : "#252226",
-        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-        "text_color" : "#EBEBEA",
         
         "IDTableViewHeader [deactived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -268,19 +264,6 @@
         "text_color" : "#737373",
         "icon_color" : "#737373",
         "corner_radius" : "2.0",
-    },
-    
-    "ClassToolbarButton [actived]" : {
-    },
-    
-    "ClassToolbarButton [deactived]" : {
-    },
-    
-    "ClassToolbarButton [clicked]" : {
-    },
-    
-    "ClassToolbarButton [disabled]" : {
-        "icon_color": "#CCCCCC",
     },
     
     "ClassTitlebarButton [actived]" : {
@@ -545,8 +528,6 @@
     
     "IDSessionSymbolTableView [actived]" : {
         "background_color" : "#252226",
-        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-        "text_color" : "#EBEBEA",
         
         "IDTableViewHeader [actived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -580,8 +561,6 @@
      
      "IDSessionSymbolTableView [deactived]" : {
         "background_color" : "#252226",
-        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-        "text_color" : "#EBEBEA",
         
         "IDTableViewHeader [deactived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -615,8 +594,6 @@
     
     "IDSessionReferenceTableView [actived]" : {
         "background_color" : "#252226",
-        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-        "text_color" : "#EBEBEA",
         
         "IDTableViewHeader [actived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -650,8 +627,6 @@
     
     "IDSessionReferenceTableView [deactived]" : {
         "background_color" : "#252226",
-        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-        "text_color" : "#EBEBEA",
         
         "IDTableViewHeader [deactived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -685,8 +660,6 @@
     
     "IDSessionFilePathTableView [actived]" : {
         "background_color" : "#252226",
-        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-        "text_color" : "#EBEBEA",
         
         "IDTableViewHeader [actived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -716,12 +689,10 @@
             "knob_color" : "#4B464D",
             "background_color" : "#252226",
         },
-    },
+     },
      
-    "IDSessionFilePathTableView [deactived]" : {
+     "IDSessionFilePathTableView [deactived]" : {
         "background_color" : "#252226",
-        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
-        "text_color" : "#EBEBEA",
         
         "IDTableViewHeader [deactived]" : {
             "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
@@ -767,13 +738,5 @@
     
     "ClassSessionFrameManagerView [deactived]" : {
         "icon_color" : "#bdbdbd",
-    },
-    
-    "IDSourceHistoryView [actived]" : {        
-        "background_color" : "#252226",
-    },
-    
-    "IDSourceHistoryView [deactived]" : {      
-        "background_color" : "#252226",
     },
 }

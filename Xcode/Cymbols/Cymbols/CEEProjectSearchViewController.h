@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEProjectSearchViewController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, CEETextViewDelegate>
 @property BOOL autoStart;
+@property CEESearchResult* selectedResult;
 @end
 
 NS_ASSUME_NONNULL_END
