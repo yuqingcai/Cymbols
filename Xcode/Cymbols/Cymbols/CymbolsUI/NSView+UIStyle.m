@@ -29,8 +29,6 @@
     NSString* bordersProperty = scheme.descriptor[@"borders"];
     NSString* borderWidthProperty = scheme.descriptor[@"border_width"];
     NSString* cornerRadiusProperty = scheme.descriptor[@"corner_radius"];
-    NSString* caretColorProperty = scheme.descriptor[@"caret_color"];
-    NSString* caretColorMarkedProperty = scheme.descriptor[@"caret_color_marked"];
     NSString* textBackgroundColorSelectedProperty = scheme.descriptor[@"text_background_color_selected"];
     NSString* textBackgroundColorSelectedOutlineProperty = scheme.descriptor[@"text_background_color_selected_outline"];
     NSString* textBackgroundColorHighlightProperty = scheme.descriptor[@"text_background_color_highlight"];
@@ -81,12 +79,6 @@
     
     if (cornerRadiusProperty)
         self.cornerRadius = [cornerRadiusProperty floatValue];
-
-    if (caretColorProperty)
-        self.caretColor = [CEEUserInterfaceStyleConfiguration createColorFromString:caretColorProperty];
-    
-    if (caretColorMarkedProperty)
-        self.caretColorMarked = [CEEUserInterfaceStyleConfiguration createColorFromString:caretColorMarkedProperty];
     
     if (textBackgroundColorSelectedProperty)
         self.textBackgroundColorSelected = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorSelectedProperty];

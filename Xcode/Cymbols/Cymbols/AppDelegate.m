@@ -39,8 +39,8 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [styleManager setStyleHomeDirectory:[_cymbolsHome stringByAppendingPathComponent:@"Styles"]];
-    styleManager.userInterfaceStyleName = _activedConfigurations[@"UIStyle"];
-    styleManager.textHighlightStyleName = _activedConfigurations[@"SyntaxStyle"];
+    styleManager.userInterfaceStyleName = _activedConfigurations[@"ui_style"];
+    styleManager.textHighlightStyleName = _activedConfigurations[@"syntax_style"];
     
     _sourceBufferManager = [[CEESourceBufferManager alloc] init];
     _projectController = [[CEEProjectController alloc] init];

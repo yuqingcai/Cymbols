@@ -78,12 +78,12 @@
 
 - (IBAction)prev:(id)sender {
     if (_port)
-        [_port moveBufferReferencePrev];
+        [_port moveSourceBufferReferencePrev];
 }
 
 - (IBAction)next:(id)sender {
     if (_port)
-        [_port moveBufferReferenceNext];
+        [_port moveSourceBufferReferenceNext];
 }
 
 - (void)expandTitleViewDetail:(CEETitleView *)titleView {
@@ -116,17 +116,6 @@
     if (!buffer)
         return kCEEPresentSourceStateNoBuffer;
     
-    NSInteger presentedLineBufferOffset = [[_port currentBufferReference] presentedLineBufferOffset];
-    NSInteger caretBufferOffset = [[_port currentBufferReference] caretBufferOffset];
-    //CEETextStorageRef storage = buffer.storage;
-    //cee_size size = cee_text_storage_size_get(storage);
-    //if (presentedLineBufferOffset >= size)
-    //    presentedLineBufferOffset = 0;
-    //[[_port currentBufferReference] setPresentedLineBufferOffset:presentedLineBufferOffset];
-    //if (caretBufferOffset >= size)
-    //    caretBufferOffset = 0;
-    //[[_port currentBufferReference] setCaretBufferOffset:caretBufferOffset];
-        
     CEEEditViewController* viewController = nil;
     
     if (buffer.encodeType == kCEEBufferEncodeTypeUTF8)
@@ -156,12 +145,13 @@
     [self.view addConstraints:constraintsH];
     [self.view addConstraints:constraintsV];
     
-    [viewController setEditable:YES];
-    [viewController setIntelligence:YES];
     [viewController setPort:_port];
     [viewController setBuffer:buffer];
+    
+    NSInteger lineBufferOffset = [[_port currentSourceBufferReference] lineBufferOffset];
+    NSInteger caretBufferOffset = [[_port currentSourceBufferReference] caretBufferOffset];
     [viewController setCaretBufferOffset:caretBufferOffset];
-    [viewController setPresentedLineBufferOffset:presentedLineBufferOffset];
+    [viewController setLineBufferOffset:lineBufferOffset];
     
     if ([buffer stateSet:kCEESourceBufferStateFileTemporary])
         self.title = [buffer.filePath lastPathComponent];

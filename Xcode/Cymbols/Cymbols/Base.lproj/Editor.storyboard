@@ -121,9 +121,9 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="JwB-GE-K7G" customClass="CEETextLabel">
-                                        <rect key="frame" x="405" y="37" width="80" height="24"/>
+                                        <rect key="frame" x="405" y="37" width="110" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="80" id="ITV-OA-ZqU"/>
+                                            <constraint firstAttribute="width" constant="110" id="ITV-OA-ZqU"/>
                                             <constraint firstAttribute="height" constant="24" id="fBA-AQ-uin"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
@@ -199,7 +199,7 @@
                                     <constraint firstItem="JwB-GE-K7G" firstAttribute="leading" secondItem="zwB-Mp-2LG" secondAttribute="trailing" constant="6" id="SXm-cG-vq3"/>
                                     <constraint firstItem="zwB-Mp-2LG" firstAttribute="leading" secondItem="xMz-fk-g7n" secondAttribute="trailing" id="WtB-18-HT0"/>
                                     <constraint firstItem="rNb-xI-fDo" firstAttribute="top" secondItem="IBL-aU-c8f" secondAttribute="bottom" constant="6" id="YUL-6c-wfZ"/>
-                                    <constraint firstItem="7TO-lK-xhN" firstAttribute="leading" secondItem="JwB-GE-K7G" secondAttribute="trailing" constant="6" id="Zn1-lu-h0h"/>
+                                    <constraint firstItem="7TO-lK-xhN" firstAttribute="leading" secondItem="JwB-GE-K7G" secondAttribute="trailing" constant="-24" id="Zn1-lu-h0h"/>
                                     <constraint firstItem="IBL-aU-c8f" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="aR3-Ga-61E"/>
                                     <constraint firstItem="mMC-Hd-AXe" firstAttribute="leading" secondItem="7TO-lK-xhN" secondAttribute="trailing" constant="3" id="bDY-Su-bP1"/>
                                     <constraint firstItem="tmX-ko-mzp" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="c3m-MU-62X"/>

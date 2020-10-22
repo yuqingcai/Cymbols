@@ -1,4 +1,5 @@
-// this is a Cymbols configuration file
+// this is a Cymbols UI configuration file
+// Don't modify this file, you can copy it as a template to make your own one
 {
     "description" : "cymbols_syntax_configuration",
     "name" : "Monokai",

@@ -49,9 +49,9 @@
     if (!_port)
         return 0;
     
-    if (!_port.bufferReferences)
+    if (!_port.sourceBufferReferences)
         return 0;
-    return _port.bufferReferences.count;
+    return _port.sourceBufferReferences.count;
 }
 
 - (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column {
@@ -60,7 +60,7 @@
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    CEESourceBufferReferenceContext* reference = _port.bufferReferences[row];
+    CEESourceBufferReferenceContext* reference = _port.sourceBufferReferences[row];
     CEEFileNameCellView *cellView = [_historyTable makeViewWithIdentifier:@"IDFileNameCellView"];
     NSString* string = [reference.filePath lastPathComponent];
     
@@ -76,8 +76,8 @@
 
 - (void)highlightSelectionInHistoryTable {    
     NSIndexSet *indexSet = nil;
-    CEESourceBufferReferenceContext* reference = [_port currentBufferReference];
-    NSArray* references = [_port bufferReferences];
+    CEESourceBufferReferenceContext* reference = [_port currentSourceBufferReference];
+    NSArray* references = [_port sourceBufferReferences];
     for (NSInteger i = 0; i < references.count; i ++) {
         if (reference == references[i]) {
             indexSet = [NSIndexSet indexSetWithIndex:i];
@@ -91,7 +91,7 @@
 - (IBAction)selectRow:sender {
     if (!_historyTable.selectedRowIndexes)
         return;
-    [_port presentHistory:_port.bufferReferences[_historyTable.selectedRow]];
+    [_port presentHistory:_port.sourceBufferReferences[_historyTable.selectedRow]];
 }
 
 @end

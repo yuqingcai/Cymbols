@@ -13,7 +13,8 @@
 @interface CEETextView()
 @property BOOL autoScrolling;
 @property NSTimer* autoScrollTimer;
-@property NSInteger heartBeatCount;
+@property NSTimer* caretBlinkTimer;
+@property NSInteger caretBlinkFlag;
 @end
 
 typedef enum _CEETextViewScrollDirection {
@@ -66,6 +67,8 @@ CEEPoint CEEPointFromNSPoint(NSPoint point)
 
 @implementation CEETextView
 
+@synthesize caretBlinkTimeInterval = _caretBlinkTimeInterval;
+
 static void pasteboard_string_set(cee_pointer platform_ref, const cee_uchar* str)
 {
     [[NSPasteboard generalPasteboard] clearContents];
@@ -81,11 +84,13 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 
 - (BOOL)becomeFirstResponder {
     [super setStyleState:kCEEViewStyleStateActived];
+    [self startCaretBlink];
     return YES;
 }
 
 - (BOOL)resignFirstResponder {
     [super setStyleState:kCEEViewStyleStateDeactived];
+    [self stopCaretBlink];
     return YES;
 }
 
@@ -99,8 +104,6 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 - (void)initProperties {
     [super initProperties];
     
-    _caretColor = [NSColor textColor];
-    _caretColorMarked = [NSColor textColor];
     _textBackgroundColorSelected = [NSColor selectedTextBackgroundColor];
     _textBackgroundColorSelectedOutline = [NSColor selectedTextBackgroundColor];
     _textBackgroundColorHighlight = [NSColor redColor];
@@ -108,8 +111,11 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     _styleState = kCEEViewStyleStateActived;
     _aligment = kCEETextLayoutAlignmentLeft;
     _editable = YES;
+    _wrap = YES;
+    _intelligence = YES;
     _highLightSearched = NO;
     _retain_storage = YES;
+    _caretBlinkTimeInterval = 0.5;
     
     _storage = cee_text_storage_create(NULL,
                                        (const cee_uchar*)"",
@@ -123,7 +129,32 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     CEESize size = cee_size_make(self.frame.size.width, 
                                  self.frame.size.height);
     cee_text_edit_container_size_set(_edit, size);
-    cee_text_edit_wrap_set(self.edit, TRUE);
+    cee_text_edit_wrap_set(self.edit, _wrap);
+}
+
+- (void)startCaretBlink {
+    _caretBlinkFlag = 0;
+    if (_caretBlinkTimer)
+        return;
+        
+    _caretBlinkTimer = [NSTimer timerWithTimeInterval:_caretBlinkTimeInterval target:self selector:@selector(blinkCaret:) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:_caretBlinkTimer forMode:NSRunLoopCommonModes];
+}
+
+- (void)stopCaretBlink {
+    if (!_caretBlinkTimer)
+        return;
+    [_caretBlinkTimer invalidate];
+    _caretBlinkTimer = nil;
+}
+
+- (void)setCaretBlinkTimeInterval:(CGFloat)interval {
+    _caretBlinkTimeInterval = interval;
+    [self startCaretBlink];
+}
+
+- (CGFloat )caretBlinkTimeInterval {
+    return _caretBlinkTimeInterval;
 }
 
 - (void)setTextAttributesDescriptor:(NSString*)descriptor {
@@ -158,8 +189,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     return descriptor;
 }
 
-- (void)heartBeatResponse:(NSNotification*)notification {
-    _heartBeatCount += 30;
+- (void)blinkCaret:(NSTimer*)timer {
+    _caretBlinkFlag ++;
     [self setNeedsDisplay:YES];
 }
 
@@ -181,12 +212,17 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     cee_text_edit_storage_set(_edit, _storage);
 }
 
-- (void)dealloc {    
+- (void)dealloc {
     if (_edit)
         cee_text_edit_free(_edit);
     
     if (_storage && _retain_storage)
         cee_text_storage_free(_storage);
+    
+    if (_caretBlinkTimer) {
+        [_caretBlinkTimer invalidate];
+        _caretBlinkTimer = nil;
+    }
 }
 
 - (BOOL)isFlipped {
@@ -631,11 +667,11 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         if (rect->size.width < FLT_EPSILON)
             rect->size.width = 2.0;
         
-        NSRect drawRect = NSMakeRect(origin.x, 
-                                     origin.y - rect->size.height, 
-                                     rect->size.width, 
-                                     rect->size.height);
-        NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:drawRect xRadius:2.0 yRadius:2.0];
+        NSRect _rect = NSMakeRect(origin.x, 
+                                  origin.y - rect->size.height, 
+                                  rect->size.width, 
+                                  rect->size.height);
+        NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:_rect xRadius:2.0 yRadius:2.0];
         [path setLineWidth:1.0];
         [path stroke];
         [path fill];
@@ -731,22 +767,29 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (void)drawCaretAtUnit:(CEETextUnitRef)unit inLine:(CEETextLineRef)line {
-    NSBezierPath* path = nil;
     CEERect line_bounds;
-    CGFloat caretAlpha = 1.0;
+    BOOL draw = NO;
     CEERect caret_bounds;
     CEETextLayoutRef layout = NULL;
     cee_float line_space = 0;
     NSRect rect;
+    cee_pointer platform = NULL;
+    
+    if (!(_caretBlinkFlag % 2))
+        draw = YES;
+    else
+        draw = NO;
+    
+    if (!draw)
+        return;
     
     layout = cee_text_edit_layout(_edit);
     if (!layout)
         return;
     
+    platform = cee_text_layout_platform_get(layout);
     line_space = cee_text_layout_line_space_get(layout);
     line_bounds = cee_text_line_bounds_get(line);
-    
-    caretAlpha = sin((double)(_heartBeatCount % 314) / 100.0);
     caret_bounds = cee_text_unit_bounds_get(unit);
     caret_bounds.origin.x += line_bounds.origin.x;
     caret_bounds.origin.y = line_bounds.origin.y - line_space;
@@ -756,9 +799,12 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                       self.frame.size.height - caret_bounds.origin.y - caret_bounds.size.height,
                       2.0, 
                       caret_bounds.size.height);
-    path = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:0.0 yRadius:0.0];
-    [_caretColor setFill];
-    [path fill];
+    CGColorRef color = (CGColorRef)cee_text_platform_fore_color_get(platform,
+                                                                    -1, 
+                                                                    0);
+    NSColor* caretColor = [NSColor colorWithCGColor:color];
+    [caretColor setFill];
+    NSRectFill(rect);
 }
 
 - (void)drawUnderlineAtUnit:(CEETextUnitRef)unit inLine:(CEETextLineRef)line {
@@ -823,7 +869,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     cee_boolean under_line = FALSE;
     CEETextLayoutRef layout = NULL;
     CGRect rect;
-    cee_pointer layout_platform = NULL;
+    cee_pointer platform = NULL;
     
     layout = cee_text_edit_layout(_edit);
     if (!layout)
@@ -833,14 +879,16 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     CGContextSaveGState(context);
     CGContextSetTextPosition(context, 0.0, 0.0);
     
-    layout_platform = cee_text_layout_platform_get(layout);
-    background_color = (CGColorRef)cee_text_layout_platform_background_color_get(layout_platform);
+    platform = cee_text_layout_platform_get(layout);
+    background_color = (CGColorRef)cee_text_platform_background_color_get(platform,
+                                                                          -1, 
+                                                                          0);
     if (background_color) {
         CGContextSetFillColorWithColor(context, background_color);
         rect = CGRectMake(0.0,
                           0.0,
                           self.frame.size.width,
-                          self.frame.size.width);
+                          self.frame.size.height);
         CGContextFillRect(context, rect);
     }
     
@@ -854,7 +902,6 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         [self drawSearchedRegions];
         [self drawSearchedHighlightRegion];
     }
-    
     
     caret_offset = cee_text_edit_caret_buffer_offset_get(_edit);
     p = cee_text_layout_lines_get(layout);
@@ -881,8 +928,10 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
             under_line = cee_text_unit_under_line_get(unit);
             position = [self viewPointFromLayoutPoint:position];
             
-            if (self.window.firstResponder == self &&  _editable &&
-                self.styleState == kCEEViewStyleStateActived && buffer_offset == caret_offset)
+            if ([self.window isKeyWindow] &&
+                self.window.firstResponder == self && _editable &&
+                self.styleState == kCEEViewStyleStateActived &&
+                buffer_offset == caret_offset)
                 [self drawCaretAtUnit:unit inLine:line];
             
             rect = CGRectMake(position.x,
@@ -942,13 +991,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     
     self.borderWidth = current.borderWidth;
     self.cornerRadius = current.cornerRadius;
-    
-    if (current.caretColor)
-        self.caretColor = current.caretColor;
-    
-    if (current.caretColorMarked)
-        self.caretColorMarked = current.caretColorMarked;
-    
+        
     if (current.textBackgroundColorSelected)
         self.textBackgroundColorSelected = current.textBackgroundColorSelected;
     

@@ -39,8 +39,6 @@ typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
 @property CGFloat borderWidth;
 @property CGFloat cornerRadius;
 
-@property (strong) NSColor* caretColor;
-@property (strong) NSColor* caretColorMarked;
 @property (strong) NSColor* textBackgroundColorSelected;
 @property (strong) NSColor* textBackgroundColorSelectedOutline;
 @property (strong) NSColor* textBackgroundColorHighlight;

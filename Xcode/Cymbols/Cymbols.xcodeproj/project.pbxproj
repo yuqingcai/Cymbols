@@ -10,6 +10,7 @@
 		2647CE3925309A1700970FE4 /* WelcomeGuide in Resources */ = {isa = PBXBuildFile; fileRef = 2647CE3825309A1700970FE4 /* WelcomeGuide */; };
 		2647CE3E25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3C25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m */; };
 		2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */; };
+		26548527254150AC00E1D0DE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 26548526254150AC00E1D0DE /* Credits.rtf */; };
 		269201A1252FF30D00D6E2DC /* cJSON_Utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920091252FF30D00D6E2DC /* cJSON_Utils.c */; };
 		2692026F252FF33300D6E2DC /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692026E252FF33300D6E2DC /* cJSON.c */; };
 		2692028E252FF35600D6E2DC /* cee_bst.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920271252FF35600D6E2DC /* cee_bst.c */; };
@@ -155,7 +156,6 @@
 		269203B9252FF3E400D6E2DC /* logo_butterfly_8x8@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2692034D252FF3E300D6E2DC /* logo_butterfly_8x8@2x.png */; };
 		269203BA252FF3E400D6E2DC /* logo_lazycatdesign@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2692034E252FF3E300D6E2DC /* logo_lazycatdesign@2x.png */; };
 		269203BB252FF3E400D6E2DC /* logo_welcome@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2692034F252FF3E300D6E2DC /* logo_welcome@2x.png */; };
-		269203BC252FF3E400D6E2DC /* cymbols.sketch in Resources */ = {isa = PBXBuildFile; fileRef = 26920350252FF3E300D6E2DC /* cymbols.sketch */; };
 		26920423252FF4F400D6E2DC /* CEEBinaryView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269203D7252FF4F400D6E2DC /* CEEBinaryView.m */; };
 		26920424252FF4F400D6E2DC /* CEEButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 269203D9252FF4F400D6E2DC /* CEEButton.m */; };
 		26920425252FF4F400D6E2DC /* CEECheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 269203DB252FF4F400D6E2DC /* CEECheckBox.m */; };
@@ -301,6 +301,7 @@
 		2647CE3B25309ACC00970FE4 /* CEETextHighlightStyleSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETextHighlightStyleSelectionController.h; sourceTree = "<group>"; };
 		2647CE3C25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETextHighlightStyleSelectionController.m; sourceTree = "<group>"; };
 		2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEUserInterfaceStyleSelectionController.m; sourceTree = "<group>"; };
+		26548526254150AC00E1D0DE /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		2667ECFB25037D8000ED5010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		26920091252FF30D00D6E2DC /* cJSON_Utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON_Utils.c; sourceTree = "<group>"; };
 		26920092252FF30D00D6E2DC /* cJSON_Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON_Utils.h; sourceTree = "<group>"; };
@@ -482,7 +483,6 @@
 		2692034D252FF3E300D6E2DC /* logo_butterfly_8x8@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo_butterfly_8x8@2x.png"; sourceTree = "<group>"; };
 		2692034E252FF3E300D6E2DC /* logo_lazycatdesign@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo_lazycatdesign@2x.png"; sourceTree = "<group>"; };
 		2692034F252FF3E300D6E2DC /* logo_welcome@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo_welcome@2x.png"; sourceTree = "<group>"; };
-		26920350252FF3E300D6E2DC /* cymbols.sketch */ = {isa = PBXFileReference; lastKnownFileType = file; path = cymbols.sketch; sourceTree = "<group>"; };
 		269203D6252FF4F400D6E2DC /* CEEBinaryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEBinaryView.h; sourceTree = "<group>"; };
 		269203D7252FF4F400D6E2DC /* CEEBinaryView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEBinaryView.m; sourceTree = "<group>"; };
 		269203D8252FF4F400D6E2DC /* CEEButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEButton.h; sourceTree = "<group>"; };
@@ -760,6 +760,7 @@
 				269204E2252FF5F100D6E2DC /* AppDelegate.h */,
 				269204E1252FF5F100D6E2DC /* AppDelegate.m */,
 				2667ECFB25037D8000ED5010 /* Assets.xcassets */,
+				26548526254150AC00E1D0DE /* Credits.rtf */,
 				269204F4252FF60200D6E2DC /* Main.storyboard */,
 				269204EC252FF60100D6E2DC /* Session.storyboard */,
 				269204FC252FF60300D6E2DC /* AddFileSelectionView.xib */,
@@ -949,7 +950,6 @@
 			isa = PBXGroup;
 			children = (
 				269202E4252FF3E300D6E2DC /* 2x */,
-				26920350252FF3E300D6E2DC /* cymbols.sketch */,
 			);
 			name = Images;
 			path = ../../../../Resources/Images;
@@ -1073,6 +1073,8 @@
 		269203D5252FF4F400D6E2DC /* CymbolsUI */ = {
 			isa = PBXGroup;
 			children = (
+				269203F7252FF4F400D6E2DC /* CEEStyleManager.h */,
+				269203F8252FF4F400D6E2DC /* CEEStyleManager.m */,
 				269203D6252FF4F400D6E2DC /* CEEBinaryView.h */,
 				269203D7252FF4F400D6E2DC /* CEEBinaryView.m */,
 				269203D8252FF4F400D6E2DC /* CEEButton.h */,
@@ -1104,8 +1106,6 @@
 				269203F4252FF4F400D6E2DC /* CEESplitViewController.m */,
 				269203F5252FF4F400D6E2DC /* CEEStateButton.h */,
 				269203F6252FF4F400D6E2DC /* CEEStateButton.m */,
-				269203F7252FF4F400D6E2DC /* CEEStyleManager.h */,
-				269203F8252FF4F400D6E2DC /* CEEStyleManager.m */,
 				269203F9252FF4F400D6E2DC /* CEETabbarButton.h */,
 				269203FA252FF4F400D6E2DC /* CEETabbarButton.m */,
 				269203FB252FF4F400D6E2DC /* CEETabbarStateButton.h */,
@@ -1157,12 +1157,12 @@
 			children = (
 				2692044C252FF50300D6E2DC /* CEEEditViewController.h */,
 				2692044D252FF50300D6E2DC /* CEEEditViewController.m */,
+				26920450252FF50300D6E2DC /* CEETextEditViewController.h */,
+				26920451252FF50300D6E2DC /* CEETextEditViewController.m */,
 				2692044A252FF50300D6E2DC /* CEEBinaryEditViewController.h */,
 				2692044B252FF50300D6E2DC /* CEEBinaryEditViewController.m */,
 				2692044E252FF50300D6E2DC /* CEEMarkdownViewController.h */,
 				2692044F252FF50300D6E2DC /* CEEMarkdownViewController.m */,
-				26920450252FF50300D6E2DC /* CEETextEditViewController.h */,
-				26920451252FF50300D6E2DC /* CEETextEditViewController.m */,
 			);
 			path = Editor;
 			sourceTree = "<group>";
@@ -1390,6 +1390,7 @@
 				269203A7252FF3E400D6E2DC /* icon_split_vertical_16x16@2x.png in Resources */,
 				26920395252FF3E400D6E2DC /* icon_reload_16x16@2x.png in Resources */,
 				26920365252FF3E400D6E2DC /* icon_file_not_existed_16x16@2x.png in Resources */,
+				26548527254150AC00E1D0DE /* Credits.rtf in Resources */,
 				2692037F252FF3E400D6E2DC /* icon_list_window_16x16@2x.png in Resources */,
 				2692038F252FF3E400D6E2DC /* icon_project_16x16@2x.png in Resources */,
 				269203A8252FF3E400D6E2DC /* icon_symbol_16x16@2x.png in Resources */,
@@ -1419,7 +1420,6 @@
 				2693B227253001D700D21FD3 /* Styles in Resources */,
 				26920506252FF60300D6E2DC /* ProjectPropertyView.xib in Resources */,
 				26920387252FF3E400D6E2DC /* icon_new_file_16x16@2x.png in Resources */,
-				269203BC252FF3E400D6E2DC /* cymbols.sketch in Resources */,
 				26920357252FF3E300D6E2DC /* icon_close_16x16@2x.png in Resources */,
 				2692035F252FF3E300D6E2DC /* icon_database_search_16x16@2x.png in Resources */,
 				26920360252FF3E400D6E2DC /* icon_database_sync_16x16@2x.png in Resources */,
@@ -1835,7 +1835,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 108;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1862,7 +1862,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 108;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;

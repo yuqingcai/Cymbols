@@ -1,4 +1,5 @@
-// this is a Cymbols UserInterface configuration file
+// this is a Cymbols UI configuration file
+// Don't modify this file, you can copy it as a template to make your own one
 {
     "Name" : "Cymbols",
     
@@ -445,8 +446,6 @@
         "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
         "text_color" : "#4D4D4D",
         "background_color" : "#FFFFFF",
-        "caret_color" : "#4D4D4D",
-        "caret_color_marked" : "#4D4D4D",
         "text_background_color_selected" : "#bbdefb",
         "text_background_color_selected_outline" : "#42a5f5",
         "text_background_color_highlight" : "#ffeb3b",
@@ -466,8 +465,6 @@
         "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
         "text_color" : "#4D4D4D",
         "background_color" : "#FFFFFF",
-        "caret_color" : "#4D4D4D",
-        "caret_color_marked" : "#4D4D4D",
         "text_background_color_selected" : "#EEEEEE",
         "text_background_color_selected_outline" : "#ABABAB",
         "text_background_color_highlight" : "#ffeb3b",
@@ -487,8 +484,6 @@
         "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
         "text_color" : "#4D4D4D",
         "background_color" : "#FFFFFF",
-        "caret_color" : "#4D4D4D",
-        "caret_color_marked" : "#4D4D4D",
         "text_background_color_selected" : "#bbdefb",
         "text_background_color_selected_outline" : "#42a5f5",
         "text_background_color_highlight" : "#ffeb3b",
@@ -503,8 +498,6 @@
         "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
         "text_color" : "#4D4D4D",
         "background_color" : "#FFFFFF",
-        "caret_color" : "#4D4D4D",
-        "caret_color_marked" : "#4D4D4D",
         "text_background_color_selected" : "#EEEEEE",
         "text_background_color_selected_outline" : "#ABABAB",
         "text_background_color_highlight" : "#ffeb3b",
@@ -519,8 +512,6 @@
         "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
         "text_color" : "#4D4D4D",
         "background_color" : "#FFFFFF",
-        "caret_color" : "#4D4D4D",
-        "caret_color_marked" : "#4D4D4D",
         "text_background_color_selected" : "#bbdefb",
         "text_background_color_selected_outline" : "#42a5f5",
         "text_background_color_highlight" : "#ffeb3b",
@@ -540,8 +531,6 @@
         "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
         "text_color" : "#4D4D4D",
         "background_color" : "#FFFFFF",
-        "caret_color" : "#4D4D4D",
-        "caret_color_marked" : "#4D4D4D",
         "text_background_color_selected" : "#EEEEEE",
         "text_background_color_selected_outline" : "#ABABAB",
         "text_background_color_highlight" : "#ffeb3b",

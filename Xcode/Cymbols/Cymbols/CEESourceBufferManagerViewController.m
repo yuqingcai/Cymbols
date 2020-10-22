@@ -43,8 +43,11 @@
     NSArray *constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[textEditView]-0-|" options:0 metrics:nil views:views];
     [_sourceContentView addConstraints:constraintsH];
     [_sourceContentView addConstraints:constraintsV];
-    [_editViewController setEditable:NO];
-    [_editViewController setIntelligence:NO];
+    
+    //[_editViewController setEditable:NO];
+    //[_editViewController setIntelligence:NO];
+    //[_editViewController setWrap:YES];
+    
     _directory = nil;
 }
 

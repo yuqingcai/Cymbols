@@ -531,11 +531,6 @@ cee_pointer cee_text_layout_platform_get(CEETextLayoutRef layout) {
     return layout->platform_ref;
 }
 
-CEETextColorRef cee_text_layout_platform_background_color_get(cee_pointer platform)
-{
-    return cee_text_platform_background_color_get(platform, -1, 0);
-}
-
 static void text_layout(CEETextLayoutRef layout,
                         cee_boolean tinted)
 {
@@ -550,8 +545,10 @@ static void text_layout(CEETextLayoutRef layout,
     CEETextLine* line = NULL;
     CEETextUnit* unit = NULL;
     
-    if (layout->lines)
+    if (layout->lines) {
         cee_list_free_full(layout->lines, line_free);
+        layout->lines = NULL;
+    }
     
     if (current == -1 || !cee_text_storage_buffer_get(storage))
         return;
@@ -626,8 +623,7 @@ static void text_layout(CEETextLayoutRef layout,
         }
     }
     
-    if (nb_paragraph > layout->nb_paragraph)
-        layout->nb_paragraph = nb_paragraph;
+    layout->nb_paragraph = nb_paragraph;
 }
 
 void cee_text_layout_run(CEETextLayoutRef layout)
@@ -641,14 +637,20 @@ void cee_text_layout_run(CEETextLayoutRef layout)
     text_layout(layout, FALSE);
     
     head_unit = cee_text_layout_head_unit_get(layout);
+    if (!head_unit)
+        return;
+    
     tail_unit = cee_text_layout_tail_unit_get(layout);
+    if (!tail_unit)
+        return;
+    
     offset = cee_text_unit_buffer_offset_get(head_unit);
     length = cee_text_unit_buffer_offset_get(tail_unit) +
         cee_text_unit_buffer_length_get(tail_unit) -
         cee_text_unit_buffer_offset_get(head_unit);
     range = cee_range_make(offset, length);
-    
     if (layout->attribute_generate) {
+        
         if (layout->tags)
             cee_list_free_full(layout->tags, cee_tag_free);
         layout->tags = layout->attribute_generate(layout->attribute_generator_ref,
@@ -700,6 +702,11 @@ CEERect cee_text_layout_bounds_get(CEETextLayoutRef layout)
 void cee_text_layout_paragraph_index_set(CEETextLayoutRef layout,
                                          cee_long index)
 {
+    CEETextStorageRef storage = layout->storage_ref;
+    cee_ulong nb_paragraph = cee_text_storage_paragraph_count_get(storage);
+    if (index >= nb_paragraph)
+        index = nb_paragraph - 1;
+    
     layout->paragraph_index = index;
 }
 
@@ -858,16 +865,25 @@ CEERect cee_text_unit_box_get(CEETextUnitRef unit)
 
 cee_long cee_text_unit_buffer_offset_get(CEETextUnitRef unit)
 {
+    if (!unit)
+        return -1;
+    
     return unit->buffer_offset;
 }
 
 cee_ulong cee_text_unit_buffer_length_get(CEETextUnitRef unit)
 {
+    if (!unit)
+        return 0;
+    
     return unit->buffer_length;
 }
 
 cee_ulong cee_text_unit_index_get(CEETextUnitRef unit)
 {
+    if (!unit)
+        return -1;
+    
     return unit->index;
 }
 
@@ -994,26 +1010,43 @@ cee_boolean cee_text_unit_under_line_get(CEETextUnitRef unit)
 CEETextLineRef cee_text_layout_head_line_get(CEETextLayoutRef layout)
 {
     CEEList* lines = cee_text_layout_lines_get(layout);
+    if (!lines)
+        return NULL;
     return cee_list_first(lines)->data;
 }
 
 CEETextUnitRef cee_text_layout_head_unit_get(CEETextLayoutRef layout)
 {
     CEETextLineRef line = cee_text_layout_head_line_get(layout);
+    if (!line)
+        return NULL;
+    
     CEEList* units = cee_text_line_units_get(line);
+    if (!units)
+        return NULL;
+    
     return cee_list_first(units)->data;
 }
 
 CEETextLineRef cee_text_layout_tail_line_get(CEETextLayoutRef layout)
 {
     CEEList* lines = cee_text_layout_lines_get(layout);
+    if (!lines)
+        return NULL;
+    
     return cee_list_last(lines)->data;
 }
 
 CEETextUnitRef cee_text_layout_tail_unit_get(CEETextLayoutRef layout)
 {
     CEETextLineRef line = cee_text_layout_tail_line_get(layout);
+    if (!line)
+        return NULL;
+    
     CEEList* units = cee_text_line_units_get(line);
+    if (!units)
+        return NULL;
+    
     return cee_list_last(units)->data;
 }
 

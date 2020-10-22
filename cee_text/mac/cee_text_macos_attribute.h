@@ -65,6 +65,7 @@ CEETextColorRef cee_text_platform_fore_color_get(cee_pointer platform_ref,
 CEETextColorRef cee_text_platform_background_color_get(cee_pointer platform_ref,
                                                        CEEUnicodePoint codepoint,
                                                        CEETagType type);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

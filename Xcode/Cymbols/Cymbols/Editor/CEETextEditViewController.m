@@ -85,7 +85,6 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self configure];
     
     _searchingText = NO;
     _searchCaseSensitive = NO;
@@ -93,23 +92,17 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     _searchMarchWord = NO;
     _searchTimeout = NO;
     _searchTextWhenModifing = YES;
-    self.editable = NO;
-    self.intelligence = NO;
     
-    cee_text_edit_wrap_set(_textView.edit, self.wrap);
-    
-    if (self.wrap)
-        [self showHorizontalScroller:NO];
-    else
-        [self showHorizontalScroller:YES];
+    [self configure];
     
     [_textView setDelegate:self];
-    [_searchInput setDelegate:self];
-    [_replaceInput setDelegate:self];
-    
+    [_textView setStorage:nil];
     CEEStyleManager* manager = [CEEStyleManager defaultStyleManager];
     NSString* descriptor = [manager textHighlighDescriptor];
     [_textView setTextAttributesDescriptor:descriptor];
+    
+    [_searchInput setDelegate:self];
+    [_replaceInput setDelegate:self];
     
     [_verticalScroller setDirection:kCEEScrollerDirectionVertical];
     [_verticalScroller setScrollerStyle:NSScrollerStyleOverlay];
@@ -125,8 +118,11 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [_horizontalScroller setTarget:self];
     [_horizontalScroller setAction:@selector(horizontalScroll:)];
     
+    if (_textView.wrap)
+        [self showHorizontalScroller:NO];
+    
     [self showTextSearch:NO];
-    [_textView setStorage:nil];
+    [self showLineNumber:_showLineNumber];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textHighlightStyleResponse:) name:CEENotificationTextHighlightStyleUpdate object:nil];
@@ -137,17 +133,21 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 - (void)configure {
     AppDelegate* delegate = [NSApp delegate];
     NSDictionary* configurations = [delegate configurations];
-    _showLineNumber = [configurations[@"line_number"] boolValue];
-    self.wrap = [configurations[@"wrap"] boolValue];
-}
-
-- (void)setWrap:(BOOL)wrap {
-    [super setWrap:wrap];
-    cee_text_edit_wrap_set(_textView.edit, self.wrap);
-    if (self.wrap)
-        [self showHorizontalScroller:NO];
+    
+    if (configurations[@"line_wrap"])
+        _textView.wrap = [configurations[@"line_wrap"] boolValue];
     else
-        [self showHorizontalScroller:YES];
+        _textView.wrap = YES;
+    
+    if (configurations[@"caret_blink_time_interval"])
+        _textView.caretBlinkTimeInterval = [configurations[@"caret_blink_time_interval"] floatValue];
+    else
+        _textView.caretBlinkTimeInterval = 0.5;
+    
+    if (configurations[@"show_line_number"])
+        _showLineNumber = [configurations[@"show_line_number"] boolValue];
+    else
+        _showLineNumber = YES;
 }
 
 - (void)viewDidAppear {
@@ -158,6 +158,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 - (void)setBuffer:(CEESourceBuffer*)buffer {
     (void)self.view;
     [super setBuffer:buffer];
+
     if (buffer) {
         CEETextLayoutRef layout = cee_text_edit_layout([_textView edit]);
         cee_text_layout_attribute_generator_set(layout, (__bridge cee_pointer)self);
@@ -167,14 +168,14 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     else {
         [_textView setStorage:nil];
     }
-
+    
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
     [self.port setDescriptor:[self createPortDescriptor]];
     [_textView setNeedsDisplay:YES];
     [self adjustScrollers];
 }
 
-- (void)setPresentedLineBufferOffset:(NSInteger)offset {
+- (void)setLineBufferOffset:(NSInteger)offset {
     CEETextEditRef edit = [_textView edit];
     CEETextLayoutRef layout = cee_text_edit_layout(edit);
     CEETextStorageRef storage = self.buffer.storage;
@@ -193,13 +194,9 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     cee_text_layout_paragraph_index_set(layout, paragraph);
     cee_text_edit_caret_buffer_offset_set(edit, offset);
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
+    [self.port setDescriptor:[self createPortDescriptor]];
     [_textView setNeedsDisplay:YES];
     [self adjustScrollers];
-}
-
-- (void)setEditable:(BOOL)editable {
-    [super setEditable:editable];
-    [_textView setEditable:self.editable];
 }
 
 - (void)showTextSearch:(BOOL)shown {
@@ -241,7 +238,6 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 
 - (void)adjustScrollers {
     CEETextEditRef edit = [_textView edit];
-    CEETextLayoutRef layout = cee_text_edit_layout(edit);
     _verticalScroller.floatValue = cee_text_edit_vertical_scroller_offset_get(edit);
     _verticalScroller.knobProportion = cee_text_edit_vertical_scroller_proportion_get(edit);
     _horizontalScroller.floatValue = cee_text_edit_horizontal_scroller_offset_get(edit);
@@ -250,11 +246,6 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     // make sure horizontal scroller always draw the knob
     if (fabs(_horizontalScroller.knobProportion - 1.0) < FLT_EPSILON)
         _horizontalScroller.knobProportion = 0.99;
-    
-    CEESourceBufferReferenceContext* reference = [self.port currentBufferReference];
-    NSInteger index = cee_text_layout_paragraph_index_get(layout);
-    NSInteger offset = cee_text_storage_buffer_offset_by_paragraph_index(self.buffer.storage, index);
-    [reference setPresentedLineBufferOffset:offset];
 }
 
 - (void)verticalScroll:(id)sender {
@@ -266,10 +257,10 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
     [_textView setNeedsDisplay:YES];
     
-    CEESourceBufferReferenceContext* reference = [self.port currentBufferReference];
+    CEESourceBufferReferenceContext* reference = [self.port currentSourceBufferReference];
     NSInteger index = cee_text_layout_paragraph_index_get(layout);
     NSInteger offset = cee_text_storage_buffer_offset_by_paragraph_index(self.buffer.storage, index);
-    [reference setPresentedLineBufferOffset:offset];
+    [reference setLineBufferOffset:offset];
 }
 
 - (void)horizontalScroll:(id)sender {
@@ -571,11 +562,20 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     }
 }
 
--(void)textViewScrolled:(CEETextView*)textView {
+- (void)textViewScrolled:(CEETextView*)textView {
     if (textView == _textView) {
-        [self.port setDescriptor:[self createPortDescriptor]];
+        //[self.port setDescriptor:[self createPortDescriptor]];
         [self adjustScrollers];
+
+        CEETextEditRef edit = [_textView edit];
+        CEETextLayoutRef layout = cee_text_edit_layout(edit);
+        CEESourceBufferReferenceContext* reference = [self.port currentSourceBufferReference];
+        NSInteger index = cee_text_layout_paragraph_index_get(layout);
+        NSInteger offset = cee_text_storage_buffer_offset_by_paragraph_index(self.buffer.storage, index);
+        [reference setLineBufferOffset:offset];
+        
         [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
+        [self.port setDescriptor:[self createPortDescriptor]];
     }
 }
 
@@ -584,23 +584,23 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
         
         CEETextEditRef edit = [_textView edit];
         CEETextLayoutRef layout = cee_text_edit_layout(edit);
-        
-        CEESourceBufferReferenceContext* reference = [self.port currentBufferReference];
-        
+        CEESourceBufferReferenceContext* reference = [self.port currentSourceBufferReference];
         NSInteger index = cee_text_layout_paragraph_index_get(layout);
         NSInteger offset = cee_text_storage_buffer_offset_by_paragraph_index(self.buffer.storage, index);
-        [reference setPresentedLineBufferOffset:offset];
-        
+        [reference setLineBufferOffset:offset];
         offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
         [reference setCaretBufferOffset:offset];
+        
+        [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
+        [self.port setDescriptor:[self createPortDescriptor]];
     }
 }
 
 - (void)textViewSelectionChangedWhenCaretMove:(CEETextView*)textView {
     if (textView == _textView) {
-        [self.port setDescriptor:[self createPortDescriptor]];
         [self adjustScrollers];
         [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
+        [self.port setDescriptor:[self createPortDescriptor]];
     }
 }
 
@@ -645,7 +645,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 }
 
 - (void)textViewSelectWithCommand:(CEETextView*)textView {
-    if (!self.intelligence || textView != _textView)
+    if (!textView.intelligence || textView != _textView)
         return;
     [self jumpToTargetSymbol:self];
     return;
@@ -676,7 +676,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 }
 
 - (void)textViewHighlightTokenCluster:(CEETextView*)textView {
-    if (!self.intelligence || textView != _textView)
+    if (!textView.intelligence || textView != _textView)
         return;
     
     CEEList* ranges = NULL;
@@ -709,14 +709,14 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 }
 
 - (void)textViewIgnoreTokenCluster:(CEETextView*)textView {
-    if (!self.intelligence || textView != _textView)
+    if (!textView.intelligence || textView != _textView)
         return;
     cee_text_edit_highlight_set([_textView edit], NULL);
     [_textView setNeedsDisplay:YES];
 }
 
 - (void)textViewCreateContext:(CEETextView*)textView {
-    if (!self.intelligence || textView != _textView)
+    if (!textView.intelligence || textView != _textView)
         return;    
 
     cee_long offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);

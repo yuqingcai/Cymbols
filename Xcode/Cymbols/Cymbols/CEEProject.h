@@ -59,7 +59,7 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 
 @interface CEESourceBufferReferenceContext : NSObject
 @property NSString* filePath;
-@property NSInteger presentedLineBufferOffset;
+@property NSInteger lineBufferOffset;
 @property NSInteger caretBufferOffset;
 - (instancetype)initWithFilePath:(NSString*)filePath;
 @end
@@ -67,16 +67,16 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 @interface CEESessionPort : NSObject <CEESerialization>
 @property (weak) CEESession* session;
 @property (strong, readonly) NSString* identifier;
-@property (strong, readonly) NSMutableArray* bufferReferences;
+@property (strong, readonly) NSMutableArray* sourceBufferReferences;
 @property (strong, readonly) NSMutableArray* openedSourceBuffers;
 @property (readonly) CEEList* context;
 @property (readonly) CEESourceSymbol* selected_symbol;
 @property (readonly) CEESourcePoint* jumpPoint;
 @property NSString* descriptor;
 
-- (void)moveBufferReferenceNext;
-- (void)moveBufferReferencePrev;
-- (CEESourceBufferReferenceContext*)currentBufferReference;
+- (void)moveSourceBufferReferenceNext;
+- (void)moveSourceBufferReferencePrev;
+- (CEESourceBufferReferenceContext*)currentSourceBufferReference;
 - (void)setActivedSourceBuffer:(CEESourceBuffer*)buffer;
 - (CEESourceBuffer*)activedSourceBuffer;
 - (void)presentHistory:(CEESourceBufferReferenceContext*)reference;

@@ -15,10 +15,10 @@ typedef struct _CEETextStorage {
     cee_ulong max_paragraph_length;
     CEETextStorageLineBreakType line_break_type;
     cee_pointer host_ref;
-    void (*buffer_update)(cee_pointer, 
-                          CEETextStorageRef,
-                          CEERange,
-                          CEERange);
+    void (*host_update)(cee_pointer, 
+                        CEETextStorageRef,
+                        CEERange,
+                        CEERange);
     CEETextModifyLoggerRef modify_logger;
 } CEETextStorage;
 
@@ -361,20 +361,19 @@ void cee_text_storage_buffer_set(CEETextStorageRef storage,
     range = cee_range_make(0, storage->size);
     storage->nb_paragraph = paragraph_count(storage->buffer, range) + 1;
     storage->max_paragraph_length = max_paragraph_length(storage->buffer, range);
-    
 }
 
 CEETextStorageRef cee_text_storage_create(cee_pointer host_ref,
                                           const cee_uchar* string,
-                                          void (*buffer_update)(cee_pointer, 
-                                                                CEETextStorageRef,
-                                                                CEERange,
-                                                                CEERange)
+                                          void (*host_update)(cee_pointer, 
+                                                              CEETextStorageRef,
+                                                              CEERange,
+                                                              CEERange)
                                           )
 {
     CEETextStorage* storage = (CEETextStorage*)cee_malloc0(sizeof(CEETextStorage));
     storage->host_ref = host_ref;
-    storage->buffer_update = buffer_update;
+    storage->host_update = host_update;
     cee_text_storage_buffer_set(storage, string);
     return storage;
 }
@@ -400,7 +399,8 @@ cee_int cee_text_storage_buffer_replace(CEETextStorageRef storage,
                                         CEERange range,
                                         const cee_uchar* in,
                                         cee_uchar** out,
-                                        cee_ulong* length)
+                                        cee_ulong* length,
+                                        cee_boolean enable_host_update)
 {
     if (!storage || (!storage->buffer && !in))
         return 0;
@@ -454,11 +454,11 @@ cee_int cee_text_storage_buffer_replace(CEETextStorageRef storage,
     if (max_length > storage->max_paragraph_length)
         storage->max_paragraph_length = max_length;
     
-    if (storage->buffer_update) {
-        storage->buffer_update(storage->host_ref, 
-                               storage,
-                               range,
-                               replacement_range);
+    if (storage->host_update && enable_host_update) {
+        storage->host_update(storage->host_ref, 
+                             storage,
+                             range,
+                             replacement_range);
     }
         
     if (!out)

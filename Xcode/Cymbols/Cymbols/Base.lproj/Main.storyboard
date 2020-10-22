@@ -18,7 +18,7 @@
                                         <menuItem title="About Cymbols" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
-                                                <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
+                                                <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="jlt-mR-UY4"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
@@ -80,12 +80,6 @@
                                         <menuItem title="New File" keyEquivalent="n" id="Was-JA-tGl">
                                             <connections>
                                                 <action selector="newFile:" target="Ady-hI-5gd" id="o4j-yc-4ig"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="New Project..." id="A5F-tQ-GwL">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="newProject:" target="Ady-hI-5gd" id="hvP-Fj-oxm"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Open…" keyEquivalent="o" id="IAo-SY-fd9">
@@ -192,6 +186,12 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Project" id="Axi-CX-u9f">
                                     <items>
+                                        <menuItem title="New Project..." keyEquivalent="N" id="5hX-dU-uPn">
+                                            <connections>
+                                                <action selector="newProject:" target="Ady-hI-5gd" id="YI5-TU-R4B"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="vTl-78-bt7"/>
                                         <menuItem title="Build" keyEquivalent="b" id="HCn-zV-Wbd">
                                             <connections>
                                                 <action selector="buildProject:" target="Ady-hI-5gd" id="tvX-z2-bkt"/>
@@ -207,8 +207,6 @@
                                                 <action selector="cleanProject:" target="Ady-hI-5gd" id="7ib-hW-BrT"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="TZP-lo-Ap5"/>
-                                        <menuItem title="Build Project Report" keyEquivalent="R" id="4ay-SX-3TH"/>
                                     </items>
                                 </menu>
                             </menuItem>
@@ -221,21 +219,28 @@
                                                 <action selector="find:" target="Ady-hI-5gd" id="TW8-kR-ngl"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Find Next" keyEquivalent="g" id="c2y-tH-FuK"/>
+                                        <menuItem title="Find Next" keyEquivalent="g" id="c2y-tH-FuK">
+                                            <connections>
+                                                <action selector="nextSearched:" target="Ady-hI-5gd" id="BNp-2z-9OY"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Find Previous" keyEquivalent="g" id="ivh-7E-P9a">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="prevSearched:" target="Ady-hI-5gd" id="CFV-iQ-WPo"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="k8n-xE-Nvh"/>
-                                        <menuItem title="Replace..." keyEquivalent="f" id="deU-g9-McU">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                        </menuItem>
-                                        <menuItem title="Replace Next" keyEquivalent="e" id="SZi-dV-cO6">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="l6o-GL-n61"/>
-                                        <menuItem title="Item" keyEquivalent="F" id="MMC-tb-Yea">
+                                        <menuItem title="Replace" id="deU-g9-McU">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
-                                                <action selector="toggleLocationSelectController:" target="Ady-hI-5gd" id="THC-UV-eJ4"/>
+                                                <action selector="replaceSearched:" target="Ady-hI-5gd" id="cRN-eR-Ta4"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Replace All" id="SZi-dV-cO6">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="replaceAllSearched:" target="Ady-hI-5gd" id="jJY-s0-7id"/>
                                             </connections>
                                         </menuItem>
                                     </items>

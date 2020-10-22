@@ -24,17 +24,18 @@ typedef enum _CEETextStorageEncodeType {
 typedef struct _CEETextStorage* CEETextStorageRef;
 CEETextStorageRef cee_text_storage_create(cee_pointer host_ref,
                                           const cee_uchar* string,
-                                          void (*buffer_update)(cee_pointer,
-                                                                CEETextStorageRef,
-                                                                CEERange,
-                                                                CEERange)
+                                          void (*host_update)(cee_pointer,
+                                                              CEETextStorageRef,
+                                                              CEERange,
+                                                              CEERange)
                                           );
 void cee_text_storage_free(CEETextStorageRef data);
 cee_int cee_text_storage_buffer_replace(CEETextStorageRef storage,
                                         CEERange range,
                                         const cee_uchar* in,
                                         cee_uchar** out,
-                                        cee_ulong* length);
+                                        cee_ulong* length,
+                                        cee_boolean enable_host_update);
 void cee_text_storage_buffer_set(CEETextStorageRef storage,
                                  const cee_uchar* string);
 const cee_uchar* cee_text_storage_buffer_get(CEETextStorageRef storage);

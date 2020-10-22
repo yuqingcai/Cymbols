@@ -742,6 +742,11 @@ CEETextColorRef cee_text_platform_fore_color_get(cee_pointer platform_ref,
                                                 CEETagType type)
 {
     CEEMacOSPlatform* platform = (CEEMacOSPlatform*)platform_ref;
+    if (codepoint == -1 || type == kCEETagTypeIgnore) {
+        CEETextAttribute* attribute = platform->attribute_map[kCEETagTypePlainText];
+        return attribute->forecolor;
+    }
+    
     CEETextAttribute* attribute = platform->attribute_map[type];
     if (!attribute)
         attribute = platform->attribute_map[kCEETagTypePlainText];

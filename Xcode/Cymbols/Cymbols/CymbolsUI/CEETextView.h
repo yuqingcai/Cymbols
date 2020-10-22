@@ -45,8 +45,6 @@ IB_DESIGNABLE
     BOOL _retain_storage;
 }
 
-@property (strong) NSColor* caretColor;
-@property (strong) NSColor* caretColorMarked;
 @property (strong) NSColor* textBackgroundColorSelected;
 @property (strong) NSColor* textBackgroundColorSelectedOutline;
 @property (strong) NSColor* textBackgroundColorHighlight;
@@ -54,8 +52,11 @@ IB_DESIGNABLE
 @property CEETextLayoutAlignment aligment;
 @property (readonly) CEETextEditRef edit;
 @property (readonly) CEETextStorageRef storage;
+@property BOOL wrap;
 @property BOOL editable;
+@property BOOL intelligence;
 @property BOOL highLightSearched;
+@property CGFloat caretBlinkTimeInterval;
 
 @property (weak) id<CEETextViewDelegate> delegate;
 - (NSString*)textAttributesDescriptor;
