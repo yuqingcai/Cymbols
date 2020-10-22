@@ -40,7 +40,7 @@
 - (IBAction)confirm:(id)sender {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     AppDelegate* delegate = [NSApp delegate];
-    [delegate setConfiguration:@"UIStyle" value:[styleManager userInterfaceStyleName]];
+    [delegate setConfiguration:@"ui_style" value:[styleManager userInterfaceStyleName]];
     [NSApp stopModalWithCode:NSModalResponseOK];
 }
 

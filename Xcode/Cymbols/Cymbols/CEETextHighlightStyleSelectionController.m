@@ -40,7 +40,7 @@
 - (IBAction)confirm:(id)sender {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     AppDelegate* delegate = [NSApp delegate];
-    [delegate setConfiguration:@"SyntaxStyle" value:[styleManager textHighlightStyleName]];
+    [delegate setConfiguration:@"syntax_style" value:[styleManager textHighlightStyleName]];
     [NSApp stopModalWithCode:NSModalResponseOK];
 }
 
