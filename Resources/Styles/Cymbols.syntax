@@ -167,16 +167,7 @@
             "forecolor" : "#673ab7",
             "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
-        
-        {
-            "name" : "protocol",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
-            "underline" : "false",
-            "strikethrough" : "false",
-            "forecolor" : "#673ab7",
-            "backgroundcolor" : "hsba(0, 0, 0, 0)"
-        },
-        
+                
         {
             "name" : "enumerator",
             "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
@@ -251,7 +242,6 @@
             "strikethrough" : "false",
             "forecolor" : "#c0ca33",
             "backgroundcolor" : "hsba(0, 0, 0, 0)"
-            
         },
         
         {

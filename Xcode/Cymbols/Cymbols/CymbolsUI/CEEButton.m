@@ -43,35 +43,50 @@
     CGFloat borderWidth = self.borderWidth;
     CGFloat cornerRadius = self.cornerRadius;
     
+    CEEUserInterfaceStyle* style = nil;
+    
     if (!self.isEnabled) {
-        CEEUserInterfaceStyle* disableStyle = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:kCEEViewStyleStateDisabled];
-        if (disableStyle) {
-            
-            if (disableStyle.font)
-                font = disableStyle.font;
-            
-            if (disableStyle.backgroundColor)
-                backgroundColor = disableStyle.backgroundColor;
-            
-            if (disableStyle.borderColor)
-                borderColor = disableStyle.borderColor;
-            
-            if (disableStyle.textColor)
-                textColor = disableStyle.textColor;
-            
-            if (disableStyle.textShadow)
-                textShadow = disableStyle.textShadow;
-            
-            if (disableStyle.gradient)
-                gradient = disableStyle.gradient;
-            
-            if (disableStyle.iconColor)
-                iconColor = disableStyle.iconColor;
-            
-            gradientAngle = disableStyle.gradientAngle;
-            borderWidth = disableStyle.borderWidth;
-            cornerRadius = disableStyle.cornerRadius;
+        style = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:kCEEViewStyleStateDisabled];
+    }
+    else {
+        if (self.state == NSControlStateValueOff) {
+            style = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:kCEEViewStyleStateActived];
+            if (self.isHighlighted) {
+                CEEUserInterfaceStyle* highlightStyle = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:kCEEViewStyleStateHeighLighted];
+                if (highlightStyle)
+                    style = highlightStyle;
+            }
         }
+        else if (self.state == NSControlStateValueOn) {
+            style = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:kCEEViewStyleStateClicked];
+        }
+    }
+    
+    if (style) {
+        if (style.font)
+            font = style.font;
+        
+        if (style.backgroundColor)
+            backgroundColor = style.backgroundColor;
+        
+        if (style.borderColor)
+            borderColor = style.borderColor;
+        
+        if (style.textColor)
+            textColor = style.textColor;
+        
+        if (style.textShadow)
+            textShadow = style.textShadow;
+        
+        if (style.gradient)
+            gradient = style.gradient;
+        
+        if (style.iconColor)
+            iconColor = style.iconColor;
+        
+        gradientAngle = style.gradientAngle;
+        borderWidth = style.borderWidth;
+        cornerRadius = style.cornerRadius;
     }
     
     NSSize frameSize = self.frame.size;
@@ -157,6 +172,7 @@
         return;
     
     self.state = NSOnState;
+    
     while (keepOn) {
         NSEventMask eventMask = NSEventMaskLeftMouseUp | NSEventMaskLeftMouseDragged;
         event = [[self window] nextEventMatchingMask:eventMask];
@@ -191,6 +207,7 @@
         return ;
     
     _state = state;
+    
     if (_state == NSOnState)
         [self setStyleState:kCEEViewStyleStateClicked];
     else if (_state == NSOffState) {

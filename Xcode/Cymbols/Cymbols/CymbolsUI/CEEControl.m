@@ -58,7 +58,7 @@
     return tintedImage;
 }
 
-- (void)setStyleState:(CEEViewStyleState)state {    
+- (void)setStyleState:(CEEViewStyleState)state {  
     _styleState = state;
     [super setStyleState:state];
 }

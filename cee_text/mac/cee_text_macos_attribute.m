@@ -6,8 +6,8 @@
 //  Copyright © 2019 Lazycatdesign. All rights reserved.
 //
 
+#import <Foundation/Foundation.h>
 #include <cjson/cJSON.h>
-#include <pcre.h>
 #include "cee_regex.h"
 #include "cee_text_macos_attribute.h"
 
@@ -773,44 +773,20 @@ static void font_attributes_from_descriptor(const cee_char* descriptor,
                                             cee_char** size)
 {
     const cee_char* pattern = "font\\s*\\(\\s*\\\"(.*)\\\"\\s*,\\s*([0-9.]+)\\s*,\\s*\\\"(.*)\\\"\\s*,\\s*([0-9.]+)\\s*\\)";
+    NSString* contentString = [NSString stringWithUTF8String:descriptor];
+    NSString* patternString = [NSString stringWithUTF8String:pattern];
     
-    cee_int ret;
-    pcre *re = NULL;
-    cee_int err;
-    cee_int ovector[OVECCOUNT];
-    const cee_char *err_msg;
-    
-    re = pcre_compile((char*)pattern,
-                      PCRE_NEWLINE_ANY | PCRE_UTF8,
-                      &err_msg,
-                      &err,
-                      NULL);
-    
-    memset(ovector, 0, sizeof(int)*OVECCOUNT);
-    
-    ret = pcre_exec(re,
-                    NULL,
-                    (char*)descriptor,
-                    (int)strlen((char*)descriptor),
-                    ovector[1],
-                    0,
-                    ovector,
-                    OVECCOUNT);
-    
-    if (ret > 0) {
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSArray *matches = [regex matchesInString:contentString options:0 range:NSMakeRange(0, [contentString length])];
+    if (matches.count) {
+        NSTextCheckingResult* match = matches[0];
         if (family)
-            *family = cee_strndup(&descriptor[ovector[1*2]], 
-                                  ovector[1*2+1] - ovector[1*2]);
+            *family = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:1]] UTF8String]);
         if (size)
-            *size = cee_strndup(&descriptor[ovector[2*2]], 
-                                ovector[2*2+1] - ovector[2*2]);
+            *size = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:2]] UTF8String]);
         if (style)
-            *style = cee_strndup(&descriptor[ovector[3*2]], 
-                                 ovector[3*2+1] - ovector[3*2]);
+            *style = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:3]] UTF8String]);
     }
-    
-    if (re)
-        pcre_free(re);
 }
 
 static CGColorRef color_create_form_descriptor(CEEMacOSPlatform* platform,
@@ -836,171 +812,113 @@ static CGColorRef color_create_form_descriptor(CEEMacOSPlatform* platform,
 static cee_boolean color_component_from_rgb_descriptor(const char* descriptor,
                                                        CGFloat components[4])
 {
-    cee_int ret = 0;
-    pcre *re = NULL;
-    cee_int err;
-    cee_int ovector[OVECCOUNT];
-    const cee_char* err_msg;
     const cee_char* pattern = "(rgba)\\s*\\(\\s*([0-9.]+)\\s*,\\s*([0-9.]+)\\s*,\\s*([0-9.]+)\\s*,\\s*([0-9.]+)\\s*\\)";
+    NSString* contentString = [NSString stringWithUTF8String:descriptor];
+    NSString* patternString = [NSString stringWithUTF8String:pattern];
+    cee_boolean ret = FALSE;
     
-    re = pcre_compile((char*)pattern,
-                      PCRE_NEWLINE_ANY | PCRE_UTF8,
-                      &err_msg,
-                      &err,
-                      NULL);
-    
-    memset(ovector, 0, sizeof(int)*OVECCOUNT);
-    
-    ret = pcre_exec(re,
-                    NULL,
-                    (char*)descriptor,
-                    (int)strlen((char*)descriptor),
-                    ovector[1],
-                    0,
-                    ovector,
-                    OVECCOUNT);
-    if (ret < 0) {
-        if (re)
-            pcre_free(re);
-        return FALSE;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSArray *matches = [regex matchesInString:contentString options:0 range:NSMakeRange(0, [contentString length])];
+    if (matches.count) {
+        ret = TRUE;
+        NSTextCheckingResult* match = matches[0];
+        
+        cee_char* type = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:1]] UTF8String]);
+        cee_char* str0 = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:2]] UTF8String]);
+        cee_char* str1 = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:3]] UTF8String]);
+        cee_char* str2 = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:4]] UTF8String]);
+        cee_char* str3 = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:5]] UTF8String]);
+        
+        components[0] = atof(str0) / 256.0;
+        components[1] = atof(str1) / 256.0;
+        components[2] = atof(str2) / 256.0;
+        components[3] = atof(str3) / 100.0;
+        
+        cee_free(str3);
+        cee_free(str2);
+        cee_free(str1);
+        cee_free(str0);
+        cee_free(type);
     }
     
-    cee_char* type = cee_strndup(&descriptor[ovector[1*2]], ovector[1*2+1] - ovector[1*2]);
-    cee_char* str0 = cee_strndup(&descriptor[ovector[2*2]], ovector[2*2+1] - ovector[2*2]);
-    cee_char* str1 = cee_strndup(&descriptor[ovector[3*2]], ovector[3*2+1] - ovector[3*2]);
-    cee_char* str2 = cee_strndup(&descriptor[ovector[4*2]], ovector[4*2+1] - ovector[4*2]);
-    cee_char* str3 = cee_strndup(&descriptor[ovector[5*2]], ovector[5*2+1] - ovector[5*2]);
-    
-    components[0] = atof(str0) / 256.0;
-    components[1] = atof(str1) / 256.0;
-    components[2] = atof(str2) / 256.0;
-    components[3] = atof(str3) / 100.0;
-        
-    cee_free(str3);
-    cee_free(str2);
-    cee_free(str1);
-    cee_free(str0);
-    cee_free(type);
-    
-    if (re)
-        pcre_free(re);
-    
-    return TRUE;
+    return ret;
 }
 
 static cee_boolean color_component_from_hsb_descriptor(const char* descriptor,
                                                        CGFloat components[4])
 {
-    cee_int ret;
-    pcre *re = NULL;
-    cee_int err;
-    cee_int ovector[OVECCOUNT];
-    const cee_char* err_msg;
     const cee_char* pattern = "(hsba)\\s*\\(\\s*([0-9.]+)\\s*,\\s*([0-9.]+)\\s*,\\s*([0-9.]+)\\s*,\\s*([0-9.]+)\\s*\\)";
+    NSString* contentString = [NSString stringWithUTF8String:descriptor];
+    NSString* patternString = [NSString stringWithUTF8String:pattern];
+    cee_boolean ret = FALSE;
     
-    re = pcre_compile((char*)pattern,
-                      PCRE_NEWLINE_ANY | PCRE_UTF8,
-                      &err_msg,
-                      &err,
-                      NULL);
-    
-    memset(ovector, 0, sizeof(int)*OVECCOUNT);
-    
-    ret = pcre_exec(re,
-                    NULL,
-                    (char*)descriptor,
-                    (int)strlen((char*)descriptor),
-                    ovector[1],
-                    0,
-                    ovector,
-                    OVECCOUNT);
-    if (ret < 0) {
-        if (re)
-            pcre_free(re);
-        return FALSE;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSArray *matches = [regex matchesInString:contentString options:0 range:NSMakeRange(0, [contentString length])];
+    if (matches.count) {
+        ret = TRUE;
+        NSTextCheckingResult* match = matches[0];
+
+        cee_char* type = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:1]] UTF8String]);
+        cee_char* str0 = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:2]] UTF8String]);
+        cee_char* str1 = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:3]] UTF8String]);
+        cee_char* str2 = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:4]] UTF8String]);
+        cee_char* str3 = cee_strdup([[contentString substringWithRange:[match rangeAtIndex:5]] UTF8String]);
+        
+        float component0 = atof(str0);
+        float component1 = atof(str1);
+        float component2 = atof(str2);
+        float component3 = atof(str3);
+
+        cee_float red = 0.0;
+        cee_float green = 0.0;
+        cee_float blue = 0.0;
+        cee_float alpha = 0.0;
+        
+        /** 
+         *  the platform color space is SRGB, we need to convert 
+         * HSB components to RGB components
+         */
+        hsb2rgb(component0, component1, component2, &red, &green, &blue);
+        
+        alpha = component3 / 100.0;
+        components[0] = red;
+        components[1] = green;
+        components[2] = blue;
+        components[3] = alpha;
+        
+        cee_free(str3);
+        cee_free(str2);
+        cee_free(str1);
+        cee_free(str0);
+        cee_free(type);
     }
     
-    cee_char* type = cee_strndup(&descriptor[ovector[1*2]], ovector[1*2+1] - ovector[1*2]);
-    cee_char* str0 = cee_strndup(&descriptor[ovector[2*2]], ovector[2*2+1] - ovector[2*2]);
-    cee_char* str1 = cee_strndup(&descriptor[ovector[3*2]], ovector[3*2+1] - ovector[3*2]);
-    cee_char* str2 = cee_strndup(&descriptor[ovector[4*2]], ovector[4*2+1] - ovector[4*2]);
-    cee_char* str3 = cee_strndup(&descriptor[ovector[5*2]], ovector[5*2+1] - ovector[5*2]);
-    
-    float component0 = atof(str0);
-    float component1 = atof(str1);
-    float component2 = atof(str2);
-    float component3 = atof(str3);
-
-    cee_float red = 0.0;
-    cee_float green = 0.0;
-    cee_float blue = 0.0;
-    cee_float alpha = 0.0;
-    
-    hsb2rgb(component0, component1, component2, &red, &green, &blue);
-    alpha = component3 / 100.0;
-    
-    components[0] = red;
-    components[1] = green;
-    components[2] = blue;
-    components[3] = alpha;
-    
-    cee_free(str3);
-    cee_free(str2);
-    cee_free(str1);
-    cee_free(str0);
-    cee_free(type);
-    
-    if (re)
-        pcre_free(re);
-    
-    return TRUE;
+    return ret;
 }
 
 
 static cee_boolean color_component_from_hex(const char* descriptor,
                                             CGFloat components[4])
 {
-    cee_int ret;
-    pcre *re = NULL;
-    cee_int err;
-    cee_int ovector[OVECCOUNT];
-    const cee_char* err_msg;
-    const cee_char* pattern = "#[0-9a-fA-F]+";
+    const cee_char* pattern = "#([0-9a-fA-F]+)";
+    NSString* contentString = [NSString stringWithUTF8String:descriptor];
+    NSString* patternString = [NSString stringWithUTF8String:pattern];
+    cee_boolean ret = FALSE;
     
-    re = pcre_compile((char*)pattern,
-                      PCRE_NEWLINE_ANY | PCRE_UTF8,
-                      &err_msg,
-                      &err,
-                      NULL);
-    
-    memset(ovector, 0, sizeof(int)*OVECCOUNT);
-    
-    ret = pcre_exec(re,
-                    NULL,
-                    (char*)descriptor,
-                    (int)strlen((char*)descriptor),
-                    ovector[1],
-                    0,
-                    ovector,
-                    OVECCOUNT);
-    if (ret < 0) {
-        if (re)
-            pcre_free(re);
-        return FALSE;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSArray *matches = [regex matchesInString:contentString options:0 range:NSMakeRange(0, [contentString length])];
+    if (matches.count) {
+        ret = TRUE;
+        NSTextCheckingResult* match = matches[0];
+        NSString* valueString = [contentString substringWithRange:[match rangeAtIndex:1]];
+        long int hexValue = strtol([valueString UTF8String], NULL, 16);
+        components[0] = (CGFloat)(((unsigned char)(hexValue >> 16)) / 256.0);
+        components[1] = (CGFloat)(((unsigned char)(hexValue >> 8)) / 256.0);
+        components[2] = (CGFloat)(((unsigned char)(hexValue)) / 256.0);
+        components[3] = 1.0;
     }
     
-    long int hexValue = strtol(&descriptor[ovector[0] + 1], NULL, 16);
-    
-    components[0] = (CGFloat)(((unsigned char)(hexValue >> 16)) / 256.0);
-    components[1] = (CGFloat)(((unsigned char)(hexValue >> 8)) / 256.0);
-    components[2] = (CGFloat)(((unsigned char)(hexValue)) / 256.0);
-    components[3] = 1.0;
-    
-    
-    if (re)
-        pcre_free(re);
-    
-    return TRUE;
+    return ret;
 }
 
 static void hsb2rgb(cee_float hue,

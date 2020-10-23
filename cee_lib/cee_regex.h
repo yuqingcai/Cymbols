@@ -5,14 +5,11 @@
 extern "C" {
 #endif
 
-#include <pcre.h>
 #include "cee_types.h"
 #include "cee_list.h"
-#include "cee_range.h"
 CEEList* cee_regex_search(const cee_char* string,
                           const cee_char* pattern,
                           cee_boolean repeat,
-                          cee_int options,
                           cee_long timeout_ms,
                           cee_boolean* timeout);
 #ifdef __cplusplus

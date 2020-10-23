@@ -64,6 +64,7 @@
         [self->_label0 setStringValue:@"Building Project..."];
     [_label1 setStringValue:@""];
     [_button setTitle:@"Stop"];
+    [_button setHighlighted:NO];
     [_progressBar setMinValue:0.0];
     [_progressBar setMaxValue:1.0];
     [_progressBar setDoubleValue:0.0];
@@ -178,6 +179,7 @@
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self->_label1 setStringValue:@"Complete!"];
             [self->_button setTitle:@"OK"];
+            [self->_button setHighlighted:YES];
         });
         
     });

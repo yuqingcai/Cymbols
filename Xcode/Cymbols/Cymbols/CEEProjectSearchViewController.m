@@ -214,7 +214,6 @@
                                                [self->_project.searcher.target UTF8String],
                                                TRUE,
                                                0,
-                                               0,
                                                NULL);
             CEEList* p = ranges;
             while (p) {

@@ -14,10 +14,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "cee_lib.h"
-#include "cee_tag.h"
-#include <CoreText/CoreText.h>
-#include <CoreGraphics/CoreGraphics.h>
+#import "cee_lib.h"
+#import "cee_tag.h"
+#import <CoreText/CoreText.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 typedef struct _CEETextFont* CEETextFontRef;
 typedef struct _CEETextColor* CEETextColorRef;

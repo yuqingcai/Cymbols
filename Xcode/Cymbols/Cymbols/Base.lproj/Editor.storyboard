@@ -107,6 +107,16 @@
                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="32" id="io5-24-zYS"/>
                                         </constraints>
                                     </customView>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="JwB-GE-K7G" customClass="CEETextLabel">
+                                        <rect key="frame" x="405" y="37" width="110" height="24"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="110" id="ITV-OA-ZqU"/>
+                                            <constraint firstAttribute="height" constant="24" id="fBA-AQ-uin"/>
+                                        </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="0 matches"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="7TO-lK-xhN" customClass="CEEButton">
                                         <rect key="frame" x="491" y="37" width="24" height="24"/>
                                         <constraints>
@@ -119,16 +129,6 @@
                                         <connections>
                                             <action selector="prevSearched:" target="Ago-IL-Isb" id="6X6-g3-nKU"/>
                                         </connections>
-                                    </customView>
-                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="JwB-GE-K7G" customClass="CEETextLabel">
-                                        <rect key="frame" x="405" y="37" width="110" height="24"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="110" id="ITV-OA-ZqU"/>
-                                            <constraint firstAttribute="height" constant="24" id="fBA-AQ-uin"/>
-                                        </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="0 matches"/>
-                                        </userDefinedRuntimeAttributes>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="78V-Ns-7U2" customClass="CEETextField">
                                         <rect key="frame" x="128" y="7" width="271" height="24"/>

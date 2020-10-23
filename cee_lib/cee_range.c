@@ -51,7 +51,7 @@ CEEList* cee_ranges_from_string(const cee_char* str)
     if (!str)
         goto exit;
     
-    matches = cee_regex_search(str, pattern, TRUE, 0, 0, NULL);
+    matches = cee_regex_search(str, pattern, TRUE, 0, NULL);
     nb_match = cee_list_length(matches);
     if (!nb_match || nb_match % 3)
         goto exit;

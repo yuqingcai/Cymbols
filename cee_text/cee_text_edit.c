@@ -2395,7 +2395,6 @@ cee_boolean cee_text_edit_search(CEETextEditRef edit,
         search->ranges = cee_regex_search((const cee_char*)buffer, 
                                           search->subject, 
                                           TRUE,
-                                          0,
                                           edit->search_timeout_ms,
                                           timeout);
     }

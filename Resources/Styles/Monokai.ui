@@ -231,6 +231,14 @@
         "corner_radius" : "2.0",
     },
     
+    "ClassButton [highlighted]" : {
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
+        "background_color" : "#3B88FD",
+        "text_color" : "#F5F5F5",
+        "icon_color": "#F5F5F5",
+        "corner_radius" : "2.0",
+    },
+    
     "ClassButton [disabled]" : {
         "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
         "background_color" : "#252226",

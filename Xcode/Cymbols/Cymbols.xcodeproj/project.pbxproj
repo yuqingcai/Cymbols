@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */ = {isa = PBXBuildFile; fileRef = 26308593254263DA000A8CB5 /* cee_regex_macos.m */; };
 		2647CE3925309A1700970FE4 /* WelcomeGuide in Resources */ = {isa = PBXBuildFile; fileRef = 2647CE3825309A1700970FE4 /* WelcomeGuide */; };
 		2647CE3E25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3C25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m */; };
 		2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */; };
@@ -48,7 +49,7 @@
 		269202DD252FF39000D6E2DC /* cee_text_layout.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202D1252FF39000D6E2DC /* cee_text_layout.c */; };
 		269202DE252FF39000D6E2DC /* cee_text_modify.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202D3252FF39000D6E2DC /* cee_text_modify.c */; };
 		269202DF252FF39000D6E2DC /* cee_text_storage.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202D5252FF39000D6E2DC /* cee_text_storage.c */; };
-		269202E0252FF39000D6E2DC /* cee_text_macos_attribute.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202D8252FF39000D6E2DC /* cee_text_macos_attribute.c */; };
+		269202E0252FF39000D6E2DC /* cee_text_macos_attribute.m in Sources */ = {isa = PBXBuildFile; fileRef = 269202D8252FF39000D6E2DC /* cee_text_macos_attribute.m */; };
 		26920351252FF3E300D6E2DC /* cymbols_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202E5252FF3E300D6E2DC /* cymbols_logo@2x.png */; };
 		26920352252FF3E300D6E2DC /* icon_add_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202E6252FF3E300D6E2DC /* icon_add_16x16@2x.png */; };
 		26920353252FF3E300D6E2DC /* icon_broom_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202E7252FF3E300D6E2DC /* icon_broom_16x16@2x.png */; };
@@ -261,7 +262,6 @@
 		2693B21C2530015200D21FD3 /* Cymbols.cfg in Resources */ = {isa = PBXBuildFile; fileRef = 2693B21B2530015200D21FD3 /* Cymbols.cfg */; };
 		2693B227253001D700D21FD3 /* Styles in Resources */ = {isa = PBXBuildFile; fileRef = 2693B226253001D700D21FD3 /* Styles */; };
 		269F9657253DB22500D8808A /* CEESourcePoint.m in Sources */ = {isa = PBXBuildFile; fileRef = 269F9656253DB22500D8808A /* CEESourcePoint.m */; };
-		26A7FA57253057C600E56E94 /* libpcre.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A7FA552530578A00E56E94 /* libpcre.a */; };
 		26BC7E7B2539301900AD8992 /* icon_alert_32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */; };
 /* End PBXBuildFile section */
 
@@ -296,6 +296,8 @@
 /* Begin PBXFileReference section */
 		2338332F22CDD555002C004E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2338333222CDD555002C004E /* Cymbols.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Cymbols.entitlements; sourceTree = "<group>"; };
+		26308593254263DA000A8CB5 /* cee_regex_macos.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = cee_regex_macos.m; sourceTree = "<group>"; };
+		26308595254263F2000A8CB5 /* cee_regex_macos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cee_regex_macos.h; sourceTree = "<group>"; };
 		2647CE3825309A1700970FE4 /* WelcomeGuide */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WelcomeGuide; path = ../../../../Resources/WelcomeGuide; sourceTree = "<group>"; };
 		2647CE3A25309ACC00970FE4 /* CEEUserInterfaceStyleSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEUserInterfaceStyleSelectionController.h; sourceTree = "<group>"; };
 		2647CE3B25309ACC00970FE4 /* CEETextHighlightStyleSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETextHighlightStyleSelectionController.h; sourceTree = "<group>"; };
@@ -374,7 +376,7 @@
 		269202D4252FF39000D6E2DC /* cee_text_modify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_text_modify.h; sourceTree = "<group>"; };
 		269202D5252FF39000D6E2DC /* cee_text_storage.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_text_storage.c; sourceTree = "<group>"; };
 		269202D6252FF39000D6E2DC /* cee_text_storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_text_storage.h; sourceTree = "<group>"; };
-		269202D8252FF39000D6E2DC /* cee_text_macos_attribute.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_text_macos_attribute.c; sourceTree = "<group>"; };
+		269202D8252FF39000D6E2DC /* cee_text_macos_attribute.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cee_text_macos_attribute.m; sourceTree = "<group>"; };
 		269202D9252FF39000D6E2DC /* cee_text_macos_attribute.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_text_macos_attribute.h; sourceTree = "<group>"; };
 		269202E5252FF3E300D6E2DC /* cymbols_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cymbols_logo@2x.png"; sourceTree = "<group>"; };
 		269202E6252FF3E300D6E2DC /* icon_add_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_add_16x16@2x.png"; sourceTree = "<group>"; };
@@ -674,7 +676,6 @@
 		2693B226253001D700D21FD3 /* Styles */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Styles; path = ../../../../Resources/Styles; sourceTree = "<group>"; };
 		269F9655253DB22500D8808A /* CEESourcePoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEESourcePoint.h; sourceTree = "<group>"; };
 		269F9656253DB22500D8808A /* CEESourcePoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESourcePoint.m; sourceTree = "<group>"; };
-		26A7FA552530578A00E56E94 /* libpcre.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpcre.a; path = ../libpcre.a; sourceTree = "<group>"; };
 		26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_alert_32x32@2x.png"; sourceTree = "<group>"; };
 		26CBE684252FECA20047771D /* Cymbols.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cymbols.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -684,7 +685,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26A7FA57253057C600E56E94 /* libpcre.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -694,7 +694,6 @@
 		231C454322EA86D400409A47 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				26A7FA552530578A00E56E94 /* libpcre.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -825,6 +824,8 @@
 				26920282252FF35600D6E2DC /* cee_mem.h */,
 				26920283252FF35600D6E2DC /* cee_range.c */,
 				26920284252FF35600D6E2DC /* cee_range.h */,
+				26308593254263DA000A8CB5 /* cee_regex_macos.m */,
+				26308595254263F2000A8CB5 /* cee_regex_macos.h */,
 				26920285252FF35600D6E2DC /* cee_regex.c */,
 				26920286252FF35600D6E2DC /* cee_regex.h */,
 				26920287252FF35600D6E2DC /* cee_strfuncs.c */,
@@ -929,7 +930,7 @@
 		269202D7252FF39000D6E2DC /* mac */ = {
 			isa = PBXGroup;
 			children = (
-				269202D8252FF39000D6E2DC /* cee_text_macos_attribute.c */,
+				269202D8252FF39000D6E2DC /* cee_text_macos_attribute.m */,
 				269202D9252FF39000D6E2DC /* cee_text_macos_attribute.h */,
 			);
 			path = mac;
@@ -1497,7 +1498,7 @@
 				26920484252FF51A00D6E2DC /* CEESessionFilePathController.m in Sources */,
 				269202C9252FF38400D6E2DC /* cee_html_parser.c in Sources */,
 				2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */,
-				269202E0252FF39000D6E2DC /* cee_text_macos_attribute.c in Sources */,
+				269202E0252FF39000D6E2DC /* cee_text_macos_attribute.m in Sources */,
 				269202DB252FF39000D6E2DC /* cee_text_autocomplete.c in Sources */,
 				269204BC252FF54000D6E2DC /* CEEFileNameCellView.m in Sources */,
 				269204A5252FF52700D6E2DC /* CEEProjectRemoveFileController.m in Sources */,
@@ -1557,6 +1558,7 @@
 				26920429252FF4F400D6E2DC /* CEEIdentifier.m in Sources */,
 				26920442252FF4F400D6E2DC /* CEEWindowContentView.m in Sources */,
 				26920491252FF51A00D6E2DC /* CEESessionSymbolController.m in Sources */,
+				26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */,
 				26920439252FF4F400D6E2DC /* CEETextTitle.m in Sources */,
 				269202C1252FF38400D6E2DC /* cee_c_parser.c in Sources */,
 				269202BE252FF38400D6E2DC /* cee_gnu_asm_lexer.l in Sources */,

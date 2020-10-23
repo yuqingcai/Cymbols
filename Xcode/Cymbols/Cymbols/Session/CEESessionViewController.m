@@ -540,4 +540,8 @@
     [_projectSearchWindowController close];    
 }
 
+- (IBAction)showHelp:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://cymbols.io/manual.html"]];
+}
+
 @end

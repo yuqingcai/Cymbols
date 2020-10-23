@@ -11,6 +11,7 @@
 #include "cee_datetime.h"
 #include "cee_strfuncs.h"
 #include "cee_regex.h"
+#include "cee_range.h"
 
 cee_long cee_timestamp_ms()
 {
@@ -43,7 +44,7 @@ time_t cee_time_from_iso8601(const cee_char* str)
         return 0;
     
     const cee_char* pattern = "(\\d+)-(\\d+)-(\\d+)T(\\d+)\\:(\\d+)\\:(\\d+)Z";
-    CEEList* matches = cee_regex_search(pattern, str, FALSE, 0, 0, NULL);
+    CEEList* matches = cee_regex_search(pattern, str, FALSE, 0, NULL);
     if (!matches)
         return 0;
 
