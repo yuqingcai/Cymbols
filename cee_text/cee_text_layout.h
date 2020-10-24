@@ -56,6 +56,7 @@ void cee_text_layout_paragraph_index_set(CEETextLayoutRef layout,
 cee_long cee_text_layout_paragraph_index_get(CEETextLayoutRef layout);
 CEEList* cee_text_layout_lines_get(CEETextLayoutRef layout);
 cee_ulong cee_text_layout_paragraph_count_get(CEETextLayoutRef layout);
+cee_ulong cee_text_layout_paragraph_count_max_get(CEETextLayoutRef layout);
 cee_float cee_text_layout_max_line_width_get(CEETextLayoutRef layout);
 CEEList* cee_text_layout_line_boxes_create(CEETextLayoutRef layout,
                                            cee_long from,

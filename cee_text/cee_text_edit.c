@@ -2275,7 +2275,7 @@ cee_float cee_text_edit_vertical_scroller_proportion_get(CEETextEditRef edit)
     
     CEETextStorageRef storage = edit->storage_ref;
     cee_ulong nb_paragraph = cee_text_storage_paragraph_count_get(storage);
-    cee_ulong nb_present_line = cee_text_layout_paragraph_count_get(edit->layout);
+    cee_ulong nb_present_line = cee_text_layout_paragraph_count_max_get(edit->layout);
     if (!nb_paragraph)
         return 1.0;
     else

@@ -1491,7 +1491,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (IBAction)find:(id)sender {
-    if (_delegate && [_delegate respondsToSelector:@selector(textViewSearchText:)])
+    if (self.editable && _delegate && [_delegate respondsToSelector:@selector(textViewSearchText:)])
         [_delegate textViewSearchText:self];
 }
 

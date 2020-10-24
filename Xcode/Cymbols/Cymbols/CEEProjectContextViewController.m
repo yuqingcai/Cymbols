@@ -60,9 +60,9 @@
     constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar(==titleHeight)]-0-[editView]-0-|" options:0 metrics:metrics views:views];
     [self.view addConstraints:constraintsV];
     
-    //[_editViewController setEditable:NO];
-    //[_editViewController setIntelligence:NO];
-    //[_editViewController setWrap:YES];
+    [_editViewController setEditable:NO];
+    [_editViewController setIntelligence:NO];
+    [_editViewController setWrap:YES];
 }
 
 - (void)viewDidAppear {

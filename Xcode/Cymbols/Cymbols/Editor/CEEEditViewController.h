@@ -18,6 +18,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSInteger lineBufferOffset;
 @property NSInteger caretBufferOffset;
 - (void)highlightRanges:(CEEList*)ranges;
+- (void)setEditable:(BOOL)flag;
+- (void)setIntelligence:(BOOL)flag;
+- (void)setWrap:(BOOL)flag;
+
 @end
 
 NS_ASSUME_NONNULL_END

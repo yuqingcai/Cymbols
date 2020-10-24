@@ -731,23 +731,24 @@ BOOL ContextContainSymbol(CEEList* context,
     CEESourceBufferReferenceContext* bufferReference = [self currentSourceBufferReference];
     CEESourceBuffer* buffer = [self bufferInContext:bufferReference];
     
-    CEESourceReferenceSearchOption options = kCEESourceReferenceSearchOptionLocal | 
-        kCEESourceReferenceSearchOptionGlobal;
-    
     if (cluster->type == kCEETokenClusterTypeReference) {
         symbolReference = (CEESourceSymbolReference*)cluster->content_ref;
         context = cee_symbols_search_by_reference(symbolReference,
                                                   buffer.prep_directive,
                                                   buffer.statement,
                                                   self.session.project.database,
-                                                  options);
+                                                  kCEESourceReferenceSearchOptionLocal);
+        if (!context) {
+            context = cee_symbols_search_by_reference(symbolReference,
+                                                      buffer.prep_directive,
+                                                      buffer.statement,
+                                                      self.session.project.database,
+                                                      kCEESourceReferenceSearchOptionGlobal);
+        }
     }
     else if (cluster->type == kCEETokenClusterTypeSymbol) {
         symbol = (CEESourceSymbol*)cluster->content_ref;
-        context = cee_database_symbols_search_by_name(self.session.project.database,
-                                                      symbol->name);
-        if (!ContextContainSymbol(context, symbol))
-            context = cee_list_prepend(context, cee_source_symbol_copy(symbol));
+        context = cee_list_prepend(context, cee_source_symbol_copy(symbol));
     }
     return context;
 }

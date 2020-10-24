@@ -5250,7 +5250,7 @@ static void c_reference_fregment_parse(const cee_uchar* filepath,
     
     if (!fregment)
         return;
-    
+        
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         if (cee_source_fregment_tokens_pattern_match(fregment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {

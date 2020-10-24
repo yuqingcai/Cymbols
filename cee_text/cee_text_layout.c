@@ -43,6 +43,7 @@ typedef struct _CEETextLayout {
     CEETextStorageRef storage_ref;
     cee_long paragraph_index;
     cee_ulong nb_paragraph;
+    cee_ulong nb_paragraph_max;
     CEEList* lines;
     cee_float max_line_width;
     cee_float horizontal_offset;
@@ -497,10 +498,6 @@ CEETextLayoutRef cee_text_layout_create(CEETextStorageRef storage,
     layout->bottom_margin = bottom_margin;
     layout->aligment = aligment;
     
-    layout->max_line_width = 0.0;
-    layout->horizontal_offset = 0.0;
-    layout->paragraph_index = 0;
-    
     return layout;
 }
 
@@ -624,6 +621,8 @@ static void text_layout(CEETextLayoutRef layout,
     }
     
     layout->nb_paragraph = nb_paragraph;
+    if (nb_paragraph > layout->nb_paragraph_max)
+        layout->nb_paragraph_max = nb_paragraph;
 }
 
 void cee_text_layout_run(CEETextLayoutRef layout)
@@ -677,7 +676,7 @@ void cee_text_layout_bounds_set(CEETextLayoutRef layout,
                                 CEERect bounds)
 {
     layout->bounds = bounds;
-    layout->nb_paragraph = 0;
+    layout->nb_paragraph_max = 0;
 }
 
 void cee_text_layout_horizontal_offset_set(CEETextLayoutRef layout,
@@ -723,6 +722,11 @@ CEEList* cee_text_layout_lines_get(CEETextLayoutRef layout)
 cee_ulong cee_text_layout_paragraph_count_get(CEETextLayoutRef layout)
 {
     return layout->nb_paragraph;
+}
+
+cee_ulong cee_text_layout_paragraph_count_max_get(CEETextLayoutRef layout)
+{
+    return layout->nb_paragraph_max;
 }
 
 cee_float cee_text_layout_max_line_width_get(CEETextLayoutRef layout)

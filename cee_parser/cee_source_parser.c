@@ -1143,11 +1143,13 @@ CEEList* cee_symbols_search_by_reference(CEESourceSymbolReference* reference,
     CEEList* duplicated = NULL;
     CEEList* p = NULL;
     CEEList* q = NULL;
+    
     if (options & kCEESourceReferenceSearchOptionLocal) {
         p = local_symbols_search_by_reference(reference,
                                               prep_directive,
                                               statement,
-                                              kCEESourceFregmentTypeRoundBracketList);
+                                              kCEESourceFregmentTypeRoundBracketList|
+                                              kCEESourceFregmentTypeCurlyBracketList);
         symbols = cee_list_concat(symbols, p);
     }
     
@@ -1205,7 +1207,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
     current = source_fregment_from_reference_get(reference);
     if (!current)
         return NULL;
-    
+        
     /** search current */
     symbols = cee_source_fregment_symbols_search_by_name(current, name);
     if (symbols) 
@@ -1214,6 +1216,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
     /** search current child fregment (round bracket list) */
     p = SOURCE_FREGMENT_CHILDREN_FIRST(current);
     while (p) {
+                
         if (((CEESourceFregment*)p->data)->type & searchable_child_fregment_type) {
             symbols = cee_source_fregment_symbols_in_children_search_by_name(p->data, name);
             if (symbols) 
@@ -1225,7 +1228,8 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
     /** search current siblings */
     if (current->node) {
         p = SOURCE_FREGMENT_PREV(current->node);
-        while (p) {     
+        while (p) {
+                        
             symbols = cee_source_fregment_symbols_search_by_name(p->data, name);
             if (symbols) 
                 goto found;
@@ -1241,7 +1245,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
         fregment = cee_source_fregment_grandfather_get(fregment);
         if (!fregment)
             break;
-        
+                
         /** search grandfather */
         symbols = cee_source_fregment_symbols_search_by_name(fregment, name);
         if (symbols)
@@ -1252,6 +1256,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
         while (p) {
             if (p->data == cee_source_fregment_parent_get(current))
                 break;
+                        
             if (((CEESourceFregment*)p->data)->type & searchable_child_fregment_type) {
                 symbols = cee_source_fregment_symbols_in_children_search_by_name(p->data, name);
                 if (symbols) 
@@ -1265,6 +1270,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
         if (fregment->node) {
             p = SOURCE_FREGMENT_PREV(fregment->node);
             while (p) {
+                                
                 symbols = cee_source_fregment_symbols_search_by_name(p->data, name);
                 if (symbols)
                     goto found;
@@ -1527,7 +1533,7 @@ CEETokenCluster* cee_token_cluster_search_by_buffer_offset(CEEList* references,
     CEESourceSymbolReference* reference = NULL;
     CEEList* ranges = NULL;
     CEEList* p = references;
-    
+        
     while (p) {
         reference = p->data;
         ranges = cee_ranges_from_string(reference->locations);

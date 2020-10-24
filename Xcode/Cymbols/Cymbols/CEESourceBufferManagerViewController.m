@@ -44,9 +44,9 @@
     [_sourceContentView addConstraints:constraintsH];
     [_sourceContentView addConstraints:constraintsV];
     
-    //[_editViewController setEditable:NO];
-    //[_editViewController setIntelligence:NO];
-    //[_editViewController setWrap:YES];
+    [_editViewController setEditable:NO];
+    [_editViewController setIntelligence:NO];
+    [_editViewController setWrap:YES];
     
     _directory = nil;
 }

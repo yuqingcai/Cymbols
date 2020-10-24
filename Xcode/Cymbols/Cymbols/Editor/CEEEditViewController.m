@@ -11,6 +11,18 @@
 
 @implementation CEEEditViewController
 
+- (void)setEditable:(BOOL)flag {
+    
+}
+
+- (void)setIntelligence:(BOOL)flag {
+    
+}
+
+- (void)setWrap:(BOOL)flag {
+    
+}
+
 - (void)highlightRanges:(CEEList*)ranges {
     
 }

@@ -86,6 +86,10 @@
     _editViewController =  [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
     [_editViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
         
+    [_editViewController setEditable:NO];
+    [_editViewController setIntelligence:NO];
+    [_editViewController setWrap:YES];
+        
 }
 
 - (void)showContextTable {

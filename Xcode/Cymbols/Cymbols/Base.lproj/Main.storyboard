@@ -210,6 +210,38 @@
                                     </items>
                                 </menu>
                             </menuItem>
+                            <menuItem title="Navigate" id="lRi-B9-aF6">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Navigate" id="AGS-E5-teN">
+                                    <items>
+                                        <menuItem title="Jump To Definition" id="27u-hK-I3T">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="jumpToTargetSymbol:" target="Ady-hI-5gd" id="Pg4-rX-Q1J"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Search Reference..." id="9DY-M0-xoa">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="searchReferences:" target="Ady-hI-5gd" id="Kbo-H8-r1P"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="xXi-jq-P3H"/>
+                                        <menuItem title="Go Forward" id="ZXY-Hh-NTk">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="next:" target="Ady-hI-5gd" id="zro-4t-gda"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Go Back" id="e2O-Pp-TpQ">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="prev:" target="Ady-hI-5gd" id="UGB-Rd-7Ex"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
                             <menuItem title="Find" id="xiL-YO-LCe" userLabel="Find">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Find" id="Rm4-R2-3JA">
