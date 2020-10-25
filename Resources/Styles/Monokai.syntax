@@ -8,7 +8,7 @@
     "rules" : [
         {
             "name" : "plaintext",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#E9E2DE",
@@ -17,7 +17,7 @@
         
         {
             "name" : "keyword",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#FD4384",
@@ -26,7 +26,7 @@
         
         {
             "name" : "comment",
-            "font" : "font(\"Menlo\", 11.0, \"italic\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"italic\", 5.0)",
             "underline" : "true",
             "strikethrough" : "true",
             "forecolor" : "#75715E",
@@ -35,7 +35,7 @@
         
         {
             "name" : "filename",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#E7DC74",
@@ -44,7 +44,7 @@
 
         {
             "name" : "constant",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#AE80FF",
@@ -53,7 +53,7 @@
 
         {
             "name" : "character",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#AE80FF",
@@ -62,7 +62,7 @@
 
         {
             "name" : "literal",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#E7DC74",
@@ -71,7 +71,7 @@
 
         {
             "name" : "punctuation",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#E9E2DE",
@@ -80,7 +80,7 @@
 
         {
             "name" : "prep_directive",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#AE80FF",
@@ -89,7 +89,7 @@
 
         {
             "name" : "parameter",
-            "font" : "font(\"Menlo\", 11.0, \"italic\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"italic\", 5.0)",
             "underline" : "true",
             "strikethrough" : "false",
             "forecolor" : "#E9E2DE",
@@ -98,7 +98,7 @@
 
         {
             "name" : "function",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#FD971F",
@@ -107,7 +107,7 @@
 
         {
             "name" : "variable",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#66D9EF",
@@ -116,7 +116,7 @@
         
         {
             "name" : "class",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#A6E22E",
@@ -125,7 +125,7 @@
 
         {
             "name" : "enum",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#A6E22E",
@@ -134,7 +134,7 @@
         
         {
             "name" : "union",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#A6E22E",
@@ -143,7 +143,7 @@
         
         {
             "name" : "interface",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#A6E22E",
@@ -152,7 +152,7 @@
         
         {
             "name" : "implementation",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#A6E22E",
@@ -161,7 +161,7 @@
         
         {
             "name" : "protocol",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#A6E22E",
@@ -170,7 +170,7 @@
                 
         {
             "name" : "enumerator",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#AE80FF",
@@ -179,7 +179,7 @@
 
         {
             "name" : "type_declaration",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#FD971F",
@@ -188,7 +188,7 @@
         
         {
             "name" : "namespace",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#A6E22E",
@@ -197,7 +197,7 @@
         
         {
             "name" : "type_reference",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#A6E22E",
@@ -207,7 +207,7 @@
                         
         {
             "name" : "prep_directive_reference",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#AE80FF",
@@ -217,7 +217,7 @@
         
         {
             "name" : "prep_directive_parameter_reference",
-            "font" : "font(\"Menlo\", 11.0, \"italic\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"italic\", 5.0)",
             "underline" : "true",
             "strikethrough" : "false",
             "forecolor" : "#FD971F",
@@ -227,7 +227,7 @@
         
         {
             "name" : "variable_reference",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#E9E2DE",
@@ -237,7 +237,7 @@
         
         {
             "name" : "member_reference",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#FD971F",
@@ -246,7 +246,7 @@
         
         {
             "name" : "function_reference",
-            "font" : "font(\"Menlo\", 11.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
             "forecolor" : "#A6E22E",
