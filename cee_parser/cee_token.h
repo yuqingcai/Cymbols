@@ -317,7 +317,8 @@ typedef enum _CEETokenID {
     kCEETokenID___KIND_OF,
     kCEETokenID_NS_ENUM,
     kCEETokenID_NS_OPTIONS,
-    
+    kCEETokenID_HTML_COMMENT,
+    kCEETokenID_HTML_DOCTYPE,    
     kCEETokenID_END
 } CEETokenID;
 

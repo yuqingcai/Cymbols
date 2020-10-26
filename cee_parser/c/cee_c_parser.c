@@ -331,7 +331,7 @@ typedef enum _CParserState {
     kCParserStatePrepDirectiveParsing = 0x1 << 1,
 } CParserState;
 
-typedef struct _CEECParser {
+typedef struct _CParser {
     CEESourceParserRef super;
     const cee_uchar* filepath_ref;
     const cee_uchar* subject_ref;
@@ -343,7 +343,7 @@ typedef struct _CEECParser {
     CEESourceFregment* comment_current;
     ParseTrap block_header_traps[CEETokenID_MAX];
     CParserState state;
-} CEECParser;
+} CParser;
 
 static void c_token_type_map_init(void);
 static CEETokenIdentifierType c_token_identifier_type_map[CEETokenID_MAX];
@@ -375,32 +375,32 @@ static cee_boolean token_id_is_alignas_specifier(CEETokenID identifier);
 static cee_boolean token_id_is_object_sepcifier(CEETokenID identifier);
 static cee_boolean token_id_is_virtual_sepcifier(CEETokenID identifier);
 static cee_boolean is_name_scope(CEEList* p);
-static cee_boolean statement_attach(CEECParser* parser,
+static cee_boolean statement_attach(CParser* parser,
                                     CEESourceFregmentType type);
-static cee_boolean statement_sub_attach(CEECParser* parser,
+static cee_boolean statement_sub_attach(CParser* parser,
                                         CEESourceFregmentType type);
-static cee_boolean statement_pop(CEECParser* parser);
-static cee_boolean prep_directive_attach(CEECParser* parser);
-static cee_boolean comment_attach(CEECParser* parser);
-static cee_boolean prep_directive_terminated(CEECParser* parser);
-static cee_boolean statement_parsing(CEECParser* parser);
+static cee_boolean statement_pop(CParser* parser);
+static cee_boolean prep_directive_attach(CParser* parser);
+static cee_boolean comment_attach(CParser* parser);
+static cee_boolean prep_directive_terminated(CParser* parser);
+static cee_boolean statement_parsing(CParser* parser);
 static void c_prep_directive_include_translate_table_init(void);
 static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment);
 static void c_prep_directive_define_translate_table_init(void);
 static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment);
 static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment);
-static void prep_directive_parse(CEECParser* parser);
-static cee_boolean prep_directive_reduce(CEECParser* parser);
-static void block_push(CEECParser* parser);
-static cee_boolean block_pop(CEECParser* parser);
-static void block_parse(CEECParser* parser);
+static void prep_directive_parse(CParser* parser);
+static cee_boolean prep_directive_reduce(CParser* parser);
+static void block_push(CParser* parser);
+static cee_boolean block_pop(CParser* parser);
+static void block_parse(CParser* parser);
 static void c_template_declaration_translate_table_init(void);
-static cee_boolean c_template_token_push(CEECParser* parser,
+static cee_boolean c_template_token_push(CParser* parser,
                                          CEEToken* push);
 static void c_template_parameter_declaration_translate_table_init(void);
 static cee_boolean c_template_parameters_parse(CEESourceFregment* fregment);
-static void template_push(CEECParser* parser);
-static cee_boolean template_pop(CEECParser* parser);
+static void template_push(CParser* parser);
+static cee_boolean template_pop(CParser* parser);
 static void c_inheritance_definition_translate_table_init(void);
 static cee_boolean c_inheritance_parse(CEEList* tokens,
                                        CEEList** inherited,
@@ -495,37 +495,37 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
                                                CEEList** pp);
 static void c_extern_block_translate_table_init(void);
 static cee_boolean c_extern_block_parse(CEESourceFregment* fregment);
-static void block_header_parse(CEECParser* parser);
-static cee_boolean block_reduce(CEECParser* parser);
-static void label_parse(CEECParser* parser);
-static cee_boolean label_reduce(CEECParser* parser);
-static void parameter_list_push(CEECParser* parser);
-static cee_boolean parameter_list_pop(CEECParser* parser);
-static void subscript_push(CEECParser* parser);
-static cee_boolean subscript_pop(CEECParser* parser);
+static void block_header_parse(CParser* parser);
+static cee_boolean block_reduce(CParser* parser);
+static void label_parse(CParser* parser);
+static cee_boolean label_reduce(CParser* parser);
+static void parameter_list_push(CParser* parser);
+static cee_boolean parameter_list_pop(CParser* parser);
+static void subscript_push(CParser* parser);
+static cee_boolean subscript_pop(CParser* parser);
 static void objective_c_definition_translate_table_init(void);
-static cee_boolean objective_c_token_push(CEECParser* parser,
+static cee_boolean objective_c_token_push(CParser* parser,
                                           CEEToken* push);
 static cee_boolean objective_c_definition_parse(CEESourceFregment* fregment,
                                                 const cee_uchar* subject);
-static void statement_parse(CEECParser* parser);
-static cee_boolean statement_reduce(CEECParser* parser);
-static void parser_block_header_trap_init(CEECParser* parser);
-static CEECParser* parser_create(void);
+static void statement_parse(CParser* parser);
+static cee_boolean statement_reduce(CParser* parser);
+static void parser_block_header_trap_init(CParser* parser);
+static CParser* parser_create(void);
 static void parser_free(cee_pointer data);
-static void symbol_parse_init(CEECParser* parser,
+static void symbol_parse_init(CParser* parser,
                               const cee_uchar* filepath,
                               const cee_uchar* subject);
-static void symbol_parse_clear(CEECParser* parser);
-static void parser_state_set(CEECParser* parser,
+static void symbol_parse_clear(CParser* parser);
+static void parser_state_set(CParser* parser,
                              CParserState state);
-static void parser_state_clear(CEECParser* parser,
+static void parser_state_clear(CParser* parser,
                                CParserState state);
-static cee_boolean current_statement_type_is(CEECParser* parser,
+static cee_boolean current_statement_type_is(CParser* parser,
                                              CEESourceFregmentType type);
-static void current_statement_type_transform(CEECParser* parser,
+static void current_statement_type_transform(CParser* parser,
                                              CEESourceFregmentType type);
-static cee_boolean statement_token_push(CEECParser* parser,
+static cee_boolean statement_token_push(CParser* parser,
                                         CEEToken* push);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_uchar* filepath,
@@ -964,8 +964,8 @@ static cee_boolean is_name_scope(CEEList* p)
     return FALSE;
 }
 
-static cee_boolean statement_attach(CEECParser* parser,
-                                   CEESourceFregmentType type)
+static cee_boolean statement_attach(CParser* parser,
+                                    CEESourceFregmentType type)
 {
     CEESourceFregment* attached = NULL;
     
@@ -983,7 +983,7 @@ static cee_boolean statement_attach(CEECParser* parser,
     return TRUE;
 }
 
-static cee_boolean statement_sub_attach(CEECParser* parser,
+static cee_boolean statement_sub_attach(CParser* parser,
                                         CEESourceFregmentType type)
 {
     CEESourceFregment* attached = NULL;
@@ -1002,7 +1002,7 @@ static cee_boolean statement_sub_attach(CEECParser* parser,
     return TRUE;
 }
 
-static cee_boolean statement_pop(CEECParser* parser)
+static cee_boolean statement_pop(CParser* parser)
 {
     if (!parser->statement_current || !parser->statement_current->parent)
         return FALSE;
@@ -1011,7 +1011,7 @@ static cee_boolean statement_pop(CEECParser* parser)
     return TRUE;
 }
 
-static cee_boolean comment_attach(CEECParser* parser)
+static cee_boolean comment_attach(CParser* parser)
 {
     CEESourceFregment* attached = NULL;
     
@@ -1030,7 +1030,7 @@ static cee_boolean comment_attach(CEECParser* parser)
 }
 
 
-static cee_boolean prep_directive_attach(CEECParser* parser)
+static cee_boolean prep_directive_attach(CParser* parser)
 {
     CEESourceFregment* attached = NULL;
     
@@ -1051,12 +1051,12 @@ static cee_boolean prep_directive_attach(CEECParser* parser)
 /**
  *  preprocessor directive
  */
-static cee_boolean prep_directive_parsing(CEECParser* parser)
+static cee_boolean prep_directive_parsing(CParser* parser)
 {
     return parser->state & kCParserStatePrepDirectiveParsing;
 }
 
-static cee_boolean prep_directive_token_push(CEECParser* parser,
+static cee_boolean prep_directive_token_push(CParser* parser,
                                              CEEToken* push)
 {
     if (!parser->prep_directive_current)
@@ -1066,7 +1066,7 @@ static cee_boolean prep_directive_token_push(CEECParser* parser,
     return TRUE;
 }
 
-static cee_boolean prep_directive_terminated(CEECParser* parser)
+static cee_boolean prep_directive_terminated(CParser* parser)
 {
     CEESourceFregment* fregment = parser->prep_directive_current;
     
@@ -1090,7 +1090,7 @@ static cee_boolean prep_directive_terminated(CEECParser* parser)
     return FALSE;
 }
 
-static void prep_directive_parse(CEECParser* parser)
+static void prep_directive_parse(CParser* parser)
 {
     CEESourceFregment* fregment = parser->prep_directive_current;
     CEEToken* token = NULL;
@@ -1132,7 +1132,7 @@ static void prep_directive_parse(CEECParser* parser)
     }
 }
 
-static cee_boolean prep_directive_reduce(CEECParser* parser)
+static cee_boolean prep_directive_reduce(CParser* parser)
 {
     if (!parser->prep_directive_current)
         return FALSE;
@@ -1141,12 +1141,12 @@ static cee_boolean prep_directive_reduce(CEECParser* parser)
     return TRUE;
 }
 
-static cee_boolean statement_parsing(CEECParser* parser)
+static cee_boolean statement_parsing(CParser* parser)
 {
     return parser->state & kCParserStateStatementParsing;
 }
 
-static cee_boolean comment_token_push(CEECParser* parser,
+static cee_boolean comment_token_push(CParser* parser,
                                       CEEToken* push)
 {
     if (!parser->comment_current)
@@ -1156,7 +1156,7 @@ static cee_boolean comment_token_push(CEECParser* parser,
     return TRUE;
 }
 
-static cee_boolean comment_fregment_reduce(CEECParser* parser)
+static cee_boolean comment_fregment_reduce(CParser* parser)
 {
     if (!parser->comment_current)
         return FALSE;
@@ -1418,13 +1418,13 @@ static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
 /**
  * block
  */
-static void block_push(CEECParser* parser)
+static void block_push(CParser* parser)
 {
     statement_sub_attach(parser, kCEESourceFregmentTypeCurlyBracketList);
     statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
 }
 
-static cee_boolean block_pop(CEECParser* parser)
+static cee_boolean block_pop(CParser* parser)
 {
     if (statement_pop(parser))
         return statement_pop(parser);
@@ -1432,7 +1432,7 @@ static cee_boolean block_pop(CEECParser* parser)
     return FALSE;
 }
 
-static void block_parse(CEECParser* parser)
+static void block_parse(CParser* parser)
 {
     CEESourceFregment* current = parser->statement_current;
     const cee_uchar* subject = parser->subject_ref;
@@ -1470,7 +1470,7 @@ static void c_template_declaration_translate_table_init(void)
     TRANSLATE_STATE_ANY(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateParameterList    , kCTemplateDeclarationTranslateStateParameterList                                          );
 }
 
-static cee_boolean c_template_token_push(CEECParser* parser,
+static cee_boolean c_template_token_push(CParser* parser,
                                          CEEToken* push)
 {
     CTemplateDeclarationTranslateState current = kCTemplateDeclarationTranslateStateInit;
@@ -1566,13 +1566,13 @@ static cee_boolean c_template_parameters_parse(CEESourceFregment* fregment)
     return TRUE;
 }
 
-static void template_push(CEECParser* parser)
+static void template_push(CParser* parser)
 {
     statement_sub_attach(parser, kCEESourceFregmentTypeSourceList);
     statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
 }
 
-static cee_boolean template_pop(CEECParser* parser)
+static cee_boolean template_pop(CParser* parser)
 {
     if (statement_pop(parser))
         return statement_pop(parser);
@@ -4211,7 +4211,7 @@ static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
     return ret;
 }
 
-static void block_header_parse(CEECParser* parser)
+static void block_header_parse(CParser* parser)
 {
     CEESourceFregment* current = parser->statement_current;
     CEEToken* token = NULL;
@@ -4251,7 +4251,7 @@ static void block_header_parse(CEECParser* parser)
     return;
 }
 
-static cee_boolean block_reduce(CEECParser* parser)
+static cee_boolean block_reduce(CParser* parser)
 {
     if (!parser->statement_current)
         return FALSE;
@@ -4275,7 +4275,7 @@ static cee_boolean block_reduce(CEECParser* parser)
     return TRUE;
 }
 
-static void label_parse(CEECParser* parser)
+static void label_parse(CParser* parser)
 {
     CEESourceFregment* fregment = NULL;
     const cee_uchar* subject = NULL;
@@ -4327,7 +4327,7 @@ static void label_parse(CEECParser* parser)
     
 }
 
-static cee_boolean label_reduce(CEECParser* parser)
+static cee_boolean label_reduce(CParser* parser)
 {
     if (!parser->statement_current)
         return FALSE;
@@ -4341,13 +4341,13 @@ static cee_boolean label_reduce(CEECParser* parser)
 /**
  * parameter list
  */
-static void parameter_list_push(CEECParser* parser)
+static void parameter_list_push(CParser* parser)
 {
     statement_sub_attach(parser, kCEESourceFregmentTypeRoundBracketList);
     statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
 }
 
-static cee_boolean parameter_list_pop(CEECParser* parser)
+static cee_boolean parameter_list_pop(CParser* parser)
 {
     if (statement_pop(parser))
         return statement_pop(parser);
@@ -4358,13 +4358,13 @@ static cee_boolean parameter_list_pop(CEECParser* parser)
 /**
  * subscript
  */
-static void subscript_push(CEECParser* parser)
+static void subscript_push(CParser* parser)
 {
     statement_sub_attach(parser, kCEESourceFregmentTypeSquareBracketList);
     statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
 }
 
-static cee_boolean subscript_pop(CEECParser* parser)
+static cee_boolean subscript_pop(CParser* parser)
 {
     if (statement_pop(parser))
         return statement_pop(parser);
@@ -4423,7 +4423,7 @@ static void objective_c_definition_translate_table_init(void)
     
 }
 
-static cee_boolean objective_c_token_push(CEECParser* parser,
+static cee_boolean objective_c_token_push(CParser* parser,
                                           CEEToken* push)
 {
     ObjectiveCDefinitionTranslateState current = kObjectiveCDefinitionTranslateStateInit;
@@ -4684,7 +4684,7 @@ exit:
 /**
  * statement
  */
-static void statement_parse(CEECParser* parser)
+static void statement_parse(CParser* parser)
 {
     CEESourceFregment* current = parser->statement_current;
     
@@ -4701,7 +4701,7 @@ static void statement_parse(CEECParser* parser)
     return;
 }
 
-static cee_boolean statement_reduce(CEECParser* parser)
+static cee_boolean statement_reduce(CParser* parser)
 {
     if (!parser->statement_current)
         return FALSE;
@@ -4719,7 +4719,7 @@ static cee_boolean statement_reduce(CEECParser* parser)
 /**
  * parser
  */
-static void parser_block_header_trap_init(CEECParser* parser)
+static void parser_block_header_trap_init(CParser* parser)
 {
     
     for (int i = 0; i < kCEETokenID_END; i ++)
@@ -4741,7 +4741,7 @@ CEESourceParserRef cee_c_parser_create(const cee_char* identifier)
     parser->reference_parse = reference_parse;
     parser->token_type_matcher = token_type_matcher;
     
-    CEECParser* c = parser_create();
+    CParser* c = parser_create();
     c->super = parser;
     
     parser_block_header_trap_init(c);
@@ -4786,20 +4786,20 @@ void cee_c_parser_free(cee_pointer data)
     cee_parser_free(parser);
 }
 
-static CEECParser* parser_create(void)
+static CParser* parser_create(void)
 {
-    return cee_malloc0(sizeof(CEECParser));
+    return cee_malloc0(sizeof(CParser));
 }
 
 static void parser_free(cee_pointer data)
 {
     if (!data)
         return ;
-    CEECParser* parser = (CEECParser*)data;
+    CParser* parser = (CParser*)data;
     cee_free(parser);
 }
 
-static void symbol_parse_init(CEECParser* parser,
+static void symbol_parse_init(CParser* parser,
                               const cee_uchar* filepath,
                               const cee_uchar* subject)
 {    
@@ -4845,7 +4845,7 @@ static void symbol_parse_init(CEECParser* parser,
     parser->state = kCParserStateStatementParsing;
 }
 
-static void symbol_parse_clear(CEECParser* parser)
+static void symbol_parse_clear(CParser* parser)
 {
     parser->subject_ref = NULL;
     parser->filepath_ref = NULL;
@@ -4857,20 +4857,20 @@ static void symbol_parse_clear(CEECParser* parser)
     parser->comment_current = NULL;
 }
 
-static void parser_state_set(CEECParser* parser,
+static void parser_state_set(CParser* parser,
                              CParserState state)
 {
     parser->state |= state;
 }
 
-static void parser_state_clear(CEECParser* parser,
-                             CParserState state)
+static void parser_state_clear(CParser* parser,
+                               CParserState state)
 {
     parser->state &= ~state;
 }
 
-static cee_boolean current_statement_type_is(CEECParser* parser,
-                                            CEESourceFregmentType type)
+static cee_boolean current_statement_type_is(CParser* parser,
+                                             CEESourceFregmentType type)
 {
     if (parser->statement_current)
         return cee_source_fregment_type_is(parser->statement_current, type);
@@ -4878,13 +4878,13 @@ static cee_boolean current_statement_type_is(CEECParser* parser,
     return FALSE;
 }
 
-static void current_statement_type_transform(CEECParser* parser,
-                                            CEESourceFregmentType type)
+static void current_statement_type_transform(CParser* parser,
+                                             CEESourceFregmentType type)
 {
     cee_source_fregment_type_set(parser->statement_current, type);
 }
 
-static cee_boolean statement_token_push(CEECParser* parser,
+static cee_boolean statement_token_push(CParser* parser,
                                         CEEToken* push)
 {
     if (!parser->statement_current)
@@ -4910,7 +4910,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map)
 {
-    CEECParser* parser = parser_ref->imp;
+    CParser* parser = parser_ref->imp;
     cee_int ret = 0;
     cee_boolean pushed = TRUE;
     CEEToken* token = NULL;

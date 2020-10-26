@@ -53,8 +53,11 @@ typedef enum _CEETagType {
     kCEETagTypeNamespaceReference,
     kCEETagTypeLabelReference,
     
-    /** ... */
+    /** HTML & XML */
+    kCEETagTypeXMLTag,
+    kCEETagTypeXMLAttribute,
     
+    /** ... */
     kCEETagTypeIgnore,
     kCEETagTypeMax,
 } CEETagType;

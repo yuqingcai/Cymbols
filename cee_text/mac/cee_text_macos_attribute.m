@@ -516,6 +516,8 @@ cee_boolean cee_text_platform_configure(cee_pointer platform_ref,
             { kCEETagTypeNamespaceReference,               "variable_reference"                    },
             { kCEETagTypeLabelReference,                   "variable_reference"                    },
             { kCEETagTypeEnumeratorReference,              "enumerator"                            },
+            { kCEETagTypeXMLTag,                           "xml_tag"                               },
+            { kCEETagTypeXMLAttribute,                     "xml_attribute"                         },
             
         };
         

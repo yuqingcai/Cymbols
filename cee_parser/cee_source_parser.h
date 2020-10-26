@@ -37,6 +37,9 @@ typedef enum _CEESourceFregmentType {
     kCEESourceFregmentTypeVariableBlock             = 1 << 22,
     kCEESourceFregmentTypeLabelDeclaration          = 1 << 23,
     kCEESourceFregmentTypeIdentifierBlock           = 1 << 24,
+    kCEESourceFregmentTypeXMLTagStart               = 1 << 25,
+    kCEESourceFregmentTypeXMLTagEnd                 = 1 << 26,
+    kCEESourceFregmentTypeXMLTagList                = 1 << 27,
 } CEESourceFregmentType;
 
 typedef enum _CEESourceFregmentIndex {
@@ -226,6 +229,8 @@ CEEList* cee_source_tags_create(CEESourceParserRef parser_ref,
                                 cee_pointer database,
                                 CEERange range,
                                 CEEList* references);
+
+void cee_source_fregment_string_dump(CEESourceFregment* fregment);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

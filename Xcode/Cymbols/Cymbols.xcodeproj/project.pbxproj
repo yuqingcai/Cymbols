@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		260D7DF225470231003BDC42 /* icon_xml_tag_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */; };
 		26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */ = {isa = PBXBuildFile; fileRef = 26308593254263DA000A8CB5 /* cee_regex_macos.m */; };
 		2647CE3925309A1700970FE4 /* WelcomeGuide in Resources */ = {isa = PBXBuildFile; fileRef = 2647CE3825309A1700970FE4 /* WelcomeGuide */; };
 		2647CE3E25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3C25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m */; };
@@ -296,6 +297,7 @@
 /* Begin PBXFileReference section */
 		2338332F22CDD555002C004E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2338333222CDD555002C004E /* Cymbols.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Cymbols.entitlements; sourceTree = "<group>"; };
+		260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_xml_tag_16x16@2x.png"; sourceTree = "<group>"; };
 		26308593254263DA000A8CB5 /* cee_regex_macos.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = cee_regex_macos.m; sourceTree = "<group>"; };
 		26308595254263F2000A8CB5 /* cee_regex_macos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cee_regex_macos.h; sourceTree = "<group>"; };
 		2647CE3825309A1700970FE4 /* WelcomeGuide */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WelcomeGuide; path = ../../../../Resources/WelcomeGuide; sourceTree = "<group>"; };
@@ -959,6 +961,7 @@
 		269202E4252FF3E300D6E2DC /* 2x */ = {
 			isa = PBXGroup;
 			children = (
+				260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */,
 				26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */,
 				269202E5252FF3E300D6E2DC /* cymbols_logo@2x.png */,
 				269202E6252FF3E300D6E2DC /* icon_add_16x16@2x.png */,
@@ -1345,6 +1348,7 @@
 				269203B7252FF3E400D6E2DC /* logo_butterfly_512x512@2x.png in Resources */,
 				26920503252FF60300D6E2DC /* RemoveFileSelectionView.xib in Resources */,
 				2692037A252FF3E400D6E2DC /* icon_implementation_definition_16x16@2x.png in Resources */,
+				260D7DF225470231003BDC42 /* icon_xml_tag_16x16@2x.png in Resources */,
 				26920391252FF3E400D6E2DC /* icon_protocol_declaration_16x16@2x.png in Resources */,
 				2692036A252FF3E400D6E2DC /* icon_file_type_c_sharp_16x16@2x.png in Resources */,
 				26920377252FF3E400D6E2DC /* icon_focus_16x16@2x.png in Resources */,

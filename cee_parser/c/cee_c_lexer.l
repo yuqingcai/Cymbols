@@ -373,7 +373,7 @@ static int c_comment(cee_long offset,
                 length ++;
                 break;
             }
-                
+            
             unput(c1);
         }
         
@@ -484,7 +484,7 @@ cee_int cee_lexer_c_token_get(CEEToken** token)
     cee_long offset = g_scan_offset;
     cee_ulong length = c_scan_get_leng();
     
-    g_scan_offset += c_scan_get_leng();
+    g_scan_offset += length;
     
     *token = cee_token_create(identifier, offset, length);
     

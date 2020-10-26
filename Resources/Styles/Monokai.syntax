@@ -251,6 +251,24 @@
             "strikethrough" : "false",
             "forecolor" : "#A6E22E",
             "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "xml_tag",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#00bcd4",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "xml_attribute",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#00bcd4",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         }
     ]
 }

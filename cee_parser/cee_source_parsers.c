@@ -39,7 +39,6 @@ void cee_parsers_free()
     cee_gnu_asm_parser_free(gnu_asm_parser);
     cee_arm_asm_parser_free(arm_asm_parser);
     cee_html_parser_free(html_parser);
-
      /**
       cee_java_parser_free(java_parser);
       cee_swift_parser_free(swift_parser);
@@ -117,23 +116,25 @@ CEESourceParserRef cee_source_parser_get(const cee_char* filepath)
     CEESourceParserRef parser = NULL;
     cee_char* extension = cee_path_extension((const cee_char*)filepath);
     
-    if (extension) {
-        if (is_c_source_extension(extension))
-            parser = c_parser;
-        else if (is_asm_source_extension(extension)) 
-            parser = asm_parser_get(extension);
-        else if (is_java_source_extension(extension))
-            parser = java_parser;
-        else if (is_swift_source_extension(extension))
-            parser = swift_parser;
-        else if (is_java_script_source_extension(extension))
-            parser = java_script_parser;
-        else if (is_html_source_extension(extension))
-            parser = html_parser;
-        
-        if (extension)
-            cee_free(extension);
-    }
+    if (!extension)
+        return parser;
+    
+    if (is_c_source_extension(extension))
+        parser = c_parser;
+    else if (is_asm_source_extension(extension)) 
+        parser = asm_parser_get(extension);
+    else if (is_java_source_extension(extension))
+        parser = java_parser;
+    else if (is_swift_source_extension(extension))
+        parser = swift_parser;
+    else if (is_java_script_source_extension(extension))
+        parser = java_script_parser;
+    else if (is_html_source_extension(extension))
+        parser = html_parser;
+    
+    if (extension)
+        cee_free(extension);
+    
     return parser;
 }
 

@@ -175,6 +175,7 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     const cee_char* filepath = "?";
     const cee_char* locations = "?";
     const cee_char* fregment_range = "?";
+    CEESourceSymbolType type = symbol->type;
     
     if (symbol->name)
         name = symbol->name;
@@ -194,8 +195,9 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     if (symbol->fregment_range)
         filepath = symbol->fregment_range;
     
-    fprintf(stdout, "%s %s %s %s %s %s\n",
+    fprintf(stdout, "%s %d %s %s %s %s %s\n",
             name,
+            type,
             protos,
             locations,
             derives, 

@@ -285,6 +285,9 @@ static CEEStyleManager* gStyleManager = nil;
         case kCEESourceSymbolTypeExternBlock:
             identifier = @"icon_source_block_16x16";
             break;
+        case kCEESourceSymbolTypeXMLTagName:
+            identifier = @"icon_xml_tag_16x16";
+            
         default:
             break;
     }
