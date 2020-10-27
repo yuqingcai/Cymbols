@@ -57,6 +57,10 @@ typedef enum _CEETagType {
     kCEETagTypeXMLTag,
     kCEETagTypeXMLAttribute,
     
+    /** CSS */
+    kCEETagTypeCSSSelector,
+    kCEETagTypeCSSProperty,
+    
     /** ... */
     kCEETagTypeIgnore,
     kCEETagTypeMax,

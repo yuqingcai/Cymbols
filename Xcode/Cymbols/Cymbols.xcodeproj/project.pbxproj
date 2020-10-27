@@ -264,6 +264,9 @@
 		2693B227253001D700D21FD3 /* Styles in Resources */ = {isa = PBXBuildFile; fileRef = 2693B226253001D700D21FD3 /* Styles */; };
 		269F9657253DB22500D8808A /* CEESourcePoint.m in Sources */ = {isa = PBXBuildFile; fileRef = 269F9656253DB22500D8808A /* CEESourcePoint.m */; };
 		26BC7E7B2539301900AD8992 /* icon_alert_32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */; };
+		26DDED3F2547B6A500BD8246 /* cee_css_lexer.l in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3C2547B6A500BD8246 /* cee_css_lexer.l */; };
+		26DDED402547B6A500BD8246 /* cee_css_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3D2547B6A500BD8246 /* cee_css_parser.c */; };
+		26DDED422547FC0800BD8246 /* icon_css_selector_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -680,6 +683,10 @@
 		269F9656253DB22500D8808A /* CEESourcePoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESourcePoint.m; sourceTree = "<group>"; };
 		26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_alert_32x32@2x.png"; sourceTree = "<group>"; };
 		26CBE684252FECA20047771D /* Cymbols.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cymbols.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		26DDED3C2547B6A500BD8246 /* cee_css_lexer.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_css_lexer.l; sourceTree = "<group>"; };
+		26DDED3D2547B6A500BD8246 /* cee_css_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_css_parser.c; sourceTree = "<group>"; };
+		26DDED3E2547B6A500BD8246 /* cee_css_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_css_parser.h; sourceTree = "<group>"; };
+		26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_css_selector_16x16@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -857,6 +864,8 @@
 			children = (
 				269202A1252FF38300D6E2DC /* asm */,
 				269202A8252FF38300D6E2DC /* c */,
+				269202B8252FF38400D6E2DC /* html */,
+				26DDED3B2547B6A500BD8246 /* css */,
 				269202AC252FF38300D6E2DC /* cee_reference.c */,
 				269202AD252FF38300D6E2DC /* cee_reference.h */,
 				269202AE252FF38300D6E2DC /* cee_source_parser.c */,
@@ -869,7 +878,6 @@
 				269202B5252FF38300D6E2DC /* cee_tag.h */,
 				269202B6252FF38300D6E2DC /* cee_token.c */,
 				269202B7252FF38400D6E2DC /* cee_token.h */,
-				269202B8252FF38400D6E2DC /* html */,
 			);
 			name = cee_parser;
 			path = ../../../cee_parser;
@@ -961,6 +969,7 @@
 		269202E4252FF3E300D6E2DC /* 2x */ = {
 			isa = PBXGroup;
 			children = (
+				26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */,
 				260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */,
 				26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */,
 				269202E5252FF3E300D6E2DC /* cymbols_logo@2x.png */,
@@ -1274,6 +1283,16 @@
 			path = CellViews;
 			sourceTree = "<group>";
 		};
+		26DDED3B2547B6A500BD8246 /* css */ = {
+			isa = PBXGroup;
+			children = (
+				26DDED3C2547B6A500BD8246 /* cee_css_lexer.l */,
+				26DDED3D2547B6A500BD8246 /* cee_css_parser.c */,
+				26DDED3E2547B6A500BD8246 /* cee_css_parser.h */,
+			);
+			path = css;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1423,6 +1442,7 @@
 				26920390252FF3E400D6E2DC /* icon_property_16x16@2x.png in Resources */,
 				269203AE252FF3E400D6E2DC /* icon_undo_16x16@2x.png in Resources */,
 				2693B227253001D700D21FD3 /* Styles in Resources */,
+				26DDED422547FC0800BD8246 /* icon_css_selector_16x16@2x.png in Resources */,
 				26920506252FF60300D6E2DC /* ProjectPropertyView.xib in Resources */,
 				26920387252FF3E400D6E2DC /* icon_new_file_16x16@2x.png in Resources */,
 				26920357252FF3E300D6E2DC /* icon_close_16x16@2x.png in Resources */,
@@ -1512,7 +1532,9 @@
 				269202DD252FF39000D6E2DC /* cee_text_layout.c in Sources */,
 				26920436252FF4F400D6E2DC /* CEETableView.m in Sources */,
 				26920454252FF50300D6E2DC /* CEEMarkdownViewController.m in Sources */,
+				26DDED3F2547B6A500BD8246 /* cee_css_lexer.l in Sources */,
 				26920445252FF4F400D6E2DC /* NSImageView+UIStyle.m in Sources */,
+				26DDED402547B6A500BD8246 /* cee_css_parser.c in Sources */,
 				2692042A252FF4F400D6E2DC /* CEEImageView.m in Sources */,
 				2692043C252FF4F400D6E2DC /* CEETitleView.m in Sources */,
 				26920299252FF35600D6E2DC /* cee_strfuncs.c in Sources */,

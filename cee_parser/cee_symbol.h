@@ -41,6 +41,7 @@ typedef enum _CEESourceSymbolType {
     kCEESourceSymbolTypeXMLTagEnd,
     kCEESourceSymbolTypeXMLTagName,
     kCEESourceSymbolTypeXMLTagAttribute,
+    kCEESourceSymbolTypeCSSSelector,
     kCEESourceSymbolTypeMax,
 } CEESourceSymbolType;
 

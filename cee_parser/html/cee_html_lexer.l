@@ -2,13 +2,14 @@
 %option noyywrap
 %option prefix="html_scan_"
 %x Preprocesser
-L	[a-zA-Z_]
-H	[a-fA-F0-9]
-D	[0-9]
+L   [a-zA-Z_]
+H   [a-fA-F0-9]
+D   [0-9]
 O   [0-7]
 B   [01]
-WS	[ \t]
-NL	(\r\n|\n|\r\v\f)
+WS  [ \t]
+NL  (\r\n|\n|\r\v\f)
+WN  ([ \t]|\r\n|\n|\r\v\f)
 IS  (u|U|l|L)*
 FS  (f|F|l|L)
 DE  ([eE][+|-]?[0-9]+)

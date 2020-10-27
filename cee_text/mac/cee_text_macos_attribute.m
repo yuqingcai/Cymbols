@@ -518,7 +518,8 @@ cee_boolean cee_text_platform_configure(cee_pointer platform_ref,
             { kCEETagTypeEnumeratorReference,              "enumerator"                            },
             { kCEETagTypeXMLTag,                           "xml_tag"                               },
             { kCEETagTypeXMLAttribute,                     "xml_attribute"                         },
-            
+            { kCEETagTypeCSSProperty,                      "css_property"                          },
+            { kCEETagTypeCSSSelector,                      "css_selector"                          }
         };
         
         int map_size = sizeof (rule_map) / sizeof(rule_map[0]);

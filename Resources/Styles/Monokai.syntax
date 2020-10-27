@@ -269,6 +269,24 @@
             "strikethrough" : "false",
             "forecolor" : "#00bcd4",
             "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "css_selector",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#66D9EF",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
+        
+        {
+            "name" : "css_property",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#FD4384",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
         }
     ]
 }

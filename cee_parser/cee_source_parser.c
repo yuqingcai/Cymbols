@@ -80,8 +80,10 @@ static void symbol_tag_map_init(void)
     symbol_tag_map[kCEESourceSymbolTypeLabel]                             = kCEETagTypeVariable;
     symbol_tag_map[kCEESourceSymbolTypeXMLTagStart]                       = kCEETagTypeXMLTag;
     symbol_tag_map[kCEESourceSymbolTypeXMLTagEnd]                         = kCEETagTypeXMLTag;
-    symbol_tag_map[kCEESourceSymbolTypeXMLTagName]                         = kCEETagTypeXMLTag;
+    symbol_tag_map[kCEESourceSymbolTypeXMLTagName]                        = kCEETagTypeXMLTag;
     symbol_tag_map[kCEESourceSymbolTypeXMLTagAttribute]                   = kCEETagTypeXMLAttribute;
+    symbol_tag_map[kCEESourceSymbolTypeCSSSelector]                       = kCEETagTypeCSSSelector;
+    
 }
 
 static void reference_tag_map_init(void)
@@ -620,7 +622,9 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeProtocolDeclaration) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeVariableBlock) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeIdentifierBlock) ||
-                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeXMLTagStart)) {
+                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeXMLTagStart) ||
+                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeXMLTagStart) ||
+                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeCSSBlock)) {
                     
                     s = grandson->symbols;
                     while (s) {
@@ -634,7 +638,8 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                             symbol->type == kCEESourceSymbolTypeInterfaceDeclaration ||
                             symbol->type == kCEESourceSymbolTypeImplementationDefinition ||
                             symbol->type == kCEESourceSymbolTypeProtocolDeclaration ||
-                            symbol->type == kCEESourceSymbolTypeExternBlock) {
+                            symbol->type == kCEESourceSymbolTypeExternBlock ||
+                            symbol->type == kCEESourceSymbolTypeCSSSelector) {
                             
                             leaf = cee_tree_create();
                             leaf->data = symbol;
@@ -1477,6 +1482,10 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
                     tag_type = kCEETagTypeLiteral;
                 else if (token->identifier == kCEETokenID_CHARACTER)
                     tag_type = kCEETagTypeCharacter;
+                else if (token->identifier == kCEETokenID_CSS_PROPERTY)
+                    tag_type = kCEETagTypeCSSProperty;
+                else if (token->identifier == kCEETokenID_CSS_FUNCTION)
+                    tag_type = kCEETagTypeFunctionReference;
             }
             
             if (tag_type != kCEETagTypeIgnore) {

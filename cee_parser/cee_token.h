@@ -318,7 +318,10 @@ typedef enum _CEETokenID {
     kCEETokenID_NS_ENUM,
     kCEETokenID_NS_OPTIONS,
     kCEETokenID_HTML_COMMENT,
-    kCEETokenID_HTML_DOCTYPE,    
+    kCEETokenID_HTML_DOCTYPE,
+    kCEETokenID_CSS_RULE,
+    kCEETokenID_CSS_PROPERTY,
+    kCEETokenID_CSS_FUNCTION,
     kCEETokenID_END
 } CEETokenID;
 

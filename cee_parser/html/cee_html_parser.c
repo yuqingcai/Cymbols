@@ -41,10 +41,14 @@ static cee_boolean token_is_comment(CEEToken* token);
 static cee_boolean comment_token_push(HTMLParser* parser,
                                       CEEToken* push);
 static cee_boolean comment_fregment_reduce(HTMLParser* parser);
-static cee_boolean comment_attach(HTMLParser* parser);;
+static cee_boolean comment_attach(HTMLParser* parser);
 static XMLTagType tag_parse(CEESourceFregment* fregment);
 static cee_boolean token_is_empty_tag(CEEToken* token);
 static void html_tag_symbols_create(CEESourceFregment* fregment);
+static cee_char* attribute_name_get(CEESourceFregment* fregment,
+                                    CEEList* p);
+static cee_char* attribute_value_get(CEESourceFregment* fregment,
+                                     CEEList* p);
 static cee_boolean statement_push(HTMLParser* parser,
                                   CEESourceFregment* fregment);
 static cee_boolean statement_pop(HTMLParser* parser);
@@ -58,8 +62,7 @@ CEESourceParserRef cee_html_parser_create(const cee_char* identifier)
     
     HTMLParser* html = parser_create();
     html->super = parser;
-    
-    parser->imp = parser_create();
+    parser->imp = html;
     return (CEESourceParserRef)parser;
 }
 
@@ -341,6 +344,8 @@ static void html_tag_symbols_create(CEESourceFregment* fregment)
     cee_int i = 0;
     CEESourceSymbol* symbol = NULL;
     CEESourceSymbolType type = kCEESourceSymbolTypeUnknow;
+    cee_char* identifier = NULL;
+    cee_char* class = NULL;
     
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
@@ -355,10 +360,20 @@ static void html_tag_symbols_create(CEESourceFregment* fregment)
             type = kCEESourceSymbolTypeXMLTagEnd;
         }
         else if (token->identifier == kCEETokenID_IDENTIFIER) {
-            if (i == 0) 
+            if (i == 0)  {
                 type = kCEESourceSymbolTypeXMLTagName;
-            else
+            }
+            else {
                 type = kCEESourceSymbolTypeXMLTagAttribute;
+                cee_char* name = attribute_name_get(fregment, p);
+                if (name) {
+                    if (!strcmp(name, "id") && !identifier)
+                        identifier = attribute_value_get(fregment, p);
+                    else if (!strcmp(name, "class") && !class)
+                        class = attribute_value_get(fregment, p);
+                    cee_free(name);
+                }
+            }
             
             i ++;
         }
@@ -372,10 +387,75 @@ static void html_tag_symbols_create(CEESourceFregment* fregment)
                                                                "HTML");
             fregment->symbols = cee_list_prepend(fregment->symbols, symbol);
         }
-        
         p = TOKEN_NEXT(p);
     }
     
+    p = fregment->symbols;
+    while (p) {
+        symbol = p->data;
+        
+        if (symbol->type == kCEESourceSymbolTypeXMLTagName) {
+            if (symbol->name) {
+                cee_char* str = NULL;
+                if (identifier)
+                    str = cee_strconcat(symbol->name, "#", identifier, NULL);
+                else if (class)
+                    str = cee_strconcat(symbol->name, ".", class, NULL);
+        
+                if (str) {
+                    cee_free(symbol->name);
+                    symbol->name = str;
+                }
+            }
+            break;
+        }
+        p = p->next;
+    }
+
+    if (identifier)
+        cee_free(identifier);
+    if (class)
+        cee_free(class);
+    
+}
+
+static cee_char* attribute_name_get(CEESourceFregment* fregment,
+                                    CEEList* p)
+{
+    CEEToken* token = p->data;
+    if (!token)
+        return NULL;
+    cee_char* subject_ref = (cee_char*)fregment->subject_ref;
+    cee_char* name = cee_strndup(&subject_ref[token->offset], 
+                                 token->length);
+    return name;
+}
+
+static cee_char* attribute_value_get(CEESourceFregment* fregment,
+                                     CEEList* p)
+{
+    CEEList* q = NULL;
+    CEEToken* token = NULL;
+    cee_char* value = NULL;
+    cee_char* subject_ref = (cee_char*)fregment->subject_ref;
+    
+    q = cee_token_not_whitespace_newline_after(p);
+    if (q) {
+        token = q->data;
+        if (token->identifier == '=') {
+            q = cee_token_not_whitespace_newline_after(q);
+            if (q) {
+                token = q->data;
+                value = cee_strndup(&subject_ref[token->offset],
+                                    token->length);
+                value = cee_strtrim(value, "\"");
+                return value;
+                
+            }
+        }
+    }
+    
+    return NULL;
 }
 
 static cee_boolean token_is_comment(CEEToken* token)

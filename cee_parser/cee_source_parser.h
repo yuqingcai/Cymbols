@@ -40,6 +40,7 @@ typedef enum _CEESourceFregmentType {
     kCEESourceFregmentTypeXMLTagStart               = 1 << 25,
     kCEESourceFregmentTypeXMLTagEnd                 = 1 << 26,
     kCEESourceFregmentTypeXMLTagList                = 1 << 27,
+    kCEESourceFregmentTypeCSSBlock                  = 1 << 28,
 } CEESourceFregmentType;
 
 typedef enum _CEESourceFregmentIndex {
