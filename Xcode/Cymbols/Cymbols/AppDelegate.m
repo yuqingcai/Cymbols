@@ -90,6 +90,11 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     _configurations = _activedConfigurations;
 }
 
+
+- (NSString*)configurationFilePath {
+    return [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
+}
+
 - (void)dealloc {
     
     cee_parsers_free();
@@ -172,11 +177,6 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 
 - (void)applicationWillBecomeActive:(NSNotification *)notification {
     [_sourceBufferManager syncSourceBuffersFromFiles];
-}
-
-- (IBAction)syntaxColorChange:(id)sender {
-    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    [styleManager setTextHighlightStyleName:@"Red"];
 }
 
 - (CEEProject*)currentProject {

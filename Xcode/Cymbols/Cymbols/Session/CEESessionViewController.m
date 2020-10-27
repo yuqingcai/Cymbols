@@ -544,4 +544,10 @@
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://cymbols.io/manual.html"]];
 }
 
+- (IBAction)setPreferences:(id)sender {
+    AppDelegate* delegate = [NSApp delegate];
+    CEESessionPort* port = self.session.activedPort;
+    [port openSourceBuffersWithFilePaths:@[[delegate configurationFilePath]]];
+}
+
 @end

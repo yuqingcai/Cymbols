@@ -25,7 +25,11 @@
                                         <menuItem title="Preferences" id="y2E-OR-19J">
                                             <menu key="submenu" title="Preferences" id="gnb-fJ-yMj">
                                                 <items>
-                                                    <menuItem title="Setting..." keyEquivalent="," id="Sp1-Fe-a6Y"/>
+                                                    <menuItem title="Setting" keyEquivalent="," id="Sp1-Fe-a6Y">
+                                                        <connections>
+                                                            <action selector="setPreferences:" target="Ady-hI-5gd" id="783-vJ-nO4"/>
+                                                        </connections>
+                                                    </menuItem>
                                                     <menuItem title="User Interface Styles..." id="H8D-5c-Z7G">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>

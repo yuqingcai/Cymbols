@@ -29,4 +29,5 @@ extern NSNotificationName CEENotificationHeartBeat;
 - (NSString*)serializerVersionString;
 - (NSString*)infoString;
 - (void)setConfiguration:(NSString*)configuration value:(NSString*)value;
+- (NSString*)configurationFilePath;
 @end

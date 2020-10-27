@@ -12,6 +12,7 @@
 		2647CE3925309A1700970FE4 /* WelcomeGuide in Resources */ = {isa = PBXBuildFile; fileRef = 2647CE3825309A1700970FE4 /* WelcomeGuide */; };
 		2647CE3E25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3C25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m */; };
 		2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */; };
+		264EA89C25480CFD005042EA /* icon_file_type_css_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */; };
 		26548527254150AC00E1D0DE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 26548526254150AC00E1D0DE /* Credits.rtf */; };
 		269201A1252FF30D00D6E2DC /* cJSON_Utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920091252FF30D00D6E2DC /* cJSON_Utils.c */; };
 		2692026F252FF33300D6E2DC /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692026E252FF33300D6E2DC /* cJSON.c */; };
@@ -308,6 +309,7 @@
 		2647CE3B25309ACC00970FE4 /* CEETextHighlightStyleSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETextHighlightStyleSelectionController.h; sourceTree = "<group>"; };
 		2647CE3C25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETextHighlightStyleSelectionController.m; sourceTree = "<group>"; };
 		2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEUserInterfaceStyleSelectionController.m; sourceTree = "<group>"; };
+		264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_css_16x16@2x.png"; sourceTree = "<group>"; };
 		26548526254150AC00E1D0DE /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		2667ECFB25037D8000ED5010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		26920091252FF30D00D6E2DC /* cJSON_Utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON_Utils.c; sourceTree = "<group>"; };
@@ -969,6 +971,7 @@
 		269202E4252FF3E300D6E2DC /* 2x */ = {
 			isa = PBXGroup;
 			children = (
+				264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */,
 				26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */,
 				260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */,
 				26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */,
@@ -1440,6 +1443,7 @@
 				269203B6252FF3E400D6E2DC /* logo_butterfly_32x32@2x.png in Resources */,
 				26920501252FF60300D6E2DC /* TableCellViews.xib in Resources */,
 				26920390252FF3E400D6E2DC /* icon_property_16x16@2x.png in Resources */,
+				264EA89C25480CFD005042EA /* icon_file_type_css_16x16@2x.png in Resources */,
 				269203AE252FF3E400D6E2DC /* icon_undo_16x16@2x.png in Resources */,
 				2693B227253001D700D21FD3 /* Styles in Resources */,
 				26DDED422547FC0800BD8246 /* icon_css_selector_16x16@2x.png in Resources */,
@@ -1863,7 +1867,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 110;
+				CURRENT_PROJECT_VERSION = 111;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1875,7 +1879,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
@@ -1891,7 +1895,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 110;
+				CURRENT_PROJECT_VERSION = 111;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1903,7 +1907,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;

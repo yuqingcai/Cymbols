@@ -271,12 +271,24 @@ static void block_header_parse(CSSParser* parser)
     
     if (!fregment || !fregment->tokens)
         return;
-        
+    
     CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
-    p = cee_token_not_whitespace_newline_after(p);  /** skip whitesapce and newline */
+    /** skip whitesapce and newline */
+    if (cee_token_is_identifier(p, kCEETokenID_WHITE_SPACE) ||
+        cee_token_is_identifier(p, kCEETokenID_NEW_LINE))
+        p = cee_token_not_whitespace_newline_after(p);
+    
     CEEList* q = SOURCE_FREGMENT_TOKENS_LAST(fregment);
-    q = TOKEN_PREV(q);  /** skip '{' */
-    q = cee_token_not_whitespace_newline_before(q); /** skip whitesapce and newline */
+    /** skip '{' */
+    if (cee_token_is_identifier(q, '{'))
+        q = TOKEN_PREV(q);
+    /** skip whitesapce and newline */
+    if (cee_token_is_identifier(q, kCEETokenID_WHITE_SPACE) ||
+        cee_token_is_identifier(q, kCEETokenID_NEW_LINE))
+        q = cee_token_not_whitespace_newline_before(q);
+    
+    if (!p || !q)
+        return;
     
     symbol = cee_source_symbol_create_from_token_slice(fregment->filepath_ref, 
                                                        fregment->subject_ref, 
