@@ -791,22 +791,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "26AA8FE6-2D00-43EE-BF66-9E9DC1BAB53E"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../cee_parser/cee_source_parsers.c"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "22"
-            endingLineNumber = "22"
-            landmarkName = "unknown"
-            landmarkType = "0">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "F99FADFC-1CC6-4E6E-9C2C-872ADF6B4AF5"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -1278,8 +1262,8 @@
             filePath = "../../cee_parser/c/cee_c_parser.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "5117"
-            endingLineNumber = "5117"
+            startingLineNumber = "5118"
+            endingLineNumber = "5118"
             landmarkName = "references_in_source_fregment_parse(filepath, fregment, subject, prep_directive, statement, range, references)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1310,8 +1294,8 @@
             filePath = "../../cee_parser/cee_source_parser.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "552"
-            endingLineNumber = "552"
+            startingLineNumber = "573"
+            endingLineNumber = "573"
             landmarkName = "cee_source_fregment_symbol_tree_create(fregment)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1326,8 +1310,8 @@
             filePath = "../../cee_parser/cee_source_parser.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1005"
-            endingLineNumber = "1005"
+            startingLineNumber = "1026"
+            endingLineNumber = "1026"
             landmarkName = "cee_source_fregment_indexes_in_range(token_map, range, indexes)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1342,8 +1326,8 @@
             filePath = "../../cee_parser/cee_source_parser.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1343"
-            endingLineNumber = "1343"
+            startingLineNumber = "1364"
+            endingLineNumber = "1364"
             landmarkName = "cee_source_tags_create(parser_ref, token_map, prep_directive, statement, database, range, references)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1358,25 +1342,9 @@
             filePath = "../../cee_parser/cee_source_parser.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "951"
-            endingLineNumber = "951"
-            landmarkName = "cee_source_fregment_sublevel_backtrack(fregment)"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "6831C071-3FAB-43C9-8528-C109D1A3C2E3"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../cee_parser/html/cee_html_parser.c"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "452"
-            endingLineNumber = "452"
-            landmarkName = "attribute_value_get(fregment, p)"
+            startingLineNumber = "972"
+            endingLineNumber = "972"
+            landmarkName = "cee_source_fregment_tokens_break(fregment, from, range, sub)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1394,6 +1362,38 @@
             endingLineNumber = "550"
             landmarkName = "-setPreferences:"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "37481B9C-E972-46E0-8824-8435841624C5"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../cee_parser/swift/cee_swift_parser.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "133"
+            endingLineNumber = "133"
+            landmarkName = "symbol_parse(parser_ref, filepath, subject, prep_directive, statement, comment, tokens_ref, source_token_map)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D2BF480B-4466-47DE-9721-7FF2F3E73420"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../cee_parser/c/cee_c_parser.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "3604"
+            endingLineNumber = "3604"
+            landmarkName = "c_declaration_parse(fregment)"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

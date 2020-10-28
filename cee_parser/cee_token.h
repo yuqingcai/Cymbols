@@ -55,8 +55,8 @@ typedef enum _CEETokenID {
     kCEETokenID_NEW_LINE,
     kCEETokenID_WHITE_SPACE,
     
-    kCEETokenID_C_COMMENT,
-    kCEETokenID_CPP_COMMENT,
+    kCEETokenID_LINES_COMMENT,
+    kCEETokenID_LINE_COMMENT,
     kCEETokenID_IDENTIFIER,
     kCEETokenID_CONSTANT,
     kCEETokenID_CHARACTER,

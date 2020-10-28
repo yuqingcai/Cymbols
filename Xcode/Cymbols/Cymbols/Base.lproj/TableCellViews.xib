@@ -10,11 +10,11 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView identifier="IDFileNameCellView" id="c22-O7-iKe" customClass="CEEFileNameCellView">
-            <rect key="frame" x="0.0" y="0.0" width="394" height="20"/>
+            <rect key="frame" x="0.0" y="0.0" width="394" height="22"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="uM5-2f-o0s" customClass="CEETableRowCellViewTextLabel">
-                    <rect key="frame" x="28" y="3" width="366" height="18"/>
+                    <rect key="frame" x="28" y="4" width="366" height="18"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="18" id="RAO-en-bRF"/>
                     </constraints>
@@ -23,7 +23,7 @@
                     </userDefinedRuntimeAttributes>
                 </customView>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="y5a-5g-jck" customClass="CEEImageView">
-                    <rect key="frame" x="8" y="0.0" width="20" height="20"/>
+                    <rect key="frame" x="8" y="1" width="20" height="20"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="20" id="cSA-jQ-rfq"/>
                         <constraint firstAttribute="height" constant="20" id="kde-H6-Vw9"/>
@@ -32,9 +32,9 @@
                 </imageView>
             </subviews>
             <constraints>
-                <constraint firstAttribute="bottom" secondItem="uM5-2f-o0s" secondAttribute="bottom" constant="3" id="1NC-FJ-Iyy"/>
+                <constraint firstAttribute="bottom" secondItem="uM5-2f-o0s" secondAttribute="bottom" constant="4" id="1NC-FJ-Iyy"/>
                 <constraint firstItem="y5a-5g-jck" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="8" id="HUb-da-8Ss"/>
-                <constraint firstAttribute="bottom" secondItem="y5a-5g-jck" secondAttribute="bottom" id="aWp-h9-uKz"/>
+                <constraint firstAttribute="bottom" secondItem="y5a-5g-jck" secondAttribute="bottom" constant="1" id="aWp-h9-uKz"/>
                 <constraint firstItem="uM5-2f-o0s" firstAttribute="leading" secondItem="y5a-5g-jck" secondAttribute="trailing" id="gDK-ce-Jao"/>
                 <constraint firstAttribute="trailing" secondItem="uM5-2f-o0s" secondAttribute="trailing" id="rCx-yV-JdJ"/>
             </constraints>
@@ -45,11 +45,11 @@
             <point key="canvasLocation" x="96" y="38"/>
         </customView>
         <customView identifier="IDSourceBufferSaveConfirmCellView" id="DOt-U7-aqq" customClass="CEESourceBufferSaveConfirmCellView">
-            <rect key="frame" x="0.0" y="0.0" width="394" height="20"/>
+            <rect key="frame" x="0.0" y="0.0" width="394" height="22"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="rwX-pp-pnv" customClass="CEECheckBox">
-                    <rect key="frame" x="8" y="2" width="22" height="17"/>
+                    <rect key="frame" x="8" y="3" width="22" height="17"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="22" id="iwi-xO-OSx"/>
                         <constraint firstAttribute="height" constant="17" id="lYt-sf-O3I"/>
@@ -59,7 +59,7 @@
                     </connections>
                 </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="Zy4-MJ-sZa" customClass="CEETableRowCellViewTextLabel">
-                    <rect key="frame" x="30" y="3" width="364" height="18"/>
+                    <rect key="frame" x="30" y="4" width="364" height="18"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="18" id="wSr-61-mGD"/>
                     </constraints>
@@ -71,9 +71,9 @@
             <constraints>
                 <constraint firstItem="Zy4-MJ-sZa" firstAttribute="leading" secondItem="rwX-pp-pnv" secondAttribute="trailing" id="GS6-9P-h0x"/>
                 <constraint firstAttribute="trailing" secondItem="Zy4-MJ-sZa" secondAttribute="trailing" id="VI7-rJ-Phc"/>
-                <constraint firstAttribute="bottom" secondItem="Zy4-MJ-sZa" secondAttribute="bottom" constant="3" id="knd-77-egU"/>
+                <constraint firstAttribute="bottom" secondItem="Zy4-MJ-sZa" secondAttribute="bottom" constant="4" id="knd-77-egU"/>
                 <constraint firstItem="rwX-pp-pnv" firstAttribute="leading" secondItem="DOt-U7-aqq" secondAttribute="leading" constant="8" id="rTY-ze-kjh"/>
-                <constraint firstAttribute="bottom" secondItem="rwX-pp-pnv" secondAttribute="bottom" constant="2" id="u0Y-pH-8RT"/>
+                <constraint firstAttribute="bottom" secondItem="rwX-pp-pnv" secondAttribute="bottom" constant="3" id="u0Y-pH-8RT"/>
             </constraints>
             <connections>
                 <outlet property="check" destination="rwX-pp-pnv" id="Rtr-su-aZX"/>
@@ -82,11 +82,11 @@
             <point key="canvasLocation" x="96" y="111"/>
         </customView>
         <customView identifier="IDFilePathCellView" id="E4A-hY-VtA" customClass="CEEFilePathCellView">
-            <rect key="frame" x="0.0" y="0.0" width="394" height="20"/>
+            <rect key="frame" x="0.0" y="0.0" width="394" height="22"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="uFF-Nx-0gN" customClass="CEETableRowCellViewTextLabel">
-                    <rect key="frame" x="8" y="3" width="386" height="18"/>
+                    <rect key="frame" x="8" y="4" width="386" height="18"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="18" id="CEv-ro-eAt"/>
                     </constraints>
@@ -98,7 +98,7 @@
             <constraints>
                 <constraint firstItem="uFF-Nx-0gN" firstAttribute="leading" secondItem="E4A-hY-VtA" secondAttribute="leading" constant="8" id="7eE-eD-av2"/>
                 <constraint firstAttribute="trailing" secondItem="uFF-Nx-0gN" secondAttribute="trailing" id="9DB-rG-5JV"/>
-                <constraint firstAttribute="bottom" secondItem="uFF-Nx-0gN" secondAttribute="bottom" constant="3" id="CC7-8Z-zfR"/>
+                <constraint firstAttribute="bottom" secondItem="uFF-Nx-0gN" secondAttribute="bottom" constant="4" id="CC7-8Z-zfR"/>
             </constraints>
             <connections>
                 <outlet property="title" destination="uFF-Nx-0gN" id="cQT-gU-m4U"/>
@@ -106,11 +106,11 @@
             <point key="canvasLocation" x="96" y="185"/>
         </customView>
         <customView identifier="IDSymbolCellView" id="yiQ-nJ-vxH" customClass="CEESymbolCellView">
-            <rect key="frame" x="0.0" y="0.0" width="394" height="20"/>
+            <rect key="frame" x="0.0" y="0.0" width="394" height="22"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="Nfa-Pw-8hN" customClass="CEETableRowCellViewTextLabel">
-                    <rect key="frame" x="28" y="3" width="366" height="18"/>
+                    <rect key="frame" x="28" y="4" width="366" height="18"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="18" id="zXQ-OH-1ZW"/>
                     </constraints>
@@ -119,7 +119,7 @@
                     </userDefinedRuntimeAttributes>
                 </customView>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="8DZ-xr-nvr" customClass="CEEImageView">
-                    <rect key="frame" x="8" y="0.0" width="20" height="20"/>
+                    <rect key="frame" x="8" y="1" width="20" height="20"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="20" id="DDh-UL-Z2j"/>
                         <constraint firstAttribute="width" constant="20" id="Tts-Ln-f07"/>
@@ -129,9 +129,9 @@
             </subviews>
             <constraints>
                 <constraint firstAttribute="trailing" secondItem="Nfa-Pw-8hN" secondAttribute="trailing" id="Fup-bX-QgY"/>
-                <constraint firstAttribute="bottom" secondItem="8DZ-xr-nvr" secondAttribute="bottom" id="ScR-CI-Ryy"/>
+                <constraint firstAttribute="bottom" secondItem="8DZ-xr-nvr" secondAttribute="bottom" constant="1" id="ScR-CI-Ryy"/>
                 <constraint firstItem="8DZ-xr-nvr" firstAttribute="leading" secondItem="yiQ-nJ-vxH" secondAttribute="leading" constant="8" id="SyC-dx-WrX"/>
-                <constraint firstAttribute="bottom" secondItem="Nfa-Pw-8hN" secondAttribute="bottom" constant="3" id="bBj-eZ-R5n"/>
+                <constraint firstAttribute="bottom" secondItem="Nfa-Pw-8hN" secondAttribute="bottom" constant="4" id="bBj-eZ-R5n"/>
                 <constraint firstItem="Nfa-Pw-8hN" firstAttribute="leading" secondItem="8DZ-xr-nvr" secondAttribute="trailing" id="rlS-Ac-Fb6"/>
             </constraints>
             <connections>

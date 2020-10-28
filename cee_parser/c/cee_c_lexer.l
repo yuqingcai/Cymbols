@@ -260,8 +260,8 @@ static int character(cee_long offset,
 "nullable"                                  RETURN_TOKEN_ID(kCEETokenID_NULLABLE                   )
 "NS_ENUM"                                   RETURN_TOKEN_ID(kCEETokenID_NS_ENUM                    )
 "NS_OPTIONS"                                RETURN_TOKEN_ID(kCEETokenID_NS_OPTIONS                 )
-"/*"                                        RETURN_TOKEN_ID(kCEETokenID_C_COMMENT                  )
-"//"                                        RETURN_TOKEN_ID(kCEETokenID_CPP_COMMENT                )
+"/*"                                        RETURN_TOKEN_ID(kCEETokenID_LINES_COMMENT              )
+"//"                                        RETURN_TOKEN_ID(kCEETokenID_LINE_COMMENT               )
 "\""                                        RETURN_TOKEN_ID(kCEETokenID_LITERAL                    )
 "@"{WS}*"\""                                RETURN_TOKEN_ID(kCEETokenID_LITERAL                    )
 "'"                                         RETURN_TOKEN_ID(kCEETokenID_CHARACTER                  )
@@ -491,12 +491,12 @@ cee_int cee_lexer_c_token_get(CEEToken** token)
     if (!identifier) /* EOF */
         return 0;
     
-    if (identifier == kCEETokenID_C_COMMENT) {
+    if (identifier == kCEETokenID_LINES_COMMENT) {
         tail_length = c_comment(offset, &eof);
         (*token)->length += tail_length;
         g_scan_offset += tail_length;
     }
-    else if (identifier == kCEETokenID_CPP_COMMENT) {
+    else if (identifier == kCEETokenID_LINE_COMMENT) {
         tail_length = cpp_comment(offset, &eof);
         (*token)->length += tail_length;
         g_scan_offset += tail_length;

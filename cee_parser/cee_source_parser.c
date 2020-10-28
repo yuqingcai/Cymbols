@@ -39,6 +39,20 @@ static cee_boolean syntax_tags_create_recursive(CEESourceParserRef parser_ref,
                                                 CEEList** tags);
 static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
                                              CEESourceFregment* fregment);
+static void source_fregment_symbols_parent_parse(CEESourceFregment* fregment);
+static cee_char* global_scope_name_from_source_fregment(CEESourceFregment* fregment);
+static cee_char* class_scope_name_from_source_fregment(CEESourceFregment* fregment);
+static cee_char* union_scope_name_from_source_fregment(CEESourceFregment* fregment);
+static cee_char* namespace_scope_name_from_source_fregment(CEESourceFregment* fregment);
+static cee_char* implementation_scope_name_from_source_fregment(CEESourceFregment* fregment);
+static cee_char* interface_scope_name_from_source_fregment(CEESourceFregment* fregment);
+static cee_char* protocol_scope_name_from_source_fregment(CEESourceFregment* fregment);
+static cee_boolean is_anonymous_namespace_name(CEESourceFregment* fregment,
+                                               const cee_char* name);
+static cee_boolean is_anonymous_class_name(CEESourceFregment* fregment,
+                                                 const cee_char* name);
+static cee_boolean is_anonymous_union_name(CEESourceFregment* fregment,
+                                                 const cee_char* name);
 
 static CEETagType symbol_tag_map[kCEESourceSymbolTypeMax];
 static CEETagType reference_tag_map[kCEESourceReferenceTypeMax];
@@ -198,12 +212,14 @@ cee_boolean cee_source_reference_parse(CEESourceParserRef parser_ref,
 
 CEESourceFregment* cee_source_fregment_create(CEESourceFregmentType type,
                                               const cee_uchar* filepath,
-                                              const cee_uchar* subject)
+                                              const cee_uchar* subject,
+                                              const cee_uchar* filetype)
 {
     CEESourceFregment* fregment = cee_malloc0(sizeof(CEESourceFregment));
     fregment->type |= type;
     fregment->filepath_ref = filepath;
     fregment->subject_ref = subject;
+    fregment->filetype = (cee_uchar*)cee_strdup((const cee_char*)filetype);
     return fregment;
 }
 
@@ -217,6 +233,9 @@ void cee_source_fregment_free(cee_pointer data)
     cee_list_free(fregment->tokens_last);
     cee_list_free(fregment->symbols);
     cee_list_free_full(fregment->children, cee_source_fregment_free);
+
+    if (fregment->filetype)
+        cee_free(fregment->filetype);
     
     free(fregment);
 }
@@ -260,14 +279,16 @@ void cee_source_fregment_descriptors_free(CEEList* descriptors)
 CEESourceFregment* cee_source_fregment_append(CEESourceFregment* sibling,
                                               CEESourceFregmentType type,
                                               const cee_uchar* filepath,
-                                              const cee_uchar* subject)
+                                              const cee_uchar* subject,
+                                              const cee_uchar* filetype)
 {
     if (!sibling || !sibling->parent)
         return NULL;
     
     CEESourceFregment* attached = cee_source_fregment_create(type,
                                                              filepath,
-                                                             subject);
+                                                             subject,
+                                                             filetype);
     attached->parent = sibling->parent;
     SOURCE_FREGMENT_CHILD_APPEND(sibling->parent, attached);
     return attached;
@@ -276,14 +297,16 @@ CEESourceFregment* cee_source_fregment_append(CEESourceFregment* sibling,
 CEESourceFregment* cee_source_fregment_sub_attach(CEESourceFregment* main,
                                                   CEESourceFregmentType type,
                                                   const cee_uchar* filepath,
-                                                  const cee_uchar* subject)
+                                                  const cee_uchar* subject,
+                                                  const cee_uchar* filetype)
 {
     if (!main)
         return NULL;
     
     CEESourceFregment* attached = cee_source_fregment_create(type,
                                                              filepath,
-                                                             subject);
+                                                             subject,
+                                                             filetype);
     attached->parent = main;
     SOURCE_FREGMENT_CHILD_APPEND(main, attached);
     return attached;
@@ -292,7 +315,8 @@ CEESourceFregment* cee_source_fregment_sub_attach(CEESourceFregment* main,
 CEESourceFregment* cee_source_fregment_push(CEESourceFregment* main,
                                             CEESourceFregmentType type,
                                             const cee_uchar* filepath,
-                                            const cee_uchar* subject)
+                                            const cee_uchar* subject,
+                                            const cee_uchar* filetype)
 {
     if (!main)
         return NULL;
@@ -300,11 +324,13 @@ CEESourceFregment* cee_source_fregment_push(CEESourceFregment* main,
     CEESourceFregment* attached = cee_source_fregment_sub_attach(main,
                                                                  type,
                                                                  filepath,
-                                                                 subject);
+                                                                 subject,
+                                                                 filetype);
     attached = cee_source_fregment_sub_attach(attached,
                                               kCEESourceFregmentTypeStatement,
                                               filepath,
-                                              subject);
+                                              subject,
+                                              filetype);
     return attached;
 }
 
@@ -1472,9 +1498,9 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
             if (tag_type == kCEETagTypeIgnore) {
                 if (token->identifier == kCEETokenID_CONSTANT)
                     tag_type = kCEETagTypeConstant;
-                else if (token->identifier == kCEETokenID_C_COMMENT)
+                else if (token->identifier == kCEETokenID_LINE_COMMENT)
                     tag_type = kCEETagTypeComment;
-                else if (token->identifier == kCEETokenID_CPP_COMMENT)
+                else if (token->identifier == kCEETokenID_LINES_COMMENT)
                     tag_type = kCEETagTypeComment;
                 else if (token->identifier == kCEETokenID_HTML_COMMENT)
                     tag_type = kCEETagTypeComment;
@@ -1617,5 +1643,233 @@ void cee_source_fregment_string_dump(CEESourceFregment* fregment)
 {
     int i = 0;
     _source_fregment_string_dump(fregment, i);
+}
+
+void cee_source_fregment_tree_symbols_parent_parse(CEESourceFregment* fregment)
+{
+    if (!fregment)
+        return;
     
+    source_fregment_symbols_parent_parse(fregment);
+    
+    CEEList* p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
+    while (p) {
+        fregment = p->data;
+        cee_source_fregment_tree_symbols_parent_parse(fregment);
+        p = SOURCE_FREGMENT_NEXT(p);
+    }
+}
+
+static void source_fregment_symbols_parent_parse(CEESourceFregment* fregment)
+{
+    CEEList* p = NULL;
+    CEESourceSymbol* symbol = NULL;
+    CEESourceFregment *grandfather = NULL;
+    cee_char* parent = NULL;
+    
+    grandfather = cee_source_fregment_grandfather_get(fregment);
+    if (!grandfather)
+        return;
+    
+    if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeTemplateDeclaration) ||
+        cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeVariableBlock) ||
+        cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeIdentifierBlock)) {
+        while (1) {
+            grandfather = cee_source_fregment_grandfather_get(grandfather);
+            if (!grandfather)
+                break;
+            
+            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeTemplateDeclaration) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeVariableBlock) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeIdentifierBlock))
+                continue;
+            break;
+        }
+    }
+    
+    if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeRoot))
+        parent = global_scope_name_from_source_fregment(grandfather);
+    else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition))
+        parent = class_scope_name_from_source_fregment(grandfather);
+    else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeUnionDefinition))
+        parent = union_scope_name_from_source_fregment(grandfather);
+    else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeNamespaceDefinition))
+        parent = namespace_scope_name_from_source_fregment(grandfather);
+    else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeImplementationDefinition))
+        parent = implementation_scope_name_from_source_fregment(grandfather);
+    else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDeclaration))
+        parent = interface_scope_name_from_source_fregment(grandfather);
+    else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeProtocolDeclaration))
+        parent = protocol_scope_name_from_source_fregment(grandfather);
+    
+    p = fregment->symbols;
+    while (p) {
+        symbol = p->data;
+        
+        if (symbol->type == kCEESourceSymbolTypeFunctionDeclaration || 
+            symbol->type == kCEESourceSymbolTypeFunctionDefinition ||
+            symbol->type == kCEESourceSymbolTypeVariableDeclaration ||
+            symbol->type == kCEESourceSymbolTypeCustomTypeDeclaration ||
+            symbol->type == kCEESourceSymbolTypeProperty ||
+            symbol->type == kCEESourceSymbolTypeMessageDeclaration ||
+            symbol->type == kCEESourceSymbolTypeMessageDefinition ||
+            symbol->type == kCEESourceSymbolTypeTypeDefine ||
+            symbol->type == kCEESourceSymbolTypeClassDefinition ||
+            symbol->type == kCEESourceSymbolTypeEnumDefinition ||
+            symbol->type == kCEESourceSymbolTypeUnionDefinition ||
+            symbol->type == kCEESourceSymbolTypeNamespaceDefinition ||
+            symbol->type == kCEESourceSymbolTypeInterfaceDeclaration ||
+            symbol->type == kCEESourceSymbolTypeImplementationDefinition ||
+            symbol->type == kCEESourceSymbolTypeProtocolDeclaration) {
+            symbol->parent = cee_strdup(parent);
+        }
+        
+        p = p->next;
+    }
+    
+    if (parent)
+        cee_free(parent);
+    
+}
+
+static cee_char* global_scope_name_from_source_fregment(CEESourceFregment* fregment)
+{
+    return cee_strdup("global");
+}
+
+static cee_char* class_scope_name_from_source_fregment(CEESourceFregment* fregment)
+{
+    CEEList* p = NULL;
+    CEESourceSymbol* symbol = NULL;
+    cee_char* names = NULL;
+    
+    p = fregment->symbols;
+    while (p) {
+        symbol = p->data;
+        
+        if (symbol->type == kCEESourceSymbolTypeClassDefinition) {
+            if (!is_anonymous_class_name(fregment, symbol->name))
+                cee_strconcat0(&names, symbol->name, " ", NULL);
+        }
+        else if (symbol->type == kCEESourceSymbolTypeTypeDefine) {
+            cee_strconcat0(&names, symbol->name, " ", NULL);
+        }
+        
+        p = p->next;
+    }
+    
+    return names;
+}
+
+static cee_char* union_scope_name_from_source_fregment(CEESourceFregment* fregment)
+{
+    CEEList* p = NULL;
+    CEESourceSymbol* symbol = NULL;
+    cee_char* names = NULL;
+    
+    p = fregment->symbols;
+    while (p) {
+        symbol = p->data;
+        
+        if (symbol->type == kCEESourceSymbolTypeClassDefinition) {
+            if (!is_anonymous_union_name(fregment, symbol->name))
+                cee_strconcat0(&names, symbol->name, " ", NULL);
+        }
+        else if (symbol->type == kCEESourceSymbolTypeTypeDefine) {
+            cee_strconcat0(&names, symbol->name, " ", NULL);
+        }
+        
+        p = p->next;
+    }
+    
+    return names;
+}
+
+static cee_char* namespace_scope_name_from_source_fregment(CEESourceFregment* fregment)
+{
+    CEEList* p = NULL;
+    CEESourceSymbol* symbol = NULL;
+    cee_char* names = NULL;
+    
+    p = fregment->symbols;
+    while (p) {
+        symbol = p->data;
+        
+        if (symbol->type == kCEESourceSymbolTypeNamespaceDefinition) {
+            if (!is_anonymous_namespace_name(fregment, symbol->name))
+                cee_strconcat0(&names, symbol->name, " ", NULL);
+        }
+        p = p->next;
+    }
+    return names;
+}
+
+static cee_char* implementation_scope_name_from_source_fregment(CEESourceFregment* fregment)
+{
+    CEEList* p = NULL;
+    CEESourceSymbol* symbol = NULL;
+    
+    p = fregment->symbols;
+    while (p) {
+        symbol = p->data;
+        
+        if (symbol->type == kCEESourceSymbolTypeImplementationDefinition)
+            return cee_strdup(symbol->name);
+        
+        p = p->next;
+    }
+    return NULL;
+}
+
+static cee_char* interface_scope_name_from_source_fregment(CEESourceFregment* fregment)
+{
+    CEEList* p = NULL;
+    CEESourceSymbol* symbol = NULL;
+    
+    p = fregment->symbols;
+    while (p) {
+        symbol = p->data;
+        
+        if (symbol->type == kCEESourceSymbolTypeInterfaceDeclaration)
+            return cee_strdup(symbol->name);
+        
+        p = p->next;
+    }
+    return NULL;
+}
+
+static cee_char* protocol_scope_name_from_source_fregment(CEESourceFregment* fregment)
+{
+    CEEList* p = NULL;
+    CEESourceSymbol* symbol = NULL;
+    
+    p = fregment->symbols;
+    while (p) {
+        symbol = p->data;
+        
+        if (symbol->type == kCEESourceSymbolTypeProtocolDeclaration)
+            return cee_strdup(symbol->name);
+        
+        p = p->next;
+    }
+    return NULL;
+}
+
+static cee_boolean is_anonymous_namespace_name(CEESourceFregment* fregment,
+                                                const cee_char* name)
+{
+    return !cee_strcmp(name, "namespace", FALSE);
+}
+
+static cee_boolean is_anonymous_class_name(CEESourceFregment* fregment,
+                                           const cee_char* name)
+{
+    return !cee_strcmp(name, "struct", FALSE) || 
+            !cee_strcmp(name, "class", FALSE);
+}
+
+static cee_boolean is_anonymous_union_name(CEESourceFregment* fregment,
+                                           const cee_char* name)
+{
+    return !cee_strcmp(name, "union", FALSE);
 }

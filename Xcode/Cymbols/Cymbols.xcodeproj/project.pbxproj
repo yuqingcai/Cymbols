@@ -14,6 +14,8 @@
 		2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */; };
 		264EA89C25480CFD005042EA /* icon_file_type_css_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */; };
 		26548527254150AC00E1D0DE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 26548526254150AC00E1D0DE /* Credits.rtf */; };
+		268376DF25490C720066305C /* cee_swift_lexer.l in Sources */ = {isa = PBXBuildFile; fileRef = 268376DC25490C720066305C /* cee_swift_lexer.l */; };
+		268376E025490C720066305C /* cee_swift_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 268376DD25490C720066305C /* cee_swift_parser.c */; };
 		269201A1252FF30D00D6E2DC /* cJSON_Utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920091252FF30D00D6E2DC /* cJSON_Utils.c */; };
 		2692026F252FF33300D6E2DC /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692026E252FF33300D6E2DC /* cJSON.c */; };
 		2692028E252FF35600D6E2DC /* cee_bst.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920271252FF35600D6E2DC /* cee_bst.c */; };
@@ -312,6 +314,9 @@
 		264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_css_16x16@2x.png"; sourceTree = "<group>"; };
 		26548526254150AC00E1D0DE /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		2667ECFB25037D8000ED5010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		268376DC25490C720066305C /* cee_swift_lexer.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_swift_lexer.l; sourceTree = "<group>"; };
+		268376DD25490C720066305C /* cee_swift_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_swift_parser.c; sourceTree = "<group>"; };
+		268376DE25490C720066305C /* cee_swift_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_swift_parser.h; sourceTree = "<group>"; };
 		26920091252FF30D00D6E2DC /* cJSON_Utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON_Utils.c; sourceTree = "<group>"; };
 		26920092252FF30D00D6E2DC /* cJSON_Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON_Utils.h; sourceTree = "<group>"; };
 		2692026D252FF33300D6E2DC /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
@@ -792,6 +797,16 @@
 			path = Cymbols;
 			sourceTree = "<group>";
 		};
+		268376DB25490C720066305C /* swift */ = {
+			isa = PBXGroup;
+			children = (
+				268376DC25490C720066305C /* cee_swift_lexer.l */,
+				268376DD25490C720066305C /* cee_swift_parser.c */,
+				268376DE25490C720066305C /* cee_swift_parser.h */,
+			);
+			path = swift;
+			sourceTree = "<group>";
+		};
 		26920083252FF30D00D6E2DC /* 3tdParty */ = {
 			isa = PBXGroup;
 			children = (
@@ -864,8 +879,9 @@
 		269202A0252FF38300D6E2DC /* cee_parser */ = {
 			isa = PBXGroup;
 			children = (
-				269202A1252FF38300D6E2DC /* asm */,
 				269202A8252FF38300D6E2DC /* c */,
+				268376DB25490C720066305C /* swift */,
+				269202A1252FF38300D6E2DC /* asm */,
 				269202B8252FF38400D6E2DC /* html */,
 				26DDED3B2547B6A500BD8246 /* css */,
 				269202AC252FF38300D6E2DC /* cee_reference.c */,
@@ -1578,6 +1594,7 @@
 				2692043A252FF4F400D6E2DC /* CEETextView.m in Sources */,
 				26920296252FF35600D6E2DC /* cee_mem.c in Sources */,
 				26920492252FF51A00D6E2DC /* CEESessionToolbar.m in Sources */,
+				268376E025490C720066305C /* cee_swift_parser.c in Sources */,
 				269204C2252FF55600D6E2DC /* CEESessionDescriptor.c in Sources */,
 				269204A4252FF52700D6E2DC /* CEEProjectAddFileController.m in Sources */,
 				269202C5252FF38400D6E2DC /* cee_symbol.c in Sources */,
@@ -1622,6 +1639,7 @@
 				269202C8252FF38400D6E2DC /* cee_html_lexer.l in Sources */,
 				269202DE252FF39000D6E2DC /* cee_text_modify.c in Sources */,
 				26920426252FF4F400D6E2DC /* CEEContainerView.m in Sources */,
+				268376DF25490C720066305C /* cee_swift_lexer.l in Sources */,
 				269202C4252FF38400D6E2DC /* cee_source_parsers.c in Sources */,
 				26920489252FF51A00D6E2DC /* CEESessionFrameView.m in Sources */,
 				2692050F252FF6AE00D6E2DC /* main.m in Sources */,

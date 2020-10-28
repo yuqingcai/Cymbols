@@ -68,7 +68,7 @@ static int css_comment(cee_long offset,
 "#"                                         RETURN_TOKEN_ID('#'                                     )
 ";"                                         RETURN_TOKEN_ID(';'                                     )
 "@"{WN}*{L}({L}|{D})*                       RETURN_TOKEN_ID(kCEETokenID_CSS_RULE                    )
-"/*"                                        RETURN_TOKEN_ID(kCEETokenID_C_COMMENT                   )
+"/*"                                        RETURN_TOKEN_ID(kCEETokenID_LINES_COMMENT               )
 "\""                                        RETURN_TOKEN_ID(kCEETokenID_LITERAL                     )
 "align-content"                             RETURN_TOKEN_ID(kCEETokenID_CSS_PROPERTY                )
 "align-items"                               RETURN_TOKEN_ID(kCEETokenID_CSS_PROPERTY                )
@@ -389,7 +389,7 @@ cee_int cee_lexer_css_token_get(CEEToken** token)
     if (!identifier) /* EOF */
         return 0;
         
-    if (identifier == kCEETokenID_C_COMMENT) {
+    if (identifier == kCEETokenID_LINES_COMMENT) {
         tail_length = css_comment(offset, &eof);
         (*token)->length += tail_length;
         g_scan_offset += tail_length;

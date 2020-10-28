@@ -140,7 +140,7 @@ void cee_strconcat0(cee_char** string0, ...)
         l += strlen(s);
         s = va_arg(args, cee_char*);
     }
-    va_end (args);
+    va_end(args);
     l += 1; /* '\0' terminator */
     
     
@@ -153,7 +153,7 @@ void cee_strconcat0(cee_char** string0, ...)
         ptr = cee_stpcpy(ptr, s);
         s = va_arg(args, cee_char*);
     }
-    va_end (args);
+    va_end(args);
     
     
     if (!*string0)

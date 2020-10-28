@@ -566,8 +566,8 @@ static void c_token_type_map_init(void)
     for (cee_int i = 0; i < CEETokenID_MAX; i ++)
         c_token_identifier_type_map[i] = 0;
     
-    c_token_identifier_type_map[kCEETokenID_C_COMMENT]                    = kCEETokenIdentifierTypeComment;
-    c_token_identifier_type_map[kCEETokenID_CPP_COMMENT]                  = kCEETokenIdentifierTypeComment;
+    c_token_identifier_type_map[kCEETokenID_LINE_COMMENT]                 = kCEETokenIdentifierTypeComment;
+    c_token_identifier_type_map[kCEETokenID_LINES_COMMENT]                = kCEETokenIdentifierTypeComment;
     c_token_identifier_type_map[kCEETokenID_CONST]                        = kCEETokenIdentifierTypeConstant;
     c_token_identifier_type_map[kCEETokenID_CHARACTER]                    = kCEETokenIdentifierTypeCharacter;
     c_token_identifier_type_map[kCEETokenID_LITERAL]                      = kCEETokenIdentifierTypeLiteral;
@@ -975,7 +975,8 @@ static cee_boolean statement_attach(CParser* parser,
     attached = cee_source_fregment_append(parser->statement_current, 
                                           type, 
                                           parser->filepath_ref,
-                                          parser->subject_ref);
+                                          parser->subject_ref,
+                                          (const cee_uchar*)"c");
     if (!attached)
         return FALSE;
     
@@ -994,7 +995,8 @@ static cee_boolean statement_sub_attach(CParser* parser,
     attached = cee_source_fregment_sub_attach(parser->statement_current, 
                                               type,
                                               parser->filepath_ref,
-                                              parser->subject_ref);
+                                              parser->subject_ref,
+                                              (const cee_uchar*)"c");
     if (!attached)
         return FALSE;
     
@@ -1021,7 +1023,8 @@ static cee_boolean comment_attach(CParser* parser)
     attached = cee_source_fregment_append(parser->comment_current, 
                                           kCEESourceFregmentTypeComment, 
                                           parser->filepath_ref,
-                                          parser->subject_ref);
+                                          parser->subject_ref,
+                                          (const cee_uchar*)"c");
     if (!attached)
         return FALSE;
     
@@ -1040,7 +1043,8 @@ static cee_boolean prep_directive_attach(CParser* parser)
     attached = cee_source_fregment_append(parser->prep_directive_current, 
                                           kCEESourceFregmentTypePrepDirective, 
                                           parser->filepath_ref,
-                                          parser->subject_ref);
+                                          parser->subject_ref,
+                                          (const cee_uchar*)"c");
     if (!attached)
         return FALSE;
     
@@ -1502,7 +1506,7 @@ static cee_boolean c_template_token_push(CParser* parser,
             angle_brackets --;
         p = TOKEN_NEXT(p);
     }
-        
+    
     if (current == kCTemplateDeclarationTranslateStateParameterList && !angle_brackets) {
         c_template_parameters_parse(parser->statement_current);
         template_push(parser);
@@ -1534,32 +1538,13 @@ static cee_boolean c_template_parameters_parse(CEESourceFregment* fregment)
         p = TOKEN_NEXT(p);
     }
     
-    if (begin) {
+    if (begin && end) {
         template = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
                                                              fregment->subject_ref,
                                                              begin, 
                                                              end, 
                                                              kCEESourceSymbolTypeTemplateDeclaration,
                                                              "c");
-        if (template->name)
-            cee_free(template->name);
-        /*template->descriptor = cee_string_from_token_slice(fregment->subject_ref,
-                                                           begin,
-                                                           end,
-                                                           kCEETokenStringOptionDefault);
-         */
-        template->name = cee_strdup("template");
-        
-        if (template->locations)
-            cee_free(template->locations);
-        template->locations = cee_ranges_string_from_token_slice(begin, 
-                                                                 end, 
-                                                                 kCEERangeListTypeContinue);
-        if (template->fregment_range)
-            cee_free(template->fregment_range);
-        template->fregment_range = cee_ranges_string_from_token_slice(begin, 
-                                                                      end, 
-                                                                      kCEERangeListTypeContinue);
         fregment->symbols = cee_list_prepend(fregment->symbols, template);
     }
     
@@ -2370,8 +2355,9 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
         cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeAssignmentBlock);
     }
     
-    if (definition)
+    if (definition) {
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
+    }
     
 #ifdef DEBUG_FUNCTION_DEFINITION
     cee_source_symbols_print(fregment->symbols);
@@ -3611,9 +3597,9 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
     
     if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeClassDefinition))
         is_class_member = TRUE;
+        
     
     //cee_source_fregment_string_print(fregment);
-    
     
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
@@ -3777,6 +3763,7 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
     
     if (declarations) {
         fregment->symbols = cee_list_concat(fregment->symbols, declarations);
+        //cee_source_symbols_print(fregment->symbols);
         cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeDeclaration);
         ret = TRUE;
     }
@@ -4117,9 +4104,11 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
                                                                    "c");
         }
         
-        fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeNamespaceDefinition);
-        ret = TRUE;
+        if (definition) {
+            fregment->symbols = cee_list_prepend(fregment->symbols, definition);
+            cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeNamespaceDefinition);
+            ret = TRUE;
+        }
     }
     
     *pp = NULL;
@@ -4516,7 +4505,7 @@ static cee_boolean objective_c_definition_parse(CEESourceFregment* fregment,
     
     if (!definition)
         return FALSE;
-        
+    
     fregment->symbols = cee_list_prepend(fregment->symbols, definition);
     
     if (type == kObjectiveCDefinitionTypeInterface)
@@ -4766,7 +4755,7 @@ CEESourceParserRef cee_c_parser_create(const cee_char* identifier)
     
     parser->imp = c;
         
-    return (CEESourceParserRef)parser;
+    return parser;
 }
 
 static cee_boolean token_type_matcher(CEEToken* token,
@@ -4808,39 +4797,48 @@ static void symbol_parse_init(CParser* parser,
     
     parser->prep_directive_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                              parser->filepath_ref,
-                                                             parser->subject_ref);
+                                                             parser->subject_ref,
+                                                             (const cee_uchar*)"c");
     parser->prep_directive_current = cee_source_fregment_sub_attach(parser->prep_directive_root, 
                                                                     kCEESourceFregmentTypeSourceList, 
                                                                     parser->filepath_ref,
-                                                                    parser->subject_ref);
+                                                                    parser->subject_ref,
+                                                                    (const cee_uchar*)"c");
     parser->prep_directive_current = cee_source_fregment_sub_attach(parser->prep_directive_current, 
                                                                     kCEESourceFregmentTypePrepDirective, 
                                                                     parser->filepath_ref,
-                                                                    parser->subject_ref);
+                                                                    parser->subject_ref,
+                                                                    (const cee_uchar*)"c");
     
     parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                         parser->filepath_ref,
-                                                        parser->subject_ref);
+                                                        parser->subject_ref,
+                                                        (const cee_uchar*)"c");
     parser->statement_current = cee_source_fregment_sub_attach(parser->statement_root, 
                                                                kCEESourceFregmentTypeSourceList, 
                                                                parser->filepath_ref,
-                                                               parser->subject_ref);
+                                                               parser->subject_ref,
+                                                               (const cee_uchar*)"c");
     parser->statement_current = cee_source_fregment_sub_attach(parser->statement_current, 
                                                                kCEESourceFregmentTypeStatement, 
                                                                parser->filepath_ref,
-                                                               parser->subject_ref);
+                                                               parser->subject_ref,
+                                                               (const cee_uchar*)"c");
     
     parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                       parser->filepath_ref,
-                                                      parser->subject_ref);
+                                                      parser->subject_ref,
+                                                      (const cee_uchar*)"c");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
                                                              kCEESourceFregmentTypeSourceList, 
                                                              parser->filepath_ref,
-                                                             parser->subject_ref);
+                                                             parser->subject_ref,
+                                                             (const cee_uchar*)"c");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
                                                              kCEESourceFregmentTypeComment, 
                                                              parser->filepath_ref,
-                                                             parser->subject_ref);
+                                                             parser->subject_ref,
+                                                             (const cee_uchar*)"c");
     
     parser->state = kCParserStateStatementParsing;
 }
@@ -4897,8 +4895,8 @@ static cee_boolean statement_token_push(CParser* parser,
 
 static cee_boolean token_is_comment(CEEToken* token)
 {
-    return token->identifier == kCEETokenID_CPP_COMMENT ||
-            token->identifier == kCEETokenID_C_COMMENT;
+    return token->identifier == kCEETokenID_LINE_COMMENT ||
+            token->identifier == kCEETokenID_LINES_COMMENT;
 }
 
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
@@ -5050,6 +5048,8 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
     } while(1);
     
+    cee_source_fregment_tree_symbols_parent_parse(parser->statement_root);
+    
     *statement = parser->statement_root;
     *prep_directive = parser->prep_directive_root;
     *comment = parser->comment_root;
@@ -5158,16 +5158,19 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
     if (cee_source_fregment_parent_type_is(fregment, kCEESourceFregmentTypeSquareBracketList)) {
         reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeSquareBracketList,
                                                         fregment->filepath_ref,
-                                                        fregment->subject_ref);
+                                                        fregment->subject_ref,
+                                                        (const cee_uchar*)"c");
         reference_fregment = cee_source_fregment_sub_attach(reference_fregment, 
                                                             kCEESourceFregmentTypeStatement,
                                                             fregment->filepath_ref,
-                                                            fregment->subject_ref);
+                                                            fregment->subject_ref,
+                                                            (const cee_uchar*)"c");
     }
     else {
         reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeStatement,
                                                         fregment->filepath_ref,
-                                                        fregment->subject_ref);
+                                                        fregment->subject_ref,
+                                                        (const cee_uchar*)"c");
     }
     
     current = reference_fregment;
@@ -5185,7 +5188,8 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
                 current = cee_source_fregment_push(current,
                                                    kCEESourceFregmentTypeCurlyBracketList,
                                                    fregment->filepath_ref,
-                                                   fregment->subject_ref);
+                                                   fregment->subject_ref,
+                                                   (const cee_uchar*)"c");
             }
             else if (token->identifier == '}') {
                 current = cee_source_fregment_pop(current);
@@ -5199,7 +5203,8 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
                 current = cee_source_fregment_push(current, 
                                                    kCEESourceFregmentTypeSquareBracketList,
                                                    fregment->filepath_ref,
-                                                   fregment->subject_ref);
+                                                   fregment->subject_ref,
+                                                   (const cee_uchar*)"c");
             }
             else if (token->identifier == ']') {
                 current = cee_source_fregment_pop(current);
@@ -5212,7 +5217,8 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
                 current = cee_source_fregment_push(current, 
                                                    kCEESourceFregmentTypeRoundBracketList,
                                                    fregment->filepath_ref,
-                                                   fregment->subject_ref);
+                                                   fregment->subject_ref,
+                                                   (const cee_uchar*)"c");
             }
             else if (token->identifier == ')') {
                 current = cee_source_fregment_pop(current);

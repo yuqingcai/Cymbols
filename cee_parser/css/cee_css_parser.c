@@ -62,7 +62,7 @@ CEESourceParserRef cee_css_parser_create(const cee_char* identifier)
     css->super = parser;
         
     parser->imp = css;
-    return (CEESourceParserRef)parser;
+    return parser;
 }
 
 void cee_css_parser_free(cee_pointer data)
@@ -178,27 +178,33 @@ static void symbol_parse_init(CSSParser* parser,
     
     parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                         parser->filepath_ref,
-                                                        parser->subject_ref);
+                                                        parser->subject_ref,
+                                                        (const cee_uchar*)"css");
     parser->statement_current = cee_source_fregment_sub_attach(parser->statement_root, 
                                                                kCEESourceFregmentTypeSourceList, 
                                                                parser->filepath_ref,
-                                                               parser->subject_ref);
+                                                               parser->subject_ref,
+                                                               (const cee_uchar*)"css");
     parser->statement_current = cee_source_fregment_sub_attach(parser->statement_current, 
                                                                kCEESourceFregmentTypeStatement, 
                                                                parser->filepath_ref,
-                                                               parser->subject_ref);
+                                                               parser->subject_ref,
+                                                               (const cee_uchar*)"css");
     
     parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                       parser->filepath_ref,
-                                                      parser->subject_ref);    
+                                                      parser->subject_ref,
+                                                      (const cee_uchar*)"css");    
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
                                                              kCEESourceFregmentTypeSourceList, 
                                                              parser->filepath_ref,
-                                                             parser->subject_ref);
+                                                             parser->subject_ref,
+                                                             (const cee_uchar*)"css");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
                                                              kCEESourceFregmentTypeComment, 
                                                              parser->filepath_ref,
-                                                             parser->subject_ref);
+                                                             parser->subject_ref,
+                                                             (const cee_uchar*)"css");
 }
 
 static void symbol_parse_clear(CSSParser* parser)
@@ -213,7 +219,7 @@ static void symbol_parse_clear(CSSParser* parser)
 
 static cee_boolean token_is_comment(CEEToken* token)
 {
-    return token->identifier == kCEETokenID_C_COMMENT;
+    return token->identifier == kCEETokenID_LINES_COMMENT;
 }
 
 static cee_boolean comment_token_push(CSSParser* parser,
@@ -245,7 +251,8 @@ static cee_boolean comment_attach(CSSParser* parser)
     attached = cee_source_fregment_append(parser->comment_current, 
                                           kCEESourceFregmentTypeComment, 
                                           parser->filepath_ref,
-                                          parser->subject_ref);
+                                          parser->subject_ref,
+                                          (const cee_uchar*)"css");
     if (!attached)
         return FALSE;
     
@@ -377,7 +384,8 @@ static cee_boolean statement_attach(CSSParser* parser,
     attached = cee_source_fregment_append(parser->statement_current, 
                                           type, 
                                           parser->filepath_ref,
-                                          parser->subject_ref);
+                                          parser->subject_ref,
+                                          (const cee_uchar*)"css");
     if (!attached)
         return FALSE;
     
@@ -396,7 +404,8 @@ static cee_boolean statement_sub_attach(CSSParser* parser,
     attached = cee_source_fregment_sub_attach(parser->statement_current, 
                                               type,
                                               parser->filepath_ref,
-                                              parser->subject_ref);
+                                              parser->subject_ref,
+                                              (const cee_uchar*)"css");
     if (!attached)
         return FALSE;
     

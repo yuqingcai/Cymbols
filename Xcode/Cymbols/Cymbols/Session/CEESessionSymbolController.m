@@ -94,9 +94,9 @@
         case kCEESourceSymbolTypeFunctionDeclaration:
             string = [string stringByAppendingString:@"()"];
             break;
-        case kCEESourceSymbolTypeTemplateDeclaration:
-            string = [string stringByAppendingString:@"<>"];
-            break;
+        //case kCEESourceSymbolTypeTemplateDeclaration:
+        //    string = [string stringByAppendingString:@"<>"];
+        //    break;
         default:
             break;
     }
