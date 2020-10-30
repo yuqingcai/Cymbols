@@ -302,7 +302,7 @@ static void block_header_parse(CSSParser* parser)
                                                        p, 
                                                        q, 
                                                        kCEESourceSymbolTypeCSSSelector, 
-                                                       "CSS");
+                                                       "css");
     fregment->symbols = cee_list_prepend(fregment->symbols, symbol);
     cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeCSSBlock);
     

@@ -193,6 +193,7 @@ CEEList* cee_source_fregment_symbol_tags_create(CEESourceFregment* fregment);
 CEESourceFregment* cee_source_fregment_parent_get(CEESourceFregment* fregment);
 CEESourceFregment* cee_source_fregment_grandfather_get(CEESourceFregment* fregment);
 void cee_source_fregment_string_print(CEESourceFregment* fregment);
+void cee_source_fregment_tree_string_print(CEESourceFregment* fregment);
 CEERange cee_source_fregment_content_range(CEESourceFregment* fregment);
 void cee_source_fregment_symbols_fregment_range_mark(CEESourceFregment* fregment);
 CEESourceFregment* cee_source_fregment_child_index_by_leaf(CEESourceFregment* fregment,
@@ -235,7 +236,6 @@ CEEList* cee_source_tags_create(CEESourceParserRef parser_ref,
                                 cee_pointer database,
                                 CEERange range,
                                 CEEList* references);
-void cee_source_fregment_string_dump(CEESourceFregment* fregment);
 void cee_source_fregment_tree_symbols_parent_parse(CEESourceFregment* fregment);
 #ifdef __cplusplus
 }

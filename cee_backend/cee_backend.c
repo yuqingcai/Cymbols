@@ -925,8 +925,19 @@ CEEList* cee_database_symbols_search_by_parent(cee_pointer db,
     
     CEEList* symbols = NULL;
     char* condition = NULL;
+    
     cee_strconcat0(&condition, "parent=", "'", parent, "'", NULL);
     symbols = symbols_search(db, condition);
+    
+    if (!symbols) {
+        if (condition)
+            cee_free(condition);
+        condition = NULL;
+        
+        cee_strconcat0(&condition, "parent like ", "'%,", parent, ",%'", NULL);
+        symbols = symbols_search(db, condition);
+    }
+    
     cee_free(condition);
     return symbols;
 }

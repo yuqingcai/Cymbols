@@ -408,7 +408,6 @@ static int cpp_comment(cee_long offset,
     return length;
 }
 
-
 static int literal(cee_long offset,
                    cee_boolean* eof)
 {

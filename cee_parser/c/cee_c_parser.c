@@ -562,7 +562,7 @@ static cee_boolean token_type_matcher(CEEToken* token,
                                       CEETokenIdentifierType type);
 
 static void c_token_type_map_init(void)
-{    
+{
     for (cee_int i = 0; i < CEETokenID_MAX; i ++)
         c_token_identifier_type_map[i] = 0;
     
@@ -1031,7 +1031,6 @@ static cee_boolean comment_attach(CParser* parser)
     parser->comment_current = attached;
     return TRUE;
 }
-
 
 static cee_boolean prep_directive_attach(CParser* parser)
 {

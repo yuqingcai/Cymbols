@@ -273,6 +273,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
+		26385E53254B906E008E1FCC /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			fileType = sourcecode.yacc;
+			inputFiles = (
+			);
+			isEditable = 1;
+			outputFiles = (
+			);
+			script = "cd \"$INPUT_FILE_DIR\"\n/usr/bin/bison -o \"$DERIVED_FILE_DIR/$INPUT_FILE_BASE.tab.c\" \"$INPUT_FILE_BASE.y\"\n";
+		};
 		26920082252FF03E00D6E2DC /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
@@ -1325,6 +1336,7 @@
 				26DD26CA25302A2900052431 /* Embed Libraries */,
 			);
 			buildRules = (
+				26385E53254B906E008E1FCC /* PBXBuildRule */,
 				26920082252FF03E00D6E2DC /* PBXBuildRule */,
 			);
 			dependencies = (

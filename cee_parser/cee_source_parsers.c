@@ -25,10 +25,10 @@ void cee_parsers_create()
 {
     cee_parsers_init();
     asm_parser_name = cee_strdup("gnu");
-    c_parser = cee_c_parser_create("C");
+    c_parser = cee_c_parser_create("c");
     html_parser = cee_html_parser_create("html");
     css_parser = cee_css_parser_create("css");
-    swift_parser = cee_swift_parser_create("SWIFT");
+    swift_parser = cee_swift_parser_create("swift");
     
     /**
      java_parser = cee_java_parser_create("JAVA");

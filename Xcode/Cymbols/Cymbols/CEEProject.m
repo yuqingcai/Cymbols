@@ -763,8 +763,35 @@ BOOL ContextContainSymbol(CEEList* context,
 
     if (_context)
         cee_list_free_full(_context, cee_source_symbol_free);
+    
     _context = context;
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCreateContext object:self];
+    
+    //[self testSymblsSearchByParent:_context];
+}
+
+- (void)testSymblsSearchByParent:(CEEList*)context {
+    
+    // Test symbols search by parent
+    if (context) {
+        CEESourceSymbol* symbol = cee_list_nth(context, 0)->data;
+        if (symbol->parent) {
+            CEEList* symbols = 
+                cee_database_symbols_search_by_parent(self.session.project.database, 
+                                                      symbol->parent);
+
+            fprintf(stdout, "%s:\n", symbol->parent);
+            if (symbols) {
+                CEEList* p = symbols;
+                while (p) {
+                    symbol = p->data;
+                    fprintf(stdout, "\t%s\n", symbol->name);
+                    p = p->next;
+                }
+                cee_list_free_full(symbols, cee_source_symbol_free);
+            }
+        }
+    } // Test symbols search by parent end
 }
 
 - (void)setSelectedSourceSymbol:(CEESourceSymbol*)symbol {
