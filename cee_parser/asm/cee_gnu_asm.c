@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "cee_gnu_asm_parser.h"
+#include "cee_gnu_asm.h"
 
 typedef struct _CEEGNUASMParser {
 } CEEGNUASMParser;

@@ -1,5 +1,5 @@
-#ifndef __CEE_GNU_ASM_PARSER_H__
-#define __CEE_GNU_ASM_PARSER_H__
+#ifndef __CEE_GNU_ASM_H__
+#define __CEE_GNU_ASM_H__
 
 #ifdef __cplusplus
 extern "C" {

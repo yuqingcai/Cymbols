@@ -1,5 +1,5 @@
-#ifndef __CEE_CSS_PARSER_H__
-#define __CEE_CSS_PARSER_H__
+#ifndef __CEE_CSS_H__
+#define __CEE_CSS_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,4 +20,4 @@ cee_int cee_lexer_css_token_get(CEEToken** token);
 }
 #endif /* __cplusplus */
 
-#endif /* __CEE_CSS_PARSER_H__ */
+#endif /* __CEE_CSS_H__ */

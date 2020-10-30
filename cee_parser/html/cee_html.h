@@ -1,5 +1,5 @@
-#ifndef __CEE_HTML_PARSER_H__
-#define __CEE_HTML_PARSER_H__
+#ifndef __CEE_HTML_H__
+#define __CEE_HTML_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,4 +20,4 @@ cee_int cee_lexer_html_token_get(CEEToken** token);
 }
 #endif /* __cplusplus */
 
-#endif /* __CEE_HTML_PARSER_H__ */
+#endif /* __CEE_HTML_H__ */

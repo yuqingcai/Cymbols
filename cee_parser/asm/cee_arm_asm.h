@@ -1,5 +1,5 @@
-#ifndef __CEE_ARM_ASM_PARSER_H__
-#define __CEE_ARM_ASM_PARSER_H__
+#ifndef __CEE_ARM_ASM_H__
+#define __CEE_ARM_ASM_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,4 +21,4 @@ cee_int cee_lexer_arm_asm_token_get(CEETokenID* token_id,
 }
 #endif /* __cplusplus */
 
-#endif /* __CEE_ARM_ASM_PARSER_H__ */
+#endif /* __CEE_ARM_ASM_H__ */

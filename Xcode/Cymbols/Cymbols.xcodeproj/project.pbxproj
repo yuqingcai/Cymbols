@@ -14,8 +14,8 @@
 		2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */; };
 		264EA89C25480CFD005042EA /* icon_file_type_css_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */; };
 		26548527254150AC00E1D0DE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 26548526254150AC00E1D0DE /* Credits.rtf */; };
-		268376DF25490C720066305C /* cee_swift_lexer.l in Sources */ = {isa = PBXBuildFile; fileRef = 268376DC25490C720066305C /* cee_swift_lexer.l */; };
-		268376E025490C720066305C /* cee_swift_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 268376DD25490C720066305C /* cee_swift_parser.c */; };
+		268376DF25490C720066305C /* cee_swift.l in Sources */ = {isa = PBXBuildFile; fileRef = 268376DC25490C720066305C /* cee_swift.l */; };
+		268376E025490C720066305C /* cee_swift.c in Sources */ = {isa = PBXBuildFile; fileRef = 268376DD25490C720066305C /* cee_swift.c */; };
 		269201A1252FF30D00D6E2DC /* cJSON_Utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920091252FF30D00D6E2DC /* cJSON_Utils.c */; };
 		2692026F252FF33300D6E2DC /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692026E252FF33300D6E2DC /* cJSON.c */; };
 		2692028E252FF35600D6E2DC /* cee_bst.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920271252FF35600D6E2DC /* cee_bst.c */; };
@@ -33,20 +33,20 @@
 		2692029A252FF35600D6E2DC /* cee_tree.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920289252FF35600D6E2DC /* cee_tree.c */; };
 		2692029B252FF35600D6E2DC /* cee_uuid.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692028C252FF35600D6E2DC /* cee_uuid.c */; };
 		2692029F252FF37400D6E2DC /* cee_backend.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692029D252FF37400D6E2DC /* cee_backend.c */; };
-		269202BC252FF38400D6E2DC /* cee_arm_asm_lexer.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202A2252FF38300D6E2DC /* cee_arm_asm_lexer.l */; };
-		269202BD252FF38400D6E2DC /* cee_arm_asm_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202A3252FF38300D6E2DC /* cee_arm_asm_parser.c */; };
-		269202BE252FF38400D6E2DC /* cee_gnu_asm_lexer.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202A5252FF38300D6E2DC /* cee_gnu_asm_lexer.l */; };
-		269202BF252FF38400D6E2DC /* cee_gnu_asm_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202A6252FF38300D6E2DC /* cee_gnu_asm_parser.c */; };
-		269202C0252FF38400D6E2DC /* cee_c_lexer.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202A9252FF38300D6E2DC /* cee_c_lexer.l */; };
-		269202C1252FF38400D6E2DC /* cee_c_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202AA252FF38300D6E2DC /* cee_c_parser.c */; };
+		269202BC252FF38400D6E2DC /* cee_arm_asm.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202A2252FF38300D6E2DC /* cee_arm_asm.l */; };
+		269202BD252FF38400D6E2DC /* cee_arm_asm.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202A3252FF38300D6E2DC /* cee_arm_asm.c */; };
+		269202BE252FF38400D6E2DC /* cee_gnu_asm.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202A5252FF38300D6E2DC /* cee_gnu_asm.l */; };
+		269202BF252FF38400D6E2DC /* cee_gnu_asm.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202A6252FF38300D6E2DC /* cee_gnu_asm.c */; };
+		269202C0252FF38400D6E2DC /* cee_c.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202A9252FF38300D6E2DC /* cee_c.l */; };
+		269202C1252FF38400D6E2DC /* cee_c.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202AA252FF38300D6E2DC /* cee_c.c */; };
 		269202C2252FF38400D6E2DC /* cee_reference.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202AC252FF38300D6E2DC /* cee_reference.c */; };
 		269202C3252FF38400D6E2DC /* cee_source_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202AE252FF38300D6E2DC /* cee_source_parser.c */; };
 		269202C4252FF38400D6E2DC /* cee_source_parsers.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202B0252FF38300D6E2DC /* cee_source_parsers.c */; };
 		269202C5252FF38400D6E2DC /* cee_symbol.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202B2252FF38300D6E2DC /* cee_symbol.c */; };
 		269202C6252FF38400D6E2DC /* cee_tag.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202B4252FF38300D6E2DC /* cee_tag.c */; };
 		269202C7252FF38400D6E2DC /* cee_token.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202B6252FF38300D6E2DC /* cee_token.c */; };
-		269202C8252FF38400D6E2DC /* cee_html_lexer.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202B9252FF38400D6E2DC /* cee_html_lexer.l */; };
-		269202C9252FF38400D6E2DC /* cee_html_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202BA252FF38400D6E2DC /* cee_html_parser.c */; };
+		269202C8252FF38400D6E2DC /* cee_html.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202B9252FF38400D6E2DC /* cee_html.l */; };
+		269202C9252FF38400D6E2DC /* cee_html.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202BA252FF38400D6E2DC /* cee_html.c */; };
 		269202DA252FF39000D6E2DC /* cee_binary_storage.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202CB252FF39000D6E2DC /* cee_binary_storage.c */; };
 		269202DB252FF39000D6E2DC /* cee_text_autocomplete.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202CD252FF39000D6E2DC /* cee_text_autocomplete.c */; };
 		269202DC252FF39000D6E2DC /* cee_text_edit.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202CF252FF39000D6E2DC /* cee_text_edit.c */; };
@@ -267,8 +267,8 @@
 		2693B227253001D700D21FD3 /* Styles in Resources */ = {isa = PBXBuildFile; fileRef = 2693B226253001D700D21FD3 /* Styles */; };
 		269F9657253DB22500D8808A /* CEESourcePoint.m in Sources */ = {isa = PBXBuildFile; fileRef = 269F9656253DB22500D8808A /* CEESourcePoint.m */; };
 		26BC7E7B2539301900AD8992 /* icon_alert_32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */; };
-		26DDED3F2547B6A500BD8246 /* cee_css_lexer.l in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3C2547B6A500BD8246 /* cee_css_lexer.l */; };
-		26DDED402547B6A500BD8246 /* cee_css_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3D2547B6A500BD8246 /* cee_css_parser.c */; };
+		26DDED3F2547B6A500BD8246 /* cee_css.l in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3C2547B6A500BD8246 /* cee_css.l */; };
+		26DDED402547B6A500BD8246 /* cee_css.c in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3D2547B6A500BD8246 /* cee_css.c */; };
 		26DDED422547FC0800BD8246 /* icon_css_selector_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */; };
 /* End PBXBuildFile section */
 
@@ -325,9 +325,9 @@
 		264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_css_16x16@2x.png"; sourceTree = "<group>"; };
 		26548526254150AC00E1D0DE /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		2667ECFB25037D8000ED5010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		268376DC25490C720066305C /* cee_swift_lexer.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_swift_lexer.l; sourceTree = "<group>"; };
-		268376DD25490C720066305C /* cee_swift_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_swift_parser.c; sourceTree = "<group>"; };
-		268376DE25490C720066305C /* cee_swift_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_swift_parser.h; sourceTree = "<group>"; };
+		268376DC25490C720066305C /* cee_swift.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_swift.l; sourceTree = "<group>"; };
+		268376DD25490C720066305C /* cee_swift.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_swift.c; sourceTree = "<group>"; };
+		268376DE25490C720066305C /* cee_swift.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_swift.h; sourceTree = "<group>"; };
 		26920091252FF30D00D6E2DC /* cJSON_Utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON_Utils.c; sourceTree = "<group>"; };
 		26920092252FF30D00D6E2DC /* cJSON_Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON_Utils.h; sourceTree = "<group>"; };
 		2692026D252FF33300D6E2DC /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
@@ -363,15 +363,15 @@
 		2692028D252FF35600D6E2DC /* cee_uuid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_uuid.h; sourceTree = "<group>"; };
 		2692029D252FF37400D6E2DC /* cee_backend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_backend.c; sourceTree = "<group>"; };
 		2692029E252FF37400D6E2DC /* cee_backend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_backend.h; sourceTree = "<group>"; };
-		269202A2252FF38300D6E2DC /* cee_arm_asm_lexer.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_arm_asm_lexer.l; sourceTree = "<group>"; };
-		269202A3252FF38300D6E2DC /* cee_arm_asm_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_arm_asm_parser.c; sourceTree = "<group>"; };
-		269202A4252FF38300D6E2DC /* cee_arm_asm_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_arm_asm_parser.h; sourceTree = "<group>"; };
-		269202A5252FF38300D6E2DC /* cee_gnu_asm_lexer.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_gnu_asm_lexer.l; sourceTree = "<group>"; };
-		269202A6252FF38300D6E2DC /* cee_gnu_asm_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_gnu_asm_parser.c; sourceTree = "<group>"; };
-		269202A7252FF38300D6E2DC /* cee_gnu_asm_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_gnu_asm_parser.h; sourceTree = "<group>"; };
-		269202A9252FF38300D6E2DC /* cee_c_lexer.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_c_lexer.l; sourceTree = "<group>"; };
-		269202AA252FF38300D6E2DC /* cee_c_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_c_parser.c; sourceTree = "<group>"; };
-		269202AB252FF38300D6E2DC /* cee_c_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_c_parser.h; sourceTree = "<group>"; };
+		269202A2252FF38300D6E2DC /* cee_arm_asm.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_arm_asm.l; sourceTree = "<group>"; };
+		269202A3252FF38300D6E2DC /* cee_arm_asm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_arm_asm.c; sourceTree = "<group>"; };
+		269202A4252FF38300D6E2DC /* cee_arm_asm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_arm_asm.h; sourceTree = "<group>"; };
+		269202A5252FF38300D6E2DC /* cee_gnu_asm.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_gnu_asm.l; sourceTree = "<group>"; };
+		269202A6252FF38300D6E2DC /* cee_gnu_asm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_gnu_asm.c; sourceTree = "<group>"; };
+		269202A7252FF38300D6E2DC /* cee_gnu_asm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_gnu_asm.h; sourceTree = "<group>"; };
+		269202A9252FF38300D6E2DC /* cee_c.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_c.l; sourceTree = "<group>"; };
+		269202AA252FF38300D6E2DC /* cee_c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_c.c; sourceTree = "<group>"; };
+		269202AB252FF38300D6E2DC /* cee_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_c.h; sourceTree = "<group>"; };
 		269202AC252FF38300D6E2DC /* cee_reference.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_reference.c; sourceTree = "<group>"; };
 		269202AD252FF38300D6E2DC /* cee_reference.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_reference.h; sourceTree = "<group>"; };
 		269202AE252FF38300D6E2DC /* cee_source_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_source_parser.c; sourceTree = "<group>"; };
@@ -384,9 +384,9 @@
 		269202B5252FF38300D6E2DC /* cee_tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_tag.h; sourceTree = "<group>"; };
 		269202B6252FF38300D6E2DC /* cee_token.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_token.c; sourceTree = "<group>"; };
 		269202B7252FF38400D6E2DC /* cee_token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_token.h; sourceTree = "<group>"; };
-		269202B9252FF38400D6E2DC /* cee_html_lexer.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_html_lexer.l; sourceTree = "<group>"; };
-		269202BA252FF38400D6E2DC /* cee_html_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_html_parser.c; sourceTree = "<group>"; };
-		269202BB252FF38400D6E2DC /* cee_html_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_html_parser.h; sourceTree = "<group>"; };
+		269202B9252FF38400D6E2DC /* cee_html.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_html.l; sourceTree = "<group>"; };
+		269202BA252FF38400D6E2DC /* cee_html.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_html.c; sourceTree = "<group>"; };
+		269202BB252FF38400D6E2DC /* cee_html.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_html.h; sourceTree = "<group>"; };
 		269202CB252FF39000D6E2DC /* cee_binary_storage.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_binary_storage.c; sourceTree = "<group>"; };
 		269202CC252FF39000D6E2DC /* cee_binary_storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_binary_storage.h; sourceTree = "<group>"; };
 		269202CD252FF39000D6E2DC /* cee_text_autocomplete.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_text_autocomplete.c; sourceTree = "<group>"; };
@@ -701,9 +701,9 @@
 		269F9656253DB22500D8808A /* CEESourcePoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESourcePoint.m; sourceTree = "<group>"; };
 		26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_alert_32x32@2x.png"; sourceTree = "<group>"; };
 		26CBE684252FECA20047771D /* Cymbols.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cymbols.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		26DDED3C2547B6A500BD8246 /* cee_css_lexer.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_css_lexer.l; sourceTree = "<group>"; };
-		26DDED3D2547B6A500BD8246 /* cee_css_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_css_parser.c; sourceTree = "<group>"; };
-		26DDED3E2547B6A500BD8246 /* cee_css_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_css_parser.h; sourceTree = "<group>"; };
+		26DDED3C2547B6A500BD8246 /* cee_css.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_css.l; sourceTree = "<group>"; };
+		26DDED3D2547B6A500BD8246 /* cee_css.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_css.c; sourceTree = "<group>"; };
+		26DDED3E2547B6A500BD8246 /* cee_css.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_css.h; sourceTree = "<group>"; };
 		26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_css_selector_16x16@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -811,9 +811,9 @@
 		268376DB25490C720066305C /* swift */ = {
 			isa = PBXGroup;
 			children = (
-				268376DC25490C720066305C /* cee_swift_lexer.l */,
-				268376DD25490C720066305C /* cee_swift_parser.c */,
-				268376DE25490C720066305C /* cee_swift_parser.h */,
+				268376DC25490C720066305C /* cee_swift.l */,
+				268376DD25490C720066305C /* cee_swift.c */,
+				268376DE25490C720066305C /* cee_swift.h */,
 			);
 			path = swift;
 			sourceTree = "<group>";
@@ -915,12 +915,12 @@
 		269202A1252FF38300D6E2DC /* asm */ = {
 			isa = PBXGroup;
 			children = (
-				269202A2252FF38300D6E2DC /* cee_arm_asm_lexer.l */,
-				269202A3252FF38300D6E2DC /* cee_arm_asm_parser.c */,
-				269202A4252FF38300D6E2DC /* cee_arm_asm_parser.h */,
-				269202A5252FF38300D6E2DC /* cee_gnu_asm_lexer.l */,
-				269202A6252FF38300D6E2DC /* cee_gnu_asm_parser.c */,
-				269202A7252FF38300D6E2DC /* cee_gnu_asm_parser.h */,
+				269202A2252FF38300D6E2DC /* cee_arm_asm.l */,
+				269202A3252FF38300D6E2DC /* cee_arm_asm.c */,
+				269202A4252FF38300D6E2DC /* cee_arm_asm.h */,
+				269202A5252FF38300D6E2DC /* cee_gnu_asm.l */,
+				269202A6252FF38300D6E2DC /* cee_gnu_asm.c */,
+				269202A7252FF38300D6E2DC /* cee_gnu_asm.h */,
 			);
 			path = asm;
 			sourceTree = "<group>";
@@ -928,9 +928,9 @@
 		269202A8252FF38300D6E2DC /* c */ = {
 			isa = PBXGroup;
 			children = (
-				269202A9252FF38300D6E2DC /* cee_c_lexer.l */,
-				269202AA252FF38300D6E2DC /* cee_c_parser.c */,
-				269202AB252FF38300D6E2DC /* cee_c_parser.h */,
+				269202A9252FF38300D6E2DC /* cee_c.l */,
+				269202AA252FF38300D6E2DC /* cee_c.c */,
+				269202AB252FF38300D6E2DC /* cee_c.h */,
 			);
 			path = c;
 			sourceTree = "<group>";
@@ -938,9 +938,9 @@
 		269202B8252FF38400D6E2DC /* html */ = {
 			isa = PBXGroup;
 			children = (
-				269202B9252FF38400D6E2DC /* cee_html_lexer.l */,
-				269202BA252FF38400D6E2DC /* cee_html_parser.c */,
-				269202BB252FF38400D6E2DC /* cee_html_parser.h */,
+				269202B9252FF38400D6E2DC /* cee_html.l */,
+				269202BA252FF38400D6E2DC /* cee_html.c */,
+				269202BB252FF38400D6E2DC /* cee_html.h */,
 			);
 			path = html;
 			sourceTree = "<group>";
@@ -1316,9 +1316,9 @@
 		26DDED3B2547B6A500BD8246 /* css */ = {
 			isa = PBXGroup;
 			children = (
-				26DDED3C2547B6A500BD8246 /* cee_css_lexer.l */,
-				26DDED3D2547B6A500BD8246 /* cee_css_parser.c */,
-				26DDED3E2547B6A500BD8246 /* cee_css_parser.h */,
+				26DDED3C2547B6A500BD8246 /* cee_css.l */,
+				26DDED3D2547B6A500BD8246 /* cee_css.c */,
+				26DDED3E2547B6A500BD8246 /* cee_css.h */,
 			);
 			path = css;
 			sourceTree = "<group>";
@@ -1547,12 +1547,12 @@
 				269204E3252FF5F200D6E2DC /* AppDelegate.m in Sources */,
 				269204C8252FF58200D6E2DC /* CEESearcher.m in Sources */,
 				26920446252FF4F400D6E2DC /* NSSplitView+UIStyle.m in Sources */,
-				269202BD252FF38400D6E2DC /* cee_arm_asm_parser.c in Sources */,
+				269202BD252FF38400D6E2DC /* cee_arm_asm.c in Sources */,
 				2692042F252FF4F400D6E2DC /* CEEScroller.m in Sources */,
 				26920455252FF50300D6E2DC /* CEETextEditViewController.m in Sources */,
 				26920496252FF51A00D6E2DC /* CEESourceHistoryViewController.m in Sources */,
 				26920484252FF51A00D6E2DC /* CEESessionFilePathController.m in Sources */,
-				269202C9252FF38400D6E2DC /* cee_html_parser.c in Sources */,
+				269202C9252FF38400D6E2DC /* cee_html.c in Sources */,
 				2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */,
 				269202E0252FF39000D6E2DC /* cee_text_macos_attribute.m in Sources */,
 				269202DB252FF39000D6E2DC /* cee_text_autocomplete.c in Sources */,
@@ -1564,9 +1564,9 @@
 				269202DD252FF39000D6E2DC /* cee_text_layout.c in Sources */,
 				26920436252FF4F400D6E2DC /* CEETableView.m in Sources */,
 				26920454252FF50300D6E2DC /* CEEMarkdownViewController.m in Sources */,
-				26DDED3F2547B6A500BD8246 /* cee_css_lexer.l in Sources */,
+				26DDED3F2547B6A500BD8246 /* cee_css.l in Sources */,
 				26920445252FF4F400D6E2DC /* NSImageView+UIStyle.m in Sources */,
-				26DDED402547B6A500BD8246 /* cee_css_parser.c in Sources */,
+				26DDED402547B6A500BD8246 /* cee_css.c in Sources */,
 				2692042A252FF4F400D6E2DC /* CEEImageView.m in Sources */,
 				2692043C252FF4F400D6E2DC /* CEETitleView.m in Sources */,
 				26920299252FF35600D6E2DC /* cee_strfuncs.c in Sources */,
@@ -1580,12 +1580,12 @@
 				26920291252FF35600D6E2DC /* cee_error.c in Sources */,
 				2692048F252FF51A00D6E2DC /* CEESessionSpliter1.m in Sources */,
 				2692028F252FF35600D6E2DC /* cee_codec.c in Sources */,
-				269202BC252FF38400D6E2DC /* cee_arm_asm_lexer.l in Sources */,
+				269202BC252FF38400D6E2DC /* cee_arm_asm.l in Sources */,
 				26920490252FF51A00D6E2DC /* CEESessionStatusBar.m in Sources */,
 				269204B0252FF53100D6E2DC /* CEEProjectSettingView.m in Sources */,
 				26920423252FF4F400D6E2DC /* CEEBinaryView.m in Sources */,
 				26920290252FF35600D6E2DC /* cee_datetime.c in Sources */,
-				269202C0252FF38400D6E2DC /* cee_c_lexer.l in Sources */,
+				269202C0252FF38400D6E2DC /* cee_c.l in Sources */,
 				2692048D252FF51A00D6E2DC /* CEESessionSourceController.m in Sources */,
 				26920488252FF51A00D6E2DC /* CEESessionFrameTitleView.m in Sources */,
 				2692048C252FF51A00D6E2DC /* CEESessionReferenceTableView.m in Sources */,
@@ -1606,7 +1606,7 @@
 				2692043A252FF4F400D6E2DC /* CEETextView.m in Sources */,
 				26920296252FF35600D6E2DC /* cee_mem.c in Sources */,
 				26920492252FF51A00D6E2DC /* CEESessionToolbar.m in Sources */,
-				268376E025490C720066305C /* cee_swift_parser.c in Sources */,
+				268376E025490C720066305C /* cee_swift.c in Sources */,
 				269204C2252FF55600D6E2DC /* CEESessionDescriptor.c in Sources */,
 				269204A4252FF52700D6E2DC /* CEEProjectAddFileController.m in Sources */,
 				269202C5252FF38400D6E2DC /* cee_symbol.c in Sources */,
@@ -1619,8 +1619,8 @@
 				26920491252FF51A00D6E2DC /* CEESessionSymbolController.m in Sources */,
 				26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */,
 				26920439252FF4F400D6E2DC /* CEETextTitle.m in Sources */,
-				269202C1252FF38400D6E2DC /* cee_c_parser.c in Sources */,
-				269202BE252FF38400D6E2DC /* cee_gnu_asm_lexer.l in Sources */,
+				269202C1252FF38400D6E2DC /* cee_c.c in Sources */,
+				269202BE252FF38400D6E2DC /* cee_gnu_asm.l in Sources */,
 				26920425252FF4F400D6E2DC /* CEECheckBox.m in Sources */,
 				269204DD252FF5BC00D6E2DC /* CEEProjectParseViewController.m in Sources */,
 				26920292252FF35600D6E2DC /* cee_fileutils.c in Sources */,
@@ -1641,17 +1641,17 @@
 				269204D9252FF5BC00D6E2DC /* CEEProjectCleanViewController.m in Sources */,
 				2692043B252FF4F400D6E2DC /* CEETitlebarButton.m in Sources */,
 				26920438252FF4F400D6E2DC /* CEETextLabel.m in Sources */,
-				269202BF252FF38400D6E2DC /* cee_gnu_asm_parser.c in Sources */,
+				269202BF252FF38400D6E2DC /* cee_gnu_asm.c in Sources */,
 				2692048E252FF51A00D6E2DC /* CEESessionSpliter0.m in Sources */,
 				269204BF252FF54000D6E2DC /* CEESymbolCellView.m in Sources */,
 				2692042E252FF4F400D6E2DC /* CEEPopupPanel.m in Sources */,
 				269204A3252FF52700D6E2DC /* CEEFilePathConfirmView.m in Sources */,
 				2692029A252FF35600D6E2DC /* cee_tree.c in Sources */,
 				269202C6252FF38400D6E2DC /* cee_tag.c in Sources */,
-				269202C8252FF38400D6E2DC /* cee_html_lexer.l in Sources */,
+				269202C8252FF38400D6E2DC /* cee_html.l in Sources */,
 				269202DE252FF39000D6E2DC /* cee_text_modify.c in Sources */,
 				26920426252FF4F400D6E2DC /* CEEContainerView.m in Sources */,
-				268376DF25490C720066305C /* cee_swift_lexer.l in Sources */,
+				268376DF25490C720066305C /* cee_swift.l in Sources */,
 				269202C4252FF38400D6E2DC /* cee_source_parsers.c in Sources */,
 				26920489252FF51A00D6E2DC /* CEESessionFrameView.m in Sources */,
 				2692050F252FF6AE00D6E2DC /* main.m in Sources */,

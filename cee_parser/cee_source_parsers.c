@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "cee_source_parsers.h"
-#include "cee_c_parser.h"
-#include "cee_html_parser.h"
-#include "cee_css_parser.h"
-#include "cee_swift_parser.h"
+#include "cee_c.h"
+#include "cee_html.h"
+#include "cee_css.h"
+#include "cee_swift.h"
 
 static CEESourceParserRef c_parser = NULL;
 static CEESourceParserRef html_parser = NULL;

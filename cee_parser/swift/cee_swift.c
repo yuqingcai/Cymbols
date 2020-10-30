@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "cee_swift_parser.h"
+#include "cee_swift.h"
 #include "cee_symbol.h"
 #include "cee_reference.h"
 
