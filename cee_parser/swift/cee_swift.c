@@ -17,7 +17,6 @@ typedef struct _SwiftParser {
 } SwiftParser;
 
 static CEETokenIdentifierType swift_token_identifier_type_map[CEETokenID_MAX];
-
 static SwiftParser* parser_create(void);
 static void parser_free(cee_pointer data);
 static void swift_token_type_map_init(void);
@@ -67,7 +66,10 @@ static void statement_parse(SwiftParser* parser);
 static cee_boolean statement_pop(SwiftParser* parser);
 static cee_boolean statement_reduce(SwiftParser* parser);
 static cee_boolean statement_complete(SwiftParser* parser);
-
+static cee_boolean current_statement_type_is(SwiftParser* parser,
+                                             CEESourceFregmentType type);
+static void current_statement_type_transform(SwiftParser* parser,
+                                             CEESourceFregmentType type);
 /**
  * parser
  */
@@ -98,6 +100,9 @@ void cee_swift_parser_free(cee_pointer data)
     cee_parser_free(parser);
 }
 
+/**
+ * parser
+ */
 static SwiftParser* parser_create(void)
 {
     return cee_malloc0(sizeof(SwiftParser));
@@ -289,6 +294,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
 {
     SwiftParser* parser = parser_ref->imp;
     cee_int ret = 0;
+    cee_boolean pushed = TRUE;
     CEEToken* token = NULL;
     CEESourceTokenMap* map = NULL;
     CEEList* tokens = NULL;
@@ -317,59 +323,75 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                 continue;
         }
         
-        if (token->identifier == '{') { 
-            statement_token_push(parser, token);
-            block_header_parse(parser);
-            block_push(parser);
+        pushed = FALSE;
+        
+        if (current_statement_type_is(parser, kCEESourceFregmentTypeImportStatement)) {
+            //pushed = import_statement_token_push(parser, token);
         }
-        else if (token->identifier == '}') {
-            block_parse(parser);
-            if (!block_pop(parser))
-                break;
-            
-            statement_token_push(parser, token);
-            
-            if (!block_reduce(parser))
-                break;
+        else if (current_statement_type_is(parser, kCEESourceFregmentTypeClassDefinition)) {
+            //pushed = class_definition_statement_token_push(parser, token);
         }
-        else if (token->identifier == '[') {
-            statement_token_push(parser, token);
-            subscript_push(parser);
+        else if (current_statement_type_is(parser, kCEESourceFregmentTypeFunctionDefinition)) {
+            //pushed = function_definition_statement_token_push(parser, token);
         }
-        else if (token->identifier == ']') {
-            if (!subscript_pop(parser))
-                break;
-            
-            statement_token_push(parser, token);
-        }
-        else if (token->identifier == '(') {
-            statement_token_push(parser, token);
-            parameter_list_push(parser);
-        }
-        else if (token->identifier == ')') {
-            if (!parameter_list_pop(parser))
-                break;
-            
-            statement_token_push(parser, token);
-        }
-        else if (token->identifier == ';') {
-            statement_token_push(parser, token);
-            statement_parse(parser);
-            if (!statement_reduce(parser))
-                break;
-        }
-        else if (token->identifier == kCEETokenID_NEW_LINE) {
-            statement_token_push(parser, token);
-            //if (statement_complete(parser)) {
+        
+        if (!pushed) {
+            if (token->identifier == kCEETokenID_IMPORT) {
+                current_statement_type_transform(parser, kCEESourceFregmentTypeImportStatement);
+                statement_token_push(parser, token);
+            }
+            else if (token->identifier == kCEETokenID_CLASS ||
+                     token->identifier == kCEETokenID_STRUCT) {
+                current_statement_type_transform(parser, kCEESourceFregmentTypeClassDefinition);
+                statement_token_push(parser, token);
+            }
+            else if (token->identifier == kCEETokenID_FUNC) {
+                current_statement_type_transform(parser, kCEESourceFregmentTypeFunctionDefinition);
+                statement_token_push(parser, token);
+            }
+            else if (token->identifier == '{') { 
+                statement_token_push(parser, token);
+                block_push(parser);
+            }
+            else if (token->identifier == '}') {
+                if (!block_pop(parser))
+                    break;
+                
+                statement_token_push(parser, token);
+                
+                if (!block_reduce(parser))
+                    break;
+            }
+            else if (token->identifier == '[') {
+                statement_token_push(parser, token);
+                subscript_push(parser);
+            }
+            else if (token->identifier == ']') {
+                if (!subscript_pop(parser))
+                    break;
+                
+                statement_token_push(parser, token);
+            }
+            else if (token->identifier == '(') {
+                statement_token_push(parser, token);
+                parameter_list_push(parser);
+            }
+            else if (token->identifier == ')') {
+                if (!parameter_list_pop(parser))
+                    break;
+                
+                statement_token_push(parser, token);
+            }
+            else if (token->identifier == ';') {
+                statement_token_push(parser, token);
                 statement_parse(parser);
                 if (!statement_reduce(parser))
                     break;
-            //}
+            }
+            else {
+                statement_token_push(parser, token);
+            }
         }
-        else {
-            statement_token_push(parser, token);
-        }
-        
         if (!ret)
             break;
         
@@ -682,5 +704,20 @@ static cee_boolean statement_complete(SwiftParser* parser)
         }
     }
     return TRUE;
+}
+
+static cee_boolean current_statement_type_is(SwiftParser* parser,
+                                             CEESourceFregmentType type)
+{
+    if (parser->statement_current)
+        return cee_source_fregment_type_is(parser->statement_current, type);
+        
+    return FALSE;
+}
+
+static void current_statement_type_transform(SwiftParser* parser,
+                                             CEESourceFregmentType type)
+{
+    cee_source_fregment_type_set(parser->statement_current, type);
 }
 

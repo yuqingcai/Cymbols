@@ -218,7 +218,9 @@ CEESourceFregment* cee_source_fregment_create(CEESourceFregmentType type,
                                               const cee_uchar* filetype)
 {
     CEESourceFregment* fregment = cee_malloc0(sizeof(CEESourceFregment));
-    fregment->type |= type;
+    cee_size type_size = sizeof(fregment->type);
+    memset(fregment->type, 0, sizeof(fregment->type));
+    fregment->type[type] = 1;
     fregment->filepath_ref = filepath;
     fregment->subject_ref = subject;
     fregment->filetype = (cee_uchar*)cee_strdup((const cee_char*)filetype);
@@ -360,7 +362,7 @@ void cee_source_fregment_type_set(CEESourceFregment* fregment,
     if (!fregment)
         return;
     
-    fregment->type |= type;
+    fregment->type[type] = 1;
 }
 
 void cee_source_fregment_type_set_exclusive(CEESourceFregment* fregment,
@@ -369,7 +371,8 @@ void cee_source_fregment_type_set_exclusive(CEESourceFregment* fregment,
     if (!fregment)
         return;
     
-    fregment->type = type;
+    memset(fregment->type, 0, sizeof(fregment->type));
+    fregment->type[type] = 1;
 }
 
 void cee_source_fregment_type_clear(CEESourceFregment* fregment,
@@ -378,20 +381,20 @@ void cee_source_fregment_type_clear(CEESourceFregment* fregment,
     if (!fregment)
         return;
     
-    fregment->type &= ~type;
+    fregment->type[type] = 0;
 }
 
 cee_boolean cee_source_fregment_type_is(CEESourceFregment* fregment,
                                         CEESourceFregmentType type)
 {
-    return (fregment->type & type) != 0;
+    return fregment->type[type] != 0;
 }
 
 cee_boolean cee_source_fregment_parent_type_is(CEESourceFregment* fregment,
                                                CEESourceFregmentType type)
 {
     CEESourceFregment* parent = fregment->parent;
-    if (parent && (parent->type & type))
+    if (parent && cee_source_fregment_type_is(parent, type))
         return TRUE;
     return FALSE;
 }
@@ -402,7 +405,7 @@ cee_boolean cee_source_fregment_grandfather_type_is(CEESourceFregment* fregment,
     CEESourceFregment* parent = fregment->parent;
     if (parent) {
         parent = parent->parent;
-        if (parent && (parent->type & type))
+        if (parent && cee_source_fregment_type_is(parent, type))
             return TRUE;
     }
     
@@ -1035,15 +1038,15 @@ void cee_source_fregment_indexes_in_range(CEESourceTokenMap* token_map,
             
             fregment = cee_source_fregment_sublevel_backtrack(fregment);
             
-            if (fregment->type & kCEESourceFregmentTypeComment) {
+            if (cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeComment)) {
                 if (!indexes[kCEESourceFregmentIndexComment])
                     indexes[kCEESourceFregmentIndexComment] = fregment;
             }
-            else if (fregment->type & kCEESourceFregmentTypePrepDirective) {
+            else if (cee_source_fregment_type_is(fregment, kCEESourceFregmentTypePrepDirective)) {
                 if (!indexes[kCEESourceFregmentIndexPrepDirective])
                     indexes[kCEESourceFregmentIndexPrepDirective] = fregment;
             }
-            else if (!(fregment->type & kCEESourceFregmentTypeRoot)){
+            else if (!cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeRoot)){
                 if (!indexes[kCEESourceFregmentIndexStatement])
                     indexes[kCEESourceFregmentIndexStatement] = fregment;
             }
@@ -1284,8 +1287,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
     /** search current child fregment (round bracket list) */
     p = SOURCE_FREGMENT_CHILDREN_FIRST(current);
     while (p) {
-                
-        if (((CEESourceFregment*)p->data)->type & searchable_child_fregment_type) {
+        if (cee_source_fregment_type_is(p->data, searchable_child_fregment_type)) {
             symbols = cee_source_fregment_symbols_in_children_search_by_name(p->data, name);
             if (symbols) 
                 goto found;
@@ -1325,7 +1327,7 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
             if (p->data == cee_source_fregment_parent_get(current))
                 break;
                         
-            if (((CEESourceFregment*)p->data)->type & searchable_child_fregment_type) {
+            if (cee_source_fregment_type_is(p->data, searchable_child_fregment_type)) {
                 symbols = cee_source_fregment_symbols_in_children_search_by_name(p->data, name);
                 if (symbols) 
                     goto found;

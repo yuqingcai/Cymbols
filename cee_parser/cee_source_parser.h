@@ -13,35 +13,42 @@ extern "C" {
 #include "cee_backend.h"
 
 typedef enum _CEESourceFregmentType {
-    kCEESourceFregmentTypeRoot                      = 1 << 1,
-    kCEESourceFregmentTypeSourceList                = 1 << 2,
-    kCEESourceFregmentTypeComment                   = 1 << 3,
-    kCEESourceFregmentTypePrepDirective             = 1 << 4,
-    kCEESourceFregmentTypeStatement                 = 1 << 5,
-    kCEESourceFregmentTypeRoundBracketList          = 1 << 6,       /** ( ) */
-    kCEESourceFregmentTypeSquareBracketList         = 1 << 7,       /** [ ] */
-    kCEESourceFregmentTypeCurlyBracketList          = 1 << 8,       /** { } */
-    kCEESourceFregmentTypeStatementBlock            = 1 << 9,
-    kCEESourceFregmentTypeAssignmentBlock           = 1 << 10,
-    kCEESourceFregmentTypeTemplateDeclaration       = 1 << 11,
-    kCEESourceFregmentTypeFunctionDefinition        = 1 << 12,
-    kCEESourceFregmentTypeNamespaceDefinition       = 1 << 13,
-    kCEESourceFregmentTypeClassDefinition           = 1 << 14,
-    kCEESourceFregmentTypeUnionDefinition           = 1 << 15,
-    kCEESourceFregmentTypeEnumDefinition            = 1 << 16,
-    kCEESourceFregmentTypeDeclaration               = 1 << 17,
-    kCEESourceFregmentTypeEnumurators               = 1 << 18,
-    kCEESourceFregmentTypeInterfaceDeclaration      = 1 << 19,
-    kCEESourceFregmentTypeImplementationDefinition  = 1 << 20,
-    kCEESourceFregmentTypeProtocolDeclaration       = 1 << 21,
-    kCEESourceFregmentTypeVariableBlock             = 1 << 22,
-    kCEESourceFregmentTypeLabelDeclaration          = 1 << 23,
-    kCEESourceFregmentTypeIdentifierBlock           = 1 << 24,
-    kCEESourceFregmentTypeXMLTagStart               = 1 << 25,
-    kCEESourceFregmentTypeXMLTagEnd                 = 1 << 26,
-    kCEESourceFregmentTypeXMLTagList                = 1 << 27,
-    kCEESourceFregmentTypeCSSBlock                  = 1 << 28,
+    kCEESourceFregmentTypeRoot                      ,
+    kCEESourceFregmentTypeSourceList                ,
+    kCEESourceFregmentTypeComment                   ,
+    kCEESourceFregmentTypePrepDirective             ,
+    kCEESourceFregmentTypeStatement                 ,
+    kCEESourceFregmentTypeRoundBracketList          ,       /** ( ) */
+    kCEESourceFregmentTypeSquareBracketList         ,       /** [ ] */
+    kCEESourceFregmentTypeCurlyBracketList          ,       /** { } */
+    kCEESourceFregmentTypeStatementBlock            ,
+    kCEESourceFregmentTypeAssignmentBlock           ,
+    kCEESourceFregmentTypeTemplateDeclaration       ,
+    kCEESourceFregmentTypeFunctionDefinition        ,
+    kCEESourceFregmentTypeNamespaceDefinition       ,
+    kCEESourceFregmentTypeClassDefinition           ,
+    kCEESourceFregmentTypeUnionDefinition           ,
+    kCEESourceFregmentTypeEnumDefinition            ,
+    kCEESourceFregmentTypeDeclaration               ,
+    kCEESourceFregmentTypeEnumurators               ,
+    kCEESourceFregmentTypeInterfaceDeclaration      ,
+    kCEESourceFregmentTypeImplementationDefinition  ,
+    kCEESourceFregmentTypeProtocolDeclaration       ,
+    kCEESourceFregmentTypeVariableBlock             ,
+    kCEESourceFregmentTypeLabelDeclaration          ,
+    kCEESourceFregmentTypeIdentifierBlock           ,
+    kCEESourceFregmentTypeXMLTagStart               ,
+    kCEESourceFregmentTypeXMLTagEnd                 ,
+    kCEESourceFregmentTypeXMLTagList                ,
+    kCEESourceFregmentTypeCSSBlock                  ,
+    kCEESourceFregmentTypeImportStatement           ,
+    /** 
+     * ... 
+     *
+     */
+    CEESourceFregmentTypeMax
 } CEESourceFregmentType;
+
 
 typedef enum _CEESourceFregmentIndex {
     kCEESourceFregmentIndexComment = 0,
@@ -53,7 +60,7 @@ typedef enum _CEESourceFregmentIndex {
 typedef struct _CEESourceFregment {
     struct _CEESourceFregment* parent;
     CEEList* children;
-    CEESourceFregmentType type;
+    cee_char type[CEESourceFregmentTypeMax];
     const cee_uchar* filepath_ref;
     const cee_uchar* subject_ref;
     CEEList* tokens;
@@ -121,7 +128,6 @@ typedef struct _CEESourceParser {
                                    CEESourceFregment*,
                                    CEERange,
                                    CEEList**);
-    
 } CEESourceParser;
 
 void cee_parsers_init(void);

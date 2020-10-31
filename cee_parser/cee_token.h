@@ -397,11 +397,20 @@ typedef enum _CEETokenID {
     kCEETokenID_LEFT_SHIFT_ASSIGNMENT,
     kCEETokenID_RIGHT_SHIFT_ASSIGNMENT,
     
-    
-    
-    
-    
-    
+    kCEETokenID_ABSTRACT,
+    kCEETokenID_ASSERT,
+    kCEETokenID_BOOLEAN,
+    kCEETokenID_BYTE,
+    kCEETokenID_EXPORTS,
+    kCEETokenID_EXTENDS,
+    kCEETokenID_FINALLY,
+    kCEETokenID_IMPLEMENTS,
+    kCEETokenID_INSTANCEOF,
+    kCEETokenID_INTERFACE,
+    kCEETokenID_NATIVE,
+    kCEETokenID_PACKAGE,
+    kCEETokenID_STRICTFP,
+    kCEETokenID_TRANSIENT,
     
     kCEETokenID_END
 } CEETokenID;
