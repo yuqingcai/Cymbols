@@ -199,3 +199,44 @@ CEERange cee_range_consistent_from_discrete(CEEList* ranges)
     return range;
 }
 
+cee_int cee_range_compare(CEERange* range0,
+                          CEERange* range1)
+{
+    if (range0->location < range1->location)
+        return -1;
+    else if (range0->location > range1->location)
+        return 1;
+    return  0;
+}
+
+
+cee_int cee_range_string_compare(const cee_char* str0,
+                                 const cee_char* str1)
+{
+    cee_int ret = 0;
+    CEEList* ranges0 = NULL;
+    CEEList* ranges1 = NULL;
+    CEERange* range0 = NULL;
+    CEERange* range1 = NULL;
+        
+    ranges0 = cee_ranges_from_string(str0);
+    ranges1 = cee_ranges_from_string(str1);
+    
+    if (!ranges0 || !ranges1)
+        goto exit;
+    
+    range0 = ranges0->data;
+    range1 = ranges1->data;
+    
+    ret = cee_range_compare(range0, range1);
+    
+exit:
+    
+    if (ranges0)
+        cee_list_free_full(ranges0, cee_range_free);
+    
+    if (ranges1)
+        cee_list_free_full(ranges1, cee_range_free);
+    
+    return ret;
+}

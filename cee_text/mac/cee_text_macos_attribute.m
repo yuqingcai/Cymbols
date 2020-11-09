@@ -519,7 +519,9 @@ cee_boolean cee_text_platform_configure(cee_pointer platform_ref,
             { kCEETagTypeXMLTag,                           "xml_tag"                               },
             { kCEETagTypeXMLAttribute,                     "xml_attribute"                         },
             { kCEETagTypeCSSProperty,                      "css_property"                          },
-            { kCEETagTypeCSSSelector,                      "css_selector"                          }
+            { kCEETagTypeCSSSelector,                      "css_selector"                          },
+            { kCEETagTypeAnnotation,                       "annotation"                            },
+            
         };
         
         int map_size = sizeof (rule_map) / sizeof(rule_map[0]);
@@ -925,11 +927,11 @@ static cee_boolean color_component_from_hex(const char* descriptor,
 }
 
 static void hsb2rgb(cee_float hue,
-                     cee_float saturation,
-                     cee_float brightness,
-                     cee_float *red,
-                     cee_float *green,
-                     cee_float *blue)
+                    cee_float saturation,
+                    cee_float brightness,
+                    cee_float *red,
+                    cee_float *green,
+                    cee_float *blue)
 {
     int i;
     float f, p, q, t;

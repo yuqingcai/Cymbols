@@ -13,7 +13,7 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* name,
                                           const cee_char* parent,
                                           const cee_char* derives,
-                                          const cee_char* protos,
+                                          const cee_char* proto,
                                           const cee_char* language,
                                           const cee_char* filepath,
                                           const cee_char* locations,
@@ -32,8 +32,8 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
     if (derives)
         symbol->derives = cee_strdup(derives);
     
-    if (protos)
-        symbol->protos = cee_strdup(protos);
+    if (proto)
+        symbol->proto = cee_strdup(proto);
     
     if (language)
         symbol->language = cee_strdup(language);
@@ -66,8 +66,8 @@ void cee_source_symbol_free(cee_pointer data)
     if (symbol->derives)
         cee_free(symbol->derives);
     
-    if (symbol->protos)
-        cee_free(symbol->protos);
+    if (symbol->proto)
+        cee_free(symbol->proto);
     
     if (symbol->filepath)
         cee_free(symbol->filepath);
@@ -97,7 +97,7 @@ CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol)
     copy->filepath = cee_strdup(symbol->filepath);
     copy->parent = cee_strdup(symbol->parent);
     copy->derives = cee_strdup(symbol->derives);
-    copy->protos = cee_strdup(symbol->protos);
+    copy->proto = cee_strdup(symbol->proto);
     copy->locations = cee_strdup(symbol->locations);
     copy->fregment_range = cee_strdup(symbol->fregment_range);
     
@@ -183,8 +183,8 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     if (symbol->name)
         name = symbol->name;
     
-    if (symbol->protos)
-        protos = symbol->protos;
+    if (symbol->proto)
+        protos = symbol->proto;
     
     if (symbol->derives)
         derives = symbol->derives;
@@ -196,7 +196,7 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
         filepath = symbol->filepath;
     
     if (symbol->fregment_range)
-        filepath = symbol->fregment_range;
+        fregment_range = symbol->fregment_range;
     
     fprintf(stdout, "%s %d %s %s %s %s %s\n",
             name,
@@ -257,13 +257,8 @@ cee_int cee_source_symbol_location_compare(const cee_pointer a,
     range0 = ranges0->data;
     range1 = ranges1->data;
     
-    if (range0->location < range1->location)
-        ret = -1;
-    else if (range0->location > range1->location)
-        ret = 1;
-    else
-        ret = 0;
-
+    ret = cee_range_compare(range0, range1);
+    
 exit:
     
     if (ranges0)

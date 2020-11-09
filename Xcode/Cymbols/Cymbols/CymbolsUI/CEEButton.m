@@ -150,9 +150,19 @@
     
     if (_icon) {
         NSImage* tintedIcon = [_icon copy];
-        if (iconColor)
+        if (iconColor) {
             tintedIcon = [self tintedImage:tintedIcon withColor:iconColor];
-                    
+        }
+        else {
+            if (self.styleState == kCEEViewStyleStateClicked) {
+                NSArray* colors = [self schemeColorsFromImage:tintedIcon];
+                if (colors && colors.count >= 2) {
+                    iconColor = colors[1];
+                    tintedIcon = [self tintedImage:tintedIcon withColor:iconColor];
+                }
+            }
+        }
+        
         CGFloat iconWidth = tintedIcon.size.width;
         CGFloat iconHeight = tintedIcon.size.height;
         CGRect r0 = CGRectMake(0, 0, iconWidth, iconHeight);

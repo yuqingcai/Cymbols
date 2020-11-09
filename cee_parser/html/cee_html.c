@@ -139,46 +139,51 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
         if (token->identifier == '<') {
             SOURCE_FREGMENT_TOKEN_PUSH(fregment, token, TRUE);
-            parsing = TRUE;
+            if (!parsing)
+                parsing = TRUE;
         }
         else if (token->identifier == '>') {
             SOURCE_FREGMENT_TOKEN_PUSH(fregment, token, TRUE);
-            parsing = FALSE;
             
-            XMLTagType type = tag_parse(fregment);
+            if (parsing) {
             
-            if (type == kXMLTagTypeBegin) {
-                if (!statement_push(parser, fregment))
-                    break;
-                fregment = NULL;
-            }
-            else if (type == kXMLTagTypeClose) {
-                cee_source_fregment_type_set_exclusive(fregment,
-                                                       kCEESourceFregmentTypeXMLTagEnd);
-                if (!statement_pop(parser))
-                    break;
+                XMLTagType type = tag_parse(fregment);
+                
+                if (type == kXMLTagTypeBegin) {
+                    if (!statement_push(parser, fregment))
+                        break;
+                    fregment = NULL;
+                }
+                else if (type == kXMLTagTypeClose) {
+                    cee_source_fregment_type_set_exclusive(fregment,
+                                                           kCEESourceFregmentTypeXMLTagEnd);
+                    if (!statement_pop(parser))
+                        break;
                                 
-                if (!statement_push(parser, fregment))
+                    if (!statement_push(parser, fregment))
+                        break;
+                    
+                    if (!statement_pop(parser))
+                        break;
+                    
+                    fregment = NULL;
+                    
+                }
+                else if (type == kXMLTagTypeEmpty) {
+                    if (!statement_push(parser, fregment))
+                        break;
+                    
+                    if (!statement_pop(parser))
+                        break;
+                    
+                    fregment = NULL;
+                    
+                }
+                else {
                     break;
+                }
                 
-                if (!statement_pop(parser))
-                    break;
-                
-                fregment = NULL;
-
-            }
-            else if (type == kXMLTagTypeEmpty) {
-                if (!statement_push(parser, fregment))
-                    break;
-                
-                if (!statement_pop(parser))
-                    break;
-                
-                fregment = NULL;
-                
-            }
-            else {
-                break;
+                parsing = FALSE;
             }
         }
         else {

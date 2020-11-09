@@ -25,7 +25,7 @@ WB  [^a-zA-Z0-9_"'<]
 #include "cee_lib.h"
 #include "cee_token.h"
 
-static cee_ulong g_scan_offset = 0;
+static cee_ulong scan_offset = 0;
 static YY_BUFFER_STATE buffer = NULL;
 
 #define RETURN_TOKEN_ID(token_id) {\
@@ -72,6 +72,7 @@ static int character(cee_long offset,
 "instanceof"                                RETURN_TOKEN_ID(kCEETokenID_INSTANCEOF              )
 "int"                                       RETURN_TOKEN_ID(kCEETokenID_INT                     )
 "interface"                                 RETURN_TOKEN_ID(kCEETokenID_INTERFACE               )
+"@"{WN}*"interface"                         RETURN_TOKEN_ID(kCEETokenID_INTERFACE               )
 "long"                                      RETURN_TOKEN_ID(kCEETokenID_LONG                    )
 "module"                                    RETURN_TOKEN_ID(kCEETokenID_MODULE                  )
 "native"                                    RETURN_TOKEN_ID(kCEETokenID_NATIVE                  )
@@ -113,8 +114,8 @@ static int character(cee_long offset,
 "|"                                         RETURN_TOKEN_ID('|'                                 )
 "^"                                         RETURN_TOKEN_ID('^'                                 )
 "!"                                         RETURN_TOKEN_ID('!'                                 )
-">"                                         RETURN_TOKEN_ID('<'                                 )
-"<"                                         RETURN_TOKEN_ID('>'                                 )
+"<"                                         RETURN_TOKEN_ID('<'                                 )
+">"                                         RETURN_TOKEN_ID('>'                                 )
 "."                                         RETURN_TOKEN_ID('.'                                 )
 ","                                         RETURN_TOKEN_ID(','                                 )
 "?"                                         RETURN_TOKEN_ID('?'                                 )
@@ -126,6 +127,9 @@ static int character(cee_long offset,
 "["                                         RETURN_TOKEN_ID('['                                 )
 "]"                                         RETURN_TOKEN_ID(']'                                 )
 ";"                                         RETURN_TOKEN_ID(';'                                 )
+"@"                                         RETURN_TOKEN_ID('@'                                 )
+"."                                         RETURN_TOKEN_ID('.'                                 )
+"..."                                       RETURN_TOKEN_ID(kCEETokenID_ELLIPSIS                )
 "+="                                        RETURN_TOKEN_ID(kCEETokenID_ADD_ASSIGNMENT          )
 "-="                                        RETURN_TOKEN_ID(kCEETokenID_MINUS_ASSIGNMENT        )
 "*="                                        RETURN_TOKEN_ID(kCEETokenID_MULTI_ASSIGNMENT        )
@@ -144,6 +148,7 @@ static int character(cee_long offset,
 "!="                                        RETURN_TOKEN_ID(kCEETokenID_LOGIC_UNEQUAL           )
 "<="                                        RETURN_TOKEN_ID(kCEETokenID_LOGIC_LESS_EQUAL        )
 ">="                                        RETURN_TOKEN_ID(kCEETokenID_LOGIC_LARGE_EQUAL       )
+"@"{WN}*{L}({L}|{D})*                       RETURN_TOKEN_ID(kCEETokenID_ANNOTATION              )
 0[xX]{H}+{IS}?                              RETURN_TOKEN_ID(kCEETokenID_CONSTANT                )
 {D}+{IS}?                                   RETURN_TOKEN_ID(kCEETokenID_CONSTANT                )
 0b{B}+{IS}?                                 RETURN_TOKEN_ID(kCEETokenID_CONSTANT                )
@@ -294,10 +299,10 @@ cee_int cee_lexer_java_token_get(CEEToken** token)
     cee_ulong tail_length = 0;
     
     CEETokenID identifier = java_scan_lex();
-    cee_long offset = g_scan_offset;
+    cee_long offset = scan_offset;
     cee_ulong length = java_scan_get_leng();
     
-    g_scan_offset += length;
+    scan_offset += length;
     
     *token = cee_token_create(identifier, offset, length);
     
@@ -307,22 +312,22 @@ cee_int cee_lexer_java_token_get(CEEToken** token)
     if (identifier == kCEETokenID_LINES_COMMENT) {
         tail_length = lines_comment(offset, &eof);
         (*token)->length += tail_length;
-        g_scan_offset += tail_length;
+        scan_offset += tail_length;
     }
     else if (identifier == kCEETokenID_LINE_COMMENT) {
         tail_length = line_comment(offset, &eof);
         (*token)->length += tail_length;
-        g_scan_offset += tail_length;
+        scan_offset += tail_length;
     }
     else if (identifier == kCEETokenID_LITERAL) {
         tail_length = literal(offset, &eof);
         (*token)->length += tail_length;
-        g_scan_offset += tail_length;
+        scan_offset += tail_length;
     }
     else if (identifier == kCEETokenID_CHARACTER) {
         tail_length = character(offset, &eof);
         (*token)->length += tail_length;
-        g_scan_offset += tail_length;
+        scan_offset += tail_length;
     }
     
     if (eof)
@@ -333,7 +338,7 @@ cee_int cee_lexer_java_token_get(CEEToken** token)
 void cee_lexer_java_buffer_create(const cee_uchar* subject)
 {
     buffer = java_scan__scan_bytes(subject, strlen(subject));
-    g_scan_offset = 0;
+    scan_offset = 0;
 }
 
 void cee_lexer_java_buffer_free()

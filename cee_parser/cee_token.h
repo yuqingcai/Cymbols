@@ -411,6 +411,7 @@ typedef enum _CEETokenID {
     kCEETokenID_PACKAGE,
     kCEETokenID_STRICTFP,
     kCEETokenID_TRANSIENT,
+    kCEETokenID_ANNOTATION,
     
     kCEETokenID_END
 } CEETokenID;

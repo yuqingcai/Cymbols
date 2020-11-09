@@ -221,7 +221,7 @@
                                     <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_search_16x16"/>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
-                                    <action selector="search:" target="58X-QB-Qaa" id="5QY-Y0-Kbn"/>
+                                    <action selector="find:" target="58X-QB-Qaa" id="Ak9-GC-B2y"/>
                                 </connections>
                             </customView>
                             <customView toolTip="Undo" translatesAutoresizingMaskIntoConstraints="NO" id="Aav-vb-zjK" customClass="CEEToolbarButton">

@@ -31,7 +31,10 @@ cee_boolean cee_location_overflow_range(cee_long location,
 cee_boolean cee_ranges_intersect(CEERange range0,
                                  CEERange range1);
 CEERange cee_range_consistent_from_discrete(CEEList* ranges);
-
+cee_int cee_range_compare(CEERange* range0,
+                          CEERange* range1);
+cee_int cee_range_string_compare(const cee_char* str0,
+                                 const cee_char* str1);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

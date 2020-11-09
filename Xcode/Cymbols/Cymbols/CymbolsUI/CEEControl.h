@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSPointerArray* userInterfaceStyles;
 - (void)initProperties;
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint;
+- (NSArray*)schemeColorsFromImage:(NSImage*)image;
 @end
 
 NS_ASSUME_NONNULL_END

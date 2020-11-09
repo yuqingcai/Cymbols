@@ -52,7 +52,7 @@ typedef struct _CEESourceSymbol {
     cee_char* filepath;
     cee_char* parent;
     cee_char* derives;
-    cee_char* protos;
+    cee_char* proto;
     cee_char* locations;
     cee_char* fregment_range;
 } CEESourceSymbol;
@@ -97,7 +97,6 @@ cee_boolean cee_source_symbol_matcher_by_buffer_offset(cee_pointer data,
 cee_boolean cee_source_symbol_matcher_by_name(cee_pointer data,
                                               cee_pointer user_data);
 cee_boolean cee_source_symbol_is_definition(CEESourceSymbol* symbol);
-
 
 typedef struct _CEESourceSymbolWrapper {
     CEESourceSymbol* symbol_ref;

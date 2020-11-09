@@ -341,7 +341,7 @@ static cee_boolean tables_create(sqlite3* database)
     "   name           TEXT                                            ,"  \
     "   parent         TEXT                                            ,"  \
     "   derives        TEXT                                            ,"  \
-    "   protos         TEXT                                            ,"  \
+    "   proto          TEXT                                            ,"  \
     "   language       TEXT                                            ,"  \
     "   filepath       TEXT                                            ,"  \
     "   locations      TEXT                                            ,"  \
@@ -863,7 +863,7 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
     sqlite3_stmt* stmt = NULL;
     char *message = NULL;
     char* sql =
-    "INSERT INTO cee_source_symbols (type, name, parent, derives, protos, language, filepath, locations, fregment_range) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    "INSERT INTO cee_source_symbols (type, name, parent, derives, proto, language, filepath, locations, fregment_range) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
     int ret = SQLITE_OK;
     
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
@@ -881,7 +881,7 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
         sqlite3_bind_text(stmt, 2, symbol->name, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 3, symbol->parent, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 4, symbol->derives, -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 5, symbol->protos, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 5, symbol->proto, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 6, symbol->language, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 7, symbol->filepath, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 8, symbol->locations, -1, SQLITE_STATIC);
@@ -984,7 +984,7 @@ static CEEList* symbols_search(sqlite3* db,
     sqlite3_stmt* stmt;
     
     cee_strconcat0(&sql, 
-                   "SELECT type, name, parent, derives, protos, language, filepath, locations fregment_range FROM cee_source_symbols WHERE ",
+                   "SELECT type, name, parent, derives, proto, language, filepath, locations fregment_range FROM cee_source_symbols WHERE ",
                    condition, 
                    ";",
                    NULL);
@@ -1023,10 +1023,10 @@ static CEEList* symbols_search(sqlite3* db,
         length = sqlite3_column_bytes(stmt, 3);
         symbol->derives = cee_strndup(text, length);
         
-        /** protos */
+        /** proto */
         text = (char*)sqlite3_column_text(stmt, 4);
         length = sqlite3_column_bytes(stmt, 4);
-        symbol->protos = cee_strndup(text, length);
+        symbol->proto = cee_strndup(text, length);
         
         /** language */
         text = (char*)sqlite3_column_text(stmt, 5);

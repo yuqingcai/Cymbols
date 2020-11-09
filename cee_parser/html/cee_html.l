@@ -24,7 +24,8 @@ WB  [^a-zA-Z0-9_"'<]
 #include "cee_lib.h"
 #include "cee_token.h"
 
-static cee_ulong g_scan_offset = 0;
+static cee_boolean in_tag = FALSE;
+static cee_ulong scan_offset = 0;
 static YY_BUFFER_STATE buffer = NULL;
 
 #define RETURN_TOKEN_ID(token_id) {\
@@ -185,30 +186,41 @@ cee_int cee_lexer_html_token_get(CEEToken** token)
     cee_ulong tail_length = 0;
     
     CEETokenID identifier = html_scan_lex();
-    cee_long offset = g_scan_offset;
+    cee_long offset = scan_offset;
     cee_ulong length = html_scan_get_leng();
     
-    g_scan_offset += length;
+    scan_offset += length;
     
     *token = cee_token_create(identifier, offset, length);
     
     if (!identifier) /* EOF */
         return 0;
         
-    if (identifier == kCEETokenID_HTML_COMMENT) {
+    if (identifier == '<') {
+        in_tag = TRUE;
+    }
+    else if (identifier == '>') {
+        if (in_tag)
+            in_tag = FALSE;
+    }
+    else if (identifier == kCEETokenID_HTML_COMMENT) {
         tail_length = html_comment(offset, &eof);
         (*token)->length += tail_length;
-        g_scan_offset += tail_length;
+        scan_offset += tail_length;
     }
     else if (identifier == kCEETokenID_LITERAL) {
-        tail_length = literal(offset, &eof);
-        (*token)->length += tail_length;
-        g_scan_offset += tail_length;
+        if (in_tag) {
+            tail_length = literal(offset, &eof);
+            (*token)->length += tail_length;
+            scan_offset += tail_length;
+        }
     }
     else if (identifier == kCEETokenID_CHARACTER) {
-        tail_length = character(offset, &eof);
-        (*token)->length += tail_length;
-        g_scan_offset += tail_length;
+        if (in_tag) {
+            tail_length = character(offset, &eof);
+            (*token)->length += tail_length;
+            scan_offset += tail_length;
+        }
     }
     
     if (eof)
@@ -219,7 +231,7 @@ cee_int cee_lexer_html_token_get(CEEToken** token)
 void cee_lexer_html_buffer_create(const cee_uchar* subject)
 {
     buffer = html_scan__scan_bytes(subject, strlen(subject));
-    g_scan_offset = 0;
+    scan_offset = 0;
 }
 
 void cee_lexer_html_buffer_free()

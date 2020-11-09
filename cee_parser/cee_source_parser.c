@@ -1270,6 +1270,8 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
     CEEList* symbols = NULL;
     CEEList* copied = NULL;
     CEEList* p = NULL;
+    CEEList* removes = NULL;
+    CEESourceSymbol* symbol = NULL;
     
     name = reference->name;
     if (!name)
@@ -1360,6 +1362,23 @@ search_prep_directive:
     return NULL;
     
 found:
+    
+    /** remove the symbols defined after the reference  */
+    p = symbols;
+    while (p) {
+        symbol = p->data;
+        if (cee_range_string_compare(symbol->locations, reference->locations) == 1)
+            removes = cee_list_prepend(removes, p);
+        p = p->next;
+    }
+    p = removes;
+    while (p) {
+        CEEList* q = p->data;
+        symbols = cee_list_remove_link(symbols, q);
+        cee_list_free(q);
+        p = p->next;
+    }
+    
     p = symbols;
     while (p) {
         copied = cee_list_prepend(copied, cee_source_symbol_copy(p->data));
@@ -1544,6 +1563,10 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
                     tag_type = kCEETagTypeCSSProperty;
                 else if (token->identifier == kCEETokenID_CSS_FUNCTION)
                     tag_type = kCEETagTypeFunctionReference;
+                else if (token->identifier == kCEETokenID_CSS_FUNCTION)
+                    tag_type = kCEETagTypeFunctionReference;
+                else if (token->identifier == kCEETokenID_ANNOTATION)
+                    tag_type = kCEETagTypeAnnotation;
             }
             
             if (tag_type != kCEETagTypeIgnore) {
