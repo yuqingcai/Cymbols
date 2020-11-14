@@ -13,7 +13,6 @@ void cee_tag_free(cee_pointer data)
     
     CEETag* tag = (CEETag*)data;
     
-    
     cee_free(tag);
 }
 

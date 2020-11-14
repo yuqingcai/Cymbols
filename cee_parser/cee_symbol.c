@@ -8,9 +8,11 @@
 static void source_symbol_tree_dump_to_wrappers(CEETree* tree, 
                                                 int n, 
                                                 CEEList** list);
+cee_int cee_source_symbol_count = 0;
 
 CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* name,
+                                          const cee_char* alias,
                                           const cee_char* parent,
                                           const cee_char* derives,
                                           const cee_char* proto,
@@ -25,6 +27,9 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
     
     if (name)
         symbol->name = cee_strdup(name);
+    
+    if (alias)
+        symbol->alias = cee_strdup(alias);
     
     if (parent)
         symbol->parent = cee_strdup(parent);
@@ -47,6 +52,8 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
     if (fregment_range)
         symbol->fregment_range = cee_strdup(fregment_range);
     
+    cee_source_symbol_count ++;
+    
     return symbol;
 }
 
@@ -60,6 +67,15 @@ void cee_source_symbol_free(cee_pointer data)
     if (symbol->name)
         cee_free(symbol->name);
     
+    if (symbol->alias)
+        cee_free(symbol->alias);
+    
+    if (symbol->language)
+        cee_free(symbol->language);
+        
+    if (symbol->filepath)
+        cee_free(symbol->filepath);
+    
     if (symbol->parent)
         cee_free(symbol->parent);
     
@@ -69,12 +85,6 @@ void cee_source_symbol_free(cee_pointer data)
     if (symbol->proto)
         cee_free(symbol->proto);
     
-    if (symbol->filepath)
-        cee_free(symbol->filepath);
-    
-    if (symbol->language)
-        cee_free(symbol->language);
-    
     if (symbol->locations)
         cee_free(symbol->locations);
     
@@ -82,25 +92,30 @@ void cee_source_symbol_free(cee_pointer data)
         cee_free(symbol->fregment_range);
     
     cee_free(symbol);
+    
+    cee_source_symbol_count --;
 }
+
+cee_int cee_source_symbol_count_get(void)
+{
+    return cee_source_symbol_count;
+}
+
 
 CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol)
 {
     if (!symbol)
         return NULL;
-    
-    CEESourceSymbol* copy = cee_malloc0(sizeof(CEESourceSymbol));
-    
-    copy->type = symbol->type;
-    copy->name = cee_strdup(symbol->name);
-    copy->language = cee_strdup(symbol->language);
-    copy->filepath = cee_strdup(symbol->filepath);
-    copy->parent = cee_strdup(symbol->parent);
-    copy->derives = cee_strdup(symbol->derives);
-    copy->proto = cee_strdup(symbol->proto);
-    copy->locations = cee_strdup(symbol->locations);
-    copy->fregment_range = cee_strdup(symbol->fregment_range);
-    
+    CEESourceSymbol* copy = cee_source_symbol_create(symbol->type,
+                                                     symbol->name,
+                                                     symbol->alias,
+                                                     symbol->parent,
+                                                     symbol->derives,
+                                                     symbol->proto,
+                                                     symbol->language,
+                                                     symbol->filepath,
+                                                     symbol->locations,
+                                                     symbol->fregment_range);
     return copy;
 }
 
@@ -111,7 +126,16 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_uchar* file
                                                            CEESourceSymbolType type,
                                                            const cee_char* language)
 {
-    CEESourceSymbol* symbol = cee_malloc0(sizeof(CEESourceSymbol));
+    CEESourceSymbol* symbol = cee_source_symbol_create(kCEESourceSymbolTypeUnknow,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL);
     symbol->filepath = cee_strdup((cee_char*)filepath);
     symbol->type = type;
     symbol->language = cee_strdup(language);
@@ -132,7 +156,16 @@ CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_uchar* filepath,
                                                       CEESourceSymbolType type,
                                                       const cee_char* language)
 {
-    CEESourceSymbol* symbol = cee_malloc0(sizeof(CEESourceSymbol));
+    CEESourceSymbol* symbol = cee_source_symbol_create(kCEESourceSymbolTypeUnknow,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL);
     symbol->filepath = cee_strdup((cee_char*)filepath);
     symbol->type = type;
     symbol->language = cee_strdup(language);

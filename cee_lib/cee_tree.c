@@ -7,9 +7,12 @@
 #include "cee_mem.h"
 #include "cee_tree.h"
 
+cee_int cee_tree_count = 0;
+
 CEETree* cee_tree_create(void)
 {
     CEETree* tree = cee_malloc0(sizeof(CEETree));
+    cee_tree_count ++;
     return tree;
 }
 
@@ -24,6 +27,8 @@ void cee_tree_free(CEETree* tree)
     cee_list_free(tree->children);
     
     cee_free(tree);
+
+    cee_tree_count --;
 }
 
 void cee_tree_free_full(CEETree* tree,
@@ -39,6 +44,13 @@ void cee_tree_free_full(CEETree* tree,
     
     (*free_func)(tree->data);
     cee_free(tree);
+    
+    cee_tree_count --;
+}
+
+cee_int cee_tree_count_get(void)
+{
+    return cee_tree_count;
 }
 
 CEETree* cee_tree_insert(CEETree* tree,

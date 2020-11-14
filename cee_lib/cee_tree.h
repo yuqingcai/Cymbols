@@ -23,7 +23,7 @@ void cee_tree_free(CEETree* tree);
 void cee_tree_free_full(CEETree* tree,
                         CEEDestroyNotify free_func);
 CEETree* cee_tree_create(void);
-
+cee_int cee_tree_count_get(void);
 CEETree* cee_tree_insert(CEETree* tree,
                          cee_pointer data);
 void cee_tree_foreach(CEETree* tree,

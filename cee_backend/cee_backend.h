@@ -49,6 +49,8 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
                                        CEEList* symbols);
 CEEList* cee_database_symbols_search_by_name(cee_pointer db,
                                              const cee_char* name);
+CEEList* cee_database_symbols_search_by_alias(cee_pointer db,
+                                              const cee_char* alias);
 CEEList* cee_database_symbols_search_by_parent(cee_pointer db,
                                                const cee_char* parent);
 CEEList* cee_database_symbols_search_by_type(cee_pointer db,
@@ -65,8 +67,8 @@ cee_boolean cee_database_security_bookmark_remove(cee_pointer db,
 cee_char* cee_database_security_bookmark_content_get(cee_pointer db,
                                                      const cee_char* filepath);
 CEEList* cee_database_filepath_entry_infos_get(cee_pointer db);
-void cee_database_application_info_set(sqlite3* db,
-                                       const cee_char* descriptor);
+cee_boolean cee_database_application_info_set(sqlite3* db,
+                                              const cee_char* descriptor);
 cee_char* cee_database_application_info_get(sqlite3* db);
 
 #ifdef __cplusplus

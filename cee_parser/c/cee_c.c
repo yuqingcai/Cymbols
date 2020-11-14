@@ -343,6 +343,7 @@ typedef struct _CParser {
     CEESourceFregment* comment_current;
     ParseTrap block_header_traps[CEETokenID_MAX];
     CParserState state;
+    cee_int prep_if_directive;
 } CParser;
 
 static void c_token_type_map_init(void);
@@ -474,20 +475,20 @@ static cee_char* c_declaration_protos_create(CEESourceFregment* fregment,
                                              CEEList* parameter_list,
                                              CEEList* identifier,
                                              CEEList* object_identifier);
-static CEESourceSymbol* c_declaration_operator_overload_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_operator_overload_declaration_create(CEESourceFregment* fregment,
                                                                const cee_char* proto,
                                                                CEEList* overload,
                                                                CEEList* parameter_list);
-static CEESourceSymbol* c_declaration_surrounded_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_surrounded_declaration_create(CEESourceFregment* fregment,
                                                         const cee_char* proto,
                                                         CEEList* surrounded);
-static CEESourceSymbol* c_declaration_function_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregment,
                                                       const cee_char* proto,
                                                       CEEList* parameter_list);
-static CEESourceSymbol* c_declaration_custom_type_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFregment* fregment,
                                                          const cee_char* proto,
                                                          CEEList* identifier);
-static CEESourceSymbol* c_declaration_identifier_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_identifier_declaration_create(CEESourceFregment* fregment,
                                                         const cee_char* proto,
                                                         CEEList* identifier);
 static void c_namespace_definition_translate_table_init(void);
@@ -964,6 +965,124 @@ static cee_boolean is_name_scope(CEEList* p)
     return FALSE;
 }
 
+/**
+ *  preprocessor directive
+ */
+static cee_boolean prep_directive_parsing(CParser* parser)
+{
+    return parser->state & kCParserStatePrepDirectiveParsing;
+}
+
+static cee_boolean prep_directive_token_push(CParser* parser,
+                                             CEEToken* push)
+{
+    if (!parser->prep_directive_current)
+        return FALSE;
+    
+    SOURCE_FREGMENT_TOKEN_PUSH(parser->prep_directive_current, push, TRUE);
+    return TRUE;
+}
+
+static cee_boolean prep_directive_terminated(CParser* parser)
+{
+    CEESourceFregment* fregment = parser->prep_directive_current;
+    
+    if (!fregment->tokens_ref)
+        return FALSE;
+    
+    CEEList* p = SOURCE_FREGMENT_TOKENS_LAST(fregment);
+    
+    if (cee_token_is_identifier(p, 0))
+        return TRUE;
+    
+    if (cee_token_is_identifier(p, kCEETokenID_NEW_LINE)) {
+        p = TOKEN_PREV(p);
+        
+        if (cee_token_is_identifier(p, '\\'))
+            return FALSE;
+        
+        return TRUE;
+    }
+    
+    return FALSE;
+}
+
+static cee_boolean prep_directive_attach(CParser* parser)
+{
+    CEESourceFregment* attached = NULL;
+    
+    if (!parser->prep_directive_current)
+        return FALSE;
+    
+    attached = cee_source_fregment_append(parser->prep_directive_current, 
+                                          kCEESourceFregmentTypePrepDirective, 
+                                          parser->filepath_ref,
+                                          parser->subject_ref,
+                                          (const cee_uchar*)"c");
+    if (!attached)
+        return FALSE;
+    
+    parser->prep_directive_current = attached;
+    return TRUE;
+}
+
+static void prep_directive_parse(CParser* parser)
+{
+    CEESourceFregment* fregment = parser->prep_directive_current;
+    CEEToken* token = NULL;
+    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+        
+    while (p) {
+        token = p->data;
+        if (token_id_is_prep_directive(token->identifier))
+            break;
+        p = TOKEN_NEXT(p);
+    }
+    
+    if (p) {
+        token = p->data;
+        
+        if (token->identifier == kCEETokenID_HASH_IF ||
+            token->identifier == kCEETokenID_HASH_IFDEF ||
+            token->identifier == kCEETokenID_HASH_IFNDEF) {
+            parser->prep_if_directive ++;
+        }
+        else if (token->identifier == kCEETokenID_HASH_ELIF ||
+                 token->identifier == kCEETokenID_HASH_ELSE) {
+            if (parser->state & kCParserStateStatementParsing)
+                parser->state &= ~kCParserStateStatementParsing;
+        }
+        else if (token->identifier == kCEETokenID_HASH_ENDIF) {
+            parser->prep_if_directive --;
+            if (!parser->prep_if_directive) {
+                if (!(parser->state & kCParserStateStatementParsing))
+                    parser->state |= kCParserStateStatementParsing;
+            }
+        }
+        else if (token->identifier == kCEETokenID_HASH_INCLUDE ||
+                 token->identifier == kCEETokenID_HASH_IMPORT) {
+            prep_directive_include_parse(fregment);
+        }
+        else if (token->identifier == kCEETokenID_HASH_DEFINE) {
+            prep_directive_define_parse(fregment);
+        }
+        else {
+            prep_directive_common_parse(fregment);
+        }
+    }
+}
+
+static cee_boolean prep_directive_reduce(CParser* parser)
+{
+    if (!parser->prep_directive_current)
+        return FALSE;
+    
+    prep_directive_attach(parser);
+    return TRUE;
+}
+/**
+ * statement
+ */
 static cee_boolean statement_attach(CParser* parser,
                                     CEESourceFregmentType type)
 {
@@ -1013,6 +1132,46 @@ static cee_boolean statement_pop(CParser* parser)
     return TRUE;
 }
 
+static cee_boolean statement_parsing(CParser* parser)
+{
+    return parser->state & kCParserStateStatementParsing;
+}
+
+static void statement_parse(CParser* parser)
+{
+    CEESourceFregment* current = parser->statement_current;
+    
+    if (!current || !current->tokens_ref)
+        return;
+    
+    if (objective_c_property_declaration_parse(current) ||
+        objective_c_message_declaration_parse(current))
+        return;
+    
+    if (c_declaration_parse(current))
+        return;
+    
+    return;
+}
+
+static cee_boolean statement_reduce(CParser* parser)
+{
+    if (!parser->statement_current)
+        return FALSE;
+    
+    if (cee_source_fregment_grandfather_type_is(parser->statement_current, 
+                                                kCEESourceFregmentTypeTemplateDeclaration))
+        if (!template_pop(parser))
+            return FALSE;
+    
+    statement_attach(parser, kCEESourceFregmentTypeStatement);
+    
+    return TRUE;
+}
+
+/**
+ *  comment
+ */
 static cee_boolean comment_attach(CParser* parser)
 {
     CEESourceFregment* attached = NULL;
@@ -1030,123 +1189,6 @@ static cee_boolean comment_attach(CParser* parser)
     
     parser->comment_current = attached;
     return TRUE;
-}
-
-static cee_boolean prep_directive_attach(CParser* parser)
-{
-    CEESourceFregment* attached = NULL;
-    
-    if (!parser->prep_directive_current)
-        return FALSE;
-    
-    attached = cee_source_fregment_append(parser->prep_directive_current, 
-                                          kCEESourceFregmentTypePrepDirective, 
-                                          parser->filepath_ref,
-                                          parser->subject_ref,
-                                          (const cee_uchar*)"c");
-    if (!attached)
-        return FALSE;
-    
-    parser->prep_directive_current = attached;
-    return TRUE;
-}
-
-/**
- *  preprocessor directive
- */
-static cee_boolean prep_directive_parsing(CParser* parser)
-{
-    return parser->state & kCParserStatePrepDirectiveParsing;
-}
-
-static cee_boolean prep_directive_token_push(CParser* parser,
-                                             CEEToken* push)
-{
-    if (!parser->prep_directive_current)
-        return FALSE;
-    
-    SOURCE_FREGMENT_TOKEN_PUSH(parser->prep_directive_current, push, TRUE);
-    return TRUE;
-}
-
-static cee_boolean prep_directive_terminated(CParser* parser)
-{
-    CEESourceFregment* fregment = parser->prep_directive_current;
-    
-    if (!fregment->tokens)
-        return FALSE;
-    
-    CEEList* p = SOURCE_FREGMENT_TOKENS_LAST(fregment);
-    
-    if (cee_token_is_identifier(p, 0))
-        return TRUE;
-    
-    if (cee_token_is_identifier(p, kCEETokenID_NEW_LINE)) {
-        p = TOKEN_PREV(p);
-        
-        if (cee_token_is_identifier(p, '\\'))
-            return FALSE;
-        
-        return TRUE;
-    }
-    
-    return FALSE;
-}
-
-static void prep_directive_parse(CParser* parser)
-{
-    CEESourceFregment* fregment = parser->prep_directive_current;
-    CEEToken* token = NULL;
-    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
-        
-    while (p) {
-        token = p->data;
-        if (token_id_is_prep_directive(token->identifier))
-            break;
-        p = TOKEN_NEXT(p);
-    }
-    
-    if (p) {
-        token = p->data;
-        
-        if (token->identifier == kCEETokenID_HASH_IF ||
-            token->identifier == kCEETokenID_HASH_IFDEF ||
-            token->identifier == kCEETokenID_HASH_IFNDEF) {
-        }
-        else if (token->identifier == kCEETokenID_HASH_ELIF ||
-                 token->identifier == kCEETokenID_HASH_ELSE) {
-            if (parser->state & kCParserStateStatementParsing)
-                parser->state &= ~kCParserStateStatementParsing;
-        }
-        else if (token->identifier == kCEETokenID_HASH_ENDIF) {
-            if (!(parser->state & kCParserStateStatementParsing))
-                parser->state |= kCParserStateStatementParsing;
-        }
-        else if (token->identifier == kCEETokenID_HASH_INCLUDE ||
-                 token->identifier == kCEETokenID_HASH_IMPORT) {
-            prep_directive_include_parse(fregment);
-        }
-        else if (token->identifier == kCEETokenID_HASH_DEFINE) {
-            prep_directive_define_parse(fregment);
-        }
-        else {
-            prep_directive_common_parse(fregment);
-        }
-    }
-}
-
-static cee_boolean prep_directive_reduce(CParser* parser)
-{
-    if (!parser->prep_directive_current)
-        return FALSE;
-    
-    prep_directive_attach(parser);
-    return TRUE;
-}
-
-static cee_boolean statement_parsing(CParser* parser)
-{
-    return parser->state & kCParserStateStatementParsing;
 }
 
 static cee_boolean comment_token_push(CParser* parser,
@@ -1442,11 +1484,11 @@ static void block_parse(CParser* parser)
     const cee_uchar* filepath = current->filepath_ref;
     CEEList* enumerators = NULL;
     
-    if (!current || !current->tokens)
+    if (!current || !current->tokens_ref)
         return;
     
     if (cee_source_fregment_grandfather_type_is(current, kCEESourceFregmentTypeEnumDefinition)) {
-        enumerators = enumerators_extract(current->tokens, filepath, subject);
+        enumerators = enumerators_extract(current->tokens_ref, filepath, subject);
         if (enumerators) {
             current->symbols = cee_list_concat(current->symbols, enumerators);
             cee_source_fregment_type_set(current, kCEESourceFregmentTypeEnumurators);
@@ -2003,7 +2045,7 @@ static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
             child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
             if (child) {
                 child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
-                r = child->tokens_last;
+                r = child->tokens_ref_last;
                 while (r) {
                     token = r->data;
                     if (token->identifier == kCEETokenID_IDENTIFIER)
@@ -2284,7 +2326,7 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
         current = c_function_definition_translate_table[current][token->identifier];
         
         if (current == kCFunctionDefinitionTranslateStateError) {
-            //current = kCFunctionDefinitionTranslateStateInit;
+            /*current = kCFunctionDefinitionTranslateStateInit;*/
             return FALSE;
         }
         else if (current == kCFunctionDefinitionTranslateStateTemplateParameter) {
@@ -3678,30 +3720,30 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
                                                     identifier,
                                                     object_identifier);
             if (overload)
-                declaration = c_declaration_operator_overload_create(fregment,
+                declaration = c_operator_overload_declaration_create(fregment,
                                                                      proto,
                                                                      overload,
                                                                      parameter_list);
             else if (surrounded)
-                declaration = c_declaration_surrounded_create(fregment,
+                declaration = c_surrounded_declaration_create(fregment,
                                                               proto,
                                                               parameter_list);
             else if (parameter_list)
-                declaration = c_declaration_function_create(fregment,
+                declaration = c_function_declaration_create(fregment,
                                                             proto,
                                                             parameter_list);
             else if (identifier)
-                declaration = c_declaration_identifier_create(fregment,
+                declaration = c_identifier_declaration_create(fregment,
                                                               proto,
                                                               identifier);
             else if (object_identifier) {
                 token = cee_token_not_whitespace_newline_before(object_identifier)->data;
                 if (token_id_is_object_sepcifier(token->identifier))
-                    declaration = c_declaration_custom_type_create(fregment,
+                    declaration = c_custom_type_declaration_create(fregment,
                                                                    proto,
                                                                    object_identifier);
                 else
-                    declaration = c_declaration_identifier_create(fregment,
+                    declaration = c_identifier_declaration_create(fregment,
                                                                   proto,
                                                                   object_identifier);
             }
@@ -3814,7 +3856,7 @@ static cee_char* c_declaration_protos_create(CEESourceFregment* fregment,
     return proto;
 }
 
-static CEESourceSymbol* c_declaration_function_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregment,
                                                       const cee_char* proto,
                                                       CEEList* parameter_list)
 {
@@ -3851,7 +3893,7 @@ static CEESourceSymbol* c_declaration_function_create(CEESourceFregment* fregmen
     return declaration;
 }
 
-static CEESourceSymbol* c_declaration_custom_type_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFregment* fregment,
                                                          const cee_char* proto,
                                                          CEEList* identifier)
 {
@@ -3870,7 +3912,7 @@ static CEESourceSymbol* c_declaration_custom_type_create(CEESourceFregment* freg
     return declaration;
 }
 
-static CEESourceSymbol* c_declaration_identifier_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_identifier_declaration_create(CEESourceFregment* fregment,
                                                         const cee_char* proto,
                                                         CEEList* identifier)
 {
@@ -3889,7 +3931,7 @@ static CEESourceSymbol* c_declaration_identifier_create(CEESourceFregment* fregm
     return declaration;
 }
 
-static CEESourceSymbol* c_declaration_operator_overload_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_operator_overload_declaration_create(CEESourceFregment* fregment,
                                                                const cee_char* proto,
                                                                CEEList* overload,
                                                                CEEList* parameter_list)
@@ -3918,7 +3960,7 @@ static CEESourceSymbol* c_declaration_operator_overload_create(CEESourceFregment
     return declaration;
 }
 
-static CEESourceSymbol* c_declaration_surrounded_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_surrounded_declaration_create(CEESourceFregment* fregment,
                                                         const cee_char* proto,
                                                         CEEList* surrounded)
 {
@@ -4202,7 +4244,7 @@ static void block_header_parse(CParser* parser)
     CEEList* p = NULL;
     ParseTrap trap = NULL;
     
-    if (!current || !current->tokens)
+    if (!current || !current->tokens_ref)
         return;
     
     if (c_extern_block_parse(current))
@@ -4268,7 +4310,7 @@ static void label_parse(CParser* parser)
     CEESourceSymbol* declaration = NULL;
         
     fregment = parser->statement_current;
-    if (!fregment || !fregment->tokens)
+    if (!fregment || !fregment->tokens_ref)
         return;
     
     if (!cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeFunctionDefinition) &&
@@ -4476,21 +4518,21 @@ static cee_boolean objective_c_definition_parse(CEESourceFregment* fregment,
     while (p) {        
         if (cee_token_is_identifier(p, kCEETokenID_AT_INTERFACE)) {
             type = kObjectiveCDefinitionTypeInterface;
-            definition = objective_c_interface_extract(fregment->tokens, 
+            definition = objective_c_interface_extract(fregment->tokens_ref,
                                                        fregment->filepath_ref,
                                                        subject);
             break;
         }
         else if (cee_token_is_identifier(p, kCEETokenID_AT_IMPLEMENTATION)) {
             type = kObjectiveCDefinitionTypeImplementation;
-            definition = objective_c_implementation_extract(fregment->tokens, 
+            definition = objective_c_implementation_extract(fregment->tokens_ref,
                                                             fregment->filepath_ref,
                                                             subject);
             break;
         }
         else if (cee_token_is_identifier(p, kCEETokenID_AT_PROTOCOL)) {
             type = kObjectiveCDefinitionTypeProtocol;
-            definition = objective_c_protocol_extract(fregment->tokens, 
+            definition = objective_c_protocol_extract(fregment->tokens_ref,
                                                       fregment->filepath_ref,
                                                       subject);
             break;
@@ -4666,41 +4708,6 @@ exit:
 }
 
 /**
- * statement
- */
-static void statement_parse(CParser* parser)
-{
-    CEESourceFregment* current = parser->statement_current;
-    
-    if (!current || !current->tokens)
-        return;
-    
-    if (objective_c_property_declaration_parse(current) ||
-        objective_c_message_declaration_parse(current))
-        return;
-    
-    if (c_declaration_parse(current))
-        return;
-    
-    return;
-}
-
-static cee_boolean statement_reduce(CParser* parser)
-{
-    if (!parser->statement_current)
-        return FALSE;
-    
-    if (cee_source_fregment_grandfather_type_is(parser->statement_current, 
-                                                kCEESourceFregmentTypeTemplateDeclaration))
-        if (!template_pop(parser))
-            return FALSE;
-    
-    statement_attach(parser, kCEESourceFregmentTypeStatement);
-    
-    return TRUE;
-}
-
-/**
  * parser
  */
 static void parser_block_header_trap_init(CParser* parser)
@@ -4783,13 +4790,24 @@ static void parser_free(cee_pointer data)
     cee_free(parser);
 }
 
+static void parser_state_set(CParser* parser,
+                             CParserState state)
+{
+    parser->state |= state;
+}
+
+static void parser_state_clear(CParser* parser,
+                               CParserState state)
+{
+    parser->state &= ~state;
+}
+
 static void symbol_parse_init(CParser* parser,
                               const cee_uchar* filepath,
                               const cee_uchar* subject)
-{    
+{
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
-    
     parser->prep_directive_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
@@ -4834,8 +4852,8 @@ static void symbol_parse_init(CParser* parser,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              (const cee_uchar*)"c");
-    
     parser->state = kCParserStateStatementParsing;
+    parser->prep_if_directive = 0;
 }
 
 static void symbol_parse_clear(CParser* parser)
@@ -4848,18 +4866,7 @@ static void symbol_parse_clear(CParser* parser)
     parser->prep_directive_current = NULL;
     parser->comment_root = NULL;
     parser->comment_current = NULL;
-}
-
-static void parser_state_set(CParser* parser,
-                             CParserState state)
-{
-    parser->state |= state;
-}
-
-static void parser_state_clear(CParser* parser,
-                               CParserState state)
-{
-    parser->state &= ~state;
+    parser->prep_if_directive = 0;
 }
 
 static cee_boolean current_statement_type_is(CParser* parser,
@@ -5257,17 +5264,17 @@ static void c_reference_fregment_parse(const cee_uchar* filepath,
         if (cee_source_fregment_tokens_pattern_match(fregment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
             p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
-            type = kCEESourceReferenceTypeMember;
+            type = kCEESourceReferenceTypeUnknow;
         }
         else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_MEMBER_POINTER, kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
             p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
-            type = kCEESourceReferenceTypeMember;
+            type = kCEESourceReferenceTypeUnknow;
         }
         else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_SCOPE, kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
             p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
-            type = kCEESourceReferenceTypeMember;
+            type = kCEESourceReferenceTypeUnknow;
         }
         else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_IDENTIFIER, ':',  NULL) &&
                  cee_source_fregment_parent_type_is(fregment, kCEESourceFregmentTypeSquareBracketList)) {

@@ -12,10 +12,9 @@ extern "C" {
 
 CEESourceParserRef cee_gnu_asm_parser_create(const cee_char* identifier);
 void cee_gnu_asm_parser_free(cee_pointer data);
-void cee_lexer_gnu_asm_subject_init(const cee_uchar* subject);
-cee_int cee_lexer_gnu_asm_token_get(CEETokenID* token_id,
-                                    cee_long* offset,
-                                    cee_ulong* length);
+void cee_lexer_gnu_asm_buffer_create(const cee_uchar* subject);
+void cee_lexer_gnu_asm_buffer_free(void);
+cee_int cee_lexer_gnu_asm_token_get(CEEToken** token);
 
 #ifdef __cplusplus
 }

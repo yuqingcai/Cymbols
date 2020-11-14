@@ -42,12 +42,16 @@ typedef enum _CEESourceSymbolType {
     kCEESourceSymbolTypeXMLTagName,
     kCEESourceSymbolTypeXMLTagAttribute,
     kCEESourceSymbolTypeCSSSelector,
+    kCEESourceSymbolTypeImport,
+    kCEESourceSymbolTypePackage,
     kCEESourceSymbolTypeMax,
+    kCEESourceSymbolTypeASMDirective,
 } CEESourceSymbolType;
 
 typedef struct _CEESourceSymbol {
     CEESourceSymbolType type;
     cee_char* name;
+    cee_char* alias;
     cee_char* language;
     cee_char* filepath;
     cee_char* parent;
@@ -58,7 +62,8 @@ typedef struct _CEESourceSymbol {
 } CEESourceSymbol;
 
 CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
-                                          const cee_char* descriptor,
+                                          const cee_char* name,
+                                          const cee_char* alias,
                                           const cee_char* parent,
                                           const cee_char* derived,
                                           const cee_char* data_type,
@@ -67,6 +72,7 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* locations,
                                           const cee_char* block_range);
 void cee_source_symbol_free(cee_pointer data);
+cee_int cee_source_symbol_count_get(void);
 CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol);
 CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_uchar* filepath,
                                                            const cee_uchar* subject,

@@ -14,7 +14,6 @@
 #import "CEEImageView.h"
 #import "cee_symbol.h"
 
-
 @interface CEESessionContextViewController ()
 @property (strong) IBOutlet CEETitleView *titlebar;
 @property (strong) IBOutlet CEEImageView *titleIcon;
@@ -198,7 +197,23 @@
 
 - (void)presentContextBufferWithSymbol:(CEESourceSymbol*)symbol {
     NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-    CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+    CEESourceBuffer* buffer = nil;
+    // fucking app sandbox make this code so tedious!!!
+    if (access([filePath UTF8String], R_OK) != 0) {
+        NSArray* bookmarks = [self.session.project getSecurityBookmarksWithFilePaths:@[filePath]];
+        if (bookmarks) {
+            [self.session.project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
+            buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+            [self.session.project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
+        }
+    }
+    else {
+        buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+    }
+    
+    if (!buffer)
+        return;
+    
     cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
     [_editViewController setBuffer:buffer];
     CEEList* ranges = cee_ranges_from_string(symbol->locations);

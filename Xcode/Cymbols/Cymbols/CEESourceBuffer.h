@@ -15,7 +15,6 @@
 #import "cee_symbol.h"
 #import "cee_reference.h"
 
-
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSNotificationName CEENotificationSourceBufferStateChanged;
@@ -50,7 +49,7 @@ typedef NS_ENUM(NSUInteger, CEEBufferEncodeType) {
 @property CEETree* prep_directive_symbol_tree;
 @property CEETree* statement_symbol_tree;
 @property (readonly)NSInteger referenceCount;
-@property CEEList* tokens_ref;
+@property CEEList* tokens;
 @property CEESourceParserRef parser_ref;
 @property CEEList* symbol_wrappers;
 

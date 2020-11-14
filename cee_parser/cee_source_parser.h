@@ -13,35 +13,36 @@ extern "C" {
 #include "cee_backend.h"
 
 typedef enum _CEESourceFregmentType {
-    kCEESourceFregmentTypeRoot                      ,
-    kCEESourceFregmentTypeSourceList                ,
-    kCEESourceFregmentTypeComment                   ,
-    kCEESourceFregmentTypePrepDirective             ,
-    kCEESourceFregmentTypeStatement                 ,
-    kCEESourceFregmentTypeRoundBracketList          ,       /** ( ) */
-    kCEESourceFregmentTypeSquareBracketList         ,       /** [ ] */
-    kCEESourceFregmentTypeCurlyBracketList          ,       /** { } */
-    kCEESourceFregmentTypeStatementBlock            ,
-    kCEESourceFregmentTypeAssignmentBlock           ,
-    kCEESourceFregmentTypeTemplateDeclaration       ,
-    kCEESourceFregmentTypeFunctionDefinition        ,
-    kCEESourceFregmentTypeNamespaceDefinition       ,
-    kCEESourceFregmentTypeClassDefinition           ,
-    kCEESourceFregmentTypeUnionDefinition           ,
-    kCEESourceFregmentTypeEnumDefinition            ,
-    kCEESourceFregmentTypeDeclaration               ,
-    kCEESourceFregmentTypeEnumurators               ,
-    kCEESourceFregmentTypeInterfaceDeclaration      ,
-    kCEESourceFregmentTypeImplementationDefinition  ,
-    kCEESourceFregmentTypeProtocolDeclaration       ,
-    kCEESourceFregmentTypeVariableBlock             ,
-    kCEESourceFregmentTypeLabelDeclaration          ,
-    kCEESourceFregmentTypeIdentifierBlock           ,
-    kCEESourceFregmentTypeXMLTagStart               ,
-    kCEESourceFregmentTypeXMLTagEnd                 ,
-    kCEESourceFregmentTypeXMLTagList                ,
-    kCEESourceFregmentTypeCSSBlock                  ,
-    kCEESourceFregmentTypeImportStatement           ,
+    kCEESourceFregmentTypeRoot                      = 0 ,
+    kCEESourceFregmentTypeSourceList                    ,
+    kCEESourceFregmentTypeComment                       ,
+    kCEESourceFregmentTypePrepDirective                 ,
+    kCEESourceFregmentTypeStatement                     ,
+    kCEESourceFregmentTypeRoundBracketList              ,       /** ( ) */
+    kCEESourceFregmentTypeSquareBracketList             ,       /** [ ] */
+    kCEESourceFregmentTypeCurlyBracketList              ,       /** { } */
+    kCEESourceFregmentTypeStatementBlock                ,
+    kCEESourceFregmentTypeAssignmentBlock               ,
+    kCEESourceFregmentTypeTemplateDeclaration           ,
+    kCEESourceFregmentTypeFunctionDefinition            ,
+    kCEESourceFregmentTypeNamespaceDefinition           ,
+    kCEESourceFregmentTypeClassDefinition               ,
+    kCEESourceFregmentTypeUnionDefinition               ,
+    kCEESourceFregmentTypeEnumDefinition                ,
+    kCEESourceFregmentTypeDeclaration                   ,
+    kCEESourceFregmentTypeEnumurators                   ,
+    kCEESourceFregmentTypeInterfaceDeclaration          ,
+    kCEESourceFregmentTypeImplementationDefinition      ,
+    kCEESourceFregmentTypeProtocolDeclaration           ,
+    kCEESourceFregmentTypeVariableBlock                 ,
+    kCEESourceFregmentTypeLabelDeclaration              ,
+    kCEESourceFregmentTypeIdentifierBlock               ,
+    kCEESourceFregmentTypeXMLTagStart                   ,
+    kCEESourceFregmentTypeXMLTagEnd                     ,
+    kCEESourceFregmentTypeXMLTagList                    ,
+    kCEESourceFregmentTypeCSSBlock                      ,
+    kCEESourceFregmentTypeImportStatement               ,
+    kCEESourceFregmentTypePackageStatement              ,
     /** 
      * ... 
      *
@@ -63,31 +64,31 @@ typedef struct _CEESourceFregment {
     cee_char type[CEESourceFregmentTypeMax];
     const cee_uchar* filepath_ref;
     const cee_uchar* subject_ref;
-    CEEList* tokens;
-    CEEList* tokens_last;
+    CEEList* tokens_ref;
+    CEEList* tokens_ref_last;
     CEEList* symbols;
     CEEList* node;
     cee_uchar* filetype;
 } CEESourceFregment;
 
-#define SOURCE_FREGMENT_TOKENS_FIRST(fregment) ((CEESourceFregment*)fregment)->tokens
-#define SOURCE_FREGMENT_TOKENS_LAST(fregment) ((CEESourceFregment*)fregment)->tokens_last
+#define SOURCE_FREGMENT_TOKENS_FIRST(fregment) ((CEESourceFregment*)fregment)->tokens_ref
+#define SOURCE_FREGMENT_TOKENS_LAST(fregment) ((CEESourceFregment*)fregment)->tokens_ref_last
 
 #define SOURCE_FREGMENT_TOKEN_PUSH(fregment, token, log_fregment_in_token) {\
     if (log_fregment_in_token)\
         token->fregment_ref = ((CEESourceFregment*)fregment);\
-    ((CEESourceFregment*)fregment)->tokens_last = cee_list_prepend(((CEESourceFregment*)fregment)->tokens_last, (token));\
-    if (!((CEESourceFregment*)fregment)->tokens)\
-        ((CEESourceFregment*)fregment)->tokens = ((CEESourceFregment*)fregment)->tokens_last;\
+    ((CEESourceFregment*)fregment)->tokens_ref_last = cee_list_prepend(((CEESourceFregment*)fregment)->tokens_ref_last, (token));\
+    if (!((CEESourceFregment*)fregment)->tokens_ref)\
+        ((CEESourceFregment*)fregment)->tokens_ref = ((CEESourceFregment*)fregment)->tokens_ref_last;\
 }
 
 #define SOURCE_FREGMENT_TOKEN_NODE_REMOVE(fregment, p) {\
-    if (((CEESourceFregment*)fregment)->tokens_last) {\
-        if (p == ((CEESourceFregment*)fregment)->tokens)\
-            ((CEESourceFregment*)fregment)->tokens = ((CEESourceFregment*)fregment)->tokens->prev;\
-        ((CEESourceFregment*)fregment)->tokens_last = cee_list_remove_link(((CEESourceFregment*)fregment)->tokens_last, p);\
-        if (!((CEESourceFregment*)fregment)->tokens_last)\
-            ((CEESourceFregment*)fregment)->tokens = NULL;\
+    if (((CEESourceFregment*)fregment)->tokens_ref_last) {\
+        if (p == ((CEESourceFregment*)fregment)->tokens_ref)\
+            ((CEESourceFregment*)fregment)->tokens_ref = ((CEESourceFregment*)fregment)->tokens_ref->prev;\
+        ((CEESourceFregment*)fregment)->tokens_ref_last = cee_list_remove_link(((CEESourceFregment*)fregment)->tokens_ref_last, p);\
+        if (!((CEESourceFregment*)fregment)->tokens_ref_last)\
+            ((CEESourceFregment*)fregment)->tokens_ref = NULL;\
     }\
 }
 
@@ -154,6 +155,7 @@ CEESourceFregment* cee_source_fregment_create(CEESourceFregmentType type,
                                               const cee_uchar* filepath,
                                               const cee_uchar* subject,
                                               const cee_uchar* filetype);
+cee_int cee_source_fregment_count_get(void);
 void cee_source_fregment_free(cee_pointer data);
 void cee_source_fregment_free_full(cee_pointer data);
 void cee_source_fregment_remove(CEESourceFregment* fregment);
@@ -180,6 +182,8 @@ void cee_source_fregment_type_set_exclusive(CEESourceFregment* fregment,
                                             CEESourceFregmentType type);
 void cee_source_fregment_type_clear(CEESourceFregment* fregment,
                                     CEESourceFregmentType type);
+cee_boolean cee_source_fregment_type_is_one_of(CEESourceFregment* fregment,
+                                               CEESourceFregmentType* types);
 cee_boolean cee_source_fregment_type_is(CEESourceFregment* fregment,
                                         CEESourceFregmentType type);
 cee_boolean cee_source_fregment_parent_type_is(CEESourceFregment* fregment,

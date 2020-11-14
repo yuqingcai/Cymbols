@@ -30,7 +30,6 @@ extern "C" {
 #define TOKEN_NEXT_SET(p, node) (p)->prev = (node)
 #define TOKEN_APPEND(tokens, token) (tokens) = cee_list_prepend((tokens), (token))
 
-
 typedef enum _CEETokenIdentifierType {
     kCEETokenIdentifierTypeComment                  = 0x1 << 0,
     kCEETokenIdentifierTypeConstant                 = 0x1 << 1,
@@ -48,12 +47,14 @@ typedef enum _CEETokenIdentifierType {
     kCEETokenIdentifierTypeVirtualSpecifier         = 0x1 << 13,
     kCEETokenIdentifierTypeAlignasSpecifier         = 0x1 << 14,
     kCEETokenIdentifierTypeOverloadOperator         = 0x1 << 15,
+    kCEETokenIdentifierTypeASMDirective             = 0x1 << 16,
 } CEETokenIdentifierType;
 
 typedef enum _CEETokenID {
     kCEETokenID_UNKNOW = 512,
     kCEETokenID_NEW_LINE,
     kCEETokenID_WHITE_SPACE,
+    kCEETokenID_REGISTER_NAME,
     
     kCEETokenID_LINES_COMMENT,
     kCEETokenID_LINE_COMMENT,

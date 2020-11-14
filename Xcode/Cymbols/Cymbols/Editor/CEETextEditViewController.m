@@ -123,9 +123,9 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [self showTextSearch:NO];
     [self showLineNumber:_showLineNumber];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferSavedResponse:) name:CEENotificationSourceBufferSaved object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textHighlightStyleResponse:) name:CEENotificationTextHighlightStyleUpdate object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferReloadResponse:) name:CEENotificationSourceBufferReload object:nil];
 }
 
@@ -490,7 +490,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
 }
 
-- (void)bufferStateChangedResponse:(NSNotification*)notification {
+- (void)sourceBufferStateChangedResponse:(NSNotification*)notification {
     CEESourceBuffer* buffer = notification.object;
     if (buffer != self.buffer)
         return;
@@ -527,6 +527,16 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
 }
 
+- (void)sourceBufferSavedResponse:(NSNotification*)notification {
+    CEESourceBuffer* buffer = notification.object;
+    if (buffer != self.buffer)
+        return;
+    
+    CEETextLayoutRef layout = cee_text_edit_layout(_textView.edit);
+    cee_text_layout_run(layout);
+    [_textView setNeedsDisplay:YES];
+}
+
 - (void)textHighlightStyleResponse:(NSNotification*)notification {
     CEEStyleManager* manager = [CEEStyleManager defaultStyleManager];
     NSString* descriptor = [manager textHighlighDescriptor];
@@ -557,7 +567,8 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF8)
         encodeType = @"UTF-8";
     
-    return [NSString stringWithFormat:@"Line:%ld, Column:%ld    %@    %@    %@", 
+    return [NSString stringWithFormat:@"Offset:%ld, Line:%ld, Column:%ld    %@    %@    %@",
+                buffer_offset,
                 paragraph + 1,
                 character + 1,
                 lineBreakTypeString,

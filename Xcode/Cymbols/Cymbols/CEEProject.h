@@ -11,6 +11,7 @@
 #import "CEESourceBuffer.h"
 #import "CEESearcher.h"
 #import "CEESourcePoint.h"
+#import "CEESecurityBookmark.h"
 
 extern NSNotificationName CEENotificationProjectSettingProperties;
 extern NSNotificationName CEENotificationProjectAddFilePaths;
@@ -46,12 +47,6 @@ NSDictionary* JSONDictionaryFromString(NSString* string);
 @property (strong) NSArray* filePathsExpanded;
 - (NSString*)databasePath;
 + (CEEProjectSetting*)projectSettingWithName:(NSString*)name path:(NSString*)path filePaths:(NSArray*)filePaths filePathsUserSelected:(NSArray*)filePathsUserSelected;
-@end
-
-@interface CEESecurityBookmark : NSObject
-@property (strong) NSString* filePath;
-@property (strong) NSString* content;
-- (instancetype)initWithFilePath:(NSString*)filePath;
 @end
 
 CEESecurityBookmark* CreateBookmarkWithFilePath(NSString* filePath);

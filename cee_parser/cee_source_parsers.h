@@ -11,8 +11,8 @@ extern "C" {
 void cee_parsers_create(void);
 void cee_parsers_free(void);
 CEESourceParserRef cee_source_parser_get(const cee_char* filepath);
-/*void cee_source_parser_asm_name_set(const cee_char* name);
-const cee_char* cee_source_parser_asm_name_get(void);*/
+void cee_source_parser_asm_name_set(const cee_char* name);
+const cee_char* cee_source_parser_asm_name_get(void);
 
 #ifdef __cplusplus
 }

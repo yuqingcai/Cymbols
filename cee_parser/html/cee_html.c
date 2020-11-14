@@ -271,7 +271,7 @@ static XMLTagType tag_parse(CEESourceFregment* fregment)
     cee_boolean tag_close = FALSE;
     cee_boolean empty_element = FALSE;
         
-    if (!fregment || !fregment->tokens)
+    if (!fregment || !fregment->tokens_ref)
         return kXMLTagTypeUnknow;
     
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);

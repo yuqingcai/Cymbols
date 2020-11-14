@@ -81,7 +81,6 @@ CEEList* cee_list_concat(CEEList *list1,
     CEEList *tmp_list;
     
     if (list2) {
-        
         tmp_list = cee_list_last(list1);
         if (tmp_list)
             tmp_list->next = list2;

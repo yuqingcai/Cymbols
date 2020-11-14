@@ -276,7 +276,7 @@ static void block_header_parse(CSSParser* parser)
     CEESourceFregment* fregment = parser->statement_current;
     CEESourceSymbol* symbol = NULL;
     
-    if (!fregment || !fregment->tokens)
+    if (!fregment || !fregment->tokens_ref)
         return;
     
     CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
@@ -357,7 +357,7 @@ static void statement_parse(CSSParser* parser)
 {
     CEESourceFregment* current = parser->statement_current;
     
-    if (!current || !current->tokens)
+    if (!current || !current->tokens_ref)
         return;
     
     return;

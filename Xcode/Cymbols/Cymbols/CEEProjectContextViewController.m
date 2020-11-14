@@ -14,6 +14,7 @@
 #import "CEEImageView.h"
 
 @interface CEEProjectContextViewController ()
+@property (strong) CEEProject* project;
 @property (weak) IBOutlet CEETableView *symbolTable;
 @property (weak) IBOutlet CEETitleView *titlebar;
 @property (strong) CEEEditViewController *editViewController;
@@ -23,6 +24,25 @@
 @end
 
 @implementation CEEProjectContextViewController
+
+- (CEESourceBuffer*)project:(CEEProject*)project securityCreateSourceBufferWithFilePath:(NSString*)filePath {
+    if (!project || !filePath)
+        return nil;
+    
+    CEESourceBuffer* buffer = nil;
+    if (access([filePath UTF8String], R_OK) != 0) {
+        NSArray* bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
+        if (bookmarks) {
+            [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
+            buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+            [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
+        }
+    }
+    else {
+        buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+    }
+    return buffer;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -68,6 +88,8 @@
 - (void)viewDidAppear {
     [super viewDidAppear];
     AppDelegate* delegate = [NSApp delegate];
+    _project = [delegate currentProject];
+    
     CEESessionPort* activedPort = [[[delegate currentProject] currentSession] activedPort];
     _symbols = activedPort.context;
     
@@ -113,7 +135,8 @@
         return;
     CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)_symbolTable.selectedRow);
     NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-    CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+    CEESourceBuffer* buffer = [self project:_project securityCreateSourceBufferWithFilePath:filePath];
+    
     cee_source_buffer_parse(buffer, 0);
     [_editViewController setBuffer:buffer];
     CEEList* ranges = cee_ranges_from_string(symbol->locations);

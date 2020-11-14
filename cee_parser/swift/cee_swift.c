@@ -645,7 +645,7 @@ static void statement_parse(SwiftParser* parser)
 {
     CEESourceFregment* current = parser->statement_current;
     
-    if (!current || !current->tokens)
+    if (!current || !current->tokens_ref)
         return;
         
     return;

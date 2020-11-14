@@ -38,22 +38,22 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
     CEESourceFregment* statement = NULL;
     CEESourceFregment* prep_directive = NULL;
     CEESourceFregment* comment = NULL;
-    CEEList* tokens_ref = NULL;
+    CEEList* tokens = NULL;
     CEESourceTokenMap* source_token_map = NULL;
     
     //m0 = cee_timestamp_ms();
     // parse buffer begin
     if (buffer.comment)
         cee_source_fregment_free_full(buffer.comment);
-
+    
     if (buffer.prep_directive)
         cee_source_fregment_free_full(buffer.prep_directive);
     
     if (buffer.statement)
         cee_source_fregment_free_full(buffer.statement);
-    
-    if (buffer.tokens_ref)
-        cee_list_free(buffer.tokens_ref);
+        
+    if (buffer.tokens)
+        cee_list_free_full(buffer.tokens, cee_token_free);
     
     if (buffer.source_token_map)
         cee_source_token_map_free(buffer.source_token_map);
@@ -66,17 +66,17 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
     
     cee_source_symbol_parse(buffer.parser_ref,
                             (const cee_uchar*)[buffer.filePath UTF8String],
-                            subject, 
+                            subject,
                             &prep_directive,
-                            &statement, 
-                            &comment, 
-                            &tokens_ref, 
+                            &statement,
+                            &comment,
+                            &tokens,
                             &source_token_map);
     
     buffer.comment = comment;
     buffer.prep_directive = prep_directive;
     buffer.statement = statement;
-    buffer.tokens_ref = tokens_ref;
+    buffer.tokens = tokens;
     buffer.source_token_map = source_token_map;
     buffer.prep_directive_symbol_tree = 
         cee_source_fregment_symbol_tree_create(buffer.prep_directive);
@@ -102,6 +102,9 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
         buffer.symbol_wrappers = wrappers;
         // symbol wrappers create end
     }
+    //NSLog(@"+ source_fregment_count: %d", cee_source_fregment_count_get());
+    //NSLog(@"+ source_symbol_count: %d", cee_source_symbol_count_get());
+    //NSLog(@"+ cee_tree_count_get: %d", cee_tree_count_get());
 }
 
 static void text_buffer_modified(cee_pointer buffer, 
@@ -159,6 +162,9 @@ static void binary_buffer_modified(cee_pointer buffer,
         cee_uchar* content = NULL;
         cee_file_contents_get([_filePath UTF8String], &content, &length);
         
+        if (!content)
+            return nil;
+        
         if (cee_codec_encoding_utf8(content, length)) {
             _encodeType = kCEEBufferEncodeTypeUTF8;
             _storage = cee_text_storage_create((__bridge cee_pointer)self,
@@ -176,6 +182,7 @@ static void binary_buffer_modified(cee_pointer buffer,
         
         cee_free(content);
     }
+    
     _fileLastModifiedDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];
     return self;
 }
@@ -190,8 +197,8 @@ static void binary_buffer_modified(cee_pointer buffer,
     if (_statement)
         cee_source_fregment_free_full(_statement);
     
-    if (_tokens_ref)
-        cee_list_free(_tokens_ref);
+    if (_tokens)
+        cee_list_free_full(_tokens, cee_token_free);
     
     if (_source_token_map)
         cee_source_token_map_free(_source_token_map);
@@ -213,6 +220,10 @@ static void binary_buffer_modified(cee_pointer buffer,
         else
             assert(0);
     }
+    
+    //NSLog(@"- cee_tree_count_get: %d", cee_tree_count_get());
+    //NSLog(@"- source_symbol_count: %d", cee_source_symbol_count_get());
+    //NSLog(@"- source_fregment_count: %d", cee_source_fregment_count_get());
 }
 
 - (void)setState:(CEESourceBufferState)state {

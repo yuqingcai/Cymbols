@@ -41,6 +41,25 @@
 
 @implementation CEEProjectSearchViewController
 
+- (CEESourceBuffer*)project:(CEEProject*)project securityCreateSourceBufferWithFilePath:(NSString*)filePath {
+    if (!project || !filePath)
+        return nil;
+    
+    CEESourceBuffer* buffer = nil;
+    if (access([filePath UTF8String], R_OK) != 0) {
+        NSArray* bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
+        if (bookmarks) {
+            [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
+            buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+            [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
+        }
+    }
+    else {
+        buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+    }
+    return buffer;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -139,7 +158,7 @@
         for (int i = 0; i < filePaths.count; i ++) {
             __block NSString* filePath = filePaths[i];
             CEEList* references = NULL;
-            CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+            CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
             const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
             CEERange range = cee_range_make(0, cee_text_storage_size_get(buffer.storage));
             cee_source_buffer_parse(buffer, 0);
@@ -208,7 +227,7 @@
         
         for (int i = 0; i < filePaths.count; i ++) {
             NSString* filePath = filePaths[i];
-            CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+            CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
             const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
             CEEList* ranges = cee_regex_search((const cee_char*)subject,
                                                [self->_project.searcher.target UTF8String],
@@ -282,7 +301,7 @@
         
         for (int i = 0; i < filePaths.count; i ++) {
             NSString* filePath = filePaths[i];
-            CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+            CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
             const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
             CEEList* ranges = cee_str_search((const cee_char*)subject,
                                              [self->_project.searcher.target UTF8String],
@@ -524,7 +543,7 @@
         return;
     
     CEESearchResult* result = _project.searcher.results[_resultTable.selectedRow ];
-    CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:result.filePath];
+    CEESourceBuffer* buffer = [self project:_project securityCreateSourceBufferWithFilePath:result.filePath];
     cee_source_buffer_parse(buffer, 0);
     [_editViewController setBuffer:buffer];
     CEEList* ranges = cee_ranges_from_string([result.locations UTF8String]);

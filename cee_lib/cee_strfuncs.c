@@ -143,7 +143,6 @@ void cee_strconcat0(cee_char** string0, ...)
     va_end(args);
     l += 1; /* '\0' terminator */
     
-    
     append = cee_malloc(sizeof(cee_char)*l);
     ptr = append;
     
@@ -154,10 +153,10 @@ void cee_strconcat0(cee_char** string0, ...)
         s = va_arg(args, cee_char*);
     }
     va_end(args);
-    
-    
-    if (!*string0)
+        
+    if (!*string0) {
         *string0 = append;
+    }
     else {
         cee_char* string = cee_strconcat(*string0, append, NULL);
         cee_free(append);
@@ -423,6 +422,9 @@ static cee_int strcmp_insensitive(const cee_char* string1,
 {
     cee_int c1 = 0, c2 = 0;
     
+    if (!string1 || !string2)
+        return 0;
+    
     while (*string1 && *string2) {
         c1 = (cee_int)(cee_char)TO_UPPER_LETTER(*string1);
         c2 = (cee_int)(cee_char)TO_UPPER_LETTER(*string2);
@@ -444,9 +446,12 @@ static cee_int strcmp_insensitive(const cee_char* string1,
     return 0;
 }
 
-static cee_int strcmp_sensitive(const cee_char *string1,
-                                const cee_char *string2)
+static cee_int strcmp_sensitive(const cee_char* string1,
+                                const cee_char* string2)
 {
+    if (!string1 || !string2)
+        return 0;
+    
     cee_int c1 = 0, c2 = 0;
     
     while (*string1 && *string2) {

@@ -73,6 +73,7 @@ typedef enum _JavaMethodDefinitionTranslateState {
     kJavaMethodDefinitionTranslateStateAnnotationListEnd, 
     kJavaMethodDefinitionTranslateStateThrows, 
     kJavaMethodDefinitionTranslateStateException, 
+    kJavaMethodDefinitionTranslateStateExceptionSeparator, 
     kJavaMethodDefinitionTranslateStateTypeParameters,
     kJavaMethodDefinitionTranslateStateCommit, 
     kJavaMethodDefinitionTranslateStateError, 
@@ -109,14 +110,41 @@ typedef enum _JavaDeclarationTranslateState {
     kJavaDeclarationTranslateStateAnnotation, 
     kJavaDeclarationTranslateStateAnnotationList, 
     kJavaDeclarationTranslateStateAnnotationListEnd, 
-    kJavaDeclarationTranslateStateThrows, 
     kJavaDeclarationTranslateStateDefault, 
     kJavaDeclarationTranslateStateCommit, 
     kJavaDeclarationTranslateStateTypeInit, 
     kJavaDeclarationTranslateStateTypeParameters, 
+    kJavaDeclarationTranslateStateThrows, 
+    kJavaDeclarationTranslateStateException, 
+    kJavaDeclarationTranslateStateExceptionSeparator, 
     kJavaDeclarationTranslateStateError, 
     kJavaDeclarationTranslateStateMax, 
 } JavaDeclarationTranslateState;
+
+typedef enum _JavaImportStatementTranslateState {
+    kJavaImportStatementTranslateStateInit = 0, 
+    kJavaImportStatementTranslateStateImport, 
+    kJavaImportStatementTranslateStateIdentifier, 
+    kJavaImportStatementTranslateStateIdentifierSeparator, 
+    kJavaImportStatementTranslateStateDemand, 
+    kJavaImportStatementTranslateStateCommit, 
+    kJavaImportStatementTranslateStateError, 
+    kJavaImportStatementTranslateStateMax, 
+} JavaImportStatementTranslateState;
+
+
+typedef enum _JavaPackageStatementTranslateState {
+    kJavaPackageStatementTranslateStateInit = 0,
+    kJavaPackageStatementTranslateStatePackage,
+    kJavaPackageStatementTranslateStateAnnotation,
+    kJavaPackageStatementTranslateStateAnnotationList,
+    kJavaPackageStatementTranslateStateAnnotationListEnd,
+    kJavaPackageStatementTranslateStateIdentifier,
+    kJavaPackageStatementTranslateStateIdentifierSeparator,
+    kJavaPackageStatementTranslateStateCommit,
+    kJavaPackageStatementTranslateStateError,
+    kJavaPackageStatementTranslateStateMax,
+} JavaPackageStatementTranslateState;
 
 typedef cee_boolean (*ParseTrap)(CEESourceFregment*, 
                                  CEEList**);
@@ -138,6 +166,8 @@ static cee_short java_enum_definition_translate_table[kJavaEnumDefinitionTransla
 static cee_short java_method_definition_translate_table[kJavaMethodDefinitionTranslateStateMax][CEETokenID_MAX];
 static cee_short java_method_parameters_declaration_translate_table[kJavaMethodParametersDeclarationTranslateStateMax][CEETokenID_MAX];
 static cee_short java_declaration_translate_table[kJavaDeclarationTranslateStateMax][CEETokenID_MAX];
+static cee_short java_import_statement_translate_table[kJavaImportStatementTranslateStateMax][CEETokenID_MAX];
+static cee_short java_package_statement_translate_table[kJavaPackageStatementTranslateStateMax][CEETokenID_MAX];
 
 static CEETokenIdentifierType java_token_identifier_type_map[CEETokenID_MAX];
 
@@ -207,13 +237,17 @@ static void statement_parse(JavaParser* parser);
 static void java_declaration_translate_table_init(void);
 static cee_boolean java_declaration_parse(CEESourceFregment* fregment);
 static CEEList* skip_java_declaration_interval(CEEList* p);
-static CEESourceSymbol* java_declaration_method_create(CEESourceFregment* fregment,
+static CEESourceSymbol* java_method_declaration_create(CEESourceFregment* fregment,
                                                        const cee_char* type_str,
                                                        CEEList* parameter_list,
                                                        CEEList* throws);
-static CEESourceSymbol* java_declaration_identifier_create(CEESourceFregment* fregment,
+static CEESourceSymbol* java_identifier_declaration_create(CEESourceFregment* fregment,
                                                            const cee_char* type_str,
                                                            CEEList* identifier);
+static void java_import_statement_translate_table_init(void);
+static cee_boolean java_import_statement_parse(CEESourceFregment* fregment);
+static void java_package_statement_translate_table_init(void);
+static cee_boolean java_package_statement_parse(CEESourceFregment* fregment);
 static cee_boolean statement_reduce(JavaParser* parser);
 static cee_boolean statement_attach(JavaParser* parser,
                                     CEESourceFregmentType type);
@@ -293,6 +327,8 @@ CEESourceParserRef cee_java_parser_create(const cee_char* identifier)
     java_method_definition_translate_table_init();
     java_method_parameters_declaration_translate_table_init();
     java_declaration_translate_table_init();
+    java_import_statement_translate_table_init();
+    java_package_statement_translate_table_init();
     
     parser->imp = java;
     
@@ -586,7 +622,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
     } while(1);
     
-    //cee_source_fregment_tree_string_print(parser->statement_root);
+    cee_source_fregment_tree_symbols_parent_parse(parser->statement_root);
     
     *statement = parser->statement_root;
     *prep_directive = NULL;
@@ -732,7 +768,7 @@ static CEESourceFregment* java_referernce_fregment_convert(CEESourceFregment* fr
                     break;
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
             }
-            else if (token->identifier == '[') {   /** @[ */
+            else if (token->identifier == '[') {
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
                 current = cee_source_fregment_push(current,
                                                    kCEESourceFregmentTypeSquareBracketList,
@@ -795,7 +831,7 @@ static void java_reference_fregment_parse(const cee_uchar* filepath,
         if (cee_source_fregment_tokens_pattern_match(fregment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
             p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
-            type = kCEESourceReferenceTypeMember;
+            type = kCEESourceReferenceTypeUnknow;
         }
         else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_IDENTIFIER, NULL)) {
             /** catch any other identifier */
@@ -811,9 +847,6 @@ static void java_reference_fregment_parse(const cee_uchar* filepath,
                                                            subject,
                                                            sub,
                                                            type);
-            
-            cee_source_symbol_reference_print(reference);
-            
             *references = cee_list_prepend(*references, reference);
             type = kCEESourceReferenceTypeUnknow;
             reference = NULL;
@@ -837,7 +870,7 @@ static void java_reference_fregment_parse(const cee_uchar* filepath,
 static void symbol_parse_init(JavaParser* parser,
                               const cee_uchar* filepath,
                               const cee_uchar* subject)
-{    
+{
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
     
@@ -881,7 +914,9 @@ static void symbol_parse_clear(JavaParser* parser)
     parser->comment_root = NULL;
     parser->comment_current = NULL;
 }
-
+/**
+ *  comment
+ */
 static cee_boolean token_is_comment(CEEToken* token)
 {
     return token->identifier == kCEETokenID_LINES_COMMENT ||
@@ -926,6 +961,9 @@ static cee_boolean comment_attach(JavaParser* parser)
     return TRUE;
 }
 
+/**
+ *  statement
+ */
 static cee_boolean statement_token_push(JavaParser* parser,
                                         CEEToken* push)
 {
@@ -944,7 +982,7 @@ static void block_header_parse(JavaParser* parser)
     CEEList* p = NULL;
     ParseTrap trap = NULL;
     
-    if (!current || !current->tokens)
+    if (!current || !current->tokens_ref)
         return;
     
     if (java_method_definition_parse(current))
@@ -993,19 +1031,18 @@ static void block_parse(JavaParser* parser)
     const cee_uchar* subject = parser->subject_ref;
     const cee_uchar* filepath = current->filepath_ref;
     
-    if (!current || !current->tokens)
+    if (!current || !current->tokens_ref)
         return;
     
     /** enumerators parse */
     if (cee_source_fregment_grandfather_type_is(current, kCEESourceFregmentTypeEnumDefinition)) {
         CEEList* enumerators = NULL;
-        enumerators = enumerators_extract(current->tokens, filepath, subject);
+        enumerators = enumerators_extract(current->tokens_ref, filepath, subject);
         if (enumerators) {
             current->symbols = cee_list_concat(current->symbols, enumerators);
             cee_source_fregment_type_set(current, kCEESourceFregmentTypeEnumurators);
         }
     }
-    
 }
 
 static cee_boolean statement_pop(JavaParser* parser)
@@ -1037,7 +1074,7 @@ static void label_parse(JavaParser* parser)
     CEESourceSymbol* declaration = NULL;
         
     fregment = parser->statement_current;
-    if (!fregment || !fregment->tokens)
+    if (!fregment || !fregment->tokens_ref)
         return;
     
     if (!cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeFunctionDefinition) &&
@@ -1096,24 +1133,15 @@ static cee_boolean label_reduce(JavaParser* parser)
  */
 static void statement_parse(JavaParser* parser)
 {
-    CEESourceFregment* current = parser->statement_current;
-    const cee_uchar* subject = parser->subject_ref;
-    const cee_uchar* filepath = current->filepath_ref;
-    
-    if (!current || !current->tokens)
+    CEESourceFregment* current = parser->statement_current;    
+    if (!current || !current->tokens_ref)
         return;
     
-    /** enumerators parse */
-    if (cee_source_fregment_grandfather_type_is(current, kCEESourceFregmentTypeEnumDefinition)) {
-        CEEList* enumerators = NULL;
-        enumerators = enumerators_extract(current->tokens, filepath, subject);
-        if (enumerators) {
-            current->symbols = cee_list_concat(current->symbols, enumerators);
-            cee_source_fregment_type_set(current, kCEESourceFregmentTypeEnumurators);
-        }
-    }
-    
     if (java_declaration_parse(current))
+        return;
+    else if (java_import_statement_parse(current))
+        return;
+    else if (java_package_statement_parse(current))
         return;
     
     return;
@@ -1178,23 +1206,25 @@ static void java_declaration_translate_table_init(void)
      *  BuiltinType             DeclarationSpecifier        BuiltinType         Identifier          Error                   Error                   *TypeParameters     Annotation          Error           Error       Error           Error               BuiltinType         BuiltinType         Error       Error
      *  CustomType              Error                       Error               Identifier          Error                   CustomTypeSeparator     *TypeParameters     Annotation          Error           Error       Structor        Error               CustomType          CustomType          Error       Error
      *  Structor                Error                       Error               Error               Error                   Error                   Error               Error               Error           Error       Error           StructorEnd         Error               Error               Error       Error
-     *  StructorEnd             Error                       Error               Error               Error                   Error                   *TypeParameters     Error               *Throws         Commit      Error           Error               Error               Error               Error       Commit
+     *  StructorEnd             Error                       Error               Error               Error                   Error                   *TypeParameters     Error               Throws          Commit      Error           Error               Error               Error               Error       Commit
      *  Identifier              Error                       Error               Error               Commit                  Error                   Error               Error               Error           Commit      ParameterList   Error               Identifier          Identifier          Error       Commit
      *  CustomTypeSeparator     Error                       Error               CustomType          Error                   Error                   Error               Error               Error           Error       Error           Error               Error               Error               Error       Error
      *  ParameterList           Error                       Error               Error               Error                   Error                   Error               Error               Error           Error       Error           ParameterListEnd    Error               Error               Error       Error
-     *  ParameterListEnd        Error                       Error               Error               Error                   Error                   Error               Annotation          *Throws         Commit      Error           Error               Error               Error               *Default    Commit
-     *  Annotation              DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          *Throws         Commit      AnnotationList  Error               Annotation          Annotation          *Default    Commit
+     *  ParameterListEnd        Error                       Error               Error               Error                   Error                   Error               Annotation          Throws          Commit      Error           Error               Error               Error               *Default    Commit
+     *  Annotation              DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          Throws          Commit      AnnotationList  Error               Annotation          Annotation          *Default    Commit
      *  AnnotationList          Error                       Error               Error               Error                   Error                   Error               Error               Error           Error       Error           AnnotationListEnd   Error               Error               Error       Error
-     *  AnnotationListEnd       DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          *Throws         Commit      Error           Error               AnnotationListEnd   AnnotationListEnd   *Default    Commit
+     *  AnnotationListEnd       DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          Throws          Commit      Error           Error               AnnotationListEnd   AnnotationListEnd   *Default    Commit
      *  TypeInit                Error                       Error               Identifier          Error                   Error                   Error               Error               Error           Error       Error           Error               Error               Error               Error       Error
-     *  Commit
+     *  Throws                  Error                       Error               Exception           Error                   Error                   Error               Error               Error           Error       Error           Error               Error               Error               Error       Error
+     *  Exception               Error                       Error               Exception           Error                   ExceptionSeparator      *TypeParameters     Error               Error           Exception   Error           Error               Error               Error               Error       Commit
+     *  ExceptionSeparator      Error                       Error               Exception           Error                   Error                   Error               Error               Error           Error       Error           Error               Error               Error               Error       Error
      *  
      *  TypeParameters: save 'current state', skip TypeParameterList then restore 'current state'  
      *  Default: skip to Terminate
      *  Throws: skip to Terminate
      *  
-     */
-    
+     */ 
+
     TRANSLATE_STATE_INI(java_declaration_translate_table, kJavaDeclarationTranslateStateMax                     , kJavaDeclarationTranslateStateError                                                               );
     TRANSLATE_FUNCS_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateInit                    , token_id_is_declaration_specifier         , kJavaDeclarationTranslateStateDeclarationSpecifier    );
     TRANSLATE_FUNCS_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateInit                    , token_id_is_builtin_type                  , kJavaDeclarationTranslateStateBuiltinType             );
@@ -1263,7 +1293,13 @@ static void java_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateAnnotationListEnd       , kCEETokenID_DEFAULT                       , kJavaDeclarationTranslateStateDefault                 );
     TRANSLATE_STATE_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateAnnotationListEnd       , ';'                                       , kJavaDeclarationTranslateStateCommit                  );
     TRANSLATE_STATE_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateTypeInit                , kCEETokenID_IDENTIFIER                    , kJavaDeclarationTranslateStateIdentifier              );
-    
+    TRANSLATE_STATE_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateThrows                  , kCEETokenID_IDENTIFIER                    , kJavaDeclarationTranslateStateException               );
+    TRANSLATE_STATE_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateException               , '.'                                       , kJavaDeclarationTranslateStateExceptionSeparator      );
+    TRANSLATE_STATE_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateException               , '<'                                       , kJavaDeclarationTranslateStateTypeParameters          );
+    TRANSLATE_STATE_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateException               , kCEETokenID_IDENTIFIER                    , kJavaDeclarationTranslateStateException               );
+    TRANSLATE_STATE_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateException               , ','                                       , kJavaDeclarationTranslateStateException               );
+    TRANSLATE_STATE_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateException               , ';'                                       , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table, kJavaDeclarationTranslateStateExceptionSeparator      , kCEETokenID_IDENTIFIER                    , kJavaDeclarationTranslateStateException               );
 }
 
 static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
@@ -1287,13 +1323,13 @@ static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
     
     grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
     if (grandfather_fregment) {
-        if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeClassDefinition))
+        if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition))
             parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
                                                                         kCEESourceSymbolTypeClassDefinition);
-        else if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeInterfaceDeclaration))
+        else if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDeclaration))
             parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment, 
                                                                         kCEESourceSymbolTypeInterfaceDeclaration);
-        else if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition)) {
+        else if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeEnumDefinition)) {
             parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment, 
                                                                         kCEESourceSymbolTypeEnumDefinition);
         }
@@ -1304,12 +1340,6 @@ static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
         }
     }
     
-    if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeClassDefinition) ||
-        cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeInterfaceDeclaration) ||
-        cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition)) {
-        
-    }
-        
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
@@ -1353,8 +1383,11 @@ static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
                 cee_token_is_identifier(p, ')'))
                 parameter_list_end = p;
         }
+        else if (current == kJavaDeclarationTranslateStateThrows) {
+            if (cee_token_is_identifier(p, kCEETokenID_THROWS))
+                throws = p;
+        }
         else if (current == kJavaDeclarationTranslateStateDefault || 
-                 current == kJavaDeclarationTranslateStateThrows || 
                  current == kJavaDeclarationTranslateStateCommit) {
             
             if (!type) {
@@ -1372,32 +1405,35 @@ static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
                         type = cee_strdup(parent_symbol->name);
                 } 
             }
-                            
-            if (cee_token_is_identifier(p, kCEETokenID_THROWS))
-                throws = p;
-                                    
+                                                
             if (parameter_list) {
-                declaration = java_declaration_method_create(fregment, 
+                declaration = java_method_declaration_create(fregment, 
                                                              type, 
                                                              parameter_list, 
                                                              throws);
-                //cee_source_symbol_print(declaration);
             }
             else if (identifier) {
-                declaration = java_declaration_identifier_create(fregment,
+                declaration = java_identifier_declaration_create(fregment,
                                                                  type,
                                                                  identifier);
-                //cee_source_symbol_print(declaration);
             }
-            
-            if (declaration)
+                        
+            if (declaration) {
+                /** Java enumerator can be a constructor, set these symbols to be an enumerator explicitly */
+                if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeEnumDefinition))
+                    declaration->type = kCEESourceSymbolTypeEnumerator;
+                
                 declarations = cee_list_prepend(declarations, declaration);
+            }
             
             declaration = NULL;
             identifier = NULL;
             parameter_list = NULL;
             parameter_list_end = NULL;
             throws = NULL;
+            
+            if (current == kJavaDeclarationTranslateStateDefault)
+                break;
             
             if (!cee_token_is_identifier(p, ',') &&
                 !cee_token_is_identifier(p, ';')) {
@@ -1449,7 +1485,7 @@ static CEEList* skip_java_declaration_interval(CEEList* p)
     return NULL;
 }
 
-static CEESourceSymbol* java_declaration_method_create(CEESourceFregment* fregment,
+static CEESourceSymbol* java_method_declaration_create(CEESourceFregment* fregment,
                                                        const cee_char* type_str,
                                                        CEEList* parameter_list,
                                                        CEEList* throws)
@@ -1488,9 +1524,9 @@ static CEESourceSymbol* java_declaration_method_create(CEESourceFregment* fregme
     return declaration;
 }
 
-static CEESourceSymbol* java_declaration_identifier_create(CEESourceFregment* fregment,
-                                                         const cee_char* type_str,
-                                                         CEEList* identifier)
+static CEESourceSymbol* java_identifier_declaration_create(CEESourceFregment* fregment,
+                                                           const cee_char* type_str,
+                                                           CEEList* identifier)
 {
     CEESourceSymbol* declaration = NULL;
     declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
@@ -1506,6 +1542,166 @@ static CEESourceSymbol* java_declaration_identifier_create(CEESourceFregment* fr
                                identifier, 
                                kCEETokenStateSymbolOccupied);
     return declaration;
+}
+
+
+static void java_import_statement_translate_table_init(void)
+{
+    /**
+     *                              import      static      Identifier      .                       *       ;
+     *  Init                        Import      Error       Error           Error                   Error   Error
+     *  Import                      Error       Import      Identifier      Error                   Error   Commit
+     *  Identifier                  Error       Error       Error           IdentifierSeparator     Error   Commit
+     *  IdentifierSeparator         Error       Error       Identifier      Error                   Demand  Error
+     *  Demand                      Error       Error       Error           Error                   Error   Commit
+     */
+    TRANSLATE_STATE_INI(java_import_statement_translate_table, kJavaImportStatementTranslateStateMax                    , kJavaImportStatementTranslateStateError                                               );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateInit                   , kCEETokenID_IMPORT            , kJavaImportStatementTranslateStateImport              );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateImport                 , kCEETokenID_STATIC            , kJavaImportStatementTranslateStateImport              );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateImport                 , kCEETokenID_IDENTIFIER        , kJavaImportStatementTranslateStateIdentifier          );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateImport                 , ';'                           , kJavaImportStatementTranslateStateCommit              );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateIdentifier             , '.'                           , kJavaImportStatementTranslateStateIdentifierSeparator );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateIdentifier             , ';'                           , kJavaImportStatementTranslateStateCommit              );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateIdentifierSeparator    , kCEETokenID_IDENTIFIER        , kJavaImportStatementTranslateStateIdentifier          );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateIdentifierSeparator    , '*'                           , kJavaImportStatementTranslateStateDemand              );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateDemand                 , ';'                           , kJavaImportStatementTranslateStateCommit              );
+}
+
+static cee_boolean java_import_statement_parse(CEESourceFregment* fregment)
+{
+    cee_boolean ret = FALSE;
+    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    JavaImportStatementTranslateState current = kJavaImportStatementTranslateStateInit;
+    JavaImportStatementTranslateState prev = kJavaImportStatementTranslateStateInit;
+    CEEToken* token = NULL;
+    CEESourceSymbol* import = NULL;
+    CEEList* r = NULL;
+    CEEList* s = NULL;
+    
+    while (p) {
+        token = p->data;
+        
+        prev = current;
+        current = java_import_statement_translate_table[current][token->identifier];
+        
+        if (current == kJavaImportStatementTranslateStateError) {
+            break;
+        }
+        else if (current == kJavaImportStatementTranslateStateCommit) {
+            if (cee_token_is_identifier(p, ';'))
+                s = TOKEN_PREV(p);
+            break;
+        }
+        else if (current == kJavaImportStatementTranslateStateImport) {
+            if (cee_token_is_identifier(p, kCEETokenID_IMPORT))
+                r = p;
+        }
+        p = TOKEN_NEXT(p);
+    }
+    
+    if (current != kJavaImportStatementTranslateStateCommit)
+        goto exit;
+    
+    import = cee_source_symbol_create_from_token_slice(fregment->filepath_ref, 
+                                                       fregment->subject_ref, 
+                                                       r, 
+                                                       s, 
+                                                       kCEESourceSymbolTypeImport, 
+                                                       "java");
+    if (import) {
+        cee_source_symbol_name_format(import->name);
+        fregment->symbols = cee_list_prepend(fregment->symbols, import);
+        cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeImportStatement);   
+        ret = TRUE;
+    }
+    
+#ifdef DEBUG_IMPORT
+    cee_source_symbol_print(import);
+#endif
+    
+exit:
+    return ret;
+}
+
+static void java_package_statement_translate_table_init(void)
+{
+    /**
+     *                          package         annotation      identifier      .                       (               )                   ;
+     *  Init                    Package         Annotation      Error           Error                   Error           Error               Error
+     *  Package                 Error           Error           Identifier      Error                   Error           Error               Error
+     *  Annotation              Package         Error           Error           Error                   AnnotationList  Error               Error
+     *  AnnotationList          Error           Error           Error           Error                   Error           AnnotationListEnd   Error
+     *  AnnotationListEnd       Package         Error           Error           Error                   Error           Error               Error  
+     *  Identifier              Error           Error           Error           IdentifierSeparator     Error           Error               Commit
+     *  IdentifierSeparator     Error           Error           Identifier      Error                   Error           Error               Error
+     */
+    TRANSLATE_STATE_INI(java_package_statement_translate_table, kJavaPackageStatementTranslateStateMax                      , kJavaPackageStatementTranslateStateError                                                      );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateInit                     , kCEETokenID_PACKAGE               , kJavaPackageStatementTranslateStatePackage                );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateInit                     , kCEETokenID_ANNOTATION            , kJavaPackageStatementTranslateStateAnnotation             );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStatePackage                  , kCEETokenID_IDENTIFIER            , kJavaPackageStatementTranslateStateIdentifier             );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateAnnotation               , kCEETokenID_PACKAGE               , kJavaPackageStatementTranslateStatePackage                );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateAnnotation               , '('                               , kJavaPackageStatementTranslateStateAnnotationList         );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateAnnotationList           , ')'                               , kJavaPackageStatementTranslateStateAnnotationListEnd      );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateAnnotationListEnd        , kCEETokenID_PACKAGE               , kJavaPackageStatementTranslateStatePackage                );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateIdentifier               , '.'                               , kJavaPackageStatementTranslateStateIdentifierSeparator    );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateIdentifier               , ';'                               , kJavaPackageStatementTranslateStateCommit                 );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateIdentifierSeparator      , kCEETokenID_IDENTIFIER            , kJavaPackageStatementTranslateStateIdentifier             );
+}
+
+static cee_boolean java_package_statement_parse(CEESourceFregment* fregment)
+{
+    cee_boolean ret = FALSE;
+    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    JavaPackageStatementTranslateState current = kJavaPackageStatementTranslateStateInit;
+    JavaPackageStatementTranslateState prev = kJavaPackageStatementTranslateStateInit;
+    CEEToken* token = NULL;
+    CEESourceSymbol* package = NULL;
+    CEEList* r = NULL;
+    CEEList* s = NULL;
+    
+    while (p) {
+        token = p->data;
+        
+        prev = current;
+        current = java_package_statement_translate_table[current][token->identifier];
+        
+        if (current == kJavaPackageStatementTranslateStateError) {
+            break;
+        }
+        else if (current == kJavaPackageStatementTranslateStateCommit) {
+            if (cee_token_is_identifier(p, ';'))
+                s = TOKEN_PREV(p);
+            break;
+        }
+        else if (current == kJavaPackageStatementTranslateStatePackage) {
+            if (cee_token_is_identifier(p, kCEETokenID_PACKAGE))
+                r = p;
+        }
+        p = TOKEN_NEXT(p);
+    }
+    
+    if (current != kJavaPackageStatementTranslateStateCommit)
+        goto exit;
+    
+    package = cee_source_symbol_create_from_token_slice(fregment->filepath_ref, 
+                                                        fregment->subject_ref, 
+                                                        r, 
+                                                        s, 
+                                                        kCEESourceSymbolTypePackage, 
+                                                        "java");
+    if (package) {
+        cee_source_symbol_name_format(package->name);
+        fregment->symbols = cee_list_prepend(fregment->symbols, package);
+        cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypePackageStatement);   
+        ret = TRUE;
+    }
+    
+#ifdef DEBUG_IMPORT
+    cee_source_symbol_print(package);
+#endif
+    
+exit:
+    return ret;
 }
 
 /**
@@ -1700,16 +1896,16 @@ static cee_boolean java_class_definition_trap(CEESourceFregment* fregment,
     
     p = TOKEN_LAST(class_identifier);
     definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                           fregment->subject_ref, 
-                                                           p, 
-                                                           p, 
-                                                           kCEESourceSymbolTypeClassDefinition, 
+                                                           fregment->subject_ref,
+                                                           p,
+                                                           p,
+                                                           kCEESourceSymbolTypeClassDefinition,
                                                            "java");
     
     cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
     definition->derives = derives_str;
-    definition->proto = java_class_proto_descriptor_create(fregment, 
-                                                           definition, 
+    definition->proto = java_class_proto_descriptor_create(fregment,
+                                                           definition,
                                                            derives_str);
     fregment->symbols = cee_list_prepend(fregment->symbols, definition);
     cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeClassDefinition);    
@@ -1745,7 +1941,6 @@ exit:
         cee_free(superinterfaces_str);
     
     return ret;
-    
 }
 
 static void java_interface_definition_translate_table_init(void)
@@ -1872,8 +2067,8 @@ static cee_boolean java_interface_definition_trap(CEESourceFregment* fregment,
                                                            "java");
     cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
     definition->derives = derives_str;
-    definition->proto = java_class_proto_descriptor_create(fregment, 
-                                                           definition, 
+    definition->proto = java_class_proto_descriptor_create(fregment,
+                                                           definition,
                                                            derives_str);
     fregment->symbols = cee_list_prepend(fregment->symbols, definition);
     cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeInterfaceDeclaration);    
@@ -2034,7 +2229,7 @@ static cee_boolean java_enum_definition_trap(CEESourceFregment* fregment,
     cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeEnumDefinition);    
     
     *pp = NULL;
-        
+    
 #ifdef DEBUG_ENUM
     cee_source_symbol_print(definition);
 #endif
@@ -2187,14 +2382,13 @@ static cee_char* java_name_scope_list_string_create(CEEList* scopes,
         if (str) {
             cee_strconcat0(&scopes_str, str, NULL);
             if (p->prev)
-                cee_strconcat0(&scopes_str, ",", NULL);
+                cee_strconcat0(&scopes_str, " ", NULL);
             cee_free(str);
         }
         p = p->prev;
     }
     return scopes_str;
 }
-
 
 static cee_char* java_name_scope_create(CEEList* tokens,
                                         const cee_uchar* subject)
@@ -2246,19 +2440,19 @@ static void extendinterface_free(cee_pointer data)
 static void java_method_definition_translate_table_init(void)
 {
     /**
-     *                          declaration_specifier       builtin_type        identifier          .           <                   annotation          throws          ,           (               )                   [                       ]                   {
-     *  Init                    DeclarationSpecifier        BuiltinType         Identifier          Error       *TypeParameters     Annotation          Error           Error       Error           Error               Error                   Error               Error
-     *  DeclarationSpecifier    DeclarationSpecifier        BuiltinType         Identifier          Error       *TypeParameters     Annotation          Error           Error       Error           Error               Error                   Error               Error
-     *  BuiltinType             DeclarationSpecifier        BuiltinType         Identifier          Error       *TypeParameters     Annotation          Error           Error       Error           Error               BuiltinType             BuiltinType         Error
-     *  Identifier              Error                       Error               Identifier          Identifier  *TypeParameters     Annotation          Error           Error       ParameterList   Error               Identifier              Identifier          Error
-     *  ParameterList           Error                       Error               Error               Error       Error               Error               Error           Error       Error           ParameterListEnd    Error                   Error               Error
-     *  ParameterListEnd        Error                       Error               Error               Error       Error               Annotation          Throws          Error       Error           Error               ParameterListEnd        ParameterListEnd    Commit
-     *  Annotation              DeclarationSpecifier        BuiltinType         Identifier          Error       *TypeParameters     Annotation          Throws          Error       AnnotationList  Error               Annotation              Annotation          Commit
-     *  AnnotationList          Error                       Error               Error               Error       Error               Error               Error           Error       Error           AnnotationListEnd   Error                   Error               Error  
-     *  AnnotationListEnd       DeclarationSpecifier        BuiltinType         Identifier          Error       *TypeParameters     Annotation          Throws          Error       Error           Error               AnnotationListEnd       AnnotationListEnd   Commit
-     *  Throws                  Error                       Error               Exception           Error       Error               Error               Error           Error       Error           Error               Error                   Error               Error
-     *  Exception               Error                       Error               Exception           Exception   Error               Error               Error           Exception   Error           Error               Error                   Error               Commit
-     *  
+     *                          declaration_specifier       builtin_type        identifier          .                       <                   annotation          throws          ,           (               )                   [                       ]                   {
+     *  Init                    DeclarationSpecifier        BuiltinType         Identifier          Error                   *TypeParameters     Annotation          Error           Error       Error           Error               Error                   Error               Error
+     *  DeclarationSpecifier    DeclarationSpecifier        BuiltinType         Identifier          Error                   *TypeParameters     Annotation          Error           Error       Error           Error               Error                   Error               Error
+     *  BuiltinType             DeclarationSpecifier        BuiltinType         Identifier          Error                   *TypeParameters     Annotation          Error           Error       Error           Error               BuiltinType             BuiltinType         Error
+     *  Identifier              Error                       Error               Identifier          Identifier              *TypeParameters     Annotation          Error           Error       ParameterList   Error               Identifier              Identifier          Error
+     *  ParameterList           Error                       Error               Error               Error                   Error               Error               Error           Error       Error           ParameterListEnd    Error                   Error               Error
+     *  ParameterListEnd        Error                       Error               Error               Error                   Error               Annotation          Throws          Error       Error           Error               ParameterListEnd        ParameterListEnd    Commit
+     *  Annotation              DeclarationSpecifier        BuiltinType         Identifier          Error                   *TypeParameters     Annotation          Throws          Error       AnnotationList  Error               Annotation              Annotation          Commit
+     *  AnnotationList          Error                       Error               Error               Error                   Error               Error               Error           Error       Error           AnnotationListEnd   Error                   Error               Error  
+     *  AnnotationListEnd       DeclarationSpecifier        BuiltinType         Identifier          Error                   *TypeParameters     Annotation          Throws          Error       Error           Error               AnnotationListEnd       AnnotationListEnd   Commit
+     *  Throws                  Error                       Error               Exception           Error                   Error               Error               Error           Error       Error           Error               Error                   Error               Error
+     *  Exception               Error                       Error               Exception           ExceptionSeparator      *TypeParameters     Error               Error           Exception   Error           Error               Error                   Error               Commit
+     *  ExceptionSeparator      Error                       Error               Exception           Error                   Error               Error               Error           Error       Error           Error               Error                   Error               Error
      *  
      *  TypeParameters save 'current state', skip TypeParameterList then restore 'current state'
      *  
@@ -2316,9 +2510,11 @@ static void java_method_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotationListEnd    , '{'                                       , kJavaMethodDefinitionTranslateStateCommit                 );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateThrows               , kCEETokenID_IDENTIFIER                    , kJavaMethodDefinitionTranslateStateException              );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , kCEETokenID_IDENTIFIER                    , kJavaMethodDefinitionTranslateStateException              );
-    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , '.'                                       , kJavaMethodDefinitionTranslateStateException              );
+    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , '.'                                       , kJavaMethodDefinitionTranslateStateExceptionSeparator     );
+    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , '<'                                       , kJavaMethodDefinitionTranslateStateTypeParameters         );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , ','                                       , kJavaMethodDefinitionTranslateStateException              );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , '{'                                       , kJavaMethodDefinitionTranslateStateCommit                 );
+    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateExceptionSeparator   , kCEETokenID_IDENTIFIER                    , kJavaMethodDefinitionTranslateStateException              );
 }
 
 static cee_boolean java_method_definition_parse(CEESourceFregment* fregment)
@@ -2603,8 +2799,8 @@ static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregme
         
         /** find type descriptor */
         if (token_id_is_builtin_type(token->identifier) ||
-            token->identifier == kCEETokenID_IDENTIFIER ||
-            token->identifier == '.') {
+            cee_token_is_identifier(p, kCEETokenID_IDENTIFIER) ||
+            cee_token_is_identifier(p, '.')) {
             
             str = cee_strndup((cee_char*)&subject[token->offset], 
                               token->length);
@@ -2614,19 +2810,24 @@ static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregme
             }
             if (!found_type)
                 found_type = TRUE;
-        }
-        
-        /** find array descriptor */
-        if ((cee_token_is_identifier(p, '[') ||
-            cee_token_is_identifier(p, ']')) &&
-            found_type) {
+            
+        }   /** find array descriptor */
+        else if ((cee_token_is_identifier(p, '[') ||
+                  cee_token_is_identifier(p, ']')) &&
+                 found_type) {
+            
             str = cee_strndup((cee_char*)&subject[token->offset], 
                               token->length);
             if (str) {
                 cee_strconcat0(&protos, str, NULL);
                 cee_free(str);
             }
-        }    
+        }
+        else if (cee_token_is_identifier(p, '<')) {
+            p = skip_type_parameter_list(p, FALSE);
+            if (!p || (q && p == q))
+                break;
+        }
         
         if (q && p == q)
             break;
@@ -2658,8 +2859,6 @@ static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregme
     CEESourceSymbol* parent_symbol = NULL;
     CEESourceFregment* grandfather_fregment = NULL;   
     const cee_uchar* subject = fregment->subject_ref;
- 
-    
     
     if (method) {
         return_str = java_type_descriptor_from_token_slice(fregment, 
@@ -2700,11 +2899,14 @@ static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregme
             CEEToken* token = p->data;
             if (token->identifier == kCEETokenID_IDENTIFIER ||
                 token->identifier == '.') {
-                
                 TOKEN_APPEND(exception, token);
             }
+            else if (token->identifier == '<') {
+                p = skip_type_parameter_list(p, FALSE);
+                if (!p)
+                    break;
+            }
             else if (token->identifier == ',') {
-                
                 if (exception) {
                     exceptions = cee_list_prepend(exceptions, exception);
                     exception = NULL;
@@ -2760,8 +2962,7 @@ static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregme
     
     if (exceptions_str)
         free(exceptions_str);
-    
-    
+        
     if (exception)
         cee_list_free(exception);
     
@@ -2770,7 +2971,6 @@ static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregme
     
     return descriptor;
 }
-
 
 static cee_char* java_method_declaration_protos_descriptor_create(CEESourceFregment* fregment,
                                                                   CEESourceSymbol* definition,
@@ -2792,18 +2992,24 @@ static cee_char* java_method_declaration_protos_descriptor_create(CEESourceFregm
         p = TOKEN_NEXT(throws);
         while (p) {
             CEEToken* token = p->data;
+            
             if (token->identifier == kCEETokenID_IDENTIFIER ||
                 token->identifier == '.') {
-                
                 TOKEN_APPEND(exception, token);
             }
             else if (token->identifier == ',' ||
-                     token->identifier == ';') {
+                token->identifier == ';') {
                 if (exception) {
                     exceptions = cee_list_prepend(exceptions, exception);
                     exception = NULL;
                 }
             }
+            else if (token->identifier == '<') {
+                p = skip_type_parameter_list(p, FALSE);
+                if (!p)
+                    break;
+            }
+            
             p = TOKEN_NEXT(p);
         }
     }

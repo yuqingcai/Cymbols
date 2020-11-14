@@ -178,27 +178,6 @@ BOOL ContextContainSymbol(CEEList* context,
 
 @end
 
-@implementation CEESecurityBookmark
-
-- (instancetype)initWithFilePath:(NSString*)filePath {
-    self = [super init];
-    
-    if (!self)
-        return nil;
-    
-    self.filePath = filePath;
-    NSURL* fileURL = [NSURL fileURLWithPath:filePath];
-    NSError* error = nil;
-    NSData* bookmarkData = [fileURL bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope includingResourceValuesForKeys:nil relativeToURL:nil error:&error];
-    
-    if (!error)
-        self.content = [bookmarkData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-    
-    return self;
-}
-
-@end
-
 @interface CEESessionPort()
 @property NSInteger bufferReferenceIndex;
 @end
@@ -1157,7 +1136,7 @@ BOOL ContextContainSymbol(CEEList* context,
     // save User Selected File Path Bookmark
     NSArray* bookmarks = CreateBookmarksWithFilePaths(properties.filePathsUserSelected);
     for (CEESecurityBookmark* bookmark in bookmarks) {
-        cee_database_security_bookmark_append(_database, 
+        cee_database_security_bookmark_append(_database,
                                               [bookmark.filePath UTF8String], 
                                               [bookmark.content UTF8String]);
     }

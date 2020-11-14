@@ -53,6 +53,7 @@ typedef enum _CEETagType {
     kCEETagTypeNamespaceReference,
     kCEETagTypeLabelReference,
     kCEETagTypeAnnotation,
+    kCEETagTypeRegisgerName,
     
     /** HTML & XML */
     kCEETagTypeXMLTag,

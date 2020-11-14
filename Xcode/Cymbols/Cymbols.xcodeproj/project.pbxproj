@@ -268,7 +268,10 @@
 		2693B21C2530015200D21FD3 /* Cymbols.cfg in Resources */ = {isa = PBXBuildFile; fileRef = 2693B21B2530015200D21FD3 /* Cymbols.cfg */; };
 		2693B227253001D700D21FD3 /* Styles in Resources */ = {isa = PBXBuildFile; fileRef = 2693B226253001D700D21FD3 /* Styles */; };
 		269F9657253DB22500D8808A /* CEESourcePoint.m in Sources */ = {isa = PBXBuildFile; fileRef = 269F9656253DB22500D8808A /* CEESourcePoint.m */; };
+		26A761E5255A8BB20032A06D /* icon_import_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A761E4255A8BB20032A06D /* icon_import_16x16@2x.png */; };
+		26A761E7255A8D420032A06D /* icon_package_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A761E6255A8D420032A06D /* icon_package_16x16@2x.png */; };
 		26BC7E7B2539301900AD8992 /* icon_alert_32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */; };
+		26DAE285255C0A16005C8A2D /* CEESecurityBookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DAE284255C0A16005C8A2D /* CEESecurityBookmark.m */; };
 		26DDED3F2547B6A500BD8246 /* cee_css.l in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3C2547B6A500BD8246 /* cee_css.l */; };
 		26DDED402547B6A500BD8246 /* cee_css.c in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3D2547B6A500BD8246 /* cee_css.c */; };
 		26DDED422547FC0800BD8246 /* icon_css_selector_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */; };
@@ -704,8 +707,12 @@
 		2693B226253001D700D21FD3 /* Styles */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Styles; path = ../../../../Resources/Styles; sourceTree = "<group>"; };
 		269F9655253DB22500D8808A /* CEESourcePoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEESourcePoint.h; sourceTree = "<group>"; };
 		269F9656253DB22500D8808A /* CEESourcePoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESourcePoint.m; sourceTree = "<group>"; };
+		26A761E4255A8BB20032A06D /* icon_import_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_import_16x16@2x.png"; sourceTree = "<group>"; };
+		26A761E6255A8D420032A06D /* icon_package_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_package_16x16@2x.png"; sourceTree = "<group>"; };
 		26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_alert_32x32@2x.png"; sourceTree = "<group>"; };
 		26CBE684252FECA20047771D /* Cymbols.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cymbols.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		26DAE283255C0A16005C8A2D /* CEESecurityBookmark.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEESecurityBookmark.h; sourceTree = "<group>"; };
+		26DAE284255C0A16005C8A2D /* CEESecurityBookmark.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESecurityBookmark.m; sourceTree = "<group>"; };
 		26DDED3C2547B6A500BD8246 /* cee_css.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_css.l; sourceTree = "<group>"; };
 		26DDED3D2547B6A500BD8246 /* cee_css.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_css.c; sourceTree = "<group>"; };
 		26DDED3E2547B6A500BD8246 /* cee_css.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_css.h; sourceTree = "<group>"; };
@@ -780,6 +787,8 @@
 				2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */,
 				269204D4252FF5BC00D6E2DC /* CEEProjectParseViewController.h */,
 				269204D8252FF5BC00D6E2DC /* CEEProjectParseViewController.m */,
+				26DAE283255C0A16005C8A2D /* CEESecurityBookmark.h */,
+				26DAE284255C0A16005C8A2D /* CEESecurityBookmark.m */,
 				269204CF252FF5BB00D6E2DC /* CEEProjectCleanViewController.h */,
 				269204D0252FF5BB00D6E2DC /* CEEProjectCleanViewController.m */,
 				269204D1252FF5BB00D6E2DC /* CEEProjectSearchViewController.h */,
@@ -931,12 +940,12 @@
 		269202A1252FF38300D6E2DC /* asm */ = {
 			isa = PBXGroup;
 			children = (
-				269202A2252FF38300D6E2DC /* cee_arm_asm.l */,
-				269202A3252FF38300D6E2DC /* cee_arm_asm.c */,
-				269202A4252FF38300D6E2DC /* cee_arm_asm.h */,
 				269202A5252FF38300D6E2DC /* cee_gnu_asm.l */,
 				269202A6252FF38300D6E2DC /* cee_gnu_asm.c */,
 				269202A7252FF38300D6E2DC /* cee_gnu_asm.h */,
+				269202A2252FF38300D6E2DC /* cee_arm_asm.l */,
+				269202A3252FF38300D6E2DC /* cee_arm_asm.c */,
+				269202A4252FF38300D6E2DC /* cee_arm_asm.h */,
 			);
 			path = asm;
 			sourceTree = "<group>";
@@ -1014,6 +1023,8 @@
 		269202E4252FF3E300D6E2DC /* 2x */ = {
 			isa = PBXGroup;
 			children = (
+				26A761E6255A8D420032A06D /* icon_package_16x16@2x.png */,
+				26A761E4255A8BB20032A06D /* icon_import_16x16@2x.png */,
 				264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */,
 				26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */,
 				260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */,
@@ -1422,6 +1433,7 @@
 				269203AB252FF3E400D6E2DC /* icon_template_declaration_16x16@2x.png in Resources */,
 				26920397252FF3E400D6E2DC /* icon_sand_clock_16x16@2x.png in Resources */,
 				2692050A252FF60300D6E2DC /* Editor.storyboard in Resources */,
+				26A761E5255A8BB20032A06D /* icon_import_16x16@2x.png in Resources */,
 				26920373252FF3E400D6E2DC /* icon_file_type_objective_c_16x16@2x.png in Resources */,
 				2692038A252FF3E400D6E2DC /* icon_open_file_16x16@2x.png in Resources */,
 				2647CE3925309A1700970FE4 /* WelcomeGuide in Resources */,
@@ -1477,6 +1489,7 @@
 				2693B21C2530015200D21FD3 /* Cymbols.cfg in Resources */,
 				2692038E252FF3E400D6E2DC /* icon_prep_directive_define_16x16@2x.png in Resources */,
 				269203A5252FF3E400D6E2DC /* icon_split4_16x16@2x.png in Resources */,
+				26A761E7255A8D420032A06D /* icon_package_16x16@2x.png in Resources */,
 				2692037B252FF3E400D6E2DC /* icon_interface_declaration_16x16@2x.png in Resources */,
 				26920509252FF60300D6E2DC /* AutoComplete.storyboard in Resources */,
 				2692036C252FF3E400D6E2DC /* icon_file_type_cpp_16x16@2x.png in Resources */,
@@ -1622,6 +1635,7 @@
 				269204A2252FF52700D6E2DC /* CEEAddFileSelectionView.m in Sources */,
 				2692043A252FF4F400D6E2DC /* CEETextView.m in Sources */,
 				26920296252FF35600D6E2DC /* cee_mem.c in Sources */,
+				26DAE285255C0A16005C8A2D /* CEESecurityBookmark.m in Sources */,
 				26920492252FF51A00D6E2DC /* CEESessionToolbar.m in Sources */,
 				268376E025490C720066305C /* cee_swift.c in Sources */,
 				269204C2252FF55600D6E2DC /* CEESessionDescriptor.c in Sources */,
@@ -1919,6 +1933,7 @@
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				INFOPLIST_FILE = Cymbols/Info.plist;
 				INSTALL_PATH = /Applications;
