@@ -381,7 +381,13 @@ static cee_boolean statement_attach(CParser* parser,
 static cee_boolean statement_sub_attach(CParser* parser,
                                         CEESourceFregmentType type);
 static cee_boolean statement_pop(CParser* parser);
-static cee_boolean prep_directive_attach(CParser* parser);
+static cee_boolean prep_directive_attach(CParser* parser,
+                                         CEESourceFregmentType type);
+static cee_boolean prep_directive_sub_attach(CParser* parser,
+                                             CEESourceFregmentType type);
+static void prep_directive_branch_push(CParser* parser);
+static cee_boolean prep_directive_branch_pop(CParser* parser);
+static cee_boolean prep_directive_pop(CParser* parser);
 static cee_boolean comment_attach(CParser* parser);
 static cee_boolean prep_directive_terminated(CParser* parser);
 static cee_boolean statement_parsing(CParser* parser);
@@ -1007,15 +1013,16 @@ static cee_boolean prep_directive_terminated(CParser* parser)
     return FALSE;
 }
 
-static cee_boolean prep_directive_attach(CParser* parser)
+static cee_boolean prep_directive_attach(CParser* parser,
+                                         CEESourceFregmentType type)
 {
     CEESourceFregment* attached = NULL;
     
     if (!parser->prep_directive_current)
         return FALSE;
     
-    attached = cee_source_fregment_append(parser->prep_directive_current, 
-                                          kCEESourceFregmentTypePrepDirective, 
+    attached = cee_source_fregment_attach(parser->prep_directive_current,
+                                          type,
                                           parser->filepath_ref,
                                           parser->subject_ref,
                                           (const cee_uchar*)"c");
@@ -1023,6 +1030,52 @@ static cee_boolean prep_directive_attach(CParser* parser)
         return FALSE;
     
     parser->prep_directive_current = attached;
+    return TRUE;
+}
+
+
+static void prep_directive_branch_push(CParser* parser)
+{
+    prep_directive_sub_attach(parser, kCEESourceFregmentTypeSourceList);
+    prep_directive_sub_attach(parser, kCEESourceFregmentTypePrepDirective);
+}
+
+static cee_boolean prep_directive_sub_attach(CParser* parser,
+                                             CEESourceFregmentType type)
+{
+    CEESourceFregment* attached = NULL;
+    
+    if (!parser->prep_directive_current)
+        return FALSE;
+    
+    attached = cee_source_fregment_sub_attach(parser->prep_directive_current,
+                                              type,
+                                              parser->filepath_ref,
+                                              parser->subject_ref,
+                                              (const cee_uchar*)"c");
+    if (!attached)
+        return FALSE;
+    
+    parser->prep_directive_current = attached;
+    return TRUE;
+}
+
+static cee_boolean prep_directive_branch_pop(CParser* parser)
+{
+    if (prep_directive_pop(parser))
+        return prep_directive_pop(parser);
+    
+    return FALSE;
+}
+
+static cee_boolean prep_directive_pop(CParser* parser)
+{
+    if (!parser->prep_directive_current ||
+        !parser->prep_directive_current->parent)
+        return FALSE;
+    
+    parser->prep_directive_current =
+        parser->prep_directive_current->parent;
     return TRUE;
 }
 
@@ -1077,9 +1130,10 @@ static cee_boolean prep_directive_reduce(CParser* parser)
     if (!parser->prep_directive_current)
         return FALSE;
     
-    prep_directive_attach(parser);
+    prep_directive_attach(parser, kCEESourceFregmentTypePrepDirective);
     return TRUE;
 }
+
 /**
  * statement
  */
@@ -1091,7 +1145,7 @@ static cee_boolean statement_attach(CParser* parser,
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_append(parser->statement_current, 
+    attached = cee_source_fregment_attach(parser->statement_current,
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -1179,7 +1233,7 @@ static cee_boolean comment_attach(CParser* parser)
     if (!parser->comment_current)
         return FALSE;
     
-    attached = cee_source_fregment_append(parser->comment_current, 
+    attached = cee_source_fregment_attach(parser->comment_current, 
                                           kCEESourceFregmentTypeComment, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -4808,6 +4862,7 @@ static void symbol_parse_init(CParser* parser,
 {
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
+    
     parser->prep_directive_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,

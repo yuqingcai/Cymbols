@@ -292,7 +292,7 @@ void cee_source_fregment_descriptors_free(CEEList* descriptors)
 /**
  * source fregment
  */
-CEESourceFregment* cee_source_fregment_append(CEESourceFregment* sibling,
+CEESourceFregment* cee_source_fregment_attach(CEESourceFregment* sibling,
                                               CEESourceFregmentType type,
                                               const cee_uchar* filepath,
                                               const cee_uchar* subject,

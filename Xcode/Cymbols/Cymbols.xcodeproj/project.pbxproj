@@ -3,11 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2602A92C254BFB010011FBD5 /* cee_java.l in Sources */ = {isa = PBXBuildFile; fileRef = 2602A929254BFB000011FBD5 /* cee_java.l */; };
 		2602A92D254BFB010011FBD5 /* cee_java.c in Sources */ = {isa = PBXBuildFile; fileRef = 2602A92A254BFB000011FBD5 /* cee_java.c */; };
 		260D7DF225470231003BDC42 /* icon_xml_tag_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */; };
 		26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */ = {isa = PBXBuildFile; fileRef = 26308593254263DA000A8CB5 /* cee_regex_macos.m */; };
@@ -16,7 +15,6 @@
 		2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */; };
 		264EA89C25480CFD005042EA /* icon_file_type_css_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */; };
 		26548527254150AC00E1D0DE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 26548526254150AC00E1D0DE /* Credits.rtf */; };
-		268376DF25490C720066305C /* cee_swift.l in Sources */ = {isa = PBXBuildFile; fileRef = 268376DC25490C720066305C /* cee_swift.l */; };
 		268376E025490C720066305C /* cee_swift.c in Sources */ = {isa = PBXBuildFile; fileRef = 268376DD25490C720066305C /* cee_swift.c */; };
 		269201A1252FF30D00D6E2DC /* cJSON_Utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920091252FF30D00D6E2DC /* cJSON_Utils.c */; };
 		2692026F252FF33300D6E2DC /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692026E252FF33300D6E2DC /* cJSON.c */; };
@@ -35,11 +33,8 @@
 		2692029A252FF35600D6E2DC /* cee_tree.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920289252FF35600D6E2DC /* cee_tree.c */; };
 		2692029B252FF35600D6E2DC /* cee_uuid.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692028C252FF35600D6E2DC /* cee_uuid.c */; };
 		2692029F252FF37400D6E2DC /* cee_backend.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692029D252FF37400D6E2DC /* cee_backend.c */; };
-		269202BC252FF38400D6E2DC /* cee_arm_asm.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202A2252FF38300D6E2DC /* cee_arm_asm.l */; };
 		269202BD252FF38400D6E2DC /* cee_arm_asm.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202A3252FF38300D6E2DC /* cee_arm_asm.c */; };
-		269202BE252FF38400D6E2DC /* cee_gnu_asm.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202A5252FF38300D6E2DC /* cee_gnu_asm.l */; };
 		269202BF252FF38400D6E2DC /* cee_gnu_asm.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202A6252FF38300D6E2DC /* cee_gnu_asm.c */; };
-		269202C0252FF38400D6E2DC /* cee_c.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202A9252FF38300D6E2DC /* cee_c.l */; };
 		269202C1252FF38400D6E2DC /* cee_c.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202AA252FF38300D6E2DC /* cee_c.c */; };
 		269202C2252FF38400D6E2DC /* cee_reference.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202AC252FF38300D6E2DC /* cee_reference.c */; };
 		269202C3252FF38400D6E2DC /* cee_source_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202AE252FF38300D6E2DC /* cee_source_parser.c */; };
@@ -47,7 +42,6 @@
 		269202C5252FF38400D6E2DC /* cee_symbol.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202B2252FF38300D6E2DC /* cee_symbol.c */; };
 		269202C6252FF38400D6E2DC /* cee_tag.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202B4252FF38300D6E2DC /* cee_tag.c */; };
 		269202C7252FF38400D6E2DC /* cee_token.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202B6252FF38300D6E2DC /* cee_token.c */; };
-		269202C8252FF38400D6E2DC /* cee_html.l in Sources */ = {isa = PBXBuildFile; fileRef = 269202B9252FF38400D6E2DC /* cee_html.l */; };
 		269202C9252FF38400D6E2DC /* cee_html.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202BA252FF38400D6E2DC /* cee_html.c */; };
 		269202DA252FF39000D6E2DC /* cee_binary_storage.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202CB252FF39000D6E2DC /* cee_binary_storage.c */; };
 		269202DB252FF39000D6E2DC /* cee_text_autocomplete.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202CD252FF39000D6E2DC /* cee_text_autocomplete.c */; };
@@ -270,25 +264,20 @@
 		269F9657253DB22500D8808A /* CEESourcePoint.m in Sources */ = {isa = PBXBuildFile; fileRef = 269F9656253DB22500D8808A /* CEESourcePoint.m */; };
 		26A761E5255A8BB20032A06D /* icon_import_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A761E4255A8BB20032A06D /* icon_import_16x16@2x.png */; };
 		26A761E7255A8D420032A06D /* icon_package_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A761E6255A8D420032A06D /* icon_package_16x16@2x.png */; };
+		26B3F0762560F403007D902C /* cee_arm_asm.l in Sources */ = {isa = PBXBuildFile; fileRef = 26B3F0742560F403007D902C /* cee_arm_asm.l */; };
+		26B3F0772560F403007D902C /* cee_gnu_asm.l in Sources */ = {isa = PBXBuildFile; fileRef = 26B3F0752560F403007D902C /* cee_gnu_asm.l */; };
+		26B3F0792560F410007D902C /* cee_c.l in Sources */ = {isa = PBXBuildFile; fileRef = 26B3F0782560F410007D902C /* cee_c.l */; };
+		26B3F07B2560F41B007D902C /* cee_css.l in Sources */ = {isa = PBXBuildFile; fileRef = 26B3F07A2560F41B007D902C /* cee_css.l */; };
+		26B3F07D2560F422007D902C /* cee_html.l in Sources */ = {isa = PBXBuildFile; fileRef = 26B3F07C2560F422007D902C /* cee_html.l */; };
+		26B3F07F2560F42B007D902C /* cee_java.l in Sources */ = {isa = PBXBuildFile; fileRef = 26B3F07E2560F42B007D902C /* cee_java.l */; };
+		26B3F0812560F434007D902C /* cee_swift.l in Sources */ = {isa = PBXBuildFile; fileRef = 26B3F0802560F434007D902C /* cee_swift.l */; };
 		26BC7E7B2539301900AD8992 /* icon_alert_32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */; };
 		26DAE285255C0A16005C8A2D /* CEESecurityBookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DAE284255C0A16005C8A2D /* CEESecurityBookmark.m */; };
-		26DDED3F2547B6A500BD8246 /* cee_css.l in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3C2547B6A500BD8246 /* cee_css.l */; };
 		26DDED402547B6A500BD8246 /* cee_css.c in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3D2547B6A500BD8246 /* cee_css.c */; };
 		26DDED422547FC0800BD8246 /* icon_css_selector_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
-		26385E53254B906E008E1FCC /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.proxy.script;
-			fileType = sourcecode.yacc;
-			inputFiles = (
-			);
-			isEditable = 1;
-			outputFiles = (
-			);
-			script = "cd \"$INPUT_FILE_DIR\"\n/usr/bin/bison -o \"$DERIVED_FILE_DIR/$INPUT_FILE_BASE.tab.c\" \"$INPUT_FILE_BASE.y\"\n";
-		};
 		26920082252FF03E00D6E2DC /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
@@ -299,7 +288,8 @@
 			outputFiles = (
 				"$(DERIVED_FILE_DIR)/$(INPUT_FILE_BASE).lex.c",
 			);
-			script = "cd \"$INPUT_FILE_DIR\"\n/usr/bin/flex -o \"$DERIVED_FILE_DIR/$INPUT_FILE_BASE.lex.c\" \"$INPUT_FILE_BASE.l\"\n\n";
+			runOncePerArchitecture = 0;
+			script = "cd \"$INPUT_FILE_DIR\"\n/usr/bin/flex -o \"$DERIVED_FILE_DIR/$INPUT_FILE_BASE.lex.c\" \"$INPUT_FILE_BASE.l\"\n";
 		};
 /* End PBXBuildRule section */
 
@@ -319,7 +309,6 @@
 /* Begin PBXFileReference section */
 		2338332F22CDD555002C004E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2338333222CDD555002C004E /* Cymbols.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Cymbols.entitlements; sourceTree = "<group>"; };
-		2602A929254BFB000011FBD5 /* cee_java.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_java.l; sourceTree = "<group>"; };
 		2602A92A254BFB000011FBD5 /* cee_java.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_java.c; sourceTree = "<group>"; };
 		2602A92B254BFB000011FBD5 /* cee_java.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_java.h; sourceTree = "<group>"; };
 		260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_xml_tag_16x16@2x.png"; sourceTree = "<group>"; };
@@ -333,7 +322,6 @@
 		264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_css_16x16@2x.png"; sourceTree = "<group>"; };
 		26548526254150AC00E1D0DE /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		2667ECFB25037D8000ED5010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		268376DC25490C720066305C /* cee_swift.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_swift.l; sourceTree = "<group>"; };
 		268376DD25490C720066305C /* cee_swift.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_swift.c; sourceTree = "<group>"; };
 		268376DE25490C720066305C /* cee_swift.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_swift.h; sourceTree = "<group>"; };
 		26920091252FF30D00D6E2DC /* cJSON_Utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON_Utils.c; sourceTree = "<group>"; };
@@ -371,13 +359,10 @@
 		2692028D252FF35600D6E2DC /* cee_uuid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_uuid.h; sourceTree = "<group>"; };
 		2692029D252FF37400D6E2DC /* cee_backend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_backend.c; sourceTree = "<group>"; };
 		2692029E252FF37400D6E2DC /* cee_backend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_backend.h; sourceTree = "<group>"; };
-		269202A2252FF38300D6E2DC /* cee_arm_asm.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_arm_asm.l; sourceTree = "<group>"; };
 		269202A3252FF38300D6E2DC /* cee_arm_asm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_arm_asm.c; sourceTree = "<group>"; };
 		269202A4252FF38300D6E2DC /* cee_arm_asm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_arm_asm.h; sourceTree = "<group>"; };
-		269202A5252FF38300D6E2DC /* cee_gnu_asm.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_gnu_asm.l; sourceTree = "<group>"; };
 		269202A6252FF38300D6E2DC /* cee_gnu_asm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_gnu_asm.c; sourceTree = "<group>"; };
 		269202A7252FF38300D6E2DC /* cee_gnu_asm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_gnu_asm.h; sourceTree = "<group>"; };
-		269202A9252FF38300D6E2DC /* cee_c.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_c.l; sourceTree = "<group>"; };
 		269202AA252FF38300D6E2DC /* cee_c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_c.c; sourceTree = "<group>"; };
 		269202AB252FF38300D6E2DC /* cee_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_c.h; sourceTree = "<group>"; };
 		269202AC252FF38300D6E2DC /* cee_reference.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_reference.c; sourceTree = "<group>"; };
@@ -392,7 +377,6 @@
 		269202B5252FF38300D6E2DC /* cee_tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_tag.h; sourceTree = "<group>"; };
 		269202B6252FF38300D6E2DC /* cee_token.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_token.c; sourceTree = "<group>"; };
 		269202B7252FF38400D6E2DC /* cee_token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_token.h; sourceTree = "<group>"; };
-		269202B9252FF38400D6E2DC /* cee_html.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_html.l; sourceTree = "<group>"; };
 		269202BA252FF38400D6E2DC /* cee_html.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_html.c; sourceTree = "<group>"; };
 		269202BB252FF38400D6E2DC /* cee_html.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_html.h; sourceTree = "<group>"; };
 		269202CB252FF39000D6E2DC /* cee_binary_storage.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_binary_storage.c; sourceTree = "<group>"; };
@@ -709,11 +693,17 @@
 		269F9656253DB22500D8808A /* CEESourcePoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESourcePoint.m; sourceTree = "<group>"; };
 		26A761E4255A8BB20032A06D /* icon_import_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_import_16x16@2x.png"; sourceTree = "<group>"; };
 		26A761E6255A8D420032A06D /* icon_package_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_package_16x16@2x.png"; sourceTree = "<group>"; };
+		26B3F0742560F403007D902C /* cee_arm_asm.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_arm_asm.l; sourceTree = "<group>"; };
+		26B3F0752560F403007D902C /* cee_gnu_asm.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_gnu_asm.l; sourceTree = "<group>"; };
+		26B3F0782560F410007D902C /* cee_c.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_c.l; sourceTree = "<group>"; };
+		26B3F07A2560F41B007D902C /* cee_css.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_css.l; sourceTree = "<group>"; };
+		26B3F07C2560F422007D902C /* cee_html.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_html.l; sourceTree = "<group>"; };
+		26B3F07E2560F42B007D902C /* cee_java.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_java.l; sourceTree = "<group>"; };
+		26B3F0802560F434007D902C /* cee_swift.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_swift.l; sourceTree = "<group>"; };
 		26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_alert_32x32@2x.png"; sourceTree = "<group>"; };
 		26CBE684252FECA20047771D /* Cymbols.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cymbols.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		26DAE283255C0A16005C8A2D /* CEESecurityBookmark.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEESecurityBookmark.h; sourceTree = "<group>"; };
 		26DAE284255C0A16005C8A2D /* CEESecurityBookmark.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESecurityBookmark.m; sourceTree = "<group>"; };
-		26DDED3C2547B6A500BD8246 /* cee_css.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_css.l; sourceTree = "<group>"; };
 		26DDED3D2547B6A500BD8246 /* cee_css.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_css.c; sourceTree = "<group>"; };
 		26DDED3E2547B6A500BD8246 /* cee_css.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_css.h; sourceTree = "<group>"; };
 		26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_css_selector_16x16@2x.png"; sourceTree = "<group>"; };
@@ -825,9 +815,9 @@
 		2602A928254BFAD40011FBD5 /* java */ = {
 			isa = PBXGroup;
 			children = (
+				26B3F07E2560F42B007D902C /* cee_java.l */,
 				2602A92A254BFB000011FBD5 /* cee_java.c */,
 				2602A92B254BFB000011FBD5 /* cee_java.h */,
-				2602A929254BFB000011FBD5 /* cee_java.l */,
 			);
 			path = java;
 			sourceTree = "<group>";
@@ -835,7 +825,7 @@
 		268376DB25490C720066305C /* swift */ = {
 			isa = PBXGroup;
 			children = (
-				268376DC25490C720066305C /* cee_swift.l */,
+				26B3F0802560F434007D902C /* cee_swift.l */,
 				268376DD25490C720066305C /* cee_swift.c */,
 				268376DE25490C720066305C /* cee_swift.h */,
 			);
@@ -940,10 +930,10 @@
 		269202A1252FF38300D6E2DC /* asm */ = {
 			isa = PBXGroup;
 			children = (
-				269202A5252FF38300D6E2DC /* cee_gnu_asm.l */,
+				26B3F0752560F403007D902C /* cee_gnu_asm.l */,
 				269202A6252FF38300D6E2DC /* cee_gnu_asm.c */,
 				269202A7252FF38300D6E2DC /* cee_gnu_asm.h */,
-				269202A2252FF38300D6E2DC /* cee_arm_asm.l */,
+				26B3F0742560F403007D902C /* cee_arm_asm.l */,
 				269202A3252FF38300D6E2DC /* cee_arm_asm.c */,
 				269202A4252FF38300D6E2DC /* cee_arm_asm.h */,
 			);
@@ -953,7 +943,7 @@
 		269202A8252FF38300D6E2DC /* c */ = {
 			isa = PBXGroup;
 			children = (
-				269202A9252FF38300D6E2DC /* cee_c.l */,
+				26B3F0782560F410007D902C /* cee_c.l */,
 				269202AA252FF38300D6E2DC /* cee_c.c */,
 				269202AB252FF38300D6E2DC /* cee_c.h */,
 			);
@@ -963,7 +953,7 @@
 		269202B8252FF38400D6E2DC /* html */ = {
 			isa = PBXGroup;
 			children = (
-				269202B9252FF38400D6E2DC /* cee_html.l */,
+				26B3F07C2560F422007D902C /* cee_html.l */,
 				269202BA252FF38400D6E2DC /* cee_html.c */,
 				269202BB252FF38400D6E2DC /* cee_html.h */,
 			);
@@ -1343,7 +1333,7 @@
 		26DDED3B2547B6A500BD8246 /* css */ = {
 			isa = PBXGroup;
 			children = (
-				26DDED3C2547B6A500BD8246 /* cee_css.l */,
+				26B3F07A2560F41B007D902C /* cee_css.l */,
 				26DDED3D2547B6A500BD8246 /* cee_css.c */,
 				26DDED3E2547B6A500BD8246 /* cee_css.h */,
 			);
@@ -1363,7 +1353,6 @@
 				26DD26CA25302A2900052431 /* Embed Libraries */,
 			);
 			buildRules = (
-				26385E53254B906E008E1FCC /* PBXBuildRule */,
 				26920082252FF03E00D6E2DC /* PBXBuildRule */,
 			);
 			dependencies = (
@@ -1557,6 +1546,7 @@
 				26920432252FF4F400D6E2DC /* CEEStateButton.m in Sources */,
 				26920435252FF4F400D6E2DC /* CEETabbarStateButton.m in Sources */,
 				269204AF252FF53100D6E2DC /* CEEProjectPropertyView.m in Sources */,
+				26B3F0772560F403007D902C /* cee_gnu_asm.l in Sources */,
 				26920294252FF35600D6E2DC /* cee_lib.c in Sources */,
 				26920495252FF51A00D6E2DC /* CEESessionWindowController.m in Sources */,
 				269204A6252FF52700D6E2DC /* CEERemoveFileSelectionView.m in Sources */,
@@ -1575,10 +1565,13 @@
 				26920430252FF4F400D6E2DC /* CEESplitView.m in Sources */,
 				269204E3252FF5F200D6E2DC /* AppDelegate.m in Sources */,
 				269204C8252FF58200D6E2DC /* CEESearcher.m in Sources */,
+				26B3F0792560F410007D902C /* cee_c.l in Sources */,
 				26920446252FF4F400D6E2DC /* NSSplitView+UIStyle.m in Sources */,
 				269202BD252FF38400D6E2DC /* cee_arm_asm.c in Sources */,
 				2692042F252FF4F400D6E2DC /* CEEScroller.m in Sources */,
 				26920455252FF50300D6E2DC /* CEETextEditViewController.m in Sources */,
+				26B3F07B2560F41B007D902C /* cee_css.l in Sources */,
+				26B3F0812560F434007D902C /* cee_swift.l in Sources */,
 				26920496252FF51A00D6E2DC /* CEESourceHistoryViewController.m in Sources */,
 				26920484252FF51A00D6E2DC /* CEESessionFilePathController.m in Sources */,
 				269202C9252FF38400D6E2DC /* cee_html.c in Sources */,
@@ -1588,12 +1581,12 @@
 				269204BC252FF54000D6E2DC /* CEEFileNameCellView.m in Sources */,
 				269204A5252FF52700D6E2DC /* CEEProjectRemoveFileController.m in Sources */,
 				2692028E252FF35600D6E2DC /* cee_bst.c in Sources */,
+				26B3F07F2560F42B007D902C /* cee_java.l in Sources */,
 				269204AE252FF53100D6E2DC /* CEEProjectCreatorController.m in Sources */,
 				269202C7252FF38400D6E2DC /* cee_token.c in Sources */,
 				269202DD252FF39000D6E2DC /* cee_text_layout.c in Sources */,
 				26920436252FF4F400D6E2DC /* CEETableView.m in Sources */,
 				26920454252FF50300D6E2DC /* CEEMarkdownViewController.m in Sources */,
-				26DDED3F2547B6A500BD8246 /* cee_css.l in Sources */,
 				26920445252FF4F400D6E2DC /* NSImageView+UIStyle.m in Sources */,
 				26DDED402547B6A500BD8246 /* cee_css.c in Sources */,
 				2692042A252FF4F400D6E2DC /* CEEImageView.m in Sources */,
@@ -1609,12 +1602,10 @@
 				26920291252FF35600D6E2DC /* cee_error.c in Sources */,
 				2692048F252FF51A00D6E2DC /* CEESessionSpliter1.m in Sources */,
 				2692028F252FF35600D6E2DC /* cee_codec.c in Sources */,
-				269202BC252FF38400D6E2DC /* cee_arm_asm.l in Sources */,
 				26920490252FF51A00D6E2DC /* CEESessionStatusBar.m in Sources */,
 				269204B0252FF53100D6E2DC /* CEEProjectSettingView.m in Sources */,
 				26920423252FF4F400D6E2DC /* CEEBinaryView.m in Sources */,
 				26920290252FF35600D6E2DC /* cee_datetime.c in Sources */,
-				269202C0252FF38400D6E2DC /* cee_c.l in Sources */,
 				2692048D252FF51A00D6E2DC /* CEESessionSourceController.m in Sources */,
 				26920488252FF51A00D6E2DC /* CEESessionFrameTitleView.m in Sources */,
 				2692048C252FF51A00D6E2DC /* CEESessionReferenceTableView.m in Sources */,
@@ -1628,7 +1619,6 @@
 				2692043F252FF4F400D6E2DC /* CEEView.m in Sources */,
 				26920428252FF4F400D6E2DC /* CEEGridView.m in Sources */,
 				26920298252FF35600D6E2DC /* cee_regex.c in Sources */,
-				2602A92C254BFB010011FBD5 /* cee_java.l in Sources */,
 				26920483252FF51A00D6E2DC /* CEESessionContextViewController.m in Sources */,
 				26920486252FF51A00D6E2DC /* CEESessionFrameManagerView.m in Sources */,
 				26920433252FF4F400D6E2DC /* CEEStyleManager.m in Sources */,
@@ -1643,6 +1633,7 @@
 				269202C5252FF38400D6E2DC /* cee_symbol.c in Sources */,
 				26920453252FF50300D6E2DC /* CEEEditViewController.m in Sources */,
 				2692042B252FF4F400D6E2DC /* CEEJSONReader.m in Sources */,
+				26B3F0762560F403007D902C /* cee_arm_asm.l in Sources */,
 				2692026F252FF33300D6E2DC /* cJSON.c in Sources */,
 				269204C5252FF57500D6E2DC /* CEEProject.m in Sources */,
 				26920429252FF4F400D6E2DC /* CEEIdentifier.m in Sources */,
@@ -1651,7 +1642,6 @@
 				26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */,
 				26920439252FF4F400D6E2DC /* CEETextTitle.m in Sources */,
 				269202C1252FF38400D6E2DC /* cee_c.c in Sources */,
-				269202BE252FF38400D6E2DC /* cee_gnu_asm.l in Sources */,
 				26920425252FF4F400D6E2DC /* CEECheckBox.m in Sources */,
 				269204DD252FF5BC00D6E2DC /* CEEProjectParseViewController.m in Sources */,
 				26920292252FF35600D6E2DC /* cee_fileutils.c in Sources */,
@@ -1662,6 +1652,7 @@
 				26920427252FF4F400D6E2DC /* CEEControl.m in Sources */,
 				26920295252FF35600D6E2DC /* cee_list.c in Sources */,
 				26920493252FF51A00D6E2DC /* CEESessionView.m in Sources */,
+				26B3F07D2560F422007D902C /* cee_html.l in Sources */,
 				26920452252FF50300D6E2DC /* CEEBinaryEditViewController.m in Sources */,
 				26920444252FF4F400D6E2DC /* NSControl+UIStyle.m in Sources */,
 				2692029B252FF35600D6E2DC /* cee_uuid.c in Sources */,
@@ -1679,11 +1670,9 @@
 				269204A3252FF52700D6E2DC /* CEEFilePathConfirmView.m in Sources */,
 				2692029A252FF35600D6E2DC /* cee_tree.c in Sources */,
 				269202C6252FF38400D6E2DC /* cee_tag.c in Sources */,
-				269202C8252FF38400D6E2DC /* cee_html.l in Sources */,
 				269202DE252FF39000D6E2DC /* cee_text_modify.c in Sources */,
 				26920426252FF4F400D6E2DC /* CEEContainerView.m in Sources */,
 				2602A92D254BFB010011FBD5 /* cee_java.c in Sources */,
-				268376DF25490C720066305C /* cee_swift.l in Sources */,
 				269202C4252FF38400D6E2DC /* cee_source_parsers.c in Sources */,
 				26920489252FF51A00D6E2DC /* CEESessionFrameView.m in Sources */,
 				2692050F252FF6AE00D6E2DC /* main.m in Sources */,
@@ -1929,7 +1918,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 111;
+				CURRENT_PROJECT_VERSION = 120;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1942,7 +1931,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
@@ -1958,7 +1947,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 111;
+				CURRENT_PROJECT_VERSION = 120;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1970,7 +1959,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;

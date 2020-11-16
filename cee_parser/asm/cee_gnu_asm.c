@@ -536,7 +536,7 @@ static cee_boolean comment_attach(GNUASMParser* parser)
     if (!parser->comment_current)
         return FALSE;
     
-    attached = cee_source_fregment_append(parser->comment_current, 
+    attached = cee_source_fregment_attach(parser->comment_current,
                                           kCEESourceFregmentTypeComment, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -613,7 +613,7 @@ static cee_boolean prep_directive_attach(GNUASMParser* parser)
     if (!parser->prep_directive_current)
         return FALSE;
     
-    attached = cee_source_fregment_append(parser->prep_directive_current, 
+    attached = cee_source_fregment_attach(parser->prep_directive_current,
                                           kCEESourceFregmentTypePrepDirective, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -677,7 +677,7 @@ static cee_boolean statement_attach(GNUASMParser* parser,
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_append(parser->statement_current, 
+    attached = cee_source_fregment_attach(parser->statement_current, 
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,

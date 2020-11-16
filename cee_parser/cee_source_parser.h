@@ -160,7 +160,7 @@ void cee_source_fregment_free(cee_pointer data);
 void cee_source_fregment_free_full(cee_pointer data);
 void cee_source_fregment_remove(CEESourceFregment* fregment);
 void cee_source_fregment_descriptors_free(CEEList* descriptors);
-CEESourceFregment* cee_source_fregment_append(CEESourceFregment* sibling,
+CEESourceFregment* cee_source_fregment_attach(CEESourceFregment* sibling,
                                               CEESourceFregmentType type,
                                               const cee_uchar* filepath,
                                               const cee_uchar* subject,

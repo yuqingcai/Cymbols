@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <pcre.h>
 #include "cee_range.h"
 #include "cee_mem.h"
 #include "cee_regex.h"

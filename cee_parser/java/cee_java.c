@@ -949,7 +949,7 @@ static cee_boolean comment_attach(JavaParser* parser)
     if (!parser->comment_current)
         return FALSE;
     
-    attached = cee_source_fregment_append(parser->comment_current, 
+    attached = cee_source_fregment_attach(parser->comment_current,
                                           kCEESourceFregmentTypeComment, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -1165,7 +1165,7 @@ static cee_boolean statement_attach(JavaParser* parser,
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_append(parser->statement_current, 
+    attached = cee_source_fregment_attach(parser->statement_current, 
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
