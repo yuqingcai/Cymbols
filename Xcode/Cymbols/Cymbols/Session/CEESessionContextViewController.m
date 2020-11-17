@@ -11,6 +11,8 @@
 #import "CEESessionContextViewController.h"
 #import "CEEEditViewController.h"
 #import "CEESymbolCellView.h"
+#import "CEEFileNameCellView.h"
+#import "CEEFilePathCellView.h"
 #import "CEEImageView.h"
 #import "cee_symbol.h"
 
@@ -76,7 +78,7 @@
     [_contextTable setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     [_contextTable setDelegate:self];
     [_contextTable setDataSource:self];
-    [_contextTable setColumns:1];
+    [_contextTable setColumns:2];
     [_contextTable setEnableDrawHeader:YES];
     [_contextTable setTarget:self];
     [_contextTable setAction:@selector(selectRow:)];
@@ -281,23 +283,40 @@
 
 - (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column {
     if (!_context_symbols)
-        return @"Related Symbol";
-    
+        return @"Related Source";
     CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, 0);
-    NSString* name = [NSString stringWithUTF8String:symbol->name];
-    return [NSString stringWithFormat:@"\"%@\" Releated Sources", name];
+    if (column == 0) {
+        //NSString* name = [NSString stringWithUTF8String:symbol->name];
+        //return [NSString stringWithFormat:@"\"%@\" Releated Sources", name];
+        return @"Name";
+    }
+    else if (column == 1) {
+        return @"Path";
+    }
     
+    return @"";
 }
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    CEESymbolCellView* cellView = [tableView makeViewWithIdentifier:@"IDSymbolCellView"];
-    CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, (cee_int)row);
-    NSString* name = [NSString stringWithUTF8String:symbol->name];
-    NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-    cellView.title.stringValue = [NSString stringWithFormat:@"%@", [filePath lastPathComponent]];
-    [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
-    return cellView;
+    
+    if (column == 0) {
+        CEESymbolCellView* cellView = [tableView makeViewWithIdentifier:@"IDSymbolCellView"];
+        CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, (cee_int)row);
+        NSString* name = [NSString stringWithUTF8String:symbol->name];
+        NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
+        cellView.title.stringValue = [NSString stringWithFormat:@"%@", [filePath lastPathComponent]];
+        [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
+        return cellView;
+    }
+    else if (column == 1) {
+        CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFilePathCellView"];
+        CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, (cee_int)row);
+        NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
+        cellView.title.stringValue = filePath;
+        return cellView;
+    }
+    return nil;
 }
 
 - (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {

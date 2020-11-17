@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "cee_symbol.h"
 
+static cee_boolean symbol_is_asm_label(CEESourceSymbol* symbol);
 static void source_symbol_tree_dump_to_wrappers(CEETree* tree, 
                                                 int n, 
                                                 CEEList** list);
@@ -388,9 +389,21 @@ cee_boolean cee_source_symbol_is_definition(CEESourceSymbol* symbol)
             symbol->type == kCEESourceSymbolTypeUnionDefinition || 
             symbol->type == kCEESourceSymbolTypeNamespaceDefinition || 
             symbol->type == kCEESourceSymbolTypeImplementationDefinition || 
-            symbol->type == kCEESourceSymbolTypeProtocolDeclaration);
+            symbol->type == kCEESourceSymbolTypeProtocolDeclaration ||
+            symbol_is_asm_label(symbol));
 }
 
+static cee_boolean symbol_is_asm_label(CEESourceSymbol* symbol)
+{
+    if (symbol->language &&
+        (cee_strcmp(symbol->language, "gnu_asm", FALSE) ||
+         cee_strcmp(symbol->language, "arm_asm", FALSE)))
+    {
+        if (symbol->type == kCEESourceSymbolTypeLabel)
+            return TRUE;
+    }
+    return FALSE;
+}
 
 CEESourceSymbolWrapper* cee_source_symbol_wrapper_create(CEESourceSymbol* symbol,
                                                          cee_uint level)

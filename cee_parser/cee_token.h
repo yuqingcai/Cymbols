@@ -52,9 +52,9 @@ typedef enum _CEETokenIdentifierType {
 
 typedef enum _CEETokenID {
     kCEETokenID_UNKNOW = 512,
+    kCEETokenID_IGNORE,
     kCEETokenID_NEW_LINE,
     kCEETokenID_WHITE_SPACE,
-    kCEETokenID_REGISTER_NAME,
     
     kCEETokenID_LINES_COMMENT,
     kCEETokenID_LINE_COMMENT,
@@ -413,6 +413,7 @@ typedef enum _CEETokenID {
     kCEETokenID_STRICTFP,
     kCEETokenID_TRANSIENT,
     kCEETokenID_ANNOTATION,
+    kCEETokenID_LABEL,
     
     kCEETokenID_END
 } CEETokenID;
@@ -446,6 +447,7 @@ typedef enum _CEETokenID {
 typedef enum _CEETokenState {
     kCEETokenStateInit = 0,
     kCEETokenStateSymbolOccupied = 0x1 << 0,
+    kCEETokenStateIgnore = 0x1 << 1,
 } CEETokenState;
 
 typedef enum _CEERangeListType {

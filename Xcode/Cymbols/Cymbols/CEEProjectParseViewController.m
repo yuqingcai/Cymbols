@@ -138,6 +138,7 @@
         while (p) {
             
             @autoreleasepool {
+                
                 CEEProjectFilePathEntryInfo* info = p->data;
                 NSString* filePath = [NSString stringWithUTF8String:info->file_path];
                 CEEList* list = NULL;

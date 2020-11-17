@@ -637,14 +637,15 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
             q =  SOURCE_FREGMENT_CHILDREN_FIRST(child);
             while (q) {
                 grandson = q->data;
-                                
+                
                 if (cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeFunctionDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeDeclaration) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeEnumurators) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypePrepDirective)  ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeXMLTagStart) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeImportStatement) ||
-                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypePackageStatement)) {
+                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypePackageStatement) ||
+                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeLabelDeclaration) ) {
                     
                     s = grandson->symbols;
                     while (s) {
@@ -664,7 +665,8 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                             symbol->type == kCEESourceSymbolTypePrepDirectiveInclude ||
                             symbol->type == kCEESourceSymbolTypeXMLTagName ||
                             symbol->type == kCEESourceSymbolTypeImport ||
-                            symbol->type == kCEESourceSymbolTypePackage) {
+                            symbol->type == kCEESourceSymbolTypePackage ||
+                            symbol->type == kCEESourceSymbolTypeLabel) {
                             
                             leaf = cee_tree_create();
                             leaf->data = symbol;
@@ -675,7 +677,10 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                     }
                 }
                 
-                if (cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeTemplateDeclaration) ||
+                /** recursive dump */
+                if (cee_source_fregment_type_is(grandson, kCEESourceFregmentTypePrepDirectiveCondition) ||
+                    //cee_source_fregment_type_is(grandson, kCEESourceFregmentTypePrepDirectiveBranch) ||
+                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeTemplateDeclaration) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeNamespaceDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeClassDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeEnumDefinition) ||
@@ -688,7 +693,7 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeXMLTagStart) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeXMLTagStart) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeCSSBlock)) {
-                    
+                                        
                     s = grandson->symbols;
                     while (s) {
                         symbol = s->data;
@@ -1296,7 +1301,7 @@ CEEList* cee_symbols_search_by_reference(CEESourceSymbolReference* reference,
     }
     
     symbols = cee_list_concat(local, global);
-    
+        
     return symbols;
 }
 
@@ -1535,9 +1540,9 @@ static CEEList* syntax_tags_create(CEESourceParserRef parser_ref,
 }
 
 static cee_boolean syntax_tags_create_recursive(CEESourceParserRef parser_ref,
-                                                         CEESourceFregment* fregment,
-                                                         CEERange range,
-                                                         CEEList** tags)
+                                                CEESourceFregment* fregment,
+                                                CEERange range,
+                                                CEEList** tags)
 {
     if (cee_source_fregment_over_range(fregment, range))
         return FALSE;
@@ -1570,9 +1575,7 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
-        
-        //cee_string_from_token_print(fregment->subject_ref, token);
-        
+                
         if (!(token->state & kCEETokenStateSymbolOccupied)) {
         
             tag_type = kCEETagTypeIgnore;
@@ -1584,6 +1587,8 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
                     tag_type = kCEETagTypePrepDirective;
                 else if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypePunctuation))
                     tag_type = kCEETagTypePunctuation;
+                else if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypeASMDirective))
+                    tag_type = kCEETagTypeASMDirective;
             }
             
             if (tag_type == kCEETagTypeIgnore) {
@@ -1609,8 +1614,6 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
                     tag_type = kCEETagTypeFunctionReference;
                 else if (token->identifier == kCEETokenID_ANNOTATION)
                     tag_type = kCEETagTypeAnnotation;
-                else if (token->identifier == kCEETokenID_REGISTER_NAME)
-                    tag_type = kCEETagTypeRegisgerName;
             }
             
             if (tag_type != kCEETagTypeIgnore) {

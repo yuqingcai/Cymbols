@@ -156,45 +156,47 @@
         });
         
         for (int i = 0; i < filePaths.count; i ++) {
-            __block NSString* filePath = filePaths[i];
-            CEEList* references = NULL;
-            CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
-            const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
-            CEERange range = cee_range_make(0, cee_text_storage_size_get(buffer.storage));
-            cee_source_buffer_parse(buffer, 0);
-            cee_source_reference_parse(buffer.parser_ref, 
-                                       (const cee_uchar*)[buffer.filePath UTF8String], 
-                                       subject, 
-                                       buffer.source_token_map, 
-                                       buffer.prep_directive, 
-                                       buffer.statement, 
-                                       range, 
-                                       &references);
-            CEEList* p = references;
-            while (p) {
-                CEESourceSymbolReference* reference = p->data;
-                if (!strcmp(reference->name, [self->_project.searcher.target UTF8String])) {
-                    CEESearchResult* result = [[CEESearchResult alloc] init];
-                    result.filePath = [NSString stringWithUTF8String:reference->filepath];
-                    result.locations =  [NSString stringWithUTF8String:reference->locations];
-                    [results addObject:result];
-                    self->_project.searcher.results = results;
-                    dispatch_sync(dispatch_get_main_queue(), ^{
-                        [self->_resultTable reloadData];
-                    });
+            @autoreleasepool {
+                __block NSString* filePath = filePaths[i];
+                CEEList* references = NULL;
+                CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
+                const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
+                CEERange range = cee_range_make(0, cee_text_storage_size_get(buffer.storage));
+                cee_source_buffer_parse(buffer, 0);
+                cee_source_reference_parse(buffer.parser_ref,
+                                            (const cee_uchar*)[buffer.filePath UTF8String],
+                                            subject,
+                                            buffer.source_token_map,
+                                            buffer.prep_directive,
+                                            buffer.statement,
+                                            range,
+                                            &references);
+                CEEList* p = references;
+                while (p) {
+                    CEESourceSymbolReference* reference = p->data;
+                    if (!strcmp(reference->name, [self->_project.searcher.target UTF8String])) {
+                        CEESearchResult* result = [[CEESearchResult alloc] init];
+                        result.filePath = [NSString stringWithUTF8String:reference->filepath];
+                        result.locations =  [NSString stringWithUTF8String:reference->locations];
+                        [results addObject:result];
+                        self->_project.searcher.results = results;
+                        dispatch_sync(dispatch_get_main_queue(), ^{
+                            [self->_resultTable reloadData];
+                        });
+                    }
+                    p = p->next;
                 }
-                p = p->next;
+                            
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    [self->_labelParsing setStringValue:[filePath lastPathComponent]];
+                    [self->_progressBar setDoubleValue:(double)(i+1)/filePaths.count];
+                });
+                
+                cee_list_free_full(references, cee_source_symbol_reference_free);
+                
+                if (self->_cancel)
+                    break;
             }
-                        
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                [self->_labelParsing setStringValue:[filePath lastPathComponent]];
-                [self->_progressBar setDoubleValue:(double)(i+1)/filePaths.count];
-            });
-            
-            cee_list_free_full(references, cee_source_symbol_reference_free);
-            
-            if (self->_cancel)
-                break;
         }
         
         dispatch_sync(dispatch_get_main_queue(), ^{
@@ -226,39 +228,41 @@
         });
         
         for (int i = 0; i < filePaths.count; i ++) {
-            NSString* filePath = filePaths[i];
-            CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
-            const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
-            CEEList* ranges = cee_regex_search((const cee_char*)subject,
-                                               [self->_project.searcher.target UTF8String],
-                                               TRUE,
-                                               0,
-                                               NULL);
-            CEEList* p = ranges;
-            while (p) {
-                cee_char* range_string = cee_string_from_range(p->data);
-                if (range_string) {
-                    CEESearchResult* result = [[CEESearchResult alloc] init];
-                    result.filePath = filePath;
-                    result.locations = [NSString stringWithUTF8String:range_string];
-                    [results addObject:result];
-                    self->_project.searcher.results = results;
-                    dispatch_sync(dispatch_get_main_queue(), ^{
-                        [self->_resultTable reloadData];
-                    });
-                    cee_free(range_string);
+            @autoreleasepool {
+                NSString* filePath = filePaths[i];
+                CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
+                const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
+                CEEList* ranges = cee_regex_search((const cee_char*)subject,
+                                                   [self->_project.searcher.target UTF8String],
+                                                   TRUE,
+                                                   0,
+                                                   NULL);
+                CEEList* p = ranges;
+                while (p) {
+                    cee_char* range_string = cee_string_from_range(p->data);
+                    if (range_string) {
+                        CEESearchResult* result = [[CEESearchResult alloc] init];
+                        result.filePath = filePath;
+                        result.locations = [NSString stringWithUTF8String:range_string];
+                        [results addObject:result];
+                        self->_project.searcher.results = results;
+                        dispatch_sync(dispatch_get_main_queue(), ^{
+                            [self->_resultTable reloadData];
+                        });
+                        cee_free(range_string);
+                    }
+                    p = p->next;
                 }
-                p = p->next;
+                cee_list_free_full(ranges, cee_range_free);
+                    
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    [self->_labelParsing setStringValue:[filePath lastPathComponent]];
+                    [self->_progressBar setDoubleValue:(double)(i+1)/filePaths.count];
+                });
+                
+                if (self->_cancel)
+                    break;
             }
-            cee_list_free_full(ranges, cee_range_free);
-                        
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                [self->_labelParsing setStringValue:[filePath lastPathComponent]];
-                [self->_progressBar setDoubleValue:(double)(i+1)/filePaths.count];
-            });
-            
-            if (self->_cancel)
-                break;
         }
         
         dispatch_sync(dispatch_get_main_queue(), ^{
@@ -300,38 +304,40 @@
         });
         
         for (int i = 0; i < filePaths.count; i ++) {
-            NSString* filePath = filePaths[i];
-            CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
-            const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
-            CEEList* ranges = cee_str_search((const cee_char*)subject,
-                                             [self->_project.searcher.target UTF8String],
-                                             sensitive,
-                                             mode);
-            CEEList* p = ranges;
-            while (p) {
-                cee_char* range_string = cee_string_from_range(p->data);
-                if (range_string) {
-                    CEESearchResult* result = [[CEESearchResult alloc] init];
-                    result.filePath = filePath;
-                    result.locations = [NSString stringWithUTF8String:range_string];
-                    [results addObject:result];
-                    self->_project.searcher.results = results;
-                    dispatch_sync(dispatch_get_main_queue(), ^{
-                        [self->_resultTable reloadData];
-                    });
-                    cee_free(range_string);
+            @autoreleasepool {
+                NSString* filePath = filePaths[i];
+                CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
+                const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
+                CEEList* ranges = cee_str_search((const cee_char*)subject,
+                                                    [self->_project.searcher.target UTF8String],
+                                                    sensitive,
+                                                    mode);
+                CEEList* p = ranges;
+                while (p) {
+                    cee_char* range_string = cee_string_from_range(p->data);
+                    if (range_string) {
+                        CEESearchResult* result = [[CEESearchResult alloc] init];
+                        result.filePath = filePath;
+                        result.locations = [NSString stringWithUTF8String:range_string];
+                        [results addObject:result];
+                        self->_project.searcher.results = results;
+                        dispatch_sync(dispatch_get_main_queue(), ^{
+                            [self->_resultTable reloadData];
+                        });
+                        cee_free(range_string);
+                    }
+                    p = p->next;
                 }
-                p = p->next;
+                cee_list_free_full(ranges, cee_range_free);
+                
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    [self->_labelParsing setStringValue:[filePath lastPathComponent]];
+                    [self->_progressBar setDoubleValue:(double)(i+1)/filePaths.count];
+                });
+                
+                if (self->_cancel)
+                    break;
             }
-            cee_list_free_full(ranges, cee_range_free);
-            
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                [self->_labelParsing setStringValue:[filePath lastPathComponent]];
-                [self->_progressBar setDoubleValue:(double)(i+1)/filePaths.count];
-            });
-            
-            if (self->_cancel)
-                break;
         }
         
         dispatch_sync(dispatch_get_main_queue(), ^{

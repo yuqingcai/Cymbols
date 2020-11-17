@@ -63,6 +63,9 @@ typedef enum _CEETagType {
     kCEETagTypeCSSSelector,
     kCEETagTypeCSSProperty,
     
+    /** ASM */
+    kCEETagTypeASMDirective,
+    
     /** ... */
     kCEETagTypeIgnore,
     kCEETagTypeMax,

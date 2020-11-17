@@ -1268,7 +1268,7 @@ BOOL ContextContainSymbol(CEEList* context,
         return ;
     
     // turn off journal mode, apple's sandbox forbid the journal file created
-    sqlite3_exec(_database, "PRAGMA journal_mode=OFF;", NULL, 0, 0);
+    sqlite3_exec(_database, "PRAGMA journal_mode=MEMORY;", NULL, 0, 0);
     
     [self validateDatabase];
     

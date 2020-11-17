@@ -299,7 +299,7 @@
         },
         
         {
-            "name" : "register_name",
+            "name" : "asm_directive",
             "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",

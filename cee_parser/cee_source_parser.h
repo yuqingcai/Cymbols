@@ -17,6 +17,8 @@ typedef enum _CEESourceFregmentType {
     kCEESourceFregmentTypeSourceList                    ,
     kCEESourceFregmentTypeComment                       ,
     kCEESourceFregmentTypePrepDirective                 ,
+    kCEESourceFregmentTypePrepDirectiveCondition        ,
+    kCEESourceFregmentTypePrepDirectiveBranch           ,
     kCEESourceFregmentTypeStatement                     ,
     kCEESourceFregmentTypeRoundBracketList              ,       /** ( ) */
     kCEESourceFregmentTypeSquareBracketList             ,       /** [ ] */
