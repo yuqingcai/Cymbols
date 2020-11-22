@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -13,29 +13,10 @@
             <rect key="frame" x="0.0" y="0.0" width="600" height="500"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <customView identifier="IDProjectSettingSaveAtButton" translatesAutoresizingMaskIntoConstraints="NO" id="G7j-6Z-aBD" customClass="CEEButton">
-                    <rect key="frame" x="527" y="394" width="53" height="24"/>
-                    <constraints>
-                        <constraint firstAttribute="width" constant="53" id="0B0-JZ-ObJ"/>
-                        <constraint firstAttribute="height" constant="24" id="eOf-PW-HZU"/>
-                    </constraints>
-                    <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="image" keyPath="icon" value="NSPathTemplate"/>
-                        <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
-                            <color key="value" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
-                        </userDefinedRuntimeAttribute>
-                    </userDefinedRuntimeAttributes>
-                </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="OFt-FS-1Bm" customClass="CEETextField">
                     <rect key="frame" x="126" y="428" width="454" height="24"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="24" id="VGq-4n-j8f"/>
-                    </constraints>
-                </customView>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="rqJ-OA-JOu" customClass="CEETextField">
-                    <rect key="frame" x="126" y="394" width="393" height="24"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="24" id="7qj-hP-9d6"/>
                     </constraints>
                 </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="w9P-Lo-li0" customClass="CEETextTitle">
@@ -48,34 +29,14 @@
                         <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Create New Project"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Nq6-Dd-10K" customClass="CEETextLabel">
-                    <rect key="frame" x="20" y="428" width="98" height="24"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="24" id="7ZQ-VH-bd6"/>
-                        <constraint firstAttribute="width" constant="98" id="GRQ-3u-xEK"/>
-                    </constraints>
-                    <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Project Name"/>
-                    </userDefinedRuntimeAttributes>
-                </customView>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="vKQ-4c-BuE" customClass="CEETextLabel">
-                    <rect key="frame" x="20" y="394" width="98" height="24"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="24" id="ubJ-b9-a9M"/>
-                        <constraint firstAttribute="width" constant="98" id="xlP-rA-saK"/>
-                    </constraints>
-                    <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Save At"/>
-                    </userDefinedRuntimeAttributes>
-                </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="Ie8-uo-OBP" customClass="CEETextLabel">
-                    <rect key="frame" x="20" y="362" width="124" height="24"/>
+                    <rect key="frame" x="20" y="394" width="124" height="24"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="124" id="1lD-RL-12O"/>
                         <constraint firstAttribute="height" constant="24" id="hUP-Wf-Is7"/>
                     </constraints>
                     <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Source Files"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Source Files:"/>
                     </userDefinedRuntimeAttributes>
                 </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="qo6-mS-OmK" customClass="CEEButton">
@@ -117,10 +78,10 @@
                     </userDefinedRuntimeAttributes>
                 </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="J9L-pL-Jti" customClass="CEEContainerView">
-                    <rect key="frame" x="20" y="30" width="560" height="331"/>
+                    <rect key="frame" x="20" y="30" width="560" height="363"/>
                     <subviews>
                         <customView translatesAutoresizingMaskIntoConstraints="NO" id="XGl-be-vic" customClass="CEETableView">
-                            <rect key="frame" x="1" y="1" width="558" height="329"/>
+                            <rect key="frame" x="1" y="1" width="558" height="361"/>
                         </customView>
                     </subviews>
                     <constraints>
@@ -132,32 +93,34 @@
                         <constraint firstItem="XGl-be-vic" firstAttribute="leading" secondItem="J9L-pL-Jti" secondAttribute="leading" constant="1" id="pKX-bH-C2A"/>
                     </constraints>
                 </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Nq6-Dd-10K" customClass="CEETextLabel">
+                    <rect key="frame" x="20" y="428" width="98" height="24"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="24" id="7ZQ-VH-bd6"/>
+                        <constraint firstAttribute="width" constant="98" id="GRQ-3u-xEK"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Project Name:"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
             </subviews>
             <constraints>
-                <constraint firstItem="G7j-6Z-aBD" firstAttribute="leading" secondItem="rqJ-OA-JOu" secondAttribute="trailing" constant="8" id="0lG-JF-ovQ"/>
-                <constraint firstItem="G7j-6Z-aBD" firstAttribute="top" secondItem="OFt-FS-1Bm" secondAttribute="bottom" constant="10" id="0t5-Vq-5UR"/>
                 <constraint firstItem="Nq6-Dd-10K" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="2HF-DR-pxW"/>
                 <constraint firstItem="OFt-FS-1Bm" firstAttribute="leading" secondItem="Nq6-Dd-10K" secondAttribute="trailing" constant="8" id="2Ty-GG-xIJ"/>
-                <constraint firstItem="rqJ-OA-JOu" firstAttribute="top" secondItem="OFt-FS-1Bm" secondAttribute="bottom" constant="10" id="4Gc-hF-juh"/>
-                <constraint firstItem="vKQ-4c-BuE" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="6PS-7i-BP0"/>
                 <constraint firstItem="w9P-Lo-li0" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="16" id="6Xl-Q6-ZwS"/>
                 <constraint firstItem="qo6-mS-OmK" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="6mm-Bk-lOk"/>
                 <constraint firstItem="qo6-mS-OmK" firstAttribute="top" secondItem="J9L-pL-Jti" secondAttribute="bottom" constant="8" id="9Cv-h8-XC1"/>
                 <constraint firstAttribute="trailing" secondItem="OFt-FS-1Bm" secondAttribute="trailing" constant="20" id="FcT-R7-ekL"/>
-                <constraint firstItem="G7j-6Z-aBD" firstAttribute="leading" secondItem="rqJ-OA-JOu" secondAttribute="trailing" constant="8" id="Iko-ub-CG5"/>
+                <constraint firstItem="Ie8-uo-OBP" firstAttribute="top" secondItem="OFt-FS-1Bm" secondAttribute="bottom" constant="10" id="QSU-O0-wSp"/>
                 <constraint firstItem="w9P-Lo-li0" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="Qih-Hf-vAh"/>
                 <constraint firstItem="Nq6-Dd-10K" firstAttribute="top" secondItem="w9P-Lo-li0" secondAttribute="bottom" constant="8" id="RV2-eK-r0x"/>
                 <constraint firstItem="OFt-FS-1Bm" firstAttribute="top" secondItem="w9P-Lo-li0" secondAttribute="bottom" constant="8" id="TUz-1m-dIt"/>
-                <constraint firstItem="Ie8-uo-OBP" firstAttribute="top" secondItem="rqJ-OA-JOu" secondAttribute="bottom" constant="8" id="XCf-TP-sXW"/>
                 <constraint firstAttribute="trailing" secondItem="J9L-pL-Jti" secondAttribute="trailing" constant="20" id="aeI-qU-5Nt"/>
-                <constraint firstItem="vKQ-4c-BuE" firstAttribute="top" secondItem="Nq6-Dd-10K" secondAttribute="bottom" constant="10" id="aif-3M-6bq"/>
                 <constraint firstAttribute="bottom" secondItem="a32-f4-9IG" secondAttribute="bottom" id="crf-oG-0K8"/>
                 <constraint firstItem="J9L-pL-Jti" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="iMW-qL-JSl"/>
                 <constraint firstItem="J9L-pL-Jti" firstAttribute="top" secondItem="Ie8-uo-OBP" secondAttribute="bottom" constant="1" id="lMH-tP-q8k"/>
-                <constraint firstAttribute="trailing" secondItem="G7j-6Z-aBD" secondAttribute="trailing" constant="20" id="n4i-8d-ZF1"/>
                 <constraint firstItem="a32-f4-9IG" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="48" id="pvb-GK-EhE"/>
                 <constraint firstItem="Ie8-uo-OBP" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="rgV-Dk-eC7"/>
-                <constraint firstItem="rqJ-OA-JOu" firstAttribute="leading" secondItem="vKQ-4c-BuE" secondAttribute="trailing" constant="8" id="vhz-jJ-K9H"/>
                 <constraint firstAttribute="bottom" secondItem="qo6-mS-OmK" secondAttribute="bottom" id="wNG-DR-PjQ"/>
             </constraints>
             <connections>
@@ -166,15 +129,12 @@
                 <outlet property="nameInput" destination="OFt-FS-1Bm" id="M1J-rF-7kg"/>
                 <outlet property="projectNameLabel" destination="Nq6-Dd-10K" id="AS6-lA-qAe"/>
                 <outlet property="removeFilePathsButton" destination="a32-f4-9IG" id="dG1-hV-uQZ"/>
-                <outlet property="saveAtButton" destination="G7j-6Z-aBD" id="ozI-X1-Cmy"/>
-                <outlet property="savePathInput" destination="rqJ-OA-JOu" id="ScA-Q8-ud1"/>
             </connections>
             <point key="canvasLocation" x="75" y="162"/>
         </customView>
     </objects>
     <resources>
-        <image name="NSAddTemplate" width="11" height="11"/>
-        <image name="NSPathTemplate" width="16" height="10"/>
-        <image name="NSRemoveTemplate" width="11" height="11"/>
+        <image name="NSAddTemplate" width="14" height="13"/>
+        <image name="NSRemoveTemplate" width="14" height="4"/>
     </resources>
 </document>

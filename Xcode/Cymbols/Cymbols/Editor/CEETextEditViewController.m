@@ -32,7 +32,7 @@
 @property (weak) IBOutlet CEEStateButton *buttonMatchWord;
 @property (weak) IBOutlet CEETextLabel *textSearchLabel;
 @property (weak) IBOutlet NSLayoutConstraint *textSearcherHeight;
-@property (weak) IBOutlet NSLayoutConstraint *verticalScrollerHeight;
+@property (weak) IBOutlet NSLayoutConstraint *horizontalScrollerHeight;
 @property (weak) IBOutlet NSLayoutConstraint *lineNumberViewWidth;
 @property BOOL showLineNumber;
 @property BOOL searchingText;
@@ -134,12 +134,9 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     NSDictionary* configurations = [delegate configurations];
     
     if (configurations[@"line_wrap"])
-        _textView.wrap = [configurations[@"line_wrap"] boolValue];
+        [self setWrap:[configurations[@"line_wrap"] boolValue]];
     else
-        _textView.wrap = YES;
-    
-    if (_textView.wrap)
-        [self showHorizontalScroller:NO];
+        [self setWrap:NO];
     
     if (configurations[@"caret_blink_time_interval"])
         _textView.caretBlinkTimeInterval = [configurations[@"caret_blink_time_interval"] floatValue];
@@ -164,6 +161,9 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     _textView.wrap = flag;
     if (_textView.wrap)
         [self showHorizontalScroller:NO];
+    else
+        [self showHorizontalScroller:YES];
+        
 }
 
 - (void)viewDidAppear {
@@ -217,7 +217,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 
 - (void)showTextSearch:(BOOL)shown {
     if (shown)
-        _textSearcherHeight.constant = 67.0;
+        _textSearcherHeight.constant = 66.0;
     else
         _textSearcherHeight.constant = 0.0;
     [self.view updateConstraints];
@@ -233,9 +233,9 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 
 - (void)showHorizontalScroller:(BOOL)shown {
     if (shown)
-        _verticalScrollerHeight.constant = CEEHorizontalScrollerHeight;
+        _horizontalScrollerHeight.constant = CEEHorizontalScrollerHeight;
     else
-        _verticalScrollerHeight.constant = 0.0;
+        _horizontalScrollerHeight.constant = 0.0;
     [self.view updateConstraints];
 }
 

@@ -23,6 +23,8 @@
     
     if (!error)
         self.content = [bookmarkData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+    else
+        return nil;
     
     return self;
 }

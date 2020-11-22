@@ -33,12 +33,10 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
 
 @implementation CEEProjectCreatorController
 
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     AppDelegate* delegate = [NSApp delegate];
-    _setting = [self.session.project createEmptyProjectSetting];
     
     _settingView = (CEEProjectSettingView*)[delegate nibObjectWithClass:[CEEProjectSettingView class] fromNibNamed:@"ProjectSettingView"];
     [_settingView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
@@ -52,8 +50,6 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     [_settingView.filePathTable setDelegate:self];
     [_settingView.filePathTable setColumns:2];
     [_settingView.filePathTable setAllowsMultipleSelection:YES];
-    [_settingView.saveAtButton setTarget:self];
-    [_settingView.saveAtButton setAction:@selector(selectSavePath:)];
     [_settingView.addFilePathButton setTarget:self];
     [_settingView.addFilePathButton setAction:@selector(addUserSelectedFilePaths:)];
     [_settingView.removeFilePathsButton setTarget:self];
@@ -66,6 +62,7 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
 }
 
 - (void)viewWillAppear {
+    _setting = [self.session.project createEmptyProjectSetting];
     _scene = kCEEProjectSetting;
     [self createScene:_scene];
     [self setViewStyleState:kCEEViewStyleStateActived];
@@ -79,7 +76,6 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     
     if (scene == kCEEProjectSetting) {
         _settingView.nameInput.stringValue = _setting.name;
-        _settingView.savePathInput.stringValue = _setting.path;
         [_settingView.filePathTable reloadData];
         _currentView = (CEEView*)_settingView;
         _button0.title = @"Cancel";
@@ -90,13 +86,11 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
         [_propertyView.filePathTable reloadData];
         _currentView = (CEEView*)_propertyView;
         _setting.name = _settingView.nameInput.stringValue;
-        _setting.path = _settingView.savePathInput.stringValue;
-        
         _propertyView.projectNameLabel.stringValue = [NSString stringWithFormat:@"Project Name: %@", _setting.name];
         _propertyView.savePathLabel.stringValue = [NSString stringWithFormat:@"Project Path: %@", _setting.path];
         _propertyView.sourceFileLabel.stringValue = [NSString stringWithFormat:@"%lu Files will be added to Project", (unsigned long)_setting.filePathsExpanded.count];
         _button0.title = @"Previous";
-        _button1.title = @"Complete";
+        _button1.title = @"Create";
     }
     
     [_currentView setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -124,10 +118,9 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     }
 }
 
-- (IBAction)button1Action:(id)sender {    
+- (IBAction)button1Action:(id)sender {
     if (_scene == kCEEProjectSetting) {
-        _scene = kCEEProjectProperty;
-        [self createScene:_scene];
+        [self selectSavePath:self];
     }
     else if (_scene == kCEEProjectProperty) {
         [self createProject];
@@ -136,6 +129,9 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
 }
 
 - (void)createProject {
+    if (_setting.bookmark)
+        [self.session.project startAccessSecurityScopedResourcesWithBookmarks:@[_setting.bookmark]];
+    
     CEEProjectController* controller = nil;
     if (!self.session.project.database) {
         [self.session.project setProperties:_setting];
@@ -144,6 +140,10 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
         controller = [NSDocumentController sharedDocumentController];
         [controller createProjectFromSetting:_setting];
     }
+    [self.session.project saveProjectSettingAsDefault:_setting];
+    
+    if (_setting.bookmark)
+        [self.session.project stopAccessSecurityScopedResourcesWithBookmarks:@[_setting.bookmark]];
 }
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
@@ -212,17 +212,25 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
 
 - (IBAction)selectSavePath:(id)sender {
     NSOpenPanel* openPanel = [NSOpenPanel openPanel];
-    NSURL* URL = [[NSURL alloc] initFileURLWithPath:NSHomeDirectory() isDirectory:YES];
+    NSString* filePath = NSHomeDirectory();
+    if (_setting.path)
+        filePath = _setting.path;
+    NSURL* URL = [[NSURL alloc] initFileURLWithPath:filePath isDirectory:YES];
+    //[openPanel setAccessoryView:[[CEEView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 100.0, 100.0)] ];
     [openPanel setDirectoryURL:URL];
     [openPanel setCanChooseDirectories:YES];
     [openPanel setAllowsMultipleSelection:NO];
     [openPanel setCanChooseFiles:YES];
-    [openPanel setCanCreateDirectories:NO];
+    [openPanel setCanCreateDirectories:YES];
     [openPanel setDelegate:self];
+    [openPanel setPrompt:@"Next"];
     [openPanel beginSheetModalForWindow:self.view.window completionHandler: (^(NSInteger result){
         [NSApp stopModalWithCode:result];
         if (result == NSModalResponseOK) {
-            self->_settingView.savePathInput.stringValue = [[openPanel URL] path];
+            self->_setting.path = [[openPanel URL] path];
+            self->_setting.bookmark = nil;
+            self->_scene = kCEEProjectProperty;
+            [self createScene:self->_scene];
         }
     })];
     

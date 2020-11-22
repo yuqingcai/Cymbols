@@ -324,8 +324,8 @@ static void binary_buffer_modified(cee_pointer buffer,
 
 - (void)createTemporyDirectory {
     NSArray* searchPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    NSString* applicationSupportDirectory = [searchPaths firstObject];
-    _temporaryDirectory = [applicationSupportDirectory stringByAppendingPathComponent:@"Cymbols/Backups/Untitled"];
+    NSString* applicationSupportDirectory = [[searchPaths firstObject] stringByAppendingPathComponent:@"Cymbols"];
+    _temporaryDirectory = [applicationSupportDirectory stringByAppendingPathComponent:@"Backups/Untitled"];
     if (![[NSFileManager defaultManager] fileExistsAtPath:_temporaryDirectory isDirectory:nil])
         [[NSFileManager defaultManager] createDirectoryAtPath:_temporaryDirectory withIntermediateDirectories:YES attributes:nil error:nil];
 }

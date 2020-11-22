@@ -43,6 +43,7 @@ NSDictionary* JSONDictionaryFromString(NSString* string);
 @interface CEEProjectSetting : NSObject
 @property (strong) NSString* name;
 @property (strong) NSString* path;
+@property (strong) CEESecurityBookmark* bookmark;
 @property (strong) NSArray* filePathsUserSelected;
 @property (strong) NSArray* filePathsExpanded;
 - (NSString*)databasePath;
@@ -116,6 +117,7 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 - (void)addFilePaths:(NSArray*)filePaths;
 - (void)removeFilePaths:(NSArray*)filePaths;
 - (CEEProjectSetting*)createEmptyProjectSetting;
+- (void)saveProjectSettingAsDefault:(CEEProjectSetting*)setting;
 - (void)deleteAllSessions;
 - (void)syncSourceSymbols:(CEESourceBuffer*)buffer;
 - (void)addSecurityBookmarksWithFilePaths:(NSArray*)filePaths;

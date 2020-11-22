@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -15,57 +15,31 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView identifier="ClassTextView.IDVerticalScroller" translatesAutoresizingMaskIntoConstraints="NO" id="jkq-fw-xdi" customClass="CEEScroller">
-                                <rect key="frame" x="560" y="0.0" width="15" height="233"/>
+                                <rect key="frame" x="560" y="66" width="15" height="234"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="15" id="uho-X4-FJn"/>
+                                    <constraint firstAttribute="width" constant="15" id="Ecl-ru-clD"/>
                                 </constraints>
                             </customView>
                             <customView identifier="ClassTextView.IDHorizontalScroller" translatesAutoresizingMaskIntoConstraints="NO" id="qpQ-df-c8I" customClass="CEEScroller">
-                                <rect key="frame" x="60" y="0.0" width="500" height="15"/>
+                                <rect key="frame" x="60" y="66" width="500" height="15"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="15" id="iRT-h8-QaO"/>
+                                    <constraint firstAttribute="height" constant="15" id="CZD-uU-Ysp"/>
                                 </constraints>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="f9i-e6-6yN" customClass="CEELineNumberView">
-                                <rect key="frame" x="0.0" y="0.0" width="60" height="233"/>
+                                <rect key="frame" x="0.0" y="66" width="60" height="234"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="60" id="QO8-4Y-ODf"/>
+                                    <constraint firstAttribute="width" constant="60" id="VgX-tm-6mI"/>
                                 </constraints>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="kKt-JL-Aih" customClass="CEETitleView">
-                                <rect key="frame" x="0.0" y="233" width="575" height="67"/>
+                            <customView identifier="IDTextSearchView" translatesAutoresizingMaskIntoConstraints="NO" id="kKt-JL-Aih" customClass="CEETitleView">
+                                <rect key="frame" x="0.0" y="0.0" width="575" height="66"/>
                                 <subviews>
-                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="IBL-aU-c8f" customClass="CEEButton">
-                                        <rect key="frame" x="545" y="37" width="24" height="24"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="24" id="9eT-Wj-Lbk"/>
-                                            <constraint firstAttribute="height" constant="24" id="Urt-nl-sDM"/>
-                                        </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_close_16x16"/>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="closeTextSearcher:" target="Ago-IL-Isb" id="nbU-XI-xqG"/>
-                                        </connections>
-                                    </customView>
-                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="mMC-Hd-AXe" customClass="CEEButton">
-                                        <rect key="frame" x="518" y="37" width="24" height="24"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="4Ph-B0-utc"/>
-                                            <constraint firstAttribute="width" constant="24" id="KAS-gS-6fe"/>
-                                        </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_navigate_down_16x16"/>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="nextSearched:" target="Ago-IL-Isb" id="v5K-TE-k5y"/>
-                                        </connections>
-                                    </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="83W-b2-4kh" customClass="CEEStateButton">
-                                        <rect key="frame" x="33" y="37" width="24" height="24"/>
+                                        <rect key="frame" x="36" y="36" width="24" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="Ri2-UJ-KJ2"/>
-                                            <constraint firstAttribute="width" constant="24" id="yFN-0E-Qj0"/>
+                                            <constraint firstAttribute="height" constant="24" id="G7T-QM-f9S"/>
+                                            <constraint firstAttribute="width" constant="24" id="jAx-dn-5Rq"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_character_16x16"/>
@@ -75,10 +49,10 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="p8z-hB-UZ2" customClass="CEEStateButton">
-                                        <rect key="frame" x="60" y="37" width="24" height="24"/>
+                                        <rect key="frame" x="66" y="36" width="24" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="ME9-Oo-Lvf"/>
-                                            <constraint firstAttribute="width" constant="24" id="jxV-My-V4v"/>
+                                            <constraint firstAttribute="width" constant="24" id="JUa-AM-7zY"/>
+                                            <constraint firstAttribute="height" constant="24" id="bdd-wf-SER"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_whole_word_16x16"/>
@@ -88,10 +62,10 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="tmX-ko-mzp" customClass="CEEStateButton">
-                                        <rect key="frame" x="6" y="37" width="24" height="24"/>
+                                        <rect key="frame" x="6" y="36" width="24" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="58R-w0-sNh"/>
-                                            <constraint firstAttribute="width" constant="24" id="8fR-hL-GRe"/>
+                                            <constraint firstAttribute="width" constant="24" id="rCQ-Mb-REa"/>
+                                            <constraint firstAttribute="height" constant="24" id="zDg-yL-wmj"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_regex_16x16"/>
@@ -101,27 +75,53 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="zwB-Mp-2LG" customClass="CEETextField">
-                                        <rect key="frame" x="128" y="37" width="271" height="24"/>
+                                        <rect key="frame" x="128" y="36" width="261" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="deI-2W-8fg"/>
-                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="32" id="io5-24-zYS"/>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="32" id="1OT-uf-f6b"/>
+                                            <constraint firstAttribute="height" constant="24" id="jgS-sa-Smt"/>
                                         </constraints>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="JwB-GE-K7G" customClass="CEETextLabel">
-                                        <rect key="frame" x="405" y="37" width="110" height="24"/>
+                                        <rect key="frame" x="395" y="36" width="174" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="110" id="ITV-OA-ZqU"/>
-                                            <constraint firstAttribute="height" constant="24" id="fBA-AQ-uin"/>
+                                            <constraint firstAttribute="width" constant="174" id="Fhv-kf-5Ky"/>
+                                            <constraint firstAttribute="height" constant="24" id="vId-nD-7dh"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="0 matches"/>
                                         </userDefinedRuntimeAttributes>
                                     </customView>
-                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="7TO-lK-xhN" customClass="CEEButton">
-                                        <rect key="frame" x="491" y="37" width="24" height="24"/>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="IBL-aU-c8f" customClass="CEEButton">
+                                        <rect key="frame" x="545" y="36" width="24" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="24" id="JGL-o2-tdO"/>
-                                            <constraint firstAttribute="height" constant="24" id="Xi5-hS-l59"/>
+                                            <constraint firstAttribute="height" constant="24" id="Up3-LH-lzW"/>
+                                            <constraint firstAttribute="width" constant="24" id="Uwv-4t-tdQ"/>
+                                        </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_close_16x16"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="closeTextSearcher:" target="Ago-IL-Isb" id="nbU-XI-xqG"/>
+                                        </connections>
+                                    </customView>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="mMC-Hd-AXe" customClass="CEEButton">
+                                        <rect key="frame" x="515" y="36" width="24" height="24"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="24" id="dw4-vW-MZg"/>
+                                            <constraint firstAttribute="width" constant="24" id="nbl-XR-Dzq"/>
+                                        </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_navigate_down_16x16"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="nextSearched:" target="Ago-IL-Isb" id="v5K-TE-k5y"/>
+                                        </connections>
+                                    </customView>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="7TO-lK-xhN" customClass="CEEButton">
+                                        <rect key="frame" x="485" y="36" width="24" height="24"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="24" id="HjF-wD-yt2"/>
+                                            <constraint firstAttribute="height" constant="24" id="nEs-1b-XRj"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_navigate_up_16x16"/>
@@ -131,17 +131,17 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="78V-Ns-7U2" customClass="CEETextField">
-                                        <rect key="frame" x="128" y="7" width="271" height="24"/>
+                                        <rect key="frame" x="128" y="6" width="261" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="32" id="EwK-qy-kp7"/>
-                                            <constraint firstAttribute="height" constant="24" id="KWC-vF-alj"/>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="32" id="Op5-4p-pYA"/>
+                                            <constraint firstAttribute="height" constant="24" id="xaK-vF-TcH"/>
                                         </constraints>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="doo-bE-zBW" customClass="CEEButton">
-                                        <rect key="frame" x="405" y="7" width="80" height="24"/>
+                                        <rect key="frame" x="395" y="6" width="84" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="80" id="IIt-uT-7bU"/>
-                                            <constraint firstAttribute="height" constant="24" id="fWX-da-o0A"/>
+                                            <constraint firstAttribute="height" constant="24" id="eb2-ug-XjX"/>
+                                            <constraint firstAttribute="width" constant="84" id="zEB-a0-LCT"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="title" value="Replace"/>
@@ -151,10 +151,10 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="rNb-xI-fDo" customClass="CEEButton">
-                                        <rect key="frame" x="491" y="7" width="78" height="24"/>
+                                        <rect key="frame" x="485" y="6" width="84" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="GkJ-Io-Kyy"/>
-                                            <constraint firstAttribute="width" constant="78" id="mD7-DB-lnX"/>
+                                            <constraint firstAttribute="width" constant="84" id="dxA-yL-lmX"/>
+                                            <constraint firstAttribute="height" constant="24" id="pFP-QQ-0AY"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="title" value="Replace All"/>
@@ -164,20 +164,20 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="xMz-fk-g7n" customClass="CEETextLabel">
-                                        <rect key="frame" x="90" y="37" width="38" height="24"/>
+                                        <rect key="frame" x="90" y="36" width="38" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="bdY-Jw-3us"/>
-                                            <constraint firstAttribute="width" constant="38" id="uKf-ql-itU"/>
+                                            <constraint firstAttribute="height" constant="24" id="Kvn-B5-HlT"/>
+                                            <constraint firstAttribute="width" constant="38" id="a2K-WA-a6J"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Find:"/>
                                         </userDefinedRuntimeAttributes>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="dt9-gC-ZJF" customClass="CEETextLabel">
-                                        <rect key="frame" x="70" y="7" width="58" height="24"/>
+                                        <rect key="frame" x="70" y="6" width="58" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="Oab-yr-cjN"/>
-                                            <constraint firstAttribute="width" constant="58" id="q2F-mP-BrJ"/>
+                                            <constraint firstAttribute="height" constant="24" id="6ZK-FH-mky"/>
+                                            <constraint firstAttribute="width" constant="58" id="Oec-hh-40Q"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Replace:"/>
@@ -185,78 +185,78 @@
                                     </customView>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="78V-Ns-7U2" firstAttribute="top" secondItem="p8z-hB-UZ2" secondAttribute="bottom" constant="6" id="8cN-XU-ifi"/>
-                                    <constraint firstItem="p8z-hB-UZ2" firstAttribute="leading" secondItem="83W-b2-4kh" secondAttribute="trailing" constant="3" id="AZ3-gD-wKI"/>
-                                    <constraint firstItem="doo-bE-zBW" firstAttribute="top" secondItem="JwB-GE-K7G" secondAttribute="bottom" constant="6" id="AZx-gP-nyy"/>
-                                    <constraint firstItem="mMC-Hd-AXe" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="EQf-XN-WQO"/>
-                                    <constraint firstItem="tmX-ko-mzp" firstAttribute="leading" secondItem="kKt-JL-Aih" secondAttribute="leading" constant="6" id="EaQ-dV-Tuv"/>
-                                    <constraint firstItem="dt9-gC-ZJF" firstAttribute="top" secondItem="83W-b2-4kh" secondAttribute="bottom" constant="6" id="FSb-HS-GMu"/>
-                                    <constraint firstItem="zwB-Mp-2LG" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="GtT-TV-gDh"/>
-                                    <constraint firstAttribute="height" constant="67" id="JNu-un-XeY"/>
-                                    <constraint firstItem="rNb-xI-fDo" firstAttribute="leading" secondItem="doo-bE-zBW" secondAttribute="trailing" constant="6" id="NCP-2C-CQH"/>
-                                    <constraint firstItem="7TO-lK-xhN" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="NrQ-KB-zsI"/>
-                                    <constraint firstItem="83W-b2-4kh" firstAttribute="leading" secondItem="tmX-ko-mzp" secondAttribute="trailing" constant="3" id="RyU-UF-dSM"/>
-                                    <constraint firstItem="JwB-GE-K7G" firstAttribute="leading" secondItem="zwB-Mp-2LG" secondAttribute="trailing" constant="6" id="SXm-cG-vq3"/>
-                                    <constraint firstItem="zwB-Mp-2LG" firstAttribute="leading" secondItem="xMz-fk-g7n" secondAttribute="trailing" id="WtB-18-HT0"/>
-                                    <constraint firstItem="rNb-xI-fDo" firstAttribute="top" secondItem="IBL-aU-c8f" secondAttribute="bottom" constant="6" id="YUL-6c-wfZ"/>
-                                    <constraint firstItem="7TO-lK-xhN" firstAttribute="leading" secondItem="JwB-GE-K7G" secondAttribute="trailing" constant="-24" id="Zn1-lu-h0h"/>
-                                    <constraint firstItem="IBL-aU-c8f" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="aR3-Ga-61E"/>
-                                    <constraint firstItem="mMC-Hd-AXe" firstAttribute="leading" secondItem="7TO-lK-xhN" secondAttribute="trailing" constant="3" id="bDY-Su-bP1"/>
-                                    <constraint firstItem="tmX-ko-mzp" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="c3m-MU-62X"/>
-                                    <constraint firstItem="78V-Ns-7U2" firstAttribute="leading" secondItem="dt9-gC-ZJF" secondAttribute="trailing" id="dkE-PB-VpV"/>
-                                    <constraint firstAttribute="trailing" secondItem="IBL-aU-c8f" secondAttribute="trailing" constant="6" id="e1Z-at-eTs"/>
-                                    <constraint firstItem="dt9-gC-ZJF" firstAttribute="leading" secondItem="kKt-JL-Aih" secondAttribute="leading" constant="70" id="f8U-O7-gzg"/>
-                                    <constraint firstItem="83W-b2-4kh" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="imW-Q9-HgD"/>
-                                    <constraint firstItem="JwB-GE-K7G" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="lxD-Dy-HrY"/>
-                                    <constraint firstItem="IBL-aU-c8f" firstAttribute="leading" secondItem="mMC-Hd-AXe" secondAttribute="trailing" constant="3" id="mDb-kf-Aaa"/>
-                                    <constraint firstItem="doo-bE-zBW" firstAttribute="leading" secondItem="78V-Ns-7U2" secondAttribute="trailing" constant="6" id="nW5-1K-onA"/>
-                                    <constraint firstItem="xMz-fk-g7n" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="twe-UC-K5Y"/>
-                                    <constraint firstAttribute="trailing" secondItem="rNb-xI-fDo" secondAttribute="trailing" constant="6" id="vDe-gh-kIF"/>
-                                    <constraint firstItem="xMz-fk-g7n" firstAttribute="leading" secondItem="p8z-hB-UZ2" secondAttribute="trailing" constant="6" id="wsi-OQ-jEw"/>
-                                    <constraint firstItem="p8z-hB-UZ2" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="xyp-9L-iXa"/>
+                                    <constraint firstItem="rNb-xI-fDo" firstAttribute="leading" secondItem="doo-bE-zBW" secondAttribute="trailing" constant="6" id="2SR-QD-FT2"/>
+                                    <constraint firstAttribute="bottom" secondItem="doo-bE-zBW" secondAttribute="bottom" constant="6" id="69e-H8-Ay3"/>
+                                    <constraint firstItem="tmX-ko-mzp" firstAttribute="leading" secondItem="kKt-JL-Aih" secondAttribute="leading" constant="6" id="CEj-56-tsm"/>
+                                    <constraint firstItem="JwB-GE-K7G" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="Ews-Tj-wvc"/>
+                                    <constraint firstAttribute="trailing" secondItem="JwB-GE-K7G" secondAttribute="trailing" constant="6" id="FZs-r5-in4"/>
+                                    <constraint firstAttribute="bottom" secondItem="rNb-xI-fDo" secondAttribute="bottom" constant="6" id="Lr1-sO-RPo"/>
+                                    <constraint firstItem="78V-Ns-7U2" firstAttribute="leading" secondItem="dt9-gC-ZJF" secondAttribute="trailing" id="Nez-07-nFd"/>
+                                    <constraint firstItem="xMz-fk-g7n" firstAttribute="leading" secondItem="p8z-hB-UZ2" secondAttribute="trailing" id="PaS-EV-UME"/>
+                                    <constraint firstItem="zwB-Mp-2LG" firstAttribute="leading" secondItem="xMz-fk-g7n" secondAttribute="trailing" id="PfY-o0-V51"/>
+                                    <constraint firstItem="p8z-hB-UZ2" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="Q44-ZH-3vb"/>
+                                    <constraint firstAttribute="bottom" secondItem="dt9-gC-ZJF" secondAttribute="bottom" constant="6" id="Q8P-jX-9uB"/>
+                                    <constraint firstItem="mMC-Hd-AXe" firstAttribute="leading" secondItem="7TO-lK-xhN" secondAttribute="trailing" constant="6" id="TWC-WR-Wfi"/>
+                                    <constraint firstItem="dt9-gC-ZJF" firstAttribute="leading" secondItem="kKt-JL-Aih" secondAttribute="leading" constant="70" id="Vc3-Tt-Umd"/>
+                                    <constraint firstItem="83W-b2-4kh" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="b91-Aw-soQ"/>
+                                    <constraint firstItem="IBL-aU-c8f" firstAttribute="leading" secondItem="mMC-Hd-AXe" secondAttribute="trailing" constant="6" id="blo-Ya-gdD"/>
+                                    <constraint firstItem="7TO-lK-xhN" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="cqs-bH-EsJ"/>
+                                    <constraint firstItem="mMC-Hd-AXe" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="fK1-Xj-F9Y"/>
+                                    <constraint firstItem="p8z-hB-UZ2" firstAttribute="leading" secondItem="83W-b2-4kh" secondAttribute="trailing" constant="6" id="hTP-FP-pdp"/>
+                                    <constraint firstItem="xMz-fk-g7n" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="ky3-2s-3Fq"/>
+                                    <constraint firstItem="IBL-aU-c8f" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="mIv-u5-cJO"/>
+                                    <constraint firstItem="doo-bE-zBW" firstAttribute="leading" secondItem="78V-Ns-7U2" secondAttribute="trailing" constant="6" id="mgO-9E-v7g"/>
+                                    <constraint firstAttribute="trailing" secondItem="IBL-aU-c8f" secondAttribute="trailing" constant="6" id="mho-C1-7Rh"/>
+                                    <constraint firstAttribute="bottom" secondItem="78V-Ns-7U2" secondAttribute="bottom" constant="6" id="n7P-FP-5Vm"/>
+                                    <constraint firstAttribute="height" constant="66" id="pYN-Y2-Ion"/>
+                                    <constraint firstItem="83W-b2-4kh" firstAttribute="leading" secondItem="tmX-ko-mzp" secondAttribute="trailing" constant="6" id="sSQ-5L-Ler"/>
+                                    <constraint firstAttribute="trailing" secondItem="rNb-xI-fDo" secondAttribute="trailing" constant="6" id="tnb-GP-ivu"/>
+                                    <constraint firstItem="JwB-GE-K7G" firstAttribute="leading" secondItem="zwB-Mp-2LG" secondAttribute="trailing" constant="6" id="vJq-Fr-lGr"/>
+                                    <constraint firstItem="zwB-Mp-2LG" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="vy4-ql-5Rs"/>
+                                    <constraint firstItem="tmX-ko-mzp" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="zqN-Qp-SIh"/>
                                 </constraints>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="E4V-hL-D43" customClass="CEETextView">
-                                <rect key="frame" x="60" y="15" width="500" height="218"/>
+                                <rect key="frame" x="60" y="81" width="500" height="219"/>
                                 <connections>
                                     <outlet property="menu" destination="vud-lC-Ogt" id="U8O-hi-Pqi"/>
                                 </connections>
                             </customView>
                         </subviews>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="qpQ-df-c8I" secondAttribute="bottom" id="35k-up-jTY"/>
-                            <constraint firstAttribute="bottom" secondItem="f9i-e6-6yN" secondAttribute="bottom" id="5nw-Jc-LJZ"/>
-                            <constraint firstItem="E4V-hL-D43" firstAttribute="leading" secondItem="f9i-e6-6yN" secondAttribute="trailing" id="8LV-DK-4ex"/>
-                            <constraint firstItem="E4V-hL-D43" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="bottom" id="JGw-E5-gEN"/>
-                            <constraint firstItem="f9i-e6-6yN" firstAttribute="leading" secondItem="s8f-ON-9fZ" secondAttribute="leading" id="Juk-gd-bUa"/>
-                            <constraint firstItem="qpQ-df-c8I" firstAttribute="leading" secondItem="f9i-e6-6yN" secondAttribute="trailing" id="LDA-b7-od6"/>
-                            <constraint firstItem="kKt-JL-Aih" firstAttribute="leading" secondItem="s8f-ON-9fZ" secondAttribute="leading" id="SQX-du-geE"/>
-                            <constraint firstItem="kKt-JL-Aih" firstAttribute="top" secondItem="s8f-ON-9fZ" secondAttribute="top" id="UwU-Vp-SkG"/>
-                            <constraint firstItem="jkq-fw-xdi" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="bottom" id="Wro-VQ-SER"/>
-                            <constraint firstItem="jkq-fw-xdi" firstAttribute="leading" secondItem="qpQ-df-c8I" secondAttribute="trailing" id="ZBo-FM-eFI"/>
-                            <constraint firstItem="qpQ-df-c8I" firstAttribute="top" secondItem="E4V-hL-D43" secondAttribute="bottom" id="a9L-DN-G1j"/>
-                            <constraint firstAttribute="trailing" secondItem="jkq-fw-xdi" secondAttribute="trailing" id="an4-nP-DQR"/>
-                            <constraint firstAttribute="bottom" secondItem="jkq-fw-xdi" secondAttribute="bottom" id="fUv-NN-910"/>
-                            <constraint firstAttribute="trailing" secondItem="kKt-JL-Aih" secondAttribute="trailing" id="jBf-wk-bCP"/>
-                            <constraint firstItem="jkq-fw-xdi" firstAttribute="leading" secondItem="E4V-hL-D43" secondAttribute="trailing" id="pUZ-oU-vTb"/>
-                            <constraint firstItem="f9i-e6-6yN" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="bottom" id="t4C-la-pNb"/>
+                            <constraint firstItem="kKt-JL-Aih" firstAttribute="top" secondItem="qpQ-df-c8I" secondAttribute="bottom" id="5Mm-Mj-Pwa"/>
+                            <constraint firstItem="kKt-JL-Aih" firstAttribute="leading" secondItem="s8f-ON-9fZ" secondAttribute="leading" id="5vr-DG-41g"/>
+                            <constraint firstItem="jkq-fw-xdi" firstAttribute="leading" secondItem="E4V-hL-D43" secondAttribute="trailing" id="72B-5j-VdW"/>
+                            <constraint firstItem="E4V-hL-D43" firstAttribute="top" secondItem="s8f-ON-9fZ" secondAttribute="top" id="BXI-Sd-aP2"/>
+                            <constraint firstItem="qpQ-df-c8I" firstAttribute="top" secondItem="E4V-hL-D43" secondAttribute="bottom" id="Clo-1y-ohP"/>
+                            <constraint firstAttribute="trailing" secondItem="jkq-fw-xdi" secondAttribute="trailing" id="San-Fy-tjt"/>
+                            <constraint firstItem="kKt-JL-Aih" firstAttribute="top" secondItem="jkq-fw-xdi" secondAttribute="bottom" id="Tgo-Fp-pvJ"/>
+                            <constraint firstItem="jkq-fw-xdi" firstAttribute="top" secondItem="s8f-ON-9fZ" secondAttribute="top" id="VY8-vz-mDS"/>
+                            <constraint firstItem="f9i-e6-6yN" firstAttribute="leading" secondItem="s8f-ON-9fZ" secondAttribute="leading" id="Vdj-76-Wsj"/>
+                            <constraint firstAttribute="trailing" secondItem="kKt-JL-Aih" secondAttribute="trailing" id="bHU-8y-lUJ"/>
+                            <constraint firstItem="kKt-JL-Aih" firstAttribute="top" secondItem="f9i-e6-6yN" secondAttribute="bottom" id="cNa-Rf-lIM"/>
+                            <constraint firstItem="E4V-hL-D43" firstAttribute="leading" secondItem="f9i-e6-6yN" secondAttribute="trailing" id="dmr-V4-rMM"/>
+                            <constraint firstItem="f9i-e6-6yN" firstAttribute="top" secondItem="s8f-ON-9fZ" secondAttribute="top" id="ign-4l-fgU"/>
+                            <constraint firstItem="qpQ-df-c8I" firstAttribute="leading" secondItem="f9i-e6-6yN" secondAttribute="trailing" id="pNm-mg-IIB"/>
+                            <constraint firstItem="jkq-fw-xdi" firstAttribute="leading" secondItem="qpQ-df-c8I" secondAttribute="trailing" id="z1S-r1-wav"/>
+                            <constraint firstAttribute="bottom" secondItem="kKt-JL-Aih" secondAttribute="bottom" id="zyq-uH-hHB"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="buttonCaseSensitive" destination="83W-b2-4kh" id="QgS-tu-3et"/>
-                        <outlet property="buttonMatchWord" destination="p8z-hB-UZ2" id="vcI-JZ-WAF"/>
-                        <outlet property="buttonRegex" destination="tmX-ko-mzp" id="WKe-T4-8xK"/>
+                        <outlet property="buttonCaseSensitive" destination="83W-b2-4kh" id="oLb-rc-8ln"/>
+                        <outlet property="buttonMatchWord" destination="p8z-hB-UZ2" id="WnF-Sf-J8A"/>
+                        <outlet property="buttonRegex" destination="tmX-ko-mzp" id="rQl-4K-tnH"/>
                         <outlet property="horizontalScroller" destination="qpQ-df-c8I" id="QQc-NW-qn2"/>
+                        <outlet property="horizontalScrollerHeight" destination="CZD-uU-Ysp" id="plX-sY-HOH"/>
                         <outlet property="lineNmberView" destination="f9i-e6-6yN" id="uYx-T5-Ozg"/>
-                        <outlet property="lineNumberViewWidth" destination="QO8-4Y-ODf" id="aI3-md-sMm"/>
+                        <outlet property="lineNumberViewWidth" destination="VgX-tm-6mI" id="TqU-SJ-7i3"/>
                         <outlet property="replaceInput" destination="78V-Ns-7U2" id="Y6T-7l-EkC"/>
                         <outlet property="searchInput" destination="zwB-Mp-2LG" id="ynt-Mn-SPi"/>
                         <outlet property="textSearchLabel" destination="JwB-GE-K7G" id="plx-6s-fFX"/>
                         <outlet property="textSearcher" destination="kKt-JL-Aih" id="28u-E3-m6T"/>
-                        <outlet property="textSearcherHeight" destination="JNu-un-XeY" id="Zof-74-yjD"/>
+                        <outlet property="textSearcherHeight" destination="pYN-Y2-Ion" id="JHj-m4-2sd"/>
                         <outlet property="textView" destination="E4V-hL-D43" id="yeM-St-cns"/>
                         <outlet property="verticalScroller" destination="jkq-fw-xdi" id="D7W-i8-gA4"/>
-                        <outlet property="verticalScrollerHeight" destination="iRT-h8-QaO" id="qKV-rN-SOR"/>
                     </connections>
                 </viewController>
                 <customObject id="76x-dZ-nfA" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

@@ -146,6 +146,9 @@
     if (port != _port)
         return;
     
+    if (_buffer == [_port activedSourceBuffer])
+        return;
+    
     _buffer = [_port activedSourceBuffer];
     [self presentSymbols];
 }
@@ -155,6 +158,10 @@
         return;
     
     _port = [_session activedPort];
+    
+    if (_buffer == [_port activedSourceBuffer])
+        return;
+    
     _buffer = [_port activedSourceBuffer];
     [self presentSymbols];
 }

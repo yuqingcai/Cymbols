@@ -9,10 +9,11 @@
 #import "CEEViewController.h"
 #import "CEETableView.h"
 #import "CEEProject.h"
+#import "CEETextField.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CEEProjectCreatorController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, NSOpenSavePanelDelegate>
+@interface CEEProjectCreatorController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, NSOpenSavePanelDelegate, CEETextViewDelegate>
 @property (weak) CEESession* session;
 
 @end

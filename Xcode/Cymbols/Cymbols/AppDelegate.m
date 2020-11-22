@@ -85,8 +85,8 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 }
 
 - (void)configure {
-    NSString* filepath = [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
-    _activedConfigurations = [CEEJSONReader objectFromFile:filepath];
+    NSString* filePath = [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
+    _activedConfigurations = [CEEJSONReader objectFromFile:filePath];
     _configurations = _activedConfigurations;
 }
 
@@ -208,8 +208,8 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 - (void)setConfiguration:(NSString*)configuration value:(NSString*)value {
     [_activedConfigurations setValue:value forKey:configuration];
     _configurations = _activedConfigurations;
-    NSString* filepath = [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
-    [CEEJSONReader object:_activedConfigurations toFile:filepath];
+    NSString* filePath = [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
+    [CEEJSONReader object:_activedConfigurations toFile:filePath];
 }
 
 @end

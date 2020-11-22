@@ -160,25 +160,24 @@ typedef struct _JavaParser {
     ParseTrap block_header_traps[CEETokenID_MAX];
 } JavaParser;
 
-static cee_short java_class_definition_translate_table[kJavaClassDefinitionTranslateStateMax][CEETokenID_MAX];
-static cee_short java_interface_definition_translate_table[kJavaInterfaceDefinitionTranslateStateMax][CEETokenID_MAX];
-static cee_short java_enum_definition_translate_table[kJavaEnumDefinitionTranslateStateMax][CEETokenID_MAX];
-static cee_short java_method_definition_translate_table[kJavaMethodDefinitionTranslateStateMax][CEETokenID_MAX];
-static cee_short java_method_parameters_declaration_translate_table[kJavaMethodParametersDeclarationTranslateStateMax][CEETokenID_MAX];
-static cee_short java_declaration_translate_table[kJavaDeclarationTranslateStateMax][CEETokenID_MAX];
-static cee_short java_import_statement_translate_table[kJavaImportStatementTranslateStateMax][CEETokenID_MAX];
-static cee_short java_package_statement_translate_table[kJavaPackageStatementTranslateStateMax][CEETokenID_MAX];
-
-static CEETokenIdentifierType java_token_identifier_type_map[CEETokenID_MAX];
+static CEETokenType java_token_type_map[CEETokenID_MAX];
+static cee_int java_class_definition_translate_table[kJavaClassDefinitionTranslateStateMax][CEETokenID_MAX];
+static cee_int java_interface_definition_translate_table[kJavaInterfaceDefinitionTranslateStateMax][CEETokenID_MAX];
+static cee_int java_enum_definition_translate_table[kJavaEnumDefinitionTranslateStateMax][CEETokenID_MAX];
+static cee_int java_method_definition_translate_table[kJavaMethodDefinitionTranslateStateMax][CEETokenID_MAX];
+static cee_int java_method_parameters_declaration_translate_table[kJavaMethodParametersDeclarationTranslateStateMax][CEETokenID_MAX];
+static cee_int java_declaration_translate_table[kJavaDeclarationTranslateStateMax][CEETokenID_MAX];
+static cee_int java_import_statement_translate_table[kJavaImportStatementTranslateStateMax][CEETokenID_MAX];
+static cee_int java_package_statement_translate_table[kJavaPackageStatementTranslateStateMax][CEETokenID_MAX];
 
 static JavaParser* parser_create(void);
 static void parser_free(cee_pointer data);
-static void parser_block_header_trap_init(JavaParser* parser);
+static void java_block_header_trap_init(JavaParser* parser);
 static void java_token_type_map_init(void);
 static CEEList* skip_type_parameter_list(CEEList* p,
                                          cee_boolean reverse);
 static cee_boolean token_type_matcher(CEEToken* token,
-                                      CEETokenIdentifierType type);
+                                      CEETokenType type);
 static cee_boolean token_id_is_assignment(CEETokenID identifier);
 static cee_boolean token_id_is_builtin_type(CEETokenID identifier);
 static cee_boolean token_id_is_declaration_specifier(CEETokenID identifier);
@@ -223,17 +222,29 @@ static cee_boolean comment_token_push(JavaParser* parser,
                                       CEEToken* push);
 static cee_boolean comment_fregment_reduce(JavaParser* parser);
 static cee_boolean comment_attach(JavaParser* parser);
-static cee_boolean statement_token_push(JavaParser* parser,
-                                        CEEToken* push);
 static void block_header_parse(JavaParser* parser);
 static void block_push(JavaParser* parser);
 static cee_boolean block_pop(JavaParser* parser);
 static void block_parse(JavaParser* parser);
-static cee_boolean statement_pop(JavaParser* parser);
 static cee_boolean block_reduce(JavaParser* parser);
 static void label_parse(JavaParser* parser);
 static cee_boolean label_reduce(JavaParser* parser);
+
+/** statement */
 static void statement_parse(JavaParser* parser);
+static cee_boolean statement_reduce(JavaParser* parser);
+static cee_boolean statement_attach(JavaParser* parser,
+                                    CEESourceFregmentType type);
+static cee_boolean statement_sub_attach(JavaParser* parser,
+                                        CEESourceFregmentType type);
+static cee_boolean statement_pop(JavaParser* parser);
+static cee_boolean statement_token_push(JavaParser* parser,
+                                        CEEToken* push);
+static void parameter_list_push(JavaParser* parser);
+static cee_boolean parameter_list_pop(JavaParser* parser);
+static void subscript_push(JavaParser* parser);
+static cee_boolean subscript_pop(JavaParser* parser);
+
 static void java_declaration_translate_table_init(void);
 static cee_boolean java_declaration_parse(CEESourceFregment* fregment);
 static CEEList* skip_java_declaration_interval(CEEList* p);
@@ -248,15 +259,6 @@ static void java_import_statement_translate_table_init(void);
 static cee_boolean java_import_statement_parse(CEESourceFregment* fregment);
 static void java_package_statement_translate_table_init(void);
 static cee_boolean java_package_statement_parse(CEESourceFregment* fregment);
-static cee_boolean statement_reduce(JavaParser* parser);
-static cee_boolean statement_attach(JavaParser* parser,
-                                    CEESourceFregmentType type);
-static cee_boolean statement_sub_attach(JavaParser* parser,
-                                        CEESourceFregmentType type);
-static void parameter_list_push(JavaParser* parser);
-static cee_boolean parameter_list_pop(JavaParser* parser);
-static void subscript_push(JavaParser* parser);
-static cee_boolean subscript_pop(JavaParser* parser);
 static void java_class_definition_translate_table_init(void);
 static cee_boolean java_class_definition_trap(CEESourceFregment* fregment,
                                               CEEList** pp);
@@ -318,7 +320,7 @@ CEESourceParserRef cee_java_parser_create(const cee_char* identifier)
     JavaParser* java = parser_create();
     java->super = parser;
     
-    parser_block_header_trap_init(java);
+    java_block_header_trap_init(java);
     java_token_type_map_init();
     
     java_class_definition_translate_table_init();
@@ -359,7 +361,7 @@ static void parser_free(cee_pointer data)
     cee_free(parser);
 }
 
-static void parser_block_header_trap_init(JavaParser* parser)
+static void java_block_header_trap_init(JavaParser* parser)
 {
     
     for (int i = 0; i < kCEETokenID_END; i ++)
@@ -373,107 +375,113 @@ static void parser_block_header_trap_init(JavaParser* parser)
 static void java_token_type_map_init(void)
 {
     for (cee_int i = 0; i < CEETokenID_MAX; i ++)
-        java_token_identifier_type_map[i] = 0;
+        java_token_type_map[i] = 0;
     
-    java_token_identifier_type_map[kCEETokenID_ABSTRACT]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_ASSERT]                      = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_BOOLEAN]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    java_token_identifier_type_map[kCEETokenID_BREAK]                       = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_BYTE]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    java_token_identifier_type_map[kCEETokenID_CASE]                        = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_CATCH]                       = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_CHAR]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    java_token_identifier_type_map[kCEETokenID_CLASS]                       = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_CONTINUE]                    = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_CONST]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_DEFAULT]                     = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_DO]                          = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_DOUBLE]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    java_token_identifier_type_map[kCEETokenID_ELSE]                        = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_ENUM]                        = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_EXPORTS]                     = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_EXTENDS]                     = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_FINAL]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_FINALLY]                     = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_FLOAT]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    java_token_identifier_type_map[kCEETokenID_FOR]                         = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_GOTO]                        = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_IF]                          = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_IMPLEMENTS]                  = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_IMPORT]                      = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_INSTANCEOF]                  = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_INT]                         = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    java_token_identifier_type_map[kCEETokenID_INTERFACE]                   = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_LONG]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    java_token_identifier_type_map[kCEETokenID_MODULE]                      = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_NATIVE]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_NEW]                         = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_PACKAGE]                     = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_PRIVATE]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_PROTECTED]                   = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_PUBLIC]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_REQUIRES]                    = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_RETURN]                      = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_SHORT]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    java_token_identifier_type_map[kCEETokenID_STATIC]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_STRICTFP]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_SUPER]                       = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_SWITCH]                      = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_SYNCHRONIZED]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_THIS]                        = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_THROW]                       = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_THROWS]                      = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_TRANSIENT]                   = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_TRY]                         = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map[kCEETokenID_VAR]                         = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    java_token_identifier_type_map[kCEETokenID_VOID]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    java_token_identifier_type_map[kCEETokenID_VOLATILE]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    java_token_identifier_type_map[kCEETokenID_WHILE]                       = kCEETokenIdentifierTypeKeyword;
-    java_token_identifier_type_map['=']                                     = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map['+']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['-']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['*']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['/']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['\\']                                    = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['%']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['~']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['&']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['|']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['^']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['!']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['<']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['>']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['.']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[',']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['?']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[':']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['(']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[')']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['{']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['}']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['[']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[']']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[';']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['@']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map['.']                                     = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[kCEETokenID_ADD_ASSIGNMENT]              = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map[kCEETokenID_MINUS_ASSIGNMENT]            = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map[kCEETokenID_MULTI_ASSIGNMENT]            = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map[kCEETokenID_DIV_ASSIGNMENT]              = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map[kCEETokenID_MOD_ASSIGNMENT]              = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map[kCEETokenID_AND_ASSIGNMENT]              = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map[kCEETokenID_OR_ASSIGNMENT]               = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map[kCEETokenID_XOR_ASSIGNMENT]              = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map[kCEETokenID_LEFT_OFFSET_ASSIGNMENT]      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map[kCEETokenID_RIGHT_OFFSET_ASSIGNMENT]     = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeAssignment;
-    java_token_identifier_type_map[kCEETokenID_INCREMENT]                   = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[kCEETokenID_DECREMENT]                   = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[kCEETokenID_LOGIC_AND]                   = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[kCEETokenID_LOGIC_OR]                    = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[kCEETokenID_LOGIC_EQUAL]                 = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[kCEETokenID_LOGIC_UNEQUAL]               = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[kCEETokenID_LOGIC_LESS_EQUAL]            = kCEETokenIdentifierTypePunctuation;
-    java_token_identifier_type_map[kCEETokenID_LOGIC_LARGE_EQUAL]           = kCEETokenIdentifierTypePunctuation;
+    java_token_type_map[kCEETokenID_ABSTRACT]                    = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_ASSERT]                      = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_BOOLEAN]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    java_token_type_map[kCEETokenID_BREAK]                       = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_BYTE]                        = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    java_token_type_map[kCEETokenID_CASE]                        = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_CATCH]                       = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_CHAR]                        = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    java_token_type_map[kCEETokenID_CLASS]                       = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_CONTINUE]                    = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_CONST]                       = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_DEFAULT]                     = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_DO]                          = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_DOUBLE]                      = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    java_token_type_map[kCEETokenID_ELSE]                        = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_ENUM]                        = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_EXPORTS]                     = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_EXTENDS]                     = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_FINAL]                       = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_FINALLY]                     = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_FLOAT]                       = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    java_token_type_map[kCEETokenID_FOR]                         = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_GOTO]                        = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_IF]                          = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_IMPLEMENTS]                  = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_IMPORT]                      = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_INSTANCEOF]                  = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_INT]                         = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    java_token_type_map[kCEETokenID_INTERFACE]                   = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_LONG]                        = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    java_token_type_map[kCEETokenID_MODULE]                      = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_NATIVE]                      = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_NEW]                         = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_PACKAGE]                     = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_PRIVATE]                     = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_PROTECTED]                   = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_PUBLIC]                      = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_REQUIRES]                    = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_RETURN]                      = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_SHORT]                       = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    java_token_type_map[kCEETokenID_STATIC]                      = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_STRICTFP]                    = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_SUPER]                       = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_SWITCH]                      = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_SYNCHRONIZED]                = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_THIS]                        = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_THROW]                       = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_THROWS]                      = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_TRANSIENT]                   = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_TRY]                         = kCEETokenTypeKeyword;
+    java_token_type_map[kCEETokenID_VAR]                         = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    java_token_type_map[kCEETokenID_VOID]                        = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    java_token_type_map[kCEETokenID_VOLATILE]                    = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    java_token_type_map[kCEETokenID_WHILE]                       = kCEETokenTypeKeyword;
+    java_token_type_map['=']                                     = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map['+']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['-']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['*']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['/']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['\\']                                    = kCEETokenTypePunctuation;
+    java_token_type_map['%']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['~']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['&']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['|']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['^']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['!']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['<']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['>']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['.']                                     = kCEETokenTypePunctuation;
+    java_token_type_map[',']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['?']                                     = kCEETokenTypePunctuation;
+    java_token_type_map[':']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['(']                                     = kCEETokenTypePunctuation;
+    java_token_type_map[')']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['{']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['}']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['[']                                     = kCEETokenTypePunctuation;
+    java_token_type_map[']']                                     = kCEETokenTypePunctuation;
+    java_token_type_map[';']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['@']                                     = kCEETokenTypePunctuation;
+    java_token_type_map['.']                                     = kCEETokenTypePunctuation;
+    java_token_type_map[kCEETokenID_ADD_ASSIGNMENT]              = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map[kCEETokenID_MINUS_ASSIGNMENT]            = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map[kCEETokenID_MULTI_ASSIGNMENT]            = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map[kCEETokenID_DIV_ASSIGNMENT]              = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map[kCEETokenID_MOD_ASSIGNMENT]              = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map[kCEETokenID_AND_ASSIGNMENT]              = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map[kCEETokenID_OR_ASSIGNMENT]               = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map[kCEETokenID_XOR_ASSIGNMENT]              = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map[kCEETokenID_LEFT_OFFSET_ASSIGNMENT]      = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map[kCEETokenID_RIGHT_OFFSET_ASSIGNMENT]     = kCEETokenTypePunctuation | kCEETokenTypeAssignment;
+    java_token_type_map[kCEETokenID_INCREMENT]                   = kCEETokenTypePunctuation;
+    java_token_type_map[kCEETokenID_DECREMENT]                   = kCEETokenTypePunctuation;
+    java_token_type_map[kCEETokenID_LOGIC_AND]                   = kCEETokenTypePunctuation;
+    java_token_type_map[kCEETokenID_LOGIC_OR]                    = kCEETokenTypePunctuation;
+    java_token_type_map[kCEETokenID_LOGIC_EQUAL]                 = kCEETokenTypePunctuation;
+    java_token_type_map[kCEETokenID_LOGIC_UNEQUAL]               = kCEETokenTypePunctuation;
+    java_token_type_map[kCEETokenID_LOGIC_LESS_EQUAL]            = kCEETokenTypePunctuation;
+    java_token_type_map[kCEETokenID_LOGIC_LARGE_EQUAL]           = kCEETokenTypePunctuation;
+    java_token_type_map[kCEETokenID_LINES_COMMENT]               = kCEETokenTypeComment;
+    java_token_type_map[kCEETokenID_LINE_COMMENT]                = kCEETokenTypeComment;
+    java_token_type_map[kCEETokenID_LITERAL]                     = kCEETokenTypeLiteral;
+    java_token_type_map[kCEETokenID_CHARACTER]                   = kCEETokenTypeCharacter;
+    java_token_type_map[kCEETokenID_CONSTANT]                    = kCEETokenTypeConstant;
+    java_token_type_map[kCEETokenID_IDENTIFIER]                  = kCEETokenTypeIdentifier;
 }
 
 /**
@@ -505,29 +513,29 @@ static CEEList* skip_type_parameter_list(CEEList* p,
 }
 
 static cee_boolean token_type_matcher(CEEToken* token,
-                                      CEETokenIdentifierType type)
+                                      CEETokenType type)
 {
-    return (java_token_identifier_type_map[token->identifier] & type) != 0;
+    return (java_token_type_map[token->identifier] & type) != 0;
 }
 
 static cee_boolean token_id_is_assignment(CEETokenID identifier)
 {
-    return (java_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeAssignment) != 0;
+    return (java_token_type_map[identifier] & kCEETokenTypeAssignment) != 0;
 }
 
 static cee_boolean token_id_is_builtin_type(CEETokenID identifier)
 {
-    return (java_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeBuildinType) != 0;
+    return (java_token_type_map[identifier] & kCEETokenTypeBuildinType) != 0;
 }
 
 static cee_boolean token_id_is_declaration_specifier(CEETokenID identifier)
 {
-    return (java_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeDeclarationSpecifier) != 0;
+    return (java_token_type_map[identifier] & kCEETokenTypeDeclarationSpecifier) != 0;
 }
 
 static cee_boolean token_id_is_punctuation(CEETokenID identifier)
 {
-    return (java_token_identifier_type_map[identifier] & kCEETokenIdentifierTypePunctuation) != 0;
+    return (java_token_type_map[identifier] & kCEETokenTypePunctuation) != 0;
 }
 
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
@@ -914,6 +922,7 @@ static void symbol_parse_clear(JavaParser* parser)
     parser->comment_root = NULL;
     parser->comment_current = NULL;
 }
+
 /**
  *  comment
  */
@@ -962,19 +971,8 @@ static cee_boolean comment_attach(JavaParser* parser)
 }
 
 /**
- *  statement
+ * block
  */
-static cee_boolean statement_token_push(JavaParser* parser,
-                                        CEEToken* push)
-{
-    if (!parser->statement_current)
-        return FALSE;
-    
-    SOURCE_FREGMENT_TOKEN_PUSH(parser->statement_current, push, TRUE);
-    
-    return TRUE;
-}
-
 static void block_header_parse(JavaParser* parser)
 {
     CEESourceFregment* current = parser->statement_current;
@@ -1008,9 +1006,6 @@ static void block_header_parse(JavaParser* parser)
     return;
 }
 
-/**
- * block
- */
 static void block_push(JavaParser* parser)
 {
     statement_sub_attach(parser, kCEESourceFregmentTypeCurlyBracketList);
@@ -1044,16 +1039,6 @@ static void block_parse(JavaParser* parser)
         }
     }
 }
-
-static cee_boolean statement_pop(JavaParser* parser)
-{
-    if (!parser->statement_current || !parser->statement_current->parent)
-        return FALSE;
-    
-    parser->statement_current = parser->statement_current->parent;
-    return TRUE;
-}
-
 
 static cee_boolean block_reduce(JavaParser* parser)
 {
@@ -1094,8 +1079,8 @@ static void label_parse(JavaParser* parser)
                 q = cee_token_not_whitespace_newline_after(p);
                 if (q && cee_token_is_identifier(q, ':')) {
                     declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                            subject, 
-                                                                            p, 
+                                                                            subject,
+                                                                            p,
                                                                             p,
                                                                             kCEESourceSymbolTypeLabel,
                                                                             "java");
@@ -1157,6 +1142,15 @@ static cee_boolean statement_reduce(JavaParser* parser)
     return TRUE;
 }
 
+static cee_boolean statement_pop(JavaParser* parser)
+{
+    if (!parser->statement_current || !parser->statement_current->parent)
+        return FALSE;
+    
+    parser->statement_current = parser->statement_current->parent;
+    return TRUE;
+}
+
 static cee_boolean statement_attach(JavaParser* parser,
                                     CEESourceFregmentType type)
 {
@@ -1195,6 +1189,51 @@ static cee_boolean statement_sub_attach(JavaParser* parser,
     
     parser->statement_current = attached;
     return TRUE;
+}
+
+static cee_boolean statement_token_push(JavaParser* parser,
+                                        CEEToken* push)
+{
+    if (!parser->statement_current)
+        return FALSE;
+    
+    SOURCE_FREGMENT_TOKEN_PUSH(parser->statement_current, push, TRUE);
+    
+    return TRUE;
+}
+
+/**
+ * parameter list
+ */
+static void parameter_list_push(JavaParser* parser)
+{
+    statement_sub_attach(parser, kCEESourceFregmentTypeRoundBracketList);
+    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+}
+
+static cee_boolean parameter_list_pop(JavaParser* parser)
+{
+    if (statement_pop(parser))
+        return statement_pop(parser);
+    
+    return FALSE;
+}
+
+/**
+ * subscript
+ */
+static void subscript_push(JavaParser* parser)
+{
+    statement_sub_attach(parser, kCEESourceFregmentTypeSquareBracketList);
+    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+}
+
+static cee_boolean subscript_pop(JavaParser* parser)
+{
+    if (statement_pop(parser))
+        return statement_pop(parser);
+    
+    return FALSE;
 }
 
 static void java_declaration_translate_table_init(void)
@@ -1702,40 +1741,6 @@ static cee_boolean java_package_statement_parse(CEESourceFregment* fregment)
     
 exit:
     return ret;
-}
-
-/**
- * parameter list
- */
-static void parameter_list_push(JavaParser* parser)
-{
-    statement_sub_attach(parser, kCEESourceFregmentTypeRoundBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
-}
-
-static cee_boolean parameter_list_pop(JavaParser* parser)
-{
-    if (statement_pop(parser))
-        return statement_pop(parser);
-    
-    return FALSE;
-}
-
-/**
- * subscript
- */
-static void subscript_push(JavaParser* parser)
-{
-    statement_sub_attach(parser, kCEESourceFregmentTypeSquareBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
-}
-
-static cee_boolean subscript_pop(JavaParser* parser)
-{
-    if (statement_pop(parser))
-        return statement_pop(parser);
-    
-    return FALSE;
 }
 
 static void java_class_definition_translate_table_init(void)

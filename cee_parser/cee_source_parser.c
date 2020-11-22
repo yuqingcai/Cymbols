@@ -1571,7 +1571,7 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
     CEEList* tags = NULL;
     CEETagType tag_type = kCEETagTypeIgnore;
     CEERange range;
-        
+    
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
@@ -1581,13 +1581,13 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
             tag_type = kCEETagTypeIgnore;
             
             if (parser_ref->token_type_matcher) {
-                if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypeKeyword))
+                if (parser_ref->token_type_matcher(token, kCEETokenTypeKeyword))
                     tag_type = kCEETagTypeKeyword;
-                else if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypePrepDirective))
+                else if (parser_ref->token_type_matcher(token, kCEETokenTypePrepDirective))
                     tag_type = kCEETagTypePrepDirective;
-                else if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypePunctuation))
+                else if (parser_ref->token_type_matcher(token, kCEETokenTypePunctuation))
                     tag_type = kCEETagTypePunctuation;
-                else if (parser_ref->token_type_matcher(token, kCEETokenIdentifierTypeASMDirective))
+                else if (parser_ref->token_type_matcher(token, kCEETokenTypeASMDirective))
                     tag_type = kCEETagTypeASMDirective;
             }
             
@@ -1751,6 +1751,7 @@ static void source_fregment_symbols_parent_parse(CEESourceFregment* fregment)
     if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeTemplateDeclaration) || 
         cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeVariableBlock) || 
         cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeIdentifierBlock)) {
+        
         while (1) {
             grandfather = cee_source_fregment_grandfather_get(grandfather);
             if (!grandfather)
@@ -1760,9 +1761,13 @@ static void source_fregment_symbols_parent_parse(CEESourceFregment* fregment)
                 cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeVariableBlock) || 
                 cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeIdentifierBlock))
                 continue;
+            
             break;
         }
     }
+    
+    if (!grandfather)
+        return;
     
     if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeRoot))
         parent = global_scope_name_from_source_fregment(grandfather);

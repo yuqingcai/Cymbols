@@ -46,9 +46,9 @@ typedef struct _GNUASMParser {
     GNUASMParserState state;
 } GNUASMParser;
 
-static CEETokenIdentifierType gnu_asm_token_identifier_type_map[CEETokenID_MAX];
-static cee_short gnu_asm_prep_directive_include_translate_table[kGNUASMPrepDirectiveIncludeTranslateStateMax][CEETokenID_MAX];
-static cee_short gnu_asm_prep_directive_define_translate_table[kGNUASMPrepDirectiveDefineTranslateStateMax][CEETokenID_MAX];
+static CEETokenType gnu_asm_token_type_map[CEETokenID_MAX];
+static cee_int gnu_asm_prep_directive_include_translate_table[kGNUASMPrepDirectiveIncludeTranslateStateMax][CEETokenID_MAX];
+static cee_int gnu_asm_prep_directive_define_translate_table[kGNUASMPrepDirectiveDefineTranslateStateMax][CEETokenID_MAX];
 
 static void gnu_asm_token_type_map_init(void);
 static GNUASMParser* parser_create(void);
@@ -94,7 +94,7 @@ static void symbol_parse_init(GNUASMParser* parser,
 static void symbol_parse_clear(GNUASMParser* parser);
 static CEEList* skip_include_path(CEEList* p);
 static cee_boolean token_type_matcher(CEEToken* token,
-                                      CEETokenIdentifierType type);
+                                      CEETokenType type);
 
 /** comment */
 static cee_boolean token_is_comment(CEEToken* token);
@@ -196,58 +196,60 @@ static void parser_state_clear(GNUASMParser* parser,
 static void gnu_asm_token_type_map_init(void)
 {
     for (cee_int i = 0; i < CEETokenID_MAX; i ++)
-        gnu_asm_token_identifier_type_map[i] = 0;
+        gnu_asm_token_type_map[i] = 0;
     
-    gnu_asm_token_identifier_type_map[kCEETokenID_LINE_COMMENT]                 = kCEETokenIdentifierTypeComment;
-    gnu_asm_token_identifier_type_map[kCEETokenID_LINES_COMMENT]                = kCEETokenIdentifierTypeComment;
-    gnu_asm_token_identifier_type_map[kCEETokenID_CONST]                        = kCEETokenIdentifierTypeConstant;
-    gnu_asm_token_identifier_type_map[kCEETokenID_CHARACTER]                    = kCEETokenIdentifierTypeCharacter;
-    gnu_asm_token_identifier_type_map[kCEETokenID_LITERAL]                      = kCEETokenIdentifierTypeLiteral;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_INCLUDE]                 = kCEETokenIdentifierTypePrepDirective;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_IMPORT]                  = kCEETokenIdentifierTypePrepDirective;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_DEFINE]                  = kCEETokenIdentifierTypePrepDirective;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_UNDEF]                   = kCEETokenIdentifierTypePrepDirective;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_IF]                      = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_IFDEF]                   = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_IFNDEF]                  = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_ENDIF]                   = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_ELSE]                    = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_ELIF]                    = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_LINE]                    = kCEETokenIdentifierTypePrepDirective;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_ERROR]                   = kCEETokenIdentifierTypePrepDirective;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_WARNING]                 = kCEETokenIdentifierTypePrepDirective;
-    gnu_asm_token_identifier_type_map[kCEETokenID_HASH_PRAGMA]                  = kCEETokenIdentifierTypePrepDirective;
-    gnu_asm_token_identifier_type_map['=']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['+']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['-']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['*']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['/']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['\\']                                     = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['%']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['~']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['&']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['|']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['^']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['!']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['<']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['>']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['.']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map[',']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['?']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map[':']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map['(']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map[')']                                      = kCEETokenIdentifierTypePunctuation;
-    gnu_asm_token_identifier_type_map[';']                                      = kCEETokenIdentifierTypePunctuation;
+    gnu_asm_token_type_map[kCEETokenID_HASH_INCLUDE]                 = kCEETokenTypePrepDirective;
+    gnu_asm_token_type_map[kCEETokenID_HASH_IMPORT]                  = kCEETokenTypePrepDirective;
+    gnu_asm_token_type_map[kCEETokenID_HASH_DEFINE]                  = kCEETokenTypePrepDirective;
+    gnu_asm_token_type_map[kCEETokenID_HASH_UNDEF]                   = kCEETokenTypePrepDirective;
+    gnu_asm_token_type_map[kCEETokenID_HASH_IF]                      = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    gnu_asm_token_type_map[kCEETokenID_HASH_IFDEF]                   = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    gnu_asm_token_type_map[kCEETokenID_HASH_IFNDEF]                  = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    gnu_asm_token_type_map[kCEETokenID_HASH_ENDIF]                   = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    gnu_asm_token_type_map[kCEETokenID_HASH_ELSE]                    = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    gnu_asm_token_type_map[kCEETokenID_HASH_ELIF]                    = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    gnu_asm_token_type_map[kCEETokenID_HASH_LINE]                    = kCEETokenTypePrepDirective;
+    gnu_asm_token_type_map[kCEETokenID_HASH_ERROR]                   = kCEETokenTypePrepDirective;
+    gnu_asm_token_type_map[kCEETokenID_HASH_WARNING]                 = kCEETokenTypePrepDirective;
+    gnu_asm_token_type_map[kCEETokenID_HASH_PRAGMA]                  = kCEETokenTypePrepDirective;
+    gnu_asm_token_type_map['=']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['+']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['-']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['*']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['/']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['\\']                                     = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['%']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['~']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['&']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['|']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['^']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['!']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['<']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['>']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['.']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map[',']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['?']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map[':']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map['(']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map[')']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map[';']                                      = kCEETokenTypePunctuation;
+    gnu_asm_token_type_map[kCEETokenID_LINE_COMMENT]                 = kCEETokenTypeComment;
+    gnu_asm_token_type_map[kCEETokenID_LINES_COMMENT]                = kCEETokenTypeComment;
+    gnu_asm_token_type_map[kCEETokenID_CONSTANT]                     = kCEETokenTypeConstant;
+    gnu_asm_token_type_map[kCEETokenID_CHARACTER]                    = kCEETokenTypeCharacter;
+    gnu_asm_token_type_map[kCEETokenID_LITERAL]                      = kCEETokenTypeLiteral;
+    gnu_asm_token_type_map[kCEETokenID_IDENTIFIER]                   = kCEETokenTypeIdentifier;
+
 }
 
 static cee_boolean token_id_is_prep_directive(CEETokenID identifier)
 {
-    return (gnu_asm_token_identifier_type_map[identifier] & kCEETokenIdentifierTypePrepDirective) != 0;
+    return (gnu_asm_token_type_map[identifier] & kCEETokenTypePrepDirective) != 0;
 }
 
 static cee_boolean token_id_is_punctuation(CEETokenID identifier)
 {
-    return (gnu_asm_token_identifier_type_map[identifier] & kCEETokenIdentifierTypePunctuation) != 0;
+    return (gnu_asm_token_type_map[identifier] & kCEETokenTypePunctuation) != 0;
 }
 
 static cee_boolean token_is_directive(const cee_uchar* subject,
@@ -503,9 +505,9 @@ static CEEList* skip_include_path(CEEList* p)
 }
 
 static cee_boolean token_type_matcher(CEEToken* token,
-                                      CEETokenIdentifierType type)
+                                      CEETokenType type)
 {
-    if (type & kCEETokenIdentifierTypeASMDirective) {
+    if (type & kCEETokenTypeASMDirective) {
         if (token->identifier == kCEETokenID_IDENTIFIER) {
             CEESourceFregment* fregment = token->fregment_ref;
             return token_is_directive(fregment->subject_ref, token);
@@ -514,7 +516,7 @@ static cee_boolean token_type_matcher(CEEToken* token,
             return FALSE;
     }
     
-    return (gnu_asm_token_identifier_type_map[token->identifier] & type) != 0;
+    return (gnu_asm_token_type_map[token->identifier] & type) != 0;
 }
 
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,

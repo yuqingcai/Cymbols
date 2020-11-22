@@ -10,6 +10,8 @@
 		2602A92D254BFB010011FBD5 /* cee_java.c in Sources */ = {isa = PBXBuildFile; fileRef = 2602A92A254BFB000011FBD5 /* cee_java.c */; };
 		260D7DF225470231003BDC42 /* icon_xml_tag_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */; };
 		26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */ = {isa = PBXBuildFile; fileRef = 26308593254263DA000A8CB5 /* cee_regex_macos.m */; };
+		26381F282564A692004CC769 /* cee_csharp.c in Sources */ = {isa = PBXBuildFile; fileRef = 26381F252564A692004CC769 /* cee_csharp.c */; };
+		26381F292564A692004CC769 /* cee_csharp.l in Sources */ = {isa = PBXBuildFile; fileRef = 26381F272564A692004CC769 /* cee_csharp.l */; };
 		2647CE3925309A1700970FE4 /* WelcomeGuide in Resources */ = {isa = PBXBuildFile; fileRef = 2647CE3825309A1700970FE4 /* WelcomeGuide */; };
 		2647CE3E25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3C25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m */; };
 		2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */; };
@@ -75,7 +77,6 @@
 		26920367252FF3E400D6E2DC /* icon_file_type_asm_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202FB252FF3E300D6E2DC /* icon_file_type_asm_16x16@2x.png */; };
 		26920368252FF3E400D6E2DC /* icon_file_type_c_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202FC252FF3E300D6E2DC /* icon_file_type_c_16x16@2x.png */; };
 		26920369252FF3E400D6E2DC /* icon_file_type_c_header_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202FD252FF3E300D6E2DC /* icon_file_type_c_header_16x16@2x.png */; };
-		2692036A252FF3E400D6E2DC /* icon_file_type_c_sharp_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202FE252FF3E300D6E2DC /* icon_file_type_c_sharp_16x16@2x.png */; };
 		2692036B252FF3E400D6E2DC /* icon_file_type_common_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202FF252FF3E300D6E2DC /* icon_file_type_common_16x16@2x.png */; };
 		2692036C252FF3E400D6E2DC /* icon_file_type_cpp_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26920300252FF3E300D6E2DC /* icon_file_type_cpp_16x16@2x.png */; };
 		2692036D252FF3E400D6E2DC /* icon_file_type_cpp_header_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26920301252FF3E300D6E2DC /* icon_file_type_cpp_header_16x16@2x.png */; };
@@ -261,6 +262,7 @@
 		26920511252FF71400D6E2DC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2667ECFB25037D8000ED5010 /* Assets.xcassets */; };
 		2693B21C2530015200D21FD3 /* Cymbols.cfg in Resources */ = {isa = PBXBuildFile; fileRef = 2693B21B2530015200D21FD3 /* Cymbols.cfg */; };
 		2693B227253001D700D21FD3 /* Styles in Resources */ = {isa = PBXBuildFile; fileRef = 2693B226253001D700D21FD3 /* Styles */; };
+		2693B8CC2565F9910021E246 /* icon_file_type_csharp_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2693B8CB2565F9910021E246 /* icon_file_type_csharp_16x16@2x.png */; };
 		269F9657253DB22500D8808A /* CEESourcePoint.m in Sources */ = {isa = PBXBuildFile; fileRef = 269F9656253DB22500D8808A /* CEESourcePoint.m */; };
 		26A761E5255A8BB20032A06D /* icon_import_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A761E4255A8BB20032A06D /* icon_import_16x16@2x.png */; };
 		26A761E7255A8D420032A06D /* icon_package_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A761E6255A8D420032A06D /* icon_package_16x16@2x.png */; };
@@ -314,6 +316,9 @@
 		260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_xml_tag_16x16@2x.png"; sourceTree = "<group>"; };
 		26308593254263DA000A8CB5 /* cee_regex_macos.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = cee_regex_macos.m; sourceTree = "<group>"; };
 		26308595254263F2000A8CB5 /* cee_regex_macos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cee_regex_macos.h; sourceTree = "<group>"; };
+		26381F252564A692004CC769 /* cee_csharp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_csharp.c; sourceTree = "<group>"; };
+		26381F262564A692004CC769 /* cee_csharp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_csharp.h; sourceTree = "<group>"; };
+		26381F272564A692004CC769 /* cee_csharp.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_csharp.l; sourceTree = "<group>"; };
 		2647CE3825309A1700970FE4 /* WelcomeGuide */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WelcomeGuide; path = ../../../../Resources/WelcomeGuide; sourceTree = "<group>"; };
 		2647CE3A25309ACC00970FE4 /* CEEUserInterfaceStyleSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEUserInterfaceStyleSelectionController.h; sourceTree = "<group>"; };
 		2647CE3B25309ACC00970FE4 /* CEETextHighlightStyleSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETextHighlightStyleSelectionController.h; sourceTree = "<group>"; };
@@ -418,7 +423,6 @@
 		269202FB252FF3E300D6E2DC /* icon_file_type_asm_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_asm_16x16@2x.png"; sourceTree = "<group>"; };
 		269202FC252FF3E300D6E2DC /* icon_file_type_c_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_c_16x16@2x.png"; sourceTree = "<group>"; };
 		269202FD252FF3E300D6E2DC /* icon_file_type_c_header_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_c_header_16x16@2x.png"; sourceTree = "<group>"; };
-		269202FE252FF3E300D6E2DC /* icon_file_type_c_sharp_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_c_sharp_16x16@2x.png"; sourceTree = "<group>"; };
 		269202FF252FF3E300D6E2DC /* icon_file_type_common_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_common_16x16@2x.png"; sourceTree = "<group>"; };
 		26920300252FF3E300D6E2DC /* icon_file_type_cpp_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_cpp_16x16@2x.png"; sourceTree = "<group>"; };
 		26920301252FF3E300D6E2DC /* icon_file_type_cpp_header_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_cpp_header_16x16@2x.png"; sourceTree = "<group>"; };
@@ -689,6 +693,7 @@
 		2692050E252FF6AD00D6E2DC /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2693B21B2530015200D21FD3 /* Cymbols.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cymbols.cfg; path = ../../../../Resources/Cymbols.cfg; sourceTree = "<group>"; };
 		2693B226253001D700D21FD3 /* Styles */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Styles; path = ../../../../Resources/Styles; sourceTree = "<group>"; };
+		2693B8CB2565F9910021E246 /* icon_file_type_csharp_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_csharp_16x16@2x.png"; sourceTree = "<group>"; };
 		269F9655253DB22500D8808A /* CEESourcePoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEESourcePoint.h; sourceTree = "<group>"; };
 		269F9656253DB22500D8808A /* CEESourcePoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESourcePoint.m; sourceTree = "<group>"; };
 		26A761E4255A8BB20032A06D /* icon_import_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_import_16x16@2x.png"; sourceTree = "<group>"; };
@@ -822,6 +827,16 @@
 			path = java;
 			sourceTree = "<group>";
 		};
+		26381F242564A692004CC769 /* csharp */ = {
+			isa = PBXGroup;
+			children = (
+				26381F252564A692004CC769 /* cee_csharp.c */,
+				26381F262564A692004CC769 /* cee_csharp.h */,
+				26381F272564A692004CC769 /* cee_csharp.l */,
+			);
+			path = csharp;
+			sourceTree = "<group>";
+		};
 		268376DB25490C720066305C /* swift */ = {
 			isa = PBXGroup;
 			children = (
@@ -904,6 +919,7 @@
 		269202A0252FF38300D6E2DC /* cee_parser */ = {
 			isa = PBXGroup;
 			children = (
+				26381F242564A692004CC769 /* csharp */,
 				2602A928254BFAD40011FBD5 /* java */,
 				268376DB25490C720066305C /* swift */,
 				269202A8252FF38300D6E2DC /* c */,
@@ -1044,7 +1060,7 @@
 				269202FB252FF3E300D6E2DC /* icon_file_type_asm_16x16@2x.png */,
 				269202FC252FF3E300D6E2DC /* icon_file_type_c_16x16@2x.png */,
 				269202FD252FF3E300D6E2DC /* icon_file_type_c_header_16x16@2x.png */,
-				269202FE252FF3E300D6E2DC /* icon_file_type_c_sharp_16x16@2x.png */,
+				2693B8CB2565F9910021E246 /* icon_file_type_csharp_16x16@2x.png */,
 				269202FF252FF3E300D6E2DC /* icon_file_type_common_16x16@2x.png */,
 				26920300252FF3E300D6E2DC /* icon_file_type_cpp_16x16@2x.png */,
 				26920301252FF3E300D6E2DC /* icon_file_type_cpp_header_16x16@2x.png */,
@@ -1305,10 +1321,10 @@
 			children = (
 				269204A8252FF53100D6E2DC /* CEEProjectCreatorController.h */,
 				269204A9252FF53100D6E2DC /* CEEProjectCreatorController.m */,
-				269204AA252FF53100D6E2DC /* CEEProjectPropertyView.h */,
-				269204AB252FF53100D6E2DC /* CEEProjectPropertyView.m */,
 				269204AC252FF53100D6E2DC /* CEEProjectSettingView.h */,
 				269204AD252FF53100D6E2DC /* CEEProjectSettingView.m */,
+				269204AA252FF53100D6E2DC /* CEEProjectPropertyView.h */,
+				269204AB252FF53100D6E2DC /* CEEProjectPropertyView.m */,
 			);
 			path = ProjectCreator;
 			sourceTree = "<group>";
@@ -1416,7 +1432,6 @@
 				2692037A252FF3E400D6E2DC /* icon_implementation_definition_16x16@2x.png in Resources */,
 				260D7DF225470231003BDC42 /* icon_xml_tag_16x16@2x.png in Resources */,
 				26920391252FF3E400D6E2DC /* icon_protocol_declaration_16x16@2x.png in Resources */,
-				2692036A252FF3E400D6E2DC /* icon_file_type_c_sharp_16x16@2x.png in Resources */,
 				26920377252FF3E400D6E2DC /* icon_focus_16x16@2x.png in Resources */,
 				269203B4252FF3E400D6E2DC /* logo_butterfly_16x16@2x.png in Resources */,
 				269203AB252FF3E400D6E2DC /* icon_template_declaration_16x16@2x.png in Resources */,
@@ -1485,6 +1500,7 @@
 				2692038B252FF3E400D6E2DC /* icon_opened_files_16x16@2x.png in Resources */,
 				269203A1252FF3E400D6E2DC /* icon_split1_16x16@2x.png in Resources */,
 				26920505252FF60300D6E2DC /* Theme.storyboard in Resources */,
+				2693B8CC2565F9910021E246 /* icon_file_type_csharp_16x16@2x.png in Resources */,
 				269203AF252FF3E400D6E2DC /* icon_union_definition_16x16@2x.png in Resources */,
 				269203B6252FF3E400D6E2DC /* logo_butterfly_32x32@2x.png in Resources */,
 				26920501252FF60300D6E2DC /* TableCellViews.xib in Resources */,
@@ -1593,6 +1609,7 @@
 				2692043C252FF4F400D6E2DC /* CEETitleView.m in Sources */,
 				26920299252FF35600D6E2DC /* cee_strfuncs.c in Sources */,
 				269204C0252FF54000D6E2DC /* CEETableRowCellViewTextLabel.m in Sources */,
+				26381F282564A692004CC769 /* cee_csharp.c in Sources */,
 				26920440252FF4F400D6E2DC /* CEEViewController.m in Sources */,
 				2647CE3E25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m in Sources */,
 				269201A1252FF30D00D6E2DC /* cJSON_Utils.c in Sources */,
@@ -1633,6 +1650,7 @@
 				269202C5252FF38400D6E2DC /* cee_symbol.c in Sources */,
 				26920453252FF50300D6E2DC /* CEEEditViewController.m in Sources */,
 				2692042B252FF4F400D6E2DC /* CEEJSONReader.m in Sources */,
+				26381F292564A692004CC769 /* cee_csharp.l in Sources */,
 				26B3F0762560F403007D902C /* cee_arm_asm.l in Sources */,
 				2692026F252FF33300D6E2DC /* cJSON.c in Sources */,
 				269204C5252FF57500D6E2DC /* CEEProject.m in Sources */,
@@ -1918,7 +1936,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 120;
+				CURRENT_PROJECT_VERSION = 130;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1931,7 +1949,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
@@ -1947,7 +1965,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 120;
+				CURRENT_PROJECT_VERSION = 130;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1959,7 +1977,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;

@@ -206,6 +206,10 @@ static CEEStyleManager* gStyleManager = nil;
     if ([extension caseInsensitiveCompare:@"css"] == NSOrderedSame)
         identifier = @"icon_file_type_css_16x16";
     
+    
+    if ([extension caseInsensitiveCompare:@"cs"] == NSOrderedSame)
+        identifier = @"icon_file_type_csharp_16x16";
+    
     return [NSImage imageNamed:identifier];
 }
 

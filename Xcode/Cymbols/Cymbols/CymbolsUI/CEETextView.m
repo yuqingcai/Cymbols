@@ -66,7 +66,7 @@ CEEPoint CEEPointFromNSPoint(NSPoint point)
 }
 
 @implementation CEETextView
-
+@synthesize wrap = _wrap;
 @synthesize caretBlinkTimeInterval = _caretBlinkTimeInterval;
 
 static void pasteboard_string_set(cee_pointer platform_ref, const cee_uchar* str)
@@ -130,6 +130,15 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                                  self.frame.size.height);
     cee_text_edit_container_size_set(_edit, size);
     cee_text_edit_wrap_set(self.edit, _wrap);
+}
+
+- (void)setWrap:(BOOL)wrap {
+    _wrap = wrap;
+    cee_text_edit_wrap_set(self.edit, _wrap);
+}
+
+- (BOOL)wrap {
+    return _wrap;
 }
 
 - (void)startCaretBlink {

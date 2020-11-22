@@ -16,12 +16,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEProjectSettingView : NSView
 @property (strong) IBOutlet CEETextLabel *projectNameLabel;
-@property (strong) IBOutlet CEEButton *saveAtButton;
 @property (strong) IBOutlet CEEButton *addFilePathButton;
 @property (strong) IBOutlet CEEButton *removeFilePathsButton;
 @property (strong) IBOutlet CEETableView *filePathTable;
 @property (strong) IBOutlet CEETextField *nameInput;
-@property (strong) IBOutlet CEETextField *savePathInput;
 @end
 
 NS_ASSUME_NONNULL_END

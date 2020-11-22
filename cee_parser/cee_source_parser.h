@@ -113,7 +113,7 @@ typedef struct _CEESourceParser {
     cee_char* identifier;
     cee_pointer imp;
     cee_boolean (*token_type_matcher)(CEEToken*,
-                                      CEETokenIdentifierType);
+                                      CEETokenType);
     cee_boolean (*symbol_parse)(CEESourceParserRef,
                                 const cee_uchar*,
                                 const cee_uchar*,

@@ -345,22 +345,22 @@ typedef struct _CParser {
     CParserState state;
 } CParser;
 
-static CEETokenIdentifierType c_token_identifier_type_map[CEETokenID_MAX];
-static cee_short objective_c_message_definition_translate_table[kObjectiveCMessageDefinitionTranslateStateMax][CEETokenID_MAX];
-static cee_short objective_c_definition_translate_table[kObjectiveCDefinitionTranslateStateMax][CEETokenID_MAX];
-static cee_short objective_c_property_declaration_translate_table[kObjectiveCPropertyDeclarationTranslateStateMax][CEETokenID_MAX];
-static cee_short objective_c_message_declaration_translate_table[kObjectiveCMessageDeclarationTranslateStateMax][CEETokenID_MAX];
-static cee_short c_template_declaration_translate_table[kCTemplateDeclarationTranslateStateMax][CEETokenID_MAX];
-static cee_short c_function_definition_translate_table[kCFunctionDefinitionTranslateStateMax][CEETokenID_MAX];
-static cee_short c_function_parameters_declaration_translate_table[kCFunctionParametersDeclarationTranslateStateMax][CEETokenID_MAX];
-static cee_short c_declaration_translate_table[kCDeclarationTranslateStateMax][CEETokenID_MAX];
-static cee_short c_inheritance_definition_translate_table[kCInheritanceDefinitionTranslateStateMax][CEETokenID_MAX];
-static cee_short c_prep_directive_include_translate_table[kCPrepDirectiveIncludeTranslateStateMax][CEETokenID_MAX];
-static cee_short c_prep_directive_define_translate_table[kCPrepDirectiveDefineTranslateStateMax][CEETokenID_MAX];
-static cee_short c_namespace_definition_translate_table[kCNamespaceDefinitionTranslateStateMax][CEETokenID_MAX];
-static cee_short c_protos_translate_table[kCProtosTranslateStateMax][CEETokenID_MAX];
-static cee_short c_extern_block_translate_table[kCExternBlockTranslateStateMax][CEETokenID_MAX];
-static cee_short objective_c_enum_definition_translate_table[kObjectiveCEnumDefinitionTranslateStateMax][CEETokenID_MAX];
+static CEETokenType c_token_type_map[CEETokenID_MAX];
+static cee_int objective_c_message_definition_translate_table[kObjectiveCMessageDefinitionTranslateStateMax][CEETokenID_MAX];
+static cee_int objective_c_definition_translate_table[kObjectiveCDefinitionTranslateStateMax][CEETokenID_MAX];
+static cee_int objective_c_property_declaration_translate_table[kObjectiveCPropertyDeclarationTranslateStateMax][CEETokenID_MAX];
+static cee_int objective_c_message_declaration_translate_table[kObjectiveCMessageDeclarationTranslateStateMax][CEETokenID_MAX];
+static cee_int c_template_declaration_translate_table[kCTemplateDeclarationTranslateStateMax][CEETokenID_MAX];
+static cee_int c_function_definition_translate_table[kCFunctionDefinitionTranslateStateMax][CEETokenID_MAX];
+static cee_int c_function_parameters_declaration_translate_table[kCFunctionParametersDeclarationTranslateStateMax][CEETokenID_MAX];
+static cee_int c_declaration_translate_table[kCDeclarationTranslateStateMax][CEETokenID_MAX];
+static cee_int c_inheritance_definition_translate_table[kCInheritanceDefinitionTranslateStateMax][CEETokenID_MAX];
+static cee_int c_prep_directive_include_translate_table[kCPrepDirectiveIncludeTranslateStateMax][CEETokenID_MAX];
+static cee_int c_prep_directive_define_translate_table[kCPrepDirectiveDefineTranslateStateMax][CEETokenID_MAX];
+static cee_int c_namespace_definition_translate_table[kCNamespaceDefinitionTranslateStateMax][CEETokenID_MAX];
+static cee_int c_protos_translate_table[kCProtosTranslateStateMax][CEETokenID_MAX];
+static cee_int c_extern_block_translate_table[kCExternBlockTranslateStateMax][CEETokenID_MAX];
+static cee_int objective_c_enum_definition_translate_table[kObjectiveCEnumDefinitionTranslateStateMax][CEETokenID_MAX];
 
 static void c_token_type_map_init(void);
 static cee_boolean token_id_is_prep_directive(CEETokenID identifier);
@@ -529,7 +529,7 @@ static cee_boolean objective_c_definition_parse(CEESourceFregment* fregment,
                                                 const cee_uchar* subject);
 static void statement_parse(CParser* parser);
 static cee_boolean statement_reduce(CParser* parser);
-static void parser_block_header_trap_init(CParser* parser);
+static void c_block_header_trap_init(CParser* parser);
 static CParser* parser_create(void);
 static void parser_free(cee_pointer data);
 static void symbol_parse_init(CParser* parser,
@@ -578,360 +578,361 @@ static void c_reference_fregment_parse(const cee_uchar* filepath,
                                        CEESourceFregment* statement,
                                        CEEList** references);
 static cee_boolean token_type_matcher(CEEToken* token,
-                                      CEETokenIdentifierType type);
+                                      CEETokenType type);
 
 static void c_token_type_map_init(void)
 {
     for (cee_int i = 0; i < CEETokenID_MAX; i ++)
-        c_token_identifier_type_map[i] = 0;
+        c_token_type_map[i] = 0;
     
-    c_token_identifier_type_map[kCEETokenID_LINE_COMMENT]                 = kCEETokenIdentifierTypeComment;
-    c_token_identifier_type_map[kCEETokenID_LINES_COMMENT]                = kCEETokenIdentifierTypeComment;
-    c_token_identifier_type_map[kCEETokenID_CONST]                        = kCEETokenIdentifierTypeConstant;
-    c_token_identifier_type_map[kCEETokenID_CHARACTER]                    = kCEETokenIdentifierTypeCharacter;
-    c_token_identifier_type_map[kCEETokenID_LITERAL]                      = kCEETokenIdentifierTypeLiteral;
-    c_token_identifier_type_map[kCEETokenID_HASH_INCLUDE]                 = kCEETokenIdentifierTypePrepDirective;
-    c_token_identifier_type_map[kCEETokenID_HASH_IMPORT]                  = kCEETokenIdentifierTypePrepDirective;
-    c_token_identifier_type_map[kCEETokenID_HASH_DEFINE]                  = kCEETokenIdentifierTypePrepDirective;
-    c_token_identifier_type_map[kCEETokenID_HASH_UNDEF]                   = kCEETokenIdentifierTypePrepDirective;
-    c_token_identifier_type_map[kCEETokenID_HASH_IF]                      = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    c_token_identifier_type_map[kCEETokenID_HASH_IFDEF]                   = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    c_token_identifier_type_map[kCEETokenID_HASH_IFNDEF]                  = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    c_token_identifier_type_map[kCEETokenID_HASH_ENDIF]                   = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    c_token_identifier_type_map[kCEETokenID_HASH_ELSE]                    = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    c_token_identifier_type_map[kCEETokenID_HASH_ELIF]                    = kCEETokenIdentifierTypePrepDirective | kCEETokenIdentifierTypePrepDirectiveCondition;
-    c_token_identifier_type_map[kCEETokenID_HASH_LINE]                    = kCEETokenIdentifierTypePrepDirective;
-    c_token_identifier_type_map[kCEETokenID_HASH_ERROR]                   = kCEETokenIdentifierTypePrepDirective;
-    c_token_identifier_type_map[kCEETokenID_HASH_WARNING]                 = kCEETokenIdentifierTypePrepDirective;
-    c_token_identifier_type_map[kCEETokenID_HASH_PRAGMA]                  = kCEETokenIdentifierTypePrepDirective;
-    c_token_identifier_type_map[kCEETokenID_HASH_UNKNOW]                  = kCEETokenIdentifierTypePrepDirective;
-    c_token_identifier_type_map['=']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map['+']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['-']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['*']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['/']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['\\']                                     = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map['%']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['~']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['&']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['|']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['^']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['!']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['<']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['>']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['.']                                      = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[',']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['?']                                      = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[':']                                      = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map['(']                                      = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[')']                                      = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map['{']                                      = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map['}']                                      = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map['[']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[']']                                      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map['#']                                      = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[';']                                      = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map['@']                                      = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[kCEETokenID_ADD_ASSIGNMENT]               = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map[kCEETokenID_MINUS_ASSIGNMENT]             = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map[kCEETokenID_MULTI_ASSIGNMENT]             = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map[kCEETokenID_DIV_ASSIGNMENT]               = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map[kCEETokenID_MOD_ASSIGNMENT]               = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map[kCEETokenID_AND_ASSIGNMENT]               = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map[kCEETokenID_OR_ASSIGNMENT]                = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map[kCEETokenID_XOR_ASSIGNMENT]               = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map[kCEETokenID_LEFT_OFFSET_ASSIGNMENT]       = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map[kCEETokenID_RIGHT_OFFSET_ASSIGNMENT]      = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator | kCEETokenIdentifierTypeAssignment;
-    c_token_identifier_type_map[kCEETokenID_INCREMENT]                    = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_DECREMENT]                    = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_LOGIC_AND]                    = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_LOGIC_OR]                     = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_LOGIC_EQUAL]                  = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_LOGIC_UNEQUAL]                = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_LOGIC_LESS_EQUAL]             = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_LOGIC_LARGE_EQUAL]            = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_MEMBER_POINTER]               = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_COMPARISON]                   = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_POINTER_MEMBER_POINTER]       = kCEETokenIdentifierTypePunctuation | kCEETokenIdentifierTypeOverloadOperator;
-    c_token_identifier_type_map[kCEETokenID_TOKEN_PASTING]                = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[kCEETokenID_ELLIPSIS]                     = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[kCEETokenID_SCOPE]                        = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[kCEETokenID_AT_BRACE]                     = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[kCEETokenID_AT_BRACKET]                   = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[kCEETokenID_CARAT_BRACE]                  = kCEETokenIdentifierTypePunctuation;
-    c_token_identifier_type_map[kCEETokenID_ALIGNAS]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeAlignasSpecifier;
-    c_token_identifier_type_map[kCEETokenID_ALIGNOF]                      = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AND]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AND_EQ]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_ASM]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_ATOMIC_CANCEL]                = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_ATOMIC_COMMIT]                = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_ATOMIC_NOEXCEPT]              = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AUTO]                         = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_BITAND]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_BITOR]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_BOOL]                         = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_BREAK]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_CASE]                         = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_CATCH]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_CHAR]                         = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_CHAR16_T]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_CHAR32_T]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_CLASS]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeObjectSpecifier;
-    c_token_identifier_type_map[kCEETokenID_COMPL]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_CONCEPT]                      = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_CONST]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_CONSTEVAL]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_CONSTEXPR]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_CONST_CAST]                   = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_CONTINUE]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_DECLTYPE]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_DEFAULT]                      = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_DELETE]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_DO]                           = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_DOUBLE]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_DYNAMIC_CAST]                 = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_ELSE]                         = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_ENUM]                         = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeObjectSpecifier;
-    c_token_identifier_type_map[kCEETokenID_EXPLICIT]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_EXPORT]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_EXTERN]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_FALSE]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_FLOAT]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_FOR]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_FRIEND]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_GOTO]                         = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_IF]                           = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_IMPORT]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_INLINE]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_INT]                          = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_LONG]                         = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_MODULE]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_MUTABLE]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_NAMESPACE]                    = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_NEW]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_NOEXCEPT]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_NOT]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_NOT_EQ]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_NULLPTR]                      = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_OPERATOR]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_OR]                           = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_OR_EQ]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_PRIVATE]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeAccessSpecifier;
-    c_token_identifier_type_map[kCEETokenID_PROTECTED]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeAccessSpecifier;
-    c_token_identifier_type_map[kCEETokenID_PUBLIC]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeAccessSpecifier;
-    c_token_identifier_type_map[kCEETokenID_REGISTER]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_REINTERPRET_CAST]             = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_REQUIRES]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_RESTRICT]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_RETURN]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_SHORT]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SIGNED]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SIZEOF]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_STATIC]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_STATIC_ASSERT]                = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_STATIC_CAST]                  = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_STRUCT]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeObjectSpecifier;
-    c_token_identifier_type_map[kCEETokenID_SWITCH]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_SYNCHRONIZED]                 = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_TEMPLATE]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_THIS]                         = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_THREAD_LOCAL]                 = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_THROW]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_TRUE]                         = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_TRY]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_TYPEDEF]                      = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_TYPEID]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_TYPENAME]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_UNION]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeObjectSpecifier;
-    c_token_identifier_type_map[kCEETokenID_UNSIGNED]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_USING]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_VIRTUAL]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_VOLATILE]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_WCHAR_T]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_WHILE]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_XOR]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_XOR_EQ]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_OVERRIDE]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeVirtualSpecifier;
-    c_token_identifier_type_map[kCEETokenID_FINAL]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeVirtualSpecifier;
-    c_token_identifier_type_map[kCEETokenID_TRANSACTION_SAFE]             = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_TRANSACTION_SAFE_DYNAMIC]     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID__ALIGNAS]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeAlignasSpecifier;
-    c_token_identifier_type_map[kCEETokenID__ALIGNOF]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID__ATOMIC]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID__BOOL]                        = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID__COMPLEX]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID__GENERIC]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID__IMAGINARY]                   = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID__NORETURN]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID__STATIC_ASSERT]               = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID__THREAD_LOCAL]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_VOID]                         = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_LONG_DOUBLE]                  = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SIGNED_CHAR]                  = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UNSIGNED_CHAR]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SHORT_INT]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SIGNED_SHORT]                 = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SIGNED_SHORT_INT]             = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UNSIGNED_SHORT]               = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UNSIGNED_SHORT_INT]           = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SIGNED_INT]                   = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UNSIGNED_INT]                 = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_LONG_INT]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SIGNED_LONG]                  = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SIGNED_LONG_INT]              = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UNSIGNED_LONG]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UNSIGNED_LONG_INT]            = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_LONG_LONG]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_LONG_LONG_INT]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SIGNED_LONG_LONG]             = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SIGNED_LONG_LONG_INT]         = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UNSIGNED_LONG_LONG]           = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UNSIGNED_LONG_LONG_INT]       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT8_T]                       = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT16_T]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT32_T]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT64_T]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT_FAST8_T]                  = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT_FAST16_T]                 = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT_FAST32_T]                 = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT_FAST64_T]                 = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT_LEAST8_T]                 = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT_LEAST16_T]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT_LEAST32_T]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INT_LEAST64_T]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INTMAX_T]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INTPTR_T]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT8_T]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT16_T]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT32_T]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT64_T]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT_FAST8_T]                 = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT_FAST16_T]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT_FAST32_T]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT_FAST64_T]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT_LEAST8_T]                = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT_LEAST16_T]               = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT_LEAST32_T]               = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINT_LEAST64_T]               = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINTMAX_T]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_UINTPTR_T]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_AT_INTERFACE]                 = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_IMPLEMENTATION]            = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_PROTOCOL]                  = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_END]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_CLASS]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_PUBLIC]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeAccessSpecifier;
-    c_token_identifier_type_map[kCEETokenID_AT_PACKAGE]                   = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_PROTECTED]                 = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeAccessSpecifier;
-    c_token_identifier_type_map[kCEETokenID_AT_PRIVATE]                   = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeAccessSpecifier;
-    c_token_identifier_type_map[kCEETokenID_AT_PROPERTY]                  = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_SYNTHESIZE]                = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_DYNAMIC]                   = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_REQUIRED]                  = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_OPTIONAL]                  = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_TRY]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_CATCH]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_FINALLY]                   = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_THROW]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_SELECTOR]                  = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_ENCODE]                    = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_DEFS]                      = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_AUTORELEASEPOOL]           = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_SYNCHRONIZED]              = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_AT_COMPATIBILITY_ALIAS]       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_ID]                           = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_INSTANCETYPE]                 = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_IMP]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_IN]                           = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_INOUT]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_NIL]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_ONEWAY]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_OUT]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_SEL]                          = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeBuildinType;
-    c_token_identifier_type_map[kCEETokenID_SELF]                         = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_SUPER]                        = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_YES]                          = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_NO]                           = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_ATOMIC]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_NONATOMIC]                    = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_STRONG]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_WEAK]                         = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_ASSIGN]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_COPY]                         = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_RETAIN]                       = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_READONLY]                     = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_READWRITE]                    = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID___BRIDGE]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID___BRIDGE_TRANSFER]            = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID___BRIDGE_RETAINED]            = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID___BLOCK]                      = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID__NONNULL]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID__NULLABLE]                    = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_NONNULL]                      = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID_NULLABLE]                     = kCEETokenIdentifierTypeKeyword | kCEETokenIdentifierTypeDeclarationSpecifier;
-    c_token_identifier_type_map[kCEETokenID___KIND_OF]                    = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_NS_ENUM]                      = kCEETokenIdentifierTypeKeyword;
-    c_token_identifier_type_map[kCEETokenID_NS_OPTIONS]                   = kCEETokenIdentifierTypeKeyword;
+    c_token_type_map[kCEETokenID_ALIGNAS]                      = kCEETokenTypeKeyword | kCEETokenTypeAlignasSpecifier;
+    c_token_type_map[kCEETokenID_ALIGNOF]                      = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AND]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AND_EQ]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_ASM]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_ATOMIC_CANCEL]                = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_ATOMIC_COMMIT]                = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_ATOMIC_NOEXCEPT]              = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AUTO]                         = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_BITAND]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_BITOR]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_BOOL]                         = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_BREAK]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_CASE]                         = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_CATCH]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_CHAR]                         = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_CHAR16_T]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_CHAR32_T]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_CLASS]                        = kCEETokenTypeKeyword | kCEETokenTypeObjectSpecifier;
+    c_token_type_map[kCEETokenID_COMPL]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_CONCEPT]                      = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_CONST]                        = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_CONSTEVAL]                    = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_CONSTEXPR]                    = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_CONST_CAST]                   = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_CONTINUE]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_DECLTYPE]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_DEFAULT]                      = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_DELETE]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_DO]                           = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_DOUBLE]                       = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_DYNAMIC_CAST]                 = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_ELSE]                         = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_ENUM]                         = kCEETokenTypeKeyword | kCEETokenTypeObjectSpecifier;
+    c_token_type_map[kCEETokenID_EXPLICIT]                     = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_EXPORT]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_EXTERN]                       = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_FALSE]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_FLOAT]                        = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_FOR]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_FRIEND]                       = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_GOTO]                         = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_IF]                           = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_IMPORT]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_INLINE]                       = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_INT]                          = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_LONG]                         = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_MODULE]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_MUTABLE]                      = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_NAMESPACE]                    = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_NEW]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_NOEXCEPT]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_NOT]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_NOT_EQ]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_NULLPTR]                      = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_OPERATOR]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_OR]                           = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_OR_EQ]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_PRIVATE]                      = kCEETokenTypeKeyword | kCEETokenTypeAccessSpecifier;
+    c_token_type_map[kCEETokenID_PROTECTED]                    = kCEETokenTypeKeyword | kCEETokenTypeAccessSpecifier;
+    c_token_type_map[kCEETokenID_PUBLIC]                       = kCEETokenTypeKeyword | kCEETokenTypeAccessSpecifier;
+    c_token_type_map[kCEETokenID_REGISTER]                     = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_REINTERPRET_CAST]             = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_REQUIRES]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_RESTRICT]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_RETURN]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_SHORT]                        = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SIGNED]                       = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SIZEOF]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_STATIC]                       = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_STATIC_ASSERT]                = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_STATIC_CAST]                  = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_STRUCT]                       = kCEETokenTypeKeyword | kCEETokenTypeObjectSpecifier;
+    c_token_type_map[kCEETokenID_SWITCH]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_SYNCHRONIZED]                 = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_TEMPLATE]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_THIS]                         = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_THREAD_LOCAL]                 = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_THROW]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_TRUE]                         = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_TRY]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_TYPEDEF]                      = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_TYPEID]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_TYPENAME]                     = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_UNION]                        = kCEETokenTypeKeyword | kCEETokenTypeObjectSpecifier;
+    c_token_type_map[kCEETokenID_UNSIGNED]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_USING]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_VIRTUAL]                      = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_VOLATILE]                     = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_WCHAR_T]                      = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_WHILE]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_XOR]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_XOR_EQ]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_OVERRIDE]                     = kCEETokenTypeKeyword | kCEETokenTypeVirtualSpecifier;
+    c_token_type_map[kCEETokenID_FINAL]                        = kCEETokenTypeKeyword | kCEETokenTypeVirtualSpecifier;
+    c_token_type_map[kCEETokenID_TRANSACTION_SAFE]             = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_TRANSACTION_SAFE_DYNAMIC]     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID__ALIGNAS]                     = kCEETokenTypeKeyword | kCEETokenTypeAlignasSpecifier;
+    c_token_type_map[kCEETokenID__ALIGNOF]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID__ATOMIC]                      = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID__BOOL]                        = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID__COMPLEX]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID__GENERIC]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID__IMAGINARY]                   = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID__NORETURN]                    = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID__STATIC_ASSERT]               = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID__THREAD_LOCAL]                = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_VOID]                         = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_LONG_DOUBLE]                  = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SIGNED_CHAR]                  = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UNSIGNED_CHAR]                = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SHORT_INT]                    = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SIGNED_SHORT]                 = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SIGNED_SHORT_INT]             = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UNSIGNED_SHORT]               = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UNSIGNED_SHORT_INT]           = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SIGNED_INT]                   = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UNSIGNED_INT]                 = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_LONG_INT]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SIGNED_LONG]                  = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SIGNED_LONG_INT]              = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UNSIGNED_LONG]                = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UNSIGNED_LONG_INT]            = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_LONG_LONG]                    = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_LONG_LONG_INT]                = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SIGNED_LONG_LONG]             = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SIGNED_LONG_LONG_INT]         = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UNSIGNED_LONG_LONG]           = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UNSIGNED_LONG_LONG_INT]       = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT8_T]                       = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT16_T]                      = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT32_T]                      = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT64_T]                      = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT_FAST8_T]                  = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT_FAST16_T]                 = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT_FAST32_T]                 = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT_FAST64_T]                 = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT_LEAST8_T]                 = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT_LEAST16_T]                = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT_LEAST32_T]                = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INT_LEAST64_T]                = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INTMAX_T]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INTPTR_T]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT8_T]                      = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT16_T]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT32_T]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT64_T]                     = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT_FAST8_T]                 = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT_FAST16_T]                = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT_FAST32_T]                = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT_FAST64_T]                = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT_LEAST8_T]                = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT_LEAST16_T]               = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT_LEAST32_T]               = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINT_LEAST64_T]               = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINTMAX_T]                    = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_UINTPTR_T]                    = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_AT_INTERFACE]                 = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_IMPLEMENTATION]            = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_PROTOCOL]                  = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_END]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_CLASS]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_PUBLIC]                    = kCEETokenTypeKeyword | kCEETokenTypeAccessSpecifier;
+    c_token_type_map[kCEETokenID_AT_PACKAGE]                   = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_PROTECTED]                 = kCEETokenTypeKeyword | kCEETokenTypeAccessSpecifier;
+    c_token_type_map[kCEETokenID_AT_PRIVATE]                   = kCEETokenTypeKeyword | kCEETokenTypeAccessSpecifier;
+    c_token_type_map[kCEETokenID_AT_PROPERTY]                  = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_SYNTHESIZE]                = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_DYNAMIC]                   = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_REQUIRED]                  = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_OPTIONAL]                  = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_TRY]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_CATCH]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_FINALLY]                   = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_THROW]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_SELECTOR]                  = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_ENCODE]                    = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_DEFS]                      = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_AUTORELEASEPOOL]           = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_SYNCHRONIZED]              = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_AT_COMPATIBILITY_ALIAS]       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_ID]                           = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_INSTANCETYPE]                 = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_IMP]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_IN]                           = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_INOUT]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_NIL]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_ONEWAY]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_OUT]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_SEL]                          = kCEETokenTypeKeyword | kCEETokenTypeBuildinType;
+    c_token_type_map[kCEETokenID_SELF]                         = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_SUPER]                        = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_YES]                          = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_NO]                           = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_ATOMIC]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_NONATOMIC]                    = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_STRONG]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_WEAK]                         = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_ASSIGN]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_COPY]                         = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_RETAIN]                       = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_READONLY]                     = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_READWRITE]                    = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID___BRIDGE]                     = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID___BRIDGE_TRANSFER]            = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID___BRIDGE_RETAINED]            = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID___BLOCK]                      = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID__NONNULL]                     = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID__NULLABLE]                    = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_NONNULL]                      = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID_NULLABLE]                     = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
+    c_token_type_map[kCEETokenID___KIND_OF]                    = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_NS_ENUM]                      = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID_NS_OPTIONS]                   = kCEETokenTypeKeyword;
+    c_token_type_map['=']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map['+']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['-']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['*']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['/']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['\\']                                     = kCEETokenTypePunctuation;
+    c_token_type_map['%']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['~']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['&']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['|']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['^']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['!']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['<']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['>']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['.']                                      = kCEETokenTypePunctuation;
+    c_token_type_map[',']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['?']                                      = kCEETokenTypePunctuation;
+    c_token_type_map[':']                                      = kCEETokenTypePunctuation;
+    c_token_type_map['(']                                      = kCEETokenTypePunctuation;
+    c_token_type_map[')']                                      = kCEETokenTypePunctuation;
+    c_token_type_map['{']                                      = kCEETokenTypePunctuation;
+    c_token_type_map['}']                                      = kCEETokenTypePunctuation;
+    c_token_type_map['[']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[']']                                      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map['#']                                      = kCEETokenTypePunctuation;
+    c_token_type_map[';']                                      = kCEETokenTypePunctuation;
+    c_token_type_map['@']                                      = kCEETokenTypePunctuation;
+    c_token_type_map[kCEETokenID_ADD_ASSIGNMENT]               = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map[kCEETokenID_MINUS_ASSIGNMENT]             = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map[kCEETokenID_MULTI_ASSIGNMENT]             = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map[kCEETokenID_DIV_ASSIGNMENT]               = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map[kCEETokenID_MOD_ASSIGNMENT]               = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map[kCEETokenID_AND_ASSIGNMENT]               = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map[kCEETokenID_OR_ASSIGNMENT]                = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map[kCEETokenID_XOR_ASSIGNMENT]               = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map[kCEETokenID_LEFT_OFFSET_ASSIGNMENT]       = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map[kCEETokenID_RIGHT_OFFSET_ASSIGNMENT]      = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator | kCEETokenTypeAssignment;
+    c_token_type_map[kCEETokenID_INCREMENT]                    = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_DECREMENT]                    = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_LOGIC_AND]                    = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_LOGIC_OR]                     = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_LOGIC_EQUAL]                  = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_LOGIC_UNEQUAL]                = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_LOGIC_LESS_EQUAL]             = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_LOGIC_LARGE_EQUAL]            = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_MEMBER_POINTER]               = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_COMPARISON]                   = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_POINTER_MEMBER_POINTER]       = kCEETokenTypePunctuation | kCEETokenTypeOverloadOperator;
+    c_token_type_map[kCEETokenID_TOKEN_PASTING]                = kCEETokenTypePunctuation;
+    c_token_type_map[kCEETokenID_ELLIPSIS]                     = kCEETokenTypePunctuation;
+    c_token_type_map[kCEETokenID_SCOPE]                        = kCEETokenTypePunctuation;
+    c_token_type_map[kCEETokenID_AT_BRACE]                     = kCEETokenTypePunctuation;
+    c_token_type_map[kCEETokenID_AT_BRACKET]                   = kCEETokenTypePunctuation;
+    c_token_type_map[kCEETokenID_CARAT_BRACE]                  = kCEETokenTypePunctuation;
+    c_token_type_map[kCEETokenID_HASH_INCLUDE]                 = kCEETokenTypePrepDirective;
+    c_token_type_map[kCEETokenID_HASH_IMPORT]                  = kCEETokenTypePrepDirective;
+    c_token_type_map[kCEETokenID_HASH_DEFINE]                  = kCEETokenTypePrepDirective;
+    c_token_type_map[kCEETokenID_HASH_UNDEF]                   = kCEETokenTypePrepDirective;
+    c_token_type_map[kCEETokenID_HASH_IF]                      = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    c_token_type_map[kCEETokenID_HASH_IFDEF]                   = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    c_token_type_map[kCEETokenID_HASH_IFNDEF]                  = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    c_token_type_map[kCEETokenID_HASH_ENDIF]                   = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    c_token_type_map[kCEETokenID_HASH_ELSE]                    = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    c_token_type_map[kCEETokenID_HASH_ELIF]                    = kCEETokenTypePrepDirective | kCEETokenTypePrepDirectiveCondition;
+    c_token_type_map[kCEETokenID_HASH_LINE]                    = kCEETokenTypePrepDirective;
+    c_token_type_map[kCEETokenID_HASH_ERROR]                   = kCEETokenTypePrepDirective;
+    c_token_type_map[kCEETokenID_HASH_WARNING]                 = kCEETokenTypePrepDirective;
+    c_token_type_map[kCEETokenID_HASH_PRAGMA]                  = kCEETokenTypePrepDirective;
+    c_token_type_map[kCEETokenID_HASH_UNKNOW]                  = kCEETokenTypePrepDirective;
+    c_token_type_map[kCEETokenID_LINE_COMMENT]                 = kCEETokenTypeComment;
+    c_token_type_map[kCEETokenID_LINES_COMMENT]                = kCEETokenTypeComment;
+    c_token_type_map[kCEETokenID_CONSTANT]                     = kCEETokenTypeConstant;
+    c_token_type_map[kCEETokenID_CHARACTER]                    = kCEETokenTypeCharacter;
+    c_token_type_map[kCEETokenID_LITERAL]                      = kCEETokenTypeLiteral;
+    c_token_type_map[kCEETokenID_IDENTIFIER]                   = kCEETokenTypeIdentifier;
 }
 
 static cee_boolean token_id_is_prep_directive(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypePrepDirective) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypePrepDirective) != 0;
 }
 
 static cee_boolean token_id_is_prep_directive_condition(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypePrepDirectiveCondition) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypePrepDirectiveCondition) != 0;
 }
 
 static cee_boolean token_id_is_keyword(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeKeyword) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypeKeyword) != 0;
 }
 
 static cee_boolean token_id_is_punctuation(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypePunctuation) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypePunctuation) != 0;
 }
 
 static cee_boolean token_id_is_assignment(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeAssignment) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypeAssignment) != 0;
 }
 
 static cee_boolean token_id_is_builtin_type(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeBuildinType) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypeBuildinType) != 0;
 }
 
 static cee_boolean token_id_is_declaration_specifier(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeDeclarationSpecifier) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypeDeclarationSpecifier) != 0;
 }
 
 static cee_boolean token_id_is_access_specifier(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeAccessSpecifier) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypeAccessSpecifier) != 0;
 }
 
 static cee_boolean token_id_is_alignas_specifier(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeAlignasSpecifier) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypeAlignasSpecifier) != 0;
 }
 
 static cee_boolean token_id_is_object_sepcifier(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeObjectSpecifier) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypeObjectSpecifier) != 0;
 }
 
 static cee_boolean token_id_is_virtual_sepcifier(CEETokenID identifier) 
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeVirtualSpecifier) != 0;   
+    return (c_token_type_map[identifier] & kCEETokenTypeVirtualSpecifier) != 0;
 }
 static cee_boolean token_id_is_overload_operator(CEETokenID identifier)
 {
-    return (c_token_identifier_type_map[identifier] & kCEETokenIdentifierTypeOverloadOperator) != 0;
+    return (c_token_type_map[identifier] & kCEETokenTypeOverloadOperator) != 0;
 }
 
 static cee_boolean is_name_scope(CEEList* p)
@@ -4802,7 +4803,7 @@ exit:
 /**
  * parser
  */
-static void parser_block_header_trap_init(CParser* parser)
+static void c_block_header_trap_init(CParser* parser)
 {
     
     for (int i = 0; i < kCEETokenID_END; i ++)
@@ -4827,7 +4828,7 @@ CEESourceParserRef cee_c_parser_create(const cee_char* identifier)
     CParser* c = parser_create();
     c->super = parser;
     
-    parser_block_header_trap_init(c);
+    c_block_header_trap_init(c);
     c_token_type_map_init();
     
     c_prep_directive_include_translate_table_init();
@@ -4853,9 +4854,9 @@ CEESourceParserRef cee_c_parser_create(const cee_char* identifier)
 }
 
 static cee_boolean token_type_matcher(CEEToken* token,
-                                      CEETokenIdentifierType type)
+                                      CEETokenType type)
 {
-    return (c_token_identifier_type_map[token->identifier] & type) != 0;
+    return (c_token_type_map[token->identifier] & type) != 0;
 }
 
 void cee_c_parser_free(cee_pointer data)

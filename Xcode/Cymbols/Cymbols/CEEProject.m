@@ -11,6 +11,7 @@
 #import "CEESessionWindowController.h"
 #import "CEESessionViewController.h"
 #import "CEEIdentifier.h"
+#import "CEEJSONReader.h"
 #import "cee_symbol.h"
 #import "cee_backend.h"
 #import "cee_source_parser.h"
@@ -1091,7 +1092,7 @@ BOOL ContextContainSymbol(CEEList* context,
 - (void)setProperties:(CEEProjectSetting*)properties {
     AppDelegate* delegate = [NSApp delegate];
     
-    if (!properties || !properties.name || !properties.path || !properties.filePathsExpanded)
+    if (!properties || !properties.name || !properties.path)
         return;
     
     _properties = properties;
@@ -1111,9 +1112,9 @@ BOOL ContextContainSymbol(CEEList* context,
     cee_database_application_info_set(_database, [[delegate infoString] UTF8String]);
     
     // turn off journal mode, apple's sandbox forbid the journal file created
-    sqlite3_exec(_database, "PRAGMA journal_mode=OFF;", NULL, 0, 0);
+    sqlite3_exec(_database, "PRAGMA journal_mode=MEMORY;", NULL, 0, 0);
 
-    // save filePathsExpanded
+    // { save filePathsExpanded
     NSArray* filePaths = properties.filePathsExpanded;
     CEEList* file_paths_expanded = NULL;
     for (NSString* filePath in filePaths)
@@ -1122,8 +1123,9 @@ BOOL ContextContainSymbol(CEEList* context,
     cee_database_filepaths_append(_database, file_paths_expanded);
     cee_list_free_full(file_paths_expanded, cee_free);
     file_paths_expanded = NULL;
+    // save filePathsExpanded }
     
-    // save filePathsUserSelected
+    // { save User Selected File Path Bookmark and bookmarks
     NSArray* filePathsUserSelected = properties.filePathsUserSelected;
     CEEList* file_paths_user_selected = NULL;
     for (NSString* filePath in filePathsUserSelected)
@@ -1132,14 +1134,14 @@ BOOL ContextContainSymbol(CEEList* context,
     cee_database_filepaths_user_selected_append(_database, file_paths_user_selected);
     cee_list_free_full(file_paths_user_selected, cee_free);
     file_paths_user_selected = NULL;
-        
-    // save User Selected File Path Bookmark
+    
     NSArray* bookmarks = CreateBookmarksWithFilePaths(properties.filePathsUserSelected);
     for (CEESecurityBookmark* bookmark in bookmarks) {
         cee_database_security_bookmark_append(_database,
                                               [bookmark.filePath UTF8String], 
                                               [bookmark.content UTF8String]);
     }
+    // save User Selected File Path Bookmark and bookmarks }
     
     for (CEESession* session in self.sessions) {
         for (CEESessionPort* port in session.ports) {
@@ -1147,6 +1149,8 @@ BOOL ContextContainSymbol(CEEList* context,
             [port discardReferences];
         }
     }
+    
+    [self startAccessSecurityScopedDirectories];
     
     if (properties.filePathsExpanded) {
         for (CEESession* session in self.sessions) {
@@ -1238,9 +1242,43 @@ BOOL ContextContainSymbol(CEEList* context,
 }
 
 - (CEEProjectSetting*)createEmptyProjectSetting {
-    CEEProjectSetting* setting = [CEEProjectSetting projectSettingWithName:@"NewProject" path:NSHomeDirectoryForUser(NSUserName()) filePaths:nil filePathsUserSelected:nil];
+    CEEProjectSetting* setting = nil;
+    NSString* filePath = [self defaultProjectSettingPath];
     
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        NSMutableDictionary* descriptor = [CEEJSONReader objectFromFile:filePath];
+        CEESecurityBookmark* bookmark = [[CEESecurityBookmark alloc] init];
+        bookmark.filePath = descriptor[@"filePath"];
+        bookmark.content = descriptor[@"bookmarkContent"];
+        
+        setting = [CEEProjectSetting projectSettingWithName:@"NewProject" path:bookmark.filePath filePaths:nil filePathsUserSelected:nil];
+        setting.bookmark = bookmark;
+    }
+    else {
+        setting = [CEEProjectSetting projectSettingWithName:@"NewProject" path:nil filePaths:nil filePathsUserSelected:nil];
+    }
     return setting;
+}
+
+- (NSString*)defaultProjectSettingPath {
+    NSArray* searchPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+    NSString* applicationSupportDirectory = [[searchPaths firstObject] stringByAppendingPathComponent:@"Cymbols"];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:applicationSupportDirectory isDirectory:nil])
+        [[NSFileManager defaultManager] createDirectoryAtPath:applicationSupportDirectory withIntermediateDirectories:YES attributes:nil error:nil];
+    NSString* defaultProjectSettingPath = [applicationSupportDirectory stringByAppendingPathComponent:@"DefaultProjectSetting.cfg"];
+    return defaultProjectSettingPath;
+}
+
+- (void)saveProjectSettingAsDefault:(CEEProjectSetting*)setting {
+    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+    NSString* path = setting.path;
+    CEESecurityBookmark* bookmark = CreateBookmarkWithFilePath(path);
+    if (bookmark) {
+        [dict setValue:bookmark.filePath forKey:@"filePath"];
+        [dict setValue:bookmark.content forKey:@"bookmarkContent"];
+    }
+    NSString* filePath = [self defaultProjectSettingPath];
+    [CEEJSONReader object:dict toFile:filePath];
 }
 
 - (NSArray*)directoriesFromFilePaths:(NSArray*)filePaths {
