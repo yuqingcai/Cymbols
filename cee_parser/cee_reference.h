@@ -37,7 +37,7 @@ typedef struct _CEESourceSymbolReference {
 } CEESourceSymbolReference;
 
 CEESourceSymbolReference* cee_source_symbol_reference_create(const cee_char* filepath,
-                                                             const cee_uchar* subject,
+                                                             const cee_char* subject,
                                                              CEEList* tokens,
                                                              CEESourceReferenceType type);
 void cee_source_symbol_reference_free(cee_pointer data);

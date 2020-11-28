@@ -125,6 +125,7 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 - (NSArray*)getSecurityBookmarksWithFilePaths:(NSArray*)filePaths;
 - (void)startAccessSecurityScopedResourcesWithBookmarks:(NSArray*)bookmarks;
 - (void)stopAccessSecurityScopedResourcesWithBookmarks:(NSArray*)bookmarks;
+- (BOOL)isUntitled;
 @end
 
 @interface CEEProjectController : NSDocumentController

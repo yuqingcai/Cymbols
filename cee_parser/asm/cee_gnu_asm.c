@@ -34,8 +34,8 @@ typedef enum _GNUASMParserState {
 
 typedef struct _GNUASMParser {
     CEESourceParserRef super;
-    const cee_uchar* filepath_ref;
-    const cee_uchar* subject_ref;
+    const cee_char* filepath_ref;
+    const cee_char* subject_ref;
     CEESourceFregment* statement_root;
     CEESourceFregment* statement_current;
     CEESourceFregment* prep_directive_root;
@@ -58,39 +58,39 @@ static void parser_state_set(GNUASMParser* parser,
 static void parser_state_clear(GNUASMParser* parser,
                                GNUASMParserState state);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
-                                const cee_uchar* filepath,
-                                const cee_uchar* subject,
+                                const cee_char* filepath,
+                                const cee_char* subject,
                                 CEESourceFregment** prep_directive,
                                 CEESourceFregment** statement,
                                 CEESourceFregment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,
-                                   const cee_uchar* filepath,
-                                   const cee_uchar* subject,
+                                   const cee_char* filepath,
+                                   const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
                                    CEESourceFregment* prep_directive,
                                    CEESourceFregment* statement,
                                    CEERange range,
                                    CEEList** references);
-static cee_boolean references_in_source_fregment_parse(const cee_uchar* filepath,
+static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
                                                        CEESourceFregment* fregment,
-                                                       const cee_uchar* subject,
+                                                       const cee_char* subject,
                                                        CEESourceFregment* prep_directive,
                                                        CEESourceFregment* statement,
                                                        CEERange range,
                                                        CEEList** references);
 static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment* fregment,
-                                                              const cee_uchar* subject);
-static void gnu_asm_reference_fregment_parse(const cee_uchar* filepath,
+                                                              const cee_char* subject);
+static void gnu_asm_reference_fregment_parse(const cee_char* filepath,
                                              CEESourceFregment* fregment,
-                                             const cee_uchar* subject,
+                                             const cee_char* subject,
                                              CEESourceFregment* prep_directive,
                                              CEESourceFregment* statement,
                                              CEEList** references);
 static void symbol_parse_init(GNUASMParser* parser,
-                              const cee_uchar* filepath,
-                              const cee_uchar* subject);
+                              const cee_char* filepath,
+                              const cee_char* subject);
 static void symbol_parse_clear(GNUASMParser* parser);
 static CEEList* skip_include_path(CEEList* p);
 static cee_boolean token_type_matcher(CEEToken* token,
@@ -252,7 +252,7 @@ static cee_boolean token_id_is_punctuation(CEETokenID identifier)
     return (gnu_asm_token_type_map[identifier] & kCEETokenTypePunctuation) != 0;
 }
 
-static cee_boolean token_is_directive(const cee_uchar* subject,
+static cee_boolean token_is_directive(const cee_char* subject,
                                       CEEToken* token)
 {
     cee_boolean ret = FALSE;
@@ -520,8 +520,8 @@ static cee_boolean token_type_matcher(CEEToken* token,
 }
 
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
-                                const cee_uchar* filepath,
-                                const cee_uchar* subject,
+                                const cee_char* filepath,
+                                const cee_char* subject,
                                 CEESourceFregment** prep_directive,
                                 CEESourceFregment** statement,
                                 CEESourceFregment** comment,
@@ -614,8 +614,8 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
 }
 
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,
-                                   const cee_uchar* filepath,
-                                   const cee_uchar* subject,
+                                   const cee_char* filepath,
+                                   const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
                                    CEESourceFregment* prep_directive,
                                    CEESourceFregment* statement,
@@ -657,9 +657,9 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
     return TRUE;
 }
 
-static cee_boolean references_in_source_fregment_parse(const cee_uchar* filepath,
+static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
                                                        CEESourceFregment* fregment,
-                                                       const cee_uchar* subject,
+                                                       const cee_char* subject,
                                                        CEESourceFregment* prep_directive,
                                                        CEESourceFregment* statement,
                                                        CEERange range,
@@ -698,7 +698,7 @@ static cee_boolean references_in_source_fregment_parse(const cee_uchar* filepath
 }
 
 static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment* fregment,
-                                                              const cee_uchar* subject)
+                                                              const cee_char* subject)
 {
     CEEList* p = NULL;
     CEEToken* token = NULL;
@@ -709,18 +709,18 @@ static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment*
         reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeSquareBracketList,
                                                         fregment->filepath_ref,
                                                         fregment->subject_ref,
-                                                        (const cee_uchar*)"gnu_asm");
+                                                        "gnu_asm");
         reference_fregment = cee_source_fregment_sub_attach(reference_fregment,
                                                             kCEESourceFregmentTypeStatement,
                                                             fregment->filepath_ref,
                                                             fregment->subject_ref,
-                                                            (const cee_uchar*)"gnu_asm");
+                                                            "gnu_asm");
     }
     else {
         reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeStatement,
                                                         fregment->filepath_ref,
                                                         fregment->subject_ref,
-                                                        (const cee_uchar*)"gnu_asm");
+                                                        "gnu_asm");
     }
     
     current = reference_fregment;
@@ -737,7 +737,7 @@ static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment*
                                                    kCEESourceFregmentTypeCurlyBracketList,
                                                    fregment->filepath_ref,
                                                    fregment->subject_ref,
-                                                   (const cee_uchar*)"gnu_asm");
+                                                   "gnu_asm");
             }
             else if (token->identifier == '}') {
                 current = cee_source_fregment_pop(current);
@@ -751,7 +751,7 @@ static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment*
                                                    kCEESourceFregmentTypeSquareBracketList,
                                                    fregment->filepath_ref,
                                                    fregment->subject_ref,
-                                                   (const cee_uchar*)"gnu_asm");
+                                                   "gnu_asm");
             }
             else if (token->identifier == ']') {
                 current = cee_source_fregment_pop(current);
@@ -765,7 +765,7 @@ static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment*
                                                    kCEESourceFregmentTypeRoundBracketList,
                                                    fregment->filepath_ref,
                                                    fregment->subject_ref,
-                                                   (const cee_uchar*)"gnu_asm");
+                                                   "gnu_asm");
             }
             else if (token->identifier == ')') {
                 current = cee_source_fregment_pop(current);
@@ -788,9 +788,9 @@ static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment*
     return current;
 }
 
-static void gnu_asm_reference_fregment_parse(const cee_uchar* filepath,
+static void gnu_asm_reference_fregment_parse(const cee_char* filepath,
                                              CEESourceFregment* fregment,
-                                             const cee_uchar* subject,
+                                             const cee_char* subject,
                                              CEESourceFregment* prep_directive,
                                              CEESourceFregment* statement,
                                              CEEList** references)
@@ -845,8 +845,8 @@ static void gnu_asm_reference_fregment_parse(const cee_uchar* filepath,
 }
 
 static void symbol_parse_init(GNUASMParser* parser,
-                              const cee_uchar* filepath,
-                              const cee_uchar* subject)
+                              const cee_char* filepath,
+                              const cee_char* subject)
 {
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
@@ -854,47 +854,47 @@ static void symbol_parse_init(GNUASMParser* parser,
     parser->prep_directive_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
-                                                             (const cee_uchar*)"gnu_asm");
+                                                             "gnu_asm");
     parser->prep_directive_current = cee_source_fregment_sub_attach(parser->prep_directive_root, 
                                                                     kCEESourceFregmentTypeSourceList, 
                                                                     parser->filepath_ref,
                                                                     parser->subject_ref,
-                                                                    (const cee_uchar*)"gnu_asm");
+                                                                    "gnu_asm");
     parser->prep_directive_current = cee_source_fregment_sub_attach(parser->prep_directive_current, 
                                                                     kCEESourceFregmentTypePrepDirective, 
                                                                     parser->filepath_ref,
                                                                     parser->subject_ref,
-                                                                    (const cee_uchar*)"gnu_asm");
+                                                                    "gnu_asm");
     
     parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                         parser->filepath_ref,
                                                         parser->subject_ref,
-                                                        (const cee_uchar*)"gnu_asm");
+                                                        "gnu_asm");
     parser->statement_current = cee_source_fregment_sub_attach(parser->statement_root, 
                                                                kCEESourceFregmentTypeSourceList, 
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
-                                                               (const cee_uchar*)"gnu_asm");
+                                                               "gnu_asm");
     parser->statement_current = cee_source_fregment_sub_attach(parser->statement_current, 
                                                                kCEESourceFregmentTypeStatement, 
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
-                                                               (const cee_uchar*)"gnu_asm");
+                                                               "gnu_asm");
     
     parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                       parser->filepath_ref,
                                                       parser->subject_ref,
-                                                      (const cee_uchar*)"gnu_asm");
+                                                      "gnu_asm");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
                                                              kCEESourceFregmentTypeSourceList, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
-                                                             (const cee_uchar*)"gnu_asm");
+                                                             "gnu_asm");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
                                                              kCEESourceFregmentTypeComment, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
-                                                             (const cee_uchar*)"gnu_asm");
+                                                             "gnu_asm");
     parser->state = kGNUASMParserStateStatementParsing;
 }
 
@@ -930,7 +930,7 @@ static cee_boolean comment_attach(GNUASMParser* parser)
                                           kCEESourceFregmentTypeComment,
                                           parser->filepath_ref,
                                           parser->subject_ref,
-                                          (const cee_uchar*)"gnu_asm");
+                                          "gnu_asm");
     if (!attached)
         return FALSE;
     
@@ -1011,7 +1011,7 @@ static cee_boolean prep_directive_attach(GNUASMParser* parser,
                                           type,
                                           parser->filepath_ref,
                                           parser->subject_ref,
-                                          (const cee_uchar*)"gnu_asm");
+                                          "gnu_asm");
     if (!attached)
         return FALSE;
     
@@ -1031,7 +1031,7 @@ static cee_boolean prep_directive_sub_attach(GNUASMParser* parser,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,
-                                              (const cee_uchar*)"gnu_asm");
+                                              "gnu_asm");
     if (!attached)
         return FALSE;
     
@@ -1148,13 +1148,13 @@ static void gnu_asm_prep_directive_include_translate_table_init(void)
      *
      *  PathBegin, skip to Commit
      */
-    TRANSLATE_STATE_INI(gnu_asm_prep_directive_include_translate_table,   kGNUASMPrepDirectiveIncludeTranslateStateMax             , kGNUASMPrepDirectiveIncludeTranslateStateError                                               );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table,   kGNUASMPrepDirectiveIncludeTranslateStateInit            , kCEETokenID_HASH_INCLUDE                , kGNUASMPrepDirectiveIncludeTranslateStateDirective );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table,   kGNUASMPrepDirectiveIncludeTranslateStateInit            , kCEETokenID_HASH_IMPORT                 , kGNUASMPrepDirectiveIncludeTranslateStateDirective );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table,   kGNUASMPrepDirectiveIncludeTranslateStateDirective       , kCEETokenID_IDENTIFIER                  , kGNUASMPrepDirectiveIncludeTranslateStateCommit    );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table,   kGNUASMPrepDirectiveIncludeTranslateStateDirective       , kCEETokenID_LITERAL                     , kGNUASMPrepDirectiveIncludeTranslateStateCommit    );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table,   kGNUASMPrepDirectiveIncludeTranslateStateDirective       , '\\'                                    , kGNUASMPrepDirectiveIncludeTranslateStateDirective );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table,   kGNUASMPrepDirectiveIncludeTranslateStateDirective       , '<'                                     , kGNUASMPrepDirectiveIncludeTranslateStatePath      );
+    TRANSLATE_STATE_INI(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateMax        , kGNUASMPrepDirectiveIncludeTranslateStateError                                    );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateInit       , kCEETokenID_HASH_INCLUDE  , kGNUASMPrepDirectiveIncludeTranslateStateDirective    );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateInit       , kCEETokenID_HASH_IMPORT   , kGNUASMPrepDirectiveIncludeTranslateStateDirective    );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , kCEETokenID_IDENTIFIER    , kGNUASMPrepDirectiveIncludeTranslateStateCommit       );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , kCEETokenID_LITERAL       , kGNUASMPrepDirectiveIncludeTranslateStateCommit       );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , '\\'                      , kGNUASMPrepDirectiveIncludeTranslateStateDirective    );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , '<'                       , kGNUASMPrepDirectiveIncludeTranslateStatePath         );
 }
 
 static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
@@ -1252,19 +1252,19 @@ static void gnu_asm_prep_directive_define_translate_table_init(void)
      *  ParameterList       Error               Parameter       Error           Commit              Error           ParameterList   Error
      *  Parameter           Error               Error           Error           Commit              ParameterList   Parameter       Error
      */
-    TRANSLATE_STATE_INI(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateMax              , kGNUASMPrepDirectiveDefineTranslateStateError                                                      );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateInit             , kCEETokenID_HASH_DEFINE                   , kGNUASMPrepDirectiveDefineTranslateStateDirective      );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateDirective        , kCEETokenID_IDENTIFIER                    , kGNUASMPrepDirectiveDefineTranslateStateDefineName     );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateDirective        , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateDirective      );
-    TRANSLATE_STATE_ANY(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateDefineName       , kGNUASMPrepDirectiveDefineTranslateStateCommit                                                     );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateDefineName       , '('                                       , kGNUASMPrepDirectiveDefineTranslateStateParameterList  );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateDefineName       , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateDefineName     );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateParameterList    , kCEETokenID_IDENTIFIER                    , kGNUASMPrepDirectiveDefineTranslateStateParameter      );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateParameterList    , ')'                                       , kGNUASMPrepDirectiveDefineTranslateStateCommit         );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateParameterList    , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateParameterList  );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateParameter        , ')'                                       , kGNUASMPrepDirectiveDefineTranslateStateCommit         );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateParameter        , ','                                       , kGNUASMPrepDirectiveDefineTranslateStateParameterList  );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,    kGNUASMPrepDirectiveDefineTranslateStateParameter        , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateParameter      );
+    TRANSLATE_STATE_INI(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateMax             , kGNUASMPrepDirectiveDefineTranslateStateError                                                      );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateInit            , kCEETokenID_HASH_DEFINE                   , kGNUASMPrepDirectiveDefineTranslateStateDirective      );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDirective       , kCEETokenID_IDENTIFIER                    , kGNUASMPrepDirectiveDefineTranslateStateDefineName     );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDirective       , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateDirective      );
+    TRANSLATE_STATE_ANY(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDefineName      , kGNUASMPrepDirectiveDefineTranslateStateCommit                                                     );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDefineName      , '('                                       , kGNUASMPrepDirectiveDefineTranslateStateParameterList  );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDefineName      , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateDefineName     );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameterList   , kCEETokenID_IDENTIFIER                    , kGNUASMPrepDirectiveDefineTranslateStateParameter      );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameterList   , ')'                                       , kGNUASMPrepDirectiveDefineTranslateStateCommit         );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameterList   , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateParameterList  );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameter       , ')'                                       , kGNUASMPrepDirectiveDefineTranslateStateCommit         );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameter       , ','                                       , kGNUASMPrepDirectiveDefineTranslateStateParameterList  );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameter       , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateParameter      );
 }
 
 static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
@@ -1417,7 +1417,7 @@ static void statement_parse(GNUASMParser* parser)
                     symbol->name = cee_strtrim(symbol->name, ":");
                 
                 current->symbols = cee_list_prepend(current->symbols, symbol);
-                cee_source_fregment_type_set(current, kCEESourceFregmentTypeLabelDeclaration);
+                cee_source_fregment_type_set(current, kCEESourceFregmentTypeDeclaration);
             }
             cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
         }
@@ -1493,7 +1493,7 @@ static cee_boolean statement_attach(GNUASMParser* parser,
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
-                                          (const cee_uchar*)"gnu_asm");
+                                          "gnu_asm");
     if (!attached)
         return FALSE;
     
@@ -1513,7 +1513,7 @@ static cee_boolean statement_sub_attach(GNUASMParser* parser,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,
-                                              (const cee_uchar*)"gnu_asm");
+                                              "gnu_asm");
     if (!attached)
         return FALSE;
     

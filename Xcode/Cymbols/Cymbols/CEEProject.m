@@ -664,8 +664,8 @@ BOOL ContextContainSymbol(CEEList* context,
         CEERange range = cee_range_make(0, cee_text_storage_size_get(target.storage));
         CEEList* symbolReferences = NULL;
         cee_source_reference_parse(target.parser_ref, 
-                                   (const cee_uchar*)[target.filePath UTF8String], 
-                                   subject, 
+                                   [target.filePath UTF8String],
+                                   (const cee_char*)subject,
                                    target.source_token_map, 
                                    target.prep_directive, 
                                    target.statement, 
@@ -1068,9 +1068,32 @@ BOOL ContextContainSymbol(CEEList* context,
     [controller setIdentifier:CreateObjectID(controller)];
     [controller setSession:session];
     [controller deserialize:session.descriptor[@"ui"][@"window"]];
+    
+    if ([self isUntitled])
+        [self loadDefaultWindowSetting:controller];
     [self addWindowController:controller];
     [controller showWindow:self];
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPresent object:self];
+}
+
+- (void)loadDefaultWindowSetting:(CEEWindowController*)windowController {
+    AppDelegate* delegate = [NSApp delegate];
+    NSString* filePath = [delegate defaultWindowSettingPath];
+    NSMutableDictionary* descriptor = [CEEJSONReader objectFromFile:filePath];
+    if (descriptor &&
+        descriptor[@"x"] && descriptor[@"y"] &&
+        descriptor[@"width"] && descriptor[@"height"]) {
+        CGFloat x = [descriptor[@"x"] floatValue];
+        CGFloat y = [descriptor[@"y"] floatValue];
+        CGFloat width = [descriptor[@"width"] floatValue];
+        CGFloat height = [descriptor[@"height"] floatValue];
+        NSRect frame = [windowController.window frame];
+        frame.origin.x = x;
+        frame.origin.y = y;
+        frame.size.width = width;
+        frame.size.height = height;
+        [windowController.window setFrame:frame display:NO];
+    }
 }
 
 - (void)createSessionWithFilePaths:(NSArray*)filePaths {
@@ -1242,8 +1265,9 @@ BOOL ContextContainSymbol(CEEList* context,
 }
 
 - (CEEProjectSetting*)createEmptyProjectSetting {
+    AppDelegate* delegate = [NSApp delegate];
     CEEProjectSetting* setting = nil;
-    NSString* filePath = [self defaultProjectSettingPath];
+    NSString* filePath = [delegate defaultProjectSettingPath];
     
     if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
         NSMutableDictionary* descriptor = [CEEJSONReader objectFromFile:filePath];
@@ -1260,16 +1284,9 @@ BOOL ContextContainSymbol(CEEList* context,
     return setting;
 }
 
-- (NSString*)defaultProjectSettingPath {
-    NSArray* searchPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    NSString* applicationSupportDirectory = [[searchPaths firstObject] stringByAppendingPathComponent:@"Cymbols"];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:applicationSupportDirectory isDirectory:nil])
-        [[NSFileManager defaultManager] createDirectoryAtPath:applicationSupportDirectory withIntermediateDirectories:YES attributes:nil error:nil];
-    NSString* defaultProjectSettingPath = [applicationSupportDirectory stringByAppendingPathComponent:@"DefaultProjectSetting.cfg"];
-    return defaultProjectSettingPath;
-}
 
 - (void)saveProjectSettingAsDefault:(CEEProjectSetting*)setting {
+    AppDelegate* delegate = [NSApp delegate];
     NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
     NSString* path = setting.path;
     CEESecurityBookmark* bookmark = CreateBookmarkWithFilePath(path);
@@ -1277,7 +1294,7 @@ BOOL ContextContainSymbol(CEEList* context,
         [dict setValue:bookmark.filePath forKey:@"filePath"];
         [dict setValue:bookmark.content forKey:@"bookmarkContent"];
     }
-    NSString* filePath = [self defaultProjectSettingPath];
+    NSString* filePath = [delegate defaultProjectSettingPath];
     [CEEJSONReader object:dict toFile:filePath];
 }
 
@@ -1474,6 +1491,10 @@ BOOL ContextContainSymbol(CEEList* context,
     [super close];
 }
 
+- (BOOL)isUntitled {
+    return self.database == NULL;
+}
+
 @end
 
 @implementation CEEProjectController
@@ -1498,7 +1519,6 @@ BOOL ContextContainSymbol(CEEList* context,
     
     return project;
 }
-
 
 - (void)openDocumentWithContentsOfURL:(NSURL*)url display:(BOOL)displayDocument completionHandler:(void (^)(NSDocument *document, BOOL documentWasAlreadyOpen, NSError *error))completionHandler {
     [super openDocumentWithContentsOfURL:url display:displayDocument completionHandler:(^(NSDocument *document, BOOL documentWasAlreadyOpen, NSError *error) {

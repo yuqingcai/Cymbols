@@ -6,7 +6,7 @@
 #include "cee_reference.h"
 
 CEESourceSymbolReference* cee_source_symbol_reference_create(const cee_char* filepath,
-                                                             const cee_uchar* subject,
+                                                             const cee_char* subject,
                                                              CEEList* tokens,
                                                              CEESourceReferenceType type)
 {

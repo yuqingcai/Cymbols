@@ -120,8 +120,8 @@ CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol)
     return copy;
 }
 
-CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_uchar* filepath,
-                                                           const cee_uchar* subject,
+CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* filepath,
+                                                           const cee_char* subject,
                                                            CEEList* begin,
                                                            CEEList* end,
                                                            CEESourceSymbolType type,
@@ -151,8 +151,8 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_uchar* file
     return symbol;
 }
 
-CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_uchar* filepath,
-                                                      const cee_uchar* subject,
+CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* filepath,
+                                                      const cee_char* subject,
                                                       CEEList* tokens,
                                                       CEESourceSymbolType type,
                                                       const cee_char* language)
@@ -259,10 +259,12 @@ cee_boolean cee_source_symbol_is_block_type(CEESourceSymbol* symbol)
     return (symbol->type == kCEESourceSymbolTypeFunctionDefinition ||
             symbol->type == kCEESourceSymbolTypeMessageDefinition ||
             symbol->type == kCEESourceSymbolTypeClassDefinition ||
+            symbol->type == kCEESourceSymbolTypeStructDefinition ||
             symbol->type == kCEESourceSymbolTypeEnumDefinition ||
             symbol->type == kCEESourceSymbolTypeUnionDefinition ||
             symbol->type == kCEESourceSymbolTypeNamespaceDefinition ||
             symbol->type == kCEESourceSymbolTypeInterfaceDeclaration ||
+            symbol->type == kCEESourceSymbolTypeInterfaceDefinition ||
             symbol->type == kCEESourceSymbolTypeImplementationDefinition ||
             symbol->type == kCEESourceSymbolTypeProtocolDeclaration ||
             symbol->type == kCEESourceSymbolTypeExternBlock);
@@ -380,11 +382,12 @@ cee_boolean cee_source_symbol_is_definition(CEESourceSymbol* symbol)
 {
     return (symbol->type == kCEESourceSymbolTypePrepDirectiveDefine || 
             symbol->type == kCEESourceSymbolTypeFunctionDefinition || 
-            symbol->type == kCEESourceSymbolTypeProperty || 
+            symbol->type == kCEESourceSymbolTypePropertyDeclaration ||
             symbol->type == kCEESourceSymbolTypeVariableDeclaration || 
             symbol->type == kCEESourceSymbolTypeMessageDefinition || 
             symbol->type == kCEESourceSymbolTypeTypeDefine || 
-            symbol->type == kCEESourceSymbolTypeClassDefinition || 
+            symbol->type == kCEESourceSymbolTypeClassDefinition ||
+            symbol->type == kCEESourceSymbolTypeStructDefinition ||
             symbol->type == kCEESourceSymbolTypeEnumDefinition || 
             symbol->type == kCEESourceSymbolTypeUnionDefinition || 
             symbol->type == kCEESourceSymbolTypeNamespaceDefinition || 

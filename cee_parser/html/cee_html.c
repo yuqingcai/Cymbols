@@ -8,8 +8,8 @@
 
 typedef struct _HTMLParser {
     CEESourceParserRef super;
-    const cee_uchar* filepath_ref;
-    const cee_uchar* subject_ref;
+    const cee_char* filepath_ref;
+    const cee_char* subject_ref;
     CEESourceFregment* statement_root;
     CEESourceFregment* statement_current;
     CEESourceFregment* comment_root;
@@ -26,16 +26,16 @@ typedef enum _XMLTagType {
 static HTMLParser* parser_create(void);
 static void parser_free(cee_pointer data);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
-                                const cee_uchar* filepath,
-                                const cee_uchar* subject,
+                                const cee_char* filepath,
+                                const cee_char* subject,
                                 CEESourceFregment** prep_directive,
                                 CEESourceFregment** statement,
                                 CEESourceFregment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 static void symbol_parse_init(HTMLParser* parser,
-                              const cee_uchar* filepath,
-                              const cee_uchar* subject);
+                              const cee_char* filepath,
+                              const cee_char* subject);
 static void symbol_parse_clear(HTMLParser* parser);
 static cee_boolean token_is_comment(CEEToken* token);
 static cee_boolean comment_token_push(HTMLParser* parser,
@@ -91,8 +91,8 @@ static void parser_free(cee_pointer data)
 }
 
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
-                                const cee_uchar* filepath,
-                                const cee_uchar* subject,
+                                const cee_char* filepath,
+                                const cee_char* subject,
                                 CEESourceFregment** prep_directive,
                                 CEESourceFregment** statement,
                                 CEESourceFregment** comment,
@@ -120,7 +120,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
             fregment = cee_source_fregment_create(kCEESourceFregmentTypeXMLTagStart,
                                                   filepath, 
                                                   subject,
-                                                  (const cee_uchar*)"html");
+                                                  "html");
         
         ret = cee_lexer_html_token_get(&token);
         
@@ -223,8 +223,8 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
 
 
 static void symbol_parse_init(HTMLParser* parser,
-                              const cee_uchar* filepath,
-                              const cee_uchar* subject)
+                              const cee_char* filepath,
+                              const cee_char* subject)
 {    
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
@@ -232,23 +232,23 @@ static void symbol_parse_init(HTMLParser* parser,
     parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                         parser->filepath_ref,
                                                         parser->subject_ref,
-                                                        (const cee_uchar*)"html");
+                                                        "html");
     parser->statement_current = parser->statement_root;
     
     parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                       parser->filepath_ref,
                                                       parser->subject_ref,
-                                                      (const cee_uchar*)"html");    
+                                                      "html");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
                                                              kCEESourceFregmentTypeSourceList, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
-                                                             (const cee_uchar*)"html");
+                                                             "html");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
                                                              kCEESourceFregmentTypeComment, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
-                                                             (const cee_uchar*)"html");
+                                                             "html");
 }
 
 static void symbol_parse_clear(HTMLParser* parser)
@@ -506,7 +506,7 @@ static cee_boolean comment_attach(HTMLParser* parser)
                                           kCEESourceFregmentTypeComment, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
-                                          (const cee_uchar*)"html");
+                                          "html");
     if (!attached)
         return FALSE;
     
@@ -526,7 +526,7 @@ static cee_boolean statement_push(HTMLParser* parser,
                                                   kCEESourceFregmentTypeXMLTagList,
                                                   parser->filepath_ref,
                                                   parser->subject_ref,
-                                                  (const cee_uchar*)"html");
+                                                  "html");
         if (!attached)
             return FALSE;
 

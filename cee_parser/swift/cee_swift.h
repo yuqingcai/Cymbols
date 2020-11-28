@@ -12,7 +12,7 @@ extern "C" {
 
 CEESourceParserRef cee_swift_parser_create(const cee_char* identifier);
 void cee_swift_parser_free(cee_pointer data);
-void cee_lexer_swift_buffer_create(const cee_uchar* subject);
+void cee_lexer_swift_buffer_create(const cee_char* subject);
 void cee_lexer_swift_buffer_free(void);
 cee_int cee_lexer_swift_token_get(CEEToken** token);
 

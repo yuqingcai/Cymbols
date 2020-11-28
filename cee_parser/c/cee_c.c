@@ -333,8 +333,8 @@ typedef enum _CParserState {
 
 typedef struct _CParser {
     CEESourceParserRef super;
-    const cee_uchar* filepath_ref;
-    const cee_uchar* subject_ref;
+    const cee_char* filepath_ref;
+    const cee_char* subject_ref;
     CEESourceFregment* statement_root;
     CEESourceFregment* statement_current;
     CEESourceFregment* prep_directive_root;
@@ -372,7 +372,7 @@ static cee_boolean token_id_is_builtin_type(CEETokenID identifier);
 static cee_boolean token_id_is_declaration_specifier(CEETokenID identifier);
 static cee_boolean token_id_is_access_specifier(CEETokenID identifier);
 static cee_boolean token_id_is_alignas_specifier(CEETokenID identifier);
-static cee_boolean token_id_is_object_sepcifier(CEETokenID identifier);
+static cee_boolean token_id_is_object_specifier(CEETokenID identifier);
 static cee_boolean token_id_is_virtual_sepcifier(CEETokenID identifier);
 static cee_boolean is_name_scope(CEEList* p);
 
@@ -425,22 +425,22 @@ static cee_boolean c_inheritance_parse(CEEList* tokens,
                                        CEEList** inherited,
                                        CEEList** derives);
 CEESourceSymbol* c_inheritance_definition_create(CEEList* tokens,
-                                                 const cee_uchar* filepath,
-                                                 const cee_uchar* subject);
+                                                 const cee_char* filepath,
+                                                 const cee_char* subject);
 static cee_char* c_name_scope_list_string_create(CEEList* scopes,
-                                                 const cee_uchar* subject);
+                                                 const cee_char* subject);
 static cee_char* c_name_scope_create(CEEList* tokens,
-                                     const cee_uchar* subject);
+                                     const cee_char* subject);
 static CEEList* c_name_scope_head_get(CEEList* p,
-                                      const cee_uchar* subject);
+                                      const cee_char* subject);
 static void derived_chain_free(cee_pointer data);
 static cee_boolean c_class_definition_trap(CEESourceFregment* fregment,
                                            CEEList** pp);
 static cee_boolean c_enum_definition_trap(CEESourceFregment* fregment,
                                           CEEList** pp);
 static CEEList* enumerators_extract(CEEList* tokens,
-                                    const cee_uchar* filepath,
-                                    const cee_uchar* subject);
+                                    const cee_char* filepath,
+                                    const cee_char* subject);
 static cee_boolean c_union_definition_trap(CEESourceFregment* fregment,
                                            CEEList** pp);
 static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
@@ -463,20 +463,20 @@ static cee_char* objective_c_message_protos_dump(CEESourceFregment* fregment);
 static cee_char* objective_c_message_parameter_protos_dump(CEESourceFregment* fregment,
                                                            cee_int parameter_index);
 static void c_protos_translate_table_init(void);
-static cee_char* c_protos_string_from_token_slice(const cee_uchar* subject,
+static cee_char* c_protos_string_from_token_slice(const cee_char* subject,
                                                   CEEList* p,
                                                   CEEList* q);
 static CEESourceSymbol* objective_c_interface_extract(CEEList* tokens,
-                                                      const cee_uchar* filepath,
-                                                      const cee_uchar* subject);
+                                                      const cee_char* filepath,
+                                                      const cee_char* subject);
 static CEESourceSymbol* objective_c_implementation_extract(CEEList* tokens,
-                                                           const cee_uchar* filepath,
-                                                           const cee_uchar* subject);
+                                                           const cee_char* filepath,
+                                                           const cee_char* subject);
 static CEESourceSymbol* objective_c_protocol_extract(CEEList* tokens,
-                                                     const cee_uchar* filepath,
-                                                     const cee_uchar* subject);
+                                                     const cee_char* filepath,
+                                                     const cee_char* subject);
 static cee_char* c_name_list_create(CEEList* tokens,
-                                    const cee_uchar* subject);
+                                    const cee_char* subject);
 static void objective_c_property_declaration_translate_table_init(void);
 static cee_boolean objective_c_property_declaration_parse(CEESourceFregment* fregment);
 static void objective_c_message_declaration_translate_table_init(void);
@@ -526,15 +526,15 @@ static void objective_c_definition_translate_table_init(void);
 static cee_boolean objective_c_token_push(CParser* parser,
                                           CEEToken* push);
 static cee_boolean objective_c_definition_parse(CEESourceFregment* fregment,
-                                                const cee_uchar* subject);
+                                                const cee_char* subject);
 static void statement_parse(CParser* parser);
 static cee_boolean statement_reduce(CParser* parser);
 static void c_block_header_trap_init(CParser* parser);
 static CParser* parser_create(void);
 static void parser_free(cee_pointer data);
 static void symbol_parse_init(CParser* parser,
-                              const cee_uchar* filepath,
-                              const cee_uchar* subject);
+                              const cee_char* filepath,
+                              const cee_char* subject);
 static void symbol_parse_clear(CParser* parser);
 static void parser_state_set(CParser* parser,
                              CParserState state);
@@ -547,33 +547,33 @@ static void current_statement_type_transform(CParser* parser,
 static cee_boolean statement_token_push(CParser* parser,
                                         CEEToken* push);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
-                                const cee_uchar* filepath,
-                                const cee_uchar* subject,
+                                const cee_char* filepath,
+                                const cee_char* subject,
                                 CEESourceFregment** prep_directive,
                                 CEESourceFregment** statement,
                                 CEESourceFregment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,
-                                   const cee_uchar* filepath,
-                                   const cee_uchar* subject,
+                                   const cee_char* filepath,
+                                   const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
                                    CEESourceFregment* prep_directive,
                                    CEESourceFregment* statement,
                                    CEERange range,
                                    CEEList** references);
-static cee_boolean references_in_source_fregment_parse(const cee_uchar* filepath,
+static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
                                                        CEESourceFregment* fregment,
-                                                       const cee_uchar* subject,
+                                                       const cee_char* subject,
                                                        CEESourceFregment* prep_directive,
                                                        CEESourceFregment* statement,
                                                        CEERange range,
                                                        CEEList** references);
 static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregment,
-                                                        const cee_uchar* subject);
-static void c_reference_fregment_parse(const cee_uchar* filepath,
+                                                        const cee_char* subject);
+static void c_reference_fregment_parse(const cee_char* filepath,
                                        CEESourceFregment* fregment,
-                                       const cee_uchar* subject,
+                                       const cee_char* subject,
                                        CEESourceFregment* prep_directive,
                                        CEESourceFregment* statement,
                                        CEEList** references);
@@ -921,7 +921,7 @@ static cee_boolean token_id_is_alignas_specifier(CEETokenID identifier)
     return (c_token_type_map[identifier] & kCEETokenTypeAlignasSpecifier) != 0;
 }
 
-static cee_boolean token_id_is_object_sepcifier(CEETokenID identifier)
+static cee_boolean token_id_is_object_specifier(CEETokenID identifier)
 {
     return (c_token_type_map[identifier] & kCEETokenTypeObjectSpecifier) != 0;
 }
@@ -1005,7 +1005,7 @@ static cee_boolean comment_attach(CParser* parser)
                                           kCEESourceFregmentTypeComment,
                                           parser->filepath_ref,
                                           parser->subject_ref,
-                                          (const cee_uchar*)"c");
+                                          "c");
     if (!attached)
         return FALSE;
     
@@ -1086,7 +1086,7 @@ static cee_boolean prep_directive_attach(CParser* parser,
                                           type,
                                           parser->filepath_ref,
                                           parser->subject_ref,
-                                          (const cee_uchar*)"c");
+                                          "c");
     if (!attached)
         return FALSE;
     
@@ -1106,7 +1106,7 @@ static cee_boolean prep_directive_sub_attach(CParser* parser,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,
-                                              (const cee_uchar*)"c");
+                                              "c");
     if (!attached)
         return FALSE;
     
@@ -1222,13 +1222,13 @@ static void c_prep_directive_include_translate_table_init(void)
      *
      *  PathBegin, skip to Commit
      */
-    TRANSLATE_STATE_INI(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateMax             , kCPrepDirectiveIncludeTranslateStateError                                               );
-    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateInit            , kCEETokenID_HASH_INCLUDE                , kCPrepDirectiveIncludeTranslateStateDirective );
-    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateInit            , kCEETokenID_HASH_IMPORT                 , kCPrepDirectiveIncludeTranslateStateDirective );
-    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateDirective       , kCEETokenID_IDENTIFIER                  , kCPrepDirectiveIncludeTranslateStateCommit    );
-    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateDirective       , kCEETokenID_LITERAL                     , kCPrepDirectiveIncludeTranslateStateCommit    );
-    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateDirective       , '\\'                                    , kCPrepDirectiveIncludeTranslateStateDirective );
-    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateDirective       , '<'                                     , kCPrepDirectiveIncludeTranslateStatePath      );
+    TRANSLATE_STATE_INI(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateMax         , kCPrepDirectiveIncludeTranslateStateError                                 );
+    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateInit        , kCEETokenID_HASH_INCLUDE  , kCPrepDirectiveIncludeTranslateStateDirective );
+    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateInit        , kCEETokenID_HASH_IMPORT   , kCPrepDirectiveIncludeTranslateStateDirective );
+    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateDirective   , kCEETokenID_IDENTIFIER    , kCPrepDirectiveIncludeTranslateStateCommit    );
+    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateDirective   , kCEETokenID_LITERAL       , kCPrepDirectiveIncludeTranslateStateCommit    );
+    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateDirective   , '\\'                      , kCPrepDirectiveIncludeTranslateStateDirective );
+    TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateDirective   , '<'                       , kCPrepDirectiveIncludeTranslateStatePath      );
 }
 
 static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
@@ -1478,7 +1478,7 @@ static cee_boolean statement_attach(CParser* parser,
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
-                                          (const cee_uchar*)"c");
+                                          "c");
     if (!attached)
         return FALSE;
     
@@ -1498,7 +1498,7 @@ static cee_boolean statement_sub_attach(CParser* parser,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,
-                                              (const cee_uchar*)"c");
+                                              "c");
     if (!attached)
         return FALSE;
     
@@ -1573,8 +1573,8 @@ static cee_boolean block_pop(CParser* parser)
 static void block_parse(CParser* parser)
 {
     CEESourceFregment* current = parser->statement_current;
-    const cee_uchar* subject = parser->subject_ref;
-    const cee_uchar* filepath = current->filepath_ref;
+    const cee_char* subject = parser->subject_ref;
+    const cee_char* filepath = current->filepath_ref;
     CEEList* enumerators = NULL;
     
     if (!current || !current->tokens_ref)
@@ -1716,35 +1716,35 @@ static void c_inheritance_definition_translate_table_init(void)
      *  
      *  TemplateParameter: save 'current state', skip template parameterlist then restore 'current state'  
      */
-    TRANSLATE_STATE_INI(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateMax                          , kCInheritanceDefinitionTranslateStateError                                                            );
-    TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateInit                         , token_id_is_object_sepcifier      , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , kCEETokenID_IDENTIFIER            , kCInheritanceDefinitionTranslateStateObjectIdentifier             );
-    TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , token_id_is_object_sepcifier      , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
-    TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , token_id_is_alignas_specifier     , kCInheritanceDefinitionTranslateStateAlignasSpecifier             );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , kCEETokenID_SCOPE                 , kCInheritanceDefinitionTranslateStateObjectIdentifierScope        );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , '['                               , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , ']'                               , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , '{'                               , kCInheritanceDefinitionTranslateStateCommit                       );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifier             , kCEETokenID_IDENTIFIER            , kCInheritanceDefinitionTranslateStateObjectIdentifier             );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifier             , '<'                               , kCInheritanceDefinitionTranslateStateTemplateParameter            );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifier             , kCEETokenID_SCOPE                 , kCInheritanceDefinitionTranslateStateObjectIdentifierScope        );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifier             , ':'                               , kCInheritanceDefinitionTranslateStateObjectDerive                 );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifier             , '{'                               , kCInheritanceDefinitionTranslateStateCommit                       );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifierScope        , kCEETokenID_IDENTIFIER            , kCInheritanceDefinitionTranslateStateObjectIdentifier             );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , kCEETokenID_VIRTUAL               , kCInheritanceDefinitionTranslateStateObjectDerive                 );
-    TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , token_id_is_access_specifier      , kCInheritanceDefinitionTranslateStateObjectDerive                 );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , kCEETokenID_IDENTIFIER            , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , kCEETokenID_SCOPE                 , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifierScope  );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , ','                               , kCInheritanceDefinitionTranslateStateObjectDerive                 );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , '['                               , kCInheritanceDefinitionTranslateStateObjectDerive                 );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , ']'                               , kCInheritanceDefinitionTranslateStateObjectDerive                 );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       , '<'                               , kCInheritanceDefinitionTranslateStateTemplateParameter            );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       , kCEETokenID_SCOPE                 , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifierScope  );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       , ','                               , kCInheritanceDefinitionTranslateStateObjectDerive                 );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       , '{'                               , kCInheritanceDefinitionTranslateStateCommit                       );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifierScope  , kCEETokenID_IDENTIFIER            , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateAlignasSpecifier             , '('                               , kCInheritanceDefinitionTranslateStateAlignasList                  );
-    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateAlignasList                  , ')'                               , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
+    TRANSLATE_STATE_INI(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateMax                          , kCInheritanceDefinitionTranslateStateError                                                        );
+    TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateInit                         , token_id_is_object_specifier  , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , kCEETokenID_IDENTIFIER        , kCInheritanceDefinitionTranslateStateObjectIdentifier             );
+    TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , token_id_is_object_specifier  , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
+    TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , token_id_is_alignas_specifier , kCInheritanceDefinitionTranslateStateAlignasSpecifier             );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , kCEETokenID_SCOPE             , kCInheritanceDefinitionTranslateStateObjectIdentifierScope        );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , '['                           , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , ']'                           , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectSpecifier              , '{'                           , kCInheritanceDefinitionTranslateStateCommit                       );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifier             , kCEETokenID_IDENTIFIER        , kCInheritanceDefinitionTranslateStateObjectIdentifier             );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifier             , '<'                           , kCInheritanceDefinitionTranslateStateTemplateParameter            );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifier             , kCEETokenID_SCOPE             , kCInheritanceDefinitionTranslateStateObjectIdentifierScope        );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifier             , ':'                           , kCInheritanceDefinitionTranslateStateObjectDerive                 );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifier             , '{'                           , kCInheritanceDefinitionTranslateStateCommit                       );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifierScope        , kCEETokenID_IDENTIFIER        , kCInheritanceDefinitionTranslateStateObjectIdentifier             );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , kCEETokenID_VIRTUAL           , kCInheritanceDefinitionTranslateStateObjectDerive                 );
+    TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , token_id_is_access_specifier  , kCInheritanceDefinitionTranslateStateObjectDerive                 );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , kCEETokenID_IDENTIFIER        , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , kCEETokenID_SCOPE             , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifierScope  );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , ','                           , kCInheritanceDefinitionTranslateStateObjectDerive                 );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , '['                           , kCInheritanceDefinitionTranslateStateObjectDerive                 );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , ']'                           , kCInheritanceDefinitionTranslateStateObjectDerive                 );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       , '<'                           , kCInheritanceDefinitionTranslateStateTemplateParameter            );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       , kCEETokenID_SCOPE             , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifierScope  );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       , ','                           , kCInheritanceDefinitionTranslateStateObjectDerive                 );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       , '{'                           , kCInheritanceDefinitionTranslateStateCommit                       );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifierScope  , kCEETokenID_IDENTIFIER        , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateAlignasSpecifier             , '('                           , kCInheritanceDefinitionTranslateStateAlignasList                  );
+    TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateAlignasList                  , ')'                           , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
 }
 
 static cee_boolean c_inheritance_parse(CEEList* tokens,
@@ -1813,8 +1813,8 @@ static cee_boolean c_inheritance_parse(CEEList* tokens,
 }
 
 CEESourceSymbol* c_inheritance_definition_create(CEEList* tokens,
-                                                 const cee_uchar* filepath,
-                                                 const cee_uchar* subject)
+                                                 const cee_char* filepath,
+                                                 const cee_char* subject)
 {
     CEEList* name = NULL;
     CEEList* derives_chains = NULL;
@@ -1860,7 +1860,7 @@ CEESourceSymbol* c_inheritance_definition_create(CEEList* tokens,
 }
 
 static cee_char* c_name_scope_list_string_create(CEEList* scopes,
-                                                 const cee_uchar* subject)
+                                                 const cee_char* subject)
 {
     CEEList* p = NULL;
     CEEList* q = NULL;
@@ -1883,7 +1883,7 @@ static cee_char* c_name_scope_list_string_create(CEEList* scopes,
 }
 
 static cee_char* c_name_scope_create(CEEList* tokens,
-                                     const cee_uchar* subject)
+                                     const cee_char* subject)
 {
     CEEList* p = NULL;
     cee_char* scope = NULL;
@@ -1906,7 +1906,7 @@ static cee_char* c_name_scope_create(CEEList* tokens,
 }
 
 static CEEList* c_name_scope_head_get(CEEList* p,
-                                      const cee_uchar* subject)
+                                      const cee_char* subject)
 {
     CEEToken* token = NULL;
     CEEList* q = NULL;
@@ -1997,8 +1997,8 @@ static cee_boolean c_enum_definition_trap(CEESourceFregment* fregment,
 }
 
 static CEEList* enumerators_extract(CEEList* tokens,
-                                    const cee_uchar* filepath,
-                                    const cee_uchar* subject)
+                                    const cee_char* filepath,
+                                    const cee_char* subject)
 {
     CEEList* p = TOKEN_FIRST(tokens);
     CEEToken* token = NULL;
@@ -2095,13 +2095,13 @@ static void objective_c_enum_definition_translate_table_init(void)
      *  ParameterListEnd    Error       Error           Error           Error               Commit      Error
      *
      */
-    TRANSLATE_STATE_INI(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateMax                         , kObjectiveCEnumDefinitionTranslateStateError                                                           );
-    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateInit                        , kCEETokenID_NS_ENUM                           , kObjectiveCEnumDefinitionTranslateStateEnum            );
-    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateInit                        , kCEETokenID_NS_OPTIONS                        , kObjectiveCEnumDefinitionTranslateStateOPtions         );
-    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateEnum                        , '('                                           , kObjectiveCEnumDefinitionTranslateStateParameterList   );
-    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateOPtions                     , '('                                           , kObjectiveCEnumDefinitionTranslateStateParameterList   );
-    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateParameterList               , ')'                                           , kObjectiveCEnumDefinitionTranslateStateParameterListEnd);
-    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateParameterListEnd            , '{'                                           , kObjectiveCEnumDefinitionTranslateStateCommit          );
+    TRANSLATE_STATE_INI(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateMax                 , kObjectiveCEnumDefinitionTranslateStateError                                      );
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateInit                , kCEETokenID_NS_ENUM       , kObjectiveCEnumDefinitionTranslateStateEnum            );
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateInit                , kCEETokenID_NS_OPTIONS    , kObjectiveCEnumDefinitionTranslateStateOPtions         );
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateEnum                , '('                       , kObjectiveCEnumDefinitionTranslateStateParameterList   );
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateOPtions             , '('                       , kObjectiveCEnumDefinitionTranslateStateParameterList   );
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateParameterList       , ')'                       , kObjectiveCEnumDefinitionTranslateStateParameterListEnd);
+    TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateParameterListEnd    , '{'                       , kObjectiveCEnumDefinitionTranslateStateCommit          );
 }
 
 static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
@@ -2253,148 +2253,148 @@ static void c_function_definition_translate_table_init(void)
      *  Trailing: skip to Commit
      *  TemplateParameter: save 'current state', skip template parameterlist then restore 'current state'  
      */
-    TRANSLATE_STATE_INI(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMax                        , kCFunctionDefinitionTranslateStateError                                                                               );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , token_id_is_declaration_specifier                 , kCFunctionDefinitionTranslateStateDeclarationSpecifier            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , kCEETokenID_DECLTYPE                              , kCFunctionDefinitionTranslateStateDecltype                        );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , token_id_is_builtin_type                          , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , token_id_is_object_sepcifier                      , kCFunctionDefinitionTranslateStateObjectSpecifier                 );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , token_id_is_access_specifier                      , kCFunctionDefinitionTranslateStateAccessSpecifier                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , kCEETokenID_SCOPE                                 , kCFunctionDefinitionTranslateStateIdentifierScope                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , '~'                                               , kCFunctionDefinitionTranslateStateInit                            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , '['                                               , kCFunctionDefinitionTranslateStateInit                            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , ']'                                               , kCFunctionDefinitionTranslateStateInit                            );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , token_id_is_declaration_specifier                 , kCFunctionDefinitionTranslateStateDeclarationSpecifier            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_LITERAL                               , kCFunctionDefinitionTranslateStateDeclarationSpecifier            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_DECLTYPE                              , kCFunctionDefinitionTranslateStateDecltype                        );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , token_id_is_builtin_type                          , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , token_id_is_object_sepcifier                      , kCFunctionDefinitionTranslateStateObjectSpecifier                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_SCOPE                                 , kCFunctionDefinitionTranslateStateIdentifierScope                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , '*'                                               , kCFunctionDefinitionTranslateStateDeclarationSpecifier            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , '&'                                               , kCFunctionDefinitionTranslateStateDeclarationSpecifier            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_LOGIC_AND                             , kCFunctionDefinitionTranslateStateDeclarationSpecifier            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , '~'                                               , kCFunctionDefinitionTranslateStateDeclarationSpecifier            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , '['                                               , kCFunctionDefinitionTranslateStateDeclarationSpecifier            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , ']'                                               , kCFunctionDefinitionTranslateStateDeclarationSpecifier            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_OPERATOR                              , kCFunctionDefinitionTranslateStateOperator                        );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDecltype                   , '('                                               , kCFunctionDefinitionTranslateStateDecltypeList                    );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDecltypeList               , ')'                                               , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , token_id_is_declaration_specifier                 , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , kCEETokenID_DECLTYPE                              , kCFunctionDefinitionTranslateStateDecltype                        );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , token_id_is_builtin_type                          , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , kCEETokenID_SCOPE                                 , kCFunctionDefinitionTranslateStateIdentifierScope                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , '*'                                               , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , '&'                                               , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , kCEETokenID_LOGIC_AND                             , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , '['                                               , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , ']'                                               , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , '~'                                               , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , kCEETokenID_OPERATOR                              , kCFunctionDefinitionTranslateStateOperator                        );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateObjectSpecifier            , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateObjectSpecifier            , kCEETokenID_SCOPE                                 , kCFunctionDefinitionTranslateStateIdentifierScope                 );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , token_id_is_declaration_specifier                 , kCFunctionDefinitionTranslateStateDeclarationSpecifier            );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , kCEETokenID_DECLTYPE                              , kCFunctionDefinitionTranslateStateDecltype                        );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , token_id_is_builtin_type                          , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , token_id_is_object_sepcifier                      , kCFunctionDefinitionTranslateStateObjectSpecifier                 );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , token_id_is_access_specifier                      , kCFunctionDefinitionTranslateStateAccessSpecifier                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , kCEETokenID_SCOPE                                 , kCFunctionDefinitionTranslateStateIdentifierScope                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , '~'                                               , kCFunctionDefinitionTranslateStateAccessSpecifier                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , '['                                               , kCFunctionDefinitionTranslateStateAccessSpecifier                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , ']'                                               , kCFunctionDefinitionTranslateStateAccessSpecifier                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , ':'                                               , kCFunctionDefinitionTranslateStateAccessSpecifier                 );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , token_id_is_declaration_specifier                 , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , kCEETokenID_DECLTYPE                              , kCFunctionDefinitionTranslateStateDecltype                        );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , token_id_is_builtin_type                          , kCFunctionDefinitionTranslateStateBuiltinType                     );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , token_id_is_object_sepcifier                      , kCFunctionDefinitionTranslateStateObjectSpecifier                 );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , token_id_is_access_specifier                      , kCFunctionDefinitionTranslateStateAccessSpecifier                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '<'                                               , kCFunctionDefinitionTranslateStateTemplateParameter               );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , kCEETokenID_SCOPE                                 , kCFunctionDefinitionTranslateStateIdentifierScope                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '*'                                               , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '&'                                               , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , kCEETokenID_LOGIC_AND                             , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '('                                               , kCFunctionDefinitionTranslateStateParameterList                   );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '['                                               , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , ']'                                               , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '~'                                               , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , kCEETokenID_OPERATOR                              , kCFunctionDefinitionTranslateStateOperator                        );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifierScope            , token_id_is_declaration_specifier                 , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifierScope            , token_id_is_builtin_type                          , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifierScope            , '~'                                               , kCFunctionDefinitionTranslateStateIdentifierScope                 );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifierScope            , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateIdentifier                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifierScope            , kCEETokenID_OPERATOR                              , kCFunctionDefinitionTranslateStateOperator                        );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterList              , ')'                                               , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , token_id_is_declaration_specifier                 , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , token_id_is_virtual_sepcifier                     , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_TRY                                   , kCFunctionDefinitionTranslateStateTry                             );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_NOEXCEPT                              , kCFunctionDefinitionTranslateStateNoexcept                        );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_THROW                                 , kCFunctionDefinitionTranslateStateThrow                           );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_LOGIC_AND                             , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , '('                                               , kCFunctionDefinitionTranslateStateParameterList                   );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , '['                                               , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , ']'                                               , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , ':'                                               , kCFunctionDefinitionTranslateStateInitializer                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , '{'                                               , kCFunctionDefinitionTranslateStateCommit                          );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_MEMBER_POINTER                        , kCFunctionDefinitionTranslateStateTrailing                        );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , token_id_is_virtual_sepcifier                     , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , kCEETokenID_TRY                                   , kCFunctionDefinitionTranslateStateTry                             );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , kCEETokenID_THROW                                 , kCFunctionDefinitionTranslateStateThrow                           );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , kCEETokenID_LOGIC_AND                             , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , '('                                               , kCFunctionDefinitionTranslateStateNoexceptList                    );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , '['                                               , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , ']'                                               , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , ':'                                               , kCFunctionDefinitionTranslateStateInitializer                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , kCEETokenID_MEMBER_POINTER                        , kCFunctionDefinitionTranslateStateTrailing                        );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , '{'                                               , kCFunctionDefinitionTranslateStateCommit                          );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexceptList               , ')'                                               , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , token_id_is_virtual_sepcifier                     , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , kCEETokenID_TRY                                   , kCFunctionDefinitionTranslateStateTry                             );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , kCEETokenID_NOEXCEPT                              , kCFunctionDefinitionTranslateStateNoexcept                        );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , kCEETokenID_LOGIC_AND                             , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , '('                                               , kCFunctionDefinitionTranslateStateThrowList                       );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , '['                                               , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , ']'                                               , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , ':'                                               , kCFunctionDefinitionTranslateStateInitializer                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , kCEETokenID_MEMBER_POINTER                        , kCFunctionDefinitionTranslateStateTrailing                        );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , '{'                                               , kCFunctionDefinitionTranslateStateCommit                          );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrowList                  , ')'                                               , kCFunctionDefinitionTranslateStateParameterListEnd                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInitializer                , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateMember                          );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInitializer                , ','                                               , kCFunctionDefinitionTranslateStateInitializer                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMember                     , '('                                               , kCFunctionDefinitionTranslateStateMemberInit                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMember                     , '{'                                               , kCFunctionDefinitionTranslateStateMemberInit                      );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInit                 , ')'                                               , kCFunctionDefinitionTranslateStateMemberInitEnd                   );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInit                 , '}'                                               , kCFunctionDefinitionTranslateStateMemberInitEnd                   );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInitEnd              , kCEETokenID_TRY                                   , kCFunctionDefinitionTranslateStateTry                             );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInitEnd              , ','                                               , kCFunctionDefinitionTranslateStateInitializer                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInitEnd              , '['                                               , kCFunctionDefinitionTranslateStateMemberInitEnd                   );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInitEnd              , ']'                                               , kCFunctionDefinitionTranslateStateMemberInitEnd                   );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInitEnd              , '{'                                               , kCFunctionDefinitionTranslateStateCommit                          );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateTry                        , '{'                                               , kCFunctionDefinitionTranslateStateCommit                          );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , token_id_is_builtin_type                          , kCFunctionDefinitionTranslateStateOverloadType                    );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , token_id_is_overload_operator                     , kCFunctionDefinitionTranslateStateOverloadOperator                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , kCEETokenID_IDENTIFIER                            , kCFunctionDefinitionTranslateStateOverloadType                    );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , kCEETokenID_NEW                                   , kCFunctionDefinitionTranslateStateOverloadNew                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , kCEETokenID_DELETE                                , kCFunctionDefinitionTranslateStateOverloadDelete                  );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , '('                                               , kCFunctionDefinitionTranslateStateOverloadRoundBracket            );
-    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadOperator           , token_id_is_overload_operator                     , kCFunctionDefinitionTranslateStateOverloadOperator                );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadOperator           , '('                                               , kCFunctionDefinitionTranslateStateParameterList                   );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadNew                , '['                                               , kCFunctionDefinitionTranslateStateOverloadNew                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadNew                , ']'                                               , kCFunctionDefinitionTranslateStateOverloadNew                     );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadNew                , '('                                               , kCFunctionDefinitionTranslateStateParameterList                   );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadDelete             , '['                                               , kCFunctionDefinitionTranslateStateOverloadDelete                  );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadDelete             , ']'                                               , kCFunctionDefinitionTranslateStateOverloadDelete                  );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadDelete             , '('                                               , kCFunctionDefinitionTranslateStateParameterList                   );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadType               , '('                                               , kCFunctionDefinitionTranslateStateOverloadTypeSurrounded          );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadTypeSurrounded     , ')'                                               , kCFunctionDefinitionTranslateStateOverloadTypeSurroundedEnd       );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadTypeSurroundedEnd  , '('                                               , kCFunctionDefinitionTranslateStateParameterList                   );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadRoundBracket       , ')'                                               , kCFunctionDefinitionTranslateStateOverloadRoundBracketEnd         );
-    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadRoundBracketEnd    , '('                                               , kCFunctionDefinitionTranslateStateParameterList                   );
+    TRANSLATE_STATE_INI(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMax                        , kCFunctionDefinitionTranslateStateError                                                               );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , token_id_is_declaration_specifier     , kCFunctionDefinitionTranslateStateDeclarationSpecifier        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , kCEETokenID_DECLTYPE                  , kCFunctionDefinitionTranslateStateDecltype                    );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , token_id_is_builtin_type              , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , token_id_is_object_specifier          , kCFunctionDefinitionTranslateStateObjectSpecifier             );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , token_id_is_access_specifier          , kCFunctionDefinitionTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , kCEETokenID_SCOPE                     , kCFunctionDefinitionTranslateStateIdentifierScope             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , '~'                                   , kCFunctionDefinitionTranslateStateInit                        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , '['                                   , kCFunctionDefinitionTranslateStateInit                        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInit                       , ']'                                   , kCFunctionDefinitionTranslateStateInit                        );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , token_id_is_declaration_specifier     , kCFunctionDefinitionTranslateStateDeclarationSpecifier        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_LITERAL                   , kCFunctionDefinitionTranslateStateDeclarationSpecifier        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_DECLTYPE                  , kCFunctionDefinitionTranslateStateDecltype                    );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , token_id_is_builtin_type              , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , token_id_is_object_specifier          , kCFunctionDefinitionTranslateStateObjectSpecifier             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_SCOPE                     , kCFunctionDefinitionTranslateStateIdentifierScope             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , '*'                                   , kCFunctionDefinitionTranslateStateDeclarationSpecifier        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , '&'                                   , kCFunctionDefinitionTranslateStateDeclarationSpecifier        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_LOGIC_AND                 , kCFunctionDefinitionTranslateStateDeclarationSpecifier        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , '~'                                   , kCFunctionDefinitionTranslateStateDeclarationSpecifier        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , '['                                   , kCFunctionDefinitionTranslateStateDeclarationSpecifier        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , ']'                                   , kCFunctionDefinitionTranslateStateDeclarationSpecifier        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDeclarationSpecifier       , kCEETokenID_OPERATOR                  , kCFunctionDefinitionTranslateStateOperator                    );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDecltype                   , '('                                   , kCFunctionDefinitionTranslateStateDecltypeList                );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateDecltypeList               , ')'                                   , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , token_id_is_declaration_specifier     , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , kCEETokenID_DECLTYPE                  , kCFunctionDefinitionTranslateStateDecltype                    );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , token_id_is_builtin_type              , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , kCEETokenID_SCOPE                     , kCFunctionDefinitionTranslateStateIdentifierScope             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , '*'                                   , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , '&'                                   , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , kCEETokenID_LOGIC_AND                 , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , '['                                   , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , ']'                                   , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , '~'                                   , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateBuiltinType                , kCEETokenID_OPERATOR                  , kCFunctionDefinitionTranslateStateOperator                    );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateObjectSpecifier            , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateObjectSpecifier            , kCEETokenID_SCOPE                     , kCFunctionDefinitionTranslateStateIdentifierScope             );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , token_id_is_declaration_specifier     , kCFunctionDefinitionTranslateStateDeclarationSpecifier        );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , kCEETokenID_DECLTYPE                  , kCFunctionDefinitionTranslateStateDecltype                    );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , token_id_is_builtin_type              , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , token_id_is_object_specifier          , kCFunctionDefinitionTranslateStateObjectSpecifier             );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , token_id_is_access_specifier          , kCFunctionDefinitionTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , kCEETokenID_SCOPE                     , kCFunctionDefinitionTranslateStateIdentifierScope             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , '~'                                   , kCFunctionDefinitionTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , '['                                   , kCFunctionDefinitionTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , ']'                                   , kCFunctionDefinitionTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateAccessSpecifier            , ':'                                   , kCFunctionDefinitionTranslateStateAccessSpecifier             );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , token_id_is_declaration_specifier     , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , kCEETokenID_DECLTYPE                  , kCFunctionDefinitionTranslateStateDecltype                    );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , token_id_is_builtin_type              , kCFunctionDefinitionTranslateStateBuiltinType                 );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , token_id_is_object_specifier          , kCFunctionDefinitionTranslateStateObjectSpecifier             );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , token_id_is_access_specifier          , kCFunctionDefinitionTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '<'                                   , kCFunctionDefinitionTranslateStateTemplateParameter           );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , kCEETokenID_SCOPE                     , kCFunctionDefinitionTranslateStateIdentifierScope             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '*'                                   , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '&'                                   , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , kCEETokenID_LOGIC_AND                 , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '('                                   , kCFunctionDefinitionTranslateStateParameterList               );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '['                                   , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , ']'                                   , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , '~'                                   , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifier                 , kCEETokenID_OPERATOR                  , kCFunctionDefinitionTranslateStateOperator                    );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifierScope            , token_id_is_declaration_specifier     , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifierScope            , token_id_is_builtin_type              , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifierScope            , '~'                                   , kCFunctionDefinitionTranslateStateIdentifierScope             );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifierScope            , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateIdentifier                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateIdentifierScope            , kCEETokenID_OPERATOR                  , kCFunctionDefinitionTranslateStateOperator                    );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterList              , ')'                                   , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , token_id_is_declaration_specifier     , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , token_id_is_virtual_sepcifier         , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_TRY                       , kCFunctionDefinitionTranslateStateTry                         );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_NOEXCEPT                  , kCFunctionDefinitionTranslateStateNoexcept                    );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_THROW                     , kCFunctionDefinitionTranslateStateThrow                       );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_LOGIC_AND                 , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , '('                                   , kCFunctionDefinitionTranslateStateParameterList               );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , '['                                   , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , ']'                                   , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , ':'                                   , kCFunctionDefinitionTranslateStateInitializer                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , '{'                                   , kCFunctionDefinitionTranslateStateCommit                      );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateParameterListEnd           , kCEETokenID_MEMBER_POINTER            , kCFunctionDefinitionTranslateStateTrailing                    );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , token_id_is_virtual_sepcifier         , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , kCEETokenID_TRY                       , kCFunctionDefinitionTranslateStateTry                         );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , kCEETokenID_THROW                     , kCFunctionDefinitionTranslateStateThrow                       );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , kCEETokenID_LOGIC_AND                 , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , '('                                   , kCFunctionDefinitionTranslateStateNoexceptList                );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , '['                                   , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , ']'                                   , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , ':'                                   , kCFunctionDefinitionTranslateStateInitializer                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , kCEETokenID_MEMBER_POINTER            , kCFunctionDefinitionTranslateStateTrailing                    );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexcept                   , '{'                                   , kCFunctionDefinitionTranslateStateCommit                      );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateNoexceptList               , ')'                                   , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , token_id_is_virtual_sepcifier         , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , kCEETokenID_TRY                       , kCFunctionDefinitionTranslateStateTry                         );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , kCEETokenID_NOEXCEPT                  , kCFunctionDefinitionTranslateStateNoexcept                    );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , kCEETokenID_LOGIC_AND                 , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , '('                                   , kCFunctionDefinitionTranslateStateThrowList                   );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , '['                                   , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , ']'                                   , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , ':'                                   , kCFunctionDefinitionTranslateStateInitializer                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , kCEETokenID_MEMBER_POINTER            , kCFunctionDefinitionTranslateStateTrailing                    );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrow                      , '{'                                   , kCFunctionDefinitionTranslateStateCommit                      );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateThrowList                  , ')'                                   , kCFunctionDefinitionTranslateStateParameterListEnd            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInitializer                , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateMember                      );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateInitializer                , ','                                   , kCFunctionDefinitionTranslateStateInitializer                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMember                     , '('                                   , kCFunctionDefinitionTranslateStateMemberInit                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMember                     , '{'                                   , kCFunctionDefinitionTranslateStateMemberInit                  );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInit                 , ')'                                   , kCFunctionDefinitionTranslateStateMemberInitEnd               );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInit                 , '}'                                   , kCFunctionDefinitionTranslateStateMemberInitEnd               );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInitEnd              , kCEETokenID_TRY                       , kCFunctionDefinitionTranslateStateTry                         );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInitEnd              , ','                                   , kCFunctionDefinitionTranslateStateInitializer                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInitEnd              , '['                                   , kCFunctionDefinitionTranslateStateMemberInitEnd               );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInitEnd              , ']'                                   , kCFunctionDefinitionTranslateStateMemberInitEnd               );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateMemberInitEnd              , '{'                                   , kCFunctionDefinitionTranslateStateCommit                      );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateTry                        , '{'                                   , kCFunctionDefinitionTranslateStateCommit                      );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , token_id_is_builtin_type              , kCFunctionDefinitionTranslateStateOverloadType                );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , token_id_is_overload_operator         , kCFunctionDefinitionTranslateStateOverloadOperator            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , kCEETokenID_IDENTIFIER                , kCFunctionDefinitionTranslateStateOverloadType                );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , kCEETokenID_NEW                       , kCFunctionDefinitionTranslateStateOverloadNew                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , kCEETokenID_DELETE                    , kCFunctionDefinitionTranslateStateOverloadDelete              );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOperator                   , '('                                   , kCFunctionDefinitionTranslateStateOverloadRoundBracket        );
+    TRANSLATE_FUNCS_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadOperator           , token_id_is_overload_operator         , kCFunctionDefinitionTranslateStateOverloadOperator            );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadOperator           , '('                                   , kCFunctionDefinitionTranslateStateParameterList               );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadNew                , '['                                   , kCFunctionDefinitionTranslateStateOverloadNew                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadNew                , ']'                                   , kCFunctionDefinitionTranslateStateOverloadNew                 );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadNew                , '('                                   , kCFunctionDefinitionTranslateStateParameterList               );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadDelete             , '['                                   , kCFunctionDefinitionTranslateStateOverloadDelete              );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadDelete             , ']'                                   , kCFunctionDefinitionTranslateStateOverloadDelete              );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadDelete             , '('                                   , kCFunctionDefinitionTranslateStateParameterList               );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadType               , '('                                   , kCFunctionDefinitionTranslateStateOverloadTypeSurrounded      );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadTypeSurrounded     , ')'                                   , kCFunctionDefinitionTranslateStateOverloadTypeSurroundedEnd   );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadTypeSurroundedEnd  , '('                                   , kCFunctionDefinitionTranslateStateParameterList               );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadRoundBracket       , ')'                                   , kCFunctionDefinitionTranslateStateOverloadRoundBracketEnd     );
+    TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadRoundBracketEnd    , '('                                   , kCFunctionDefinitionTranslateStateParameterList               );
 }
 
 static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
@@ -2521,89 +2521,89 @@ static void c_function_parameters_declaration_translate_table_init(void)
      *  SurroundedEnd           Error                   Error               Error           Error               Commit              Error               Error               Error   Error               Error       Error                   Error                   Error                   SurroundedEnd   SurroundedEnd       SurroundedEnd           SurroundedEnd           Commit      Error
      *  Ellipsis                Error                   Error               Error           Error               Commit              Error               Error               Error   Error               Error       Error                   Error                   Error                   Error           Error               Error                   Error                   Commit      Error
      */
-    TRANSLATE_STATE_INI(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateMax                   , kCFunctionParametersDeclarationTranslateStateError                                                                     );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                  , token_id_is_declaration_specifier                 , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                  , kCEETokenID_DECLTYPE                              , kCFunctionParametersDeclarationTranslateStateDecltype              );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                  , token_id_is_builtin_type                          , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                  , token_id_is_object_sepcifier                      , kCFunctionParametersDeclarationTranslateStateObjectSpecifier       );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                  , kCEETokenID_IDENTIFIER                            , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                  , kCEETokenID_SCOPE                                 , kCFunctionParametersDeclarationTranslateStateCustomTypeScope       );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                  , kCEETokenID_ELLIPSIS                              , kCFunctionParametersDeclarationTranslateStateEllipsis              );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                  , '['                                               , kCFunctionParametersDeclarationTranslateStateInit                  );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                  , ']'                                               , kCFunctionParametersDeclarationTranslateStateInit                  );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , token_id_is_declaration_specifier                 , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , kCEETokenID_DECLTYPE                              , kCFunctionParametersDeclarationTranslateStateDecltype              );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , token_id_is_builtin_type                          , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , token_id_is_object_sepcifier                      , kCFunctionParametersDeclarationTranslateStateObjectSpecifier       );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , kCEETokenID_IDENTIFIER                            , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , kCEETokenID_SCOPE                                 , kCFunctionParametersDeclarationTranslateStateCustomTypeScope       );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , '*'                                               , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , '&'                                               , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , kCEETokenID_LOGIC_AND                             , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , '['                                               , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  , ']'                                               , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , token_id_is_declaration_specifier                 , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , kCEETokenID_DECLTYPE                              , kCFunctionParametersDeclarationTranslateStateDecltype              );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , token_id_is_builtin_type                          , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , kCEETokenID_IDENTIFIER                            , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , kCEETokenID_SCOPE                                 , kCFunctionParametersDeclarationTranslateStateIdentifierScope       );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , '*'                                               , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , '&'                                               , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , kCEETokenID_LOGIC_AND                             , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , '['                                               , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , ']'                                               , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , ','                                               , kCFunctionParametersDeclarationTranslateStateCommit                );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType           , '('                                               , kCFunctionParametersDeclarationTranslateStateParameterList         );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDecltype              , '('                                               , kCFunctionParametersDeclarationTranslateStateDecltypeList          );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDecltypeList          , ')'                                               , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateObjectSpecifier       , kCEETokenID_IDENTIFIER                            , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateObjectSpecifier       , kCEETokenID_SCOPE                                 , kCFunctionParametersDeclarationTranslateStateCustomTypeScope       );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , token_id_is_declaration_specifier                 , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , kCEETokenID_DECLTYPE                              , kCFunctionParametersDeclarationTranslateStateDecltype              );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , token_id_is_builtin_type                          , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , token_id_is_object_sepcifier                      , kCFunctionParametersDeclarationTranslateStateObjectSpecifier       );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , kCEETokenID_IDENTIFIER                            , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , '<'                                               , kCFunctionParametersDeclarationTranslateStateTemplateParameter     );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , kCEETokenID_SCOPE                                 , kCFunctionParametersDeclarationTranslateStateCustomTypeScope       );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , '*'                                               , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , '&'                                               , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , kCEETokenID_LOGIC_AND                             , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , '['                                               , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , ']'                                               , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType            , '('                                               , kCFunctionParametersDeclarationTranslateStateParameterList         );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomTypeScope       , token_id_is_declaration_specifier                 , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomTypeScope       , kCEETokenID_IDENTIFIER                            , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomTypeScope       , token_id_is_builtin_type                          , kCFunctionParametersDeclarationTranslateStateCustomType            );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , token_id_is_declaration_specifier                 , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier  );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , kCEETokenID_DECLTYPE                              , kCFunctionParametersDeclarationTranslateStateDecltype              );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , token_id_is_builtin_type                          , kCFunctionParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , token_id_is_object_sepcifier                      , kCFunctionParametersDeclarationTranslateStateObjectSpecifier       );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , token_id_is_assignment                            , kCFunctionParametersDeclarationTranslateStateCommit                );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , kCEETokenID_IDENTIFIER                            , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , '<'                                               , kCFunctionParametersDeclarationTranslateStateTemplateParameter     );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , kCEETokenID_SCOPE                                 , kCFunctionParametersDeclarationTranslateStateIdentifierScope       );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , '*'                                               , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , '&'                                               , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , kCEETokenID_LOGIC_AND                             , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , '['                                               , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , ']'                                               , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , ','                                               , kCFunctionParametersDeclarationTranslateStateCommit                );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier            , '('                                               , kCFunctionParametersDeclarationTranslateStateParameterList         );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifierScope       , token_id_is_builtin_type                          , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifierScope       , token_id_is_declaration_specifier                 , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifierScope       , kCEETokenID_IDENTIFIER                            , kCFunctionParametersDeclarationTranslateStateIdentifier            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateParameterList         , ')'                                               , kCFunctionParametersDeclarationTranslateStateParameterListEnd      );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateParameterListEnd      , '('                                               , kCFunctionParametersDeclarationTranslateStateSurrounded            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateParameterListEnd      , '['                                               , kCFunctionParametersDeclarationTranslateStateSurrounded            );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateParameterListEnd      , ','                                               , kCFunctionParametersDeclarationTranslateStateCommit                );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurrounded            , ')'                                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd         );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurrounded            , ']'                                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd         );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurroundedEnd         , '('                                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd         );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurroundedEnd         , ')'                                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd         );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurroundedEnd         , '['                                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd         );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurroundedEnd         , ']'                                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd         );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurroundedEnd         , ','                                               , kCFunctionParametersDeclarationTranslateStateCommit                );
-    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateEllipsis              , ','                                               , kCFunctionParametersDeclarationTranslateStateCommit                );
+    TRANSLATE_STATE_INI(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateMax                     , kCFunctionParametersDeclarationTranslateStateError                                                    );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                    , token_id_is_declaration_specifier , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                    , kCEETokenID_DECLTYPE              , kCFunctionParametersDeclarationTranslateStateDecltype             );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                    , token_id_is_builtin_type          , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                    , token_id_is_object_specifier      , kCFunctionParametersDeclarationTranslateStateObjectSpecifier      );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                    , kCEETokenID_IDENTIFIER            , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                    , kCEETokenID_SCOPE                 , kCFunctionParametersDeclarationTranslateStateCustomTypeScope      );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                    , kCEETokenID_ELLIPSIS              , kCFunctionParametersDeclarationTranslateStateEllipsis             );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                    , '['                               , kCFunctionParametersDeclarationTranslateStateInit                 );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateInit                    , ']'                               , kCFunctionParametersDeclarationTranslateStateInit                 );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , token_id_is_declaration_specifier , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , kCEETokenID_DECLTYPE              , kCFunctionParametersDeclarationTranslateStateDecltype             );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , token_id_is_builtin_type          , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , token_id_is_object_specifier      , kCFunctionParametersDeclarationTranslateStateObjectSpecifier      );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , kCEETokenID_IDENTIFIER            , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , kCEETokenID_SCOPE                 , kCFunctionParametersDeclarationTranslateStateCustomTypeScope      );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , '*'                               , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , '&'                               , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , kCEETokenID_LOGIC_AND             , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , '['                               , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier    , ']'                               , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , token_id_is_declaration_specifier , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , kCEETokenID_DECLTYPE              , kCFunctionParametersDeclarationTranslateStateDecltype             );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , token_id_is_builtin_type          , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , kCEETokenID_IDENTIFIER            , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , kCEETokenID_SCOPE                 , kCFunctionParametersDeclarationTranslateStateIdentifierScope      );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , '*'                               , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , '&'                               , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , kCEETokenID_LOGIC_AND             , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , '['                               , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , ']'                               , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , ','                               , kCFunctionParametersDeclarationTranslateStateCommit               );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateBuiltinType             , '('                               , kCFunctionParametersDeclarationTranslateStateParameterList        );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDecltype                , '('                               , kCFunctionParametersDeclarationTranslateStateDecltypeList         );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateDecltypeList            , ')'                               , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateObjectSpecifier         , kCEETokenID_IDENTIFIER            , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateObjectSpecifier         , kCEETokenID_SCOPE                 , kCFunctionParametersDeclarationTranslateStateCustomTypeScope      );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , token_id_is_declaration_specifier , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , kCEETokenID_DECLTYPE              , kCFunctionParametersDeclarationTranslateStateDecltype             );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , token_id_is_builtin_type          , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , token_id_is_object_specifier      , kCFunctionParametersDeclarationTranslateStateObjectSpecifier      );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , kCEETokenID_IDENTIFIER            , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , '<'                               , kCFunctionParametersDeclarationTranslateStateTemplateParameter    );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , kCEETokenID_SCOPE                 , kCFunctionParametersDeclarationTranslateStateCustomTypeScope      );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , '*'                               , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , '&'                               , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , kCEETokenID_LOGIC_AND             , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , '['                               , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , ']'                               , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomType              , '('                               , kCFunctionParametersDeclarationTranslateStateParameterList        );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomTypeScope         , token_id_is_declaration_specifier , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomTypeScope         , kCEETokenID_IDENTIFIER            , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateCustomTypeScope         , token_id_is_builtin_type          , kCFunctionParametersDeclarationTranslateStateCustomType           );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , token_id_is_declaration_specifier , kCFunctionParametersDeclarationTranslateStateDeclarationSpecifier );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , kCEETokenID_DECLTYPE              , kCFunctionParametersDeclarationTranslateStateDecltype             );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , token_id_is_builtin_type          , kCFunctionParametersDeclarationTranslateStateBuiltinType          );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , token_id_is_object_specifier      , kCFunctionParametersDeclarationTranslateStateObjectSpecifier      );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , token_id_is_assignment            , kCFunctionParametersDeclarationTranslateStateCommit               );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , kCEETokenID_IDENTIFIER            , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , '<'                               , kCFunctionParametersDeclarationTranslateStateTemplateParameter    );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , kCEETokenID_SCOPE                 , kCFunctionParametersDeclarationTranslateStateIdentifierScope      );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , '*'                               , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , '&'                               , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , kCEETokenID_LOGIC_AND             , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , '['                               , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , ']'                               , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , ','                               , kCFunctionParametersDeclarationTranslateStateCommit               );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifier              , '('                               , kCFunctionParametersDeclarationTranslateStateParameterList        );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifierScope         , token_id_is_builtin_type          , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_FUNCS_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifierScope         , token_id_is_declaration_specifier , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateIdentifierScope         , kCEETokenID_IDENTIFIER            , kCFunctionParametersDeclarationTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateParameterList           , ')'                               , kCFunctionParametersDeclarationTranslateStateParameterListEnd     );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateParameterListEnd        , '('                               , kCFunctionParametersDeclarationTranslateStateSurrounded           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateParameterListEnd        , '['                               , kCFunctionParametersDeclarationTranslateStateSurrounded           );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateParameterListEnd        , ','                               , kCFunctionParametersDeclarationTranslateStateCommit               );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurrounded              , ')'                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd        );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurrounded              , ']'                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd        );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurroundedEnd           , '('                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd        );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurroundedEnd           , ')'                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd        );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurroundedEnd           , '['                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd        );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurroundedEnd           , ']'                               , kCFunctionParametersDeclarationTranslateStateSurroundedEnd        );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateSurroundedEnd           , ','                               , kCFunctionParametersDeclarationTranslateStateCommit               );
+    TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateEllipsis                , ','                               , kCFunctionParametersDeclarationTranslateStateCommit               );
 }
 
 static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
@@ -2813,19 +2813,19 @@ static void objective_c_message_definition_translate_table_init(void)
      *  ParameterTypeEnd     Error       Error      Parameter   Error           Error               Error       Error      Error
      *  Parameter            Error       Error      Component   Error           Error               Error       Commit     Error
      */
-    TRANSLATE_STATE_INI(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateMax               , kObjectiveCMessageDefinitionTranslateStateError                                                                   );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateInit              , '-'                                               , kObjectiveCMessageDefinitionTranslateStateMessage             );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateInit              , '+'                                               , kObjectiveCMessageDefinitionTranslateStateMessage             );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateMessage           , '('                                               , kObjectiveCMessageDefinitionTranslateStateReturnType          );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateReturnType        , ')'                                               , kObjectiveCMessageDefinitionTranslateStateReturnTypeEnd       );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateReturnTypeEnd     , kCEETokenID_IDENTIFIER                            , kObjectiveCMessageDefinitionTranslateStateComponent           );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateComponent         , ':'                                               , kObjectiveCMessageDefinitionTranslateStateColon               );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateComponent         , '{'                                               , kObjectiveCMessageDefinitionTranslateStateCommit              );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateColon             , '('                                               , kObjectiveCMessageDefinitionTranslateStateParameterType       );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateParameterType     , ')'                                               , kObjectiveCMessageDefinitionTranslateStateParameterTypeEnd    );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateParameterTypeEnd  , kCEETokenID_IDENTIFIER                            , kObjectiveCMessageDefinitionTranslateStateParameter           );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateParameter         , kCEETokenID_IDENTIFIER                            , kObjectiveCMessageDefinitionTranslateStateComponent           );
-    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateParameter         , '{'                                               , kObjectiveCMessageDefinitionTranslateStateCommit              );
+    TRANSLATE_STATE_INI(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateMax               , kObjectiveCMessageDefinitionTranslateStateError                                           );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateInit              , '-'                       , kObjectiveCMessageDefinitionTranslateStateMessage             );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateInit              , '+'                       , kObjectiveCMessageDefinitionTranslateStateMessage             );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateMessage           , '('                       , kObjectiveCMessageDefinitionTranslateStateReturnType          );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateReturnType        , ')'                       , kObjectiveCMessageDefinitionTranslateStateReturnTypeEnd       );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateReturnTypeEnd     , kCEETokenID_IDENTIFIER    , kObjectiveCMessageDefinitionTranslateStateComponent           );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateComponent         , ':'                       , kObjectiveCMessageDefinitionTranslateStateColon               );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateComponent         , '{'                       , kObjectiveCMessageDefinitionTranslateStateCommit              );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateColon             , '('                       , kObjectiveCMessageDefinitionTranslateStateParameterType       );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateParameterType     , ')'                       , kObjectiveCMessageDefinitionTranslateStateParameterTypeEnd    );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateParameterTypeEnd  , kCEETokenID_IDENTIFIER    , kObjectiveCMessageDefinitionTranslateStateParameter           );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateParameter         , kCEETokenID_IDENTIFIER    , kObjectiveCMessageDefinitionTranslateStateComponent           );
+    TRANSLATE_STATE_SET(objective_c_message_definition_translate_table, kObjectiveCMessageDefinitionTranslateStateParameter         , '{'                       , kObjectiveCMessageDefinitionTranslateStateCommit              );
 }
 
 static cee_boolean objective_c_message_definition_parse(CEESourceFregment* fregment)
@@ -2994,7 +2994,7 @@ static cee_boolean objective_c_property_declaration_parse(CEESourceFregment* fre
                                                                         fregment->subject_ref,
                                                                         q,
                                                                         q,
-                                                                        kCEESourceSymbolTypeProperty,
+                                                                        kCEESourceSymbolTypePropertyDeclaration,
                                                                         "c");
                 if (declaration) {
                     declaration->proto = cee_strdup(proto);
@@ -3233,7 +3233,7 @@ static void c_protos_translate_table_init(void)
     TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , token_id_is_declaration_specifier , kCProtosTranslateStateInit                        );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_DECLTYPE              , kCProtosTranslateStateDecltype                    );
     TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , token_id_is_builtin_type          , kCProtosTranslateStateBuiltinCommit               );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , token_id_is_object_sepcifier      , kCProtosTranslateStateObjectSpecifier             );
+    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
     TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , token_id_is_access_specifier      , kCProtosTranslateStateAccessSpecifier             );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomType                  );
@@ -3243,7 +3243,7 @@ static void c_protos_translate_table_init(void)
     TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_declaration_specifier , kCProtosTranslateStateAccessSpecifier             );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_DECLTYPE              , kCProtosTranslateStateDecltype                    );
     TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_builtin_type          , kCProtosTranslateStateBuiltinCommit               );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_object_sepcifier      , kCProtosTranslateStateObjectSpecifier             );
+    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
     TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_access_specifier      , kCProtosTranslateStateAccessSpecifier             );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomType                  );
@@ -3256,7 +3256,7 @@ static void c_protos_translate_table_init(void)
     TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_declaration_specifier , kCProtosTranslateStateCustomType                  );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_DECLTYPE              , kCProtosTranslateStateDecltype                    );
     TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_builtin_type          , kCProtosTranslateStateBuiltinCommit               );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_object_sepcifier      , kCProtosTranslateStateObjectSpecifier             );
+    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
     TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_access_specifier      , kCProtosTranslateStateAccessSpecifier             );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomTypeCommit            );
@@ -3271,7 +3271,7 @@ static void c_protos_translate_table_init(void)
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomTypeScope             , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomType                  );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAlignasSpecifier            , '('                               , kCProtosTranslateStateAlignasList                 );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAlignasList                 , ')'                               , kCProtosTranslateStateAlignasListEnd              );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , token_id_is_object_sepcifier      , kCProtosTranslateStateObjectSpecifier             );
+    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectIdentifier            );
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , kCEETokenID_SCOPE                 , kCProtosTranslateStateObjectIdentifierScope       );
@@ -3301,7 +3301,7 @@ static void c_protos_translate_table_init(void)
     TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectDefinition            , '}'                               , kCProtosTranslateStateObjectDefinitionCommit      );
 }
 
-static cee_char* c_protos_string_from_token_slice(const cee_uchar* subject,
+static cee_char* c_protos_string_from_token_slice(const cee_char* subject,
                                                   CEEList* p,
                                                   CEEList* q)
 {
@@ -3473,7 +3473,7 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateInit                          , kCEETokenID_DECLTYPE                  , kCDeclarationTranslateStateDecltype                   );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateInit                          , token_id_is_access_specifier          , kCDeclarationTranslateStateAccessSpecifier            );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateInit                          , token_id_is_builtin_type              , kCDeclarationTranslateStateBuiltinType                );
-    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateInit                          , token_id_is_object_sepcifier          , kCDeclarationTranslateStateObjectSpecifier            );
+    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateInit                          , token_id_is_object_specifier          , kCDeclarationTranslateStateObjectSpecifier            );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateInit                          , token_id_is_alignas_specifier         , kCDeclarationTranslateStateAlignasSpecifier           );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateInit                          , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateCustomType                 );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateInit                          , kCEETokenID_SCOPE                     , kCDeclarationTranslateStateCustomTypeScope            );
@@ -3485,7 +3485,7 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypedef                       , kCEETokenID_DECLTYPE                  , kCDeclarationTranslateStateDecltype                   );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypedef                       , token_id_is_access_specifier          , kCDeclarationTranslateStateAccessSpecifier            );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypedef                       , token_id_is_builtin_type              , kCDeclarationTranslateStateBuiltinType                );
-    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypedef                       , token_id_is_object_sepcifier          , kCDeclarationTranslateStateObjectSpecifier            );
+    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypedef                       , token_id_is_object_specifier          , kCDeclarationTranslateStateObjectSpecifier            );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypedef                       , token_id_is_alignas_specifier         , kCDeclarationTranslateStateAlignasSpecifier           );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypedef                       , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateCustomType                 );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypedef                       , kCEETokenID_SCOPE                     , kCDeclarationTranslateStateCustomTypeScope            );
@@ -3496,7 +3496,7 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateDeclarationSpecifier          , kCEETokenID_LITERAL                   , kCDeclarationTranslateStateDeclarationSpecifier       );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateDeclarationSpecifier          , kCEETokenID_DECLTYPE                  , kCDeclarationTranslateStateDecltype                   );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateDeclarationSpecifier          , token_id_is_builtin_type              , kCDeclarationTranslateStateBuiltinType                );
-    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateDeclarationSpecifier          , token_id_is_object_sepcifier          , kCDeclarationTranslateStateObjectSpecifier            );
+    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateDeclarationSpecifier          , token_id_is_object_specifier          , kCDeclarationTranslateStateObjectSpecifier            );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateDeclarationSpecifier          , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateCustomType                 );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateDeclarationSpecifier          , kCEETokenID_SCOPE                     , kCDeclarationTranslateStateCustomTypeScope            );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateDeclarationSpecifier          , '~'                                   , kCDeclarationTranslateStateDeclarationSpecifier       );
@@ -3507,7 +3507,7 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateAccessSpecifier               , kCEETokenID_DECLTYPE                  , kCDeclarationTranslateStateDecltype                   );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateAccessSpecifier               , token_id_is_access_specifier          , kCDeclarationTranslateStateAccessSpecifier            );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateAccessSpecifier               , token_id_is_builtin_type              , kCDeclarationTranslateStateBuiltinType                );
-    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateAccessSpecifier               , token_id_is_object_sepcifier          , kCDeclarationTranslateStateObjectSpecifier            );
+    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateAccessSpecifier               , token_id_is_object_specifier          , kCDeclarationTranslateStateObjectSpecifier            );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateAccessSpecifier               , token_id_is_alignas_specifier         , kCDeclarationTranslateStateAlignasSpecifier           );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateAccessSpecifier               , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateCustomType                 );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateAccessSpecifier               , kCEETokenID_SCOPE                     , kCDeclarationTranslateStateCustomTypeScope            );
@@ -3532,7 +3532,7 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateCustomType                    , kCEETokenID_DECLTYPE                  , kCDeclarationTranslateStateDecltype                   );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateCustomType                    , token_id_is_access_specifier          , kCDeclarationTranslateStateAccessSpecifier            );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateCustomType                    , token_id_is_builtin_type              , kCDeclarationTranslateStateBuiltinType                );
-    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateCustomType                    , token_id_is_object_sepcifier          , kCDeclarationTranslateStateObjectSpecifier            );
+    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateCustomType                    , token_id_is_object_specifier          , kCDeclarationTranslateStateObjectSpecifier            );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateCustomType                    , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateIdentifier                 );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateCustomType                    , '<'                                   , kCDeclarationTranslateStateTemplateParameter          );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateCustomType                    , kCEETokenID_SCOPE                     , kCDeclarationTranslateStateCustomTypeScope            );
@@ -3563,7 +3563,7 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateCustomTypeScope               , token_id_is_builtin_type              , kCDeclarationTranslateStateCustomType                 );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateCustomTypeScope               , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateCustomType                 );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectSpecifier               , token_id_is_alignas_specifier         , kCDeclarationTranslateStateObjectAlignasSpecifier     );
-    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectSpecifier               , token_id_is_object_sepcifier          , kCDeclarationTranslateStateObjectSpecifier            );
+    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectSpecifier               , token_id_is_object_specifier          , kCDeclarationTranslateStateObjectSpecifier            );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectSpecifier               , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateObjectIdentifier           );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectSpecifier               , kCEETokenID_SCOPE                     , kCDeclarationTranslateStateObjectIdentifierScope      );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectSpecifier               , '['                                   , kCDeclarationTranslateStateObjectSpecifier            );
@@ -3609,7 +3609,7 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateIdentifier                    , kCEETokenID_DECLTYPE                  , kCDeclarationTranslateStateDecltype                   );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateIdentifier                    , token_id_is_access_specifier          , kCDeclarationTranslateStateAccessSpecifier            );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateIdentifier                    , token_id_is_builtin_type              , kCDeclarationTranslateStateBuiltinType                );
-    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateIdentifier                    , token_id_is_object_sepcifier          , kCDeclarationTranslateStateObjectSpecifier            );
+    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateIdentifier                    , token_id_is_object_specifier          , kCDeclarationTranslateStateObjectSpecifier            );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateIdentifier                    , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateIdentifier                 );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateIdentifier                    , token_id_is_assignment                , kCDeclarationTranslateStateCommit                     );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateIdentifier                    , ':'                                   , kCDeclarationTranslateStateBitField                   );
@@ -3831,7 +3831,7 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
                                                               identifier);
             else if (object_identifier) {
                 token = cee_token_not_whitespace_newline_before(object_identifier)->data;
-                if (token_id_is_object_sepcifier(token->identifier))
+                if (token_id_is_object_specifier(token->identifier))
                     declaration = c_custom_type_declaration_create(fregment,
                                                                    proto,
                                                                    object_identifier);
@@ -4164,22 +4164,22 @@ static void c_namespace_definition_translate_table_init(void)
      *  AlignasBegin    Error           Error           Error       Error           Error       Error               Error   Error           Error           Namespace   Error
      */
     
-    TRANSLATE_STATE_INI(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateMax              , kCNamespaceDefinitionTranslateStateError                                              );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateInit             , kCEETokenID_NAMESPACE         , kCNamespaceDefinitionTranslateStateNamespace          );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , kCEETokenID_IDENTIFIER        , kCNamespaceDefinitionTranslateStateDefinitionName     );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , kCEETokenID_SCOPE             , kCNamespaceDefinitionTranslateStateNameScope          );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , '['                           , kCNamespaceDefinitionTranslateStateNamespace          );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , ']'                           , kCNamespaceDefinitionTranslateStateNamespace          );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , kCEETokenID_INLINE            , kCNamespaceDefinitionTranslateStateInlineSpecifier    );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , '{'                           , kCNamespaceDefinitionTranslateStateCommit             );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , kCEETokenID_ALIGNAS           , kCNamespaceDefinitionTranslateStateAlignas            );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateAlignas          , '('                           , kCNamespaceDefinitionTranslateStateAlignasBegin       );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateAlignasBegin     , ')'                           , kCNamespaceDefinitionTranslateStateNamespace          );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateDefinitionName   , kCEETokenID_SCOPE             , kCNamespaceDefinitionTranslateStateNameScope          );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateDefinitionName   , '{'                           , kCNamespaceDefinitionTranslateStateCommit             );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNameScope        , kCEETokenID_IDENTIFIER        , kCNamespaceDefinitionTranslateStateDefinitionName     );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNameScope        , kCEETokenID_INLINE            , kCNamespaceDefinitionTranslateStateInlineSpecifier    );
-    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateInlineSpecifier  , kCEETokenID_IDENTIFIER        , kCNamespaceDefinitionTranslateStateDefinitionName     );
+    TRANSLATE_STATE_INI(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateMax              , kCNamespaceDefinitionTranslateStateError                                          );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateInit             , kCEETokenID_NAMESPACE     , kCNamespaceDefinitionTranslateStateNamespace          );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , kCEETokenID_IDENTIFIER    , kCNamespaceDefinitionTranslateStateDefinitionName     );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , kCEETokenID_SCOPE         , kCNamespaceDefinitionTranslateStateNameScope          );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , '['                       , kCNamespaceDefinitionTranslateStateNamespace          );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , ']'                       , kCNamespaceDefinitionTranslateStateNamespace          );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , kCEETokenID_INLINE        , kCNamespaceDefinitionTranslateStateInlineSpecifier    );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , '{'                       , kCNamespaceDefinitionTranslateStateCommit             );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNamespace        , kCEETokenID_ALIGNAS       , kCNamespaceDefinitionTranslateStateAlignas            );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateAlignas          , '('                       , kCNamespaceDefinitionTranslateStateAlignasBegin       );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateAlignasBegin     , ')'                       , kCNamespaceDefinitionTranslateStateNamespace          );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateDefinitionName   , kCEETokenID_SCOPE         , kCNamespaceDefinitionTranslateStateNameScope          );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateDefinitionName   , '{'                       , kCNamespaceDefinitionTranslateStateCommit             );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNameScope        , kCEETokenID_IDENTIFIER    , kCNamespaceDefinitionTranslateStateDefinitionName     );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateNameScope        , kCEETokenID_INLINE        , kCNamespaceDefinitionTranslateStateInlineSpecifier    );
+    TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateInlineSpecifier  , kCEETokenID_IDENTIFIER    , kCNamespaceDefinitionTranslateStateDefinitionName     );
 }
 
 static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
@@ -4258,13 +4258,13 @@ static void c_extern_block_translate_table_init(void)
      *  Extern          Error   Identifier   Identifier     Error   Error
      *  Identifier      Error   Identifier   Identifier     Commit  Error
      */
-    TRANSLATE_STATE_INI(c_extern_block_translate_table,     kCExternBlockTranslateStateMax              , kCExternBlockTranslateStateError                                                );
-    TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateInit             , kCEETokenID_EXTERN              , kCExternBlockTranslateStateExtern             );
-    TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateExtern           , kCEETokenID_LITERAL             , kCExternBlockTranslateStateIdentifier         );
-    TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateExtern           , kCEETokenID_IDENTIFIER          , kCExternBlockTranslateStateIdentifier         );
-    TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateIdentifier       , kCEETokenID_LITERAL             , kCExternBlockTranslateStateIdentifier         );
-    TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateIdentifier       , kCEETokenID_IDENTIFIER          , kCExternBlockTranslateStateIdentifier         );
-    TRANSLATE_STATE_SET(c_extern_block_translate_table,     kCExternBlockTranslateStateIdentifier       , '{'                             , kCExternBlockTranslateStateCommit             );
+    TRANSLATE_STATE_INI(c_extern_block_translate_table, kCExternBlockTranslateStateMax          , kCExternBlockTranslateStateError                                          );
+    TRANSLATE_STATE_SET(c_extern_block_translate_table, kCExternBlockTranslateStateInit         , kCEETokenID_EXTERN        , kCExternBlockTranslateStateExtern             );
+    TRANSLATE_STATE_SET(c_extern_block_translate_table, kCExternBlockTranslateStateExtern       , kCEETokenID_LITERAL       , kCExternBlockTranslateStateIdentifier         );
+    TRANSLATE_STATE_SET(c_extern_block_translate_table, kCExternBlockTranslateStateExtern       , kCEETokenID_IDENTIFIER    , kCExternBlockTranslateStateIdentifier         );
+    TRANSLATE_STATE_SET(c_extern_block_translate_table, kCExternBlockTranslateStateIdentifier   , kCEETokenID_LITERAL       , kCExternBlockTranslateStateIdentifier         );
+    TRANSLATE_STATE_SET(c_extern_block_translate_table, kCExternBlockTranslateStateIdentifier   , kCEETokenID_IDENTIFIER    , kCExternBlockTranslateStateIdentifier         );
+    TRANSLATE_STATE_SET(c_extern_block_translate_table, kCExternBlockTranslateStateIdentifier   , '{'                       , kCExternBlockTranslateStateCommit             );
 }
 
 static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
@@ -4397,7 +4397,7 @@ static cee_boolean block_reduce(CParser* parser)
 static void label_parse(CParser* parser)
 {
     CEESourceFregment* fregment = NULL;
-    const cee_uchar* subject = NULL;
+    const cee_char* subject = NULL;
     CEEList* p = NULL;
     CEEList* q = NULL;
     CEESourceSymbol* declaration = NULL;
@@ -4513,32 +4513,32 @@ static void objective_c_definition_translate_table_init(void)
      *  ProtocolListEnd   Error      Error           Error     Error            Error       Error      Error   Error             Error           Error         VariableBlock  Error
      *  VariableBlock     Error      Error           Error     Error            Error       Error      Error   Error             Error           Error         Error          Error
      */
-    TRANSLATE_STATE_INI(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateMax                  , kObjectiveCDefinitionTranslateStateError                                                      );
-    TRANSLATE_STATE_ANY(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateInit                 , kObjectiveCDefinitionTranslateStateInit                                                       );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateInit                 , kCEETokenID_AT_INTERFACE          , kObjectiveCDefinitionTranslateStateInterface              );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateInit                 , kCEETokenID_AT_IMPLEMENTATION     , kObjectiveCDefinitionTranslateStateImplementation         );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateInit                 , kCEETokenID_AT_PROTOCOL           , kObjectiveCDefinitionTranslateStateProtocol               );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateInterface            , kCEETokenID_IDENTIFIER            , kObjectiveCDefinitionTranslateStateDefinitionName         );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateImplementation       , kCEETokenID_IDENTIFIER            , kObjectiveCDefinitionTranslateStateDefinitionName         );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocol             , kCEETokenID_IDENTIFIER            , kObjectiveCDefinitionTranslateStateDefinitionName         );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDefinitionName       , '('                               , kObjectiveCDefinitionTranslateStateExtendBegin            );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDefinitionName       , ':'                               , kObjectiveCDefinitionTranslateStateColon                  );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDefinitionName       , '<'                               , kObjectiveCDefinitionTranslateStateProtocolListBegin      );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDefinitionName       , '{'                               , kObjectiveCDefinitionTranslateStateVariableBlock          );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateColon                , kCEETokenID_IDENTIFIER            , kObjectiveCDefinitionTranslateStateDerived                );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDerived              , '<'                               , kObjectiveCDefinitionTranslateStateProtocolListBegin      );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDerived              , '{'                               , kObjectiveCDefinitionTranslateStateVariableBlock          );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateExtendBegin          , kCEETokenID_IDENTIFIER            , kObjectiveCDefinitionTranslateStateExtend                 );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateExtendBegin          , ')'                               , kObjectiveCDefinitionTranslateStateExtendEnd              );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateExtend               , ')'                               , kObjectiveCDefinitionTranslateStateExtendEnd              );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateExtendEnd            , '<'                               , kObjectiveCDefinitionTranslateStateProtocolListBegin      );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateExtendEnd            , '{'                               , kObjectiveCDefinitionTranslateStateVariableBlock          );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolListBegin    , kCEETokenID_IDENTIFIER            , kObjectiveCDefinitionTranslateStateProtocolNames          );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolListBegin    , '>'                               , kObjectiveCDefinitionTranslateStateProtocolListEnd        );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolNames        , kCEETokenID_IDENTIFIER            , kObjectiveCDefinitionTranslateStateProtocolNames          );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolNames        , ','                               , kObjectiveCDefinitionTranslateStateProtocolNames          );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolNames        , '>'                               , kObjectiveCDefinitionTranslateStateProtocolListEnd        );
-    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolListEnd      , '{'                               , kObjectiveCDefinitionTranslateStateVariableBlock          );
+    TRANSLATE_STATE_INI(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateMax                  , kObjectiveCDefinitionTranslateStateError                                                  );
+    TRANSLATE_STATE_ANY(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateInit                 , kObjectiveCDefinitionTranslateStateInit                                                   );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateInit                 , kCEETokenID_AT_INTERFACE      , kObjectiveCDefinitionTranslateStateInterface              );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateInit                 , kCEETokenID_AT_IMPLEMENTATION , kObjectiveCDefinitionTranslateStateImplementation         );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateInit                 , kCEETokenID_AT_PROTOCOL       , kObjectiveCDefinitionTranslateStateProtocol               );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateInterface            , kCEETokenID_IDENTIFIER        , kObjectiveCDefinitionTranslateStateDefinitionName         );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateImplementation       , kCEETokenID_IDENTIFIER        , kObjectiveCDefinitionTranslateStateDefinitionName         );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocol             , kCEETokenID_IDENTIFIER        , kObjectiveCDefinitionTranslateStateDefinitionName         );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDefinitionName       , '('                           , kObjectiveCDefinitionTranslateStateExtendBegin            );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDefinitionName       , ':'                           , kObjectiveCDefinitionTranslateStateColon                  );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDefinitionName       , '<'                           , kObjectiveCDefinitionTranslateStateProtocolListBegin      );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDefinitionName       , '{'                           , kObjectiveCDefinitionTranslateStateVariableBlock          );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateColon                , kCEETokenID_IDENTIFIER        , kObjectiveCDefinitionTranslateStateDerived                );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDerived              , '<'                           , kObjectiveCDefinitionTranslateStateProtocolListBegin      );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateDerived              , '{'                           , kObjectiveCDefinitionTranslateStateVariableBlock          );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateExtendBegin          , kCEETokenID_IDENTIFIER        , kObjectiveCDefinitionTranslateStateExtend                 );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateExtendBegin          , ')'                           , kObjectiveCDefinitionTranslateStateExtendEnd              );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateExtend               , ')'                           , kObjectiveCDefinitionTranslateStateExtendEnd              );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateExtendEnd            , '<'                           , kObjectiveCDefinitionTranslateStateProtocolListBegin      );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateExtendEnd            , '{'                           , kObjectiveCDefinitionTranslateStateVariableBlock          );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolListBegin    , kCEETokenID_IDENTIFIER        , kObjectiveCDefinitionTranslateStateProtocolNames          );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolListBegin    , '>'                           , kObjectiveCDefinitionTranslateStateProtocolListEnd        );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolNames        , kCEETokenID_IDENTIFIER        , kObjectiveCDefinitionTranslateStateProtocolNames          );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolNames        , ','                           , kObjectiveCDefinitionTranslateStateProtocolNames          );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolNames        , '>'                           , kObjectiveCDefinitionTranslateStateProtocolListEnd        );
+    TRANSLATE_STATE_SET(objective_c_definition_translate_table, kObjectiveCDefinitionTranslateStateProtocolListEnd      , '{'                           , kObjectiveCDefinitionTranslateStateVariableBlock          );
     
 }
 
@@ -4547,7 +4547,7 @@ static cee_boolean objective_c_token_push(CParser* parser,
 {
     ObjectiveCDefinitionTranslateState current = kObjectiveCDefinitionTranslateStateInit;
     ObjectiveCDefinitionTranslateState prev = kObjectiveCDefinitionTranslateStateInit;
-    const cee_uchar* subject = parser->subject_ref;
+    const cee_char* subject = parser->subject_ref;
     
     CEEToken* token = NULL;
     CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(parser->statement_current);
@@ -4602,7 +4602,7 @@ static cee_boolean objective_c_token_push(CParser* parser,
 }
 
 static cee_boolean objective_c_definition_parse(CEESourceFregment* fregment,
-                                                const cee_uchar* subject)
+                                                const cee_char* subject)
 {
     CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     ObjectiveCDefinitionType type = kObjectiveCDefinitionTypeInit;
@@ -4649,8 +4649,8 @@ static cee_boolean objective_c_definition_parse(CEESourceFregment* fregment,
 }
 
 static CEESourceSymbol* objective_c_interface_extract(CEEList* tokens,
-                                                      const cee_uchar* filepath,
-                                                      const cee_uchar* subject)
+                                                      const cee_char* filepath,
+                                                      const cee_char* subject)
 {
     CEEList* p = TOKEN_FIRST(tokens);
     CEEToken* token = NULL;
@@ -4699,7 +4699,7 @@ exit:
 }
 
 static cee_char* c_name_list_create(CEEList* tokens,
-                                    const cee_uchar* subject)
+                                    const cee_char* subject)
 {
     cee_char* names_str = NULL;
     cee_char* name_str = NULL;
@@ -4722,8 +4722,8 @@ static cee_char* c_name_list_create(CEEList* tokens,
 }
 
 static CEESourceSymbol* objective_c_implementation_extract(CEEList* tokens,
-                                                           const cee_uchar* filepath,
-                                                           const cee_uchar* subject)
+                                                           const cee_char* filepath,
+                                                           const cee_char* subject)
 {
     CEEList* p = TOKEN_FIRST(tokens);
     CEESourceSymbol* implementation = NULL;
@@ -4762,8 +4762,8 @@ exit:
 }
 
 static CEESourceSymbol* objective_c_protocol_extract(CEEList* tokens,
-                                                     const cee_uchar* filepath,
-                                                     const cee_uchar* subject)
+                                                     const cee_char* filepath,
+                                                     const cee_char* subject)
 {
     CEEList* p = TOKEN_FIRST(tokens);
     CEESourceSymbol* protocol = NULL;
@@ -4896,8 +4896,8 @@ static void parser_state_clear(CParser* parser,
 }
 
 static void symbol_parse_init(CParser* parser,
-                              const cee_uchar* filepath,
-                              const cee_uchar* subject)
+                              const cee_char* filepath,
+                              const cee_char* subject)
 {
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
@@ -4905,47 +4905,47 @@ static void symbol_parse_init(CParser* parser,
     parser->prep_directive_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
-                                                             (const cee_uchar*)"c");
+                                                             "c");
     parser->prep_directive_current = cee_source_fregment_sub_attach(parser->prep_directive_root, 
                                                                     kCEESourceFregmentTypeSourceList, 
                                                                     parser->filepath_ref,
                                                                     parser->subject_ref,
-                                                                    (const cee_uchar*)"c");
+                                                                    "c");
     parser->prep_directive_current = cee_source_fregment_sub_attach(parser->prep_directive_current, 
                                                                     kCEESourceFregmentTypePrepDirective, 
                                                                     parser->filepath_ref,
                                                                     parser->subject_ref,
-                                                                    (const cee_uchar*)"c");
+                                                                    "c");
     
     parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                         parser->filepath_ref,
                                                         parser->subject_ref,
-                                                        (const cee_uchar*)"c");
+                                                        "c");
     parser->statement_current = cee_source_fregment_sub_attach(parser->statement_root, 
                                                                kCEESourceFregmentTypeSourceList, 
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
-                                                               (const cee_uchar*)"c");
+                                                               "c");
     parser->statement_current = cee_source_fregment_sub_attach(parser->statement_current, 
                                                                kCEESourceFregmentTypeStatement, 
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
-                                                               (const cee_uchar*)"c");
+                                                               "c");
     
     parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                       parser->filepath_ref,
                                                       parser->subject_ref,
-                                                      (const cee_uchar*)"c");
+                                                      "c");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
                                                              kCEESourceFregmentTypeSourceList, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
-                                                             (const cee_uchar*)"c");
+                                                             "c");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
                                                              kCEESourceFregmentTypeComment, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
-                                                             (const cee_uchar*)"c");
+                                                             "c");
     parser->state = kCParserStateStatementParsing;
 }
 
@@ -4988,8 +4988,8 @@ static cee_boolean statement_token_push(CParser* parser,
 }
 
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
-                                const cee_uchar* filepath,
-                                const cee_uchar* subject,
+                                const cee_char* filepath,
+                                const cee_char* subject,
                                 CEESourceFregment** prep_directive,
                                 CEESourceFregment** statement,
                                 CEESourceFregment** comment,
@@ -5165,8 +5165,8 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
 }
 
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,
-                                   const cee_uchar* filepath,
-                                   const cee_uchar* subject,
+                                   const cee_char* filepath,
+                                   const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
                                    CEESourceFregment* prep_directive,
                                    CEESourceFregment* statement,
@@ -5208,9 +5208,9 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
     return TRUE;
 }
 
-static cee_boolean references_in_source_fregment_parse(const cee_uchar* filepath,
+static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
                                                        CEESourceFregment* fregment,
-                                                       const cee_uchar* subject,
+                                                       const cee_char* subject,
                                                        CEESourceFregment* prep_directive,
                                                        CEESourceFregment* statement,
                                                        CEERange range,
@@ -5249,7 +5249,7 @@ static cee_boolean references_in_source_fregment_parse(const cee_uchar* filepath
 }
 
 static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregment,
-                                                        const cee_uchar* subject)
+                                                        const cee_char* subject)
 {
     CEEList* p = NULL;
     CEEToken* token = NULL;
@@ -5260,18 +5260,18 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
         reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeSquareBracketList,
                                                         fregment->filepath_ref,
                                                         fregment->subject_ref,
-                                                        (const cee_uchar*)"c");
+                                                        "c");
         reference_fregment = cee_source_fregment_sub_attach(reference_fregment, 
                                                             kCEESourceFregmentTypeStatement,
                                                             fregment->filepath_ref,
                                                             fregment->subject_ref,
-                                                            (const cee_uchar*)"c");
+                                                            "c");
     }
     else {
         reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeStatement,
                                                         fregment->filepath_ref,
                                                         fregment->subject_ref,
-                                                        (const cee_uchar*)"c");
+                                                        "c");
     }
     
     current = reference_fregment;
@@ -5290,7 +5290,7 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
                                                    kCEESourceFregmentTypeCurlyBracketList,
                                                    fregment->filepath_ref,
                                                    fregment->subject_ref,
-                                                   (const cee_uchar*)"c");
+                                                   "c");
             }
             else if (token->identifier == '}') {
                 current = cee_source_fregment_pop(current);
@@ -5305,7 +5305,7 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
                                                    kCEESourceFregmentTypeSquareBracketList,
                                                    fregment->filepath_ref,
                                                    fregment->subject_ref,
-                                                   (const cee_uchar*)"c");
+                                                   "c");
             }
             else if (token->identifier == ']') {
                 current = cee_source_fregment_pop(current);
@@ -5319,7 +5319,7 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
                                                    kCEESourceFregmentTypeRoundBracketList,
                                                    fregment->filepath_ref,
                                                    fregment->subject_ref,
-                                                   (const cee_uchar*)"c");
+                                                   "c");
             }
             else if (token->identifier == ')') {
                 current = cee_source_fregment_pop(current);
@@ -5342,9 +5342,9 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
     return current;
 }
 
-static void c_reference_fregment_parse(const cee_uchar* filepath,
+static void c_reference_fregment_parse(const cee_char* filepath,
                                        CEESourceFregment* fregment,
-                                       const cee_uchar* subject,
+                                       const cee_char* subject,
                                        CEESourceFregment* prep_directive,
                                        CEESourceFregment* statement,
                                        CEEList** references)
@@ -5397,7 +5397,7 @@ static void c_reference_fregment_parse(const cee_uchar* filepath,
         }
         
         if (sub) {
-            reference = cee_source_symbol_reference_create((const cee_char*)filepath,
+            reference = cee_source_symbol_reference_create(filepath,
                                                            subject, 
                                                            sub, 
                                                            type);
@@ -5410,7 +5410,7 @@ static void c_reference_fregment_parse(const cee_uchar* filepath,
     
     if (objective_c_message) {
         type = kCEESourceReferenceTypeUnknow;
-        reference = cee_source_symbol_reference_create((const cee_char*)filepath,
+        reference = cee_source_symbol_reference_create(filepath,
                                                        subject, 
                                                        objective_c_message, 
                                                        type);

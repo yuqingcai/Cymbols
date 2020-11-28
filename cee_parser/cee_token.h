@@ -49,6 +49,8 @@ typedef enum _CEETokenType {
     kCEETokenTypeAlignasSpecifier         = 0x1 << 15,
     kCEETokenTypeOverloadOperator         = 0x1 << 16,
     kCEETokenTypeASMDirective             = 0x1 << 17,
+    kCEETokenTypeBuildinReference         = 0x1 << 18,
+    kCEETokenTypeParameterSpecifier       = 0x1 << 19,
 } CEETokenType;
 
 typedef enum _CEETokenID {
@@ -543,35 +545,35 @@ CEEToken* cee_token_create(CEETokenID token_id,
                            cee_long offset,
                            cee_ulong length);
 
-cee_char* cee_string_from_token(const cee_uchar* subject,
+cee_char* cee_string_from_token(const cee_char* subject,
                                 CEEToken* token);
-void cee_string_from_token_print(const cee_uchar* subject,
+void cee_string_from_token_print(const cee_char* subject,
                                  CEEToken* token);
-cee_char* cee_string_from_tokens(const cee_uchar* subject,
+cee_char* cee_string_from_tokens(const cee_char* subject,
                                  CEEList* p,
                                  CEETokenStringOption option);
-void cee_string_from_tokens_print(const cee_uchar* subject,
+void cee_string_from_tokens_print(const cee_char* subject,
                                   CEEList* p,
                                   CEETokenStringOption option);
-cee_char* cee_string_from_token_slice(const cee_uchar* subject,
+cee_char* cee_string_from_token_slice(const cee_char* subject,
                                       CEEList* p,
                                       CEEList* q,
                                       CEETokenStringOption option);
-void cee_string_from_token_slice_print(const cee_uchar* subject,
+void cee_string_from_token_slice_print(const cee_char* subject,
                                        CEEList* p,
                                        CEEList* q,
                                        CEETokenStringOption option);
 void cee_string_concat_with_token(cee_char** str,
-                                  const cee_uchar* subject,
+                                  const cee_char* subject,
                                   CEEToken* token);
-//cee_char* cee_formated_string_from_token_slice(const cee_uchar* subject,
+//cee_char* cee_formated_string_from_token_slice(const cee_char* subject,
 //                                               CEEList* p,
 //                                               CEEList* q);
-//cee_char* cee_formated_string_from_token_slice_append(const cee_uchar* subject,
+//cee_char* cee_formated_string_from_token_slice_append(const cee_char* subject,
 //                                                      CEEList* p,
 //                                                      CEEList* q,
 //                                                      const cee_char* append);
-//cee_char* cee_formated_string_from_token_slice_prepend(const cee_uchar* subject,
+//cee_char* cee_formated_string_from_token_slice_prepend(const cee_char* subject,
 //                                                       CEEList* p,
 //                                                       CEEList* q,
 //                                                       const cee_char* prepend);
@@ -592,6 +594,7 @@ cee_boolean cee_token_id_is_whitespace(CEETokenID identifier);
 cee_boolean cee_token_id_is_newline(CEETokenID identifier);
 cee_boolean cee_token_is_identifier(CEEList* p,
                                     CEETokenID identifier);
+cee_boolean cee_token_is_ignore(CEEList* p);
 CEEList* cee_token_not_whitespace_newline_before(CEEList* p);
 CEEList* cee_token_not_whitespace_newline_after(CEEList* p);
 CEEList* cee_token_not_whitespace_newline_first(CEEList* p);
@@ -619,7 +622,7 @@ void cee_tokens_state_mark(CEEList* tokens,
 
 CEEList* cee_token_is_identifier_before(CEEList* p,
                                         CEETokenID token_id);
-CEESourceTokenMap* cee_source_token_map_create(const cee_uchar* subject);
+CEESourceTokenMap* cee_source_token_map_create(const cee_char* subject);
 void cee_source_token_map_free(CEESourceTokenMap* token_map);
 void cee_source_token_map(CEESourceTokenMap* token_map,
                           CEEList* p);

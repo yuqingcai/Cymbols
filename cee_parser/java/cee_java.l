@@ -335,7 +335,7 @@ cee_int cee_lexer_java_token_get(CEEToken** token)
     
     return 1;
 }
-void cee_lexer_java_buffer_create(const cee_uchar* subject)
+void cee_lexer_java_buffer_create(const cee_char* subject)
 {
     buffer = java_scan__scan_bytes(subject, strlen(subject));
     scan_offset = 0;

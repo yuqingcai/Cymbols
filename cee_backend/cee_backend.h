@@ -15,7 +15,7 @@ typedef struct _CEEProjectFilePathEntryInfo {
     cee_int symbol_count;
 } CEEProjectFilePathEntryInfo;
 
-CEEProjectFilePathEntryInfo* cee_project_file_path_entry_info_create();
+CEEProjectFilePathEntryInfo* cee_project_file_path_entry_info_create(void);
 void cee_project_file_path_entry_info_free(cee_pointer data);
 
 cee_pointer cee_database_create(const cee_char* path);

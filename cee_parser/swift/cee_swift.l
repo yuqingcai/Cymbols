@@ -448,7 +448,7 @@ cee_int cee_lexer_swift_token_get(CEEToken** token)
         
     return 1;
 }
-void cee_lexer_swift_buffer_create(const cee_uchar* subject)
+void cee_lexer_swift_buffer_create(const cee_char* subject)
 {
     buffer = swift_scan__scan_bytes(subject, strlen(subject));
     scan_offset = 0;

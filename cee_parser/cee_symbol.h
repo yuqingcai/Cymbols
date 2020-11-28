@@ -21,18 +21,20 @@ typedef enum _CEESourceSymbolType {
     kCEESourceSymbolTypeLabel,
     kCEESourceSymbolTypeVariableDeclaration,
     kCEESourceSymbolTypeCustomTypeDeclaration,
-    kCEESourceSymbolTypeProperty,
+    kCEESourceSymbolTypePropertyDeclaration,
     kCEESourceSymbolTypeMessageDeclaration,
     kCEESourceSymbolTypeMessageDefinition,
     kCEESourceSymbolTypeFunctionParameter,
     kCEESourceSymbolTypeMessageParameter,
     kCEESourceSymbolTypeTypeDefine,
+    kCEESourceSymbolTypeStructDefinition,
     kCEESourceSymbolTypeClassDefinition,
     kCEESourceSymbolTypeEnumDefinition,
     kCEESourceSymbolTypeUnionDefinition,
     kCEESourceSymbolTypeEnumerator,
     kCEESourceSymbolTypeNamespaceDefinition,
     kCEESourceSymbolTypeInterfaceDeclaration,
+    kCEESourceSymbolTypeInterfaceDefinition,
     kCEESourceSymbolTypeImplementationDefinition,
     kCEESourceSymbolTypeProtocolDeclaration,
     kCEESourceSymbolTypeTemplateDeclaration,
@@ -43,9 +45,14 @@ typedef enum _CEESourceSymbolType {
     kCEESourceSymbolTypeXMLTagAttribute,
     kCEESourceSymbolTypeCSSSelector,
     kCEESourceSymbolTypeImport,
+    kCEESourceSymbolTypeUsingDeclaration,
     kCEESourceSymbolTypePackage,
-    kCEESourceSymbolTypeMax,
     kCEESourceSymbolTypeASMDirective,
+    kCEESourceSymbolTypeOperatorOverloadDefinition,
+    kCEESourceSymbolTypeOperatorOverloadDeclaration,
+    
+    /** ... */
+    kCEESourceSymbolTypeMax,
 } CEESourceSymbolType;
 
 typedef struct _CEESourceSymbol {
@@ -74,14 +81,14 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
 void cee_source_symbol_free(cee_pointer data);
 cee_int cee_source_symbol_count_get(void);
 CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol);
-CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_uchar* filepath,
-                                                           const cee_uchar* subject,
+CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* filepath,
+                                                           const cee_char* subject,
                                                            CEEList* begin,
                                                            CEEList* end,
                                                            CEESourceSymbolType type,
                                                            const cee_char* language);
-CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_uchar* filepath,
-                                                      const cee_uchar* subject,
+CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* filepath,
+                                                      const cee_char* subject,
                                                       CEEList* tokens,
                                                       CEESourceSymbolType type,
                                                       const cee_char* language);

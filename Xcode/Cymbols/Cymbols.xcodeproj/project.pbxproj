@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2602A92D254BFB010011FBD5 /* cee_java.c in Sources */ = {isa = PBXBuildFile; fileRef = 2602A92A254BFB000011FBD5 /* cee_java.c */; };
 		260D7DF225470231003BDC42 /* icon_xml_tag_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */; };
+		261B0782256E46EA00D1C48D /* icon_property_declaration_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 261B0780256E46EA00D1C48D /* icon_property_declaration_16x16@2x.png */; };
 		26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */ = {isa = PBXBuildFile; fileRef = 26308593254263DA000A8CB5 /* cee_regex_macos.m */; };
 		26381F282564A692004CC769 /* cee_csharp.c in Sources */ = {isa = PBXBuildFile; fileRef = 26381F252564A692004CC769 /* cee_csharp.c */; };
 		26381F292564A692004CC769 /* cee_csharp.l in Sources */ = {isa = PBXBuildFile; fileRef = 26381F272564A692004CC769 /* cee_csharp.l */; };
@@ -17,7 +18,9 @@
 		2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */; };
 		264EA89C25480CFD005042EA /* icon_file_type_css_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */; };
 		26548527254150AC00E1D0DE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 26548526254150AC00E1D0DE /* Credits.rtf */; };
+		266FEED525707D3300775864 /* icon_interface_definition_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 266FEED425707D3300775864 /* icon_interface_definition_16x16@2x.png */; };
 		268376E025490C720066305C /* cee_swift.c in Sources */ = {isa = PBXBuildFile; fileRef = 268376DD25490C720066305C /* cee_swift.c */; };
+		268531922571F7E2004724F9 /* icon_using_declaration_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 268531912571F7E2004724F9 /* icon_using_declaration_16x16@2x.png */; };
 		269201A1252FF30D00D6E2DC /* cJSON_Utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920091252FF30D00D6E2DC /* cJSON_Utils.c */; };
 		2692026F252FF33300D6E2DC /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692026E252FF33300D6E2DC /* cJSON.c */; };
 		2692028E252FF35600D6E2DC /* cee_bst.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920271252FF35600D6E2DC /* cee_bst.c */; };
@@ -114,7 +117,6 @@
 		2692038D252FF3E400D6E2DC /* icon_pin_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26920321252FF3E300D6E2DC /* icon_pin_16x16@2x.png */; };
 		2692038E252FF3E400D6E2DC /* icon_prep_directive_define_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26920322252FF3E300D6E2DC /* icon_prep_directive_define_16x16@2x.png */; };
 		2692038F252FF3E400D6E2DC /* icon_project_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26920323252FF3E300D6E2DC /* icon_project_16x16@2x.png */; };
-		26920390252FF3E400D6E2DC /* icon_property_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26920324252FF3E300D6E2DC /* icon_property_16x16@2x.png */; };
 		26920391252FF3E400D6E2DC /* icon_protocol_declaration_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26920325252FF3E300D6E2DC /* icon_protocol_declaration_16x16@2x.png */; };
 		26920392252FF3E400D6E2DC /* icon_redo_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26920326252FF3E300D6E2DC /* icon_redo_16x16@2x.png */; };
 		26920393252FF3E400D6E2DC /* icon_regex_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26920327252FF3E300D6E2DC /* icon_regex_16x16@2x.png */; };
@@ -314,6 +316,7 @@
 		2602A92A254BFB000011FBD5 /* cee_java.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_java.c; sourceTree = "<group>"; };
 		2602A92B254BFB000011FBD5 /* cee_java.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_java.h; sourceTree = "<group>"; };
 		260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_xml_tag_16x16@2x.png"; sourceTree = "<group>"; };
+		261B0780256E46EA00D1C48D /* icon_property_declaration_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_property_declaration_16x16@2x.png"; sourceTree = "<group>"; };
 		26308593254263DA000A8CB5 /* cee_regex_macos.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = cee_regex_macos.m; sourceTree = "<group>"; };
 		26308595254263F2000A8CB5 /* cee_regex_macos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cee_regex_macos.h; sourceTree = "<group>"; };
 		26381F252564A692004CC769 /* cee_csharp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_csharp.c; sourceTree = "<group>"; };
@@ -327,8 +330,10 @@
 		264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_css_16x16@2x.png"; sourceTree = "<group>"; };
 		26548526254150AC00E1D0DE /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		2667ECFB25037D8000ED5010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		266FEED425707D3300775864 /* icon_interface_definition_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_interface_definition_16x16@2x.png"; sourceTree = "<group>"; };
 		268376DD25490C720066305C /* cee_swift.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_swift.c; sourceTree = "<group>"; };
 		268376DE25490C720066305C /* cee_swift.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_swift.h; sourceTree = "<group>"; };
+		268531912571F7E2004724F9 /* icon_using_declaration_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_using_declaration_16x16@2x.png"; sourceTree = "<group>"; };
 		26920091252FF30D00D6E2DC /* cJSON_Utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON_Utils.c; sourceTree = "<group>"; };
 		26920092252FF30D00D6E2DC /* cJSON_Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON_Utils.h; sourceTree = "<group>"; };
 		2692026D252FF33300D6E2DC /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
@@ -460,7 +465,6 @@
 		26920321252FF3E300D6E2DC /* icon_pin_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_pin_16x16@2x.png"; sourceTree = "<group>"; };
 		26920322252FF3E300D6E2DC /* icon_prep_directive_define_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_prep_directive_define_16x16@2x.png"; sourceTree = "<group>"; };
 		26920323252FF3E300D6E2DC /* icon_project_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_project_16x16@2x.png"; sourceTree = "<group>"; };
-		26920324252FF3E300D6E2DC /* icon_property_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_property_16x16@2x.png"; sourceTree = "<group>"; };
 		26920325252FF3E300D6E2DC /* icon_protocol_declaration_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_protocol_declaration_16x16@2x.png"; sourceTree = "<group>"; };
 		26920326252FF3E300D6E2DC /* icon_redo_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_redo_16x16@2x.png"; sourceTree = "<group>"; };
 		26920327252FF3E300D6E2DC /* icon_regex_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_regex_16x16@2x.png"; sourceTree = "<group>"; };
@@ -1029,6 +1033,7 @@
 		269202E4252FF3E300D6E2DC /* 2x */ = {
 			isa = PBXGroup;
 			children = (
+				268531912571F7E2004724F9 /* icon_using_declaration_16x16@2x.png */,
 				26A761E6255A8D420032A06D /* icon_package_16x16@2x.png */,
 				26A761E4255A8BB20032A06D /* icon_import_16x16@2x.png */,
 				264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */,
@@ -1077,6 +1082,7 @@
 				2692030C252FF3E300D6E2DC /* icon_function_declaration_16x16@2x.png */,
 				2692030D252FF3E300D6E2DC /* icon_function_definition_16x16@2x.png */,
 				2692030E252FF3E300D6E2DC /* icon_implementation_definition_16x16@2x.png */,
+				266FEED425707D3300775864 /* icon_interface_definition_16x16@2x.png */,
 				2692030F252FF3E300D6E2DC /* icon_interface_declaration_16x16@2x.png */,
 				26920310252FF3E300D6E2DC /* icon_jump_to_target_16x16@2x.png */,
 				26920311252FF3E300D6E2DC /* icon_lamp_16x16@2x.png */,
@@ -1098,7 +1104,7 @@
 				26920321252FF3E300D6E2DC /* icon_pin_16x16@2x.png */,
 				26920322252FF3E300D6E2DC /* icon_prep_directive_define_16x16@2x.png */,
 				26920323252FF3E300D6E2DC /* icon_project_16x16@2x.png */,
-				26920324252FF3E300D6E2DC /* icon_property_16x16@2x.png */,
+				261B0780256E46EA00D1C48D /* icon_property_declaration_16x16@2x.png */,
 				26920325252FF3E300D6E2DC /* icon_protocol_declaration_16x16@2x.png */,
 				26920326252FF3E300D6E2DC /* icon_redo_16x16@2x.png */,
 				26920327252FF3E300D6E2DC /* icon_regex_16x16@2x.png */,
@@ -1471,6 +1477,7 @@
 				269203A6252FF3E400D6E2DC /* icon_split_horizontal_16x16@2x.png in Resources */,
 				2692039F252FF3E400D6E2DC /* icon_source_block_16x16@2x.png in Resources */,
 				269203A2252FF3E400D6E2DC /* icon_split2_16x16@2x.png in Resources */,
+				268531922571F7E2004724F9 /* icon_using_declaration_16x16@2x.png in Resources */,
 				269203B3252FF3E400D6E2DC /* logo_butterfly_128x128@2x.png in Resources */,
 				26920372252FF3E400D6E2DC /* icon_file_type_makefile_16x16@2x.png in Resources */,
 				269203AA252FF3E400D6E2DC /* icon_sync_16x16@2x.png in Resources */,
@@ -1479,6 +1486,7 @@
 				26920365252FF3E400D6E2DC /* icon_file_not_existed_16x16@2x.png in Resources */,
 				26548527254150AC00E1D0DE /* Credits.rtf in Resources */,
 				2692037F252FF3E400D6E2DC /* icon_list_window_16x16@2x.png in Resources */,
+				266FEED525707D3300775864 /* icon_interface_definition_16x16@2x.png in Resources */,
 				2692038F252FF3E400D6E2DC /* icon_project_16x16@2x.png in Resources */,
 				269203A8252FF3E400D6E2DC /* icon_symbol_16x16@2x.png in Resources */,
 				2692038C252FF3E400D6E2DC /* icon_paste_16x16@2x.png in Resources */,
@@ -1504,7 +1512,6 @@
 				269203AF252FF3E400D6E2DC /* icon_union_definition_16x16@2x.png in Resources */,
 				269203B6252FF3E400D6E2DC /* logo_butterfly_32x32@2x.png in Resources */,
 				26920501252FF60300D6E2DC /* TableCellViews.xib in Resources */,
-				26920390252FF3E400D6E2DC /* icon_property_16x16@2x.png in Resources */,
 				264EA89C25480CFD005042EA /* icon_file_type_css_16x16@2x.png in Resources */,
 				269203AE252FF3E400D6E2DC /* icon_undo_16x16@2x.png in Resources */,
 				2693B227253001D700D21FD3 /* Styles in Resources */,
@@ -1538,6 +1545,7 @@
 				269203A9252FF3E400D6E2DC /* icon_symbol_tree_16x16@2x.png in Resources */,
 				269203BA252FF3E400D6E2DC /* logo_lazycatdesign@2x.png in Resources */,
 				26920378252FF3E400D6E2DC /* icon_function_declaration_16x16@2x.png in Resources */,
+				261B0782256E46EA00D1C48D /* icon_property_declaration_16x16@2x.png in Resources */,
 				2692039C252FF3E400D6E2DC /* icon_search_prev_16x16@2x.png in Resources */,
 				26920379252FF3E400D6E2DC /* icon_function_definition_16x16@2x.png in Resources */,
 				26920369252FF3E400D6E2DC /* icon_file_type_c_header_16x16@2x.png in Resources */,
@@ -1936,7 +1944,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 130;
+				CURRENT_PROJECT_VERSION = 131;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1949,7 +1957,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
@@ -1965,7 +1973,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 130;
+				CURRENT_PROJECT_VERSION = 131;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1977,7 +1985,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;

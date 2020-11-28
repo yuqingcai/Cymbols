@@ -27,12 +27,14 @@ typedef enum _CEESourceFregmentType {
     kCEESourceFregmentTypeAssignmentBlock               ,
     kCEESourceFregmentTypeTemplateDeclaration           ,
     kCEESourceFregmentTypeFunctionDefinition            ,
+    kCEESourceFregmentTypeFunctionDeclaration           ,
     kCEESourceFregmentTypeNamespaceDefinition           ,
     kCEESourceFregmentTypeClassDefinition               ,
     kCEESourceFregmentTypeUnionDefinition               ,
     kCEESourceFregmentTypeEnumDefinition                ,
     kCEESourceFregmentTypeDeclaration                   ,
     kCEESourceFregmentTypeEnumurators                   ,
+    kCEESourceFregmentTypeInterfaceDefinition           ,
     kCEESourceFregmentTypeInterfaceDeclaration          ,
     kCEESourceFregmentTypeImplementationDefinition      ,
     kCEESourceFregmentTypeProtocolDeclaration           ,
@@ -43,8 +45,6 @@ typedef enum _CEESourceFregmentType {
     kCEESourceFregmentTypeXMLTagEnd                     ,
     kCEESourceFregmentTypeXMLTagList                    ,
     kCEESourceFregmentTypeCSSBlock                      ,
-    kCEESourceFregmentTypeImportStatement               ,
-    kCEESourceFregmentTypePackageStatement              ,
     /** 
      * ... 
      *
@@ -64,13 +64,13 @@ typedef struct _CEESourceFregment {
     struct _CEESourceFregment* parent;
     CEEList* children;
     cee_char type[CEESourceFregmentTypeMax];
-    const cee_uchar* filepath_ref;
-    const cee_uchar* subject_ref;
+    const cee_char* filepath_ref;
+    const cee_char* subject_ref;
     CEEList* tokens_ref;
     CEEList* tokens_ref_last;
     CEEList* symbols;
     CEEList* node;
-    cee_uchar* filetype;
+    cee_char* filetype;
 } CEESourceFregment;
 
 #define SOURCE_FREGMENT_TOKENS_FIRST(fregment) ((CEESourceFregment*)fregment)->tokens_ref
@@ -115,8 +115,8 @@ typedef struct _CEESourceParser {
     cee_boolean (*token_type_matcher)(CEEToken*,
                                       CEETokenType);
     cee_boolean (*symbol_parse)(CEESourceParserRef,
-                                const cee_uchar*,
-                                const cee_uchar*,
+                                const cee_char*,
+                                const cee_char*,
                                 CEESourceFregment**,
                                 CEESourceFregment**,
                                 CEESourceFregment**,
@@ -124,8 +124,8 @@ typedef struct _CEESourceParser {
                                 CEESourceTokenMap**);
     
     cee_boolean (*reference_parse)(CEESourceParserRef,
-                                   const cee_uchar*,
-                                   const cee_uchar*,
+                                   const cee_char*,
+                                   const cee_char*,
                                    CEESourceTokenMap*,
                                    CEESourceFregment*,
                                    CEESourceFregment*,
@@ -137,16 +137,16 @@ void cee_parsers_init(void);
 CEESourceParserRef cee_parser_create(const cee_char* identifier);
 void cee_parser_free(cee_pointer data);
 cee_boolean cee_source_symbol_parse(CEESourceParserRef parser_ref,
-                                    const cee_uchar* filepath,
-                                    const cee_uchar* subject,
+                                    const cee_char* filepath,
+                                    const cee_char* subject,
                                     CEESourceFregment** prep_directive,
                                     CEESourceFregment** statement,
                                     CEESourceFregment** comment,
                                     CEEList** tokens_ref,
                                     CEESourceTokenMap** source_token_map);
 cee_boolean cee_source_reference_parse(CEESourceParserRef parser_ref,
-                                       const cee_uchar* filepath,
-                                       const cee_uchar* subject,
+                                       const cee_char* filepath,
+                                       const cee_char* subject,
                                        CEESourceTokenMap* source_token_map,
                                        CEESourceFregment* prep_directive,
                                        CEESourceFregment* statement,
@@ -154,9 +154,9 @@ cee_boolean cee_source_reference_parse(CEESourceParserRef parser_ref,
                                        CEEList** references);
 
 CEESourceFregment* cee_source_fregment_create(CEESourceFregmentType type,
-                                              const cee_uchar* filepath,
-                                              const cee_uchar* subject,
-                                              const cee_uchar* filetype);
+                                              const cee_char* filepath,
+                                              const cee_char* subject,
+                                              const cee_char* filetype);
 cee_int cee_source_fregment_count_get(void);
 void cee_source_fregment_free(cee_pointer data);
 void cee_source_fregment_free_full(cee_pointer data);
@@ -164,19 +164,19 @@ void cee_source_fregment_remove(CEESourceFregment* fregment);
 void cee_source_fregment_descriptors_free(CEEList* descriptors);
 CEESourceFregment* cee_source_fregment_attach(CEESourceFregment* sibling,
                                               CEESourceFregmentType type,
-                                              const cee_uchar* filepath,
-                                              const cee_uchar* subject,
-                                              const cee_uchar* filetype);
+                                              const cee_char* filepath,
+                                              const cee_char* subject,
+                                              const cee_char* filetype);
 CEESourceFregment* cee_source_fregment_sub_attach(CEESourceFregment* main,
                                                   CEESourceFregmentType type,
-                                                  const cee_uchar* filepath,
-                                                  const cee_uchar* subject,
-                                                  const cee_uchar* filetype);
+                                                  const cee_char* filepath,
+                                                  const cee_char* subject,
+                                                  const cee_char* filetype);
 CEESourceFregment* cee_source_fregment_push(CEESourceFregment* main,
                                             CEESourceFregmentType type,
-                                            const cee_uchar* filepath,
-                                            const cee_uchar* subject,
-                                            const cee_uchar* filetype);
+                                            const cee_char* filepath,
+                                            const cee_char* subject,
+                                            const cee_char* filetype);
 CEESourceFregment* cee_source_fregment_pop(CEESourceFregment* fregment);
 void cee_source_fregment_type_set(CEESourceFregment* fregment,
                                   CEESourceFregmentType type);

@@ -6,7 +6,7 @@ L   [a-zA-Z_]
 H   [a-fA-F0-9]
 D   [0-9]
 O   [0-7]
-B   [01]
+B   [01_]
 WS  [ \t]
 NL  (\r\n|\n|\r\v\f)
 WN  ([ \t]|\r\n|\n|\r\v\f)
@@ -401,7 +401,7 @@ cee_int cee_lexer_csharp_token_get(CEEToken** token)
     return 1;
 }
 
-void cee_lexer_csharp_buffer_create(const cee_uchar* subject)
+void cee_lexer_csharp_buffer_create(const cee_char* subject)
 {
     buffer = csharp_scan__scan_bytes(subject, strlen(subject));
     scan_offset = 0;

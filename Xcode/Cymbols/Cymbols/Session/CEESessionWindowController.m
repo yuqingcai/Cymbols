@@ -28,6 +28,15 @@
     [_session.project.sessions removeObject:_session];
 }
 
+- (void)windowDidResize:(NSNotification *)notification {
+    if (![self.window isVisible])
+        return;
+    
+    AppDelegate* delegate = [NSApp delegate];
+    if ([_session.project isUntitled])
+        [delegate saveWindowSettingAsDefault:self];
+}
+
 - (BOOL)windowShouldClose:(NSWindow *)sender {
     __block BOOL shouldClose = YES;
     NSMutableArray* syncBuffers = nil;

@@ -22,7 +22,7 @@ extern NSNotificationName CEENotificationTextHighlightStyleUpdate;
 @property (strong) NSString* textHighlightStyleName;
 @property (strong) NSString* textHighlighDescriptor;
 + (CEEStyleManager*)defaultStyleManager;
-- (void)setStyleHomeDirectory:(NSString*)path;
+- (void)setDirectory:(NSString*)directory;
 - (NSArray*)userInterfaceStylePaths;
 - (NSArray*)textHighlightStylePaths;
 - (NSArray*)userInterfaceStyleNames;

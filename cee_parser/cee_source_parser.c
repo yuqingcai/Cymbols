@@ -79,17 +79,19 @@ static void symbol_tag_map_init(void)
     symbol_tag_map[kCEESourceSymbolTypeFunctionDefinition]                  = kCEETagTypeFunctionDefinition;
     symbol_tag_map[kCEESourceSymbolTypeVariableDeclaration]                 = kCEETagTypeVariable;
     symbol_tag_map[kCEESourceSymbolTypeCustomTypeDeclaration]               = kCEETagTypeTypeDeclaration;
-    symbol_tag_map[kCEESourceSymbolTypeProperty]                            = kCEETagTypeProperty;
+    symbol_tag_map[kCEESourceSymbolTypePropertyDeclaration]                 = kCEETagTypeProperty;
     symbol_tag_map[kCEESourceSymbolTypeMessageDeclaration]                  = kCEETagTypeMessageDeclaration;
     symbol_tag_map[kCEESourceSymbolTypeMessageDefinition]                   = kCEETagTypeMessageDefinition;
     symbol_tag_map[kCEESourceSymbolTypeFunctionParameter]                   = kCEETagTypeFunctionParameter;
     symbol_tag_map[kCEESourceSymbolTypeMessageParameter]                    = kCEETagTypeMessageParameter;
     symbol_tag_map[kCEESourceSymbolTypeTypeDefine]                          = kCEETagTypeTypeDefine;
     symbol_tag_map[kCEESourceSymbolTypeClassDefinition]                     = kCEETagTypeClassDefinition;
+    symbol_tag_map[kCEESourceSymbolTypeStructDefinition]                    = kCEETagTypeClassDefinition;
     symbol_tag_map[kCEESourceSymbolTypeEnumDefinition]                      = kCEETagTypeEnumDefinition;
     symbol_tag_map[kCEESourceSymbolTypeUnionDefinition]                     = kCEETagTypeUnionDefinition;
     symbol_tag_map[kCEESourceSymbolTypeEnumerator]                          = kCEETagTypeEnumerator;
     symbol_tag_map[kCEESourceSymbolTypeInterfaceDeclaration]                = kCEETagTypeInterface;
+    symbol_tag_map[kCEESourceSymbolTypeInterfaceDefinition]                 = kCEETagTypeInterface;
     symbol_tag_map[kCEESourceSymbolTypeImplementationDefinition]            = kCEETagTypeImplementation;
     symbol_tag_map[kCEESourceSymbolTypeProtocolDeclaration]                 = kCEETagTypeProtocol;
     symbol_tag_map[kCEESourceSymbolTypeNamespaceDefinition]                 = kCEETagTypeNamespaceDefinition;
@@ -130,18 +132,20 @@ static void symbol_reference_map_init(void)
     symbol_reference_map[kCEESourceSymbolTypeLabel]                         = kCEESourceReferenceTypeLabel;
     symbol_reference_map[kCEESourceSymbolTypeVariableDeclaration]           = kCEESourceReferenceTypeVariable;
     symbol_reference_map[kCEESourceSymbolTypeCustomTypeDeclaration]         = kCEESourceReferenceTypeCustomTypeDeclaration;
-    symbol_reference_map[kCEESourceSymbolTypeProperty]                      = kCEESourceReferenceTypeVariable;
+    symbol_reference_map[kCEESourceSymbolTypePropertyDeclaration]           = kCEESourceReferenceTypeVariable;
     symbol_reference_map[kCEESourceSymbolTypeMessageDeclaration]            = kCEESourceReferenceTypeFunction;
     symbol_reference_map[kCEESourceSymbolTypeMessageDefinition]             = kCEESourceReferenceTypeFunction;
     symbol_reference_map[kCEESourceSymbolTypeFunctionParameter]             = kCEESourceReferenceTypeVariable;
     symbol_reference_map[kCEESourceSymbolTypeMessageParameter]              = kCEESourceReferenceTypeVariable;
     symbol_reference_map[kCEESourceSymbolTypeTypeDefine]                    = kCEESourceReferenceTypeTypeDefine;
     symbol_reference_map[kCEESourceSymbolTypeClassDefinition]               = kCEESourceReferenceTypeCustomTypeDeclaration;
+    symbol_reference_map[kCEESourceSymbolTypeStructDefinition]              = kCEESourceReferenceTypeCustomTypeDeclaration;
     symbol_reference_map[kCEESourceSymbolTypeEnumDefinition]                = kCEESourceReferenceTypeCustomTypeDeclaration;
     symbol_reference_map[kCEESourceSymbolTypeUnionDefinition]               = kCEESourceReferenceTypeCustomTypeDeclaration;
     symbol_reference_map[kCEESourceSymbolTypeEnumerator]                    = kCEESourceReferenceTypeEnumerator;
     symbol_reference_map[kCEESourceSymbolTypeNamespaceDefinition]           = kCEESourceReferenceTypeNamespace;
     symbol_reference_map[kCEESourceSymbolTypeInterfaceDeclaration]          = kCEESourceReferenceTypeFunction;
+    symbol_reference_map[kCEESourceSymbolTypeInterfaceDefinition]           = kCEESourceReferenceTypeFunction;
     symbol_reference_map[kCEESourceSymbolTypeImplementationDefinition]      = kCEESourceReferenceTypeFunction;
     symbol_reference_map[kCEESourceSymbolTypeProtocolDeclaration]           = kCEESourceReferenceTypeFunction;
 }
@@ -168,8 +172,8 @@ void cee_parser_free(cee_pointer data)
 }
 
 cee_boolean cee_source_symbol_parse(CEESourceParserRef parser_ref,
-                                    const cee_uchar* filepath,
-                                    const cee_uchar* subject,
+                                    const cee_char* filepath,
+                                    const cee_char* subject,
                                     CEESourceFregment** prep_directive,
                                     CEESourceFregment** statement,
                                     CEESourceFregment** comment,
@@ -190,8 +194,8 @@ cee_boolean cee_source_symbol_parse(CEESourceParserRef parser_ref,
 }
 
 cee_boolean cee_source_reference_parse(CEESourceParserRef parser_ref,
-                                       const cee_uchar* filepath,
-                                       const cee_uchar* subject,
+                                       const cee_char* filepath,
+                                       const cee_char* subject,
                                        CEESourceTokenMap* source_token_map,
                                        CEESourceFregment* prep_directive,
                                        CEESourceFregment* statement,
@@ -212,15 +216,15 @@ cee_boolean cee_source_reference_parse(CEESourceParserRef parser_ref,
 }
 int cee_source_fregment_count = 0;
 CEESourceFregment* cee_source_fregment_create(CEESourceFregmentType type,
-                                              const cee_uchar* filepath,
-                                              const cee_uchar* subject,
-                                              const cee_uchar* filetype)
+                                              const cee_char* filepath,
+                                              const cee_char* subject,
+                                              const cee_char* filetype)
 {
     CEESourceFregment* fregment = cee_malloc0(sizeof(CEESourceFregment));
     fregment->type[type] = 1;
     fregment->filepath_ref = filepath;
     fregment->subject_ref = subject;
-    fregment->filetype = (cee_uchar*)cee_strdup((const cee_char*)filetype);
+    fregment->filetype = cee_strdup(filetype);
     
     cee_source_fregment_count ++;
     
@@ -294,9 +298,9 @@ void cee_source_fregment_descriptors_free(CEEList* descriptors)
  */
 CEESourceFregment* cee_source_fregment_attach(CEESourceFregment* sibling,
                                               CEESourceFregmentType type,
-                                              const cee_uchar* filepath,
-                                              const cee_uchar* subject,
-                                              const cee_uchar* filetype)
+                                              const cee_char* filepath,
+                                              const cee_char* subject,
+                                              const cee_char* filetype)
 {
     if (!sibling || !sibling->parent)
         return NULL;
@@ -312,9 +316,9 @@ CEESourceFregment* cee_source_fregment_attach(CEESourceFregment* sibling,
 
 CEESourceFregment* cee_source_fregment_sub_attach(CEESourceFregment* main,
                                                   CEESourceFregmentType type,
-                                                  const cee_uchar* filepath,
-                                                  const cee_uchar* subject,
-                                                  const cee_uchar* filetype)
+                                                  const cee_char* filepath,
+                                                  const cee_char* subject,
+                                                  const cee_char* filetype)
 {
     if (!main)
         return NULL;
@@ -330,9 +334,9 @@ CEESourceFregment* cee_source_fregment_sub_attach(CEESourceFregment* main,
 
 CEESourceFregment* cee_source_fregment_push(CEESourceFregment* main,
                                             CEESourceFregmentType type,
-                                            const cee_uchar* filepath,
-                                            const cee_uchar* subject,
-                                            const cee_uchar* filetype)
+                                            const cee_char* filepath,
+                                            const cee_char* subject,
+                                            const cee_char* filetype)
 {
     if (!main)
         return NULL;
@@ -623,6 +627,7 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
     CEEList* s = NULL;
     CEETree* leaf = NULL;
     
+    
     p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
     while (p) {
         
@@ -639,12 +644,11 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                 grandson = q->data;
                 
                 if (cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeFunctionDefinition) ||
+                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeFunctionDeclaration) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeDeclaration) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeEnumurators) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypePrepDirective)  ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeXMLTagStart) ||
-                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeImportStatement) ||
-                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypePackageStatement) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeLabelDeclaration) ) {
                     
                     s = grandson->symbols;
@@ -655,9 +659,11 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                         if (symbol->type == kCEESourceSymbolTypeFunctionDefinition ||
                             symbol->type == kCEESourceSymbolTypeMessageDefinition ||
                             symbol->type == kCEESourceSymbolTypeFunctionDeclaration ||
+                            symbol->type == kCEESourceSymbolTypeOperatorOverloadDefinition ||
+                            symbol->type == kCEESourceSymbolTypeOperatorOverloadDeclaration ||
                             symbol->type == kCEESourceSymbolTypeVariableDeclaration ||
                             symbol->type == kCEESourceSymbolTypeCustomTypeDeclaration ||
-                            symbol->type == kCEESourceSymbolTypeProperty ||
+                            symbol->type == kCEESourceSymbolTypePropertyDeclaration ||
                             symbol->type == kCEESourceSymbolTypeMessageDeclaration ||
                             symbol->type == kCEESourceSymbolTypeTypeDefine ||
                             symbol->type == kCEESourceSymbolTypeEnumerator ||
@@ -666,6 +672,7 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                             symbol->type == kCEESourceSymbolTypeXMLTagName ||
                             symbol->type == kCEESourceSymbolTypeImport ||
                             symbol->type == kCEESourceSymbolTypePackage ||
+                            symbol->type == kCEESourceSymbolTypeUsingDeclaration ||
                             symbol->type == kCEESourceSymbolTypeLabel) {
                             
                             leaf = cee_tree_create();
@@ -686,6 +693,7 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeEnumDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeUnionDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeInterfaceDeclaration) ||
+                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeInterfaceDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeImplementationDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeProtocolDeclaration) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeVariableBlock) ||
@@ -701,9 +709,11 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                         if (symbol->type == kCEESourceSymbolTypeTemplateDeclaration ||
                             symbol->type == kCEESourceSymbolTypeNamespaceDefinition ||
                             symbol->type == kCEESourceSymbolTypeClassDefinition ||
+                            symbol->type == kCEESourceSymbolTypeStructDefinition ||
                             symbol->type == kCEESourceSymbolTypeEnumDefinition ||
                             symbol->type == kCEESourceSymbolTypeUnionDefinition ||
                             symbol->type == kCEESourceSymbolTypeInterfaceDeclaration ||
+                            symbol->type == kCEESourceSymbolTypeInterfaceDefinition ||
                             symbol->type == kCEESourceSymbolTypeImplementationDefinition ||
                             symbol->type == kCEESourceSymbolTypeProtocolDeclaration ||
                             symbol->type == kCEESourceSymbolTypeExternBlock ||
@@ -938,7 +948,8 @@ cee_boolean cee_source_fregment_tokens_pattern_match(CEESourceFregment* fregment
     p = from;
     while (p) {
         if (!cee_token_is_identifier(p, kCEETokenID_WHITE_SPACE) &&
-            !cee_token_is_identifier(p, kCEETokenID_NEW_LINE)) {
+            !cee_token_is_identifier(p, kCEETokenID_NEW_LINE) &&
+            !cee_token_is_ignore(p)) {
             if (cee_token_is_identifier(p, token_id[i])) {
                 i ++;
                 if (i == n)
@@ -1575,7 +1586,7 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
-                
+        
         if (!(token->state & kCEETokenStateSymbolOccupied)) {
         
             tag_type = kCEETagTypeIgnore;
@@ -1620,9 +1631,10 @@ static CEEList* language_private_tags_create(CEESourceParserRef parser_ref,
                 range = cee_range_make(token->offset, token->length);
                 tag = cee_tag_create(tag_type, range);
                 if (tag)
-                    tags = cee_list_prepend(tags, tag);
+                   tags = cee_list_prepend(tags, tag);
             }
         }
+
         p = TOKEN_NEXT(p);
     }
     return tags;
@@ -1781,6 +1793,8 @@ static void source_fregment_symbols_parent_parse(CEESourceFregment* fregment)
         parent = implementation_scope_name_from_source_fregment(grandfather);
     else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDeclaration))
         parent = interface_scope_name_from_source_fregment(grandfather);
+    else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
+        parent = interface_scope_name_from_source_fregment(grandfather);
     else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeProtocolDeclaration))
         parent = protocol_scope_name_from_source_fregment(grandfather);
     
@@ -1791,16 +1805,20 @@ static void source_fregment_symbols_parent_parse(CEESourceFregment* fregment)
         if (symbol->type == kCEESourceSymbolTypeFunctionDeclaration || 
             symbol->type == kCEESourceSymbolTypeFunctionDefinition || 
             symbol->type == kCEESourceSymbolTypeVariableDeclaration || 
-            symbol->type == kCEESourceSymbolTypeCustomTypeDeclaration || 
-            symbol->type == kCEESourceSymbolTypeProperty || 
+            symbol->type == kCEESourceSymbolTypeCustomTypeDeclaration ||
+            symbol->type == kCEESourceSymbolTypePropertyDeclaration ||
+            symbol->type == kCEESourceSymbolTypeOperatorOverloadDeclaration||
+            symbol->type == kCEESourceSymbolTypeOperatorOverloadDefinition || 
             symbol->type == kCEESourceSymbolTypeMessageDeclaration || 
             symbol->type == kCEESourceSymbolTypeMessageDefinition || 
             symbol->type == kCEESourceSymbolTypeTypeDefine || 
-            symbol->type == kCEESourceSymbolTypeClassDefinition || 
+            symbol->type == kCEESourceSymbolTypeClassDefinition ||
+            symbol->type == kCEESourceSymbolTypeStructDefinition ||
             symbol->type == kCEESourceSymbolTypeEnumDefinition || 
             symbol->type == kCEESourceSymbolTypeUnionDefinition || 
             symbol->type == kCEESourceSymbolTypeNamespaceDefinition || 
             symbol->type == kCEESourceSymbolTypeInterfaceDeclaration ||
+            symbol->type == kCEESourceSymbolTypeInterfaceDefinition ||
             symbol->type == kCEESourceSymbolTypeImplementationDefinition ||
             symbol->type == kCEESourceSymbolTypeProtocolDeclaration) {
             symbol->parent = cee_strdup(parent);
@@ -1830,6 +1848,7 @@ static cee_char* class_scope_name_from_source_fregment(CEESourceFregment* fregme
         symbol = p->data;
         
         if (symbol->type == kCEESourceSymbolTypeClassDefinition ||
+            symbol->type == kCEESourceSymbolTypeStructDefinition ||
             symbol->type == kCEESourceSymbolTypeTypeDefine) {
             if (!is_anonymous_class_name(fregment, symbol->name)) {
                 if (!names)
@@ -1917,7 +1936,8 @@ static cee_char* interface_scope_name_from_source_fregment(CEESourceFregment* fr
     while (p) {
         symbol = p->data;
         
-        if (symbol->type == kCEESourceSymbolTypeInterfaceDeclaration)
+        if (symbol->type == kCEESourceSymbolTypeInterfaceDeclaration ||
+            symbol->type == kCEESourceSymbolTypeInterfaceDefinition)
             return cee_strdup(symbol->name);
         
         p = p->next;

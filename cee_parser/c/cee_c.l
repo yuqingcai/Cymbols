@@ -517,7 +517,7 @@ cee_int cee_lexer_c_token_get(CEEToken** token)
     return 1;
 }
 
-void cee_lexer_c_buffer_create(const cee_uchar* subject)
+void cee_lexer_c_buffer_create(const cee_char* subject)
 {
     buffer = c_scan__scan_bytes(subject, strlen(subject));
     scan_offset = 0;

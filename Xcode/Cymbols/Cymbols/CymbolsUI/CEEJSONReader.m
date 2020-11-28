@@ -10,6 +10,9 @@
 
 @implementation CEEJSONReader
 + (NSString*)stringFromFile:(NSString*)filePath {
+    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
+        return nil;
+    
     NSString* string = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
     NSRegularExpressionOptions options = NSRegularExpressionDotMatchesLineSeparators |
                                         NSRegularExpressionCaseInsensitive |
@@ -31,12 +34,16 @@
 
 + (NSData*)dataFromFile:(NSString*)filePath {
     NSString* string = [CEEJSONReader stringFromFile:filePath];
+    if (!string)
+        return nil;
     NSData* data = [string dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
     return data;
 }
 
 + (id)objectFromFile:(NSString*)filePath {
     NSString* string = [CEEJSONReader stringFromFile:filePath];
+    if (!string)
+        return nil;
     NSData* data = [string dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
     return [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
 }

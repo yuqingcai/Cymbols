@@ -273,7 +273,7 @@ cee_int cee_lexer_gnu_asm_token_get(CEEToken** token)
     return 1;
 }
 
-void cee_lexer_gnu_asm_buffer_create(const cee_uchar* subject)
+void cee_lexer_gnu_asm_buffer_create(const cee_char* subject)
 {
     buffer = gnu_asm_scan__scan_bytes(subject, strlen(subject));
     scan_offset = 0;

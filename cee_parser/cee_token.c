@@ -39,7 +39,7 @@ static cee_int token_compare(const cee_pointer a,
     return 0;
 }
 
-cee_char* cee_string_from_token(const cee_uchar* subject,
+cee_char* cee_string_from_token(const cee_char* subject,
                                 CEEToken* token)
 {
     if (!subject || !token)
@@ -50,7 +50,7 @@ cee_char* cee_string_from_token(const cee_uchar* subject,
     return str;
 }
 
-void cee_string_from_token_print(const cee_uchar* subject,
+void cee_string_from_token_print(const cee_char* subject,
                                  CEEToken* token)
 {
     cee_char* str = cee_string_from_token(subject, token);
@@ -61,7 +61,7 @@ void cee_string_from_token_print(const cee_uchar* subject,
     cee_free(str);
 }
 
-cee_char* cee_string_from_tokens(const cee_uchar* subject,
+cee_char* cee_string_from_tokens(const cee_char* subject,
                                  CEEList* p,
                                  CEETokenStringOption option)
 {
@@ -91,7 +91,7 @@ skip:
     return dump;
 }
 
-void cee_string_from_tokens_print(const cee_uchar* subject,
+void cee_string_from_tokens_print(const cee_char* subject,
                                   CEEList* p,
                                   CEETokenStringOption option)
 {
@@ -102,7 +102,7 @@ void cee_string_from_tokens_print(const cee_uchar* subject,
     cee_free(str);
 }
 
-cee_char* cee_string_from_token_slice(const cee_uchar* subject,
+cee_char* cee_string_from_token_slice(const cee_char* subject,
                                       CEEList* p,
                                       CEEList* q,
                                       CEETokenStringOption option)
@@ -136,7 +136,7 @@ skip:
     return dump;
 }
 
-void cee_string_from_token_slice_print(const cee_uchar* subject,
+void cee_string_from_token_slice_print(const cee_char* subject,
                                        CEEList* p,
                                        CEEList* q,
                                        CEETokenStringOption option)
@@ -149,7 +149,7 @@ void cee_string_from_token_slice_print(const cee_uchar* subject,
 }
 
 void cee_string_concat_with_token(cee_char** str,
-                                  const cee_uchar* subject,
+                                  const cee_char* subject,
                                   CEEToken* token)
 {
     cee_char* token_str = cee_string_from_token(subject, token);
@@ -159,7 +159,7 @@ void cee_string_concat_with_token(cee_char** str,
     }
 }
 
-//cee_char* cee_formated_string_from_token_slice(const cee_uchar* subject,
+//cee_char* cee_formated_string_from_token_slice(const cee_char* subject,
 //                                               CEEList* p,
 //                                               CEEList* q)
 //{
@@ -210,7 +210,7 @@ void cee_string_concat_with_token(cee_char** str,
 //    return formated;
 //}
 
-//cee_char* cee_formated_string_from_token_slice_append(const cee_uchar* subject,
+//cee_char* cee_formated_string_from_token_slice_append(const cee_char* subject,
 //                                                      CEEList* p,
 //                                                      CEEList* q,
 //                                                      const cee_char* append)
@@ -227,7 +227,7 @@ void cee_string_concat_with_token(cee_char** str,
 //    return string;
 //}
 
-//cee_char* cee_formated_string_from_token_slice_prepend(const cee_uchar* subject,
+//cee_char* cee_formated_string_from_token_slice_prepend(const cee_char* subject,
 //                                                       CEEList* p,
 //                                                       CEEList* q,
 //                                                       const cee_char* prepend)
@@ -375,6 +375,15 @@ cee_boolean cee_token_is_identifier(CEEList* p,
     
     CEEToken* token = p->data;
     return token->identifier == identifier;
+}
+
+cee_boolean cee_token_is_ignore(CEEList* p)
+{
+    if (!p || !p->data)
+        return FALSE;
+    
+    CEEToken* token = p->data;
+    return token->state & kCEETokenStateIgnore;
 }
 
 CEEList* cee_token_not_whitespace_newline_before(CEEList* p)
@@ -744,7 +753,7 @@ CEEList* cee_token_is_identifier_before(CEEList* p,
     return NULL;
 }
 
-CEESourceTokenMap* cee_source_token_map_create(const cee_uchar* subject)
+CEESourceTokenMap* cee_source_token_map_create(const cee_char* subject)
 {
     if (!subject)
         return NULL;

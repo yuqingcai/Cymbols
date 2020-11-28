@@ -11,12 +11,10 @@
 #import "CEEJSONReader.h"
 #import "cee_lib.h"
 #import "cee_source_parsers.h"
-#import "CEEWindowController.h"
 
 NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 
 @interface AppDelegate()
-@property (strong) NSString* cymbolsHome;
 @property (strong) NSTimer* heartBeatTimer;
 @property (strong) NSMutableDictionary* activedConfigurations;
 @end
@@ -32,16 +30,15 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
         
     cee_parsers_create();
     
-    [self createHomeDirectory];
+    [self setupSupportDirectory];
     [self configure];
     [self createHeartBeatTimer];
     [self createNetwork];
     
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    [styleManager setStyleHomeDirectory:[_cymbolsHome stringByAppendingPathComponent:@"Styles"]];
+    [styleManager setDirectory:[_supportDirectory stringByAppendingPathComponent:@"Styles"]];
     styleManager.userInterfaceStyleName = _activedConfigurations[@"ui_style"];
     styleManager.textHighlightStyleName = _activedConfigurations[@"syntax_style"];
-    
     _sourceBufferManager = [[CEESourceBufferManager alloc] init];
     _projectController = [[CEEProjectController alloc] init];
     
@@ -57,20 +54,21 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationHeartBeat object:self];
 }
 
-- (void)createHomeDirectory {
-    _cymbolsHome = [NSHomeDirectory() stringByAppendingPathComponent:@".Cymbols"];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:_cymbolsHome isDirectory:nil])
-        [[NSFileManager defaultManager] createDirectoryAtPath:_cymbolsHome withIntermediateDirectories:YES attributes:nil error:nil];
+- (void)setupSupportDirectory {
+    NSArray* searchPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+    _supportDirectory = [searchPaths firstObject];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:_supportDirectory isDirectory:nil])
+        [[NSFileManager defaultManager] createDirectoryAtPath:_supportDirectory withIntermediateDirectories:YES attributes:nil error:nil];
     
     // copy configure file
     NSString* fileInBundle = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Cymbols.cfg"];
-    NSString* copyFilePath = [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
+    NSString* copyFilePath = [_supportDirectory stringByAppendingPathComponent:@"Cymbols.cfg"];
     if (![[NSFileManager defaultManager] fileExistsAtPath:copyFilePath])
         [[NSFileManager defaultManager] copyItemAtPath:fileInBundle toPath:copyFilePath error:nil];
     
     // copy welcomeGuide
     fileInBundle = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"WelcomeGuide"];
-    copyFilePath = [_cymbolsHome stringByAppendingPathComponent:@"WelcomeGuide"];
+    copyFilePath = [_supportDirectory stringByAppendingPathComponent:@"WelcomeGuide"];
     if ([[NSFileManager defaultManager] fileExistsAtPath:copyFilePath isDirectory:nil])
         [[NSFileManager defaultManager] removeItemAtPath:copyFilePath error:nil];
     [[NSFileManager defaultManager] copyItemAtPath:fileInBundle toPath:copyFilePath error:nil];
@@ -81,18 +79,18 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 }
 
 - (NSString*)welcomeGuidePath {
-    return [[_cymbolsHome stringByAppendingPathComponent:@"WelcomeGuide"] stringByAppendingPathComponent:@"WelcomeGuide"];
+    return [[_supportDirectory stringByAppendingPathComponent:@"WelcomeGuide"] stringByAppendingPathComponent:@"WelcomeGuide"];
 }
 
 - (void)configure {
-    NSString* filePath = [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
+    NSString* filePath = [_supportDirectory stringByAppendingPathComponent:@"Cymbols.cfg"];
     _activedConfigurations = [CEEJSONReader objectFromFile:filePath];
     _configurations = _activedConfigurations;
 }
 
 
 - (NSString*)configurationFilePath {
-    return [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
+    return [_supportDirectory stringByAppendingPathComponent:@"Cymbols.cfg"];
 }
 
 - (void)dealloc {
@@ -111,6 +109,10 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     NSDocumentController* documentController = [NSDocumentController sharedDocumentController];
     for (CEEProject* project in documentController.documents) {
+        
+        if ([project isUntitled])
+            [self saveWindowSettingAsDefault:[project.windowControllers lastObject]];
+            
         [project serialize];
         [project deleteAllSessions];
         [project close];
@@ -208,8 +210,34 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 - (void)setConfiguration:(NSString*)configuration value:(NSString*)value {
     [_activedConfigurations setValue:value forKey:configuration];
     _configurations = _activedConfigurations;
-    NSString* filePath = [_cymbolsHome stringByAppendingPathComponent:@"Cymbols.cfg"];
+    NSString* filePath = [_supportDirectory stringByAppendingPathComponent:@"Cymbols.cfg"];
     [CEEJSONReader object:_activedConfigurations toFile:filePath];
+}
+
+- (void)saveWindowSettingAsDefault:(CEEWindowController*)controller {
+    if (!controller)
+        return;
+    
+    NSSize frameSize = controller.window.frame.size;
+    NSPoint frameOrigin = controller.window.frame.origin;
+    
+    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+    [dict setValue:@(frameOrigin.x) forKey:@"x"];
+    [dict setValue:@(frameOrigin.y) forKey:@"y"];
+    [dict setValue:@(frameSize.width) forKey:@"width"];
+    [dict setValue:@(frameSize.height) forKey:@"height"];
+    
+    NSString* defaultWindowSettingPath = [_supportDirectory stringByAppendingPathComponent:@"DefaultWindowSetting.cfg"];
+    [CEEJSONReader object:dict toFile:defaultWindowSettingPath];
+}
+
+- (NSString*) defaultWindowSettingPath {
+    return [_supportDirectory stringByAppendingPathComponent:@"DefaultWindowSetting.cfg"];
+}
+
+- (NSString*) defaultProjectSettingPath {
+    
+    return [_supportDirectory stringByAppendingPathComponent:@"DefaultProjectSetting.cfg"];
 }
 
 @end

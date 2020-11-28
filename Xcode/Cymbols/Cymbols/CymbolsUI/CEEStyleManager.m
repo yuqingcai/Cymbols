@@ -16,7 +16,7 @@ NSNotificationName CEENotificationTextHighlightStyleUpdate = @"CEENotificationTe
 
 
 @interface CEEStyleManager()
-@property (strong) NSString* homeDirectory;
+@property (strong) NSString* directory;
 @end
 
 @implementation CEEStyleManager
@@ -24,7 +24,7 @@ static CEEStyleManager* gStyleManager = nil;
 
 @synthesize userInterfaceStyleName = _userInterfaceStyleName;
 @synthesize textHighlightStyleName = _textHighlightStyleName;
-
+@synthesize directory = _directory;
 
 + (CEEStyleManager*)defaultStyleManager {
     if (!gStyleManager)
@@ -42,20 +42,24 @@ static CEEStyleManager* gStyleManager = nil;
     return self;
 }
 
-- (void)setStyleHomeDirectory:(NSString *)directory {
-    _homeDirectory = directory;
-    [self copyStylesToHomeDirectory];
+- (void)setDirectory:(NSString *)directory {
+    _directory = directory;
+    [self copyStylesToDirectory];
 }
 
-- (void)copyStylesToHomeDirectory {
-    if (![[NSFileManager defaultManager] fileExistsAtPath:[self homeDirectory] isDirectory:nil])
-        [[NSFileManager defaultManager] createDirectoryAtPath:[self homeDirectory] withIntermediateDirectories:YES attributes:nil error:nil];
+- (NSString*)directory {
+    return _directory;
+}
+
+- (void)copyStylesToDirectory {
+    if (![[NSFileManager defaultManager] fileExistsAtPath:[self directory] isDirectory:nil])
+        [[NSFileManager defaultManager] createDirectoryAtPath:[self directory] withIntermediateDirectories:YES attributes:nil error:nil];
     
     NSString* directoryInBundle = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Styles"];
     NSArray* contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryInBundle error:nil];
     for (NSString* fileName in contents) {
         NSString* src = [directoryInBundle stringByAppendingPathComponent:fileName];
-        NSString* dest = [[self homeDirectory] stringByAppendingPathComponent:fileName];
+        NSString* dest = [[self directory] stringByAppendingPathComponent:fileName];
         if ([[NSFileManager defaultManager] fileExistsAtPath:dest])
             [[NSFileManager defaultManager] removeItemAtPath:dest error:nil];
         [[NSFileManager defaultManager] copyItemAtPath:src toPath:dest error:nil];
@@ -82,7 +86,7 @@ static CEEStyleManager* gStyleManager = nil;
 }
 
 - (NSArray*)userInterfaceStylePaths {
-    return [self filenamesWithExtension:@"ui" inDirectory:[self homeDirectory]];
+    return [self filenamesWithExtension:@"ui" inDirectory:[self directory]];
 }
 
 - (NSArray*)userInterfaceStyleNames {
@@ -100,7 +104,7 @@ static CEEStyleManager* gStyleManager = nil;
 }
 
 - (NSArray*)textHighlightStylePaths {
-    return [self filenamesWithExtension:@"syntax" inDirectory:[self homeDirectory]];
+    return [self filenamesWithExtension:@"syntax" inDirectory:[self directory]];
 }
 
 - (NSArray*)textHighlightStyleNames {
@@ -119,7 +123,7 @@ static CEEStyleManager* gStyleManager = nil;
 
 - (void)setUserInterfaceStyleName:(NSString *)name {
     _userInterfaceStyleName = name;
-    NSString* filepath = [[self homeDirectory] stringByAppendingPathComponent:[_userInterfaceStyleName stringByAppendingPathExtension:@"ui"]];
+    NSString* filepath = [[self directory] stringByAppendingPathComponent:[_userInterfaceStyleName stringByAppendingPathExtension:@"ui"]];
     NSDictionary* descriptor = [CEEJSONReader objectFromFile:filepath];
     [_userInterfaceConfiguration setDescriptor:descriptor];
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationUserInterfaceStyleUpdate object:self];
@@ -136,7 +140,7 @@ static CEEStyleManager* gStyleManager = nil;
 
 - (void)setTextHighlightStyleName:(NSString *)name {
     _textHighlightStyleName = name;
-    NSString* filepath = [[self homeDirectory] stringByAppendingPathComponent:[_textHighlightStyleName stringByAppendingPathExtension:@"syntax"]];
+    NSString* filepath = [[self directory] stringByAppendingPathComponent:[_textHighlightStyleName stringByAppendingPathExtension:@"syntax"]];
     _textHighlighDescriptor = [CEEJSONReader stringFromFile:filepath];
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationTextHighlightStyleUpdate object:self];
 }
@@ -206,7 +210,6 @@ static CEEStyleManager* gStyleManager = nil;
     if ([extension caseInsensitiveCompare:@"css"] == NSOrderedSame)
         identifier = @"icon_file_type_css_16x16";
     
-    
     if ([extension caseInsensitiveCompare:@"cs"] == NSOrderedSame)
         identifier = @"icon_file_type_csharp_16x16";
     
@@ -250,8 +253,8 @@ static CEEStyleManager* gStyleManager = nil;
         case kCEESourceSymbolTypeCustomTypeDeclaration:
             identifier = @"icon_custom_type_declaration_16x16";
             break;
-        case kCEESourceSymbolTypeProperty:
-            identifier = @"icon_property_16x16";
+        case kCEESourceSymbolTypePropertyDeclaration:
+            identifier = @"icon_property_declaration_16x16";
             break;
         case kCEESourceSymbolTypeTypeDefine:
             identifier = @"icon_typedef_16x16";
@@ -274,11 +277,17 @@ static CEEStyleManager* gStyleManager = nil;
         case kCEESourceSymbolTypeClassDefinition:
             identifier = @"icon_class_definition_16x16";
             break;
+        case kCEESourceSymbolTypeStructDefinition:
+            identifier = @"icon_class_definition_16x16";
+            break;
         case kCEESourceSymbolTypeEnumDefinition:
             identifier = @"icon_enum_definition_16x16";
             break;
         case kCEESourceSymbolTypeUnionDefinition:
             identifier = @"icon_union_definition_16x16";
+            break;
+        case kCEESourceSymbolTypeInterfaceDefinition:
+            identifier = @"icon_interface_declaration_16x16";
             break;
         case kCEESourceSymbolTypeInterfaceDeclaration:
             identifier = @"icon_interface_declaration_16x16";
@@ -304,6 +313,17 @@ static CEEStyleManager* gStyleManager = nil;
         case kCEESourceSymbolTypePackage:
             identifier = @"icon_package_16x16";
             break;
+        case kCEESourceSymbolTypeOperatorOverloadDefinition:
+            identifier = @"icon_function_definition_16x16";
+            break;
+        case kCEESourceSymbolTypeOperatorOverloadDeclaration:
+            identifier = @"icon_function_declaration_16x16";
+            break;
+            
+        case kCEESourceSymbolTypeUsingDeclaration:
+            identifier = @"icon_using_declaration_16x16";
+            break;
+            
         default:
             break;
     }

@@ -8,8 +8,8 @@
 
 typedef struct _SwiftParser {
     CEESourceParserRef super;
-    const cee_uchar* filepath_ref;
-    const cee_uchar* subject_ref;
+    const cee_char* filepath_ref;
+    const cee_char* subject_ref;
     CEESourceFregment* statement_root;
     CEESourceFregment* statement_current;
     CEESourceFregment* comment_root;
@@ -23,24 +23,24 @@ static void swift_token_type_map_init(void);
 static cee_boolean token_type_matcher(CEEToken* token,
                                       CEETokenType type);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
-                                const cee_uchar* filepath,
-                                const cee_uchar* subject,
+                                const cee_char* filepath,
+                                const cee_char* subject,
                                 CEESourceFregment** prep_directive,
                                 CEESourceFregment** statement,
                                 CEESourceFregment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,
-                                   const cee_uchar* filepath,
-                                   const cee_uchar* subject,
+                                   const cee_char* filepath,
+                                   const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
                                    CEESourceFregment* prep_directive,
                                    CEESourceFregment* statement,
                                    CEERange range,
                                    CEEList** references);
 static void symbol_parse_init(SwiftParser* parser,
-                              const cee_uchar* filepath,
-                              const cee_uchar* subject);
+                              const cee_char* filepath,
+                              const cee_char* subject);
 static void symbol_parse_clear(SwiftParser* parser);
 static cee_boolean token_is_comment(CEEToken* token);
 static cee_boolean comment_token_push(SwiftParser* parser,
@@ -285,8 +285,8 @@ static cee_boolean token_type_matcher(CEEToken* token,
 }
 
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
-                                const cee_uchar* filepath,
-                                const cee_uchar* subject,
+                                const cee_char* filepath,
+                                const cee_char* subject,
                                 CEESourceFregment** prep_directive,
                                 CEESourceFregment** statement,
                                 CEESourceFregment** comment,
@@ -326,7 +326,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
         pushed = FALSE;
         
-        if (current_statement_type_is(parser, kCEESourceFregmentTypeImportStatement)) {
+        if (current_statement_type_is(parser, kCEESourceFregmentTypeDeclaration)) {
             //pushed = import_statement_token_push(parser, token);
         }
         else if (current_statement_type_is(parser, kCEESourceFregmentTypeClassDefinition)) {
@@ -338,7 +338,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
         if (!pushed) {
             if (token->identifier == kCEETokenID_IMPORT) {
-                current_statement_type_transform(parser, kCEESourceFregmentTypeImportStatement);
+                current_statement_type_transform(parser, kCEESourceFregmentTypeDeclaration);
                 statement_token_push(parser, token);
             }
             else if (token->identifier == kCEETokenID_CLASS ||
@@ -415,8 +415,8 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
 }
 
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,
-                                   const cee_uchar* filepath,
-                                   const cee_uchar* subject,
+                                   const cee_char* filepath,
+                                   const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
                                    CEESourceFregment* prep_directive,
                                    CEESourceFregment* statement,
@@ -427,39 +427,39 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
 }
 
 static void symbol_parse_init(SwiftParser* parser,
-                              const cee_uchar* filepath,
-                              const cee_uchar* subject)
+                              const cee_char* filepath,
+                              const cee_char* subject)
 {    
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
     parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                         parser->filepath_ref,
                                                         parser->subject_ref,
-                                                        (const cee_uchar*)"swift");
+                                                        "swift");
     parser->statement_current = cee_source_fregment_sub_attach(parser->statement_root, 
                                                                kCEESourceFregmentTypeSourceList, 
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
-                                                               (const cee_uchar*)"swift");
+                                                               "swift");
     parser->statement_current = cee_source_fregment_sub_attach(parser->statement_current, 
                                                                kCEESourceFregmentTypeStatement, 
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
-                                                               (const cee_uchar*)"swift");
+                                                               "swift");
     parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
                                                       parser->filepath_ref,
                                                       parser->subject_ref,
-                                                      (const cee_uchar*)"swift");
+                                                      "swift");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
                                                              kCEESourceFregmentTypeSourceList, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
-                                                             (const cee_uchar*)"swift");
+                                                             "swift");
     parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
                                                              kCEESourceFregmentTypeComment, 
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
-                                                             (const cee_uchar*)"swift");
+                                                             "swift");
 }
 
 static void symbol_parse_clear(SwiftParser* parser)
@@ -508,7 +508,7 @@ static cee_boolean comment_attach(SwiftParser* parser)
                                           kCEESourceFregmentTypeComment, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
-                                          (const cee_uchar*)"swift");
+                                          "swift");
     if (!attached)
         return FALSE;
     
@@ -614,7 +614,7 @@ static cee_boolean statement_attach(SwiftParser* parser,
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
-                                          (const cee_uchar*)"c");
+                                          "swift");
     if (!attached)
         return FALSE;
     
@@ -634,7 +634,7 @@ static cee_boolean statement_sub_attach(SwiftParser* parser,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,
-                                              (const cee_uchar*)"c");
+                                              "swift");
     if (!attached)
         return FALSE;
     

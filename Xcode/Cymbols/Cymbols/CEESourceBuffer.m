@@ -65,8 +65,8 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
         cee_tree_free(buffer.statement_symbol_tree);
     
     cee_source_symbol_parse(buffer.parser_ref,
-                            (const cee_uchar*)[buffer.filePath UTF8String],
-                            subject,
+                            [buffer.filePath UTF8String],
+                            (const cee_char*)subject,
                             &prep_directive,
                             &statement,
                             &comment,
@@ -324,8 +324,8 @@ static void binary_buffer_modified(cee_pointer buffer,
 
 - (void)createTemporyDirectory {
     NSArray* searchPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    NSString* applicationSupportDirectory = [[searchPaths firstObject] stringByAppendingPathComponent:@"Cymbols"];
-    _temporaryDirectory = [applicationSupportDirectory stringByAppendingPathComponent:@"Backups/Untitled"];
+    NSString* supportDirectory = [searchPaths firstObject];
+    _temporaryDirectory = [supportDirectory stringByAppendingPathComponent:@"Backups/Untitled"];
     if (![[NSFileManager defaultManager] fileExistsAtPath:_temporaryDirectory isDirectory:nil])
         [[NSFileManager defaultManager] createDirectoryAtPath:_temporaryDirectory withIntermediateDirectories:YES attributes:nil error:nil];
 }
@@ -379,7 +379,6 @@ static void binary_buffer_modified(cee_pointer buffer,
 - (BOOL)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {
     [[NSString stringWithUTF8String:(const char *)cee_text_storage_buffer_get(buffer.storage)] writeToURL:[NSURL fileURLWithPath:filePath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
     
-
     BOOL shouldParsed = NO;
     /** when a source buffer filename extension is changed,
      *  that means another parser is selected, we need to

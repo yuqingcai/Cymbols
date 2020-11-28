@@ -410,7 +410,7 @@ cee_int cee_lexer_css_token_get(CEEToken** token)
     
     return 1;
 }
-void cee_lexer_css_buffer_create(const cee_uchar* subject)
+void cee_lexer_css_buffer_create(const cee_char* subject)
 {
     buffer = css_scan__scan_bytes(subject, strlen(subject));
     g_scan_offset = 0;
