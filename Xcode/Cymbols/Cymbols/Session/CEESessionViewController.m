@@ -44,7 +44,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [_containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
-    _titleHeight = 23;
+    _titleHeight = 25;
     
     _toolbar = [[NSStoryboard storyboardWithName:@"Session" bundle:nil] instantiateControllerWithIdentifier:@"IDSessionToolbar"];
     [self addChildViewController:_toolbar];

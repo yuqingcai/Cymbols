@@ -13,7 +13,8 @@
 //#define DEBUG_DECLARATION
 //#define DEBUG_EVENTS
 //#define DEBUG_NAMESPACE
-#define DEBUG_USING_DIRECTIVE
+//#define DEBUG_USING_DIRECTIVE
+#define DEBUG_DELEGATE
 
 typedef enum _CSharpObjectTypeDefinitionTranslateState {
     kCSharpObjectTypeDefinitionTranslateStateInit = 0,
@@ -36,7 +37,7 @@ typedef enum _CSharpObjectTypeDefinitionTranslateState {
 
 typedef enum _CSharpEnumDefinitionTranslateState {
     kCSharpEnumDefinitionTranslateStateInit = 0,
-    kCSharpEnumDefinitionTranslateStateEnumSpecifier,
+    kCSharpEnumDefinitionTranslateStateEnum,
     kCSharpEnumDefinitionTranslateStateIdentifier,
     kCSharpEnumDefinitionTranslateStateBase,
     kCSharpEnumDefinitionTranslateStateIntegralType,
@@ -187,6 +188,29 @@ typedef enum _CSharpUsingDirectiveTranslateState{
     kCSharpUsingDirectiveTranslateStateMax,
 } CSharpUsingDirectiveTranslateState;
 
+typedef enum _CSharpDelegateDeclarationTranslateState {
+    kCSharpDelegateDeclarationTranslateStateInit = 0,
+    kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier,
+    kCSharpDelegateDeclarationTranslateStateBuiltinType,
+    kCSharpDelegateDeclarationTranslateStateBuiltinReference,
+    kCSharpDelegateDeclarationTranslateStateIdentifier,
+    kCSharpDelegateDeclarationTranslateStateIdentifierSeparator,
+    kCSharpDelegateDeclarationTranslateStateDelegate,
+    kCSharpDelegateDeclarationTranslateStateParameterList,
+    kCSharpDelegateDeclarationTranslateStateParameterListEnd,
+    kCSharpDelegateDeclarationTranslateStateConstraintClause,
+    kCSharpDelegateDeclarationTranslateStateConstraintsTypeParameter,
+    kCSharpDelegateDeclarationTranslateStateConstraints,
+    kCSharpDelegateDeclarationTranslateStateConstraint,
+    kCSharpDelegateDeclarationTranslateStateConstructor,
+    kCSharpDelegateDeclarationTranslateStateConstructorList,
+    kCSharpDelegateDeclarationTranslateStateComma,
+    kCSharpDelegateDeclarationTranslateStateTypeParameters,
+    kCSharpDelegateDeclarationTranslateStateCommit,
+    kCSharpDelegateDeclarationTranslateStateError,
+    kCSharpDelegateDeclarationTranslateStateMax,
+} CSharpDelegateDeclarationTranslateState;
+
 typedef cee_boolean (*ParseTrap)(CEESourceFregment*,
                                  CEEList**);
 
@@ -221,6 +245,7 @@ static cee_int csharp_declaration_translate_table[kCSharpDeclarationTranslateSta
 static cee_int csharp_indexer_declaration_translate_table[kCSharpIndexerDeclarationTranslateStateMax][CEETokenID_MAX];
 static cee_int csharp_namespace_definition_translate_table[kCSharpNamespaceDefinitionTranslateStateMax][CEETokenID_MAX];
 static cee_int csharp_using_directive_translate_table[kCSharpUsingDirectiveTranslateStateMax][CEETokenID_MAX];
+static cee_int csharp_delegate_declaration_translate_table[kCSharpDelegateDeclarationTranslateStateMax][CEETokenID_MAX];
 
 static void csharp_token_type_map_init(void);
 static CEEList* skip_type_parameter_list(CEEList* p,
@@ -336,13 +361,12 @@ static CEEList* enumerators_extract(CEEList* tokens,
 static void base_free(cee_pointer data);
 static cee_char* csharp_object_type_proto_descriptor_create(CEESourceFregment* fregment,
                                                             CEESourceSymbol* definition,
+                                                            CEEList* identifier,
                                                             const cee_char* derives_str);
 static cee_char* csharp_declaration_proto_descriptor_create(CEESourceFregment* fregment,
                                                             CEESourceSymbol* declaration,
+                                                            CEEList* identifier,
                                                             const cee_char* proto);
-static cee_char* csharp_enum_proto_descriptor_create(CEESourceFregment* fregment,
-                                                     CEESourceSymbol* definition,
-                                                     const cee_char* derives_str);
 static cee_char* csharp_namespace_proto_descriptor_create(CEESourceFregment* fregment,
                                                           CEESourceSymbol* definition);
 static cee_char* csharp_name_scope_list_string_create(CEEList* scopes,
@@ -365,6 +389,9 @@ static cee_char* csharp_method_protos_descriptor_create(CEESourceFregment* fregm
                                                         CEEList* parameters,
                                                         CEEList* method,
                                                         const cee_char* type);
+static const cee_char* csharp_access_level_search(CEESourceFregment* fregment,
+                                                  CEEList* begin,
+                                                  CEEList* end);
 static CEEList* skip_csharp_declaration_interval(CEEList* p);
 static void csharp_operator_translate_table_init(void);
 static cee_boolean csharp_operator_parse(CEESourceFregment* fregment);
@@ -380,6 +407,8 @@ static cee_boolean csharp_namespace_definition_trap(CEESourceFregment* fregment,
                                                     CEEList** pp);
 static void csharp_using_directive_translate_table_init(void);
 static cee_boolean csharp_using_directive_parse(CEESourceFregment* fregment);
+static void csharp_delegate_declaration_translate_table_init(void);
+static cee_boolean csharp_delegate_declaration_parse(CEESourceFregment* fregment);
 
 
 static void csharp_token_type_map_init(void)
@@ -679,6 +708,7 @@ CEESourceParserRef cee_csharp_parser_create(const cee_char* identifier)
     csharp_indexer_declaration_translate_table_init();
     csharp_namespace_definition_translate_table_init();
     csharp_using_directive_translate_table_init();
+    csharp_delegate_declaration_translate_table_init();
     
     parser->imp = csharp;
     
@@ -1538,12 +1568,13 @@ static void statement_parse(CSharpParser* parser)
         return;
     
     if (csharp_method_parse(current) ||
+        csharp_declaration_parse(current) ||
         csharp_operator_parse(current) ||
         csharp_property_declaration_parse(current) ||
         csharp_event_parse(current) ||
-        csharp_declaration_parse(current) ||
         csharp_indexer_declaration_parse(current) ||
-        csharp_using_directive_parse(current))
+        csharp_using_directive_parse(current) ||
+        csharp_delegate_declaration_parse(current))
         return;
     
     return;
@@ -1664,8 +1695,8 @@ static void csharp_declaration_translate_table_init(void)
      *  Init                    Init                    Init                    Using       Error   Error   DeclarationSpecifier    BuiltinType     BuiltinReference    CustomType      Error               Error               Error                   Error           Error   Error
      *  Using                   Error                   Error                   Error       Using   Using   DeclarationSpecifier    BuiltinType     BuiltinReference    CustomType      Error               Error               Error                   Error           Error   Error
      *  DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    Error       Error   Error   DeclarationSpecifier    BuiltinType     BuiltinReference    CustomType      Error               Error               Error                   Error           Error   Error
-     *  BuiltinType             BuiltinType             BuiltinType             Error       Error   Error   DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      BuiltinType         Error               Error                   Error           Error   Error
-     *  BuiltinReference        BuiltinReference        BuiltinReference        Error       Error   Error   DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      BuiltinReference    Error               Error                   Error           Error   Error
+     *  BuiltinType             BuiltinType             BuiltinType             Error       Error   Error   Error                   BuiltinType     BuiltinReference    Identifier      BuiltinType         Error               Error                   Error           Error   Error
+     *  BuiltinReference        BuiltinReference        BuiltinReference        Error       Error   Error   Error                   BuiltinType     BuiltinReference    Identifier      BuiltinReference    Error               Error                   Error           Error   Error
      *  CustomType              CustomType              CustomType              Error       Error   Error   Error                   Error           Error               Identifier      CustomType          Error               CustomTypeSeparator     *TypeParameters Error   Error
      *  Identifier              Identifier              Identifier              Error       Error   Error   Error                   Error           Error               Identifier      Error               Commit              Error                   Error           Commit  Commit
      *  CustomTypeSeparator     Error                   Error                   Error       Error   Error   Error                   Error           Error               CustomType      Error               Error               Error                   Error           Error   Error
@@ -1695,14 +1726,12 @@ static void csharp_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateDeclarationSpecifier    , kCEETokenID_IDENTIFIER            , kCSharpDeclarationTranslateStateCustomType            );
     TRANSLATE_STATE_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinType             , '['                               , kCSharpDeclarationTranslateStateBuiltinType           );
     TRANSLATE_STATE_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinType             , ']'                               , kCSharpDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_FUNCS_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinType             , token_id_is_declaration_specifier , kCSharpDeclarationTranslateStateDeclarationSpecifier  );
     TRANSLATE_FUNCS_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinType             , token_id_is_builtin_type          , kCSharpDeclarationTranslateStateBuiltinType           );
     TRANSLATE_FUNCS_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinType             , token_id_is_builtin_reference     , kCSharpDeclarationTranslateStateBuiltinReference      );
     TRANSLATE_STATE_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinType             , '?'                               , kCSharpDeclarationTranslateStateBuiltinType           );
     TRANSLATE_STATE_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinType             , kCEETokenID_IDENTIFIER            , kCSharpDeclarationTranslateStateIdentifier            );
     TRANSLATE_STATE_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinReference        , '['                               , kCSharpDeclarationTranslateStateBuiltinReference      );
     TRANSLATE_STATE_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinReference        , ']'                               , kCSharpDeclarationTranslateStateBuiltinReference      );
-    TRANSLATE_FUNCS_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinReference        , token_id_is_declaration_specifier , kCSharpDeclarationTranslateStateDeclarationSpecifier  );
     TRANSLATE_FUNCS_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinReference        , token_id_is_builtin_type          , kCSharpDeclarationTranslateStateBuiltinType           );
     TRANSLATE_FUNCS_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinReference        , token_id_is_builtin_reference     , kCSharpDeclarationTranslateStateBuiltinReference      );
     TRANSLATE_STATE_SET(csharp_declaration_translate_table, kCSharpDeclarationTranslateStateBuiltinReference        , '?'                               , kCSharpDeclarationTranslateStateBuiltinReference      );
@@ -1736,6 +1765,7 @@ static cee_boolean csharp_declaration_parse(CEESourceFregment* fregment)
     cee_char* type = NULL;
     CEEList* declarations = NULL;
     CEESourceSymbol* declaration = NULL;
+    CEEList* first_identifier = NULL;
         
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
@@ -1776,6 +1806,8 @@ static cee_boolean csharp_declaration_parse(CEESourceFregment* fregment)
                                                                         identifier,
                                                                         kCEESourceSymbolTypeVariableDeclaration,
                                                                         "csharp");
+                if (!first_identifier)
+                    first_identifier = identifier;
             }
             
             if (declaration) {
@@ -1784,6 +1816,7 @@ static cee_boolean csharp_declaration_parse(CEESourceFregment* fregment)
                                            kCEETokenStateSymbolOccupied);
                 declaration->proto = csharp_declaration_proto_descriptor_create(fregment,
                                                                                 declaration,
+                                                                                first_identifier,
                                                                                 type);
                 declarations = cee_list_prepend(declarations, declaration);
             }
@@ -1913,7 +1946,7 @@ static cee_boolean csharp_object_type_definition_trap(CEESourceFregment* fregmen
             }
             else if (cee_token_is_identifier(p, kCEETokenID_STRUCT)) {
                 definition_type = kCEESourceSymbolTypeStructDefinition;
-                fregment_type = kCEESourceFregmentTypeClassDefinition;
+                fregment_type = kCEESourceFregmentTypeStructDefinition;
             }
             else if (cee_token_is_identifier(p, kCEETokenID_INTERFACE)) {
                 definition_type = kCEESourceSymbolTypeInterfaceDefinition;
@@ -1990,6 +2023,7 @@ next_token:
         definition->derives = bases_str;
         definition->proto = csharp_object_type_proto_descriptor_create(fregment,
                                                                        definition,
+                                                                       class_identifier,
                                                                        bases_str);
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
         cee_source_fregment_type_set_exclusive(fregment, fregment_type);
@@ -2020,15 +2054,15 @@ static void csharp_enum_definition_translate_table_init(void)
     
     /**
      *                  enum            identifier  :       integral_type   {
-     *  Init            EnumSpecifier   Error       Error   Error           Error
-     *  EnumSpecifier   Error           Identifier  Error   Error           Error
+     *  Init            Enum            Error       Error   Error           Error
+     *  Enum            Error           Identifier  Error   Error           Error
      *  Identifier      Error           Error       Base    Error           Commit
      *  Base            Error           Error       Error   IntegralType    Error
      *  IntegralType    Error           Error       Error   Error           Commit
      */
     TRANSLATE_STATE_INI(csharp_enum_definition_translate_table, kCSharpEnumDefinitionTranslateStateMax              , kCSharpEnumDefinitionTranslateStateError                                      );
-    TRANSLATE_STATE_SET(csharp_enum_definition_translate_table, kCSharpEnumDefinitionTranslateStateInit             , kCEETokenID_ENUM          , kCSharpEnumDefinitionTranslateStateEnumSpecifier  );
-    TRANSLATE_STATE_SET(csharp_enum_definition_translate_table, kCSharpEnumDefinitionTranslateStateEnumSpecifier    , kCEETokenID_IDENTIFIER    , kCSharpEnumDefinitionTranslateStateIdentifier     );
+    TRANSLATE_STATE_SET(csharp_enum_definition_translate_table, kCSharpEnumDefinitionTranslateStateInit             , kCEETokenID_ENUM          , kCSharpEnumDefinitionTranslateStateEnum           );
+    TRANSLATE_STATE_SET(csharp_enum_definition_translate_table, kCSharpEnumDefinitionTranslateStateEnum             , kCEETokenID_IDENTIFIER    , kCSharpEnumDefinitionTranslateStateIdentifier     );
     TRANSLATE_STATE_SET(csharp_enum_definition_translate_table, kCSharpEnumDefinitionTranslateStateIdentifier       , ':'                       , kCSharpEnumDefinitionTranslateStateBase           );
     TRANSLATE_STATE_SET(csharp_enum_definition_translate_table, kCSharpEnumDefinitionTranslateStateIdentifier       , '{'                       , kCSharpEnumDefinitionTranslateStateCommit         );
     TRANSLATE_FUNCS_SET(csharp_enum_definition_translate_table, kCSharpEnumDefinitionTranslateStateBase             , token_id_is_integral_type , kCSharpEnumDefinitionTranslateStateIntegralType   );
@@ -2044,9 +2078,9 @@ static cee_boolean csharp_enum_definition_trap(CEESourceFregment* fregment,
     CSharpEnumDefinitionTranslateState prev = kCSharpEnumDefinitionTranslateStateInit;
     CEEToken* token = NULL;
     
-    CEEList* enum_identifier_ref = NULL;
+    CEEList* identifier = NULL;
     
-    CEEList* base_ref = NULL;
+    CEEList* base = NULL;
     cee_char* bases_str = NULL;
     
     CEESourceSymbol* definition = NULL;
@@ -2069,11 +2103,11 @@ static cee_boolean csharp_enum_definition_trap(CEESourceFregment* fregment,
         }
         else if (current == kCSharpEnumDefinitionTranslateStateIntegralType) {
             if (token_id_is_integral_type(token->identifier))
-                base_ref = p;
+                base = p;
         }
         else if (current == kCSharpEnumDefinitionTranslateStateIdentifier) {
             if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER))
-                enum_identifier_ref = p;
+                identifier = p;
         }
         else if (current == kCSharpEnumDefinitionTranslateStateCommit) {
             ret = TRUE;
@@ -2092,22 +2126,23 @@ next_token:
     
     definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
                                                            fregment->subject_ref,
-                                                           enum_identifier_ref,
-                                                           enum_identifier_ref,
+                                                           identifier,
+                                                           identifier,
                                                            kCEESourceSymbolTypeEnumDefinition,
                                                            "csharp");
     if (definition) {
         
-        if (base_ref)
-            bases_str = cee_string_from_token(fregment->subject_ref, base_ref->data);
+        if (base)
+            bases_str = cee_string_from_token(fregment->subject_ref, base->data);
         
-        cee_token_slice_state_mark(enum_identifier_ref,
-                                   enum_identifier_ref,
+        cee_token_slice_state_mark(identifier,
+                                   identifier,
                                    kCEETokenStateSymbolOccupied);
         definition->derives = bases_str;
-        definition->proto = csharp_enum_proto_descriptor_create(fregment,
-                                                                definition,
-                                                                bases_str);
+        definition->proto = csharp_object_type_proto_descriptor_create(fregment,
+                                                                       definition,
+                                                                       identifier,
+                                                                       bases_str);
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
         cee_source_fregment_type_set_exclusive(fregment,
                                                kCEESourceFregmentTypeEnumDefinition);
@@ -2171,6 +2206,7 @@ static CEEList* enumerators_extract(CEEList* tokens,
                 if (enumerator) {
                     enumerator->proto = csharp_declaration_proto_descriptor_create(token->fregment_ref,
                                                                                    enumerator,
+                                                                                   q,
                                                                                    enum_symbol->name);
                     cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
                     enumerators = cee_list_prepend(enumerators, enumerator);
@@ -2206,12 +2242,31 @@ static void base_free(cee_pointer data)
 
 static cee_char* csharp_object_type_proto_descriptor_create(CEESourceFregment* fregment,
                                                             CEESourceSymbol* definition,
+                                                            CEEList* identifier,
                                                             const cee_char* derives_str)
 {
     if (!fregment || !definition)
         return NULL;
     
+    CEESourceFregment* grandfather_fregment = NULL;
+    const cee_char* access_level = "public";
     cee_char* descriptor = NULL;
+    
+    if (identifier)
+        access_level = csharp_access_level_search(fregment,
+                                                  SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                  TOKEN_PREV(identifier));
+    if(!access_level) {
+        grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
+        if (grandfather_fregment) {
+            if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition))
+                access_level = "private";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+    
     cee_strconcat0(&descriptor, "{", NULL);
     
     if (definition->type == kCEESourceSymbolTypeClassDefinition)
@@ -2220,8 +2275,11 @@ static cee_char* csharp_object_type_proto_descriptor_create(CEESourceFregment* f
         cee_strconcat0(&descriptor, "type:", "struct_definition", ",", NULL);
     else if (definition->type == kCEESourceSymbolTypeInterfaceDefinition)
         cee_strconcat0(&descriptor, "type:", "interface_definition", ",", NULL);
+    else if (definition->type == kCEESourceSymbolTypeEnumDefinition)
+        cee_strconcat0(&descriptor, "type:", "enum_declaration", ",", NULL);
     
     cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
+    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
     cee_strconcat0(&descriptor, "derivers:", derives_str, NULL);
     cee_strconcat0(&descriptor, "}", NULL);
     
@@ -2230,12 +2288,31 @@ static cee_char* csharp_object_type_proto_descriptor_create(CEESourceFregment* f
 
 static cee_char* csharp_declaration_proto_descriptor_create(CEESourceFregment* fregment,
                                                             CEESourceSymbol* declaration,
+                                                            CEEList* identifier,
                                                             const cee_char* proto)
 {
     if (!fregment || !declaration)
         return NULL;
     
+    CEESourceFregment* grandfather_fregment = NULL;
+    const cee_char* access_level = "public";
     cee_char* descriptor = NULL;
+    
+    if (identifier)
+        access_level = csharp_access_level_search(fregment,
+                                                  SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                  TOKEN_PREV(identifier));
+    if (!access_level) {
+        grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
+        if (grandfather_fregment) {
+            if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition))
+                access_level = "private";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+                                                  
     cee_strconcat0(&descriptor, "{", NULL);
     
     if (declaration->type == kCEESourceSymbolTypeLabel)
@@ -2248,28 +2325,13 @@ static cee_char* csharp_declaration_proto_descriptor_create(CEESourceFregment* f
         cee_strconcat0(&descriptor, "type:", "variable", ",", NULL);
     
     cee_strconcat0(&descriptor, "name:", declaration->name, ",", NULL);
+    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
     cee_strconcat0(&descriptor, "proto:", proto, NULL);
     cee_strconcat0(&descriptor, "}", NULL);
     
     return descriptor;
 }
 
-static cee_char* csharp_enum_proto_descriptor_create(CEESourceFregment* fregment,
-                                                     CEESourceSymbol* definition,
-                                                     const cee_char* derives_str)
-{
-    if (!fregment || !definition)
-        return NULL;
-    
-    cee_char* descriptor = NULL;
-    cee_strconcat0(&descriptor, "{", NULL);
-    cee_strconcat0(&descriptor, "type:", "enum_declaration", ",", NULL);
-    cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
-    cee_strconcat0(&descriptor, "derivers:", derives_str, NULL);
-    cee_strconcat0(&descriptor, "}", NULL);
-    
-    return descriptor;
-}
 
 static cee_char* csharp_namespace_proto_descriptor_create(CEESourceFregment* fregment,
                                                           CEESourceSymbol* definition)
@@ -2281,6 +2343,7 @@ static cee_char* csharp_namespace_proto_descriptor_create(CEESourceFregment* fre
     cee_strconcat0(&descriptor, "{", NULL);
     cee_strconcat0(&descriptor, "type:", "namespace_definition", ",", NULL);
     cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
+    cee_strconcat0(&descriptor, "access_level:", "public", ",", NULL);
     cee_strconcat0(&descriptor, "}", NULL);
     
     return descriptor;
@@ -2338,9 +2401,9 @@ static void csharp_method_translate_table_init(void)
      *                              [                       ]                       declaration_specifier       builtin_type        builtin_reference       ?                   identifier                  ~                       .                       <                   (               )                   where               :                       struct          new             ,           base                        this                        {           ;               =>
      *  Init                        Init                    Init                    DeclarationSpecifier        BuiltinType         BuiltinReference        Error               Identifier                  Init                    Error                   Error               Error           Error               Error               Error                   Error           Error           Error       Error                       Error                       Error       Error           Error
      *  DeclarationSpecifier        DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier        BuiltinType         BuiltinReference        Error               Identifier                  DeclarationSpecifier    Error                   Error               Error           Error               Error               Error                   Error           Error           Error       Error                       Error                       Error       Error           Error
-     *  BuiltinType                 BuiltinType             BuiltinType             DeclarationSpecifier        BuiltinType         BuiltinReference        BuiltinType         Identifier                  BuiltinType             Error                   Error               Error           Error               Error               Error                   Error           Error           Error       Error                       Error                       Error       Error           Error
-     *  BuiltinReference            BuiltinReference        BuiltinReference        DeclarationSpecifier        BuiltinType         BuiltinReference        BuiltinReference    Identifier                  BuiltinReference        Error                   Error               Error           Error               Error               Error                   Error           Error           Error       Error                       Error                       Error       Error           Error
-     *  Identifier                  Identifier              Identifier              DeclarationSpecifier        BuiltinType         BuiltinReference        Identifier          Identifier                  Error                   IdentifierSeparator     *TypeParameters     ParameterList   Error               Error               Error                   Error           Error           Error       Error                       Error                       Error       Error           Error
+     *  BuiltinType                 BuiltinType             BuiltinType             Error                       BuiltinType         BuiltinReference        BuiltinType         Identifier                  BuiltinType             Error                   Error               Error           Error               Error               Error                   Error           Error           Error       Error                       Error                       Error       Error           Error
+     *  BuiltinReference            BuiltinReference        BuiltinReference        Error                       BuiltinType         BuiltinReference        BuiltinReference    Identifier                  BuiltinReference        Error                   Error               Error           Error               Error               Error                   Error           Error           Error       Error                       Error                       Error       Error           Error
+     *  Identifier                  Identifier              Identifier              Error                       BuiltinType         BuiltinReference        Identifier          Identifier                  Error                   IdentifierSeparator     *TypeParameters     ParameterList   Error               Error               Error                   Error           Error           Error       Error                       Error                       Error       Error           Error
      *  IdentifierSeparator         Error                   Error                   Error                       Error               Error                   Error               Identifier                  Error                   Error                   Error               Error           Error               Error               Error                   Error           Error           Error       Error                       Error                       Error       Error           Error
      *  ParameterList               Error                   Error                   Error                       Error               Error                   Error               Error                       Error                   Error                   Error               Error           ParameterListEnd    Error               Error                   Error           Error           Error       Error                       Error                       Error       Error           Error
      *  ParameterListEnd            Error                   Error                   Error                       Error               Error                   Error               Error                       Error                   Error                   Error               Error           Error               ConstraintClause    ConstructorInitializer  Error           Error           Error       Error                       Error                       Definition  Declaration     Definition
@@ -2377,7 +2440,6 @@ static void csharp_method_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinType                 , '['                               , kCSharpMethodTranslateStateBuiltinType                );
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinType                 , ']'                               , kCSharpMethodTranslateStateBuiltinType                );
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinType                 , '?'                               , kCSharpMethodTranslateStateBuiltinType                );
-    TRANSLATE_FUNCS_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinType                 , token_id_is_declaration_specifier , kCSharpMethodTranslateStateDeclarationSpecifier       );
     TRANSLATE_FUNCS_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinType                 , token_id_is_builtin_type          , kCSharpMethodTranslateStateBuiltinType                );
     TRANSLATE_FUNCS_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinType                 , token_id_is_builtin_reference     , kCSharpMethodTranslateStateBuiltinReference           );
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinType                 , kCEETokenID_IDENTIFIER            , kCSharpMethodTranslateStateIdentifier                 );
@@ -2385,7 +2447,6 @@ static void csharp_method_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinReference            , '['                               , kCSharpMethodTranslateStateBuiltinReference           );
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinReference            , ']'                               , kCSharpMethodTranslateStateBuiltinReference           );
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinReference            , '?'                               , kCSharpMethodTranslateStateBuiltinReference           );
-    TRANSLATE_FUNCS_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinReference            , token_id_is_declaration_specifier , kCSharpMethodTranslateStateDeclarationSpecifier       );
     TRANSLATE_FUNCS_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinReference            , token_id_is_builtin_type          , kCSharpMethodTranslateStateBuiltinType                );
     TRANSLATE_FUNCS_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinReference            , token_id_is_builtin_reference     , kCSharpMethodTranslateStateBuiltinReference           );
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateBuiltinReference            , kCEETokenID_IDENTIFIER            , kCSharpMethodTranslateStateIdentifier                 );
@@ -2393,7 +2454,6 @@ static void csharp_method_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateIdentifier                  , '['                               , kCSharpMethodTranslateStateIdentifier                 );
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateIdentifier                  , ']'                               , kCSharpMethodTranslateStateIdentifier                 );
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateIdentifier                  , '?'                               , kCSharpMethodTranslateStateIdentifier                 );
-    TRANSLATE_FUNCS_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateIdentifier                  , token_id_is_declaration_specifier , kCSharpMethodTranslateStateDeclarationSpecifier       );
     TRANSLATE_FUNCS_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateIdentifier                  , token_id_is_builtin_type          , kCSharpMethodTranslateStateBuiltinType                );
     TRANSLATE_FUNCS_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateIdentifier                  , token_id_is_builtin_reference     , kCSharpMethodTranslateStateBuiltinReference           );
     TRANSLATE_STATE_SET(csharp_method_translate_table,   kCSharpMethodTranslateStateIdentifier                  , kCEETokenID_IDENTIFIER            , kCSharpMethodTranslateStateIdentifier                 );
@@ -2443,12 +2503,14 @@ static void csharp_method_translate_table_init(void)
 static cee_boolean csharp_method_parse(CEESourceFregment* fregment)
 {
     cee_boolean ret = FALSE;
+    cee_boolean is_class_member = FALSE;
     CSharpMethodTranslateState current  = kCSharpMethodTranslateStateInit;
     CSharpMethodTranslateState prev = kCSharpMethodTranslateStateInit;
     CEEToken* token = NULL;
     CEEList* p = NULL;
     CEEList* q = NULL;
     CEESourceFregment* child = NULL;
+    CEESourceFregment* grandfather_fregment = NULL;
     
     CEEList* identifier = NULL;
     CEEList* parameter_list = NULL;
@@ -2456,7 +2518,15 @@ static cee_boolean csharp_method_parse(CEESourceFregment* fregment)
     CEESourceSymbol* method = NULL;
     CEESourceSymbolType symbol_type = kCEESourceSymbolTypeUnknow;
     cee_char* type = "function_definition";
-        
+    
+    grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
+    if (grandfather_fregment) {
+        if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
+            cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition) ||
+            cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition))
+            is_class_member = TRUE;
+    }
+    
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
@@ -2484,14 +2554,19 @@ static cee_boolean csharp_method_parse(CEESourceFregment* fregment)
             if (!parameter_list)
                 parameter_list = p;
         }
-        else if (current == kCSharpMethodTranslateStateDeclaration ||
-                 current == kCSharpMethodTranslateStateDefinition) {
-            
-            if (current == kCSharpMethodTranslateStateDeclaration)
+        else if (current == kCSharpMethodTranslateStateDeclaration) {
+            if (!is_class_member) {
+                current = kCSharpMethodTranslateStateError;
+                ret = FALSE;
+            }
+            else {
                 symbol_type = kCEESourceSymbolTypeFunctionDeclaration;
-            else if (current == kCSharpMethodTranslateStateDefinition)
-                symbol_type = kCEESourceSymbolTypeFunctionDefinition;
-            
+                ret = TRUE;
+            }
+            break;
+        }
+        else if (current == kCSharpMethodTranslateStateDefinition) {
+            symbol_type = kCEESourceSymbolTypeFunctionDefinition;
             ret = TRUE;
             break;
         }
@@ -2503,7 +2578,9 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (current == kCSharpMethodTranslateStateError || !identifier || !parameter_list)
+    if ((current != kCSharpMethodTranslateStateDeclaration &&
+         current != kCSharpMethodTranslateStateDefinition) ||
+        !identifier || !parameter_list)
         goto exit;
     
     p = cee_token_not_whitespace_newline_before(identifier);
@@ -2531,7 +2608,7 @@ next_token:
             cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDeclaration);
             type = "function_declaration";
         }
-                
+        
         child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
         if (child) {
             child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
@@ -2561,14 +2638,14 @@ static void csharp_method_parameters_declaration_translate_table_init(void)
      *                      [                   ]                   parameter_specifier     builtin_type    builtin_reference   params      identifier      ?                   <                   assign_operator     .                       ,
      *  Init                Init                Init                ParameterSpecifier      BuiltinType     BuiltinReference    Params      identifier      Error               Error               Error               Error                   Error
      *  ParameterSpecifier  ParameterSpecifier  ParameterSpecifier  ParameterSpecifier      BuiltinType     BuiltinReference    Params      identifier      Error               Error               Error               Error                   Error
-     *  BuiltinType         BuiltinType         BuiltinType         ParameterSpecifier      BuiltinType     BuiltinReference    Params      identifier      BuiltinType         Error               Error               Error                   Error
-     *  BuiltinReference    BuiltinReference    BuiltinReference    ParameterSpecifier      BuiltinType     BuiltinReference    Params      identifier      BuiltinReference    Error               Error               Error                   Error
+     *  BuiltinType         BuiltinType         BuiltinType         Error                   BuiltinType     BuiltinReference    Params      identifier      BuiltinType         Error               Error               Error                   Error
+     *  BuiltinReference    BuiltinReference    BuiltinReference    Error                   BuiltinType     BuiltinReference    Params      identifier      BuiltinReference    Error               Error               Error                   Error
      *  Params              Error               Error               Error                   BuiltinType     BuiltinReference    Error       identifier      Error               Error               Error               Error                   Error
      *  identifier          identifier          identifier          Error                   Error           Error               Error       identifier      identifier          *TypeParameters     Commit              IdentifierSeparator     Commit
      *  IdentifierSeparator Error               Error               Error                   Error           Error               Error       identifier      Error               Error               Error               Error                   Error
-     *  Commit              Commit              Commit              ParameterSpecifier      BuiltinType     BuiltinReference    Params      identifier      Error               Error               Error               Error                   Error
      *
      *  TypeParameters: save 'current state', skip TypeParameterList then restore 'current state'
+     *  Commit: set 'current state' to Init
      */
     TRANSLATE_STATE_INI(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateMax                 , kCSharpMethodParametersDeclarationTranslateStateError                                                     );
     TRANSLATE_STATE_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateInit                , '['                               , kCSharpMethodParametersDeclarationTranslateStateInit                  );
@@ -2588,7 +2665,6 @@ static void csharp_method_parameters_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinType         , '['                               , kCSharpMethodParametersDeclarationTranslateStateBuiltinType           );
     TRANSLATE_STATE_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinType         , ']'                               , kCSharpMethodParametersDeclarationTranslateStateBuiltinType           );
     TRANSLATE_STATE_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinType         , '?'                               , kCSharpMethodParametersDeclarationTranslateStateBuiltinType           );
-    TRANSLATE_FUNCS_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinType         , token_id_is_parameter_specifier   , kCSharpMethodParametersDeclarationTranslateStateParameterSpecifier    );
     TRANSLATE_FUNCS_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinType         , token_id_is_builtin_type          , kCSharpMethodParametersDeclarationTranslateStateBuiltinType           );
     TRANSLATE_FUNCS_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinType         , token_id_is_builtin_reference     , kCSharpMethodParametersDeclarationTranslateStateBuiltinReference      );
     TRANSLATE_STATE_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinType         , kCEETokenID_PARAMS                , kCSharpMethodParametersDeclarationTranslateStateParams                );
@@ -2596,7 +2672,6 @@ static void csharp_method_parameters_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinReference    , '['                               , kCSharpMethodParametersDeclarationTranslateStateBuiltinReference      );
     TRANSLATE_STATE_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinReference    , ']'                               , kCSharpMethodParametersDeclarationTranslateStateBuiltinReference      );
     TRANSLATE_STATE_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinReference    , '?'                               , kCSharpMethodParametersDeclarationTranslateStateBuiltinReference      );
-    TRANSLATE_FUNCS_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinReference    , token_id_is_parameter_specifier   , kCSharpMethodParametersDeclarationTranslateStateParameterSpecifier    );
     TRANSLATE_FUNCS_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinReference    , token_id_is_builtin_type          , kCSharpMethodParametersDeclarationTranslateStateBuiltinType           );
     TRANSLATE_FUNCS_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinReference    , token_id_is_builtin_reference     , kCSharpMethodParametersDeclarationTranslateStateBuiltinReference      );
     TRANSLATE_STATE_SET(csharp_method_parameters_declaration_translate_table,   kCSharpMethodParametersDeclarationTranslateStateBuiltinReference    , kCEETokenID_PARAMS                , kCSharpMethodParametersDeclarationTranslateStateParams                );
@@ -2714,6 +2789,7 @@ static CEESourceSymbol* csharp_method_parameter_create(CEESourceFregment* fregme
                                                                  TOKEN_PREV(begin));
         parameter->proto = csharp_declaration_proto_descriptor_create(fregment,
                                                                       parameter,
+                                                                      NULL,
                                                                       type);
         if (type)
             cee_free(type);
@@ -2792,44 +2868,58 @@ static cee_char* csharp_method_protos_descriptor_create(CEESourceFregment* fregm
     CEEList* parent_symbols = NULL;
     CEESourceSymbol* parent_symbol = NULL;
     CEESourceFregment* grandfather_fregment = NULL;
+    const cee_char* access_level = "public";
     
-    if (method) {
-        return_str = csharp_type_descriptor_from_token_slice(fregment,
-                                                             SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                             TOKEN_PREV(method));
-        /**
-         * Constructor and Destructor doesn't has return type declaraton,
-         * use its parent symbol type as return type
-         */
-        if (!return_str) {
-            grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
-            if (grandfather_fregment) {
-                if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeClassDefinition))
-                    parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
-                                                                                kCEESourceSymbolTypeClassDefinition);
-                else if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeInterfaceDefinition))
-                    parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
-                                                                                kCEESourceSymbolTypeInterfaceDefinition);
-                else if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition)) {
-                    parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
-                                                                                kCEESourceSymbolTypeEnumDefinition);
-                }
-                
-                if (parent_symbols) {
-                    parent_symbol = cee_list_nth_data(parent_symbols, 0);
-                    is_class_member = TRUE;
-                }
-            }
-            
-            if (parent_symbol)
-                return_str = cee_strdup(parent_symbol->name);
-        }
+    grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
+    if (grandfather_fregment) {
+        if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition))
+            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
+                                                                        kCEESourceSymbolTypeClassDefinition);
+        else if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition))
+            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
+                                                                        kCEESourceSymbolTypeStructDefinition);
+        else if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition))
+            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
+                                                                        kCEESourceSymbolTypeInterfaceDefinition);
+        is_class_member = TRUE;
     }
+    
+    if (method)
+        access_level = csharp_access_level_search(fregment,
+                                                  SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                  TOKEN_PREV(method));
+    
+    if (!access_level) {
+        if (grandfather_fregment) {
+            if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition))
+                access_level = "private";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+    
+    
+    return_str = csharp_type_descriptor_from_token_slice(fregment,
+                                                         SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                         TOKEN_PREV(method));
+    /**
+     * Constructor and Destructor doesn't has return type declaraton,
+     * use its parent symbol type as return type
+     */
+   if (!return_str) {
+       if (parent_symbols) {
+           parent_symbol = cee_list_nth_data(parent_symbols, 0);
+           return_str = cee_strdup(parent_symbol->name);
+       }
+   }
+    
     
     cee_strconcat0(&descriptor, "{", NULL);
     cee_strconcat0(&descriptor, "type:", type, ",", NULL);
     cee_strconcat0(&descriptor, "return_type:", return_str, ",", NULL);
     cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
+    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
     cee_strconcat0(&descriptor, "parameters:[", NULL);
     p = parameters;
     while (p) {
@@ -2849,6 +2939,47 @@ static cee_char* csharp_method_protos_descriptor_create(CEESourceFregment* fregm
         free(return_str);
     
     return descriptor;
+}
+
+static const cee_char* csharp_access_level_search(CEESourceFregment* fregment,
+                                                  CEEList* begin,
+                                                  CEEList* end)
+{
+    if (!begin || !end)
+        return NULL;
+    
+    CEEList* p = begin;
+    CEEList* q = NULL;
+    while (p) {
+        if (cee_token_is_identifier(p, kCEETokenID_PUBLIC)) {
+            return "public";
+        }
+        else if (cee_token_is_identifier(p, kCEETokenID_INTERNAL)) {
+            return "internal";
+        }
+        else if (cee_token_is_identifier(p, kCEETokenID_PROTECTED)) {
+            q = cee_token_not_whitespace_newline_after(p);
+            if (q && cee_token_is_identifier(q, kCEETokenID_INTERNAL))
+                return "protected internal";
+            else
+                return "protected";
+            
+        }
+        else if (cee_token_is_identifier(p, kCEETokenID_PRIVATE)) {
+            q = cee_token_not_whitespace_newline_after(p);
+            if (q && cee_token_is_identifier(q, kCEETokenID_PROTECTED))
+                return "private protected";
+            else
+                return "private";
+        }
+        
+        if (p == end)
+            break;
+        
+        p = TOKEN_NEXT(p);
+    }
+    
+    return NULL;
 }
 
 static CEEList* skip_csharp_declaration_interval(CEEList* p)
@@ -2876,9 +3007,9 @@ static void csharp_operator_translate_table_init(void)
      *                          [                       ]                       declaration_specifier   builtin_type    builtin_reference   identifier      operator    overlaodable    .                       ?                   <                   (               )                   {               ;               =>
      *  Init                    Init                    Init                    DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      Operator    Error           Error                   Error               Error               Error           Error               Error           Error           Error
      *  DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      Operator    Error           Error                   Error               Error               Error           Error               Error           Error           Error
-     *  BuiltinType             BuiltinType             BuiltinType             DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      Operator    Error           Error                   BuiltinType         Error               Error           Error               Error           Error           Error
-     *  BuiltinReference        BuiltinReference        BuiltinReference        DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      Operator    Error           Error                   BuiltinReference    Error               Error           Error               Error           Error           Error
-     *  Identifier              Identifier              Identifier              DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      Operator    Error           IdentifierSeparator     Identifier          *TypeParameters     ParameterList   Error               Error           Error           Error
+     *  BuiltinType             BuiltinType             BuiltinType             Error                   BuiltinType     BuiltinReference    Identifier      Operator    Error           Error                   BuiltinType         Error               Error           Error               Error           Error           Error
+     *  BuiltinReference        BuiltinReference        BuiltinReference        Error                   BuiltinType     BuiltinReference    Identifier      Operator    Error           Error                   BuiltinReference    Error               Error           Error               Error           Error           Error
+     *  Identifier              Identifier              Identifier              Error                   BuiltinType     BuiltinReference    Identifier      Operator    Error           IdentifierSeparator     Identifier          *TypeParameters     ParameterList   Error               Error           Error           Error
      *  IdentifierSeparator     Error                   Error                   Error                   Error           Error               Identifier      Error       Error           Error                   Error               Error               Error           Error               Error           Error           Error
      *  Operator                Error                   Error                   Error                   Error           Error               Identifier      Error       Overlaodable    Error                   Error               Error               Error           Error               Error           Error           Error
      *  Overlaodable            Error                   Error                   Error                   Error           Error               Error           Error       Overlaodable    Error                   Error               Error               ParameterList   Error               Error           Error           Error
@@ -2886,13 +3017,13 @@ static void csharp_operator_translate_table_init(void)
      *  ParameterListEnd        Error                   Error                   Error                   Error           Error               Error           Error       Error           Error                   Error               Error               Error           Error               Definition      Declaration     Definition
      */
     TRANSLATE_STATE_INI(csharp_operator_translate_table, kCSharpOperatorTranslateStateMax                  , kCSharpOperatorTranslateStateError                                                     );
+    TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateInit                 , '['                                , kCSharpOperatorTranslateStateInit                 );
+    TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateInit                 , ']'                                , kCSharpOperatorTranslateStateInit                 );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateInit                 , token_id_is_declaration_specifier  , kCSharpOperatorTranslateStateDeclarationSpecifier );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateInit                 , token_id_is_builtin_type           , kCSharpOperatorTranslateStateBuiltinType          );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateInit                 , token_id_is_builtin_reference      , kCSharpOperatorTranslateStateBuiltinReference     );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateInit                 , kCEETokenID_IDENTIFIER             , kCSharpOperatorTranslateStateIdentifier           );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateInit                 , kCEETokenID_OPERATOR               , kCSharpOperatorTranslateStateOperator             );
-    TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateInit                 , '['                                , kCSharpOperatorTranslateStateInit                 );
-    TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateInit                 , ']'                                , kCSharpOperatorTranslateStateInit                 );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateDeclarationSpecifier , token_id_is_declaration_specifier  , kCSharpOperatorTranslateStateDeclarationSpecifier );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateDeclarationSpecifier , token_id_is_builtin_type           , kCSharpOperatorTranslateStateBuiltinType          );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateDeclarationSpecifier , token_id_is_builtin_reference      , kCSharpOperatorTranslateStateBuiltinReference     );
@@ -2900,7 +3031,6 @@ static void csharp_operator_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateDeclarationSpecifier , kCEETokenID_OPERATOR               , kCSharpOperatorTranslateStateOperator             );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateDeclarationSpecifier , '['                                , kCSharpOperatorTranslateStateDeclarationSpecifier );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateDeclarationSpecifier , ']'                                , kCSharpOperatorTranslateStateDeclarationSpecifier );
-    TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinType          , token_id_is_declaration_specifier  , kCSharpOperatorTranslateStateDeclarationSpecifier );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinType          , token_id_is_builtin_type           , kCSharpOperatorTranslateStateBuiltinType          );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinType          , token_id_is_builtin_reference      , kCSharpOperatorTranslateStateBuiltinReference     );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinType          , kCEETokenID_IDENTIFIER             , kCSharpOperatorTranslateStateIdentifier           );
@@ -2908,7 +3038,6 @@ static void csharp_operator_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinType          , '['                                , kCSharpOperatorTranslateStateBuiltinType          );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinType          , ']'                                , kCSharpOperatorTranslateStateBuiltinType          );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinType          , '?'                                , kCSharpOperatorTranslateStateBuiltinType          );
-    TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinReference     , token_id_is_declaration_specifier  , kCSharpOperatorTranslateStateDeclarationSpecifier );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinReference     , token_id_is_builtin_type           , kCSharpOperatorTranslateStateBuiltinType          );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinReference     , token_id_is_builtin_reference      , kCSharpOperatorTranslateStateBuiltinReference     );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinReference     , kCEETokenID_IDENTIFIER             , kCSharpOperatorTranslateStateIdentifier           );
@@ -2916,7 +3045,6 @@ static void csharp_operator_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinReference     , '['                                , kCSharpOperatorTranslateStateBuiltinReference     );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinReference     , ']'                                , kCSharpOperatorTranslateStateBuiltinReference     );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateBuiltinReference     , '?'                                , kCSharpOperatorTranslateStateBuiltinReference     );
-    TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateIdentifier           , token_id_is_declaration_specifier  , kCSharpOperatorTranslateStateDeclarationSpecifier );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateIdentifier           , token_id_is_builtin_type           , kCSharpOperatorTranslateStateBuiltinType          );
     TRANSLATE_FUNCS_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateIdentifier           , token_id_is_builtin_reference      , kCSharpOperatorTranslateStateBuiltinReference     );
     TRANSLATE_STATE_SET(csharp_operator_translate_table, kCSharpOperatorTranslateStateIdentifier           , kCEETokenID_IDENTIFIER             , kCSharpOperatorTranslateStateIdentifier           );
@@ -2941,12 +3069,14 @@ static void csharp_operator_translate_table_init(void)
 static cee_boolean csharp_operator_parse(CEESourceFregment* fregment)
 {
     cee_boolean ret = FALSE;
+    cee_boolean is_class_member = FALSE;
     CSharpOperatorTranslateState current = kCSharpOperatorTranslateStateInit;
     CSharpOperatorTranslateState prev = kCSharpOperatorTranslateStateInit;
     CEEToken* token = NULL;
     CEEList* p = NULL;
     CEEList* q = NULL;
     CEESourceFregment* child = NULL;
+    CEESourceFregment* grandfather_fregment = NULL;
         
     CEEList* operator = NULL;
     CEEList* parameter_list = NULL;
@@ -2954,6 +3084,14 @@ static cee_boolean csharp_operator_parse(CEESourceFregment* fregment)
     CEESourceSymbol* operator_overload = NULL;
     CEESourceSymbolType symbol_type = kCEESourceSymbolTypeUnknow;
     cee_char* type = "function_definition";
+        
+    grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
+    if (grandfather_fregment) {
+        if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
+            cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition) ||
+            cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition))
+            is_class_member = TRUE;
+    }
     
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
@@ -2984,14 +3122,19 @@ static cee_boolean csharp_operator_parse(CEESourceFregment* fregment)
                 q = cee_token_not_whitespace_newline_before(parameter_list);
             }
         }
-        else if (current == kCSharpOperatorTranslateStateDefinition ||
-                 current == kCSharpOperatorTranslateStateDeclaration) {
-            
-            if (current == kCSharpOperatorTranslateStateDefinition)
-                symbol_type = kCEESourceSymbolTypeOperatorOverloadDefinition;
-            else if (current == kCSharpOperatorTranslateStateDeclaration)
+        else if (current == kCSharpOperatorTranslateStateDeclaration) {
+            if (!is_class_member) {
+                current = kCSharpOperatorTranslateStateError;
+                ret = FALSE;
+            }
+            else {
                 symbol_type = kCEESourceSymbolTypeOperatorOverloadDeclaration;
-            
+                ret = TRUE;
+            }
+            break;
+        }
+        else if (current == kCSharpOperatorTranslateStateDefinition) {
+            symbol_type = kCEESourceSymbolTypeOperatorOverloadDefinition;
             ret = TRUE;
             break;
         }
@@ -3003,7 +3146,9 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (current == kCSharpOperatorTranslateStateError || !operator || !parameter_list)
+    if ((current != kCSharpOperatorTranslateStateDeclaration &&
+         current != kCSharpOperatorTranslateStateDefinition) ||
+        !operator || !parameter_list)
         goto exit;
     
     operator_overload = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
@@ -3115,8 +3260,8 @@ static void csharp_property_declaration_translate_table_init(void)
      *                              [                       ]                       declaration_specifier   builtin_type    builtin_reference   identifier      ?                   .                   <               {       =>
      *  Init                        Init                    Init                    DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      Error               Error               Error           Error   Error
      *  DeclarationSpecifier        DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      Error               Error               Error           Error   Error
-     *  BuiltinType                 BuiltinType             BuiltinType             DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      BuiltinType         Error               Error           Error   Error
-     *  BuiltinReference            BuiltinReference        BuiltinReference        DeclarationSpecifier    BuiltinType     BuiltinReference    Identifier      BuiltinReference    Error               Error           Error   Error
+     *  BuiltinType                 BuiltinType             BuiltinType             Error                   BuiltinType     BuiltinReference    Identifier      BuiltinType         Error               Error           Error   Error
+     *  BuiltinReference            BuiltinReference        BuiltinReference        Error                   BuiltinType     BuiltinReference    Identifier      BuiltinReference    Error               Error           Error   Error
      *  Identifier                  Identifier              Identifier              Error                   Error           Error               Identifier      Identifier          IdentifierSeparator *TypeParameters Commit  Commit
      *
      *
@@ -3138,14 +3283,12 @@ static void csharp_property_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinType          , '['                                   , kCSharpPropertyDeclarationTranslateStateBuiltinType             );
     TRANSLATE_STATE_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinType          , ']'                                   , kCSharpPropertyDeclarationTranslateStateBuiltinType             );
     TRANSLATE_STATE_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinType          , '?'                                   , kCSharpPropertyDeclarationTranslateStateBuiltinType             );
-    TRANSLATE_FUNCS_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinType          , token_id_is_declaration_specifier     , kCSharpPropertyDeclarationTranslateStateDeclarationSpecifier    );
     TRANSLATE_FUNCS_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinType          , token_id_is_builtin_type              , kCSharpPropertyDeclarationTranslateStateBuiltinType             );
     TRANSLATE_FUNCS_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinType          , token_id_is_builtin_reference         , kCSharpPropertyDeclarationTranslateStateBuiltinReference        );
     TRANSLATE_STATE_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinType          , kCEETokenID_IDENTIFIER                , kCSharpPropertyDeclarationTranslateStateIdentifier              );
     TRANSLATE_STATE_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinReference     , '['                                   , kCSharpPropertyDeclarationTranslateStateBuiltinReference        );
     TRANSLATE_STATE_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinReference     , ']'                                   , kCSharpPropertyDeclarationTranslateStateBuiltinReference        );
     TRANSLATE_STATE_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinReference     , '?'                                   , kCSharpPropertyDeclarationTranslateStateBuiltinReference        );
-    TRANSLATE_FUNCS_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinReference     , token_id_is_declaration_specifier     , kCSharpPropertyDeclarationTranslateStateDeclarationSpecifier    );
     TRANSLATE_FUNCS_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinReference     , token_id_is_builtin_type              , kCSharpPropertyDeclarationTranslateStateBuiltinType             );
     TRANSLATE_FUNCS_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinReference     , token_id_is_builtin_reference         , kCSharpPropertyDeclarationTranslateStateBuiltinReference        );
     TRANSLATE_STATE_SET(csharp_property_declaration_translate_table, kCSharpPropertyDeclarationTranslateStateBuiltinReference     , kCEETokenID_IDENTIFIER                , kCSharpPropertyDeclarationTranslateStateIdentifier              );
@@ -3206,7 +3349,7 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (current == kCSharpPropertyDeclarationTranslateStateError || !identifier)
+    if (current != kCSharpPropertyDeclarationTranslateStateCommit || !identifier)
         goto exit;
     
     declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
@@ -3223,12 +3366,13 @@ next_token:
                                                            TOKEN_PREV(identifier));
         declaration->proto = csharp_declaration_proto_descriptor_create(fregment,
                                                                         declaration,
+                                                                        identifier,
                                                                         type_str);
         fregment->symbols = cee_list_prepend(fregment->symbols, declaration);
     }
     
 #ifdef DEBUG_PROPERTY_DECLARATION
-    cee_source_symbol_print(definition);
+    cee_source_symbol_print(declaration);
 #endif
     
 exit:
@@ -3246,8 +3390,8 @@ static void csharp_event_translate_table_init(void)
      *  Init                    Init                    Init                    DeclarationSpecifier    Event   Error           Error               Error           Error               Error               Error                   Error           Error   Error   Error
      *  DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    Event   Error           Error               Error           Error               Error               Error                   Error           Error   Error   Error
      *  Event                   Event                   Event                   Error                   Error   BuiltinType     BuiltinReference    CustomType      Error               Error               Error                   Error           Error   Error   Error
-     *  BuiltinType             BuiltinType             BuiltinType             DeclarationSpecifier    Error   BuiltinType     BuiltinReference    Identifier      Error               BuiltinType         Error                   Error           Error   Error   Error
-     *  BuiltinReference        BuiltinReference        BuiltinReference        DeclarationSpecifier    Error   BuiltinType     BuiltinReference    Identifier      Error               BuiltinReference    Error                   Error           Error   Error   Error
+     *  BuiltinType             BuiltinType             BuiltinType             Error                   Error   BuiltinType     BuiltinReference    Identifier      Error               BuiltinType         Error                   Error           Error   Error   Error
+     *  BuiltinReference        BuiltinReference        BuiltinReference        Error                   Error   BuiltinType     BuiltinReference    Identifier      Error               BuiltinReference    Error                   Error           Error   Error   Error
      *  CustomType              CustomType              CustomType              Error                   Error   Error           Error               Identifier      Error               CustomType          CustomTypeSeparator     *TypeParameters Error   Error   Error
      *  Identifier              Identifier              Identifier              Error                   Error   Error           Error               Identifier      Commit              Error               Error                   Error           Commit  Commit  Commit
      *  CustomTypeSeparator     Error                   Error                   Error                   Error   Error           Error               CustomType      Error               Error               Error                   Error           Error   Error   Error
@@ -3272,14 +3416,12 @@ static void csharp_event_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , '['                               , kCSharpEventTranslateStateBuiltinType             );
     TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , ']'                               , kCSharpEventTranslateStateBuiltinType             );
     TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , '?'                               , kCSharpEventTranslateStateBuiltinType             );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , token_id_is_declaration_specifier , kCSharpEventTranslateStateDeclarationSpecifier    );
     TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , token_id_is_builtin_type          , kCSharpEventTranslateStateBuiltinType             );
     TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , token_id_is_builtin_reference     , kCSharpEventTranslateStateBuiltinReference        );
     TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
     TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , '['                               , kCSharpEventTranslateStateBuiltinReference        );
     TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , ']'                               , kCSharpEventTranslateStateBuiltinReference        );
     TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , '?'                               , kCSharpEventTranslateStateBuiltinReference        );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , token_id_is_declaration_specifier , kCSharpEventTranslateStateDeclarationSpecifier    );
     TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , token_id_is_builtin_type          , kCSharpEventTranslateStateBuiltinType             );
     TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , token_id_is_builtin_reference     , kCSharpEventTranslateStateBuiltinReference        );
     TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
@@ -3311,6 +3453,7 @@ static cee_boolean csharp_event_parse(CEESourceFregment* fregment)
     CEEToken* token = NULL;
     CEEList* p = NULL;
     CEEList* identifier = NULL;
+    CEEList* first_identifier = NULL;
     cee_char* type = NULL;
     CEEList* declarations = NULL;
     CEESourceSymbol* declaration = NULL;
@@ -3354,6 +3497,8 @@ static cee_boolean csharp_event_parse(CEESourceFregment* fregment)
                                                                         identifier,
                                                                         kCEESourceSymbolTypeVariableDeclaration,
                                                                         "csharp");
+                if (!first_identifier)
+                    first_identifier = identifier;
             }
             
             if (declaration) {
@@ -3362,6 +3507,7 @@ static cee_boolean csharp_event_parse(CEESourceFregment* fregment)
                                            kCEETokenStateSymbolOccupied);
                 declaration->proto = csharp_declaration_proto_descriptor_create(fregment,
                                                                                 declaration,
+                                                                                first_identifier,
                                                                                 type);
                 declarations = cee_list_prepend(declarations, declaration);
             }
@@ -3405,8 +3551,8 @@ static void csharp_indexer_declaration_translate_table_init(void)
      *                          [                       ]                       declaration_specifier   builtin_type    builtin_reference   identifier      ?                   <               .                       this    {       =>
      *  Init                    Init                    Init                    DeclarationSpecifier    BuiltinType     BuiltinReference    Type            Error               Error           Error                   Error   Error   Error
      *  DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    BuiltinType     BuiltinReference    Type            Error               Error           Error                   Error   Error   Error
-     *  BuiltinType             BuiltinType             BuiltinType             DeclarationSpecifier    BuiltinType     BuiltinReference    Type            BuiltinType         Error           Error                   This    Error   Error
-     *  BuiltinReference        BuiltinReference        BuiltinReference        DeclarationSpecifier    BuiltinType     BuiltinReference    Type            BuiltinReference    Error           Error                   This    Error   Error
+     *  BuiltinType             BuiltinType             BuiltinType             Error                   BuiltinType     BuiltinReference    Type            BuiltinType         Error           Error                   This    Error   Error
+     *  BuiltinReference        BuiltinReference        BuiltinReference        Error                   BuiltinType     BuiltinReference    Type            BuiltinReference    Error           Error                   This    Error   Error
      *  Type                    Type                    Type                    Error                   Error           Error               InterfaceType   Type                *TypeParameters TypeSeparator           This    Error   Error
      *  TypeSeparator           Error                   Error                   Error                   Error           Error               Type            Error               Error           Error                   Error   Error   Error
      *  InterfaceType           Error                   Error                   Error                   Error           Error               Error           Error               *TypeParameters InterfaceTypeSeparator  Error   Error   Error
@@ -3434,7 +3580,6 @@ static void csharp_indexer_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , '['                               , kCSharpIndexerDeclarationTranslateStateBuiltinType            );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , ']'                               , kCSharpIndexerDeclarationTranslateStateBuiltinType            );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , '?'                               , kCSharpIndexerDeclarationTranslateStateBuiltinType            );
-    TRANSLATE_FUNCS_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , token_id_is_declaration_specifier , kCSharpIndexerDeclarationTranslateStateDeclarationSpecifier   );
     TRANSLATE_FUNCS_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , token_id_is_builtin_type          , kCSharpIndexerDeclarationTranslateStateBuiltinType            );
     TRANSLATE_FUNCS_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , token_id_is_builtin_reference     , kCSharpIndexerDeclarationTranslateStateBuiltinReference       );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , kCEETokenID_IDENTIFIER            , kCSharpIndexerDeclarationTranslateStateType                   );
@@ -3442,7 +3587,6 @@ static void csharp_indexer_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , '['                               , kCSharpIndexerDeclarationTranslateStateBuiltinReference       );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , ']'                               , kCSharpIndexerDeclarationTranslateStateBuiltinReference       );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , '?'                               , kCSharpIndexerDeclarationTranslateStateBuiltinReference       );
-    TRANSLATE_FUNCS_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , token_id_is_declaration_specifier , kCSharpIndexerDeclarationTranslateStateDeclarationSpecifier   );
     TRANSLATE_FUNCS_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , token_id_is_builtin_type          , kCSharpIndexerDeclarationTranslateStateBuiltinType            );
     TRANSLATE_FUNCS_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , token_id_is_builtin_reference     , kCSharpIndexerDeclarationTranslateStateBuiltinReference       );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , kCEETokenID_IDENTIFIER            , kCSharpIndexerDeclarationTranslateStateType                   );
@@ -3547,6 +3691,7 @@ static cee_boolean csharp_indexer_declaration_parse(CEESourceFregment* fregment)
                 
                 declaration->proto = csharp_declaration_proto_descriptor_create(fregment,
                                                                                 declaration,
+                                                                                this,
                                                                                 type);
                 declarations = cee_list_prepend(declarations, declaration);
             }
@@ -3715,6 +3860,15 @@ static cee_boolean csharp_using_directive_parse(CEESourceFregment* fregment)
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
+        if (token->identifier == kCEETokenID_USING)
+            break;
+        p = TOKEN_NEXT(p);
+    }
+    if (!p)
+        return FALSE;
+    
+    while (p) {
+        token = p->data;
         
         if (cee_token_id_is_newline(token->identifier) ||
             cee_token_id_is_whitespace(token->identifier))
@@ -3750,7 +3904,7 @@ next_token:
     definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
                                                            fregment->subject_ref,
                                                            q,
-                                                           p,
+                                                           TOKEN_PREV(p),
                                                            kCEESourceSymbolTypeUsingDeclaration,
                                                            "csharp");
     if (definition) {
@@ -3770,6 +3924,7 @@ next_token:
                 fregment->symbols = cee_list_prepend(fregment->symbols, definition);
                 definition->proto = csharp_declaration_proto_descriptor_create(fregment,
                                                                                definition,
+                                                                               NULL,
                                                                                NULL);
             }
         }
@@ -3784,5 +3939,183 @@ exit:
     if (identifier)
         cee_list_free(identifier);
     
+    return ret;
+}
+
+static void csharp_delegate_declaration_translate_table_init(void)
+{
+    /**
+     *                              [                       ]                       declaration_specifier   builtin_type    builtin_reference   ?                   delegate    identifier                  .                       <                   ,           (               )                   where               :               struct          new             ,           ;
+     *  Init                        Init                    Init                    DeclarationSpecifier    Error           Error               Error               Delegate    Error                       Error                   Error               Error       Error           Error               Error               Error           Error           Error           Error       Error
+     *  DeclarationSpecifier        DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    Error           Error               Error               Delegate    Error                       Error                   Error               Error       Error           Error               Error               Error           Error           Error           Error       Error
+     *  Delegate                    Delegate                Delegate                Error                   BuiltinType     BuiltinReference    Error               Error       Identifier                  Error                   Error               Error       Error           Error               Error               Error           Error           Error           Error       Error
+     *  BuiltinType                 BuiltinType             BuiltinType             Error                   BuiltinType     BuiltinReference    BuiltinType         Error       Identifier                  Error                   Error               Error       Error           Error               Error               Error           Error           Error           Error       Error
+     *  BuiltinReference            BuiltinReference        BuiltinReference        Error                   BuiltinType     BuiltinReference    BuiltinReference    Error       Identifier                  Error                   Error               Error       Error           Error               Error               Error           Error           Error           Error       Error
+     *  Identifier                  Identifier              Identifier              Error                   BuiltinType     BuiltinReference    Identifier          Error       Identifier                  IdentifierSeparator     *TypeParameters     Comma       EarameterList   Error               Error               Error           Error           Error           Error       Error
+     *  IdentifierSeparator         Error                   Error                   Error                   Error           Error               Error               Error       Identifier                  Error                   Error               Error       Error           Error               Error               Error           Error           Error           Error       Error
+     *  ParameterList               Error                   Error                   Error                   Error           Error               Error               Error       Error                       Error                   Error               Error       Error           ParameterListEnd    Error               Error           Error           Error           Error       Error
+     *  ParameterListEnd            Error                   Error                   Error                   Error           Error               Error               Error       Error                       Error                   Error               Error       Error           Error               ConstraintClause    Error           Error           Error           Error       Commit
+     *  Comma                       Error                   Error                   Error                   Error           Error               Error               Error       Identifier                  Error                   Error               Error       Error           Error               Error               Error           Error           Error           Error       Error
+     *  ConstraintClause            Error                   Error                   Error                   Error           Error               Error               Error       ConstraintsTypeParameter    Error                   Error               Error       Error           Error               Error               Error           Error           Error           Error       Error
+     *  ConstraintsTypeParameter    Error                   Error                   Error                   Error           Error               Error               Error       Error                       Error                   *TypeParameters     Error       Error           Error               Error               Constraints     Error           Error           Error       Error
+     *  Constraints                 Error                   Error                   Error                   Constraint      Constraint          Error               Error       Constraint                  Error                   Error               Error       Error           Error               Error               Error           Constraint      Constructor     Error       Error
+     *  Constraint                  Error                   Error                   Error                   Constraint      Constraint          Error               Error       Constraint                  Constraint              *TypeParameters     Constraint  Error           Error               ConstraintClause    Error           Constraint      Constructor     Constraint  Commit
+     *  Constructor                 Error                   Error                   Error                   Error           Error               Error               Error       Error                       Error                   Error               Error       EonstructorList Error               Error               Error           Error           Error           Error       Error
+     *  ConstructorList             Error                   Error                   Error                   Error           Error               Error               Error       Error                       Error                   Error               Error       Error           Constraint          Error               Error           Error           Error           Error       Error
+     *
+     *  TypeParameters: save 'current state', skip TypeParameterList then restore 'current state'
+     */
+    TRANSLATE_STATE_INI(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateMax                        , kCSharpDelegateDeclarationTranslateStateError                                                             );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateInit                       , '['                                   , kCSharpDelegateDeclarationTranslateStateInit                      );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateInit                       , ']'                                   , kCSharpDelegateDeclarationTranslateStateInit                      );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateInit                       , token_id_is_declaration_specifier     , kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier      );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateInit                       , kCEETokenID_DELEGATE                  , kCSharpDelegateDeclarationTranslateStateDelegate                  );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier       , '['                                   , kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier      );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier       , ']'                                   , kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier      );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier       , token_id_is_declaration_specifier     , kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier      );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier       , token_id_is_builtin_type              , kCSharpDelegateDeclarationTranslateStateBuiltinType               );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier       , token_id_is_builtin_reference         , kCSharpDelegateDeclarationTranslateStateBuiltinReference          );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier       , kCEETokenID_DELEGATE                  , kCSharpDelegateDeclarationTranslateStateDelegate                  );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDeclarationSpecifier       , kCEETokenID_IDENTIFIER                , kCSharpDelegateDeclarationTranslateStateIdentifier                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDelegate                   , '['                                   , kCSharpDelegateDeclarationTranslateStateDelegate                  );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDelegate                   , ']'                                   , kCSharpDelegateDeclarationTranslateStateDelegate                  );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDelegate                   , token_id_is_builtin_type              , kCSharpDelegateDeclarationTranslateStateBuiltinType               );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDelegate                   , token_id_is_builtin_reference         , kCSharpDelegateDeclarationTranslateStateBuiltinReference          );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateDelegate                   , kCEETokenID_IDENTIFIER                , kCSharpDelegateDeclarationTranslateStateIdentifier                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinType                , '['                                   , kCSharpDelegateDeclarationTranslateStateBuiltinType               );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinType                , ']'                                   , kCSharpDelegateDeclarationTranslateStateBuiltinType               );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinType                , token_id_is_builtin_type              , kCSharpDelegateDeclarationTranslateStateBuiltinType               );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinType                , token_id_is_builtin_reference         , kCSharpDelegateDeclarationTranslateStateBuiltinReference          );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinType                , '?'                                   , kCSharpDelegateDeclarationTranslateStateBuiltinType               );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinType                , kCEETokenID_IDENTIFIER                , kCSharpDelegateDeclarationTranslateStateIdentifier                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinReference           , '['                                   , kCSharpDelegateDeclarationTranslateStateBuiltinReference          );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinReference           , ']'                                   , kCSharpDelegateDeclarationTranslateStateBuiltinReference          );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinReference           , token_id_is_builtin_type              , kCSharpDelegateDeclarationTranslateStateBuiltinType               );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinReference           , token_id_is_builtin_reference         , kCSharpDelegateDeclarationTranslateStateBuiltinReference          );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinReference           , '?'                                   , kCSharpDelegateDeclarationTranslateStateBuiltinReference          );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateBuiltinReference           , kCEETokenID_IDENTIFIER                , kCSharpDelegateDeclarationTranslateStateIdentifier                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifier                 , '['                                   , kCSharpDelegateDeclarationTranslateStateIdentifier                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifier                 , ']'                                   , kCSharpDelegateDeclarationTranslateStateIdentifier                );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifier                 , token_id_is_builtin_type              , kCSharpDelegateDeclarationTranslateStateBuiltinType               );
+    TRANSLATE_FUNCS_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifier                 , token_id_is_builtin_reference         , kCSharpDelegateDeclarationTranslateStateBuiltinReference          );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifier                 , '?'                                   , kCSharpDelegateDeclarationTranslateStateIdentifier                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifier                 , kCEETokenID_IDENTIFIER                , kCSharpDelegateDeclarationTranslateStateIdentifier                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifier                 , '.'                                   , kCSharpDelegateDeclarationTranslateStateIdentifierSeparator       );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifier                 , ','                                   , kCSharpDelegateDeclarationTranslateStateComma                     );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifier                 , '<'                                   , kCSharpDelegateDeclarationTranslateStateTypeParameters            );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifier                 , '('                                   , kCSharpDelegateDeclarationTranslateStateParameterList             );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateIdentifierSeparator        , kCEETokenID_IDENTIFIER                , kCSharpDelegateDeclarationTranslateStateIdentifier                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateParameterList              , ')'                                   , kCSharpDelegateDeclarationTranslateStateParameterListEnd          );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateParameterListEnd           , kCEETokenID_WHERE                     , kCSharpDelegateDeclarationTranslateStateConstraintClause          );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateParameterListEnd           , ';'                                   , kCSharpDelegateDeclarationTranslateStateCommit                    );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateComma                      , kCEETokenID_IDENTIFIER                , kCSharpDelegateDeclarationTranslateStateIdentifier                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraintClause           , kCEETokenID_IDENTIFIER                , kCSharpDelegateDeclarationTranslateStateConstraintsTypeParameter  );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraintsTypeParameter   , '<'                                   , kCSharpDelegateDeclarationTranslateStateTypeParameters            );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraintsTypeParameter   , ':'                                   , kCSharpDelegateDeclarationTranslateStateConstraints               );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraints                , kCEETokenID_CLASS                     , kCSharpDelegateDeclarationTranslateStateConstraint                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraints                , kCEETokenID_IDENTIFIER                , kCSharpDelegateDeclarationTranslateStateConstraint                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraints                , kCEETokenID_STRUCT                    , kCSharpDelegateDeclarationTranslateStateConstraint                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraints                , kCEETokenID_NEW                       , kCSharpDelegateDeclarationTranslateStateConstructor               );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraint                 , kCEETokenID_CLASS                     , kCSharpDelegateDeclarationTranslateStateConstraint                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraint                 , kCEETokenID_IDENTIFIER                , kCSharpDelegateDeclarationTranslateStateConstraint                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraint                 , kCEETokenID_STRUCT                    , kCSharpDelegateDeclarationTranslateStateConstraint                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraint                 , kCEETokenID_NEW                       , kCSharpDelegateDeclarationTranslateStateConstructor               );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraint                 , kCEETokenID_WHERE                     , kCSharpDelegateDeclarationTranslateStateConstraintClause          );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraint                 , '<'                                   , kCSharpDelegateDeclarationTranslateStateTypeParameters            );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraint                 , ','                                   , kCSharpDelegateDeclarationTranslateStateConstraint                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstructor                , '('                                   , kCSharpDelegateDeclarationTranslateStateConstructorList           );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstructorList            , ')'                                   , kCSharpDelegateDeclarationTranslateStateConstraint                );
+    TRANSLATE_STATE_SET(csharp_delegate_declaration_translate_table, kCSharpDelegateDeclarationTranslateStateConstraint                 , ';'                                   , kCSharpDelegateDeclarationTranslateStateCommit                    );
+}
+
+static cee_boolean csharp_delegate_declaration_parse(CEESourceFregment* fregment)
+{
+    cee_boolean ret = FALSE;
+    CSharpDelegateDeclarationTranslateState current = kCSharpDelegateDeclarationTranslateStateInit;
+    CSharpDelegateDeclarationTranslateState prev = kCSharpDelegateDeclarationTranslateStateInit;
+    CEEToken* token = NULL;
+    CEEList* p = NULL;
+    CEESourceFregment* child = NULL;
+    CEEList* identifier = NULL;
+    CEEList* parameter_list = NULL;
+            
+    CEESourceSymbol* delegate = NULL;
+    
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    while (p) {
+        token = p->data;
+        
+        if (cee_token_id_is_newline(token->identifier) ||
+            cee_token_id_is_whitespace(token->identifier))
+            goto next_token;
+                
+        prev = current;
+        current = csharp_delegate_declaration_translate_table[current][token->identifier];
+        
+        if (current == kCSharpDelegateDeclarationTranslateStateTypeParameters) {
+            p = skip_type_parameter_list(p, FALSE);
+            if (!p)
+                break;
+            current = prev;
+        }
+        else if (current == kCSharpDelegateDeclarationTranslateStateIdentifier) {
+            if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER)) {
+                if (!parameter_list)
+                    identifier = p;
+            }
+        }
+        else if (current == kCSharpDelegateDeclarationTranslateStateParameterList) {
+            if (!parameter_list)
+                parameter_list = p;
+        }
+        else if (current == kCSharpDelegateDeclarationTranslateStateCommit) {
+            ret = TRUE;
+            break;
+        }
+        else if (current == kCSharpObjectTypeDefinitionTranslateStateError) {
+            break;
+        }
+
+next_token:
+        p = TOKEN_NEXT(p);
+    }
+    
+    if (current != kCSharpDelegateDeclarationTranslateStateCommit ||
+        !identifier || !parameter_list)
+        goto exit;
+    
+    delegate = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
+                                                         fregment->subject_ref,
+                                                         identifier,
+                                                         identifier,
+                                                         kCEESourceSymbolTypeFunctionDeclaration,
+                                                         "csharp");
+    if (delegate) {
+        cee_token_slice_state_mark(identifier,
+                                   identifier,
+                                   kCEETokenStateSymbolOccupied);
+        
+        cee_source_fregment_type_set_exclusive(fregment,
+                                               kCEESourceFregmentTypeFunctionDeclaration);
+        
+        child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
+        if (child) {
+            child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
+            csharp_method_parameters_parse(child);
+        }
+        
+        delegate->proto = csharp_method_protos_descriptor_create(fregment,
+                                                                 delegate,
+                                                                 child->symbols,
+                                                                 identifier,
+                                                                 "function_declaration");
+        fregment->symbols = cee_list_prepend(fregment->symbols, delegate);
+    }
+            
+#ifdef DEBUG_DELEGATE
+    cee_source_symbol_print(delegate);
+#endif
+    
+exit:
     return ret;
 }

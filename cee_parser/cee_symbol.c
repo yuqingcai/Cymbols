@@ -143,7 +143,7 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* filep
     symbol->name = cee_string_from_token_slice(subject,
                                                begin,
                                                end,
-                                               kCEETokenStringOptionDefault);
+                                               kCEETokenStringOptionCompact);
     symbol->locations = cee_ranges_string_from_token_slice(begin,
                                                            end,
                                                            kCEERangeListTypeContinue);
@@ -172,7 +172,7 @@ CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* filepath,
     symbol->language = cee_strdup(language);
     symbol->name = cee_string_from_tokens(subject,
                                           TOKEN_FIRST(tokens),
-                                          kCEETokenStringOptionDefault);
+                                          kCEETokenStringOptionCompact);
     symbol->locations = cee_ranges_string_from_tokens(TOKEN_FIRST(tokens),
                                                       kCEERangeListTypeSeparate);
     symbol->fregment_range = cee_ranges_string_from_tokens(TOKEN_FIRST(tokens), 

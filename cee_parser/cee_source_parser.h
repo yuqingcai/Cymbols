@@ -30,6 +30,7 @@ typedef enum _CEESourceFregmentType {
     kCEESourceFregmentTypeFunctionDeclaration           ,
     kCEESourceFregmentTypeNamespaceDefinition           ,
     kCEESourceFregmentTypeClassDefinition               ,
+    kCEESourceFregmentTypeStructDefinition              ,
     kCEESourceFregmentTypeUnionDefinition               ,
     kCEESourceFregmentTypeEnumDefinition                ,
     kCEESourceFregmentTypeDeclaration                   ,

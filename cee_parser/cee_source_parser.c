@@ -690,6 +690,7 @@ static void source_fregment_symbols_dump(CEESourceFregment* fregment,
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeTemplateDeclaration) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeNamespaceDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeClassDefinition) ||
+                    cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeStructDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeEnumDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeUnionDefinition) ||
                     cee_source_fregment_type_is(grandson, kCEESourceFregmentTypeInterfaceDeclaration) ||
@@ -1784,6 +1785,8 @@ static void source_fregment_symbols_parent_parse(CEESourceFregment* fregment)
     if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeRoot))
         parent = global_scope_name_from_source_fregment(grandfather);
     else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition))
+        parent = class_scope_name_from_source_fregment(grandfather);
+    else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition))
         parent = class_scope_name_from_source_fregment(grandfather);
     else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeUnionDefinition))
         parent = union_scope_name_from_source_fregment(grandfather);
