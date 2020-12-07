@@ -25,33 +25,23 @@
 
 @implementation CEEProjectContextViewController
 
-- (CEESourceBuffer*)project:(CEEProject*)project securityOpenSourceBufferWithFilePath:(NSString*)filePath {
+- (CEESourceBuffer*)project:(CEEProject*)project securityCreateSourceBufferWithFilePath:(NSString*)filePath {
     if (!project || !filePath)
         return nil;
     
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
     CEESourceBuffer* buffer = nil;
     if (access([filePath UTF8String], R_OK) != 0) {
         NSArray* bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
         if (bookmarks) {
             [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
+            buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
             [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
         }
     }
     else {
-        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
+        buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
     }
     return buffer;
-}
-
-- (void)project:(CEEProject*)project securityCloseSourceBuffer:(CEESourceBuffer*)buffer {
-    if (!project || !buffer)
-        return;
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    [sourceBufferManager closeSourceBuffer:buffer];
 }
 
 - (void)viewDidLoad {
@@ -146,10 +136,9 @@
             return;
         CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)_symbolTable.selectedRow);
         NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-        CEESourceBuffer* buffer = [self project:_project securityOpenSourceBufferWithFilePath:filePath];
+        CEESourceBuffer* buffer = [self project:_project securityCreateSourceBufferWithFilePath:filePath];
         cee_source_buffer_parse(buffer, 0);
         [_editViewController setBuffer:buffer];
-        [self project:_project securityCloseSourceBuffer:buffer];
         CEEList* ranges = cee_ranges_from_string(symbol->locations);
         if (ranges) {
             [_editViewController highlightRanges:ranges];

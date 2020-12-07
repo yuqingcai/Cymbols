@@ -1678,8 +1678,8 @@
             filePath = "Cymbols/CEEProjectSearchViewController.m"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "609"
-            endingLineNumber = "609"
+            startingLineNumber = "568"
+            endingLineNumber = "568"
             landmarkName = "-selectItem:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1736,7 +1736,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "3F52FE33-EC1F-4C6B-88F3-B963F549847B"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Cymbols/Session/CEESessionFrameViewController.m"

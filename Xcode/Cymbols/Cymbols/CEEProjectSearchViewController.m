@@ -41,34 +41,25 @@
 
 @implementation CEEProjectSearchViewController
 
-- (CEESourceBuffer*)project:(CEEProject*)project securityOpenSourceBufferWithFilePath:(NSString*)filePath {
+- (CEESourceBuffer*)project:(CEEProject*)project securityCreateSourceBufferWithFilePath:(NSString*)filePath {
     if (!project || !filePath)
         return nil;
     
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
     CEESourceBuffer* buffer = nil;
     if (access([filePath UTF8String], R_OK) != 0) {
         NSArray* bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
         if (bookmarks) {
             [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
+            buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
             [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
         }
     }
     else {
-        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
+        buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
     }
     return buffer;
 }
 
-- (void)project:(CEEProject*)project securityCloseSourceBuffer:(CEESourceBuffer*)buffer {
-    if (!project || !buffer)
-        return;
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    [sourceBufferManager closeSourceBuffer:buffer];
-}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -167,16 +158,9 @@
         
         for (int i = 0; i < filePaths.count; i ++) {
             @autoreleasepool {
-                
                 __block NSString* filePath = filePaths[i];
                 CEEList* references = NULL;
-                __block CEESourceBuffer* buffer = nil;
-                
-                // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    buffer = [self project:self->_project securityOpenSourceBufferWithFilePath:filePath];
-                });
-                
+                CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
                 const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
                 CEERange range = cee_range_make(0, cee_text_storage_size_get(buffer.storage));
                 cee_source_buffer_parse(buffer, 0);
@@ -188,11 +172,6 @@
                                             buffer.statement,
                                             range,
                                             &references);
-                
-                // close source buffer in main queue
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    [self project:self->_project securityCloseSourceBuffer:buffer];
-                });
                 
                 CEEList* p = references;
                 while (p) {
@@ -253,22 +232,13 @@
         for (int i = 0; i < filePaths.count; i ++) {
             @autoreleasepool {
                 NSString* filePath = filePaths[i];
-                __block CEESourceBuffer* buffer = nil;
-                // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    buffer = [self project:self->_project securityOpenSourceBufferWithFilePath:filePath];
-                });
+                CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
                 const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
                 CEEList* ranges = cee_regex_search((const cee_char*)subject,
                                                    [self->_project.searcher.target UTF8String],
                                                    TRUE,
                                                    0,
                                                    NULL);
-                // close source buffer in main queue
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    [self project:self->_project securityCloseSourceBuffer:buffer];
-                });
-                
                 CEEList* p = ranges;
                 while (p) {
                     cee_char* range_string = cee_string_from_range(p->data);
@@ -338,23 +308,13 @@
         for (int i = 0; i < filePaths.count; i ++) {
             @autoreleasepool {
                 NSString* filePath = filePaths[i];
-                __block CEESourceBuffer* buffer = nil;
-                
-                // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    buffer = [self project:self->_project securityOpenSourceBufferWithFilePath:filePath];
-                });
+                CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
                 
                 const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
                 CEEList* ranges = cee_str_search((const cee_char*)subject,
                                                     [self->_project.searcher.target UTF8String],
                                                     sensitive,
                                                     mode);
-                // close source buffer in main queue
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    [self project:self->_project securityCloseSourceBuffer:buffer];
-                });
-                
                 CEEList* p = ranges;
                 while (p) {
                     cee_char* range_string = cee_string_from_range(p->data);
@@ -591,11 +551,10 @@
     if (!_resultTable.selectedRowIndexes || _resultTable.selectedRow == -1 || _isSearching)
         return;
     
-    CEESearchResult* result = _project.searcher.results[_resultTable.selectedRow ];
-    CEESourceBuffer* buffer = [self project:_project securityOpenSourceBufferWithFilePath:result.filePath];
+    CEESearchResult* result = _project.searcher.results[_resultTable.selectedRow];
+    CEESourceBuffer* buffer = [self project:_project securityCreateSourceBufferWithFilePath:result.filePath];
     cee_source_buffer_parse(buffer, 0);
     [_editViewController setBuffer:buffer];
-    [self project:_project securityCloseSourceBuffer:buffer];
     CEEList* ranges = cee_ranges_from_string([result.locations UTF8String]);
     if (ranges) {
         [_editViewController highlightRanges:ranges];
