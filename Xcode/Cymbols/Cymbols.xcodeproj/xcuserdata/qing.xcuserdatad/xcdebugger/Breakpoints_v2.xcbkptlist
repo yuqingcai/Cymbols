@@ -1358,9 +1358,9 @@
             filePath = "Cymbols/Session/CEESessionContextViewController.m"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "319"
-            endingLineNumber = "319"
-            landmarkName = "-tableView:viewForColumn:row:"
+            startingLineNumber = "314"
+            endingLineNumber = "314"
+            landmarkName = "-tableView:titleForColumn:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1374,10 +1374,10 @@
             filePath = "Cymbols/Session/CEESessionContextViewController.m"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "310"
-            endingLineNumber = "310"
-            landmarkName = "-tableView:viewForColumn:row:"
-            landmarkType = "7">
+            startingLineNumber = "305"
+            endingLineNumber = "305"
+            landmarkName = "CEESessionContextViewController"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1518,8 +1518,8 @@
             filePath = "../../cee_parser/cee_source_parser.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1551"
-            endingLineNumber = "1551"
+            startingLineNumber = "1552"
+            endingLineNumber = "1552"
             landmarkName = "syntax_tags_create(parser_ref, fregment, range)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1534,8 +1534,8 @@
             filePath = "../../cee_parser/cee_source_parser.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1559"
-            endingLineNumber = "1559"
+            startingLineNumber = "1560"
+            endingLineNumber = "1560"
             landmarkName = "syntax_tags_create_recursive(parser_ref, fregment, range, tags)"
             landmarkType = "9">
          </BreakpointContent>
@@ -1746,6 +1746,22 @@
             endingLineNumber = "221"
             landmarkName = "-jumpToSourcePointResponse:"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A0603A2D-C45D-4029-BFBB-5AB943B01C99"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../cee_parser/cee_source_parser.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1276"
+            endingLineNumber = "1276"
+            landmarkName = "cee_symbols_search_by_reference(reference, prep_directive, statement, database, options)"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

@@ -198,38 +198,33 @@
 }
 
 - (void)presentContextBufferWithSymbol:(CEESourceSymbol*)symbol {
-    @autoreleasepool {
-        AppDelegate* delegate = [NSApp delegate];
-        CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-        NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-        CEESourceBuffer* buffer = nil;
-        // fucking app sandbox make this code so tedious!!!
-        if (access([filePath UTF8String], R_OK) != 0) {
-            NSArray* bookmarks = [self.session.project getSecurityBookmarksWithFilePaths:@[filePath]];
-            if (bookmarks) {
-                [self.session.project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-                //buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
-                buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
-                [self.session.project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            }
-        }
-        else {
-            //buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
-            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
-        }
-        
-        if (!buffer)
-            return;
-        
-        cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
-        [_editViewController setBuffer:buffer];
-        CEEList* ranges = cee_ranges_from_string(symbol->locations);
-        if (ranges) {
-            [_editViewController highlightRanges:ranges];
-            cee_list_free_full(ranges, cee_range_free);
+    NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
+    CEESourceBuffer* buffer = nil;
+    // fucking app sandbox make this code so tedious!!!
+    if (access([filePath UTF8String], R_OK) != 0) {
+        NSArray* bookmarks = [self.session.project getSecurityBookmarksWithFilePaths:@[filePath]];
+        if (bookmarks) {
+            [self.session.project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
+            buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+            [self.session.project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
         }
     }
+    else {
+        buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+    }
+    
+    if (!buffer)
+        return;
+    
+    cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
+    [_editViewController setBuffer:buffer];
+    CEEList* ranges = cee_ranges_from_string(symbol->locations);
+    if (ranges) {
+        [_editViewController highlightRanges:ranges];
+        cee_list_free_full(ranges, cee_range_free);
+    }
 }
+
 
 - (void)sessionPortCreateContextResponse:(NSNotification*)notification {
     CEESessionPort* port = notification.object;
