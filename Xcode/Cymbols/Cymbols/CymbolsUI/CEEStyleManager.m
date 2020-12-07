@@ -533,7 +533,7 @@ static CEEStyleManager* gStyleManager = nil;
     selector = [view getSchemeObjectIdentifier];
     if (selector)
         [self enumerateSchemes:&schemes fromDescriptor:_descriptor withIdentifier:selector];
-        
+    
     if (!schemes) {
         selector = [view getSchemeClassIdentifier];
         [self enumerateSchemes:&schemes fromDescriptor:_descriptor withIdentifier:selector];

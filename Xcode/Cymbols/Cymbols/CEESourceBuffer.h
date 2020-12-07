@@ -47,7 +47,6 @@ typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
 @property CEESourceParserRef parser_ref;
 @property CEEList* symbol_wrappers;
 
-- (instancetype)initWithFilePath:(nullable NSString*)filePath;
 - (void)setState:(CEESourceBufferState)state;
 - (void)clearState:(CEESourceBufferState)state;
 - (BOOL)stateSet:(CEESourceBufferState)state;

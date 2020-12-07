@@ -835,8 +835,6 @@ BOOL ContextContainSymbol(CEEList* context,
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSetDescriptor object:self];
 }
 
-
-
 @end
 
 @implementation CEESession

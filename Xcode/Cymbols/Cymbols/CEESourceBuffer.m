@@ -17,6 +17,7 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
 @property (strong) NSDate* fileLastModifiedDate;
 @property (strong) NSDate* lastModifiedDate;
 - (void)saveAtFilePath:(NSString*)filePath;
+- (instancetype)initWithFilePath:(nullable NSString*)filePath;
 @end
 
 @implementation CEESourceBuffer
