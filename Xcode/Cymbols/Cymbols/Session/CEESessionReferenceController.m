@@ -35,7 +35,7 @@
     [_referenceTable setEnableDrawHeader:NO];
     [_referenceTable setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(openSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activePortResponse:) name:CEENotificationSessionActivePort object:nil];
@@ -135,7 +135,7 @@
                                             [buffer.filePath UTF8String]);
 }
 
-- (void)sourceBufferStateChangedResponse:(NSNotification*)notification {
+- (void)sourceBufferChangeStateResponse:(NSNotification*)notification {
     [_referenceTable reloadData];
     [self highlightSelectionInReferenceTable];
 }

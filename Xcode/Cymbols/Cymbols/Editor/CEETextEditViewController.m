@@ -59,8 +59,8 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
         return NULL;
     
     cee_source_reference_parse(buffer.parser_ref, 
-                               (const cee_uchar*)[buffer.filePath UTF8String], 
-                               subject, 
+                               [buffer.filePath UTF8String],
+                               (const cee_char*)subject,
                                buffer.source_token_map, 
                                buffer.prep_directive, 
                                buffer.statement, 
@@ -123,8 +123,8 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [self showTextSearch:NO];
     [self showLineNumber:_showLineNumber];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferSavedResponse:) name:CEENotificationSourceBufferSaved object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferSavedResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textHighlightStyleResponse:) name:CEENotificationTextHighlightStyleUpdate object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferReloadResponse:) name:CEENotificationSourceBufferReload object:nil];
 }
@@ -490,7 +490,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
 }
 
-- (void)sourceBufferStateChangedResponse:(NSNotification*)notification {
+- (void)sourceBufferChangeStateResponse:(NSNotification*)notification {
     CEESourceBuffer* buffer = notification.object;
     if (buffer != self.buffer)
         return;
@@ -566,6 +566,17 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     
     if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF8)
         encodeType = @"UTF-8";
+    else if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF16BE)
+        encodeType = @"UTF-16BE";
+    else if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF16LE)
+        encodeType = @"UTF-16LE";
+    else if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF32BE)
+        encodeType = @"UTF-32BE";
+    else if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF32LE)
+        encodeType = @"UTF-32LE";
+    
+    if ([self.buffer withBOM])
+        encodeType = [encodeType stringByAppendingString:@" with BOM"];
     
     return [NSString stringWithFormat:@"Offset:%ld, Line:%ld, Column:%ld    %@    %@    %@",
                 buffer_offset,

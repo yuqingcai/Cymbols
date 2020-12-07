@@ -203,7 +203,7 @@
 
 - (IBAction)selectAll:(id)sender {
     _selectedSourceBufferFilePaths = nil;
-    if (_selectAllButton.state == NSOnState) {
+    if (_selectAllButton.state == NSControlStateValueOn) {
         _selectedSourceBufferFilePaths = [[NSMutableArray alloc] init];
         for (CEESourceBuffer* buffer in _modifiedSourceBuffers)
             [_selectedSourceBufferFilePaths addObject:buffer.filePath];

@@ -17,7 +17,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSNotificationName CEENotificationSourceBufferStateChanged;
+extern NSNotificationName CEENotificationSourceBufferChangeState;
 extern NSNotificationName CEENotificationSourceBufferReload;
 extern NSNotificationName CEENotificationSourceBufferSaved;
 
@@ -29,15 +29,9 @@ typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
     kCEESourceBufferStateShouldSyncWhenClose = 1 << 4,
 };
 
-typedef NS_ENUM(NSUInteger, CEEBufferEncodeType) {
-    kCEEBufferEncodeTypeUTF8 = 0,
-    kCEEBufferEncodeTypeBinary = 1,
-};
-
 @class CEEProject;
 
 @interface CEESourceBuffer : NSObject
-
 @property (strong) NSString* filePath;
 @property CEEBufferEncodeType encodeType;
 @property cee_pointer storage;
@@ -62,6 +56,7 @@ typedef NS_ENUM(NSUInteger, CEEBufferEncodeType) {
 - (void)updateFileModifiedDate;
 - (void)increaseReferenceCount;
 - (void)decreaseReferenceCount;
+- (BOOL)withBOM;
 @end
 
 typedef enum _CEESourceBufferParserOption {

@@ -55,7 +55,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activePortResponse:) name:CEENotificationSessionActivePort object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setPortDescriptorResponse:) name:CEENotificationSessionPortSetDescriptor object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferReloadResponse:) name:CEENotificationSourceBufferReload object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChanged:) name:CEENotificationSourceBufferStateChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPresentResponse:) name:CEENotificationSessionPresent object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferCloseResponse:) name:CEENotificationSessionPortCloseSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(requestJumpSourcePointSelectionResponse:) name:CEENotificationSessionPortRequestJumpSourcePointSelection object:nil];
@@ -188,8 +188,15 @@
 }
 
 - (IBAction)newWindow:(id)sender {
-    CEEProjectController* controller = [NSDocumentController sharedDocumentController];
-    [controller createProjectFromSetting:nil];
+    CEEProjectController* projectController = [NSDocumentController sharedDocumentController];
+    [projectController createProjectFromSetting:nil];
+    CEEWindowController* windowController = projectController.currentDocument.windowControllers[0];
+    NSRect frame = windowController.window.frame;
+    NSPoint origin = self.view.window.frame.origin;
+    frame.origin = origin;
+    frame.origin.x += 60.0;
+    frame.origin.y -= 60.0;
+    [windowController.window setFrame:frame display:YES];
 }
 
 - (IBAction)listWindows:(id)sender {
@@ -425,7 +432,7 @@
     [self updateStatusBar];
 }
 
-- (void)sourceBufferStateChanged:(NSNotification*)notification {
+- (void)sourceBufferChangeStateResponse:(NSNotification*)notification {
     if (notification.object != _session.activedPort.activedSourceBuffer)
         return;
     [self updateStatusBar];

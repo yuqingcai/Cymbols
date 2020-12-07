@@ -295,6 +295,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (void)keyDown:(NSEvent *)event {
+    [self stopCaretBlink];
+    
     if (!_editable)
         return;
     
@@ -307,7 +309,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
             [self setNeedsDisplay:YES];
         }
     }
-        
+    
     [[self inputContext] handleEvent:event];
 }
 
@@ -317,6 +319,10 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+}
+
+- (void)keyUp:(NSEvent *)event {
+    [self startCaretBlink];
 }
 
 - (void)setMarkedText:(id)markedText selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange {

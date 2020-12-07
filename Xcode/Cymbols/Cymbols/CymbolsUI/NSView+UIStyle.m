@@ -139,7 +139,7 @@
     
     if (dividerColorHorizontalProperty)
         self.dividerColorHorizontal = [CEEUserInterfaceStyleConfiguration createColorFromString:dividerColorHorizontalProperty];
-        
+    
     return self;
 }
 @end

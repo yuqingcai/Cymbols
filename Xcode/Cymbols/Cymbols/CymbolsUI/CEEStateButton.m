@@ -28,10 +28,10 @@
         switch ([event type]) {
             case NSEventTypeLeftMouseUp:
                 if (isInside) {
-                    if (self.state == NSOffState)
-                        self.state = NSOnState;
-                    else if (self.state == NSOnState)
-                        self.state = NSOffState;
+                    if (self.state == NSControlStateValueOff)
+                        self.state = NSControlStateValueOn;
+                    else if (self.state == NSControlStateValueOn)
+                        self.state = NSControlStateValueOff;
                     
                     if (self.action)
                         [self sendAction:self.action to:self.target];

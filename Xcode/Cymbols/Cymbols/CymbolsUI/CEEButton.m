@@ -26,7 +26,7 @@
     _borderWidth = 0.0;
     _cornerRadius = 1.0;
     _title = @"";
-    _state = NSOffState;
+    _state = NSControlStateValueOff;
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
@@ -181,7 +181,7 @@
     if (!self.isEnabled)
         return;
     
-    self.state = NSOnState;
+    self.state = NSControlStateValueOn;
     
     while (keepOn) {
         NSEventMask eventMask = NSEventMaskLeftMouseUp | NSEventMaskLeftMouseDragged;
@@ -192,13 +192,13 @@
         switch ([event type]) {
             case NSEventTypeLeftMouseDragged:
                 if (isInside)
-                    self.state = NSOnState;
+                    self.state = NSControlStateValueOn;
                 else
-                    self.state = NSOffState;
+                    self.state = NSControlStateValueOff;
                 break;
                 
             case NSEventTypeLeftMouseUp:
-                self.state = NSOffState;
+                self.state = NSControlStateValueOff;
                 
                 if (isInside && self.action)
                     [self sendAction:self.action to:self.target];
@@ -218,9 +218,9 @@
     
     _state = state;
     
-    if (_state == NSOnState)
+    if (_state == NSControlStateValueOn)
         [self setStyleState:kCEEViewStyleStateClicked];
-    else if (_state == NSOffState) {
+    else if (_state == NSControlStateValueOff) {
         if (self.superview && [self.superview styleState] == kCEEViewStyleStateDeactived)
             [self setStyleState:kCEEViewStyleStateDeactived];
         else

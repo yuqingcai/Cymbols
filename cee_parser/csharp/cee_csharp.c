@@ -14,7 +14,7 @@
 //#define DEBUG_EVENTS
 //#define DEBUG_NAMESPACE
 //#define DEBUG_USING_DIRECTIVE
-#define DEBUG_DELEGATE
+//#define DEBUG_DELEGATE
 
 typedef enum _CSharpObjectTypeDefinitionTranslateState {
     kCSharpObjectTypeDefinitionTranslateStateInit = 0,
@@ -343,6 +343,7 @@ static cee_boolean statement_sub_attach(CSharpParser* parser,
 static cee_boolean statement_pop(CSharpParser* parser);
 static cee_boolean statement_token_push(CSharpParser* parser,
                                         CEEToken* push);
+static CEEToken* statement_token_pop(CSharpParser* parser);
 static void parameter_list_push(CSharpParser* parser);
 static cee_boolean parameter_list_pop(CSharpParser* parser);
 static void subscript_push(CSharpParser* parser);
@@ -865,11 +866,17 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                 label_parse(parser);
                 label_reduce(parser);
             }
-            else if (token->identifier == ';' ||
-                     token->identifier == kCEETokenID_LAMBDA) {
+            else if (token->identifier == ';') {
                 statement_token_push(parser, token);
                 statement_parse(parser);
                 statement_reduce(parser);
+            }
+            else if (token->identifier == kCEETokenID_LAMBDA) {
+                statement_token_push(parser, token);
+                statement_parse(parser);
+                token = statement_token_pop(parser);
+                statement_reduce(parser);
+                statement_token_push(parser, token);
             }
             else {
                 statement_token_push(parser, token);
@@ -1566,7 +1573,7 @@ static void statement_parse(CSharpParser* parser)
     CEESourceFregment* current = parser->statement_current;
     if (!current || !current->tokens_ref)
         return;
-    
+        
     if (csharp_method_parse(current) ||
         csharp_declaration_parse(current) ||
         csharp_operator_parse(current) ||
@@ -1653,6 +1660,14 @@ static cee_boolean statement_token_push(CSharpParser* parser,
     
     return TRUE;
 }
+
+static CEEToken* statement_token_pop(CSharpParser* parser)
+{
+    if (!parser->statement_current)
+        return NULL;
+    SOURCE_FREGMENT_TOKEN_POP(parser->statement_current);
+}
+
 
 /**
  * parameter list

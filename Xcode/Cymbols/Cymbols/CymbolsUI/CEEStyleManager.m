@@ -11,6 +11,8 @@
 #import "NSView+UIStyle.h"
 #import "CEEScroller.h"
 
+#import "cee_datetime.h"
+
 NSNotificationName CEENotificationUserInterfaceStyleUpdate = @"CEENotificationUserInterfaceStyleUpdate";
 NSNotificationName CEENotificationTextHighlightStyleUpdate = @"CEENotificationTextHighlightStyleUpdate";
 
@@ -470,7 +472,6 @@ static CEEStyleManager* gStyleManager = nil;
 }
 
 - (NSString*)getIdentifierFromSchemeSelector:(NSString*)selector {
-    
     NSString* identifier = nil;
     NSString* pattern = @"([a-zA-Z0-9_]+)\\s*(\\[\\s*([a-zA-Z0-9]+)\\s*\\])?";
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:NULL];
@@ -525,22 +526,21 @@ static CEEStyleManager* gStyleManager = nil;
 - (void)configureView:(__kindof NSView*)view {
     if (!_descriptor)
         return;
-        
-    NSMutableArray* schemes = nil;
-    BOOL useClassIdentifier = NO;
-    NSString* selector = [view getSchemeObjectIdentifier];
-    if (!selector) {
-        useClassIdentifier = YES;
-        selector = [view getSchemeClassIdentifier];
-    }
-    [self enumerateSchemes:&schemes fromDescriptor:_descriptor withIdentifier:selector];
     
-    if (!schemes && !useClassIdentifier) {
+    NSMutableArray* schemes = nil;
+    NSString* selector = nil;
+    
+    selector = [view getSchemeObjectIdentifier];
+    if (selector)
+        [self enumerateSchemes:&schemes fromDescriptor:_descriptor withIdentifier:selector];
+        
+    if (!schemes) {
         selector = [view getSchemeClassIdentifier];
         [self enumerateSchemes:&schemes fromDescriptor:_descriptor withIdentifier:selector];
     }
     
     [view setSytleSchemes:schemes];
+        
     return;
 }
 

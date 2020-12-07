@@ -85,6 +85,20 @@ typedef struct _CEESourceFregment {
         ((CEESourceFregment*)fregment)->tokens_ref = ((CEESourceFregment*)fregment)->tokens_ref_last;\
 }
 
+#define SOURCE_FREGMENT_TOKEN_POP(fregment) {\
+    CEEToken* pop = NULL;\
+    if (fregment->tokens_ref_last) {\
+        CEEList* p = fregment->tokens_ref_last;\
+        fregment->tokens_ref_last = cee_list_remove_link(fregment->tokens_ref_last, p);\
+        if (!fregment->tokens_ref_last)\
+            fregment->tokens_ref = NULL;\
+        pop = p->data;\
+        pop->fregment_ref = NULL;\
+        cee_list_free(p);\
+    }\
+    return pop;\
+}
+
 #define SOURCE_FREGMENT_TOKEN_NODE_REMOVE(fregment, p) {\
     if (((CEESourceFregment*)fregment)->tokens_ref_last) {\
         if (p == ((CEESourceFregment*)fregment)->tokens_ref)\

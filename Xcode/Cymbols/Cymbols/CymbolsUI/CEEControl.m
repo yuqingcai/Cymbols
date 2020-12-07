@@ -604,4 +604,5 @@ void Mark(struct box *cube,
         [self.userInterfaceStyles replacePointerAtIndex:scheme.styleState withPointer:(void*)style];
     }
 }
+
 @end

@@ -110,9 +110,8 @@
 }
 
 - (NSView*)splitView:(NSView*)view withView:(NSView*)newView vertical:(BOOL)vertical order:(NSWindowOrderingMode)order {
-    NSView *superview;
     
-    superview = view.superview;
+    NSView* superview = view.superview;
     
     if (![superview isKindOfClass:[NSSplitView class]]) {
         [self removeView:view fromView:superview];
@@ -135,48 +134,35 @@
     }
     else {
         NSSplitView* splitView = (NSSplitView*)superview;
+        NSSplitView* newSplitView = nil;
+        NSMutableArray *subviews = [[NSMutableArray alloc] init];
+        NSInteger replaceIndex = 0;
+        for (NSInteger i = 0; i < splitView.subviews.count; i ++) {
+            [subviews addObject:splitView.subviews[i]];
+            if (splitView.subviews[i] == view)
+                replaceIndex = i;
+        }
         
-        if (splitView.vertical == vertical) {
-            
-            if (order == NSWindowAbove)
-                [splitView addSubview:newView positioned:NSWindowBelow relativeTo:view];
-            else if (order == NSWindowBelow)
-                [splitView addSubview:newView positioned:NSWindowAbove relativeTo:view];
-            
-            [self setHoldingPrioritiesInSplitView:splitView];
-            [self setDividersPositionInSplitView:splitView];
-            [splitView adjustSubviews];
+        for (NSInteger i = 0; i < subviews.count; i ++)
+            [subviews[i] removeFromSuperview];
+        
+        newSplitView = [self createSplitViewWithFrame:view.frame vertical:vertical splitViewDelegate:self];
+        [_splitViews addObject:newSplitView];
+        subviews[replaceIndex] = newSplitView;
+        for (NSInteger i = 0; i < subviews.count; i ++)
+            [splitView addSubview:subviews[i]];
+        
+        if (order == NSWindowAbove) {
+            [newSplitView addSubview:newView];
+            [newSplitView addSubview:view];
         }
-        else {
-            NSMutableArray *subviews = [[NSMutableArray alloc] init];
-            NSInteger replaceIndex = 0;
-            for (NSInteger i = 0; i < splitView.subviews.count; i ++) {
-                [subviews addObject:splitView.subviews[i]];
-                if (splitView.subviews[i] == view)
-                    replaceIndex = i;
-            }
-            
-            for (NSInteger i = 0; i < subviews.count; i ++)
-                [subviews[i] removeFromSuperview];
-            
-            NSSplitView* newSplitView = [self createSplitViewWithFrame:view.frame vertical:vertical splitViewDelegate:self];
-            [_splitViews addObject:newSplitView];
-            subviews[replaceIndex] = newSplitView;
-            for (NSInteger i = 0; i < subviews.count; i ++)
-                [splitView addSubview:subviews[i]];
-            
-            if (order == NSWindowAbove) {
-                [newSplitView addSubview:newView];
-                [newSplitView addSubview:view];
-            }
-            else if (order == NSWindowBelow){
-                [newSplitView addSubview:view];
-                [newSplitView addSubview:newView];
-            }
-            [self setHoldingPrioritiesInSplitView:newSplitView];
-            [self setDividersPositionInSplitView:newSplitView];
-            [newSplitView adjustSubviews];
+        else if (order == NSWindowBelow){
+            [newSplitView addSubview:view];
+            [newSplitView addSubview:newView];
         }
+        [self setHoldingPrioritiesInSplitView:newSplitView];
+        [self setDividersPositionInSplitView:newSplitView];
+        [newSplitView adjustSubviews];
     }
     
     for (NSViewController* controller in self.childViewControllers)
@@ -457,11 +443,11 @@
 - (void)split:(CEESplitFrameDirection)direction {
     CEESessionFrameViewController* frame = nil;
     CEESessionPort* port = nil;
-    NSArray* buffers = nil;
-    CEESourceBuffer* buffer = nil;
+    NSArray* duplicatedBuffers = nil;
+    CEESourceBuffer* activedSourceBuffer = nil;
     
-    buffer = [_session.activedPort activedSourceBuffer];
-    if (!buffer)
+    activedSourceBuffer = [_session.activedPort activedSourceBuffer];
+    if (!activedSourceBuffer)
         return;
     
     frame = [self createFrame];
@@ -469,27 +455,43 @@
         return;
     
     [self split:direction withFrame:frame];
+    
     port = [_session createPort];
     if (!port)
         return;
-    
+        
     [frame setPort:port];
     [frame setIdentifier:[self frame:frame identifierFromPort:port]];
     [frame.view setIdentifier:[self frameView:frame.view identifierFromPort:port]];
     
-    if ([buffer stateSet:kCEESourceBufferStateFileTemporary]) {
-        buffer = [frame.port openUntitledSourceBuffer];
-    }
-    else {
-        buffers = [frame.port openSourceBuffersWithFilePaths:@[buffer.filePath]];
-        if (buffers)
-            buffer = buffers[0];
+    @autoreleasepool {
+        NSMutableArray* filePaths = [[NSMutableArray alloc] init];
+        for (CEESourceBuffer* buffer in [_session.activedPort openedSourceBuffers]) {
+            [filePaths addObject:buffer.filePath];
+        }
+        duplicatedBuffers = [frame.port openSourceBuffersWithFilePaths:filePaths];
+        if (duplicatedBuffers) {
+            if ([duplicatedBuffers containsObject:activedSourceBuffer])
+                [frame.port setActivedSourceBuffer:activedSourceBuffer];
+            else
+                [frame.port setActivedSourceBuffer:duplicatedBuffers[0]];
+            [self selectFrame:frame];
+        }
     }
     
-    if (buffer) {
-        [frame.port setActivedSourceBuffer:buffer];
-        [self selectFrame:frame];
-    }
+    //if ([activedSourceBuffer stateSet:kCEESourceBufferStateFileTemporary]) {
+    //    activedSourceBuffer = [frame.port openUntitledSourceBuffer];
+    //}
+    //else {
+    //    duplicatedBuffers = [frame.port openSourceBuffersWithFilePaths:@[activedSourceBuffer.filePath]];
+    //    if (duplicatedBuffers)
+    //        activedSourceBuffer = duplicatedBuffers[0];
+    //}
+    //
+    //if (activedSourceBuffer) {
+    //    [frame.port setActivedSourceBuffer:activedSourceBuffer];
+    //    [self selectFrame:frame];
+    //}
 }
 
 - (void)mouseDown:(NSEvent *)event {

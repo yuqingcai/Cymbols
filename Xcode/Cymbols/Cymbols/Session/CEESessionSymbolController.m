@@ -41,7 +41,7 @@
     _updateSymbolsTimer = [NSTimer timerWithTimeInterval:0.5 target:self selector:@selector(updateSymbols:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:_updateSymbolsTimer forMode:NSRunLoopCommonModes];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(openSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activeSourceBufferResponse:) name:CEENotificationSessionPortActiveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activePortResponse:) name:CEENotificationSessionActivePort object:nil];
@@ -126,7 +126,7 @@
     [self presentSymbols];
 }
 
-- (void)sourceBufferStateChangedResponse:(NSNotification*)notification {
+- (void)sourceBufferChangeStateResponse:(NSNotification*)notification {
     if (notification.object != _buffer)
         return;
     if ([_buffer stateSet:kCEESourceBufferStateModified])

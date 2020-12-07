@@ -129,7 +129,7 @@
     path = [NSBezierPath bezierPathWithRoundedRect:contentRect xRadius:boxCornerRadius yRadius:boxCornerRadius];
     
     
-    if (self.state == NSOnState) {
+    if (self.state == NSControlStateValueOn) {
         if (boxBackgroundColorChecked) {
             [boxBackgroundColorChecked setFill];
             [path fill];

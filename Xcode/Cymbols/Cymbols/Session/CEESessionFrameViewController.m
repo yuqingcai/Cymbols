@@ -24,6 +24,7 @@
 @property (strong) CEEEditViewController* editViewController;
 @property (strong) NSPanel* titleDetail;
 @property (strong) CEEPopupPanel* sourceHistoryPanel;
+@property (strong) CEESourceBuffer* sourceBuffer;
 @end
 
 @implementation CEESessionFrameViewController
@@ -50,7 +51,7 @@
     
     [(CEESessionFrameView*)self.view setDelegate:self];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferStateChangedResponse:) name:CEENotificationSourceBufferStateChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setSelectedSymbolResponse:) name:CEENotificationSessionPortSetSelectedSymbol object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToSourcePointResponse:) name:CEENotificationSessionPortJumpToSourcePoint object:nil];
@@ -112,15 +113,18 @@
 }
 
 - (CEEPresentSourceState)presentSourceBuffer {
-    CEESourceBuffer* buffer = [_port activedSourceBuffer];
-    if (!buffer)
+    _sourceBuffer = [_port activedSourceBuffer];
+    if (!_sourceBuffer)
         return kCEEPresentSourceStateNoBuffer;
     
     CEEEditViewController* viewController = nil;
-    
-    if (buffer.encodeType == kCEEBufferEncodeTypeUTF8)
+    if (_sourceBuffer.encodeType == kCEEBufferEncodeTypeUTF8 ||
+        _sourceBuffer.encodeType == kCEEBufferEncodeTypeUTF16BE ||
+        _sourceBuffer.encodeType == kCEEBufferEncodeTypeUTF16LE ||
+        _sourceBuffer.encodeType == kCEEBufferEncodeTypeUTF32BE ||
+        _sourceBuffer.encodeType == kCEEBufferEncodeTypeUTF32LE)
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
-    else if (buffer.encodeType == kCEEBufferEncodeTypeBinary)
+    else if (_sourceBuffer.encodeType == kCEEBufferEncodeTypeUnknow)
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDBinaryEditViewController"];
     else
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDNotSupportedEditViewController"];
@@ -146,17 +150,17 @@
     [self.view addConstraints:constraintsV];
     
     [viewController setPort:_port];
-    [viewController setBuffer:buffer];
+    [viewController setBuffer:_sourceBuffer];
     
     NSInteger lineBufferOffset = [[_port currentSourceBufferReference] lineBufferOffset];
     NSInteger caretBufferOffset = [[_port currentSourceBufferReference] caretBufferOffset];
     [viewController setCaretBufferOffset:caretBufferOffset];
     [viewController setLineBufferOffset:lineBufferOffset];
     
-    if ([buffer stateSet:kCEESourceBufferStateFileTemporary])
-        self.title = [buffer.filePath lastPathComponent];
+    if ([_sourceBuffer stateSet:kCEESourceBufferStateFileTemporary])
+        self.title = [_sourceBuffer.filePath lastPathComponent];
     else
-        self.title = buffer.filePath;
+        self.title = _sourceBuffer.filePath;
     
     return kCEEPresentSourceStateSuccess;
 }
@@ -177,39 +181,39 @@
     [_titlebar setTitle:self.title];
 }
 
-- (void)sourceBufferStateChangedResponse:(NSNotification*)notification {
-    CEESourceBuffer* buffer = [_port activedSourceBuffer];
+- (void)sourceBufferChangeStateResponse:(NSNotification*)notification {
     CEESourceBuffer* notify_buffer = notification.object;
-    if (![notify_buffer.filePath isEqualToString:buffer.filePath])
+    //if (![notify_buffer.filePath isEqualToString:buffer.filePath])
+    //    return;
+    
+    if (notify_buffer != _sourceBuffer)
         return;
     
-    if ([buffer stateSet:kCEESourceBufferStateFileTemporary])
-        self.title = [buffer.filePath lastPathComponent];
+    if ([_sourceBuffer stateSet:kCEESourceBufferStateFileTemporary])
+        self.title = [_sourceBuffer.filePath lastPathComponent];
     else
-        self.title = buffer.filePath;
+        self.title = _sourceBuffer.filePath;
     
-    if ([buffer stateSet:kCEESourceBufferStateModified])
+    if ([_sourceBuffer stateSet:kCEESourceBufferStateModified])
         self.title = [self.title stringByAppendingFormat:@" *"];
     
-    if ([buffer stateSet:kCEESourceBufferStateFileDeleted])
+    if ([_sourceBuffer stateSet:kCEESourceBufferStateFileDeleted])
         self.title = [self.title stringByAppendingFormat:@" (delete)"];
 }
 
 - (void)saveSourceBufferResponse:(NSNotification*)notification {
     if (notification.object != _port)
         return;
-    
-    CEESourceBuffer* buffer = [_port activedSourceBuffer];
-    
-    if ([buffer stateSet:kCEESourceBufferStateFileTemporary])
-        self.title = [buffer.filePath lastPathComponent];
+        
+    if ([_sourceBuffer stateSet:kCEESourceBufferStateFileTemporary])
+        self.title = [_sourceBuffer.filePath lastPathComponent];
     else
-        self.title = buffer.filePath;
+        self.title = _sourceBuffer.filePath;
     
-    if ([buffer stateSet:kCEESourceBufferStateModified])
+    if ([_sourceBuffer stateSet:kCEESourceBufferStateModified])
         self.title = [self.title stringByAppendingFormat:@" *"];
     
-    if ([buffer stateSet:kCEESourceBufferStateFileDeleted])
+    if ([_sourceBuffer stateSet:kCEESourceBufferStateFileDeleted])
         self.title = [self.title stringByAppendingFormat:@" (delete)"];
 }
 

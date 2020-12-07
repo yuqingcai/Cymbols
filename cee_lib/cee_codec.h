@@ -88,7 +88,16 @@ typedef enum _CEEUnicodePointType {
     kCEEUnicodePointTypeASCIIAlphabet,
     kCEEUnicodePointTypeWorldWideCharacter,
 } CEEUnicodePointType;
-    
+
+
+typedef enum _CEEBufferEncodeType {
+    kCEEBufferEncodeTypeUTF8 = 0,
+    kCEEBufferEncodeTypeUTF16BE,
+    kCEEBufferEncodeTypeUTF16LE,
+    kCEEBufferEncodeTypeUTF32BE,
+    kCEEBufferEncodeTypeUTF32LE,
+    kCEEBufferEncodeTypeUnknow,
+} CEEBufferEncodeType;
 
 cee_boolean cee_codec_encoding_utf8(const cee_uchar* subject,
                                     cee_ulong length);
@@ -110,8 +119,18 @@ cee_long cee_codec_utf8_encoded_byte0_get(const cee_uchar* subject,
                                           cee_long offset);
 CEERange cee_codec_utf8_range_decoded_to_encoded(const cee_uchar* subject,
                                                  CEERange range);
-
-
+cee_boolean cee_codec_has_bom(const cee_uchar* buffer);
+void cee_codec_export_bom(const cee_uchar* buffer,
+                          cee_uchar* bom);
+CEEBufferEncodeType cee_codec_type_from_bom(const cee_uchar* bom);
+cee_uchar* cee_codec_convert_to_utf8(const cee_uchar* subject,
+                                     cee_size length,
+                                     CEEBufferEncodeType type);
+cee_boolean cee_codec_convert_from_utf8(const cee_uchar* subject,
+                                        cee_size length,
+                                        CEEBufferEncodeType type,
+                                        cee_uchar** converted_bytes,
+                                        cee_size* converted_length);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
