@@ -1215,7 +1215,8 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
                                                                       s,
                                                                       q,
                                                                       kCEESourceSymbolTypePrepDirectiveInclude,
-                                                                      "gnu_asm");
+                                                                      "gnu_asm",
+                                                                      kCEETokenStringOptionCompact);
         cee_source_symbol_name_format(include_directive->name);
         cee_token_slice_state_mark(TOKEN_NEXT(s), q, kCEETokenStateSymbolOccupied);
         fregment->symbols = cee_list_prepend(fregment->symbols, include_directive);
@@ -1226,7 +1227,8 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
                                                                      r,
                                                                      t,
                                                                      kCEESourceSymbolTypePrepDirectiveIncludePath,
-                                                                     "gnu_asm");
+                                                                     "gnu_asm",
+                                                                     kCEETokenStringOptionCompact);
             cee_token_slice_state_mark(r, t, kCEETokenStateSymbolOccupied);
             fregment->symbols = cee_list_prepend(fregment->symbols, include_path);
         }
@@ -1318,7 +1320,8 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
                                                                      s,
                                                                      s,
                                                                      kCEESourceSymbolTypePrepDirectiveDefine,
-                                                                     "gnu_asm");
+                                                                     "gnu_asm",
+                                                                     kCEETokenStringOptionCompact);
         cee_token_slice_state_mark(s, t, kCEETokenStateSymbolOccupied);
         fregment->symbols = cee_list_prepend(fregment->symbols, define_directive);
         ret = TRUE;
@@ -1331,7 +1334,8 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
                                                                   p,
                                                                   p,
                                                                   kCEESourceSymbolTypePrepDirectiveParameter,
-                                                                  "gnu_asm");
+                                                                  "gnu_asm",
+                                                                  kCEETokenStringOptionCompact);
             cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
             fregment->symbols = cee_list_prepend(fregment->symbols, parameter);
             p = TOKEN_NEXT(p);
@@ -1377,7 +1381,8 @@ static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
                                                                      p,
                                                                      q,
                                                                      kCEESourceSymbolTypePrepDirectiveCommon,
-                                                                     "gnu_asm");
+                                                                     "gnu_asm",
+                                                                     kCEETokenStringOptionCompact);
         cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
         fregment->symbols = cee_list_prepend(fregment->symbols, common_directive);
         ret = TRUE;
@@ -1411,7 +1416,8 @@ static void statement_parse(GNUASMParser* parser)
                                                                p,
                                                                p,
                                                                kCEESourceSymbolTypeLabel,
-                                                               "gnu_asm");
+                                                               "gnu_asm",
+                                                               kCEETokenStringOptionCompact);
             if (symbol) {
                 if (symbol->name)
                     symbol->name = cee_strtrim(symbol->name, ":");
@@ -1437,7 +1443,8 @@ static void statement_parse(GNUASMParser* parser)
                                                                            q,
                                                                            q,
                                                                            kCEESourceSymbolTypeVariableDeclaration,
-                                                                           "gnu_asm");
+                                                                           "gnu_asm",
+                                                                           kCEETokenStringOptionCompact);
                         if (symbol) {
                             current->symbols = cee_list_prepend(current->symbols, symbol);
                             cee_source_fregment_type_set(current, kCEESourceFregmentTypeDeclaration);

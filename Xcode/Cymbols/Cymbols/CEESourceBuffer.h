@@ -47,7 +47,6 @@ typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
 @property CEESourceParserRef parser_ref;
 @property CEEList* symbol_wrappers;
 
-- (instancetype)initWithFilePath:(nullable NSString*)filePath;
 - (void)setState:(CEESourceBufferState)state;
 - (void)clearState:(CEESourceBufferState)state;
 - (BOOL)stateSet:(CEESourceBufferState)state;
@@ -63,6 +62,11 @@ typedef enum _CEESourceBufferParserOption {
     kCEESourceBufferParserOptionCreateSymbolWrapper = 1 << 0,
 } CEESourceBufferParserOption;
 
+typedef enum _CEESourceBufferOpenOption {
+    kCEESourceBufferOpenOptionShare = 1 << 0,
+    kCEESourceBufferOpenOptionIndependent = 1 << 1,
+} CEESourceBufferOpenOption;
+
 void cee_source_buffer_parse(CEESourceBuffer* buffer,
                              CEESourceBufferParserOption options);
 
@@ -70,7 +74,7 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
 @property (readonly, strong) NSMutableArray* buffers;
 @property (strong, readonly) NSString* temporaryDirectory;
 
-- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath;
+- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath andOption:(CEESourceBufferOpenOption)option;
 - (CEESourceBuffer*)openUntitledSourceBuffer;
 - (void)closeSourceBuffer:(CEESourceBuffer*)buffer;
 - (BOOL)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath;

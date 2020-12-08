@@ -56,24 +56,35 @@
     return ret;
 }
 
-- (CEESourceBuffer*)project:(CEEProject*)project securityCreateSourceBufferWithFilePath:(NSString*)filePath {
+- (CEESourceBuffer*)project:(CEEProject*)project securityOpenSourceBufferWithFilePath:(NSString*)filePath {
     if (!project || !filePath)
         return nil;
     
     CEESourceBuffer* buffer = nil;
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
     if (access([filePath UTF8String], R_OK) != 0) {
         NSArray* bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
         if (bookmarks) {
             [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
             [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
         }
     }
     else {
-        buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
     }
     
     return buffer;
+}
+
+- (void)project:(CEEProject*)project securityCloseSourceBuffer:(CEESourceBuffer*)buffer {
+    if (!project || !buffer)
+        return;
+    
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    [sourceBufferManager closeSourceBuffer:buffer];
 }
 
 - (void)viewWillAppear {
@@ -137,6 +148,7 @@
         while (p) {
             
             @autoreleasepool {
+                
                 CEEProjectFilePathEntryInfo* info = p->data;
                 NSString* filePath = [NSString stringWithUTF8String:info->file_path];
                 CEEList* list = NULL;
@@ -151,8 +163,11 @@
                 }
                 
                 if (shouldParsed) {
-                    
-                    CEESourceBuffer* buffer = [self project:self->_project securityCreateSourceBufferWithFilePath:filePath];
+                    __block CEESourceBuffer* buffer = nil;
+                    // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        buffer = [self project:self->_project securityOpenSourceBufferWithFilePath:filePath];
+                    });
                     
                     if (self->_sync && info->symbol_count)
                         cee_database_symbols_delete_by_filepath(self->_project.database,
@@ -179,6 +194,10 @@
                         cee_list_free(list);
                     }
                     
+                    // close source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        [self project:self->_project securityCloseSourceBuffer:buffer];
+                    });
                 }
                 
                 p = p->next;

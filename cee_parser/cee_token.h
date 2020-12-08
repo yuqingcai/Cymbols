@@ -515,6 +515,7 @@ typedef enum _CEERangeListType {
 typedef enum _CEETokenStringOption {
     kCEETokenStringOptionDefault = 0,
     kCEETokenStringOptionCompact = 0x1 << 0,
+    kCEETokenStringOptionIncompact = 0x1 << 1,
 } CEETokenStringOption;
 
 typedef struct _CEEToken {

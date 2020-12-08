@@ -116,7 +116,7 @@ cee_char* cee_string_from_token_slice(const cee_char* subject,
     
     while (p) {
         token = p->data;
-                
+        
         if (option & kCEETokenStringOptionCompact) {
             if (cee_token_id_is_newline(token->identifier) ||
                  cee_token_id_is_whitespace(token->identifier))

@@ -1289,7 +1289,8 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
                                                                       s,
                                                                       q,
                                                                       kCEESourceSymbolTypePrepDirectiveInclude,
-                                                                      "c");
+                                                                      "c",
+                                                                      kCEETokenStringOptionIncompact);
         cee_source_symbol_name_format(include_directive->name);
         cee_token_slice_state_mark(TOKEN_NEXT(s), q, kCEETokenStateSymbolOccupied);
         fregment->symbols = cee_list_prepend(fregment->symbols, include_directive);
@@ -1300,7 +1301,8 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
                                                                      r,
                                                                      t,
                                                                      kCEESourceSymbolTypePrepDirectiveIncludePath,
-                                                                     "c");
+                                                                     "c",
+                                                                     kCEETokenStringOptionIncompact);
             cee_token_slice_state_mark(r, t, kCEETokenStateSymbolOccupied);
             fregment->symbols = cee_list_prepend(fregment->symbols, include_path);
         }
@@ -1392,7 +1394,8 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
                                                                      s,
                                                                      s,
                                                                      kCEESourceSymbolTypePrepDirectiveDefine,
-                                                                     "c");
+                                                                     "c",
+                                                                     kCEETokenStringOptionIncompact);
         cee_token_slice_state_mark(s, t, kCEETokenStateSymbolOccupied);
         fregment->symbols = cee_list_prepend(fregment->symbols, define_directive);
         ret = TRUE;
@@ -1405,7 +1408,8 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
                                                                   p,
                                                                   p,
                                                                   kCEESourceSymbolTypePrepDirectiveParameter,
-                                                                  "c");
+                                                                  "c",
+                                                                  kCEETokenStringOptionCompact);
             cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
             fregment->symbols = cee_list_prepend(fregment->symbols, parameter);
             p = TOKEN_NEXT(p);
@@ -1450,7 +1454,8 @@ static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
                                                                      p,
                                                                      q,
                                                                      kCEESourceSymbolTypePrepDirectiveCommon,
-                                                                     "c");
+                                                                     "c",
+                                                                     kCEETokenStringOptionIncompact);
         cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
         fregment->symbols = cee_list_prepend(fregment->symbols, common_directive);
         ret = TRUE;
@@ -1678,7 +1683,8 @@ static cee_boolean c_template_parameters_parse(CEESourceFregment* fregment)
                                                              begin, 
                                                              end, 
                                                              kCEESourceSymbolTypeTemplateDeclaration,
-                                                             "c");
+                                                             "c",
+                                                             kCEETokenStringOptionCompact);
         fregment->symbols = cee_list_prepend(fregment->symbols, template);
     }
     
@@ -1835,7 +1841,8 @@ CEESourceSymbol* c_inheritance_definition_create(CEEList* tokens,
                                                                name, 
                                                                name, 
                                                                kCEESourceSymbolTypeUnknow, 
-                                                               "c");
+                                                               "c",
+                                                               kCEETokenStringOptionCompact);
         definition->proto = cee_string_from_token(subject, name->data);
         cee_token_slice_state_mark(name, name, kCEETokenStateSymbolOccupied);
     }
@@ -1845,7 +1852,8 @@ CEESourceSymbol* c_inheritance_definition_create(CEEList* tokens,
                                                                trap_keyword, 
                                                                trap_keyword, 
                                                                kCEESourceSymbolTypeUnknow, 
-                                                               "c");
+                                                               "c",
+                                                               kCEETokenStringOptionCompact);
     }
     
     definition->derives = derives_str;
@@ -2039,7 +2047,8 @@ static CEEList* enumerators_extract(CEEList* tokens,
                                                                        q, 
                                                                        q, 
                                                                        kCEESourceSymbolTypeEnumerator, 
-                                                                       "c");
+                                                                       "c",
+                                                                       kCEETokenStringOptionCompact);
                 enumerator->proto = cee_strdup(enum_symbol->name);
                 cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
                 enumerators = cee_list_prepend(enumerators, enumerator);
@@ -2153,7 +2162,8 @@ static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
                                                                r,
                                                                r,
                                                                kCEESourceSymbolTypeEnumDefinition,
-                                                               "c");
+                                                               "c",
+                                                               kCEETokenStringOptionCompact);
         cee_token_slice_state_mark(r, r, kCEETokenStateSymbolOccupied);
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
         cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeEnumDefinition);
@@ -2470,7 +2480,8 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
                                                                q, 
                                                                r,
                                                                kCEESourceSymbolTypeFunctionDefinition,
-                                                               "c");
+                                                               "c",
+                                                               kCEETokenStringOptionCompact);
         cee_token_slice_state_mark(q, r, kCEETokenStateSymbolOccupied);
         cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDefinition);
         
@@ -2744,7 +2755,8 @@ static CEESourceSymbol* c_function_parameter_identifier_create(CEESourceFregment
                                                                            begin, 
                                                                            end,
                                                                            kCEESourceSymbolTypeFunctionParameter,
-                                                                           "c");
+                                                                           "c",
+                                                                           kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(begin, end, kCEETokenStateSymbolOccupied);
     if (head && TOKEN_PREV(begin))
         parameter->proto = c_protos_string_from_token_slice(fregment->subject_ref,
@@ -2787,7 +2799,8 @@ static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment
                                                               p, 
                                                               p,
                                                               kCEESourceSymbolTypeFunctionParameter,
-                                                              "c");
+                                                              "c",
+                                                              kCEETokenStringOptionCompact);
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
         if (head && TOKEN_PREV(surrounded))
             parameter->proto = c_protos_string_from_token_slice(fregment->subject_ref,
@@ -2867,7 +2880,8 @@ static cee_boolean objective_c_message_definition_parse(CEESourceFregment* fregm
                                                               fregment->subject_ref,
                                                               components, 
                                                               kCEESourceSymbolTypeMessageDefinition, 
-                                                              "c");
+                                                              "c",
+                                                              kCEETokenStringOptionCompact);
                 if (symbol) {
                     symbol->proto = objective_c_message_protos_dump(fregment);
                     symbols = cee_list_prepend(symbols, symbol);
@@ -2885,7 +2899,8 @@ static cee_boolean objective_c_message_definition_parse(CEESourceFregment* fregm
                                                                        q, 
                                                                        q, 
                                                                        kCEESourceSymbolTypeMessageParameter, 
-                                                                       "c");
+                                                                       "c",
+                                                                       kCEETokenStringOptionCompact);
                     if (symbol) {
                         symbol->proto = objective_c_message_parameter_protos_dump(fregment,
                                                                                   parameter_index);
@@ -2995,7 +3010,8 @@ static cee_boolean objective_c_property_declaration_parse(CEESourceFregment* fre
                                                                         q,
                                                                         q,
                                                                         kCEESourceSymbolTypePropertyDeclaration,
-                                                                        "c");
+                                                                        "c",
+                                                                        kCEETokenStringOptionCompact);
                 if (declaration) {
                     declaration->proto = cee_strdup(proto);
                     declarations = cee_list_prepend(declarations, declaration);
@@ -3108,7 +3124,8 @@ static cee_boolean objective_c_message_declaration_parse(CEESourceFregment* freg
                                                                    fregment->subject_ref,
                                                                    components, 
                                                                    kCEESourceSymbolTypeMessageDeclaration, 
-                                                                   "c");
+                                                                   "c",
+                                                                   kCEETokenStringOptionCompact);
                 if (declaration) {
                     declaration->proto = objective_c_message_protos_dump(fregment);
                     declarations = cee_list_prepend(declarations, declaration);
@@ -3126,7 +3143,8 @@ static cee_boolean objective_c_message_declaration_parse(CEESourceFregment* freg
                                                                             q, 
                                                                             q, 
                                                                             kCEESourceSymbolTypeMessageParameter, 
-                                                                            "c");
+                                                                            "c",
+                                                                            kCEETokenStringOptionCompact);
                     if (declaration) {
                         declaration->proto = objective_c_message_parameter_protos_dump(fregment,
                                                                                        parameter_index);
@@ -3971,7 +3989,8 @@ static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregmen
                                                             r,
                                                             q,
                                                             kCEESourceSymbolTypeFunctionDeclaration,
-                                                            "c");
+                                                            "c",
+                                                            kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(r, q, kCEETokenStateSymbolOccupied);
     
     child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
@@ -3996,7 +4015,8 @@ static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFregment* freg
                                                             identifier,
                                                             identifier,
                                                             kCEESourceSymbolTypeCustomTypeDeclaration,
-                                                            "c");
+                                                            "c",
+                                                            kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
     
     if (proto)
@@ -4015,7 +4035,8 @@ static CEESourceSymbol* c_identifier_declaration_create(CEESourceFregment* fregm
                                                             identifier,
                                                             identifier,
                                                             kCEESourceSymbolTypeVariableDeclaration,
-                                                            "c");
+                                                            "c",
+                                                            kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
     
     if (proto)
@@ -4036,7 +4057,8 @@ static CEESourceSymbol* c_operator_overload_declaration_create(CEESourceFregment
                                                             overload,
                                                             overload,
                                                             kCEESourceSymbolTypeFunctionDeclaration,
-                                                            "c");
+                                                            "c",
+                                                            kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(overload, overload, kCEETokenStateSymbolOccupied);
     
     if (parameter_list) {
@@ -4087,7 +4109,8 @@ static CEESourceSymbol* c_surrounded_declaration_create(CEESourceFregment* fregm
                                                                 p, 
                                                                 p,
                                                                 kCEESourceSymbolTypeVariableDeclaration,
-                                                                "c");
+                                                                "c",
+                                                                kCEETokenStringOptionCompact);
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
         
         if (proto)
@@ -4221,7 +4244,8 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
                                                                    q, 
                                                                    q, 
                                                                    kCEESourceSymbolTypeNamespaceDefinition, 
-                                                                   "c");
+                                                                   "c",
+                                                                   kCEETokenStringOptionCompact);
             definition->proto = cee_string_from_token(fregment->subject_ref, q->data);
             cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
         }
@@ -4231,7 +4255,8 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
                                                                    trap_keyword, 
                                                                    trap_keyword, 
                                                                    kCEESourceSymbolTypeNamespaceDefinition, 
-                                                                   "c");
+                                                                   "c",
+                                                                   kCEETokenStringOptionCompact);
         }
         
         if (definition) {
@@ -4300,7 +4325,8 @@ static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
                                                                      q,
                                                                      r,
                                                                      kCEESourceSymbolTypeExternBlock,
-                                                                     "c");
+                                                                     "c",
+                                                                     kCEETokenStringOptionCompact);
             
             if (extern_block->name)
                 cee_free(extern_block->name);
@@ -4427,7 +4453,8 @@ static void label_parse(CParser* parser)
                                                                             p, 
                                                                             p,
                                                                             kCEESourceSymbolTypeLabel,
-                                                                            "c");
+                                                                            "c",
+                                                                            kCEETokenStringOptionCompact);
                     cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
                     
                     cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeLabelDeclaration);
@@ -4681,7 +4708,8 @@ static CEESourceSymbol* objective_c_interface_extract(CEEList* tokens,
                                                           name, 
                                                           name, 
                                                           kCEESourceSymbolTypeInterfaceDeclaration, 
-                                                          "c");
+                                                          "c",
+                                                          kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(name, name, kCEETokenStateSymbolOccupied);
     
     if (derives)
@@ -4750,7 +4778,8 @@ static CEESourceSymbol* objective_c_implementation_extract(CEEList* tokens,
                                                                p, 
                                                                p, 
                                                                kCEESourceSymbolTypeImplementationDefinition, 
-                                                               "c");
+                                                               "c",
+                                                               kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
     
 exit:
@@ -4790,7 +4819,8 @@ static CEESourceSymbol* objective_c_protocol_extract(CEEList* tokens,
                                                          p, 
                                                          p, 
                                                          kCEESourceSymbolTypeProtocolDeclaration, 
-                                                         "c");
+                                                         "c",
+                                                         kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
 exit:
 #ifdef DEBUG_PROTOCOL
@@ -5144,7 +5174,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         else {
             token->state |= kCEETokenStateIgnore;
         }
-                
+        
         if (!ret)
             break;
         

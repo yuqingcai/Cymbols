@@ -16,6 +16,7 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
 }
 @property (strong) NSDate* fileLastModifiedDate;
 @property (strong) NSDate* lastModifiedDate;
+- (instancetype)initWithFilePath:(nullable NSString*)filePath;
 - (void)saveAtFilePath:(NSString*)filePath;
 @end
 
@@ -352,6 +353,9 @@ static void binary_buffer_modified(cee_pointer buffer,
 }
 
 - (void)decreaseReferenceCount {
+    if (!_referenceCount)
+        return;
+    
     _referenceCount --;
     if (_referenceCount == 1) {
         if ([self stateSet:kCEESourceBufferStateModified])
@@ -424,25 +428,32 @@ static void binary_buffer_modified(cee_pointer buffer,
         [[NSFileManager defaultManager] createDirectoryAtPath:_temporaryDirectory withIntermediateDirectories:YES attributes:nil error:nil];
 }
 
-- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString*)filePath {
+- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString*)filePath andOption:(CEESourceBufferOpenOption)option {
     if (!filePath || ![[NSFileManager defaultManager] fileExistsAtPath:filePath])
         return nil;
     
     CEESourceBuffer* target = nil;
     
-    for (CEESourceBuffer* buffer in _buffers) {
-        if ([buffer.filePath isEqualToString:filePath])
-            target = buffer;
+    if (option & kCEESourceBufferOpenOptionShare) {
+        for (CEESourceBuffer* buffer in _buffers) {
+            if ([buffer.filePath isEqualToString:filePath])
+                target = buffer;
+        }
+        
+        if (!target) {
+            target = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+            if (!target)
+                return nil;
+            [_buffers addObject:target];
+        }
+        
+        [target increaseReferenceCount];
     }
-    
-    if (!target) {
+    else {
         target = [[CEESourceBuffer alloc] initWithFilePath:filePath];
         if (!target)
             return nil;
-        [_buffers addObject:target];
     }
-    
-    [target increaseReferenceCount];
     
     return target;
 }
@@ -466,8 +477,10 @@ static void binary_buffer_modified(cee_pointer buffer,
 
 - (void)closeSourceBuffer:(CEESourceBuffer*)buffer {
     [buffer decreaseReferenceCount];
-    if (!buffer.referenceCount)
-        [_buffers removeObject:buffer];
+    if (!buffer.referenceCount) {
+        if ([_buffers containsObject:buffer])
+            [_buffers removeObject:buffer];
+    }
 }
 
 - (BOOL)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {

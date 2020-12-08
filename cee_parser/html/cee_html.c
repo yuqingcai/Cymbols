@@ -394,7 +394,8 @@ static void html_tag_symbols_create(CEESourceFregment* fregment)
                                                                p,
                                                                p,
                                                                type,
-                                                               "html");
+                                                               "html",
+                                                               kCEETokenStringOptionCompact);
             fregment->symbols = cee_list_prepend(fregment->symbols, symbol);
         }
         p = TOKEN_NEXT(p);

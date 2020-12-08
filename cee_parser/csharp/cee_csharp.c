@@ -385,11 +385,11 @@ static CEESourceSymbol* csharp_method_parameter_create(CEESourceFregment* fregme
 static cee_char* csharp_type_descriptor_from_token_slice(CEESourceFregment* fregment,
                                                          CEEList* p,
                                                          CEEList* q);
-static cee_char* csharp_method_protos_descriptor_create(CEESourceFregment* fregment,
-                                                        CEESourceSymbol* definition,
-                                                        CEEList* parameters,
-                                                        CEEList* method,
-                                                        const cee_char* type);
+static cee_char* csharp_method_proto_descriptor_create(CEESourceFregment* fregment,
+                                                       CEESourceSymbol* definition,
+                                                       CEEList* parameters,
+                                                       CEEList* method,
+                                                       const cee_char* type);
 static const cee_char* csharp_access_level_search(CEESourceFregment* fregment,
                                                   CEEList* begin,
                                                   CEEList* end);
@@ -1535,7 +1535,8 @@ static void label_parse(CSharpParser* parser)
                                                                             p,
                                                                             p,
                                                                             kCEESourceSymbolTypeLabel,
-                                                                            "csharp");
+                                                                            "csharp",
+                                                                            kCEETokenStringOptionCompact);
                     cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
                     
                     cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeLabelDeclaration);
@@ -1820,7 +1821,8 @@ static cee_boolean csharp_declaration_parse(CEESourceFregment* fregment)
                                                                         identifier,
                                                                         identifier,
                                                                         kCEESourceSymbolTypeVariableDeclaration,
-                                                                        "csharp");
+                                                                        "csharp",
+                                                                        kCEETokenStringOptionCompact);
                 if (!first_identifier)
                     first_identifier = identifier;
             }
@@ -2027,7 +2029,8 @@ next_token:
                                                            p,
                                                            p,
                                                            definition_type,
-                                                           "csharp");
+                                                           "csharp",
+                                                           kCEETokenStringOptionCompact);
     if (definition) {
         
         if (bases)
@@ -2144,7 +2147,8 @@ next_token:
                                                            identifier,
                                                            identifier,
                                                            kCEESourceSymbolTypeEnumDefinition,
-                                                           "csharp");
+                                                           "csharp",
+                                                           kCEETokenStringOptionCompact);
     if (definition) {
         
         if (base)
@@ -2217,7 +2221,8 @@ static CEEList* enumerators_extract(CEEList* tokens,
                                                                        q,
                                                                        q,
                                                                        kCEESourceSymbolTypeEnumerator,
-                                                                       "csharp");
+                                                                       "csharp",
+                                                                       kCEETokenStringOptionCompact);
                 if (enumerator) {
                     enumerator->proto = csharp_declaration_proto_descriptor_create(token->fregment_ref,
                                                                                    enumerator,
@@ -2609,7 +2614,8 @@ next_token:
                                                        q,
                                                        identifier,
                                                        symbol_type,
-                                                       "csharp");
+                                                       "csharp",
+                                                       kCEETokenStringOptionCompact);
     if (method) {
         cee_token_slice_state_mark(q,
                                    identifier,
@@ -2630,11 +2636,11 @@ next_token:
             csharp_method_parameters_parse(child);
         }
         
-        method->proto = csharp_method_protos_descriptor_create(fregment,
-                                                               method,
-                                                               child->symbols,
-                                                               q,
-                                                               type);
+        method->proto = csharp_method_proto_descriptor_create(fregment,
+                                                              method,
+                                                              child->symbols,
+                                                              q,
+                                                              type);
         fregment->symbols = cee_list_prepend(fregment->symbols, method);
     }
         
@@ -2793,7 +2799,8 @@ static CEESourceSymbol* csharp_method_parameter_create(CEESourceFregment* fregme
                                                                            begin,
                                                                            end,
                                                                            kCEESourceSymbolTypeFunctionParameter,
-                                                                           "csharp");
+                                                                           "csharp",
+                                                                           kCEETokenStringOptionCompact);
     if (!parameter)
         return NULL;
     
@@ -2867,11 +2874,11 @@ static cee_char* csharp_type_descriptor_from_token_slice(CEESourceFregment* freg
     return protos;
 }
 
-static cee_char* csharp_method_protos_descriptor_create(CEESourceFregment* fregment,
-                                                        CEESourceSymbol* definition,
-                                                        CEEList* parameters,
-                                                        CEEList* method,
-                                                        const cee_char* type)
+static cee_char* csharp_method_proto_descriptor_create(CEESourceFregment* fregment,
+                                                       CEESourceSymbol* definition,
+                                                       CEEList* parameters,
+                                                       CEEList* method,
+                                                       const cee_char* type)
 {
     if (!fregment || !definition)
         return NULL;
@@ -3171,7 +3178,8 @@ next_token:
                                                                   operator,
                                                                   q,
                                                                   symbol_type,
-                                                                  "csharp");
+                                                                  "csharp",
+                                                                  kCEETokenStringOptionCompact);
     if (operator_overload) {
         
         if (symbol_type == kCEESourceSymbolTypeOperatorOverloadDefinition) {
@@ -3194,11 +3202,11 @@ next_token:
             csharp_method_parameters_parse(child);
         }
         
-        operator_overload->proto = csharp_method_protos_descriptor_create(fregment,
-                                                                          operator_overload,
-                                                                          child->symbols,
-                                                                          operator,
-                                                                          type);
+        operator_overload->proto = csharp_method_proto_descriptor_create(fregment,
+                                                                         operator_overload,
+                                                                         child->symbols,
+                                                                         operator,
+                                                                         type);
         fregment->symbols = cee_list_prepend(fregment->symbols, operator_overload);
     }
     
@@ -3372,7 +3380,8 @@ next_token:
                                                             identifier,
                                                             identifier,
                                                             kCEESourceSymbolTypePropertyDeclaration,
-                                                            "csharp");
+                                                            "csharp",
+                                                            kCEETokenStringOptionCompact);
     if (declaration) {
         cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeDeclaration);
         
@@ -3511,7 +3520,8 @@ static cee_boolean csharp_event_parse(CEESourceFregment* fregment)
                                                                         identifier,
                                                                         identifier,
                                                                         kCEESourceSymbolTypeVariableDeclaration,
-                                                                        "csharp");
+                                                                        "csharp",
+                                                                        kCEETokenStringOptionCompact);
                 if (!first_identifier)
                     first_identifier = identifier;
             }
@@ -3695,7 +3705,8 @@ static cee_boolean csharp_indexer_declaration_parse(CEESourceFregment* fregment)
                                                                         parameter_list,
                                                                         parameter_list_end,
                                                                         kCEESourceSymbolTypeVariableDeclaration,
-                                                                        "csharp");
+                                                                        "csharp",
+                                                                        kCEETokenStringOptionCompact);
             }
             
             if (declaration) {
@@ -3803,7 +3814,8 @@ next_token:
                                                            TOKEN_FIRST(identifier),
                                                            TOKEN_LAST(identifier),
                                                            kCEESourceSymbolTypeNamespaceDefinition,
-                                                           "csharp");
+                                                           "csharp",
+                                                           kCEETokenStringOptionCompact);
     if (definition) {
         if (definition->name) {
             cee_free(definition->name);
@@ -3921,7 +3933,8 @@ next_token:
                                                            q,
                                                            TOKEN_PREV(p),
                                                            kCEESourceSymbolTypeUsingDeclaration,
-                                                           "csharp");
+                                                           "csharp",
+                                                           kCEETokenStringOptionIncompact);
     if (definition) {
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
         cee_source_fregment_type_set_exclusive(fregment,
@@ -3934,7 +3947,8 @@ next_token:
                                                                    TOKEN_FIRST(identifier),
                                                                    TOKEN_LAST(identifier),
                                                                    kCEESourceSymbolTypeVariableDeclaration,
-                                                                   "csharp");
+                                                                   "csharp",
+                                                                   kCEETokenStringOptionCompact);
             if (definition) {
                 fregment->symbols = cee_list_prepend(fregment->symbols, definition);
                 definition->proto = csharp_declaration_proto_descriptor_create(fregment,
@@ -4104,7 +4118,8 @@ next_token:
                                                          identifier,
                                                          identifier,
                                                          kCEESourceSymbolTypeFunctionDeclaration,
-                                                         "csharp");
+                                                         "csharp",
+                                                         kCEETokenStringOptionCompact);
     if (delegate) {
         cee_token_slice_state_mark(identifier,
                                    identifier,
@@ -4119,11 +4134,11 @@ next_token:
             csharp_method_parameters_parse(child);
         }
         
-        delegate->proto = csharp_method_protos_descriptor_create(fregment,
-                                                                 delegate,
-                                                                 child->symbols,
-                                                                 identifier,
-                                                                 "function_declaration");
+        delegate->proto = csharp_method_proto_descriptor_create(fregment,
+                                                                delegate,
+                                                                child->symbols,
+                                                                identifier,
+                                                                "function_declaration");
         fregment->symbols = cee_list_prepend(fregment->symbols, delegate);
     }
             

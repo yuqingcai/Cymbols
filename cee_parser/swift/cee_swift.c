@@ -398,8 +398,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
     } while(1);
     
-    
-    cee_source_fregment_tree_string_print(parser->statement_root);
+    cee_source_fregment_tree_symbols_parent_parse(parser->statement_root);
     
     *statement = parser->statement_root;
     *prep_directive = NULL;

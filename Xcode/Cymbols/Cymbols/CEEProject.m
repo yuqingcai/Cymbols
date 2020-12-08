@@ -208,7 +208,7 @@ BOOL ContextContainSymbol(CEEList* context,
         bookmarks = [self.session.project getSecurityBookmarksWithFilePaths:@[filePath]];
         if (bookmarks) {
             [self.session.project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
+            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionShare];
             [self.session.project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
         }
         else {
@@ -216,7 +216,7 @@ BOOL ContextContainSymbol(CEEList* context,
         }
     }
     else {
-        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
+        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionShare];
     }
     
     return buffer;

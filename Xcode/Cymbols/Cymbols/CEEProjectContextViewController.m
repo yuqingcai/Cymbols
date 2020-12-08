@@ -25,23 +25,35 @@
 
 @implementation CEEProjectContextViewController
 
-- (CEESourceBuffer*)project:(CEEProject*)project securityCreateSourceBufferWithFilePath:(NSString*)filePath {
+- (CEESourceBuffer*)project:(CEEProject*)project securityOpenSourceBufferWithFilePath:(NSString*)filePath {
     if (!project || !filePath)
         return nil;
-    
+        
     CEESourceBuffer* buffer = nil;
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
     if (access([filePath UTF8String], R_OK) != 0) {
         NSArray* bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
         if (bookmarks) {
             [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
             [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
         }
     }
     else {
-        buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
+        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
     }
+    
     return buffer;
+}
+
+- (void)project:(CEEProject*)project securityCloseSourceBuffer:(CEESourceBuffer*)buffer {
+    if (!project || !buffer)
+        return;
+    
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    [sourceBufferManager closeSourceBuffer:buffer];
 }
 
 - (void)viewDidLoad {
@@ -136,7 +148,7 @@
             return;
         CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)_symbolTable.selectedRow);
         NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-        CEESourceBuffer* buffer = [self project:_project securityCreateSourceBufferWithFilePath:filePath];
+        CEESourceBuffer* buffer = [self project:_project securityOpenSourceBufferWithFilePath:filePath];
         cee_source_buffer_parse(buffer, 0);
         [_editViewController setBuffer:buffer];
         CEEList* ranges = cee_ranges_from_string(symbol->locations);
@@ -145,6 +157,7 @@
             cee_list_free_full(ranges, cee_range_free);
         }
         [_titlebar setTitle:filePath];
+        [self project:_project securityCloseSourceBuffer:buffer];
         return;
     }
 }

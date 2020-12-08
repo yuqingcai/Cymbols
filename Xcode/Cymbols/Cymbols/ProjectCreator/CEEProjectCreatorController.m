@@ -57,7 +57,7 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     
     [_propertyView.filePathTable setDataSource:self];
     [_propertyView.filePathTable setDelegate:self];
-    [_propertyView.filePathTable setColumns:1];
+    [_propertyView.filePathTable setColumns:2];
     [_propertyView.filePathTable setAllowsMultipleSelection:NO];
 }
 
@@ -179,8 +179,13 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
         NSString* filePath = _setting.filePathsExpanded[row];
         if (column == 0) {
             CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFileNameCellView"];
-            cellView.title.stringValue = filePath;
+            cellView.title.stringValue = [filePath lastPathComponent];
             [cellView.icon setImage:[styleManager filetypeIconFromFilePath:filePath]];
+            return cellView;
+        }
+        else if (column == 1) {
+            CEEFilePathCellView* cellView = [tableView makeViewWithIdentifier:@"IDFilePathCellView"];
+            cellView.title.stringValue = filePath;
             return cellView;
         }
     }
@@ -198,6 +203,8 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     }
     else if (tableView == _propertyView.filePathTable) {
         if (column == 0)
+            return @"Name";
+        else if (column == 1)
             return @"Path";
         else
             return @"";

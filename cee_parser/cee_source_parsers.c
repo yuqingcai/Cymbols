@@ -38,7 +38,7 @@ void cee_parsers_create()
     c_parser = cee_c_parser_create("c");
     html_parser = cee_html_parser_create("html");
     css_parser = cee_css_parser_create("css");
-    //swift_parser = cee_swift_parser_create("swift");
+    swift_parser = cee_swift_parser_create("swift");
     java_parser = cee_java_parser_create("java");
     gnu_asm_parser = cee_gnu_asm_parser_create("gnu_asm");
     csharp_parser = cee_csharp_parser_create("csharp");
@@ -54,14 +54,14 @@ void cee_parsers_free()
     cee_c_parser_free(c_parser);
     cee_html_parser_free(html_parser);
     cee_css_parser_free(css_parser);
-    //cee_swift_parser_free(swift_parser);
+    cee_swift_parser_free(swift_parser);
     cee_java_parser_free(java_parser);
     cee_gnu_asm_parser_free(gnu_asm_parser);
     cee_csharp_parser_free(gnu_asm_parser);
     
     /**
+        cee_java_script_parser_free(swift_parser);
         cee_arm_asm_parser_free(arm_asm_parser);
-        cee_swift_parser_free(java_script_parser);
      */
     
     if (asm_parser_name)
@@ -113,12 +113,12 @@ static cee_boolean is_csharp_source_extension(const cee_char* extension)
 {
     return !cee_strcmp(extension, "cs", FALSE);
 }
+
 /*
 static cee_boolean is_java_script_source_extension(const cee_char* extension)
 {
     return !cee_strcmp(extension, "js", FALSE);
 }
-
 */
 
 CEESourceParserRef cee_source_parser_get(const cee_char* filepath)
@@ -135,8 +135,8 @@ CEESourceParserRef cee_source_parser_get(const cee_char* filepath)
         parser = html_parser;
     else if (is_css_source_extension(extension))
         parser = css_parser;
-    //else if (is_swift_source_extension(extension))
-    //    parser = swift_parser;
+    else if (is_swift_source_extension(extension))
+        parser = swift_parser;
     else if (is_java_source_extension(extension))
         parser = java_parser;
     else if (is_asm_source_extension(extension))

@@ -86,12 +86,14 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* filep
                                                            CEEList* begin,
                                                            CEEList* end,
                                                            CEESourceSymbolType type,
-                                                           const cee_char* language);
+                                                           const cee_char* language,
+                                                           CEETokenStringOption option);
 CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* filepath,
                                                       const cee_char* subject,
                                                       CEEList* tokens,
                                                       CEESourceSymbolType type,
-                                                      const cee_char* language);
+                                                      const cee_char* language,
+                                                      CEETokenStringOption option);
 void cee_source_symbol_name_format(cee_char* name);
 void cee_source_symbol_print(CEESourceSymbol* symbol);
 void cee_source_symbols_print(CEEList* symbols);

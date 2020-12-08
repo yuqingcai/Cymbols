@@ -273,9 +273,11 @@ static CEEList* enumerators_extract(CEEList* tokens,
                                     const cee_char* subject);
 static cee_char* java_variable_proto_descriptor_create(CEESourceFregment* fregment,
                                                        CEESourceSymbol* definition,
+                                                       CEEList* identifier,
                                                        const cee_char* proto);
 static cee_char* java_class_proto_descriptor_create(CEESourceFregment* fregment,
                                                     CEESourceSymbol* definition,
+                                                    CEEList* identifier,
                                                     const cee_char* derives_str);
 static cee_char* java_name_scope_list_string_create(CEEList* scopes,
                                                     const cee_char* subject);
@@ -295,18 +297,22 @@ static CEESourceSymbol* java_method_parameter_create(CEESourceFregment* fregment
 static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregment,
                                                        CEEList* p,
                                                        CEEList* q);
-static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_method_definition_proto_descriptor_create(CEESourceFregment* fregment,
+                                                                CEESourceSymbol* definition,
+                                                                CEEList* parameters,
+                                                                CEEList* method,
+                                                                CEEList* throws,
+                                                                CEEList* commit);
+static cee_char* java_method_declaration_proto_descriptor_create(CEESourceFregment* fregment,
                                                                  CEESourceSymbol* definition,
                                                                  CEEList* parameters,
                                                                  CEEList* method,
-                                                                 CEEList* throws,
-                                                                 CEEList* commit);
-static cee_char* java_method_declaration_protos_descriptor_create(CEESourceFregment* fregment,
-                                                                  CEESourceSymbol* definition,
-                                                                  CEEList* parameters,
-                                                                  const cee_char* return_str,
-                                                                  CEEList* throws);
+                                                                 const cee_char* return_str,
+                                                                 CEEList* throws);
 static void exception_free(cee_pointer data);
+static const cee_char* java_access_level_search(CEESourceFregment* fregment,
+                                                CEEList* begin,
+                                                CEEList* end);
 /**
  * parser
  */
@@ -1083,7 +1089,8 @@ static void label_parse(JavaParser* parser)
                                                                             p,
                                                                             p,
                                                                             kCEESourceSymbolTypeLabel,
-                                                                            "java");
+                                                                            "java",
+                                                                            kCEETokenStringOptionCompact);
                     if (declaration) {
                         cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
                         cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeLabelDeclaration);
@@ -1549,7 +1556,8 @@ static CEESourceSymbol* java_method_declaration_create(CEESourceFregment* fregme
                                                             identifier, 
                                                             identifier,
                                                             kCEESourceSymbolTypeFunctionDeclaration,
-                                                            "java");
+                                                            "java",
+                                                            kCEETokenStringOptionCompact);
     if (declaration) {
         
         child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
@@ -1558,11 +1566,12 @@ static CEESourceSymbol* java_method_declaration_create(CEESourceFregment* fregme
             java_method_parameters_parse(child);
         }
         
-        declaration->proto = java_method_declaration_protos_descriptor_create(fregment,
-                                                                              declaration,
-                                                                              child->symbols,
-                                                                              type_str,
-                                                                              throws);
+        declaration->proto = java_method_declaration_proto_descriptor_create(fregment,
+                                                                             declaration,
+                                                                             child->symbols,
+                                                                             identifier,
+                                                                             type_str,
+                                                                             throws);
         cee_token_slice_state_mark(identifier,
                                    identifier,
                                    kCEETokenStateSymbolOccupied);
@@ -1580,12 +1589,14 @@ static CEESourceSymbol* java_identifier_declaration_create(CEESourceFregment* fr
                                                             identifier,
                                                             identifier,
                                                             kCEESourceSymbolTypeVariableDeclaration,
-                                                            "java");
+                                                            "java",
+                                                            kCEETokenStringOptionCompact);
     if (!declaration)
         return NULL;
     
     declaration->proto = java_variable_proto_descriptor_create(fregment, 
-                                                               declaration, 
+                                                               declaration,
+                                                               identifier,
                                                                type_str);
     cee_token_slice_state_mark(identifier,
                                identifier,
@@ -1661,7 +1672,8 @@ next_token:
                                                        r, 
                                                        s, 
                                                        kCEESourceSymbolTypeImport, 
-                                                       "java");
+                                                       "java",
+                                                       kCEETokenStringOptionIncompact);
     if (import) {
         cee_source_symbol_name_format(import->name);
         fregment->symbols = cee_list_prepend(fregment->symbols, import);
@@ -1748,7 +1760,8 @@ next_token:
                                                         r, 
                                                         s, 
                                                         kCEESourceSymbolTypePackage, 
-                                                        "java");
+                                                        "java",
+                                                        kCEETokenStringOptionIncompact);
     if (package) {
         cee_source_symbol_name_format(package->name);
         fregment->symbols = cee_list_prepend(fregment->symbols, package);
@@ -1918,7 +1931,8 @@ next_token:
                                                            p,
                                                            p,
                                                            kCEESourceSymbolTypeClassDefinition,
-                                                           "java");
+                                                           "java",
+                                                           kCEETokenStringOptionCompact);
     
     if (definition) {
         if (superclasses) {
@@ -1940,6 +1954,7 @@ next_token:
         definition->derives = derives_str;
         definition->proto = java_class_proto_descriptor_create(fregment,
                                                                definition,
+                                                               p,
                                                                derives_str);
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
         cee_source_fregment_type_set_exclusive(fregment,
@@ -2099,7 +2114,8 @@ next_token:
                                                            p, 
                                                            p, 
                                                            kCEESourceSymbolTypeInterfaceDefinition,
-                                                           "java");
+                                                           "java",
+                                                           kCEETokenStringOptionCompact);
     if (definition) {
         
         if (extendinterfaces)
@@ -2110,6 +2126,7 @@ next_token:
         definition->derives = derives_str;
         definition->proto = java_class_proto_descriptor_create(fregment,
                                                                definition,
+                                                               p,
                                                                derives_str);
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
         cee_source_fregment_type_set_exclusive(fregment,
@@ -2264,7 +2281,8 @@ next_token:
                                                            p, 
                                                            p, 
                                                            kCEESourceSymbolTypeEnumDefinition, 
-                                                           "java");
+                                                           "java",
+                                                           kCEETokenStringOptionCompact);
     if (definition) {
         if (supperinterfaces)
             derives_str = java_name_scope_list_string_create(supperinterfaces,
@@ -2274,6 +2292,7 @@ next_token:
         definition->derives = derives_str;
         definition->proto = java_class_proto_descriptor_create(fregment,
                                                                definition,
+                                                               p,
                                                                derives_str);
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
         cee_source_fregment_type_set_exclusive(fregment,
@@ -2342,10 +2361,12 @@ static CEEList* enumerators_extract(CEEList* tokens,
                                                                        q, 
                                                                        q, 
                                                                        kCEESourceSymbolTypeEnumerator, 
-                                                                       "java");
+                                                                       "java",
+                                                                       kCEETokenStringOptionCompact);
                 if (enumerator) {
                     enumerator->proto = java_variable_proto_descriptor_create(token->fregment_ref,
                                                                               enumerator,
+                                                                              q,
                                                                               enum_symbol->name);
                     cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
                     enumerators = cee_list_prepend(enumerators, enumerator);
@@ -2373,12 +2394,33 @@ static CEEList* enumerators_extract(CEEList* tokens,
 
 static cee_char* java_variable_proto_descriptor_create(CEESourceFregment* fregment,
                                                        CEESourceSymbol* definition,
+                                                       CEEList* identifier,
                                                        const cee_char* proto)
 {
     if (!fregment || !definition)
         return NULL;
     
+    CEESourceFregment* grandfather_fregment = NULL;
+    const cee_char* access_level = "public";
     cee_char* descriptor = NULL;
+    
+    if (identifier)
+        access_level = java_access_level_search(fregment,
+                                                SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                TOKEN_PREV(identifier));
+    if (!access_level) {
+        grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
+        if (grandfather_fregment) {
+            if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeEnumDefinition))
+                access_level = "private";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+    
+    
     cee_strconcat0(&descriptor, "{", NULL);
     
     if (definition->type == kCEESourceSymbolTypeLabel)
@@ -2389,6 +2431,7 @@ static cee_char* java_variable_proto_descriptor_create(CEESourceFregment* fregme
         cee_strconcat0(&descriptor, "type:", "variable", ",", NULL);
     
     cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
+    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
     cee_strconcat0(&descriptor, "proto:", proto, NULL);
     cee_strconcat0(&descriptor, "}", NULL);
 
@@ -2397,12 +2440,32 @@ static cee_char* java_variable_proto_descriptor_create(CEESourceFregment* fregme
 
 static cee_char* java_class_proto_descriptor_create(CEESourceFregment* fregment,
                                                     CEESourceSymbol* definition,
+                                                    CEEList* identifier,
                                                     const cee_char* derives_str)
 {
     if (!fregment || !definition)
         return NULL;
     
+    CEESourceFregment* grandfather_fregment = NULL;
+    const cee_char* access_level = "public";
     cee_char* descriptor = NULL;
+    
+    if (identifier)
+        access_level = java_access_level_search(fregment,
+                                                SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                TOKEN_PREV(identifier));
+    if (!access_level) {
+        grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
+        if (grandfather_fregment) {
+            if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeEnumDefinition))
+                access_level = "private";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+        
     cee_strconcat0(&descriptor, "{", NULL);
     
     if (definition->type == kCEESourceSymbolTypeClassDefinition)
@@ -2415,6 +2478,7 @@ static cee_char* java_class_proto_descriptor_create(CEESourceFregment* fregment,
         cee_strconcat0(&descriptor, "type:", "class_declaration", ",", NULL);
     
     cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
+    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
     cee_strconcat0(&descriptor, "derivers:", derives_str, NULL);
     cee_strconcat0(&descriptor, "}", NULL);
     
@@ -2640,7 +2704,8 @@ next_token:
                                                            identifier, 
                                                            identifier,
                                                            kCEESourceSymbolTypeFunctionDefinition,
-                                                           "java");
+                                                           "java",
+                                                           kCEETokenStringOptionCompact);
     
     if (definition) {
         cee_token_slice_state_mark(identifier,
@@ -2655,12 +2720,12 @@ next_token:
             java_method_parameters_parse(child);
         }
         
-        definition->proto = java_method_definition_protos_descriptor_create(fregment,
-                                                                            definition,
-                                                                            child->symbols,
-                                                                            identifier,
-                                                                            throws,
-                                                                            commit);
+        definition->proto = java_method_definition_proto_descriptor_create(fregment,
+                                                                           definition,
+                                                                           child->symbols,
+                                                                           identifier,
+                                                                           throws,
+                                                                           commit);
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
     }
     
@@ -2831,7 +2896,8 @@ static CEESourceSymbol* java_method_parameter_create(CEESourceFregment* fregment
                                                                            begin, 
                                                                            end,
                                                                            kCEESourceSymbolTypeFunctionParameter,
-                                                                           "java");
+                                                                           "java",
+                                                                           kCEETokenStringOptionCompact);
     
     if (!parameter)
         return NULL;
@@ -2842,7 +2908,8 @@ static CEESourceSymbol* java_method_parameter_create(CEESourceFregment* fregment
                                                                head,
                                                                TOKEN_PREV(begin));
         parameter->proto = java_variable_proto_descriptor_create(fregment, 
-                                                                 parameter, 
+                                                                 parameter,
+                                                                 NULL,
                                                                  type);
         if (type)
             cee_free(type);
@@ -2904,12 +2971,12 @@ static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregme
     return protos;
 }
 
-static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregment* fregment,
-                                                                 CEESourceSymbol* definition,
-                                                                 CEEList* parameters,
-                                                                 CEEList* method,
-                                                                 CEEList* throws,
-                                                                 CEEList* commit)
+static cee_char* java_method_definition_proto_descriptor_create(CEESourceFregment* fregment,
+                                                                CEESourceSymbol* definition,
+                                                                CEEList* parameters,
+                                                                CEEList* method,
+                                                                CEEList* throws,
+                                                                CEEList* commit)
 {
     if (!fregment || !definition)
         return NULL;
@@ -2923,9 +2990,11 @@ static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregme
     CEEList* p = NULL;
     CEEList* parent_symbols = NULL;
     CEESourceSymbol* parent_symbol = NULL;
-    CEESourceFregment* grandfather_fregment = NULL;   
+    CEESourceFregment* grandfather_fregment = NULL;
+    const cee_char* access_level = "public";
     const cee_char* subject = fregment->subject_ref;
     
+    grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
     if (method) {
         return_str = java_type_descriptor_from_token_slice(fregment, 
                                                            SOURCE_FREGMENT_TOKENS_FIRST(fregment), 
@@ -2935,15 +3004,14 @@ static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregme
          * use its parent symbol type as return type
          */
         if (!return_str) {
-            grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
             if (grandfather_fregment) {
-                if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeClassDefinition))
+                if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition))
                     parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
                                                                                 kCEESourceSymbolTypeClassDefinition);
-                else if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeInterfaceDefinition))
+                else if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition))
                     parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment, 
                                                                                 kCEESourceSymbolTypeInterfaceDefinition);
-                else if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition)) {
+                else if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeEnumDefinition)) {
                     parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment, 
                                                                                 kCEESourceSymbolTypeEnumDefinition);
                 }
@@ -2959,6 +3027,22 @@ static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregme
         }
     }
     
+    if (method)
+        access_level = java_access_level_search(fregment,
+                                                SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                TOKEN_PREV(method));
+    
+    if (!access_level) {
+        if (grandfather_fregment) {
+            if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeEnumDefinition))
+                access_level = "private";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+        
     if (throws && commit) {
         p = TOKEN_NEXT(throws);
         while (p) {
@@ -3008,6 +3092,7 @@ static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregme
     cee_strconcat0(&descriptor, "type:", "function_declaration", ",", NULL);
     cee_strconcat0(&descriptor, "return_type:", return_str, ",", NULL);
     cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
+    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
     cee_strconcat0(&descriptor, "parameters:[", NULL);
     p = parameters;
     while (p) {
@@ -3038,11 +3123,12 @@ static cee_char* java_method_definition_protos_descriptor_create(CEESourceFregme
     return descriptor;
 }
 
-static cee_char* java_method_declaration_protos_descriptor_create(CEESourceFregment* fregment,
-                                                                  CEESourceSymbol* definition,
-                                                                  CEEList* parameters,
-                                                                  const cee_char* return_str,
-                                                                  CEEList* throws)
+static cee_char* java_method_declaration_proto_descriptor_create(CEESourceFregment* fregment,
+                                                                 CEESourceSymbol* definition,
+                                                                 CEEList* parameters,
+                                                                 CEEList* method,
+                                                                 const cee_char* return_str,
+                                                                 CEEList* throws)
 {
     if (!fregment || !definition)
         return NULL;
@@ -3052,7 +3138,27 @@ static cee_char* java_method_declaration_protos_descriptor_create(CEESourceFregm
     cee_char* exceptions_str = NULL;
     cee_char* descriptor = NULL;
     CEEList* p = NULL;
+    CEESourceFregment* grandfather_fregment = NULL;
     const cee_char* subject = fregment->subject_ref;
+    const cee_char* access_level = "public";
+    
+    if (method)
+        access_level = java_access_level_search(fregment,
+                                                SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                TOKEN_PREV(method));
+    
+    if (!access_level) {
+        grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
+        if (grandfather_fregment) {
+            if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition) ||
+                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeEnumDefinition))
+                access_level = "private";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+    
     
     if (throws) {
         p = TOKEN_NEXT(throws);
@@ -3099,6 +3205,7 @@ static cee_char* java_method_declaration_protos_descriptor_create(CEESourceFregm
     cee_strconcat0(&descriptor, "type:", "function_declaration", ",", NULL);
     cee_strconcat0(&descriptor, "return_type:", return_str, ",", NULL);
     cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
+    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
     cee_strconcat0(&descriptor, "parameters:[", NULL);
     p = parameters;
     while (p) {
@@ -3132,4 +3239,29 @@ static void exception_free(cee_pointer data)
         return;
     
     cee_list_free((CEEList*)data);
+}
+
+static const cee_char* java_access_level_search(CEESourceFregment* fregment,
+                                                CEEList* begin,
+                                                CEEList* end)
+{
+    if (!begin || !end)
+        return NULL;
+    
+    CEEList* p = begin;
+    while (p) {
+        if (cee_token_is_identifier(p, kCEETokenID_PUBLIC))
+            return "public";
+        else if (cee_token_is_identifier(p, kCEETokenID_PROTECTED))
+            return "protected";
+        else if (cee_token_is_identifier(p, kCEETokenID_PRIVATE))
+            return "private";
+        
+        if (p == end)
+            break;
+        
+        p = TOKEN_NEXT(p);
+    }
+    
+    return NULL;
 }
