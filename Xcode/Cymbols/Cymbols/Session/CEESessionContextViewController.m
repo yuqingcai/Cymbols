@@ -10,6 +10,7 @@
 #import "CEEStyleManager.h"
 #import "CEESessionContextViewController.h"
 #import "CEEEditViewController.h"
+#import "CEETitlebarButton.h"
 #import "CEESymbolCellView.h"
 #import "CEEFileNameCellView.h"
 #import "CEEFilePathCellView.h"
@@ -19,8 +20,10 @@
 @interface CEESessionContextViewController ()
 @property (strong) IBOutlet CEETitleView *titlebar;
 @property (strong) IBOutlet CEEImageView *titleIcon;
+@property (weak) IBOutlet CEETitlebarButton* toggleButton;
 @property (strong) CEEEditViewController *editViewController;
 @property (strong) CEETableView *contextTable;
+
 @property CEESessionPort* port;
 @property CEEList* context_symbols;
 @end
@@ -33,7 +36,9 @@
     [super viewDidLoad];
     [self.view setTranslatesAutoresizingMaskIntoConstraints:NO];
     CGFloat leadingOffset = _titleIcon.frame.size.width ;
+    CGFloat tailingOffset = self.view.frame.size.width - _toggleButton.frame.origin.x;
     [_titlebar setLeadingOffset:leadingOffset];
+    [_titlebar setTailingOffset:tailingOffset];
     [_titlebar setTitle:@"Context"];
     [self createSubviews];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortCreateContextResponse:) name:CEENotificationSessionPortCreateContext object:nil];
