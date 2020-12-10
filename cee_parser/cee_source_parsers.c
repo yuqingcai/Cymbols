@@ -10,6 +10,7 @@
 #include "cee_java.h"
 #include "cee_gnu_asm.h"
 #include "cee_csharp.h"
+#include "cee_xml.h"
 
 static CEESourceParserRef asm_parser_get(const cee_char* extension);
 static cee_boolean using_gnu_asm(void);
@@ -18,6 +19,7 @@ static cee_boolean using_arm_asm(void);
 
 static CEESourceParserRef c_parser = NULL;
 static CEESourceParserRef html_parser = NULL;
+static CEESourceParserRef xml_parser = NULL;
 static CEESourceParserRef css_parser = NULL;
 static CEESourceParserRef swift_parser = NULL;
 static CEESourceParserRef java_parser = NULL;
@@ -37,6 +39,7 @@ void cee_parsers_create()
     asm_parser_name = cee_strdup("gnu");
     c_parser = cee_c_parser_create("c");
     html_parser = cee_html_parser_create("html");
+    xml_parser = cee_xml_parser_create("xml");
     css_parser = cee_css_parser_create("css");
     swift_parser = cee_swift_parser_create("swift");
     java_parser = cee_java_parser_create("java");
@@ -51,16 +54,18 @@ void cee_parsers_create()
 
 void cee_parsers_free()
 {
-    cee_c_parser_free(c_parser);
-    cee_html_parser_free(html_parser);
-    cee_css_parser_free(css_parser);
-    cee_swift_parser_free(swift_parser);
-    cee_java_parser_free(java_parser);
+    
+    cee_csharp_parser_free(csharp_parser);
     cee_gnu_asm_parser_free(gnu_asm_parser);
-    cee_csharp_parser_free(gnu_asm_parser);
+    cee_java_parser_free(java_parser);
+    cee_swift_parser_free(swift_parser);
+    cee_css_parser_free(css_parser);
+    cee_xml_parser_free(xml_parser);
+    cee_html_parser_free(html_parser);
+    cee_c_parser_free(c_parser);
     
     /**
-        cee_java_script_parser_free(swift_parser);
+        cee_java_script_parser_free(java_srcipt_parser);
         cee_arm_asm_parser_free(arm_asm_parser);
      */
     
@@ -92,11 +97,15 @@ static cee_boolean is_html_source_extension(const cee_char* extension)
     return !cee_strcmp(extension, "html", FALSE);
 }
 
+static cee_boolean is_xml_source_extension(const cee_char* extension)
+{
+    return !cee_strcmp(extension, "xml", FALSE);
+}
+
 static cee_boolean is_css_source_extension(const cee_char* extension)
 {
     return !cee_strcmp(extension, "css", FALSE);
 }
-
 
 static cee_boolean is_java_source_extension(const cee_char* extension)
 {
@@ -133,6 +142,8 @@ CEESourceParserRef cee_source_parser_get(const cee_char* filepath)
         parser = c_parser;
     else if (is_html_source_extension(extension))
         parser = html_parser;
+    else if (is_xml_source_extension(extension))
+        parser = xml_parser;
     else if (is_css_source_extension(extension))
         parser = css_parser;
     else if (is_swift_source_extension(extension))

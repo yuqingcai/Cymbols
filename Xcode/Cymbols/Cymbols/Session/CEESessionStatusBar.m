@@ -31,7 +31,7 @@
     [super drawRect:dirtyRect];
     CGFloat diff = 0.0;
     NSRect rect;
-        
+    
     if (_content) {
         NSMutableDictionary* attributes = [[NSMutableDictionary alloc] init];
         [attributes setValue:self.font forKey:NSFontAttributeName];

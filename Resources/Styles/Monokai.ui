@@ -357,7 +357,7 @@
     },
     
     "ClassSessionStatusBar [actived]" : {
-        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
         "background_color" : "#4B464D",
         "text_color" : "#EBEBEA",
         "icon_color" : "#EBEBEA",
@@ -367,7 +367,7 @@
     },
     
     "ClassSessionStatusBar [deactived]" : {
-        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "font" : "font(\"Helvetica\", 11.0, \"regular\", 5.0)",
         "background_color" : "#4B464D",
         "text_color" : "#EBEBEA",
         "icon_color" : "#EBEBEA",

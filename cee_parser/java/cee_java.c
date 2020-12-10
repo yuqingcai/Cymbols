@@ -2922,7 +2922,7 @@ static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregme
                                                        CEEList* q)
 {
     const cee_char* subject = fregment->subject_ref;
-    cee_char* protos = NULL;
+    cee_char* proto = NULL;
     CEEToken* token = NULL;
     cee_boolean found_type = FALSE;
     cee_char* str = NULL;
@@ -2938,7 +2938,7 @@ static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregme
             str = cee_strndup((cee_char*)&subject[token->offset], 
                               token->length);
             if (str) {
-                cee_strconcat0(&protos, str, NULL);
+                cee_strconcat0(&proto, str, NULL);
                 cee_free(str);
             }
             if (!found_type)
@@ -2952,7 +2952,7 @@ static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregme
             str = cee_strndup((cee_char*)&subject[token->offset], 
                               token->length);
             if (str) {
-                cee_strconcat0(&protos, str, NULL);
+                cee_strconcat0(&proto, str, NULL);
                 cee_free(str);
             }
         }
@@ -2968,7 +2968,7 @@ static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregme
         p = TOKEN_NEXT(p);
     }
     
-    return protos;
+    return proto;
 }
 
 static cee_char* java_method_definition_proto_descriptor_create(CEESourceFregment* fregment,

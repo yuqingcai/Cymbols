@@ -325,6 +325,7 @@ static cee_boolean should_statement_parsing(CSharpParser* parser);
 
 /** block */
 static void block_header_parse(CSharpParser* parser);
+static cee_boolean statement_block_parse(CEESourceFregment* fregment);
 static void block_push(CSharpParser* parser);
 static cee_boolean block_pop(CSharpParser* parser);
 static void block_parse(CSharpParser* parser);
@@ -837,7 +838,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                     parser_state_clear(parser, kCSharpParserStateStatementParsing);
                                
                 statement_token_push(parser, token);
-                               
+                
                 if (!block_reduce(parser))
                     parser_state_clear(parser, kCSharpParserStateStatementParsing);
             }
@@ -1427,7 +1428,7 @@ static void block_header_parse(CSharpParser* parser)
     CEEToken* token = NULL;
     CEEList* p = NULL;
     ParseTrap trap = NULL;
-    
+        
     if (!current || !current->tokens_ref)
         return;
     
@@ -1455,7 +1456,44 @@ static void block_header_parse(CSharpParser* parser)
             p = TOKEN_NEXT(p);
     }
     
+    if (statement_block_parse(current))
+        return;
+    
     return;
+}
+
+static cee_boolean statement_block_parse(CEESourceFregment* fregment)
+{
+    CEEList* p = NULL;
+    CEEToken* token = NULL;
+    
+    if (cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeAssignmentBlock) ||
+        cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeStatementBlock))
+        return TRUE;
+    
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    while (p) {
+        token = p->data;
+        
+        if (token->identifier == '<') {
+            p = skip_type_parameter_list(p, FALSE);
+            if (!p)
+                return FALSE;
+        }
+        else {
+            if (token_id_is_assignment(token->identifier)) {
+                cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeAssignmentBlock);
+                break;
+            }
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    
+    if (!cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeAssignmentBlock))
+        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeStatementBlock);
+    
+    return TRUE;
 }
 
 static void block_push(CSharpParser* parser)
@@ -1498,7 +1536,13 @@ static cee_boolean block_reduce(CSharpParser* parser)
         return FALSE;
     
     cee_source_fregment_symbols_fregment_range_mark(parser->statement_current);
-    statement_attach(parser, kCEESourceFregmentTypeStatement);
+    
+    if (cee_source_fregment_type_is(parser->statement_current, kCEESourceFregmentTypeAssignmentBlock)) {
+        /** expect statement terminate ';' */
+    }
+    else {
+        statement_attach(parser, kCEESourceFregmentTypeStatement);
+    }
     return TRUE;
 }
 
@@ -2824,7 +2868,7 @@ static cee_char* csharp_type_descriptor_from_token_slice(CEESourceFregment* freg
                                                          CEEList* q)
 {
     const cee_char* subject = fregment->subject_ref;
-    cee_char* protos = NULL;
+    cee_char* proto = NULL;
     CEEToken* token = NULL;
     cee_boolean found_type = FALSE;
     cee_char* str = NULL;
@@ -2841,7 +2885,7 @@ static cee_char* csharp_type_descriptor_from_token_slice(CEESourceFregment* freg
             str = cee_strndup((cee_char*)&subject[token->offset],
                               token->length);
             if (str) {
-                cee_strconcat0(&protos, str, NULL);
+                cee_strconcat0(&proto, str, NULL);
                 cee_free(str);
             }
             if (!found_type)
@@ -2855,7 +2899,7 @@ static cee_char* csharp_type_descriptor_from_token_slice(CEESourceFregment* freg
             str = cee_strndup((cee_char*)&subject[token->offset],
                               token->length);
             if (str) {
-                cee_strconcat0(&protos, str, NULL);
+                cee_strconcat0(&proto, str, NULL);
                 cee_free(str);
             }
         }
@@ -2871,7 +2915,7 @@ static cee_char* csharp_type_descriptor_from_token_slice(CEESourceFregment* freg
         p = TOKEN_NEXT(p);
     }
     
-    return protos;
+    return proto;
 }
 
 static cee_char* csharp_method_proto_descriptor_create(CEESourceFregment* fregment,

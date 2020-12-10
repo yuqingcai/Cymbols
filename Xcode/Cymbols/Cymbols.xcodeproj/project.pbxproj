@@ -278,6 +278,8 @@
 		26B3F07F2560F42B007D902C /* cee_java.l in Sources */ = {isa = PBXBuildFile; fileRef = 26B3F07E2560F42B007D902C /* cee_java.l */; };
 		26B3F0812560F434007D902C /* cee_swift.l in Sources */ = {isa = PBXBuildFile; fileRef = 26B3F0802560F434007D902C /* cee_swift.l */; };
 		26BC7E7B2539301900AD8992 /* icon_alert_32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */; };
+		26D5315A2581B97D00AFBEF6 /* cee_xml.c in Sources */ = {isa = PBXBuildFile; fileRef = 26D531572581B97D00AFBEF6 /* cee_xml.c */; };
+		26D5315B2581B97D00AFBEF6 /* cee_xml.l in Sources */ = {isa = PBXBuildFile; fileRef = 26D531592581B97D00AFBEF6 /* cee_xml.l */; };
 		26DAE285255C0A16005C8A2D /* CEESecurityBookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DAE284255C0A16005C8A2D /* CEESecurityBookmark.m */; };
 		26DDED402547B6A500BD8246 /* cee_css.c in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3D2547B6A500BD8246 /* cee_css.c */; };
 		26DDED422547FC0800BD8246 /* icon_css_selector_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */; };
@@ -715,6 +717,9 @@
 		26B3F0802560F434007D902C /* cee_swift.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_swift.l; sourceTree = "<group>"; };
 		26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_alert_32x32@2x.png"; sourceTree = "<group>"; };
 		26CBE684252FECA20047771D /* Cymbols.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cymbols.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		26D531572581B97D00AFBEF6 /* cee_xml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_xml.c; sourceTree = "<group>"; };
+		26D531582581B97D00AFBEF6 /* cee_xml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_xml.h; sourceTree = "<group>"; };
+		26D531592581B97D00AFBEF6 /* cee_xml.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_xml.l; sourceTree = "<group>"; };
 		26DAE283255C0A16005C8A2D /* CEESecurityBookmark.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEESecurityBookmark.h; sourceTree = "<group>"; };
 		26DAE284255C0A16005C8A2D /* CEESecurityBookmark.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESecurityBookmark.m; sourceTree = "<group>"; };
 		26DDED3D2547B6A500BD8246 /* cee_css.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_css.c; sourceTree = "<group>"; };
@@ -935,6 +940,7 @@
 				269202A8252FF38300D6E2DC /* c */,
 				269202A1252FF38300D6E2DC /* asm */,
 				269202B8252FF38400D6E2DC /* html */,
+				26D531562581B97D00AFBEF6 /* xml */,
 				26DDED3B2547B6A500BD8246 /* css */,
 				269202AC252FF38300D6E2DC /* cee_reference.c */,
 				269202AD252FF38300D6E2DC /* cee_reference.h */,
@@ -1358,6 +1364,16 @@
 			path = CellViews;
 			sourceTree = "<group>";
 		};
+		26D531562581B97D00AFBEF6 /* xml */ = {
+			isa = PBXGroup;
+			children = (
+				26D531592581B97D00AFBEF6 /* cee_xml.l */,
+				26D531572581B97D00AFBEF6 /* cee_xml.c */,
+				26D531582581B97D00AFBEF6 /* cee_xml.h */,
+			);
+			path = xml;
+			sourceTree = "<group>";
+		};
 		26DDED3B2547B6A500BD8246 /* css */ = {
 			isa = PBXGroup;
 			children = (
@@ -1591,6 +1607,8 @@
 				269204E0252FF5E800D6E2DC /* CEENetwork.m in Sources */,
 				269204BD252FF54000D6E2DC /* CEEFilePathCellView.m in Sources */,
 				2692043D252FF4F400D6E2DC /* CEEToolbarButton.m in Sources */,
+				26D5315B2581B97D00AFBEF6 /* cee_xml.l in Sources */,
+				26D5315A2581B97D00AFBEF6 /* cee_xml.c in Sources */,
 				269F9657253DB22500D8808A /* CEESourcePoint.m in Sources */,
 				26920430252FF4F400D6E2DC /* CEESplitView.m in Sources */,
 				269204E3252FF5F200D6E2DC /* AppDelegate.m in Sources */,

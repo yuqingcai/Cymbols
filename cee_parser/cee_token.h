@@ -472,6 +472,8 @@ typedef enum _CEETokenID {
     kCEETokenID_WITH,
     kCEETokenID_YIELD,
     
+    kCEETokenID_XML_COMMENT,
+    
     kCEETokenID_END
 } CEETokenID;
 

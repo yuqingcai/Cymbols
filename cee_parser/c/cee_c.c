@@ -358,7 +358,7 @@ static cee_int c_inheritance_definition_translate_table[kCInheritanceDefinitionT
 static cee_int c_prep_directive_include_translate_table[kCPrepDirectiveIncludeTranslateStateMax][CEETokenID_MAX];
 static cee_int c_prep_directive_define_translate_table[kCPrepDirectiveDefineTranslateStateMax][CEETokenID_MAX];
 static cee_int c_namespace_definition_translate_table[kCNamespaceDefinitionTranslateStateMax][CEETokenID_MAX];
-static cee_int c_protos_translate_table[kCProtosTranslateStateMax][CEETokenID_MAX];
+static cee_int c_proto_translate_table[kCProtosTranslateStateMax][CEETokenID_MAX];
 static cee_int c_extern_block_translate_table[kCExternBlockTranslateStateMax][CEETokenID_MAX];
 static cee_int objective_c_enum_definition_translate_table[kObjectiveCEnumDefinitionTranslateStateMax][CEETokenID_MAX];
 
@@ -445,7 +445,7 @@ static cee_boolean c_union_definition_trap(CEESourceFregment* fregment,
                                            CEEList** pp);
 static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
                                                     CEEList** pp);
-static cee_boolean c_statement_block_parse(CEESourceFregment* fregment);
+static cee_boolean statement_block_parse(CEESourceFregment* fregment);
 static void c_function_definition_translate_table_init(void);
 static cee_boolean c_function_definition_parse(CEESourceFregment* fregment);
 static void c_function_parameters_declaration_translate_table_init(void);
@@ -459,13 +459,13 @@ static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment
                                                                CEEList* surrounded);
 static void objective_c_message_definition_translate_table_init(void);
 static cee_boolean objective_c_message_definition_parse(CEESourceFregment* fregment);
-static cee_char* objective_c_message_protos_dump(CEESourceFregment* fregment);
-static cee_char* objective_c_message_parameter_protos_dump(CEESourceFregment* fregment,
-                                                           cee_int parameter_index);
-static void c_protos_translate_table_init(void);
-static cee_char* c_protos_string_from_token_slice(const cee_char* subject,
-                                                  CEEList* p,
-                                                  CEEList* q);
+static cee_char* objective_c_message_proto_dump(CEESourceFregment* fregment);
+static cee_char* objective_c_message_parameter_proto_dump(CEESourceFregment* fregment,
+                                                          cee_int parameter_index);
+static void c_proto_translate_table_init(void);
+static cee_char* c_proto_string_from_token_slice(const cee_char* subject,
+                                                 CEEList* p,
+                                                 CEEList* q);
 static CEESourceSymbol* objective_c_interface_extract(CEEList* tokens,
                                                       const cee_char* filepath,
                                                       const cee_char* subject);
@@ -487,12 +487,12 @@ static CEEList* skip_template_parameter_list(CEEList* p,
 static CEEList* skip_include_path(CEEList* p);
 static CEEList* skip_c_declaration_interval(CEEList* p);
 static cee_boolean c_declaration_parse(CEESourceFregment* fregment);
-static cee_char* c_declaration_protos_create(CEESourceFregment* fregment,
-                                             CEEList* overload,
-                                             CEEList* surrounded,
-                                             CEEList* parameter_list,
-                                             CEEList* identifier,
-                                             CEEList* object_identifier);
+static cee_char* c_declaration_proto_create(CEESourceFregment* fregment,
+                                            CEEList* overload,
+                                            CEEList* surrounded,
+                                            CEEList* parameter_list,
+                                            CEEList* identifier,
+                                            CEEList* object_identifier);
 static CEESourceSymbol* c_operator_overload_declaration_create(CEESourceFregment* fregment,
                                                                const cee_char* proto,
                                                                CEEList* overload,
@@ -2179,7 +2179,7 @@ static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
     return TRUE;
 }
 
-static cee_boolean c_statement_block_parse(CEESourceFregment* fregment)
+static cee_boolean statement_block_parse(CEESourceFregment* fregment)
 {
     CEEList* p = NULL;
     CEEToken* token = NULL;
@@ -2201,23 +2201,20 @@ static cee_boolean c_statement_block_parse(CEESourceFregment* fregment)
 #ifdef DEBUG_STATEMENT_BLOCK
                     cee_source_fregment_string_print(fregment);
 #endif
-                    cee_source_fregment_type_set(fregment,
-                                                 kCEESourceFregmentTypeAssignmentBlock);
+                    cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeAssignmentBlock);
                 }
                 else {
 #ifdef DEBUG_STATEMENT_BLOCK
                     cee_source_fregment_string_print(fregment);
 #endif
-                    cee_source_fregment_type_set(fregment,
-                                                 kCEESourceFregmentTypeStatementBlock);
+                    cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeStatementBlock);
                 }
             }
             else {
 #ifdef DEBUG_STATEMENT_BLOCK
                 cee_source_fregment_string_print(fregment);
 #endif
-                cee_source_fregment_type_set(fregment,
-                                             kCEESourceFregmentTypeStatementBlock);
+                cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeStatementBlock);
             }
         }
         p = TOKEN_NEXT(p);
@@ -2487,9 +2484,9 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
         
         q = c_name_scope_head_get(q, fregment->subject_ref);
         if (q && TOKEN_PREV(q))
-            definition->proto = c_protos_string_from_token_slice(fregment->subject_ref,
-                                                                 SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                                 TOKEN_PREV(q));
+            definition->proto = c_proto_string_from_token_slice(fregment->subject_ref,
+                                                                SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                                TOKEN_PREV(q));
         if (parameter_list) {
             child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
             if (child) {
@@ -2759,9 +2756,9 @@ static CEESourceSymbol* c_function_parameter_identifier_create(CEESourceFregment
                                                                            kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(begin, end, kCEETokenStateSymbolOccupied);
     if (head && TOKEN_PREV(begin))
-        parameter->proto = c_protos_string_from_token_slice(fregment->subject_ref,
-                                                            head,
-                                                            TOKEN_PREV(begin));
+        parameter->proto = c_proto_string_from_token_slice(fregment->subject_ref,
+                                                           head,
+                                                           TOKEN_PREV(begin));
     return parameter;
 }
 
@@ -2803,9 +2800,9 @@ static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment
                                                               kCEETokenStringOptionCompact);
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
         if (head && TOKEN_PREV(surrounded))
-            parameter->proto = c_protos_string_from_token_slice(fregment->subject_ref,
-                                                                head,
-                                                                TOKEN_PREV(surrounded));
+            parameter->proto = c_proto_string_from_token_slice(fregment->subject_ref,
+                                                               head,
+                                                               TOKEN_PREV(surrounded));
     }
     cee_list_free(tokens);
     
@@ -2883,7 +2880,7 @@ static cee_boolean objective_c_message_definition_parse(CEESourceFregment* fregm
                                                               "c",
                                                               kCEETokenStringOptionCompact);
                 if (symbol) {
-                    symbol->proto = objective_c_message_protos_dump(fregment);
+                    symbol->proto = objective_c_message_proto_dump(fregment);
                     symbols = cee_list_prepend(symbols, symbol);
                 }
                 cee_tokens_state_mark(components, kCEETokenStateSymbolOccupied);
@@ -2902,8 +2899,8 @@ static cee_boolean objective_c_message_definition_parse(CEESourceFregment* fregm
                                                                        "c",
                                                                        kCEETokenStringOptionCompact);
                     if (symbol) {
-                        symbol->proto = objective_c_message_parameter_protos_dump(fregment,
-                                                                                  parameter_index);
+                        symbol->proto = objective_c_message_parameter_proto_dump(fregment,
+                                                                                 parameter_index);
                         symbols = cee_list_prepend(symbols, symbol);
                     }
                     q = TOKEN_NEXT(q);
@@ -2996,13 +2993,13 @@ static cee_boolean objective_c_property_declaration_parse(CEESourceFregment* fre
             if (q) {
                 if (!proto) {
                     if (attribute_end)
-                        proto = c_protos_string_from_token_slice(fregment->subject_ref,
-                                                                 TOKEN_NEXT(attribute_end), 
-                                                                 TOKEN_PREV(q));
+                        proto = c_proto_string_from_token_slice(fregment->subject_ref,
+                                                                TOKEN_NEXT(attribute_end),
+                                                                TOKEN_PREV(q));
                     else 
-                        proto = c_protos_string_from_token_slice(fregment->subject_ref,
-                                                                 TOKEN_NEXT(property), 
-                                                                 TOKEN_PREV(q));
+                        proto = c_proto_string_from_token_slice(fregment->subject_ref,
+                                                                TOKEN_NEXT(property),
+                                                                TOKEN_PREV(q));
                 }
                 
                 declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
@@ -3127,7 +3124,7 @@ static cee_boolean objective_c_message_declaration_parse(CEESourceFregment* freg
                                                                    "c",
                                                                    kCEETokenStringOptionCompact);
                 if (declaration) {
-                    declaration->proto = objective_c_message_protos_dump(fregment);
+                    declaration->proto = objective_c_message_proto_dump(fregment);
                     declarations = cee_list_prepend(declarations, declaration);
                 }
                 cee_tokens_state_mark(components, kCEETokenStateSymbolOccupied);
@@ -3146,8 +3143,8 @@ static cee_boolean objective_c_message_declaration_parse(CEESourceFregment* freg
                                                                             "c",
                                                                             kCEETokenStringOptionCompact);
                     if (declaration) {
-                        declaration->proto = objective_c_message_parameter_protos_dump(fregment,
-                                                                                       parameter_index);
+                        declaration->proto = objective_c_message_parameter_proto_dump(fregment,
+                                                                                      parameter_index);
                         declarations = cee_list_prepend(declarations, declaration);
                     }
                     q = TOKEN_NEXT(q);
@@ -3173,7 +3170,7 @@ static cee_boolean objective_c_message_declaration_parse(CEESourceFregment* freg
     return ret;
 }
 
-static cee_char* objective_c_message_protos_dump(CEESourceFregment* fregment)
+static cee_char* objective_c_message_proto_dump(CEESourceFregment* fregment)
 {
     cee_char* proto = NULL;
     CEEList* p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
@@ -3184,14 +3181,14 @@ static cee_char* objective_c_message_protos_dump(CEESourceFregment* fregment)
     if (!p)
         return NULL;
     
-    proto = c_protos_string_from_token_slice(fregment->subject_ref,
-                                             SOURCE_FREGMENT_TOKENS_FIRST(p->data), 
-                                             NULL);
+    proto = c_proto_string_from_token_slice(fregment->subject_ref,
+                                            SOURCE_FREGMENT_TOKENS_FIRST(p->data),
+                                            NULL);
     return proto;
 }
 
-static cee_char* objective_c_message_parameter_protos_dump(CEESourceFregment* fregment,
-                                                           cee_int parameter_index)
+static cee_char* objective_c_message_parameter_proto_dump(CEESourceFregment* fregment,
+                                                          cee_int parameter_index)
 {   
     cee_char* proto = NULL;
     cee_int i = 0;
@@ -3215,13 +3212,13 @@ static cee_char* objective_c_message_parameter_protos_dump(CEESourceFregment* fr
     if (!p)
         return NULL;
     
-    proto = c_protos_string_from_token_slice(fregment->subject_ref,
-                                             SOURCE_FREGMENT_TOKENS_FIRST(p->data), 
-                                             NULL);
+    proto = c_proto_string_from_token_slice(fregment->subject_ref,
+                                            SOURCE_FREGMENT_TOKENS_FIRST(p->data),
+                                            NULL);
     return proto;
 }
 
-static void c_protos_translate_table_init(void)
+static void c_proto_translate_table_init(void)
 {
     /**
      *                                  declaration_specifier   decltype_specifier  builtin_type        object_specifier    alignas_specifier   access_specifier    identifier                  ::                              <                           >           (                   )               {                   }                       *                   &                   &&                  [                   ]                   :                   ,               others
@@ -3247,93 +3244,93 @@ static void c_protos_translate_table_init(void)
      *  TemplateParameter: save 'current state', skip template parameterlist then restore 'current state'
      *
      */
-    TRANSLATE_STATE_INI(c_protos_translate_table, kCProtosTranslateStateMax                         , kCProtosTranslateStateError                                                           );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , token_id_is_declaration_specifier , kCProtosTranslateStateInit                        );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_DECLTYPE              , kCProtosTranslateStateDecltype                    );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , token_id_is_builtin_type          , kCProtosTranslateStateBuiltinCommit               );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , token_id_is_access_specifier      , kCProtosTranslateStateAccessSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomType                  );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_SCOPE                 , kCProtosTranslateStateCustomTypeScope             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , '['                               , kCProtosTranslateStateInit                        );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateInit                        , ']'                               , kCProtosTranslateStateInit                        );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_declaration_specifier , kCProtosTranslateStateAccessSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_DECLTYPE              , kCProtosTranslateStateDecltype                    );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_builtin_type          , kCProtosTranslateStateBuiltinCommit               );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_access_specifier      , kCProtosTranslateStateAccessSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomType                  );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_SCOPE                 , kCProtosTranslateStateCustomTypeScope             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , '['                               , kCProtosTranslateStateAccessSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , ']'                               , kCProtosTranslateStateAccessSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAccessSpecifier             , ':'                               , kCProtosTranslateStateAccessSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateDecltype                    , '('                               , kCProtosTranslateStateDecltypeList                );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateDecltypeList                , ')'                               , kCProtosTranslateStateDecltypeCommit              );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_declaration_specifier , kCProtosTranslateStateCustomType                  );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_DECLTYPE              , kCProtosTranslateStateDecltype                    );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_builtin_type          , kCProtosTranslateStateBuiltinCommit               );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_access_specifier      , kCProtosTranslateStateAccessSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomTypeCommit            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_SCOPE                 , kCProtosTranslateStateCustomTypeScope             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , '<'                               , kCProtosTranslateStateTemplateParameter           );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , '*'                               , kCProtosTranslateStateCustomType                  );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , '&'                               , kCProtosTranslateStateCustomType                  );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_LOGIC_AND             , kCProtosTranslateStateCustomType                  );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , '['                               , kCProtosTranslateStateCustomType                  );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomType                  , ']'                               , kCProtosTranslateStateCustomType                  );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateCustomTypeScope             , token_id_is_builtin_type          , kCProtosTranslateStateCustomType                  );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateCustomTypeScope             , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomType                  );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAlignasSpecifier            , '('                               , kCProtosTranslateStateAlignasList                 );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateAlignasList                 , ')'                               , kCProtosTranslateStateAlignasListEnd              );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectIdentifier            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , kCEETokenID_SCOPE                 , kCProtosTranslateStateObjectIdentifierScope       );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , '{'                               , kCProtosTranslateStateObjectDefinition            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , '['                               , kCProtosTranslateStateObjectSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectSpecifier             , ']'                               , kCProtosTranslateStateObjectSpecifier             );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifier            , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectIdentifierCommit      );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifier            , kCEETokenID_SCOPE                 , kCProtosTranslateStateObjectIdentifierScope       );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifier            , '<'                               , kCProtosTranslateStateTemplateParameter           );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifier            , '{'                               , kCProtosTranslateStateObjectDefinition            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifier            , '*'                               , kCProtosTranslateStateObjectIdentifier            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifier            , '&'                               , kCProtosTranslateStateObjectIdentifier            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifier            , kCEETokenID_LOGIC_AND             , kCProtosTranslateStateObjectIdentifier            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifier            , '['                               , kCProtosTranslateStateObjectIdentifier            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifier            , ']'                               , kCProtosTranslateStateObjectIdentifier            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifier            , ':'                               , kCProtosTranslateStateObjectDerive                );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectIdentifierScope       , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectIdentifier            );
-    TRANSLATE_FUNCS_SET(c_protos_translate_table, kCProtosTranslateStateObjectDerive                , token_id_is_access_specifier      , kCProtosTranslateStateObjectDerive                );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectDerive                , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectDeriveIdentifier      );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectDerive                , kCEETokenID_SCOPE                 , kCProtosTranslateStateObjectDeriveIdentifierScope );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectDerive                , ','                               , kCProtosTranslateStateObjectDerive                );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectDeriveIdentifier      , kCEETokenID_SCOPE                 , kCProtosTranslateStateObjectDeriveIdentifierScope );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectDeriveIdentifier      , '<'                               , kCProtosTranslateStateTemplateParameter           );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectDeriveIdentifier      , '{'                               , kCProtosTranslateStateObjectDefinition            );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectDeriveIdentifier      , ','                               , kCProtosTranslateStateObjectDerive                );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectDeriveIdentifierScope , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectDeriveIdentifier      );
-    TRANSLATE_STATE_SET(c_protos_translate_table, kCProtosTranslateStateObjectDefinition            , '}'                               , kCProtosTranslateStateObjectDefinitionCommit      );
+    TRANSLATE_STATE_INI(c_proto_translate_table, kCProtosTranslateStateMax                         , kCProtosTranslateStateError                                                           );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateInit                        , token_id_is_declaration_specifier , kCProtosTranslateStateInit                        );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_DECLTYPE              , kCProtosTranslateStateDecltype                    );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateInit                        , token_id_is_builtin_type          , kCProtosTranslateStateBuiltinCommit               );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateInit                        , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateInit                        , token_id_is_access_specifier      , kCProtosTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomType                  );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateInit                        , kCEETokenID_SCOPE                 , kCProtosTranslateStateCustomTypeScope             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateInit                        , '['                               , kCProtosTranslateStateInit                        );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateInit                        , ']'                               , kCProtosTranslateStateInit                        );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_declaration_specifier , kCProtosTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_DECLTYPE              , kCProtosTranslateStateDecltype                    );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_builtin_type          , kCProtosTranslateStateBuiltinCommit               );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , token_id_is_access_specifier      , kCProtosTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomType                  );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , kCEETokenID_SCOPE                 , kCProtosTranslateStateCustomTypeScope             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , '['                               , kCProtosTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , ']'                               , kCProtosTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateAccessSpecifier             , ':'                               , kCProtosTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateDecltype                    , '('                               , kCProtosTranslateStateDecltypeList                );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateDecltypeList                , ')'                               , kCProtosTranslateStateDecltypeCommit              );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_declaration_specifier , kCProtosTranslateStateCustomType                  );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_DECLTYPE              , kCProtosTranslateStateDecltype                    );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_builtin_type          , kCProtosTranslateStateBuiltinCommit               );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , token_id_is_access_specifier      , kCProtosTranslateStateAccessSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomTypeCommit            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_SCOPE                 , kCProtosTranslateStateCustomTypeScope             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , '<'                               , kCProtosTranslateStateTemplateParameter           );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , '*'                               , kCProtosTranslateStateCustomType                  );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , '&'                               , kCProtosTranslateStateCustomType                  );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , kCEETokenID_LOGIC_AND             , kCProtosTranslateStateCustomType                  );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , '['                               , kCProtosTranslateStateCustomType                  );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomType                  , ']'                               , kCProtosTranslateStateCustomType                  );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateCustomTypeScope             , token_id_is_builtin_type          , kCProtosTranslateStateCustomType                  );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateCustomTypeScope             , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateCustomType                  );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateAlignasSpecifier            , '('                               , kCProtosTranslateStateAlignasList                 );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateAlignasList                 , ')'                               , kCProtosTranslateStateAlignasListEnd              );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateObjectSpecifier             , token_id_is_object_specifier      , kCProtosTranslateStateObjectSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectSpecifier             , kCEETokenID_ALIGNAS               , kCProtosTranslateStateAlignasSpecifier            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectSpecifier             , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectIdentifier            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectSpecifier             , kCEETokenID_SCOPE                 , kCProtosTranslateStateObjectIdentifierScope       );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectSpecifier             , '{'                               , kCProtosTranslateStateObjectDefinition            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectSpecifier             , '['                               , kCProtosTranslateStateObjectSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectSpecifier             , ']'                               , kCProtosTranslateStateObjectSpecifier             );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifier            , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectIdentifierCommit      );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifier            , kCEETokenID_SCOPE                 , kCProtosTranslateStateObjectIdentifierScope       );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifier            , '<'                               , kCProtosTranslateStateTemplateParameter           );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifier            , '{'                               , kCProtosTranslateStateObjectDefinition            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifier            , '*'                               , kCProtosTranslateStateObjectIdentifier            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifier            , '&'                               , kCProtosTranslateStateObjectIdentifier            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifier            , kCEETokenID_LOGIC_AND             , kCProtosTranslateStateObjectIdentifier            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifier            , '['                               , kCProtosTranslateStateObjectIdentifier            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifier            , ']'                               , kCProtosTranslateStateObjectIdentifier            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifier            , ':'                               , kCProtosTranslateStateObjectDerive                );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectIdentifierScope       , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectIdentifier            );
+    TRANSLATE_FUNCS_SET(c_proto_translate_table, kCProtosTranslateStateObjectDerive                , token_id_is_access_specifier      , kCProtosTranslateStateObjectDerive                );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectDerive                , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectDeriveIdentifier      );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectDerive                , kCEETokenID_SCOPE                 , kCProtosTranslateStateObjectDeriveIdentifierScope );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectDerive                , ','                               , kCProtosTranslateStateObjectDerive                );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectDeriveIdentifier      , kCEETokenID_SCOPE                 , kCProtosTranslateStateObjectDeriveIdentifierScope );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectDeriveIdentifier      , '<'                               , kCProtosTranslateStateTemplateParameter           );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectDeriveIdentifier      , '{'                               , kCProtosTranslateStateObjectDefinition            );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectDeriveIdentifier      , ','                               , kCProtosTranslateStateObjectDerive                );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectDeriveIdentifierScope , kCEETokenID_IDENTIFIER            , kCProtosTranslateStateObjectDeriveIdentifier      );
+    TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectDefinition            , '}'                               , kCProtosTranslateStateObjectDefinitionCommit      );
 }
 
-static cee_char* c_protos_string_from_token_slice(const cee_char* subject,
-                                                  CEEList* p,
-                                                  CEEList* q)
+static cee_char* c_proto_string_from_token_slice(const cee_char* subject,
+                                                 CEEList* p,
+                                                 CEEList* q)
 {
     CProtosTranslateState prev = kCProtosTranslateStateInit;
     CProtosTranslateState current = kCProtosTranslateStateInit;
     CProtosTranslateState alignas_prev_status = kCProtosTranslateStateInit;
-    cee_char* protos_str = NULL;
+    cee_char* proto_str = NULL;
     CEEToken* token = NULL;
             
     while (p) {
         token = p->data;
 
         prev = current;
-        current = c_protos_translate_table[current][token->identifier];
+        current = c_proto_translate_table[current][token->identifier];
         
         if (current == kCProtosTranslateStateError) {
             break;
@@ -3353,61 +3350,61 @@ static cee_char* c_protos_string_from_token_slice(const cee_char* subject,
             current = alignas_prev_status;
         }
         else if (current == kCProtosTranslateStateBuiltinCommit) {
-            if (protos_str)
-                cee_free(protos_str);
-            protos_str = NULL;
-            protos_str = cee_string_from_token(subject, token);
+            if (proto_str)
+                cee_free(proto_str);
+            proto_str = NULL;
+            proto_str = cee_string_from_token(subject, token);
             break;
         }
         else if (current == kCProtosTranslateStateDecltype) {
-            if (protos_str)
-                cee_free(protos_str);
-            protos_str = NULL;
+            if (proto_str)
+                cee_free(proto_str);
+            proto_str = NULL;
             
             if (token->identifier == kCEETokenID_DECLTYPE)
-                cee_string_concat_with_token(&protos_str, subject, token);
+                cee_string_concat_with_token(&proto_str, subject, token);
         }
         else if (current == kCProtosTranslateStateDecltypeList) {
             if (token->identifier == '(')
-                cee_string_concat_with_token(&protos_str, subject, token);
+                cee_string_concat_with_token(&proto_str, subject, token);
         }
         else if (current == kCProtosTranslateStateDecltypeCommit) {
             if (token->identifier == ')')
-                cee_string_concat_with_token(&protos_str, subject, token);
+                cee_string_concat_with_token(&proto_str, subject, token);
             break;
         }
         else if (current == kCProtosTranslateStateCustomType) {
             if (token->identifier == kCEETokenID_IDENTIFIER ||
                 token_id_is_builtin_type(token->identifier))
-                cee_string_concat_with_token(&protos_str, subject, token);
+                cee_string_concat_with_token(&proto_str, subject, token);
         }
         else if (current == kCProtosTranslateStateCustomTypeScope) {
             if (token->identifier == kCEETokenID_SCOPE)
-                cee_string_concat_with_token(&protos_str, subject, token);
+                cee_string_concat_with_token(&proto_str, subject, token);
         }
         else if (current == kCProtosTranslateStateCustomTypeCommit) {
-            cee_strconcat0(&protos_str, ",", NULL);
+            cee_strconcat0(&proto_str, ",", NULL);
             if (token->identifier == kCEETokenID_IDENTIFIER)
-                cee_string_concat_with_token(&protos_str, subject, token);
+                cee_string_concat_with_token(&proto_str, subject, token);
             current = kCProtosTranslateStateCustomType;
         }
         else if (current == kCProtosTranslateStateObjectSpecifier) {
-            if (protos_str)
-                cee_free(protos_str);
-            protos_str = NULL;
+            if (proto_str)
+                cee_free(proto_str);
+            proto_str = NULL;
         }
         else if (current == kCProtosTranslateStateObjectIdentifier) {
             if (token->identifier == kCEETokenID_IDENTIFIER)
-                cee_string_concat_with_token(&protos_str, subject, token);
+                cee_string_concat_with_token(&proto_str, subject, token);
         }
         else if (current == kCProtosTranslateStateObjectIdentifierScope) {
             if (token->identifier == kCEETokenID_SCOPE)
-                cee_string_concat_with_token(&protos_str, subject, token);
+                cee_string_concat_with_token(&proto_str, subject, token);
         }
         else if (current == kCProtosTranslateStateObjectIdentifierCommit) {
-            cee_strconcat0(&protos_str, ",", NULL);
+            cee_strconcat0(&proto_str, ",", NULL);
             if (token->identifier == kCEETokenID_IDENTIFIER)
-                cee_string_concat_with_token(&protos_str, subject, token);
+                cee_string_concat_with_token(&proto_str, subject, token);
             current = kCProtosTranslateStateObjectIdentifier;
         }
         else if (current == kCProtosTranslateStateObjectDefinitionCommit) {
@@ -3421,13 +3418,13 @@ static cee_char* c_protos_string_from_token_slice(const cee_char* subject,
     }
     
     if (current == kCProtosTranslateStateError) {
-        if (protos_str) {
-            cee_free(protos_str);
-            protos_str = NULL;
+        if (proto_str) {
+            cee_free(proto_str);
+            proto_str = NULL;
         }
     }
     
-    return protos_str;
+    return proto_str;
 }
 
 static void c_declaration_translate_table_init(void)
@@ -3824,12 +3821,12 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
                  current == kCDeclarationTranslateStateCommit) {
             
             if (!proto)
-                proto = c_declaration_protos_create(fregment,
-                                                    overload,
-                                                    surrounded,
-                                                    parameter_list,
-                                                    identifier,
-                                                    object_identifier);
+                proto = c_declaration_proto_create(fregment,
+                                                   overload,
+                                                   surrounded,
+                                                   parameter_list,
+                                                   identifier,
+                                                   object_identifier);
             if (overload)
                 declaration = c_operator_overload_declaration_create(fregment,
                                                                      proto,
@@ -3924,12 +3921,12 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
     return ret;
 }
 
-static cee_char* c_declaration_protos_create(CEESourceFregment* fregment,
-                                             CEEList* overload,
-                                             CEEList* surrounded,
-                                             CEEList* parameter_list,
-                                             CEEList* identifier,
-                                             CEEList* object_identifier)
+static cee_char* c_declaration_proto_create(CEESourceFregment* fregment,
+                                            CEEList* overload,
+                                            CEEList* surrounded,
+                                            CEEList* parameter_list,
+                                            CEEList* identifier,
+                                            CEEList* object_identifier)
 {
     cee_char* proto = NULL;
     CEEList* first_commit = NULL;
@@ -3961,9 +3958,9 @@ static cee_char* c_declaration_protos_create(CEESourceFregment* fregment,
     if (!first_commit || !TOKEN_PREV(first_commit))
         proto = cee_strdup("?");
     else
-        proto = c_protos_string_from_token_slice(fregment->subject_ref,
-                                                 SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                 TOKEN_PREV(first_commit));
+        proto = c_proto_string_from_token_slice(fregment->subject_ref,
+                                                SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                TOKEN_PREV(first_commit));
     return proto;
 }
 
@@ -4390,7 +4387,7 @@ static void block_header_parse(CParser* parser)
             p = TOKEN_NEXT(p);
     }
     
-    if (c_statement_block_parse(current))
+    if (statement_block_parse(current))
         return;
     
     return;
@@ -4874,7 +4871,7 @@ CEESourceParserRef cee_c_parser_create(const cee_char* identifier)
     c_template_declaration_translate_table_init();
     c_declaration_translate_table_init();
     c_namespace_definition_translate_table_init();
-    c_protos_translate_table_init();
+    c_proto_translate_table_init();
     c_extern_block_translate_table_init();
     objective_c_enum_definition_translate_table_init();
     
