@@ -24,7 +24,7 @@ typedef enum _JavaClassDefinitionTranslateState {
     kJavaClassDefinitionTranslateStateAnnotationListEnd,
     kJavaClassDefinitionTranslateStateSuperinterfaces,
     kJavaClassDefinitionTranslateStateTypeParameters,
-    kJavaClassDefinitionTranslateStateCommit,
+    kJavaClassDefinitionTranslateStateConfirm,
     kJavaClassDefinitionTranslateStateError,
     kJavaClassDefinitionTranslateStateMax,
 } JavaClassDefinitionTranslateState;
@@ -40,7 +40,7 @@ typedef enum _JavaInterfaceDefinitionTranslateState {
     kJavaInterfaceDefinitionTranslateStateAnnotation,
     kJavaInterfaceDefinitionTranslateStateAnnotationList,
     kJavaInterfaceDefinitionTranslateStateAnnotationListEnd,
-    kJavaInterfaceDefinitionTranslateStateCommit,
+    kJavaInterfaceDefinitionTranslateStateConfirm,
     kJavaInterfaceDefinitionTranslateStateError,
     kJavaInterfaceDefinitionTranslateStateMax,
 } JavaInterfaceDefinitionTranslateState;
@@ -56,7 +56,7 @@ typedef enum _JavaEnumDefinitionTranslateState {
     kJavaEnumDefinitionTranslateStateAnnotationListEnd, 
     kJavaEnumDefinitionTranslateStateSuperinterfaces, 
     kJavaEnumDefinitionTranslateStateTypeParameters,
-    kJavaEnumDefinitionTranslateStateCommit, 
+    kJavaEnumDefinitionTranslateStateConfirm,
     kJavaEnumDefinitionTranslateStateError, 
     kJavaEnumDefinitionTranslateStateMax, 
 } JavaEnumDefinitionTranslateState;
@@ -75,7 +75,7 @@ typedef enum _JavaMethodDefinitionTranslateState {
     kJavaMethodDefinitionTranslateStateException, 
     kJavaMethodDefinitionTranslateStateExceptionSeparator, 
     kJavaMethodDefinitionTranslateStateTypeParameters,
-    kJavaMethodDefinitionTranslateStateCommit, 
+    kJavaMethodDefinitionTranslateStateConfirm,
     kJavaMethodDefinitionTranslateStateError, 
     kJavaMethodDefinitionTranslateStateMax, 
 } JavaMethodDefinitionTranslateState;
@@ -90,7 +90,7 @@ typedef enum _JavaMethodParametersDeclarationTranslateState {
     kJavaMethodParametersDeclarationTranslateStateAnnotationListEnd, 
     kJavaMethodParametersDeclarationTranslateStateDot, 
     kJavaMethodParametersDeclarationTranslateStateThis, 
-    kJavaMethodParametersDeclarationTranslateStateCommit, 
+    kJavaMethodParametersDeclarationTranslateStateConfirm,
     kJavaMethodParametersDeclarationTranslateStateTypeParameters, 
     kJavaMethodParametersDeclarationTranslateStateError, 
     kJavaMethodParametersDeclarationTranslateStateMax, 
@@ -111,7 +111,7 @@ typedef enum _JavaDeclarationTranslateState {
     kJavaDeclarationTranslateStateAnnotationList, 
     kJavaDeclarationTranslateStateAnnotationListEnd, 
     kJavaDeclarationTranslateStateDefault, 
-    kJavaDeclarationTranslateStateCommit, 
+    kJavaDeclarationTranslateStateConfirm,
     kJavaDeclarationTranslateStateTypeInit, 
     kJavaDeclarationTranslateStateTypeParameters, 
     kJavaDeclarationTranslateStateThrows, 
@@ -127,7 +127,7 @@ typedef enum _JavaImportStatementTranslateState {
     kJavaImportStatementTranslateStateIdentifier, 
     kJavaImportStatementTranslateStateIdentifierSeparator, 
     kJavaImportStatementTranslateStateDemand, 
-    kJavaImportStatementTranslateStateCommit, 
+    kJavaImportStatementTranslateStateConfirm,
     kJavaImportStatementTranslateStateError, 
     kJavaImportStatementTranslateStateMax, 
 } JavaImportStatementTranslateState;
@@ -141,7 +141,7 @@ typedef enum _JavaPackageStatementTranslateState {
     kJavaPackageStatementTranslateStateAnnotationListEnd,
     kJavaPackageStatementTranslateStateIdentifier,
     kJavaPackageStatementTranslateStateIdentifierSeparator,
-    kJavaPackageStatementTranslateStateCommit,
+    kJavaPackageStatementTranslateStateConfirm,
     kJavaPackageStatementTranslateStateError,
     kJavaPackageStatementTranslateStateMax,
 } JavaPackageStatementTranslateState;
@@ -223,6 +223,7 @@ static cee_boolean comment_token_push(JavaParser* parser,
 static cee_boolean comment_fregment_reduce(JavaParser* parser);
 static cee_boolean comment_attach(JavaParser* parser);
 static void block_header_parse(JavaParser* parser);
+static cee_boolean statement_block_parse(CEESourceFregment* fregment);
 static void block_push(JavaParser* parser);
 static cee_boolean block_pop(JavaParser* parser);
 static void block_parse(JavaParser* parser);
@@ -274,7 +275,7 @@ static CEEList* enumerators_extract(CEEList* tokens,
 static cee_char* java_variable_proto_descriptor_create(CEESourceFregment* fregment,
                                                        CEESourceSymbol* definition,
                                                        CEEList* identifier,
-                                                       const cee_char* proto);
+                                                       const cee_char* type_str);
 static cee_char* java_class_proto_descriptor_create(CEESourceFregment* fregment,
                                                     CEESourceSymbol* definition,
                                                     CEEList* identifier,
@@ -674,7 +675,7 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
         if (!indexes[i])
             continue;
         
-        p = indexes[i]->node;
+        p = indexes[i]->node_ref;
         while (p) {
             fregment = p->data;
             
@@ -1009,7 +1010,44 @@ static void block_header_parse(JavaParser* parser)
             p = TOKEN_NEXT(p);
     }
     
+    if (statement_block_parse(current))
+        return;
+    
     return;
+}
+
+static cee_boolean statement_block_parse(CEESourceFregment* fregment)
+{
+    CEEList* p = NULL;
+    CEEToken* token = NULL;
+    
+    if (cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeAssignmentBlock) ||
+        cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeStatementBlock))
+        return TRUE;
+    
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    while (p) {
+        token = p->data;
+        
+        if (token->identifier == '<') {
+            p = skip_type_parameter_list(p, FALSE);
+            if (!p)
+                return FALSE;
+        }
+        else {
+            if (token_id_is_assignment(token->identifier)) {
+                cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeAssignmentBlock);
+                break;
+            }
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    
+    if (!cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeAssignmentBlock))
+        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeStatementBlock);
+    
+    return TRUE;
 }
 
 static void block_push(JavaParser* parser)
@@ -1052,7 +1090,13 @@ static cee_boolean block_reduce(JavaParser* parser)
         return FALSE;
     
     cee_source_fregment_symbols_fregment_range_mark(parser->statement_current);
-    statement_attach(parser, kCEESourceFregmentTypeStatement);
+    
+    if (cee_source_fregment_type_is(parser->statement_current, kCEESourceFregmentTypeAssignmentBlock)) {
+        /** expect statement terminate ';' */
+    }
+    else {
+        statement_attach(parser, kCEESourceFregmentTypeStatement);
+    }
     return TRUE;
 }
 
@@ -1246,24 +1290,24 @@ static void java_declaration_translate_table_init(void)
 {
     /**
      *                          declaration_specifier       builtin_type        identifier          assign_operator         .                       <                   annotation          throws          ,           (               )                   [                   ]                   default     ;
-     *  Init                    DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          Error           Error       Error           Error               Error               Error               Error       Commit
+     *  Init                    DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          Error           Error       Error           Error               Error               Error               Error       Confirm
      *  DeclarationSpecifier    DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          Error           Error       Error           Error               Error               Error               Error       Error
      *  BuiltinType             DeclarationSpecifier        BuiltinType         Identifier          Error                   Error                   *TypeParameters     Annotation          Error           Error       Error           Error               BuiltinType         BuiltinType         Error       Error
      *  CustomType              Error                       Error               Identifier          Error                   CustomTypeSeparator     *TypeParameters     Annotation          Error           Error       Structor        Error               CustomType          CustomType          Error       Error
      *  Structor                Error                       Error               Error               Error                   Error                   Error               Error               Error           Error       Error           StructorEnd         Error               Error               Error       Error
-     *  StructorEnd             Error                       Error               Error               Error                   Error                   *TypeParameters     Error               Throws          Commit      Error           Error               Error               Error               Error       Commit
-     *  Identifier              Error                       Error               Error               Commit                  Error                   Error               Error               Error           Commit      ParameterList   Error               Identifier          Identifier          Error       Commit
+     *  StructorEnd             Error                       Error               Error               Error                   Error                   *TypeParameters     Error               Throws          Confirm     Error           Error               Error               Error               Error       Confirm
+     *  Identifier              Error                       Error               Error               Confirm                 Error                   Error               Error               Error           Confirm     ParameterList   Error               Identifier          Identifier          Error       Confirm
      *  CustomTypeSeparator     Error                       Error               CustomType          Error                   Error                   Error               Error               Error           Error       Error           Error               Error               Error               Error       Error
      *  ParameterList           Error                       Error               Error               Error                   Error                   Error               Error               Error           Error       Error           ParameterListEnd    Error               Error               Error       Error
-     *  ParameterListEnd        Error                       Error               Error               Error                   Error                   Error               Annotation          Throws          Commit      Error           Error               Error               Error               *Default    Commit
-     *  Annotation              DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          Throws          Commit      AnnotationList  Error               Annotation          Annotation          *Default    Commit
+     *  ParameterListEnd        Error                       Error               Error               Error                   Error                   Error               Annotation          Throws          Confirm     Error           Error               Error               Error               *Default    Confirm
+     *  Annotation              DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          Throws          Confirm     AnnotationList  Error               Annotation          Annotation          *Default    Confirm
      *  AnnotationList          Error                       Error               Error               Error                   Error                   Error               Error               Error           Error       Error           AnnotationListEnd   Error               Error               Error       Error
-     *  AnnotationListEnd       DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          Throws          Commit      Error           Error               AnnotationListEnd   AnnotationListEnd   *Default    Commit
+     *  AnnotationListEnd       DeclarationSpecifier        BuiltinType         CustomType          Error                   Error                   *TypeParameters     Annotation          Throws          Confirm     Error           Error               AnnotationListEnd   AnnotationListEnd   *Default    Confirm
      *  TypeInit                Error                       Error               Identifier          Error                   Error                   Error               Error               Error           Error       Error           Error               Error               Error               Error       Error
      *  Throws                  Error                       Error               Exception           Error                   Error                   Error               Error               Error           Error       Error           Error               Error               Error               Error       Error
-     *  Exception               Error                       Error               Exception           Error                   ExceptionSeparator      *TypeParameters     Error               Error           Exception   Error           Error               Error               Error               Error       Commit
+     *  Exception               Error                       Error               Exception           Error                   ExceptionSeparator      *TypeParameters     Error               Error           Exception   Error           Error               Error               Error               Error       Confirm
      *  ExceptionSeparator      Error                       Error               Exception           Error                   Error                   Error               Error               Error           Error       Error           Error               Error               Error               Error       Error
-     *  Commit                  Error                       Error               Identifier          Error                   Error                   Error               Error               Error           Commit      Error           Error               Error               Error               Error       Commit
+     *  Confirm                 Error                       Error               Identifier          Error                   Error                   Error               Error               Error           Confirm     Error           Error               Error               Error               Error       Confirm
      *
      *  TypeParameters: save 'current state', skip TypeParameterList then restore 'current state'  
      *  Default: skip to Terminate
@@ -1299,33 +1343,33 @@ static void java_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateStructor              , ')'                                   , kJavaDeclarationTranslateStateStructorEnd             );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateStructorEnd           , '<'                                   , kJavaDeclarationTranslateStateTypeParameters          );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateStructorEnd           , kCEETokenID_THROWS                    , kJavaDeclarationTranslateStateThrows                  );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateStructorEnd           , ','                                   , kJavaDeclarationTranslateStateCommit                  );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateStructorEnd           , ';'                                   , kJavaDeclarationTranslateStateCommit                  );
-    TRANSLATE_FUNCS_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateIdentifier            , token_id_is_assignment                , kJavaDeclarationTranslateStateCommit                  );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateIdentifier            , ','                                   , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateStructorEnd           , ','                                   , kJavaDeclarationTranslateStateConfirm                 );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateStructorEnd           , ';'                                   , kJavaDeclarationTranslateStateConfirm                 );
+    TRANSLATE_FUNCS_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateIdentifier            , token_id_is_assignment                , kJavaDeclarationTranslateStateConfirm                 );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateIdentifier            , ','                                   , kJavaDeclarationTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateIdentifier            , '('                                   , kJavaDeclarationTranslateStateParameterList           );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateIdentifier            , '['                                   , kJavaDeclarationTranslateStateIdentifier              );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateIdentifier            , ']'                                   , kJavaDeclarationTranslateStateIdentifier              );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateIdentifier            , ';'                                   , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateIdentifier            , ';'                                   , kJavaDeclarationTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateCustomTypeSeparator   , kCEETokenID_IDENTIFIER                , kJavaDeclarationTranslateStateCustomType              );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateParameterList         , ')'                                   , kJavaDeclarationTranslateStateParameterListEnd        );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateParameterListEnd      , kCEETokenID_ANNOTATION                , kJavaDeclarationTranslateStateAnnotation              );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateParameterListEnd      , kCEETokenID_THROWS                    , kJavaDeclarationTranslateStateThrows                  );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateParameterListEnd      , ','                                   , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateParameterListEnd      , ','                                   , kJavaDeclarationTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateParameterListEnd      , kCEETokenID_DEFAULT                   , kJavaDeclarationTranslateStateDefault                 );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateParameterListEnd      , ';'                                   , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateParameterListEnd      , ';'                                   , kJavaDeclarationTranslateStateConfirm                 );
     TRANSLATE_FUNCS_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , token_id_is_declaration_specifier     , kJavaDeclarationTranslateStateDeclarationSpecifier    );
     TRANSLATE_FUNCS_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , token_id_is_builtin_type              , kJavaDeclarationTranslateStateBuiltinType             );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , kCEETokenID_IDENTIFIER                , kJavaDeclarationTranslateStateCustomType              );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , '<'                                   , kJavaDeclarationTranslateStateTypeParameters          );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , kCEETokenID_ANNOTATION                , kJavaDeclarationTranslateStateAnnotation              );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , kCEETokenID_THROWS                    , kJavaDeclarationTranslateStateThrows                  );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , ','                                   , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , ','                                   , kJavaDeclarationTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , '('                                   , kJavaDeclarationTranslateStateAnnotationList          );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , '['                                   , kJavaDeclarationTranslateStateAnnotation              );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , ']'                                   , kJavaDeclarationTranslateStateAnnotation              );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , kCEETokenID_DEFAULT                   , kJavaDeclarationTranslateStateDefault                 );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , ';'                                   , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotation            , ';'                                   , kJavaDeclarationTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationList        , ')'                                   , kJavaDeclarationTranslateStateAnnotationListEnd       );
     TRANSLATE_FUNCS_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , token_id_is_declaration_specifier     , kJavaDeclarationTranslateStateDeclarationSpecifier    );
     TRANSLATE_FUNCS_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , token_id_is_builtin_type              , kJavaDeclarationTranslateStateBuiltinType             );
@@ -1333,22 +1377,22 @@ static void java_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , '<'                                   , kJavaDeclarationTranslateStateTypeParameters          );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , kCEETokenID_ANNOTATION                , kJavaDeclarationTranslateStateAnnotation              );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , kCEETokenID_THROWS                    , kJavaDeclarationTranslateStateThrows                  );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , ','                                   , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , ','                                   , kJavaDeclarationTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , '['                                   , kJavaDeclarationTranslateStateAnnotationListEnd       );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , ']'                                   , kJavaDeclarationTranslateStateAnnotationListEnd       );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , kCEETokenID_DEFAULT                   , kJavaDeclarationTranslateStateDefault                 );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , ';'                                   , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateAnnotationListEnd     , ';'                                   , kJavaDeclarationTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateTypeInit              , kCEETokenID_IDENTIFIER                , kJavaDeclarationTranslateStateIdentifier              );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateThrows                , kCEETokenID_IDENTIFIER                , kJavaDeclarationTranslateStateException               );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateException             , '.'                                   , kJavaDeclarationTranslateStateExceptionSeparator      );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateException             , '<'                                   , kJavaDeclarationTranslateStateTypeParameters          );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateException             , kCEETokenID_IDENTIFIER                , kJavaDeclarationTranslateStateException               );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateException             , ','                                   , kJavaDeclarationTranslateStateException               );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateException             , ';'                                   , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateException             , ';'                                   , kJavaDeclarationTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateExceptionSeparator    , kCEETokenID_IDENTIFIER                , kJavaDeclarationTranslateStateException               );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateCommit                , kCEETokenID_IDENTIFIER                , kJavaDeclarationTranslateStateIdentifier              );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateCommit                , ','                                   , kJavaDeclarationTranslateStateCommit                  );
-    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateCommit                , ';'                                   , kJavaDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateConfirm               , kCEETokenID_IDENTIFIER                , kJavaDeclarationTranslateStateIdentifier              );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateConfirm               , ','                                   , kJavaDeclarationTranslateStateConfirm                 );
+    TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateConfirm               , ';'                                   , kJavaDeclarationTranslateStateConfirm                 );
 }
 
 static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
@@ -1365,7 +1409,7 @@ static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
     CEEList* throws = NULL;
     CEEList* declarations = NULL;
     CEESourceSymbol* declaration = NULL;
-    cee_char* type = NULL;
+    cee_char* type_str = NULL;
     CEEList* parent_symbols = NULL;
     CEESourceSymbol* parent_symbol = NULL;
     CEESourceFregment* grandfather_fregment = NULL;
@@ -1441,13 +1485,13 @@ static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
                 throws = p;
         }
         else if (current == kJavaDeclarationTranslateStateDefault || 
-                 current == kJavaDeclarationTranslateStateCommit) {
+                 current == kJavaDeclarationTranslateStateConfirm) {
             
-            if (!type) {
+            if (!type_str) {
                 if (identifier) {
-                    type = java_type_descriptor_from_token_slice(fregment, 
-                                                                 SOURCE_FREGMENT_TOKENS_FIRST(fregment), 
-                                                                 TOKEN_PREV(identifier));
+                    type_str = java_type_descriptor_from_token_slice(fregment,
+                                                                     SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                                     TOKEN_PREV(identifier));
                 }
                 else {
                     /** 
@@ -1455,18 +1499,18 @@ static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
                      * use its parent symbol type as return type
                      */
                     if (parent_symbol) 
-                        type = cee_strdup(parent_symbol->name);
+                        type_str = cee_strdup(parent_symbol->name);
                 } 
             }
             
             if (parameter_list && parameter_list_end)
                 declaration = java_method_declaration_create(fregment, 
-                                                             type, 
+                                                             type_str,
                                                              parameter_list, 
                                                              throws);
             else if (identifier)
                 declaration = java_identifier_declaration_create(fregment,
-                                                                 type,
+                                                                 type_str,
                                                                  identifier);
             
             if (declaration) {
@@ -1511,8 +1555,8 @@ next_token:
     
 exit:
     
-    if (type)
-        cee_free(type);
+    if (type_str)
+        cee_free(type_str);
     
     return ret;
 }
@@ -1609,21 +1653,21 @@ static void java_import_statement_translate_table_init(void)
     /**
      *                              import      static      Identifier      .                       *       ;
      *  Init                        Import      Error       Error           Error                   Error   Error
-     *  Import                      Error       Import      Identifier      Error                   Error   Commit
-     *  Identifier                  Error       Error       Error           IdentifierSeparator     Error   Commit
+     *  Import                      Error       Import      Identifier      Error                   Error   Confirm
+     *  Identifier                  Error       Error       Error           IdentifierSeparator     Error   Confirm
      *  IdentifierSeparator         Error       Error       Identifier      Error                   Demand  Error
-     *  Demand                      Error       Error       Error           Error                   Error   Commit
+     *  Demand                      Error       Error       Error           Error                   Error   Confirm
      */
     TRANSLATE_STATE_INI(java_import_statement_translate_table, kJavaImportStatementTranslateStateMax                    , kJavaImportStatementTranslateStateError                                               );
     TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateInit                   , kCEETokenID_IMPORT            , kJavaImportStatementTranslateStateImport              );
     TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateImport                 , kCEETokenID_STATIC            , kJavaImportStatementTranslateStateImport              );
     TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateImport                 , kCEETokenID_IDENTIFIER        , kJavaImportStatementTranslateStateIdentifier          );
-    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateImport                 , ';'                           , kJavaImportStatementTranslateStateCommit              );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateImport                 , ';'                           , kJavaImportStatementTranslateStateConfirm             );
     TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateIdentifier             , '.'                           , kJavaImportStatementTranslateStateIdentifierSeparator );
-    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateIdentifier             , ';'                           , kJavaImportStatementTranslateStateCommit              );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateIdentifier             , ';'                           , kJavaImportStatementTranslateStateConfirm             );
     TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateIdentifierSeparator    , kCEETokenID_IDENTIFIER        , kJavaImportStatementTranslateStateIdentifier          );
     TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateIdentifierSeparator    , '*'                           , kJavaImportStatementTranslateStateDemand              );
-    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateDemand                 , ';'                           , kJavaImportStatementTranslateStateCommit              );
+    TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateDemand                 , ';'                           , kJavaImportStatementTranslateStateConfirm             );
 }
 
 static cee_boolean java_import_statement_parse(CEESourceFregment* fregment)
@@ -1650,7 +1694,7 @@ static cee_boolean java_import_statement_parse(CEESourceFregment* fregment)
         if (current == kJavaImportStatementTranslateStateError) {
             break;
         }
-        else if (current == kJavaImportStatementTranslateStateCommit) {
+        else if (current == kJavaImportStatementTranslateStateConfirm) {
             if (cee_token_is_identifier(p, ';'))
                 s = TOKEN_PREV(p);
             break;
@@ -1664,7 +1708,7 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (current != kJavaImportStatementTranslateStateCommit)
+    if (current != kJavaImportStatementTranslateStateConfirm)
         goto exit;
     
     import = cee_source_symbol_create_from_token_slice(fregment->filepath_ref, 
@@ -1699,7 +1743,7 @@ static void java_package_statement_translate_table_init(void)
      *  Annotation              Package         Error           Error           Error                   AnnotationList  Error               Error
      *  AnnotationList          Error           Error           Error           Error                   Error           AnnotationListEnd   Error
      *  AnnotationListEnd       Package         Error           Error           Error                   Error           Error               Error  
-     *  Identifier              Error           Error           Error           IdentifierSeparator     Error           Error               Commit
+     *  Identifier              Error           Error           Error           IdentifierSeparator     Error           Error               Confirm
      *  IdentifierSeparator     Error           Error           Identifier      Error                   Error           Error               Error
      */
     TRANSLATE_STATE_INI(java_package_statement_translate_table, kJavaPackageStatementTranslateStateMax                      , kJavaPackageStatementTranslateStateError                                                      );
@@ -1711,7 +1755,7 @@ static void java_package_statement_translate_table_init(void)
     TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateAnnotationList           , ')'                               , kJavaPackageStatementTranslateStateAnnotationListEnd      );
     TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateAnnotationListEnd        , kCEETokenID_PACKAGE               , kJavaPackageStatementTranslateStatePackage                );
     TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateIdentifier               , '.'                               , kJavaPackageStatementTranslateStateIdentifierSeparator    );
-    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateIdentifier               , ';'                               , kJavaPackageStatementTranslateStateCommit                 );
+    TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateIdentifier               , ';'                               , kJavaPackageStatementTranslateStateConfirm                );
     TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateIdentifierSeparator      , kCEETokenID_IDENTIFIER            , kJavaPackageStatementTranslateStateIdentifier             );
 }
 
@@ -1739,7 +1783,7 @@ static cee_boolean java_package_statement_parse(CEESourceFregment* fregment)
         if (current == kJavaPackageStatementTranslateStateError) {
             break;
         }
-        else if (current == kJavaPackageStatementTranslateStateCommit) {
+        else if (current == kJavaPackageStatementTranslateStateConfirm) {
             if (cee_token_is_identifier(p, ';'))
                 s = TOKEN_PREV(p);
             break;
@@ -1752,7 +1796,7 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (current != kJavaPackageStatementTranslateStateCommit)
+    if (current != kJavaPackageStatementTranslateStateConfirm)
         goto exit;
     
     package = cee_source_symbol_create_from_token_slice(fregment->filepath_ref, 
@@ -1784,7 +1828,7 @@ static void java_class_definition_translate_table_init(void)
      *                      class_specifier     identifier          <                   extends         annotation      .                       (                   )                   implements          ,           {
      *  Init                ClassSpecifier      Error               Error               Error           Error           Error                   Error               Error               Error               Error       Error
      *  ClassSpecifier      Error               Identifier          Error               Error           Error           Error                   Error               Error               Error               Error       Error
-     *  Identifier          Error               Identifier          *TypeParameters     Superclass      Annotation      IdentifierSeparator     Error               Error               Superinterfaces     Comma       Commit
+     *  Identifier          Error               Identifier          *TypeParameters     Superclass      Annotation      IdentifierSeparator     Error               Error               Superinterfaces     Comma       Confirm
      *  IdentifierSeparator Error               Identifier          Error               Error           Error           Error                   Error               Error               Error               Error       Error
      *  Comma               Error               Identifier          Error               Error           Annotation      Error                   Error               Error               Error               Comma       Error
      *  Superclass          Error               Identifier          Error               Ereror          Annotation      Error                   Error               Error               Error               Error       Error
@@ -1807,7 +1851,7 @@ static void java_class_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(java_class_definition_translate_table,  kJavaClassDefinitionTranslateStateIdentifierSeparator   , kCEETokenID_IDENTIFIER    , kJavaClassDefinitionTranslateStateIdentifier              );
     TRANSLATE_STATE_SET(java_class_definition_translate_table,  kJavaClassDefinitionTranslateStateIdentifier            , kCEETokenID_IMPLEMENTS    , kJavaClassDefinitionTranslateStateSuperinterfaces         );
     TRANSLATE_STATE_SET(java_class_definition_translate_table,  kJavaClassDefinitionTranslateStateIdentifier            , ','                       , kJavaClassDefinitionTranslateStateComma                   );
-    TRANSLATE_STATE_SET(java_class_definition_translate_table,  kJavaClassDefinitionTranslateStateIdentifier            , '{'                       , kJavaClassDefinitionTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_class_definition_translate_table,  kJavaClassDefinitionTranslateStateIdentifier            , '{'                       , kJavaClassDefinitionTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_class_definition_translate_table,  kJavaClassDefinitionTranslateStateComma                 , kCEETokenID_IDENTIFIER    , kJavaClassDefinitionTranslateStateIdentifier              );
     TRANSLATE_STATE_SET(java_class_definition_translate_table,  kJavaClassDefinitionTranslateStateComma                 , kCEETokenID_ANNOTATION    , kJavaClassDefinitionTranslateStateAnnotation              );
     TRANSLATE_STATE_SET(java_class_definition_translate_table,  kJavaClassDefinitionTranslateStateComma                 , ','                       , kJavaClassDefinitionTranslateStateComma                   );
@@ -1900,7 +1944,7 @@ static cee_boolean java_class_definition_trap(CEESourceFregment* fregment,
                     TOKEN_APPEND(superinterface, token);
             }
         }
-        else if (current == kJavaClassDefinitionTranslateStateCommit) {
+        else if (current == kJavaClassDefinitionTranslateStateConfirm) {
             if (superclass) {
                 superclasses = cee_list_prepend(superclasses, superclass);
                 superclass = NULL;
@@ -1921,7 +1965,7 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (current != kJavaClassDefinitionTranslateStateCommit)
+    if (current != kJavaClassDefinitionTranslateStateConfirm)
         goto exit;
     
     
@@ -1945,7 +1989,7 @@ next_token:
             superinterfaces_str = java_name_scope_list_string_create(superinterfaces,
                                                                      fregment->subject_ref);
             if (derives_str)
-                cee_strconcat0(&derives_str, " ", superinterfaces_str, NULL);
+                cee_strconcat0(&derives_str, ",", superinterfaces_str, NULL);
             else
                 derives_str = cee_strdup(superinterfaces_str);
         }
@@ -1999,7 +2043,7 @@ static void java_interface_definition_translate_table_init(void)
      *                          interface_specifier     identifier          <                   extends             annotation       .                      (                   )                   ,           {
      *  Init                    InterfaceSpecifier      Error               Error               Error               Error           Error                   Error               Error               Error       Error
      *  InterfaceSpecifier      Error                   Identifier          Error               Error               Error           Error                   Error               Error               Error       Error
-     *  Identifier              Error                   Identifier          *TypeParameters     ExtendInterface     Annotation      IdentifierSeparator     Error               Error               Comma       Commit
+     *  Identifier              Error                   Identifier          *TypeParameters     ExtendInterface     Annotation      IdentifierSeparator     Error               Error               Comma       Confirm
      *  IdentifierSeparator     Error                   Identifier          Error               Error               Error           Error                   Error               Error               Error       Error
      *  Comma                   Error                   Identifier          Error               Error               Annotation      Error                   Error               Error               Comma       Error
      *  ExtendInterface         Error                   Identifier          Error               Error               Annotation      Error                   Error               Error               Error       Error
@@ -2018,7 +2062,7 @@ static void java_interface_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(java_interface_definition_translate_table,  kJavaInterfaceDefinitionTranslateStateIdentifier            , kCEETokenID_ANNOTATION    , kJavaInterfaceDefinitionTranslateStateAnnotation              );
     TRANSLATE_STATE_SET(java_interface_definition_translate_table,  kJavaInterfaceDefinitionTranslateStateIdentifier            , '.'                       , kJavaInterfaceDefinitionTranslateStateIdentifierSeparator     );
     TRANSLATE_STATE_SET(java_interface_definition_translate_table,  kJavaInterfaceDefinitionTranslateStateIdentifier            , ','                       , kJavaInterfaceDefinitionTranslateStateComma                   );
-    TRANSLATE_STATE_SET(java_interface_definition_translate_table,  kJavaInterfaceDefinitionTranslateStateIdentifier            , '{'                       , kJavaInterfaceDefinitionTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_interface_definition_translate_table,  kJavaInterfaceDefinitionTranslateStateIdentifier            , '{'                       , kJavaInterfaceDefinitionTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_interface_definition_translate_table,  kJavaInterfaceDefinitionTranslateStateIdentifierSeparator   , kCEETokenID_IDENTIFIER    , kJavaInterfaceDefinitionTranslateStateIdentifier              );
     TRANSLATE_STATE_SET(java_interface_definition_translate_table,  kJavaInterfaceDefinitionTranslateStateExtendInterface       , kCEETokenID_IDENTIFIER    , kJavaInterfaceDefinitionTranslateStateIdentifier              );
     TRANSLATE_STATE_SET(java_interface_definition_translate_table,  kJavaInterfaceDefinitionTranslateStateExtendInterface       , kCEETokenID_ANNOTATION    , kJavaInterfaceDefinitionTranslateStateAnnotation              );
@@ -2089,7 +2133,7 @@ static cee_boolean java_interface_definition_trap(CEESourceFregment* fregment,
                     TOKEN_APPEND(extendinterface, token);
             }
         }
-        else if (current == kJavaInterfaceDefinitionTranslateStateCommit) {
+        else if (current == kJavaInterfaceDefinitionTranslateStateConfirm) {
             if (extendinterface) {
                 extendinterfaces = cee_list_prepend(extendinterfaces, extendinterface);
                 extendinterface = NULL;
@@ -2105,7 +2149,7 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (current != kJavaInterfaceDefinitionTranslateStateCommit)
+    if (current != kJavaInterfaceDefinitionTranslateStateConfirm)
         goto exit;
     
     p = TOKEN_LAST(identifier);
@@ -2161,7 +2205,7 @@ static void java_enum_definition_translate_table_init(void)
      *                      enum_specifier      identifier          <                   annotation      .                       (                   )                   implements          ,           {
      *  Init                EnumSpecifier       Error               Error               Error           Error                   Error               Error               Error               Error       Error
      *  EnumSpecifier       Error               Identifier          Error               Error           Error                   Error               Error               Error               Error       Error
-     *  Identifier          Error               Identifier          *TypeParameters     Annotation      IdentifierSeparator     Error               Error               Superinterfaces     Comma       Commit
+     *  Identifier          Error               Identifier          *TypeParameters     Annotation      IdentifierSeparator     Error               Error               Superinterfaces     Comma       Confirm
      *  IdentifierSeparator Error               Identifier          Error               Error           Error                   Error               Error               Error               Error       Error
      *  Comma               Error               Identifier          Error               Annotation      Error                   Error               Error               Error               Comma       Error
      *  Annotation          Error               Identifier          Error               Error           Error                   AnnotationList      Error               Error               Error       Error
@@ -2180,7 +2224,7 @@ static void java_enum_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(java_enum_definition_translate_table, kJavaEnumDefinitionTranslateStateIdentifier           , '.'                       , kJavaEnumDefinitionTranslateStateIdentifierSeparator      );
     TRANSLATE_STATE_SET(java_enum_definition_translate_table, kJavaEnumDefinitionTranslateStateIdentifier           , kCEETokenID_IMPLEMENTS    , kJavaEnumDefinitionTranslateStateSuperinterfaces          );
     TRANSLATE_STATE_SET(java_enum_definition_translate_table, kJavaEnumDefinitionTranslateStateIdentifier           , ','                       , kJavaEnumDefinitionTranslateStateComma                    );
-    TRANSLATE_STATE_SET(java_enum_definition_translate_table, kJavaEnumDefinitionTranslateStateIdentifier           , '{'                       , kJavaEnumDefinitionTranslateStateCommit                   );
+    TRANSLATE_STATE_SET(java_enum_definition_translate_table, kJavaEnumDefinitionTranslateStateIdentifier           , '{'                       , kJavaEnumDefinitionTranslateStateConfirm                  );
     TRANSLATE_STATE_SET(java_enum_definition_translate_table, kJavaEnumDefinitionTranslateStateIdentifierSeparator  , kCEETokenID_IDENTIFIER    , kJavaEnumDefinitionTranslateStateIdentifier               );
     TRANSLATE_STATE_SET(java_enum_definition_translate_table, kJavaEnumDefinitionTranslateStateComma                , kCEETokenID_IDENTIFIER    , kJavaEnumDefinitionTranslateStateIdentifier               );
     TRANSLATE_STATE_SET(java_enum_definition_translate_table, kJavaEnumDefinitionTranslateStateComma                , kCEETokenID_ANNOTATION    , kJavaEnumDefinitionTranslateStateAnnotation               );
@@ -2254,7 +2298,7 @@ static cee_boolean java_enum_definition_trap(CEESourceFregment* fregment,
                     TOKEN_APPEND(supperinterface, token);
             }
         }
-        else if (current == kJavaEnumDefinitionTranslateStateCommit) {
+        else if (current == kJavaEnumDefinitionTranslateStateConfirm) {
             if (supperinterface) {
                 supperinterfaces = cee_list_prepend(supperinterfaces, supperinterface);
                 supperinterface = NULL;
@@ -2270,7 +2314,7 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (current != kJavaEnumDefinitionTranslateStateCommit)
+    if (current != kJavaEnumDefinitionTranslateStateConfirm)
         goto exit;
         
 
@@ -2395,7 +2439,7 @@ static CEEList* enumerators_extract(CEEList* tokens,
 static cee_char* java_variable_proto_descriptor_create(CEESourceFregment* fregment,
                                                        CEESourceSymbol* definition,
                                                        CEEList* identifier,
-                                                       const cee_char* proto)
+                                                       const cee_char* type_str)
 {
     if (!fregment || !definition)
         return NULL;
@@ -2424,15 +2468,21 @@ static cee_char* java_variable_proto_descriptor_create(CEESourceFregment* fregme
     cee_strconcat0(&descriptor, "{", NULL);
     
     if (definition->type == kCEESourceSymbolTypeLabel)
-        cee_strconcat0(&descriptor, "type:", "label", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"label\"", ",", NULL);
     else if (definition->type == kCEESourceSymbolTypeEnumerator)
-        cee_strconcat0(&descriptor, "type:", "enumerator", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"enumerator\"", ",", NULL);
     else
-        cee_strconcat0(&descriptor, "type:", "variable", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"variable\"", ",", NULL);
     
-    cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
-    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
-    cee_strconcat0(&descriptor, "proto:", proto, NULL);
+    if (definition->name)
+        cee_strconcat0(&descriptor, "\"name\":", "\"", definition->name, "\"", ",", NULL);
+    
+    if (access_level)
+        cee_strconcat0(&descriptor, "\"access_level\":", "\"", access_level, "\"", ",", NULL);
+    
+    if (type_str)
+        cee_strconcat0(&descriptor, "\"proto\":", "\"", type_str, "\"", ",", NULL);
+    
     cee_strconcat0(&descriptor, "}", NULL);
 
     return descriptor;
@@ -2469,17 +2519,21 @@ static cee_char* java_class_proto_descriptor_create(CEESourceFregment* fregment,
     cee_strconcat0(&descriptor, "{", NULL);
     
     if (definition->type == kCEESourceSymbolTypeClassDefinition)
-        cee_strconcat0(&descriptor, "type:", "class_definition", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"class_definition\"", ",", NULL);
     else if (definition->type == kCEESourceSymbolTypeInterfaceDefinition)
-        cee_strconcat0(&descriptor, "type:", "interface_definition", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"interface_definition\"", ",", NULL);
     else if (definition->type == kCEESourceSymbolTypeEnumDefinition)
-        cee_strconcat0(&descriptor, "type:", "enum_definition", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"enum_definition\"", ",", NULL);
     else
-        cee_strconcat0(&descriptor, "type:", "class_declaration", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"class_declaration\"", ",", NULL);
     
-    cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
-    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
-    cee_strconcat0(&descriptor, "derivers:", derives_str, NULL);
+    if (definition->name)
+        cee_strconcat0(&descriptor, "\"name\":", "\"", definition->name, "\"", ",", NULL);
+    if (access_level)
+        cee_strconcat0(&descriptor, "\"access_level\":", "\"", access_level, "\"", ",", NULL);
+    if (derives_str)
+        cee_strconcat0(&descriptor, "\"derivers\":", "\"", derives_str, "\"", ",", NULL);
+    
     cee_strconcat0(&descriptor, "}", NULL);
     
     return descriptor;
@@ -2500,7 +2554,7 @@ static cee_char* java_name_scope_list_string_create(CEEList* scopes,
         if (str) {
             cee_strconcat0(&scopes_str, str, NULL);
             if (p->prev)
-                cee_strconcat0(&scopes_str, " ", NULL);
+                cee_strconcat0(&scopes_str, ",", NULL);
             cee_free(str);
         }
         p = p->prev;
@@ -2564,12 +2618,12 @@ static void java_method_definition_translate_table_init(void)
      *  BuiltinType             DeclarationSpecifier        BuiltinType         Identifier          Error                   *TypeParameters     Annotation          Error           Error       Error           Error               BuiltinType             BuiltinType         Error
      *  Identifier              Error                       Error               Identifier          Identifier              *TypeParameters     Annotation          Error           Error       ParameterList   Error               Identifier              Identifier          Error
      *  ParameterList           Error                       Error               Error               Error                   Error               Error               Error           Error       Error           ParameterListEnd    Error                   Error               Error
-     *  ParameterListEnd        Error                       Error               Error               Error                   Error               Annotation          Throws          Error       Error           Error               ParameterListEnd        ParameterListEnd    Commit
-     *  Annotation              DeclarationSpecifier        BuiltinType         Identifier          Error                   *TypeParameters     Annotation          Throws          Error       AnnotationList  Error               Annotation              Annotation          Commit
+     *  ParameterListEnd        Error                       Error               Error               Error                   Error               Annotation          Throws          Error       Error           Error               ParameterListEnd        ParameterListEnd    Confirm
+     *  Annotation              DeclarationSpecifier        BuiltinType         Identifier          Error                   *TypeParameters     Annotation          Throws          Error       AnnotationList  Error               Annotation              Annotation          Confirm
      *  AnnotationList          Error                       Error               Error               Error                   Error               Error               Error           Error       Error           AnnotationListEnd   Error                   Error               Error  
-     *  AnnotationListEnd       DeclarationSpecifier        BuiltinType         Identifier          Error                   *TypeParameters     Annotation          Throws          Error       Error           Error               AnnotationListEnd       AnnotationListEnd   Commit
+     *  AnnotationListEnd       DeclarationSpecifier        BuiltinType         Identifier          Error                   *TypeParameters     Annotation          Throws          Error       Error           Error               AnnotationListEnd       AnnotationListEnd   Confirm
      *  Throws                  Error                       Error               Exception           Error                   Error               Error               Error           Error       Error           Error               Error                   Error               Error
-     *  Exception               Error                       Error               Exception           ExceptionSeparator      *TypeParameters     Error               Error           Exception   Error           Error               Error                   Error               Commit
+     *  Exception               Error                       Error               Exception           ExceptionSeparator      *TypeParameters     Error               Error           Exception   Error           Error               Error                   Error               Confirm
      *  ExceptionSeparator      Error                       Error               Exception           Error                   Error               Error               Error           Error       Error           Error               Error                   Error               Error
      *  
      *  TypeParameters: save 'current state', skip TypeParameterList then restore 'current state'
@@ -2605,7 +2659,7 @@ static void java_method_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateParameterListEnd     , kCEETokenID_THROWS                , kJavaMethodDefinitionTranslateStateThrows                 );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateParameterListEnd     , '['                               , kJavaMethodDefinitionTranslateStateParameterListEnd       );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateParameterListEnd     , ']'                               , kJavaMethodDefinitionTranslateStateParameterListEnd       );
-    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateParameterListEnd     , '{'                               , kJavaMethodDefinitionTranslateStateCommit                 );
+    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateParameterListEnd     , '{'                               , kJavaMethodDefinitionTranslateStateConfirm                 );
     TRANSLATE_FUNCS_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotation           , token_id_is_declaration_specifier , kJavaMethodDefinitionTranslateStateDeclarationSpecifier   );
     TRANSLATE_FUNCS_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotation           , token_id_is_builtin_type          , kJavaMethodDefinitionTranslateStateBuiltinType            );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotation           , kCEETokenID_IDENTIFIER            , kJavaMethodDefinitionTranslateStateIdentifier             );
@@ -2615,7 +2669,7 @@ static void java_method_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotation           , '('                               , kJavaMethodDefinitionTranslateStateAnnotationList         );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotation           , '['                               , kJavaMethodDefinitionTranslateStateAnnotation             );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotation           , ']'                               , kJavaMethodDefinitionTranslateStateAnnotation             );
-    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotation           , '{'                               , kJavaMethodDefinitionTranslateStateCommit                 );
+    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotation           , '{'                               , kJavaMethodDefinitionTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotationList       , ')'                               , kJavaMethodDefinitionTranslateStateAnnotationListEnd      );
     TRANSLATE_FUNCS_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotationListEnd    , token_id_is_declaration_specifier , kJavaMethodDefinitionTranslateStateDeclarationSpecifier   );
     TRANSLATE_FUNCS_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotationListEnd    , token_id_is_builtin_type          , kJavaMethodDefinitionTranslateStateBuiltinType            );
@@ -2625,13 +2679,13 @@ static void java_method_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotationListEnd    , kCEETokenID_THROWS                , kJavaMethodDefinitionTranslateStateThrows                 );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotationListEnd    , '['                               , kJavaMethodDefinitionTranslateStateAnnotationListEnd      );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotationListEnd    , ']'                               , kJavaMethodDefinitionTranslateStateAnnotationListEnd      );
-    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotationListEnd    , '{'                               , kJavaMethodDefinitionTranslateStateCommit                 );
+    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateAnnotationListEnd    , '{'                               , kJavaMethodDefinitionTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateThrows               , kCEETokenID_IDENTIFIER            , kJavaMethodDefinitionTranslateStateException              );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , kCEETokenID_IDENTIFIER            , kJavaMethodDefinitionTranslateStateException              );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , '.'                               , kJavaMethodDefinitionTranslateStateExceptionSeparator     );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , '<'                               , kJavaMethodDefinitionTranslateStateTypeParameters         );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , ','                               , kJavaMethodDefinitionTranslateStateException              );
-    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , '{'                               , kJavaMethodDefinitionTranslateStateCommit                 );
+    TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateException            , '{'                               , kJavaMethodDefinitionTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_method_definition_translate_table, kJavaMethodDefinitionTranslateStateExceptionSeparator   , kCEETokenID_IDENTIFIER            , kJavaMethodDefinitionTranslateStateException              );
 }
 
@@ -2682,7 +2736,7 @@ static cee_boolean java_method_definition_parse(CEESourceFregment* fregment)
             if (!throws)
                 throws = p;
         }
-        else if (current == kJavaMethodDefinitionTranslateStateCommit) {
+        else if (current == kJavaMethodDefinitionTranslateStateConfirm) {
             commit = p;
             ret = TRUE;
             break;
@@ -2695,8 +2749,7 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (current != kJavaMethodDefinitionTranslateStateCommit ||
-        !identifier || !parameter_list)
+    if (current != kJavaMethodDefinitionTranslateStateConfirm || !identifier || !parameter_list)
         goto exit;
     
     definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
@@ -2711,8 +2764,7 @@ next_token:
         cee_token_slice_state_mark(identifier,
                                    identifier,
                                    kCEETokenStateSymbolOccupied);
-        cee_source_fregment_type_set_exclusive(fregment,
-                                               kCEESourceFregmentTypeFunctionDefinition);
+        cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDefinition);
         
         child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
         if (child) {
@@ -2745,12 +2797,12 @@ static void java_method_parameters_declaration_translate_table_init(void)
      *  Init                    DeclarationSpecifier        BuiltinType         Identifier          *TypeParameters     Error               Annotation      Error       Error   Error       Error           Error               Error           Error
      *  DeclarationSpecifier    DeclarationSpecifier        BuiltinType         Identifier          *TypeParameters     Error               Annotation      Error       Error   Error       Error           Error               Error           Error
      *  BuiltinType             DeclarationSpecifier        BuiltinType         Identifier          *TypeParameters     BuiltinType         Annotation      Error       Error   Error       Error           Error               BuiltinType     BuiltinType
-     *  Identifier              Error                       Error               Identifier          *TypeParameters     Identifier          Annotation      Commit      Dot     This        Error           Error               Identifier      Identifier
+     *  Identifier              Error                       Error               Identifier          *TypeParameters     Identifier          Annotation      Confirm     Dot     This        Error           Error               Identifier      Identifier
      *  Annotation              DeclarationSpecifier        BuiltinType         Identifier          *TypeParameters     Annotation          Annotation      Error       Error   Error       AnnotationList  Error               Error           Error
      *  AnnotationList          Error                       Error               Error               Error               Error               Error           Error       Error   Error       Error           AnnotationListEnd   Error           Error
      *  AnnotationListEnd       DeclarationSpecifier        BuiltinType         Identifier          *TypeParameters     AnnotationListEnd   Annotation      Error       Error   Error       Error           Error               Error           Error
      *  Dot                     Error                       Error               Identifier          Error               Error               Annotation      Error       Error   This        Error           Error               Error           Error
-     *  This                    Error                       Error               Error               Error               Error               Error           Commit      Error   Error       Error           Error               Error           Error
+     *  This                    Error                       Error               Error               Error               Error               Error           Confirm     Error   Error       Error           Error               Error           Error
      *
      *  TypeParameters: save 'current state', skip TypeParameterList then restore 'current state'
      *  
@@ -2779,7 +2831,7 @@ static void java_method_parameters_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateIdentifier            , '<'                               , kJavaMethodParametersDeclarationTranslateStateTypeParameters          );
     TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateIdentifier            , kCEETokenID_ELLIPSIS              , kJavaMethodParametersDeclarationTranslateStateIdentifier              );
     TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateIdentifier            , kCEETokenID_ANNOTATION            , kJavaMethodParametersDeclarationTranslateStateAnnotation              );
-    TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateIdentifier            , ','                               , kJavaMethodParametersDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateIdentifier            , ','                               , kJavaMethodParametersDeclarationTranslateStateConfirm                 );
     TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateIdentifier            , '.'                               , kJavaMethodParametersDeclarationTranslateStateDot                     );
     TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateIdentifier            , kCEETokenID_THIS                  , kJavaMethodParametersDeclarationTranslateStateThis                    );
     TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateIdentifier            , '['                               , kJavaMethodParametersDeclarationTranslateStateIdentifier              );
@@ -2801,7 +2853,7 @@ static void java_method_parameters_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateDot                   , kCEETokenID_IDENTIFIER            , kJavaMethodParametersDeclarationTranslateStateIdentifier              );
     TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateDot                   , kCEETokenID_ANNOTATION            , kJavaMethodParametersDeclarationTranslateStateAnnotation              );
     TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateDot                   , kCEETokenID_THIS                  , kJavaMethodParametersDeclarationTranslateStateThis                    );
-    TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateThis                  , ','                               , kJavaMethodParametersDeclarationTranslateStateCommit                  );
+    TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateThis                  , ','                               , kJavaMethodParametersDeclarationTranslateStateConfirm                 );
 }
 
 static cee_boolean java_method_parameters_parse(CEESourceFregment* fregment)
@@ -2848,7 +2900,7 @@ static cee_boolean java_method_parameters_parse(CEESourceFregment* fregment)
                 identifier = p;
         }
         
-        if (current == kJavaMethodParametersDeclarationTranslateStateCommit || !TOKEN_NEXT(p)) {
+        if (current == kJavaMethodParametersDeclarationTranslateStateConfirm || !TOKEN_NEXT(p)) {
 
             if (identifier) {
                 declaration = java_method_parameter_create(fregment,
@@ -2904,15 +2956,15 @@ static CEESourceSymbol* java_method_parameter_create(CEESourceFregment* fregment
     
     cee_token_slice_state_mark(begin, end, kCEETokenStateSymbolOccupied);
     if (head && TOKEN_PREV(begin)) {
-        cee_char* type = java_type_descriptor_from_token_slice(fregment,
-                                                               head,
-                                                               TOKEN_PREV(begin));
+        cee_char* type_str = java_type_descriptor_from_token_slice(fregment,
+                                                                   head,
+                                                                   TOKEN_PREV(begin));
         parameter->proto = java_variable_proto_descriptor_create(fregment, 
                                                                  parameter,
                                                                  NULL,
-                                                                 type);
-        if (type)
-            cee_free(type);
+                                                                 type_str);
+        if (type_str)
+            cee_free(type_str);
     }
     return parameter;
 }
@@ -3089,15 +3141,25 @@ static cee_char* java_method_definition_proto_descriptor_create(CEESourceFregmen
     }
     
     cee_strconcat0(&descriptor, "{", NULL);
-    cee_strconcat0(&descriptor, "type:", "function_declaration", ",", NULL);
-    cee_strconcat0(&descriptor, "return_type:", return_str, ",", NULL);
-    cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
-    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
-    cee_strconcat0(&descriptor, "parameters:[", NULL);
+    
+    cee_strconcat0(&descriptor, "\"type\":", "\"function_declaration\"", ",", NULL);
+    
+    if (return_str)
+        cee_strconcat0(&descriptor, "\"return_type\":", "\"", return_str, "\"", ",", NULL);
+    
+    if (definition->name)
+        cee_strconcat0(&descriptor, "\"name\":", "\"", definition->name, "\"", ",", NULL);
+    
+    if (access_level)
+        cee_strconcat0(&descriptor, "\"access_level\":", "\"", access_level, "\"", ",", NULL);
+    
+    cee_strconcat0(&descriptor, "\"parameters\":[", NULL);
     p = parameters;
     while (p) {
         CEESourceSymbol* parameter = p->data;
-        cee_strconcat0(&descriptor, parameter->proto, NULL);
+        
+        if (parameter->proto)
+            cee_strconcat0(&descriptor, parameter->proto, NULL);
         
         if (p->next)
             cee_strconcat0(&descriptor, ",", NULL);
@@ -3105,7 +3167,10 @@ static cee_char* java_method_definition_proto_descriptor_create(CEESourceFregmen
         p = p->next;
     }
     cee_strconcat0(&descriptor, "]", ",", NULL);
-    cee_strconcat0(&descriptor, "exceptions:", exceptions_str, NULL);
+    
+    if (exceptions_str)
+        cee_strconcat0(&descriptor, "\"exceptions\":", "\"", exceptions_str, "\"", ",", NULL);
+    
     cee_strconcat0(&descriptor, "}", NULL);
     
     if (return_str)
@@ -3202,15 +3267,25 @@ static cee_char* java_method_declaration_proto_descriptor_create(CEESourceFregme
     }
     
     cee_strconcat0(&descriptor, "{", NULL);
-    cee_strconcat0(&descriptor, "type:", "function_declaration", ",", NULL);
-    cee_strconcat0(&descriptor, "return_type:", return_str, ",", NULL);
-    cee_strconcat0(&descriptor, "name:", definition->name, ",", NULL);
-    cee_strconcat0(&descriptor, "access_level:", access_level, ",", NULL);
-    cee_strconcat0(&descriptor, "parameters:[", NULL);
+    
+    cee_strconcat0(&descriptor, "\"type\":", "\"function_declaration\"", ",", NULL);
+    
+    if (return_str)
+        cee_strconcat0(&descriptor, "\"return_type\":", "\"", return_str, "\"", ",", NULL);
+    
+    if (definition->name)
+        cee_strconcat0(&descriptor, "\"name\":", "\"", definition->name, "\"", ",", NULL);
+    
+    if (access_level)
+        cee_strconcat0(&descriptor, "\"access_level\":", "\"", access_level, "\"", ",", NULL);
+    
+    cee_strconcat0(&descriptor, "\"parameters\":[", NULL);
     p = parameters;
     while (p) {
         CEESourceSymbol* parameter = p->data;
-        cee_strconcat0(&descriptor, parameter->proto, NULL);
+        
+        if (parameter->proto)
+            cee_strconcat0(&descriptor, parameter->proto, NULL);
         
         if (p->next)
             cee_strconcat0(&descriptor, ",", NULL);
@@ -3218,7 +3293,10 @@ static cee_char* java_method_declaration_proto_descriptor_create(CEESourceFregme
         p = p->next;
     }
     cee_strconcat0(&descriptor, "]", ",", NULL);
-    cee_strconcat0(&descriptor, "exceptions:", exceptions_str, NULL);
+    
+    if (exceptions_str)
+        cee_strconcat0(&descriptor, "\"exceptions\":", "\"", exceptions_str, "\"", ",", NULL);
+    
     cee_strconcat0(&descriptor, "}", NULL);
     
     if (exceptions_str)

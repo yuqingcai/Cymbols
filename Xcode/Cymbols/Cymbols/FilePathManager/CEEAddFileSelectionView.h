@@ -14,9 +14,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEAddFileSelectionView : NSView
-@property (strong) IBOutlet CEETextField *filePathInput;
 @property (strong) IBOutlet CEETableView *sourceTable;
-@property (strong) IBOutlet CEEButton *addFilePathButton;
 @property (strong) IBOutlet CEEButton *openFilePanelButton;
 @property (strong) IBOutlet CEEButton *removeFilePathsButton;
 

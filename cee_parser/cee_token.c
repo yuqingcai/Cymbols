@@ -6,6 +6,8 @@
 #include "cee_lib.h"
 #include "cee_token.h"
 
+cee_int cee_token_count = 0;
+
 void cee_token_free(cee_pointer data)
 {
     if (!data)
@@ -13,6 +15,8 @@ void cee_token_free(cee_pointer data)
     
     CEEToken* token = (CEEToken*)data;
     cee_free(token);
+    
+    cee_token_count --;
 }
 
 CEEToken* cee_token_create(CEETokenID identifier,
@@ -23,11 +27,19 @@ CEEToken* cee_token_create(CEETokenID identifier,
     token->identifier = identifier;
     token->offset = offset;
     token->length = length;
+    
+    cee_token_count ++;
+    
     return token;
 }
 
-static cee_int token_compare(const cee_pointer a,
-                             const cee_pointer b)
+cee_int cee_token_count_get(void)
+{
+    return cee_token_count;
+}
+
+static cee_int token_location_compare(const cee_pointer a,
+                                      const cee_pointer b)
 {
     CEEToken* token0 = (CEEToken*)a;
     CEEToken* token1 = (CEEToken*)b;
@@ -45,7 +57,7 @@ cee_char* cee_string_from_token(const cee_char* subject,
     if (!subject || !token)
         return NULL;
     
-    cee_char* str = cee_strndup((cee_char*)&subject[token->offset], 
+    cee_char* str = cee_strndup(&subject[token->offset],
                                 token->length);
     return str;
 }
@@ -82,8 +94,10 @@ cee_char* cee_string_from_tokens(const cee_char* subject,
         }
 
         str = cee_string_from_token(subject, token);
-        cee_strconcat0(&dump, str, NULL);
-        cee_free(str);
+        if (str) {
+            cee_strconcat0(&dump, str, NULL);
+            cee_free(str);
+        }
 
 skip:
         p = TOKEN_NEXT(p);
@@ -124,9 +138,10 @@ cee_char* cee_string_from_token_slice(const cee_char* subject,
         }
         
         str = cee_string_from_token(subject, token);
-        cee_strconcat0(&dump, str, NULL);
-        cee_free(str);
-    
+        if (str) {
+            cee_strconcat0(&dump, str, NULL);
+            cee_free(str);
+        }
 skip:
         if (q && p == q)
             break;
@@ -157,6 +172,42 @@ void cee_string_concat_with_token(cee_char** str,
         cee_strconcat0(str, token_str, NULL);
         cee_free(token_str);
     }
+}
+
+cee_boolean cee_string_regular_line_format(cee_char** descriptor)
+{
+    if (!descriptor || !*descriptor)
+        return FALSE;
+    
+    cee_char* p = *descriptor;
+    cee_size len = strlen(*descriptor);
+    cee_size num = 0;
+    
+    while (*p) {
+        if (*p == '\r' ||
+            *p == '\n' ||
+            *p == '\v' ||
+            *p == '\t')
+            *p = ' ';
+        p ++;
+    }
+    
+    p = *descriptor;
+    while (*p) {
+        if (*p == ' ' && *(p + 1) == ' ') {
+            cee_char* q = p + 1;
+            while (*q == ' ')
+                q ++;
+            
+            num = *descriptor + len - q + 1; /** plus '\0' */
+            memmove(p + 1, q, num);
+        }
+        p ++;
+    }
+    
+    *descriptor = cee_strtrim(*descriptor, " ");
+    
+    return TRUE;
 }
 
 //cee_char* cee_formated_string_from_token_slice(const cee_char* subject,
@@ -192,7 +243,7 @@ void cee_string_concat_with_token(cee_char** str,
 //                cee_strconcat0(&formated, " ", NULL);
 //            }
 //            else {
-//                str = cee_strndup((const cee_char*)&subject[token->offset],
+//                str = cee_strndup(&subject[token->offset],
 //                                  token->length);
 //                if (str) {
 //                    cee_strconcat0(&formated, str, NULL);
@@ -257,6 +308,7 @@ CEEList* cee_ranges_from_tokens(CEEList* tokens,
 {
     CEEList* ranges = NULL;
     CEEList* p = NULL;
+    CEEList* q = NULL;
     CEEToken* token = NULL;
     CEERange* range = NULL;
     cee_long offset = -1;
@@ -265,11 +317,16 @@ CEEList* cee_ranges_from_tokens(CEEList* tokens,
     if (!tokens)
         return NULL;
     
-    tokens = cee_list_first(tokens);
-    tokens = cee_list_sort(tokens, token_compare);
+    q = tokens;
+    while (q) {
+        p = cee_list_prepend(p, q->data);
+        q = TOKEN_NEXT(q);
+    }
+    
+    p = cee_list_sort(p, token_location_compare);
+    q = p;
     
     if (type == kCEERangeListTypeSeparate) {
-        p = tokens;
         while (p) {
             token = p->data;
             range = cee_range_create(token->offset, token->length);
@@ -279,15 +336,17 @@ CEEList* cee_ranges_from_tokens(CEEList* tokens,
         ranges = cee_list_reverse(ranges);
     }
     else if (type == kCEERangeListTypeContinue) {
-        token = cee_list_first(tokens)->data;
+        token = cee_list_first(p)->data;
         offset = token->offset;
         
-        token = cee_list_last(tokens)->data;
+        token = cee_list_last(p)->data;
         length = token->offset + token->length - offset;
         
         range = cee_range_create(offset, length);
         ranges = cee_list_prepend(ranges, range);
     }
+    
+    cee_list_free(q);
     
     return ranges;
 }
@@ -341,20 +400,12 @@ cee_char* cee_ranges_string_from_token_slice(CEEList* p,
                                              CEEList* q,
                                              CEERangeListType type)
 {
-    CEEList* tokens = NULL;
     cee_char* str = NULL;
-    while (p) {
-        tokens = cee_list_prepend(tokens, p->data);
-        
-        if (q && p == q)
-            break;
-        
-        p = TOKEN_NEXT(p);
-    }
-    
-    str = cee_ranges_string_from_tokens(tokens, type);
-    cee_list_free(tokens);
-    return str;
+    CEEList* ranges = cee_ranges_from_token_slice(p, q, type);
+    str = cee_string_from_ranges(ranges);
+    if (ranges)
+        cee_list_free_full(ranges, cee_range_free);
+    return str;    
 }
 
 cee_boolean cee_token_id_is_whitespace(CEETokenID identifier)
@@ -759,15 +810,19 @@ CEESourceTokenMap* cee_source_token_map_create(const cee_char* subject)
         return NULL;
     
     CEESourceTokenMap* token_map = cee_malloc0(sizeof(CEESourceTokenMap));
-    token_map->length = strlen((const cee_char*)subject) + 1; /** length contain NULL terminater */
+    token_map->length = strlen(subject) + 1; /** plus NULL terminater */
     token_map->map = (cee_pointer*)cee_malloc0(sizeof(cee_pointer) * token_map->length);
     return token_map;
 }
 
 void cee_source_token_map_free(CEESourceTokenMap* token_map)
 {
+    if (!token_map)
+        return;
+    
     if (token_map->map)
         cee_free(token_map->map);
+    
     cee_free(token_map);
 }
 

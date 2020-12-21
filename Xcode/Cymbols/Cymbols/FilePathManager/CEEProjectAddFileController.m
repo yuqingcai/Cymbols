@@ -54,8 +54,6 @@ typedef NS_ENUM(NSInteger, CEEProjectAddFileScene) {
     [_addFileSelectionView.sourceTable setDraggingSourceOperationMask:NSDragOperationEvery forLocal:NO];
     [_addFileSelectionView.sourceTable setAllowsMultipleSelection:YES];
     
-    [_addFileSelectionView.addFilePathButton setTarget:self];
-    [_addFileSelectionView.addFilePathButton setAction:@selector(addFilePathToSourceTable:)];
     [_addFileSelectionView.openFilePanelButton setTarget:self];
     [_addFileSelectionView.openFilePanelButton setAction:@selector(openFilePanel:)];
     [_addFileSelectionView.removeFilePathsButton setTarget:self];
@@ -197,17 +195,6 @@ typedef NS_ENUM(NSInteger, CEEProjectAddFileScene) {
 - (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
     AppDelegate* delegate = [NSApp delegate];
     return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
-}
-
-- (IBAction)addFilePathToSourceTable:(id)sender {
-    if ([_addFileSelectionView.filePathInput.stringValue isEqualToString:@""])
-        return;
-    
-    NSString* filePath = _addFileSelectionView.filePathInput.stringValue;
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        [_addFilePaths addObject:filePath];
-        [_addFileSelectionView.sourceTable reloadData];
-    }
 }
 
 -(IBAction)removeFilePathsFromSourceTable:(id)sender {

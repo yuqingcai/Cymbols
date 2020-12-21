@@ -70,8 +70,9 @@ typedef struct _CEESourceFregment {
     CEEList* tokens_ref;
     CEEList* tokens_ref_last;
     CEEList* symbols;
-    CEEList* node;
+    CEEList* node_ref;
     cee_char* filetype;
+    CEEList* attributes;
 } CEESourceFregment;
 
 #define SOURCE_FREGMENT_TOKENS_FIRST(fregment) ((CEESourceFregment*)fregment)->tokens_ref
@@ -111,7 +112,7 @@ typedef struct _CEESourceFregment {
 
 #define SOURCE_FREGMENT_CHILD_APPEND(main, child) {\
     ((CEESourceFregment*)main)->children = cee_list_prepend(((CEESourceFregment*)main)->children, (child));\
-    ((CEESourceFregment*)child)->node = ((CEESourceFregment*)main)->children;\
+    ((CEESourceFregment*)child)->node_ref = ((CEESourceFregment*)main)->children;\
 }
 
 #define SOURCE_FREGMENT_CHILDREN_FIRST(fregment) cee_list_last(((CEESourceFregment*)fregment)->children)
@@ -167,16 +168,16 @@ cee_boolean cee_source_reference_parse(CEESourceParserRef parser_ref,
                                        CEESourceFregment* statement,
                                        CEERange range,
                                        CEEList** references);
-
 CEESourceFregment* cee_source_fregment_create(CEESourceFregmentType type,
                                               const cee_char* filepath,
                                               const cee_char* subject,
                                               const cee_char* filetype);
 cee_int cee_source_fregment_count_get(void);
 void cee_source_fregment_free(cee_pointer data);
+void cee_source_fregment_attribute_set(CEESourceFregment* fregment,
+                                       const cee_char* name,
+                                       const cee_char* value);
 void cee_source_fregment_free_full(cee_pointer data);
-void cee_source_fregment_remove(CEESourceFregment* fregment);
-void cee_source_fregment_descriptors_free(CEEList* descriptors);
 CEESourceFregment* cee_source_fregment_attach(CEESourceFregment* sibling,
                                               CEESourceFregmentType type,
                                               const cee_char* filepath,

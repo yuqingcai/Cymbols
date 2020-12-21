@@ -36,7 +36,9 @@ static cee_char* asm_parser_name = NULL;
 void cee_parsers_create()
 {
     cee_parsers_init();
+    
     asm_parser_name = cee_strdup("gnu");
+    
     c_parser = cee_c_parser_create("c");
     html_parser = cee_html_parser_create("html");
     xml_parser = cee_xml_parser_create("xml");

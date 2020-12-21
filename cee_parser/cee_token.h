@@ -547,7 +547,7 @@ void cee_token_free(cee_pointer data);
 CEEToken* cee_token_create(CEETokenID token_id,
                            cee_long offset,
                            cee_ulong length);
-
+cee_int cee_token_count_get(void);
 cee_char* cee_string_from_token(const cee_char* subject,
                                 CEEToken* token);
 void cee_string_from_token_print(const cee_char* subject,
@@ -569,6 +569,7 @@ void cee_string_from_token_slice_print(const cee_char* subject,
 void cee_string_concat_with_token(cee_char** str,
                                   const cee_char* subject,
                                   CEEToken* token);
+cee_boolean cee_string_regular_line_format(cee_char** descriptor);
 //cee_char* cee_formated_string_from_token_slice(const cee_char* subject,
 //                                               CEEList* p,
 //                                               CEEList* q);

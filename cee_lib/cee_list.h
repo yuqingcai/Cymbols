@@ -13,6 +13,7 @@ typedef struct _CEEList {
     struct _CEEList* prev;
 } CEEList;
 
+cee_int cee_list_count_get(void);
 void cee_list_free(CEEList* list);
 void cee_list_free_full(CEEList* list,
                         CEEDestroyNotify free_func);

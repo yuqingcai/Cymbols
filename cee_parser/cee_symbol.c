@@ -102,7 +102,6 @@ cee_int cee_source_symbol_count_get(void)
     return cee_source_symbol_count;
 }
 
-
 CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol)
 {
     if (!symbol)
@@ -138,7 +137,7 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* filep
                                                        NULL,
                                                        NULL,
                                                        NULL);
-    symbol->filepath = cee_strdup((cee_char*)filepath);
+    symbol->filepath = cee_strdup(filepath);
     symbol->type = type;
     symbol->language = cee_strdup(language);
     symbol->name = cee_string_from_token_slice(subject,
@@ -169,7 +168,7 @@ CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* filepath,
                                                        NULL,
                                                        NULL,
                                                        NULL);
-    symbol->filepath = cee_strdup((cee_char*)filepath);
+    symbol->filepath = cee_strdup(filepath);
     symbol->type = type;
     symbol->language = cee_strdup(language);
     symbol->name = cee_string_from_tokens(subject,
@@ -214,6 +213,7 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     const cee_char* filepath = "?";
     const cee_char* locations = "?";
     const cee_char* fregment_range = "?";
+    const cee_char* parent = "?";
     CEESourceSymbolType type = symbol->type;
     
     if (symbol->name)
@@ -234,14 +234,18 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     if (symbol->fregment_range)
         fregment_range = symbol->fregment_range;
     
-    fprintf(stdout, "%s %d %s %s %s %s %s\n",
+    if (symbol->parent)
+        parent = symbol->parent;
+    
+    fprintf(stdout, "%s %d %s %s %s %s %s %s\n",
             name,
             type,
             protos,
             locations,
             derives, 
             filepath,
-            fregment_range);
+            fregment_range,
+            parent);
 }
 
 void cee_source_symbols_print(CEEList* symbols)

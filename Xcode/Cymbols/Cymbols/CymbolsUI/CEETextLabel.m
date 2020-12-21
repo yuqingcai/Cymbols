@@ -20,6 +20,11 @@
     cee_text_edit_wrap_set(self.edit, TRUE);
 }
 
+- (void)setStringValue:(NSString *)string {
+    [super setStringValue:string];
+    cee_text_storage_modify_clear(cee_text_edit_storage_get(_edit));
+}
+
 - (BOOL)becomeFirstResponder {
     return NO;
 }

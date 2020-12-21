@@ -86,8 +86,7 @@ CEETextModifyLoggerRef cee_text_modify_logger_create(void (*modify_free)(cee_poi
 {
     assert(modify_free);
     
-    CEETextModifyLogger* logger = 
-        (CEETextModifyLogger*)cee_malloc0(sizeof(CEETextModifyLogger));
+    CEETextModifyLogger* logger = (CEETextModifyLogger*)cee_malloc0(sizeof(CEETextModifyLogger));
     logger->modify_free = modify_free;
     logger->modifies = cee_list_create();
     logger->current = logger->modifies;

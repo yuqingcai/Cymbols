@@ -5,6 +5,15 @@
 #include <assert.h>
 #include "cee_source_parser.h"
 
+typedef struct _Attribute {
+    cee_char* name;
+    cee_char* value;
+} Attribute;
+
+static Attribute* attribute_create(const cee_char* name,
+                                   const cee_char* value);
+static void attribute_free(cee_pointer attribute);
+
 static void symbol_tag_map_init(void);
 static void reference_tag_map_init(void);
 static void symbol_reference_map_init(void);
@@ -241,9 +250,11 @@ void cee_source_fregment_free(cee_pointer data)
     cee_list_free(fregment->tokens_ref_last);
     cee_list_free(fregment->symbols);
     cee_list_free_full(fregment->children, cee_source_fregment_free);
-
+    
     if (fregment->filetype)
         cee_free(fregment->filetype);
+    
+    cee_list_free_full(fregment->attributes, attribute_free);
     
     free(fregment);
     
@@ -264,33 +275,72 @@ void cee_source_fregment_free_full(cee_pointer data)
     if (fregment->filetype)
         cee_free(fregment->filetype);
     
+    cee_list_free_full(fregment->attributes, attribute_free);
+    
     free(fregment);
     
     cee_source_fregment_count --;
 }
 
-cee_int cee_source_fregment_count_get(void)
+void cee_source_fregment_attribute_set(CEESourceFregment* fregment,
+                                       const cee_char* name,
+                                       const cee_char* value)
 {
-    return cee_source_fregment_count;
-}
-
-void cee_source_fregment_remove(CEESourceFregment* fregment)
-{
-    CEEList* p = fregment->parent->children;
+    if (!fregment)
+        return;
+    
+    CEEList* p = fregment->attributes;
+    cee_boolean found = FALSE;
+    Attribute* attribute = NULL;
     while (p) {
-        if (p->data == fregment)
+        attribute = p->data;
+        if (!cee_strcmp(attribute->name, name, FALSE)) {
+            found = TRUE;
             break;
+        }
         p = p->next;
     }
     
-    fregment->parent->children = 
-        cee_list_remove_link(fregment->parent->children, p);
-    cee_source_fregment_free(fregment);
+    if (found) {
+        if (attribute->value)
+            cee_free(attribute->value);
+        
+        attribute->value = cee_strdup(value);
+    }
+    else {
+        attribute = attribute_create(name, value);
+        fregment->attributes = cee_list_prepend(fregment->attributes, attribute);
+    }
 }
 
-void cee_source_fregment_descriptors_free(CEEList* descriptors)
+static Attribute* attribute_create(const cee_char* name,
+                                   const cee_char* value)
 {
-    cee_list_free_full(descriptors, cee_free);
+    Attribute* attribute = cee_malloc0(sizeof(Attribute));
+    attribute->name = cee_strdup(name);
+    attribute->value = cee_strdup(value);
+    return attribute;
+}
+
+static void attribute_free(cee_pointer data)
+{
+    if (!data)
+        return;
+    
+    Attribute* attribute = (Attribute*)data;
+    
+    if (attribute->name)
+        cee_free(attribute->name);
+    
+    if (attribute->value)
+        cee_free(attribute->value);
+    
+    cee_free(attribute);
+}
+
+cee_int cee_source_fregment_count_get(void)
+{
+    return cee_source_fregment_count;
 }
 
 /**
@@ -466,7 +516,7 @@ CEEList* cee_source_fregment_tokens_expand(CEESourceFregment* fregment)
 {
     CEEList* tokens = NULL;
     source_fregment_tokens_expand(fregment, &tokens);
-    return TOKEN_FIRST(tokens);
+    return tokens;
 }
 
 static void source_fregment_tokens_expand(CEESourceFregment* fregment,
@@ -1356,8 +1406,8 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
     }
     
     /** search current siblings */
-    if (current->node) {
-        p = SOURCE_FREGMENT_PREV(current->node);
+    if (current->node_ref) {
+        p = SOURCE_FREGMENT_PREV(current->node_ref);
         while (p) {
             symbols = cee_source_fregment_symbols_search_by_name(p->data, name);
             if (symbols) 
@@ -1397,8 +1447,8 @@ static CEEList* local_symbols_search_by_reference(CEESourceSymbolReference* refe
         }
         
         /** search grandfather siblings */
-        if (fregment->node) {
-            p = SOURCE_FREGMENT_PREV(fregment->node);
+        if (fregment->node_ref) {
+            p = SOURCE_FREGMENT_PREV(fregment->node_ref);
             while (p) {
                 symbols = cee_source_fregment_symbols_search_by_name(p->data, name);
                 if (symbols)
@@ -1507,7 +1557,7 @@ static CEEList* comment_tags_create(CEESourceParserRef parser_ref,
                                     CEERange range)
 {
     CEEList* tags = NULL;
-    CEEList* p = fregment->node;
+    CEEList* p = fregment->node_ref;
     while (p) {
         fregment = p->data;
         if (cee_source_fregment_over_range(fregment, range))
@@ -1541,7 +1591,7 @@ static CEEList* syntax_tags_create(CEESourceParserRef parser_ref,
 {
     CEEList* tags = NULL;
     CEEList* p = NULL;
-    p = fregment->node;
+    p = fregment->node_ref;
     while (p) {
         fregment = p->data;
         if (!syntax_tags_create_recursive(parser_ref, fregment, range, &tags))

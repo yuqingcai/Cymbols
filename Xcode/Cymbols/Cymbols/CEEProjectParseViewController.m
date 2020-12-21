@@ -142,7 +142,6 @@
                     [self->_label0 setStringValue:@"Building Project..."];
             });
         }
-        
         int i = 0;
         CEEList* p = infos;
         while (p) {
@@ -174,6 +173,7 @@
                                                                 [buffer.filePath UTF8String]);
                     
                     cee_source_buffer_parse(buffer, 0);
+                    
                     cee_source_fregment_symbol_tree_dump_to_list(buffer.prep_directive_symbol_tree, &list);
                     cee_source_fregment_symbol_tree_dump_to_list(buffer.statement_symbol_tree, &list);
                     
@@ -216,12 +216,11 @@
                         [self->_progressBar setDoubleValue:(double)i];
                     } // autoreleasepool
                 });
-            
+
             } // autoreleasepool
-            
+                        
             if (self->_cancel)
                 break;
-            
         }
         
         cee_list_free_full(infos, cee_project_file_path_entry_info_free);
@@ -234,6 +233,56 @@
     });
 }
 
+/*
+- (void)viewDidAppear {
+    [super viewDidAppear];
+    AppDelegate* delegate = [NSApp delegate];
+    _project = [delegate currentProject];
+    CEEList* infos = cee_database_filepath_entry_infos_get(self->_project.database);
+    CEEList* p = infos;
+    while (p) {
+
+        int bst_0 = cee_bst_count_get();
+        int list_0 = cee_list_count_get();
+        int symbol_0 = cee_source_symbol_count_get();
+        int fregment_0 = cee_source_fregment_count_get();
+        int token_0 = cee_token_count_get();
+        
+        CEEProjectFilePathEntryInfo* info = p->data;
+        NSString* filePath = [NSString stringWithUTF8String:info->file_path];
+        @autoreleasepool {
+            //for (int i = 0; i < 2000; i ++) {
+                NSLog(@"%@", filePath);
+                CEESourceBuffer* buffer = [self project:self->_project securityOpenSourceBufferWithFilePath:filePath];
+                cee_source_buffer_parse(buffer, 0);
+                [self project:self->_project securityCloseSourceBuffer:buffer];
+            //}
+        } // autoreleasepool
+        
+        p = p->next;
+
+        int bst_1 = cee_bst_count_get();
+        int list_1 = cee_list_count_get();
+        int symbol_1 = cee_source_symbol_count_get();
+        int fregment_1 = cee_source_fregment_count_get();
+        int token_1 = cee_token_count_get();
+
+        if (bst_0 != bst_1 ||
+            list_0 != list_1 ||
+            symbol_0 != symbol_1 ||
+            fregment_0 != fregment_1 ||
+            token_0 != token_1) {
+            fprintf(stdout, "oops!!\n");
+        }
+    }
+
+    cee_list_free_full(infos, cee_project_file_path_entry_info_free);
+
+    [_label1 setStringValue:@"Complete!"];
+    [_button setTitle:@"OK"];
+    [_button setHighlighted:YES];
+}
+*/
 - (NSDateFormatter*)createISO8601DateFormatter {
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     NSLocale *enUSPOSIXLocale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];

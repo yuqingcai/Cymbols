@@ -451,7 +451,6 @@
     [self updateStatusBar];
 }
 
-
 - (IBAction)buildProject:(id)sender {
     if (!_projectParseWindowController)
         _projectParseWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectParseWindowController"];

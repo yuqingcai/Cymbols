@@ -9,9 +9,12 @@
 #include "cee_mem.h"
 #include "cee_list.h"
 
+cee_int cee_list_count = 0;
+
 CEEList* cee_list_create()
 {
     CEEList* list = cee_malloc0(sizeof(CEEList));
+    cee_list_count ++;
     return list;
 }
 
@@ -21,6 +24,7 @@ void cee_list_free(CEEList* list)
         CEEList* next = list->next;
         cee_free(list);
         list = next;
+        cee_list_count --;
     }
 }
 
@@ -35,6 +39,11 @@ void cee_list_free_full(CEEList* list,
     }
     
     cee_list_free(list);
+}
+
+cee_int cee_list_count_get(void)
+{
+    return cee_list_count;
 }
 
 CEEList* cee_list_append(CEEList* list,

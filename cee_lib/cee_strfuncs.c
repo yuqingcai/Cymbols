@@ -72,7 +72,7 @@ cee_char* cee_strnfill(cee_size n,
 cee_char* cee_stpcpy(cee_char *dest,
                      const cee_char *src)
 {
-    cee_char *d = dest;
+    /*cee_char *d = dest;
     const cee_char *s = src;
     
     if (!dest)
@@ -84,57 +84,61 @@ cee_char* cee_stpcpy(cee_char *dest,
         *d++ = *s;
     while (*s++ != '\0');
     
-    return d - 1;
+    return d - 1;*/
+    return stpcpy(dest, src);
 }
 
-cee_char* cee_strconcat(const cee_char *string1, ...)
+cee_char* cee_strconcat(const cee_char *str, ...)
 {
     cee_size l;
     va_list args;
     cee_char* s;
     cee_char* concat;
-    cee_char* ptr;
+    cee_char* p;
     
-    if (!string1)
+    if (!str)
         return NULL;
     
-    l = 1 + strlen (string1);
-    va_start(args, string1);
+    l = strlen(str);
+    va_start(args, str);
     s = va_arg(args, cee_char*);
     while (s) {
         l += strlen(s);
         s = va_arg(args, cee_char*);
     }
     va_end (args);
+    l += 1; /* '\0' terminator */
     
     concat = cee_malloc(sizeof(cee_char)*l);
-    ptr = concat;
+    concat[l-1] = '\0';
     
-    ptr = cee_stpcpy(ptr, string1);
-    va_start(args, string1);
+    p = concat;
+    
+    p = cee_stpcpy(p, str);
+    va_start(args, str);
     s = va_arg(args, cee_char*);
     while (s) {
-        ptr = cee_stpcpy(ptr, s);
+        p = cee_stpcpy(p, s);
         s = va_arg(args, cee_char*);
     }
     va_end (args);
-    
+        
     return concat;
 }
 
-void cee_strconcat0(cee_char** string0, ...)
+void cee_strconcat0(cee_char** str, ...)
 {
-    if (!string0)
+    if (!str)
         return;
     
-    cee_char* append;
-    cee_char* ptr;
+    cee_char* p;
     cee_char* s;
     va_list args;
     cee_size l;
+    cee_size j;
     
     l = 0;
-    va_start(args, string0);
+    va_start(args, str);
     s = va_arg(args, cee_char*);
     while (s) {
         l += strlen(s);
@@ -143,26 +147,25 @@ void cee_strconcat0(cee_char** string0, ...)
     va_end(args);
     l += 1; /* '\0' terminator */
     
-    append = cee_malloc(sizeof(cee_char)*l);
-    ptr = append;
+    if (*str) {
+        j = strlen(*str);
+        l += j;
+        *str = cee_realloc(*str, l);
+        p = *str + j;
+    }
+    else {
+        *str = cee_malloc(l);
+        p = *str;
+    }
+    (*str)[l-1] = '\0';
     
-    va_start(args, string0);
+    va_start(args, str);
     s = va_arg(args, cee_char*);
     while (s) {
-        ptr = cee_stpcpy(ptr, s);
+        p = cee_stpcpy(p, s);
         s = va_arg(args, cee_char*);
     }
     va_end(args);
-        
-    if (!*string0) {
-        *string0 = append;
-    }
-    else {
-        cee_char* string = cee_strconcat(*string0, append, NULL);
-        cee_free(append);
-        cee_free(*string0);
-        *string0 = string;
-    }
 }
 
 cee_char* cee_strjoin(const cee_char* separator, ...)
@@ -326,7 +329,6 @@ cee_char* cee_strtrim(cee_char* string,
     
     return string;
 }
-
 
 cee_char** cee_strsplit(const cee_char *string,
                         const cee_char *delimiter,

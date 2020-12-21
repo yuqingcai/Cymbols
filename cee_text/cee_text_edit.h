@@ -18,6 +18,7 @@ CEETextEditRef cee_text_edit_create(cee_pointer platform,
                                     void (*pasteboard_string_create)(cee_pointer, cee_uchar**));
 void cee_text_edit_storage_set(CEETextEditRef edit, 
                                CEETextStorageRef storage);
+CEETextStorageRef cee_text_edit_storage_get(CEETextEditRef edit);
 void cee_text_edit_wrap_set(CEETextEditRef edit,
                             cee_boolean wrap);
 cee_boolean cee_text_edit_wrap_get(CEETextEditRef edit);

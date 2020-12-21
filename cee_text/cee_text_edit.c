@@ -620,6 +620,11 @@ void cee_text_edit_storage_set(CEETextEditRef edit,
     }
 }
 
+CEETextStorageRef cee_text_edit_storage_get(CEETextEditRef edit)
+{
+    return edit->storage_ref;
+}
+
 static void text_edit_reset(CEETextEditRef edit)
 {
     if (!edit)

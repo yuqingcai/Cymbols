@@ -17,6 +17,7 @@ typedef struct _CEEBST {
 
 CEEBST* cee_bst_create(CEEList* list);
 void cee_bst_free(CEEBST* bst);
+cee_int cee_bst_count_get(void);
 
 #ifdef __cplusplus
 }

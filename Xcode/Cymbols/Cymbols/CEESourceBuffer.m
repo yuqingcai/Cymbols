@@ -211,6 +211,7 @@ static void binary_buffer_modified(cee_pointer buffer,
 }
 
 - (void)dealloc {
+    
     if (_comment)
         cee_source_fregment_free_full(_comment);
     

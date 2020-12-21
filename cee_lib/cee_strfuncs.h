@@ -16,8 +16,8 @@ cee_char* cee_strnfill(cee_size n,
                        cee_char fill_char);
 cee_char * cee_stpcpy(cee_char *dest,
                       const cee_char *src);
-cee_char* cee_strconcat(const cee_char *string1, ...);
-void cee_strconcat0(cee_char** str0, ...);
+cee_char* cee_strconcat(const cee_char *str, ...);
+void cee_strconcat0(cee_char** str, ...);
 cee_char* cee_strjoin(const cee_char* separator, ...);
 cee_boolean cee_str_has_suffix(const cee_char *str,
                                const cee_char *suffix);

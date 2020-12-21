@@ -8,7 +8,7 @@ typedef enum _GNUASMPrepDirectiveIncludeTranslateState {
     kGNUASMPrepDirectiveIncludeTranslateStateInit = 0,
     kGNUASMPrepDirectiveIncludeTranslateStateDirective,
     kGNUASMPrepDirectiveIncludeTranslateStatePath,
-    kGNUASMPrepDirectiveIncludeTranslateStateCommit,
+    kGNUASMPrepDirectiveIncludeTranslateStateConfirm,
     kGNUASMPrepDirectiveIncludeTranslateStateError,
     kGNUASMPrepDirectiveIncludeTranslateStateMax,
 } GNUASMPrepDirectiveIncludeTranslateState;
@@ -19,7 +19,7 @@ typedef enum _GNUASMPrepDirectiveDefineTranslateState {
     kGNUASMPrepDirectiveDefineTranslateStateDefineName,
     kGNUASMPrepDirectiveDefineTranslateStateParameterList,
     kGNUASMPrepDirectiveDefineTranslateStateParameter,
-    kGNUASMPrepDirectiveDefineTranslateStateCommit,
+    kGNUASMPrepDirectiveDefineTranslateStateConfirm,
     kGNUASMPrepDirectiveDefineTranslateStateError,
     kGNUASMPrepDirectiveDefineTranslateStateMax,
 } GNUASMPrepDirectiveDefineTranslateState;
@@ -637,7 +637,7 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
         if (!indexes[i])
             continue;
         
-        p = indexes[i]->node;
+        p = indexes[i]->node_ref;
         while (p) {
             fregment = p->data;
             
@@ -1144,15 +1144,15 @@ static void gnu_asm_prep_directive_include_translate_table_init(void)
     /**
      *                      include             import              identifier  literal  \                  <           >       others
      *  Init                IncludeDirective    IncludeDirective    Error       Error    Error              Error       Error   Error
-     *  IncludeDirective    Error               Error               Commit      Commit   IncludeDirective   *PathBegin  Error   Error
+     *  IncludeDirective    Error               Error               Confirm     Confirm  IncludeDirective   *PathBegin  Error   Error
      *
-     *  PathBegin, skip to Commit
+     *  PathBegin, skip to Confirm
      */
     TRANSLATE_STATE_INI(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateMax        , kGNUASMPrepDirectiveIncludeTranslateStateError                                    );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateInit       , kCEETokenID_HASH_INCLUDE  , kGNUASMPrepDirectiveIncludeTranslateStateDirective    );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateInit       , kCEETokenID_HASH_IMPORT   , kGNUASMPrepDirectiveIncludeTranslateStateDirective    );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , kCEETokenID_IDENTIFIER    , kGNUASMPrepDirectiveIncludeTranslateStateCommit       );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , kCEETokenID_LITERAL       , kGNUASMPrepDirectiveIncludeTranslateStateCommit       );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , kCEETokenID_IDENTIFIER    , kGNUASMPrepDirectiveIncludeTranslateStateConfirm      );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , kCEETokenID_LITERAL       , kGNUASMPrepDirectiveIncludeTranslateStateConfirm      );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , '\\'                      , kGNUASMPrepDirectiveIncludeTranslateStateDirective    );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , '<'                       , kGNUASMPrepDirectiveIncludeTranslateStatePath         );
 }
@@ -1193,12 +1193,12 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
             if (p) {
                 t = p;
                 q = p;
-                current = kGNUASMPrepDirectiveIncludeTranslateStateCommit;
+                current = kGNUASMPrepDirectiveIncludeTranslateStateConfirm;
             }
             break;
         }
         
-        if (current == kGNUASMPrepDirectiveIncludeTranslateStateCommit) {
+        if (current == kGNUASMPrepDirectiveIncludeTranslateStateConfirm) {
             if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER) ||
                 cee_token_is_identifier(p, kCEETokenID_LITERAL))
                 r = t = p;
@@ -1209,7 +1209,7 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
         p = TOKEN_NEXT(p);
     }
     
-    if (current == kGNUASMPrepDirectiveIncludeTranslateStateCommit && s && q) {
+    if (current == kGNUASMPrepDirectiveIncludeTranslateStateConfirm && s && q) {
         include_directive = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
                                                                       fregment->subject_ref,
                                                                       s,
@@ -1247,24 +1247,24 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
 static void gnu_asm_prep_directive_define_translate_table_init(void)
 {
     /**
-     *                      define              identifier      (               )                   ,               \               others
-     *  Init                DefineDirective     Error           Error           Error               Error           Error           Error
-     *  DefineDirective     Error               DefineName      Error           Error               Error           DefineDirective Error
-     *  DefineName          Error               Commit          ParameterList   Error               Error           DefineName      Commit
-     *  ParameterList       Error               Parameter       Error           Commit              Error           ParameterList   Error
-     *  Parameter           Error               Error           Error           Commit              ParameterList   Parameter       Error
+     *                      define              identifier      (               )           ,               \               others
+     *  Init                DefineDirective     Error           Error           Error       Error           Error           Error
+     *  DefineDirective     Error               DefineName      Error           Error       Error           DefineDirective Error
+     *  DefineName          Error               Confirm         ParameterList   Error       Error           DefineName      Confirm
+     *  ParameterList       Error               Parameter       Error           Confirm     Error           ParameterList   Error
+     *  Parameter           Error               Error           Error           Confirm     ParameterList   Parameter       Error
      */
     TRANSLATE_STATE_INI(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateMax             , kGNUASMPrepDirectiveDefineTranslateStateError                                                      );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateInit            , kCEETokenID_HASH_DEFINE                   , kGNUASMPrepDirectiveDefineTranslateStateDirective      );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDirective       , kCEETokenID_IDENTIFIER                    , kGNUASMPrepDirectiveDefineTranslateStateDefineName     );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDirective       , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateDirective      );
-    TRANSLATE_STATE_ANY(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDefineName      , kGNUASMPrepDirectiveDefineTranslateStateCommit                                                     );
+    TRANSLATE_STATE_ANY(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDefineName      , kGNUASMPrepDirectiveDefineTranslateStateConfirm                                                    );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDefineName      , '('                                       , kGNUASMPrepDirectiveDefineTranslateStateParameterList  );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateDefineName      , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateDefineName     );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameterList   , kCEETokenID_IDENTIFIER                    , kGNUASMPrepDirectiveDefineTranslateStateParameter      );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameterList   , ')'                                       , kGNUASMPrepDirectiveDefineTranslateStateCommit         );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameterList   , ')'                                       , kGNUASMPrepDirectiveDefineTranslateStateConfirm        );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameterList   , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateParameterList  );
-    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameter       , ')'                                       , kGNUASMPrepDirectiveDefineTranslateStateCommit         );
+    TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameter       , ')'                                       , kGNUASMPrepDirectiveDefineTranslateStateConfirm        );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameter       , ','                                       , kGNUASMPrepDirectiveDefineTranslateStateParameterList  );
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameter       , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateParameter      );
 }
@@ -1305,7 +1305,7 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
                 TOKEN_APPEND(q, token);
         }
         
-        if (current == kGNUASMPrepDirectiveDefineTranslateStateCommit) {
+        if (current == kGNUASMPrepDirectiveDefineTranslateStateConfirm) {
             t = p;
             break;
         }
@@ -1313,7 +1313,7 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
         p = TOKEN_NEXT(p);
     }
     
-    if (current == kGNUASMPrepDirectiveDefineTranslateStateCommit && s) {
+    if (current == kGNUASMPrepDirectiveDefineTranslateStateConfirm && s) {
         /** define macro */
         define_directive = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
                                                                      fregment->subject_ref,
