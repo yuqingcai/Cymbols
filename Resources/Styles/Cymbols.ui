@@ -303,7 +303,23 @@
     "ClassToolbarButton [disabled]" : {
         "icon_color": "#CCCCCC",
     },
-        
+    
+    "ClassToolbarStateButton [actived]" : {
+        "icon_color": "#757575",
+    },
+    
+    "ClassToolbarStateButton [deactived]" : {
+        "icon_color": "#757575",
+    },
+    
+    "ClassToolbarStateButton [clicked]" : {
+        "icon_color": "#575757",
+    },
+    
+    "ClassToolbarStateButton [disabled]" : {
+        "icon_color": "#ADADAD",
+    },
+    
     "ClassTitlebarButton [actived]" : {
         "icon_color": "#757575",
     },
@@ -320,6 +336,22 @@
         "icon_color": "#CCCCCC",
     },
     
+    "ClassTitlebarStateButton [actived]" : {
+        "icon_color": "#B5B5B5",
+    },
+    
+    "ClassTitlebarStateButton [deactived]" : {
+        "icon_color": "#B5B5B5",
+    },
+    
+    "ClassTitlebarStateButton [clicked]" : {
+        "icon_color": "#575757",
+    },
+    
+    "ClassTitlebarStateButton [disabled]" : {
+        "icon_color": "#ADADAD",
+    },
+        
     "ClassCheckBox [actived]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
         "text_color" : "#757575",

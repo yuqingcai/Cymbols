@@ -16,7 +16,7 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* alias,
                                           const cee_char* parent,
                                           const cee_char* derives,
-                                          const cee_char* proto,
+                                          const cee_char* proto_descriptor,
                                           const cee_char* language,
                                           const cee_char* filepath,
                                           const cee_char* locations,
@@ -38,8 +38,8 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
     if (derives)
         symbol->derives = cee_strdup(derives);
     
-    if (proto)
-        symbol->proto = cee_strdup(proto);
+    if (proto_descriptor)
+        symbol->proto_descriptor = cee_strdup(proto_descriptor);
     
     if (language)
         symbol->language = cee_strdup(language);
@@ -83,8 +83,8 @@ void cee_source_symbol_free(cee_pointer data)
     if (symbol->derives)
         cee_free(symbol->derives);
     
-    if (symbol->proto)
-        cee_free(symbol->proto);
+    if (symbol->proto_descriptor)
+        cee_free(symbol->proto_descriptor);
     
     if (symbol->locations)
         cee_free(symbol->locations);
@@ -111,7 +111,7 @@ CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol)
                                                      symbol->alias,
                                                      symbol->parent,
                                                      symbol->derives,
-                                                     symbol->proto,
+                                                     symbol->proto_descriptor,
                                                      symbol->language,
                                                      symbol->filepath,
                                                      symbol->locations,
@@ -214,13 +214,17 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     const cee_char* locations = "?";
     const cee_char* fregment_range = "?";
     const cee_char* parent = "?";
+    const cee_char* alias = "?";
     CEESourceSymbolType type = symbol->type;
     
     if (symbol->name)
         name = symbol->name;
     
-    if (symbol->proto)
-        protos = symbol->proto;
+    if (symbol->alias)
+        alias = symbol->alias;
+    
+    if (symbol->proto_descriptor)
+        protos = symbol->proto_descriptor;
     
     if (symbol->derives)
         derives = symbol->derives;
@@ -237,15 +241,10 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     if (symbol->parent)
         parent = symbol->parent;
     
-    fprintf(stdout, "%s %d %s %s %s %s %s %s\n",
-            name,
-            type,
-            protos,
-            locations,
-            derives, 
-            filepath,
-            fregment_range,
-            parent);
+    fprintf(stdout, "%s %s %d %s %s %s %s %s %s\n",
+            name, alias, type, protos,
+            locations, derives, filepath,
+            fregment_range, parent);
 }
 
 void cee_source_symbols_print(CEEList* symbols)

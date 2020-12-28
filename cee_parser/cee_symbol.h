@@ -63,9 +63,9 @@ typedef struct _CEESourceSymbol {
     cee_char* filepath;
     cee_char* parent;
     cee_char* derives;
-    cee_char* proto;
     cee_char* locations;
     cee_char* fregment_range;
+    cee_char* proto_descriptor;
 } CEESourceSymbol;
 
 CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
@@ -73,7 +73,7 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* alias,
                                           const cee_char* parent,
                                           const cee_char* derived,
-                                          const cee_char* data_type,
+                                          const cee_char* proto_descriptor,
                                           const cee_char* language,
                                           const cee_char* filepath,
                                           const cee_char* locations,

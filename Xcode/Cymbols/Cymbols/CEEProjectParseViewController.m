@@ -142,8 +142,19 @@
                     [self->_label0 setStringValue:@"Building Project..."];
             });
         }
+        
         int i = 0;
         CEEList* p = infos;
+        
+        CEESourceSymbolType filter_types[] = {
+            kCEESourceSymbolTypePrepDirectiveInclude,
+            kCEESourceSymbolTypePrepDirectiveIncludePath,
+            kCEESourceSymbolTypeImport,
+            kCEESourceSymbolTypeUsingDeclaration,
+            kCEESourceSymbolTypePackage,
+            0,
+        };
+        
         while (p) {
             
             @autoreleasepool {
@@ -176,6 +187,7 @@
                     
                     cee_source_fregment_symbol_tree_dump_to_list(buffer.prep_directive_symbol_tree, &list);
                     cee_source_fregment_symbol_tree_dump_to_list(buffer.statement_symbol_tree, &list);
+                    list = cee_source_fregment_symbol_list_type_filter(list, filter_types);
                     
                     if (list) {
                         //NSLog(@"%@ parsed", [buffer.filePath lastPathComponent]);

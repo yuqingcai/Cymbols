@@ -808,14 +808,48 @@
                                             <action selector="projectRemoveFile:" target="8hu-ou-ny9" id="l7f-tt-WXv"/>
                                         </connections>
                                     </customView>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="uMu-oU-HbU" customClass="CEETitlebarStateButton">
+                                        <rect key="frame" x="172" y="1" width="24" height="24"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="24" id="bLQ-Gr-1uh"/>
+                                            <constraint firstAttribute="width" constant="24" id="fKT-AP-D5U"/>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="24" id="j9d-YF-xI7"/>
+                                            <constraint firstAttribute="height" constant="24" id="nWk-FZ-WmJ"/>
+                                        </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_tree_16x16"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="toggleTreeView:" target="ZM5-zG-qt6" id="A2I-KY-sNh"/>
+                                        </connections>
+                                    </customView>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="kZo-Zp-bQU" customClass="CEETitlebarStateButton">
+                                        <rect key="frame" x="148" y="1" width="24" height="24"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="24" id="DQs-ai-3Nv"/>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="24" id="MKG-ms-ayl"/>
+                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="24" id="tzv-GN-Qp8"/>
+                                            <constraint firstAttribute="width" constant="24" id="uHE-CY-HGe"/>
+                                        </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_list_16x16"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="toggleListView:" target="ZM5-zG-qt6" id="Yom-En-LRH"/>
+                                        </connections>
+                                    </customView>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstItem="YDf-kJ-1Yl" firstAttribute="leading" secondItem="uMu-oU-HbU" secondAttribute="trailing" id="2Zl-7H-hq7"/>
+                                    <constraint firstAttribute="bottom" secondItem="uMu-oU-HbU" secondAttribute="bottom" constant="1" id="48A-il-iSD"/>
+                                    <constraint firstItem="uMu-oU-HbU" firstAttribute="leading" secondItem="kZo-Zp-bQU" secondAttribute="trailing" id="9U5-ls-lqv"/>
                                     <constraint firstAttribute="height" constant="25" id="CYu-7U-rfV"/>
                                     <constraint firstAttribute="trailing" secondItem="b4n-sQ-asi" secondAttribute="trailing" constant="6" id="deL-mW-n1z"/>
                                     <constraint firstItem="YDf-kJ-1Yl" firstAttribute="top" secondItem="JV5-ZL-u9t" secondAttribute="top" id="iTP-nf-tML"/>
                                     <constraint firstItem="b4n-sQ-asi" firstAttribute="leading" secondItem="YDf-kJ-1Yl" secondAttribute="trailing" id="mXN-eO-rHu"/>
                                     <constraint firstItem="b4n-sQ-asi" firstAttribute="top" secondItem="JV5-ZL-u9t" secondAttribute="top" id="r12-OV-Var"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="250" id="sT2-gy-1Gs"/>
+                                    <constraint firstAttribute="bottom" secondItem="kZo-Zp-bQU" secondAttribute="bottom" constant="1" id="x0p-lb-5Xe"/>
                                 </constraints>
                             </customView>
                             <customView identifier="IDSessionFilePathTableView" translatesAutoresizingMaskIntoConstraints="NO" id="bOF-Rf-GvL" customClass="CEETableView">
@@ -847,9 +881,11 @@
                     <connections>
                         <outlet property="addSourceButton" destination="YDf-kJ-1Yl" id="FFi-Mc-B87"/>
                         <outlet property="filterInput" destination="jFl-ek-Wio" id="lAN-vS-tqd"/>
+                        <outlet property="listButton" destination="kZo-Zp-bQU" id="9Ar-70-9HD"/>
                         <outlet property="removeSourceButton" destination="b4n-sQ-asi" id="DrZ-IV-gll"/>
                         <outlet property="sourceTable" destination="bOF-Rf-GvL" id="Vji-eA-pkH"/>
                         <outlet property="titlebar" destination="JV5-ZL-u9t" id="BDa-du-fWb"/>
+                        <outlet property="treeButton" destination="uMu-oU-HbU" id="IBn-7y-Hcm"/>
                     </connections>
                 </viewController>
                 <customObject id="8hu-ou-ny9" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -1149,6 +1185,7 @@
         <image name="icon_database_new_16x16" width="16" height="16"/>
         <image name="icon_database_search_16x16" width="16" height="16"/>
         <image name="icon_database_sync_16x16" width="16" height="16"/>
+        <image name="icon_list_16x16" width="16.5" height="16"/>
         <image name="icon_list_window_16x16" width="16" height="16"/>
         <image name="icon_navigate_backward_16x16" width="16" height="16"/>
         <image name="icon_navigate_forward_16x16" width="16" height="16"/>
@@ -1170,6 +1207,7 @@
         <image name="icon_split_horizontal_16x16" width="16" height="16"/>
         <image name="icon_split_vertical_16x16" width="16" height="16"/>
         <image name="icon_toolbar_toggle_16x16" width="16" height="16"/>
+        <image name="icon_tree_16x16" width="16" height="16"/>
         <image name="icon_undo_16x16" width="16" height="16"/>
         <image name="imageCell:8lr-R7-1tu:image" width="16" height="16">
             <mutableData key="keyedArchiveRepresentation">

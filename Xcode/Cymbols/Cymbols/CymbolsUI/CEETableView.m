@@ -9,9 +9,7 @@
 #import <objc/message.h>
 #import "CEETableView.h"
 #import "CEEIdentifier.h"
-#import "cee_datetime.h"
 #import "CEETextView.h"
-#import "CEEButton.h"
 
 #define MIN_COLUMN_WIDTH 24.0
 #define HEADER_HEIGHT 25.0
@@ -34,7 +32,6 @@
 
 @synthesize columnWidths = _columnWidths;
 @synthesize columnOffsets = _columnOffsets;
-
 
 - (void)initProperties {
     [super initProperties];

@@ -1354,6 +1354,9 @@ BOOL ContextContainSymbol(CEEList* context,
         session = [self createSession];
         [session.project setCurrentSession:session];
     }
+    
+    for (NSString* filePath in _properties.filePathsUserSelected)
+        NSLog(@"%@", filePath);
 }
 
 - (void)validateDatabase {

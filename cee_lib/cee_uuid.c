@@ -12,9 +12,9 @@
 
 typedef struct {
     cee_uchar bytes[16];
-} CEEUuid;
+} CEEUUID;
 
-static cee_char *cee_uuid_to_string(const CEEUuid *uuid)
+static cee_char *cee_uuid_to_string(const CEEUUID *uuid)
 {
     const cee_uchar *bytes;
     
@@ -36,7 +36,7 @@ static cee_char *cee_uuid_to_string(const CEEUuid *uuid)
 
 
 
-static void uuid_set_version(CEEUuid *uuid, cee_uint version)
+static void uuid_set_version(CEEUUID *uuid, cee_uint version)
 {
     cee_uchar *bytes = uuid->bytes;
 
@@ -47,7 +47,7 @@ static void uuid_set_version(CEEUuid *uuid, cee_uint version)
     bytes[8] |= 0x80;
 }
 
-static void cee_uuid_generate_v4(CEEUuid *uuid)
+static void cee_uuid_generate_v4(CEEUUID *uuid)
 {
     cee_int i;
     cee_uchar* bytes;
@@ -69,7 +69,7 @@ static void cee_uuid_generate_v4(CEEUuid *uuid)
 
 cee_char* cee_uuid_string_random()
 {
-    CEEUuid uuid;
+    CEEUUID uuid;
     cee_uuid_generate_v4(&uuid);
     return cee_uuid_to_string(&uuid);
 }

@@ -10,7 +10,6 @@
 #import "CEEJSONReader.h"
 #import "NSView+UIStyle.h"
 #import "CEEScroller.h"
-
 #import "cee_datetime.h"
 
 NSNotificationName CEENotificationUserInterfaceStyleUpdate = @"CEENotificationUserInterfaceStyleUpdate";
@@ -529,7 +528,7 @@ static CEEStyleManager* gStyleManager = nil;
     
     NSMutableArray* schemes = nil;
     NSString* selector = nil;
-    
+        
     selector = [view getSchemeObjectIdentifier];
     if (selector)
         [self enumerateSchemes:&schemes fromDescriptor:_descriptor withIdentifier:selector];

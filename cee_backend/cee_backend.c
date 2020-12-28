@@ -336,17 +336,17 @@ static cee_boolean tables_create(sqlite3* database)
     /** cee_source_symbols table*/
     sql =
     "CREATE TABLE IF NOT EXISTS cee_source_symbols ("                  \
-    "   id             INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
-    "   type           INTEGER                                         ,"  \
-    "   name           TEXT                                            ,"  \
-    "   alias          TEXT                                            ,"  \
-    "   parent         TEXT                                            ,"  \
-    "   derives        TEXT                                            ,"  \
-    "   proto          TEXT                                            ,"  \
-    "   language       TEXT                                            ,"  \
-    "   filepath       TEXT                                            ,"  \
-    "   locations      TEXT                                            ,"  \
-    "   fregment_range TEXT                                             "  \
+    "   id                  INTEGER     PRIMARY KEY AUTOINCREMENT  NOT NULL ,"  \
+    "   type                INTEGER                                         ,"  \
+    "   name                TEXT                                            ,"  \
+    "   alias               TEXT                                            ,"  \
+    "   parent              TEXT                                            ,"  \
+    "   derives             TEXT                                            ,"  \
+    "   proto_descriptor    TEXT                                            ,"  \
+    "   language            TEXT                                            ,"  \
+    "   filepath            TEXT                                            ,"  \
+    "   locations           TEXT                                            ,"  \
+    "   fregment_range      TEXT                                             "  \
     ");";
     
     if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
@@ -915,7 +915,7 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
     sqlite3_stmt* stmt = NULL;
     cee_char* message = NULL;
     cee_char* sql = "INSERT INTO cee_source_symbols (" \
-                        "type, name, alias, parent, derives, proto, language, filepath, locations, fregment_range" \
+                        "type, name, alias, parent, derives, proto_descriptor, language, filepath, locations, fregment_range" \
                     ")" \
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
     int ret = SQLITE_OK;
@@ -936,7 +936,7 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
         sqlite3_bind_text(stmt, 3, symbol->alias, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 4, symbol->parent, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 5, symbol->derives, -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 6, symbol->proto, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 6, symbol->proto_descriptor, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 7, symbol->language, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 8, symbol->filepath, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 9, symbol->locations, -1, SQLITE_STATIC);
@@ -1055,7 +1055,7 @@ static CEEList* symbols_search(sqlite3* db,
     sqlite3_stmt* stmt;
     
     cee_strconcat0(&sql, 
-                   "SELECT type, name, alias, parent, derives, proto, language, filepath, locations fregment_range FROM cee_source_symbols WHERE ",
+                   "SELECT type, name, alias, parent, derives, proto_descriptor, language, filepath, locations fregment_range FROM cee_source_symbols WHERE ",
                    condition, 
                    ";",
                    NULL);
@@ -1100,10 +1100,10 @@ static CEEList* symbols_search(sqlite3* db,
         length = sqlite3_column_bytes(stmt, 4);
         symbol->derives = cee_strndup(text, length);
         
-        /** proto */
+        /** proto_descriptor */
         text = (char*)sqlite3_column_text(stmt, 5);
         length = sqlite3_column_bytes(stmt, 5);
-        symbol->proto = cee_strndup(text, length);
+        symbol->proto_descriptor = cee_strndup(text, length);
         
         /** language */
         text = (char*)sqlite3_column_text(stmt, 6);

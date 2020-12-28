@@ -10,6 +10,7 @@
 #import "CEESessionFilePathController.h"
 #import "CEEFileNameCellView.h"
 #import "CEETitlebarButton.h"
+#import "CEETitlebarStateButton.h"
 
 @interface CEESessionFilePathController ()
 @property (strong) IBOutlet CEETitleView *titlebar;
@@ -19,6 +20,8 @@
 @property (weak) IBOutlet CEETextField *filterInput;
 @property (weak) IBOutlet CEETitlebarButton *addSourceButton;
 @property (weak) IBOutlet CEETitlebarButton *removeSourceButton;
+@property (weak) IBOutlet CEETitlebarStateButton *listButton;
+@property (weak) IBOutlet CEETitlebarStateButton *treeButton;
 
 @end
 
@@ -187,11 +190,15 @@
     BOOL hidden = YES;
     if (_session.project.database)
         hidden = NO;
+    
     [_addSourceButton setHidden:hidden];
     [_removeSourceButton setHidden:hidden];
+    [_listButton setHidden:hidden];
+    [_treeButton setHidden:hidden];
     
     [self presentPaths];
     [self presentTitle];
+    [self setTreeViewMode];
 }
 
 - (void)projectSettingPropertiesResponse:(NSNotification*)notification {
@@ -201,11 +208,15 @@
     BOOL hidden = YES;
     if (_session.project.database)
         hidden = NO;
+    
     [_addSourceButton setHidden:hidden];
     [_removeSourceButton setHidden:hidden];
+    [_listButton setHidden:hidden];
+    [_treeButton setHidden:hidden];
     
     [self presentPaths];
     [self presentTitle];
+    [self setTreeViewMode];
 }
 
 - (void)presentTitle {
@@ -225,6 +236,20 @@
         _filterCondition = [_filterInput.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         [self presentPaths];
     }
+}
+
+- (IBAction)toggleTreeView:(id)sender {
+    [_listButton setState:NSControlStateValueOff];
+}
+
+- (IBAction)toggleListView:(id)sender {
+    [_treeButton setState:NSControlStateValueOff];
+
+}
+
+- (void)setTreeViewMode {
+    [_treeButton setState:NSControlStateValueOn];
+    [self toggleTreeView:nil];
 }
 
 @end

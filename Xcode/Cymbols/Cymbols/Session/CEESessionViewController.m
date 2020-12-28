@@ -265,10 +265,12 @@
         NSString* typeName = [projectController typeForContentsOfURL:url error:nil];
         if ([typeName isEqualToString:@"com.lazycatdesign.cymbols.cymd"]) {
             project = [projectController documentForURL:url];
-            if (project)
+            if (project) {
                 [project showWindows];
-            else
+            }
+            else {
                 [projectController openProjectFromURL:url];
+            }
         }
         else {
             [_session.project addSecurityBookmarksWithFilePaths:@[filePath]];

@@ -12,9 +12,8 @@
 //#define DEBUG_UNION
 //#define DEBUG_ENUM
 //#define DEBUG_TEMPLATE
-//#define DEBUG_MESSAGE_DEFINITION
-//#define DEBUG_MESSAGE_DECLARATION
-//#define DEBUG_PROPERTY_DECLARATION
+//#define DEBUG_MESSAGE
+//#define DEBUG_PROPERTY
 //#define DEBUG_DECLARATION
 //#define DEBUG_INTERFACE
 //#define DEBUG_IMPLEMENTATION
@@ -70,8 +69,16 @@ typedef enum _ObjectiveCPropertyTranslateState {
     kObjectiveCPropertyTranslateStateProperty,
     kObjectiveCPropertyTranslateStateAttribute,
     kObjectiveCPropertyTranslateStateAttributeEnd,
+    kObjectiveCPropertyTranslateStateDeclarationSpecifier,
+    kObjectiveCPropertyTranslateStateBuiltinType,
+    kObjectiveCPropertyTranslateStateObjectSpecifier,
+    kObjectiveCPropertyTranslateStateObjectIdentifier,
+    kObjectiveCPropertyTranslateStateObjectDefinition,
+    kObjectiveCPropertyTranslateStateObjectDefinitionEnd,
+    kObjectiveCPropertyTranslateStateCustomType,
+    kObjectiveCPropertyTranslateStateIdentifier,
+    kObjectiveCPropertyTranslateStateTypeInit,
     kObjectiveCPropertyTranslateStateConfirm,
-    kObjectiveCPropertyTranslateStateTerminate,
     kObjectiveCPropertyTranslateStateError,
     kObjectiveCPropertyTranslateStateMax,
 } ObjectiveCPropertyTranslateState;
@@ -178,8 +185,10 @@ typedef enum _CDeclarationTranslateState {
     kCDeclarationTranslateStateSurroundedEnd,
     kCDeclarationTranslateStateNoexcept,
     kCDeclarationTranslateStateNoexceptList,
+    kCDeclarationTranslateStateNoexceptListEnd,
     kCDeclarationTranslateStateThrow,
     kCDeclarationTranslateStateThrowList,
+    kCDeclarationTranslateStateThrowListEnd,
     kCDeclarationTranslateStateOperator,
     kCDeclarationTranslateStateOverloadOperator,
     kCDeclarationTranslateStateOverloadNew,
@@ -333,8 +342,9 @@ typedef struct _CParser {
 
 static CEETokenType c_token_type_map[CEETokenID_MAX];
 static cee_int objective_c_message_translate_table[kObjectiveCMessageTranslateStateMax][CEETokenID_MAX];
-static cee_int objective_c_definition_translate_table[kObjectiveCDefinitionTranslateStateMax][CEETokenID_MAX];
 static cee_int objective_c_property_translate_table[kObjectiveCPropertyTranslateStateMax][CEETokenID_MAX];
+static cee_int objective_c_definition_translate_table[kObjectiveCDefinitionTranslateStateMax][CEETokenID_MAX];
+static cee_int objective_c_enum_definition_translate_table[kObjectiveCEnumDefinitionTranslateStateMax][CEETokenID_MAX];
 static cee_int c_template_declaration_translate_table[kCTemplateDeclarationTranslateStateMax][CEETokenID_MAX];
 static cee_int c_function_definition_translate_table[kCFunctionDefinitionTranslateStateMax][CEETokenID_MAX];
 static cee_int c_function_parameters_declaration_translate_table[kCFunctionParametersDeclarationTranslateStateMax][CEETokenID_MAX];
@@ -345,7 +355,6 @@ static cee_int c_prep_directive_define_translate_table[kCPrepDirectiveDefineTran
 static cee_int c_namespace_definition_translate_table[kCNamespaceDefinitionTranslateStateMax][CEETokenID_MAX];
 static cee_int c_proto_translate_table[kCProtosTranslateStateMax][CEETokenID_MAX];
 static cee_int c_extern_block_translate_table[kCExternBlockTranslateStateMax][CEETokenID_MAX];
-static cee_int objective_c_enum_definition_translate_table[kObjectiveCEnumDefinitionTranslateStateMax][CEETokenID_MAX];
 
 static void c_token_type_map_init(void);
 static cee_boolean token_id_is_prep_directive(CEETokenID identifier);
@@ -401,7 +410,6 @@ static void block_parse(CParser* parser);
 static void c_template_declaration_translate_table_init(void);
 static cee_boolean c_template_token_push(CParser* parser,
                                          CEEToken* push);
-static void c_template_parameters_declaration_translate_table_init(void);
 static cee_boolean c_template_parameters_parse(CEESourceFregment* fregment);
 static cee_char* c_template_proto_descriptor_create(CEESourceFregment* fregment,
                                                     CEESourceSymbol* template);
@@ -417,14 +425,12 @@ CEESourceSymbol* c_inheritance_definition_create(CEESourceFregment* fregment,
                                                  const cee_char* subject,
                                                  CEESourceSymbolType symbol_type);
 static cee_char* c_inheritance_proto_descriptor_create(CEESourceFregment* fregment,
-                                                       CEESourceSymbol* definition,
+                                                       CEESourceSymbol* inheritance,
                                                        const cee_char* derives_str);
 static cee_char* c_name_scope_list_string_create(CEEList* scopes,
                                                  const cee_char* subject);
 static cee_char* c_name_scope_create(CEEList* tokens,
                                      const cee_char* subject);
-static CEEList* c_name_scope_head_get(CEEList* p,
-                                      const cee_char* subject);
 static void derived_chain_free(cee_pointer data);
 static cee_boolean c_class_definition_trap(CEESourceFregment* fregment,
                                            CEEList** pp);
@@ -432,12 +438,9 @@ static cee_boolean c_struct_definition_trap(CEESourceFregment* fregment,
                                             CEEList** pp);
 static cee_boolean c_enum_definition_trap(CEESourceFregment* fregment,
                                           CEEList** pp);
-static CEEList* enumerators_extract(CEEList* tokens,
-                                    const cee_char* filepath,
-                                    const cee_char* subject);
+static cee_boolean c_enumerators_parse(CEESourceFregment* fregment);
 static cee_char* c_enumerator_proto_descriptor_create(CEESourceFregment* fregment,
-                                                      CEESourceSymbol* declaration,
-                                                      CEEList* identifier,
+                                                      CEESourceSymbol* enumerator,
                                                       const cee_char* proto);
 static cee_boolean c_union_definition_trap(CEESourceFregment* fregment,
                                            CEEList** pp);
@@ -447,38 +450,34 @@ static cee_boolean statement_block_parse(CEESourceFregment* fregment);
 static void c_function_definition_translate_table_init(void);
 static cee_boolean c_function_definition_parse(CEESourceFregment* fregment);
 static cee_boolean c_function_definition_is_proto(CEESourceFregment* fregment,
-                                                  CEEList* identifier_p);
-static cee_char* c_function_definition_proto_descriptor_create(CEESourceFregment* fregment,
-                                                               CEEList* identifier_p,
-                                                               CEEList* parameter_list_p,
-                                                               CEEList* parameter_list_end_p,
-                                                               CEEList* trialing_p);
+                                                  CEEList* identifier);
 static cee_boolean should_proto_descriptor_append_whitespace(CEEToken* token,
                                                                     CEEToken* token_prev);
 static cee_boolean token_id_is_c_function_proto_header_ignored(CEETokenID identifier);
 static void c_function_parameters_declaration_translate_table_init(void);
 static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment);
 static CEESourceSymbol* c_function_parameter_identifier_create(CEESourceFregment* fregment,
-                                                               CEEList* head,
-                                                               CEEList* begin,
-                                                               CEEList* end);
-static cee_char* c_function_parameter_proto_descriptor_create(CEESourceFregment* fregment,
-                                                              CEESourceSymbol* parameter,
-                                                              const cee_char* type_str);
+                                                               CEEList* prefix,
+                                                               CEEList* identifier);
 static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment* fregment,
-                                                               CEEList* head,
+                                                               CEEList* prefix,
                                                                CEEList* surrounded);
+static cee_char* c_function_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+                                                              CEEList* prefix,
+                                                              CEEList* prefix_tail,
+                                                              CEESourceSymbol* parameter);
 static void objective_c_message_translate_table_init(void);
 static cee_boolean objective_c_message_parse(CEESourceFregment* fregment);
 static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* fregment,
-                                                             CEEList* message,
-                                                             CEEList* components,
+                                                             CEEList* message_begin,
                                                              CEEList* return_type,
                                                              CEEList* return_type_end,
+                                                             CEEList* name_chain,
                                                              CEEList* parameter_types,
                                                              CEEList* parameters);
-static cee_char* objective_c_message_parameter_proto_dump(CEESourceFregment* fregment,
-                                                          cee_int parameter_index);
+static cee_char* objective_c_message_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+                                                                       cee_int index,
+                                                                       CEESourceSymbol* parameter);
 static void c_proto_translate_table_init(void);
 static cee_char* c_type_descriptor_from_token_slice(CEESourceFregment* fregment,
                                                     CEEList* p,
@@ -512,39 +511,49 @@ static CEEList* skip_template_parameter_list(CEEList* p,
 static CEEList* skip_include_path(CEEList* p);
 static CEEList* skip_c_declaration_interval(CEEList* p);
 static cee_boolean c_declaration_parse(CEESourceFregment* fregment);
-static cee_char* c_declaration_proto_create(CEESourceFregment* fregment,
-                                            CEEList* overload,
-                                            CEEList* surrounded,
-                                            CEEList* parameter_list,
-                                            CEEList* identifier,
-                                            CEEList* object_identifier);
-static CEESourceSymbol* c_operator_overload_declaration_create(CEESourceFregment* fregment,
-                                                               const cee_char* proto,
-                                                               CEEList* overload,
-                                                               CEEList* parameter_list);
-static CEESourceSymbol* c_surrounded_declaration_create(CEESourceFregment* fregment,
-                                                        const cee_char* proto,
-                                                        CEEList* surrounded);
+static CEEList* c_declaration_prefix_tail_get(CEESourceFregment* fregment,
+                                              CEEList* identifier,
+                                              CEEList* object_identifier);
 static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregment,
-                                                      const cee_char* proto,
-                                                      CEEList* parameter_list);
-static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFregment* fregment,
-                                                         const cee_char* proto,
-                                                         CEEList* identifier);
+                                                      CEEList* prefix,
+                                                      CEEList* prefix_tail,
+                                                      CEEList* identifier,
+                                                      CEEList* parameter_list,
+                                                      CEEList* parameter_list_end);
+static cee_char* c_function_proto_descriptor_create(CEESourceFregment* fregment,
+                                                    CEEList* prefix,
+                                                    CEEList* prefix_tail,
+                                                    CEEList* identifier,
+                                                    CEEList* parameter_list,
+                                                    CEEList* parameter_list_end);
 static CEESourceSymbol* c_identifier_declaration_create(CEESourceFregment* fregment,
-                                                        const cee_char* proto,
+                                                        CEEList* prefix,
+                                                        CEEList* prefix_tail,
                                                         CEEList* identifier);
+static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFregment* fregment,
+                                                         CEEList* prefix,
+                                                         CEEList* prefix_tail,
+                                                         CEEList* identifier);
+static cee_char* c_declaration_proto_descriptor_create(CEESourceFregment* fregment,
+                                                       CEEList* prefix,
+                                                       CEEList* prefix_tail,
+                                                       CEEList* identifier);
 static void c_namespace_definition_translate_table_init(void);
 static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
                                                CEEList** pp);
 static cee_char* c_namespace_proto_descriptor_create(CEESourceFregment* fregment,
-                                                     CEESourceSymbol* definition);
+                                                     CEESourceSymbol* namespace);
 static void c_extern_block_translate_table_init(void);
 static cee_boolean c_extern_block_parse(CEESourceFregment* fregment);
 static void block_header_parse(CParser* parser);
 static cee_boolean block_reduce(CParser* parser);
-static void label_parse(CParser* parser);
-static cee_boolean label_reduce(CParser* parser);
+static cee_boolean colon_parse(CParser* parser);
+static cee_boolean label_parse(CEESourceFregment* fregment);
+static cee_boolean access_level_parse(CEESourceFregment* fregment);
+static void parser_access_level_transform(CParser* parser,
+                                          CEEToken* token);
+static void access_level_transform(CEESourceFregment* current,
+                                   CEEToken* token);
 static void parameter_list_push(CParser* parser);
 static cee_boolean parameter_list_pop(CParser* parser);
 static void subscript_push(CParser* parser);
@@ -818,7 +827,7 @@ static void c_token_type_map_init(void)
     c_token_type_map[kCEETokenID___BRIDGE]                     = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
     c_token_type_map[kCEETokenID___BRIDGE_TRANSFER]            = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
     c_token_type_map[kCEETokenID___BRIDGE_RETAINED]            = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
-    c_token_type_map[kCEETokenID___BLOCK]                      = kCEETokenTypeKeyword;
+    c_token_type_map[kCEETokenID___BLOCK]                      = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
     c_token_type_map[kCEETokenID__NONNULL]                     = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
     c_token_type_map[kCEETokenID__NULLABLE]                    = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
     c_token_type_map[kCEETokenID_NONNULL]                      = kCEETokenTypeKeyword | kCEETokenTypeDeclarationSpecifier;
@@ -1014,7 +1023,6 @@ static cee_boolean is_name_scope(CEEList* p)
 /**
  *  comment
  */
-
 static cee_boolean token_is_comment(CEEToken* token)
 {
     return token->identifier == kCEETokenID_LINE_COMMENT ||
@@ -1339,7 +1347,8 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
     
     
 #ifdef DEBUG_PREP_DIRECTIVE
-    cee_source_symbols_print(fregment->symbols);
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
@@ -1447,7 +1456,8 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
         cee_list_free(q);
         
 #ifdef DEBUG_PREP_DIRECTIVE
-    cee_source_symbols_print(fregment->symbols);
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
@@ -1489,7 +1499,8 @@ static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
     }
         
 #ifdef DEBUG_PREP_DIRECTIVE
-    cee_source_symbols_print(fregment->symbols);
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
@@ -1558,7 +1569,7 @@ static void statement_parse(CParser* parser)
     
     if (!current || !current->tokens_ref)
         return;
-    
+        
     if (objective_c_property_parse(current) ||
         objective_c_message_parse(current))
         return;
@@ -1584,7 +1595,6 @@ static cee_boolean statement_reduce(CParser* parser)
     return TRUE;
 }
 
-
 /**
  * block
  */
@@ -1604,27 +1614,12 @@ static cee_boolean block_pop(CParser* parser)
 
 static void block_parse(CParser* parser)
 {
-    CEESourceFregment* current = parser->statement_current;
-    const cee_char* subject = parser->subject_ref;
-    const cee_char* filepath = current->filepath_ref;
-    CEEList* enumerators = NULL;
-    
-    if (!current || !current->tokens_ref)
-        return;
-    
-    if (cee_source_fregment_grandfather_type_is(current, kCEESourceFregmentTypeEnumDefinition)) {
-        enumerators = enumerators_extract(current->tokens_ref, filepath, subject);
-        if (enumerators) {
-            current->symbols = cee_list_concat(current->symbols, enumerators);
-            cee_source_fregment_type_set(current, kCEESourceFregmentTypeEnumurators);
-        }
-    }
+    c_enumerators_parse(parser->statement_current);
 }
 
 /**
  * c template
  */
-
 static void c_template_declaration_translate_table_init(void)
 {
     /*
@@ -1633,11 +1628,11 @@ static void c_template_declaration_translate_table_init(void)
      *  Confirm    Error       Parameter   Error     Confirm    Error
      *  Parameter  Parameter   Parameter   Parameter Parameter  Parameter
      */
-    TRANSLATE_STATE_INI(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateMax              , kCTemplateDeclarationTranslateStateError                                                  );
-    TRANSLATE_STATE_ANY(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateInit             , kCTemplateDeclarationTranslateStateInit                                                   );
-    TRANSLATE_STATE_SET(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateInit             , kCEETokenID_TEMPLATE                  , kCTemplateDeclarationTranslateStateConfirm        );
-    TRANSLATE_STATE_SET(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateConfirm          , '<'                                   , kCTemplateDeclarationTranslateStateParameterList  );
-    TRANSLATE_STATE_ANY(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateParameterList    , kCTemplateDeclarationTranslateStateParameterList                                          );
+    TRANSLATE_STATE_INI(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateMax              , kCTemplateDeclarationTranslateStateError                                                              );
+    TRANSLATE_STATE_ANY(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateInit             , kCTemplateDeclarationTranslateStateInit                                                               );
+    TRANSLATE_STATE_SET(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateInit             , kCEETokenID_TEMPLATE                              , kCTemplateDeclarationTranslateStateConfirm        );
+    TRANSLATE_STATE_SET(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateConfirm          , '<'                                               , kCTemplateDeclarationTranslateStateParameterList  );
+    TRANSLATE_STATE_ANY(c_template_declaration_translate_table, kCTemplateDeclarationTranslateStateParameterList    , kCTemplateDeclarationTranslateStateParameterList                                                      );
 }
 
 static cee_boolean c_template_token_push(CParser* parser,
@@ -1681,11 +1676,6 @@ static cee_boolean c_template_token_push(CParser* parser,
     return TRUE;
 }
 
-static void c_template_parameters_declaration_translate_table_init(void)
-{
-    
-}
-
 static cee_boolean c_template_parameters_parse(CEESourceFregment* fregment)
 {
     CEESourceSymbol* template = NULL;
@@ -1712,12 +1702,13 @@ static cee_boolean c_template_parameters_parse(CEESourceFregment* fregment)
                                                              kCEESourceSymbolTypeTemplateDeclaration,
                                                              "c",
                                                              kCEETokenStringOptionCompact);
-        template->proto = c_template_proto_descriptor_create(fregment, template);
+        template->proto_descriptor = c_template_proto_descriptor_create(fregment, template);
         fregment->symbols = cee_list_prepend(fregment->symbols, template);
     }
 
 #ifdef DEBUG_TEMPLATE
-    cee_source_symbols_print(fregment->symbols);
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif
     
     return TRUE;
@@ -1733,7 +1724,7 @@ static cee_char* c_template_proto_descriptor_create(CEESourceFregment* fregment,
     
     cee_strconcat0(&descriptor, "{", NULL);
     
-    cee_strconcat0(&descriptor, "\"type\":", "\"template_declaration\"", ",", NULL);
+    cee_strconcat0(&descriptor, "\"type\":", "\"template\"", NULL);
     
     cee_strconcat0(&descriptor, "}", NULL);
     
@@ -1754,20 +1745,19 @@ static cee_boolean template_pop(CParser* parser)
     return FALSE;
 }
 
-
 static void c_inheritance_definition_translate_table_init(void)
 {
     /**
-     *                                  object_specifier    declaration_specifier   virtual         alignas_specifier   access_specifier    identifier              <                   >       ::                              (               )               [                   ]                   :               ,               {
-     *  Init                            ObjectSpecifier     Error                   Error           Error               Error               Error                   Error               Error   Error                           Error           Error           Error               Error               Error           Error           Error
-     *  ObjectSpecifier                 ObjectSpecifier     Error                   Error           AlignasSpecifier    Error               ObjectIdentifier        Error               Error   ObjectIdentifierScope           Error           Error           ObjectSpecifier     ObjectSpecifier     Error           Error           Confirm
-     *  ObjectIdentifier                Error               Error                   Error           Error               Error               ObjectIdentifier        *TemplateParameter  Error   ObjectIdentifierScope           Error           Error           Error               Error               ObjectDerive    Error           Confirm
-     *  ObjectIdentifierScope           Error               Error                   Error           Error               Error               ObjectIdentifier        Error               Error   Error                           Error           Error           Error               Error               Error           Error           Error
-     *  ObjectDerive                    Error               Error                   ObjectDerive    Error               ObjectDerive        ObjectDeriveIdentifier  Error               Error   ObjectDeriveIdentifierScope     Error           Error           ObjectDerive        ObjectDerive        Error           ObjectDerive    Error
-     *  ObjectDeriveIdentifier          Error               Error                   Error           Error               Error               Error                   *TemplateParameter  Error   ObjectDeriveIdentifierScope     Error           Error           Error               Error               Error           ObjectDerive    Confirm
-     *  ObjectDeriveIdentifierScope     Error               Error                   Error           Error               Error               ObjectDeriveIdentifier  Error               Error   Error                           Error           Error           Error               Error               Error           Error           Error
-     *  AlignasSpecifier                Error               Error                   Error           Error               Error               Error                   Error               Error   Error                           AlignasList     Error           Error               Error               Error           Error           Error
-     *  AlignasList                     Error               Error                   Error           Error               Error               Error                   Error               Error   Error                           Error           ObjectSpecifier Error               Error               Error           Error           Error
+     *                                  object_specifier    declaration_specifier   builtin_type            virtual         alignas_specifier   access_specifier    identifier              <                   >       ::                              (               )               [                   ]                   :               ,               {
+     *  Init                            ObjectSpecifier     Error                   Error                   Error           Error               Error               Error                   Error               Error   Error                           Error           Error           Error               Error               Error           Error           Error
+     *  ObjectSpecifier                 ObjectSpecifier     Error                   Error                   Error           AlignasSpecifier    Error               ObjectIdentifier        Error               Error   ObjectIdentifierScope           Error           Error           ObjectSpecifier     ObjectSpecifier     Error           Error           Confirm
+     *  ObjectIdentifier                Error               Error                   Error                   Error           Error               Error               ObjectIdentifier        *TemplateParameter  Error   ObjectIdentifierScope           Error           Error           Error               Error               ObjectDerive    Error           Confirm
+     *  ObjectIdentifierScope           Error               Error                   Error                   Error           Error               Error               ObjectIdentifier        Error               Error   Error                           Error           Error           Error               Error               Error           Error           Error
+     *  ObjectDerive                    Error               Error                   ObjectDeriveIdentifier  ObjectDerive    Error               ObjectDerive        ObjectDeriveIdentifier  Error               Error   ObjectDeriveIdentifierScope     Error           Error           ObjectDerive        ObjectDerive        Error           ObjectDerive    Error
+     *  ObjectDeriveIdentifier          Error               Error                   Error                   Error           Error               Error               Error                   *TemplateParameter  Error   ObjectDeriveIdentifierScope     Error           Error           Error               Error               Error           ObjectDerive    Confirm
+     *  ObjectDeriveIdentifierScope     Error               Error                   ObjectDeriveIdentifier  Error           Error               Error               ObjectDeriveIdentifier  Error               Error   Error                           Error           Error           Error               Error               Error           Error           Error
+     *  AlignasSpecifier                Error               Error                   Error                   Error           Error               Error               Error                   Error               Error   Error                           AlignasList     Error           Error               Error               Error           Error           Error
+     *  AlignasList                     Error               Error                   Error                   Error           Error               Error               Error                   Error               Error   Error                           Error           ObjectSpecifier Error               Error               Error           Error           Error
      *  
      *  TemplateParameter: save 'current state', skip template parameterlist then restore 'current state'  
      */
@@ -1788,6 +1778,7 @@ static void c_inheritance_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectIdentifierScope        , kCEETokenID_IDENTIFIER        , kCInheritanceDefinitionTranslateStateObjectIdentifier             );
     TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , kCEETokenID_VIRTUAL           , kCInheritanceDefinitionTranslateStateObjectDerive                 );
     TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , token_id_is_access_specifier  , kCInheritanceDefinitionTranslateStateObjectDerive                 );
+    TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , token_id_is_builtin_type      , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       );
     TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , kCEETokenID_IDENTIFIER        , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       );
     TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , kCEETokenID_SCOPE             , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifierScope  );
     TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDerive                 , ','                           , kCInheritanceDefinitionTranslateStateObjectDerive                 );
@@ -1798,6 +1789,7 @@ static void c_inheritance_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       , ','                           , kCInheritanceDefinitionTranslateStateObjectDerive                 );
     TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       , '{'                           , kCInheritanceDefinitionTranslateStateConfirm                      );
     TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifierScope  , kCEETokenID_IDENTIFIER        , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       );
+    TRANSLATE_FUNCS_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateObjectDeriveIdentifierScope  , token_id_is_builtin_type      , kCInheritanceDefinitionTranslateStateObjectDeriveIdentifier       );
     TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateAlignasSpecifier             , '('                           , kCInheritanceDefinitionTranslateStateAlignasList                  );
     TRANSLATE_STATE_SET(c_inheritance_definition_translate_table, kCInheritanceDefinitionTranslateStateAlignasList                  , ')'                           , kCInheritanceDefinitionTranslateStateObjectSpecifier              );
 }
@@ -1875,14 +1867,14 @@ CEESourceSymbol* c_inheritance_definition_create(CEESourceFregment* fregment,
 {
     CEEList* name = NULL;
     CEEList* derives_chains = NULL;
-    CEESourceSymbol* definition = NULL;
+    CEESourceSymbol* inheritance = NULL;
     CEEList* trap_keyword = tokens;
     
     if (!c_inheritance_parse(tokens, &name, &derives_chains))
         return NULL;
     
     if (name)
-        definition = cee_source_symbol_create_from_token_slice(filepath,
+        inheritance = cee_source_symbol_create_from_token_slice(filepath,
                                                                subject, 
                                                                name, 
                                                                name, 
@@ -1890,25 +1882,24 @@ CEESourceSymbol* c_inheritance_definition_create(CEESourceFregment* fregment,
                                                                "c",
                                                                kCEETokenStringOptionCompact);
     else
-        definition = cee_source_symbol_create_from_token_slice(filepath,
-                                                               subject, 
-                                                               trap_keyword, 
-                                                               trap_keyword, 
-                                                               symbol_type,
-                                                               "c",
-                                                               kCEETokenStringOptionCompact);
-    
-    if (definition) {
+        inheritance = cee_source_symbol_create_from_token_slice(filepath,
+                                                                subject,
+                                                                trap_keyword,
+                                                                trap_keyword,
+                                                                symbol_type,
+                                                                "c",
+                                                                kCEETokenStringOptionCompact);
+    if (inheritance) {
         /** base class names found */
         if (derives_chains)
-            definition->derives = c_name_scope_list_string_create(derives_chains, subject);
+            inheritance->derives = c_name_scope_list_string_create(derives_chains, subject);
         
         if (name)
             cee_token_slice_state_mark(name, name, kCEETokenStateSymbolOccupied);
         
-        definition->proto = c_inheritance_proto_descriptor_create(fregment,
-                                                                  definition,
-                                                                  definition->derives);
+        inheritance->proto_descriptor = c_inheritance_proto_descriptor_create(fregment,
+                                                                              inheritance,
+                                                                              inheritance->derives);
     }
     
     if (name)
@@ -1917,42 +1908,42 @@ CEESourceSymbol* c_inheritance_definition_create(CEESourceFregment* fregment,
     if (derives_chains)
         cee_list_free_full(derives_chains, derived_chain_free);
     
-    return definition;
+    return inheritance;
 }
 
 static cee_char* c_inheritance_proto_descriptor_create(CEESourceFregment* fregment,
-                                                       CEESourceSymbol* definition,
+                                                       CEESourceSymbol* inheritance,
                                                        const cee_char* derives_str)
 {
-    if (!fregment || !definition)
+    if (!fregment || !inheritance)
         return NULL;
     
     cee_char* descriptor = NULL;
             
     cee_strconcat0(&descriptor, "{", NULL);
     
-    if (definition->type == kCEESourceSymbolTypeClassDefinition)
-        cee_strconcat0(&descriptor, "\"type\":", "\"class_definition\"", ",", NULL);
-    if (definition->type == kCEESourceSymbolTypeStructDefinition)
-        cee_strconcat0(&descriptor, "\"type\":", "\"struct_definition\"", ",", NULL);
-    else if (definition->type == kCEESourceSymbolTypeEnumDefinition)
-        cee_strconcat0(&descriptor, "\"type\":", "\"enum_definition\"", ",", NULL);
-    else if (definition->type == kCEESourceSymbolTypeUnionDefinition)
-        cee_strconcat0(&descriptor, "\"type\":", "\"union_definition\"", ",", NULL);
-    else if (definition->type == kCEESourceSymbolTypeInterfaceDefinition)
-        cee_strconcat0(&descriptor, "\"type\":", "\"interface_definition\"", ",", NULL);
-    else if (definition->type == kCEESourceSymbolTypeImplementationDefinition)
-        cee_strconcat0(&descriptor, "\"type\":", "\"implementation_definition\"", ",", NULL);
-    else if (definition->type == kCEESourceSymbolTypeProtocolDeclaration)
-        cee_strconcat0(&descriptor, "\"type\":", "\"protocol_declaration\"", ",", NULL);
+    if (inheritance->type == kCEESourceSymbolTypeClassDefinition)
+        cee_strconcat0(&descriptor, "\"type\":", "\"class\"", NULL);
+    if (inheritance->type == kCEESourceSymbolTypeStructDefinition)
+        cee_strconcat0(&descriptor, "\"type\":", "\"struct\"", NULL);
+    else if (inheritance->type == kCEESourceSymbolTypeEnumDefinition)
+        cee_strconcat0(&descriptor, "\"type\":", "\"enum\"", NULL);
+    else if (inheritance->type == kCEESourceSymbolTypeUnionDefinition)
+        cee_strconcat0(&descriptor, "\"type\":", "\"union\"", NULL);
+    else if (inheritance->type == kCEESourceSymbolTypeInterfaceDefinition)
+        cee_strconcat0(&descriptor, "\"type\":", "\"interface\"", NULL);
+    else if (inheritance->type == kCEESourceSymbolTypeImplementationDefinition)
+        cee_strconcat0(&descriptor, "\"type\":", "\"implementation\"", NULL);
+    else if (inheritance->type == kCEESourceSymbolTypeProtocolDeclaration)
+        cee_strconcat0(&descriptor, "\"type\":", "\"protocol\"", NULL);
     else
-        cee_strconcat0(&descriptor, "\"type\":", "\"class_definition\"", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"class\"", NULL);
     
-    if (definition->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", definition->name, "\"", ",", NULL);
+    if (inheritance->name)
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", inheritance->name, "\"", NULL);
     
     if (derives_str)
-        cee_strconcat0(&descriptor, "\"derivers\":", "\"", derives_str, "\"", ",", NULL);
+        cee_strconcat0(&descriptor, ", \"derivers\":", "\"", derives_str, "\"", NULL);
     
     cee_strconcat0(&descriptor, "}", NULL);
     
@@ -2005,49 +1996,6 @@ static cee_char* c_name_scope_create(CEEList* tokens,
     return scope;
 }
 
-static CEEList* c_name_scope_head_get(CEEList* p,
-                                      const cee_char* subject)
-{
-    CEEToken* token = NULL;
-    CEEList* q = NULL;
-    
-    token = p->data;
-    
-    if (token->identifier != kCEETokenID_IDENTIFIER &&
-        token->identifier != '~' &&
-        token->identifier != kCEETokenID_OPERATOR &&
-        token->identifier != kCEETokenID_SCOPE) {
-        return NULL;
-    }
-    
-    while (p) {
-        q = cee_token_not_whitespace_newline_before(p);
-        if (!q)
-            return p;
-        
-        if (cee_token_is_identifier(q, '>')) {
-            q = skip_template_parameter_list(q, TRUE);
-            q = cee_token_not_whitespace_newline_before(q);
-            if (!q)
-                return NULL;
-        }
-        
-        if ((cee_token_is_identifier(p, kCEETokenID_IDENTIFIER) ||
-             cee_token_is_identifier(p, '~') ||
-             cee_token_is_identifier(p, kCEETokenID_OPERATOR)) &&
-            !cee_token_is_identifier(q, kCEETokenID_SCOPE))
-            return p;
-        
-        if (cee_token_is_identifier(p, kCEETokenID_SCOPE) &&
-            !cee_token_is_identifier(q, kCEETokenID_IDENTIFIER))
-            return p;
-        
-        p = q;
-    }
-    
-    return NULL;
-}
-
 static void derived_chain_free(cee_pointer data)
 {
     if (!data)
@@ -2072,7 +2020,8 @@ static cee_boolean c_class_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
     
 #ifdef DEBUG_CLASS
-    cee_source_symbol_print(definition);
+    if (definition)
+        cee_source_symbol_print(definition);
 #endif
     return TRUE;
 }
@@ -2093,7 +2042,8 @@ static cee_boolean c_struct_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
     
 #ifdef DEBUG_STRUCT
-    cee_source_symbol_print(definition);
+    if (definition)
+        cee_source_symbol_print(definition);
 #endif
     return TRUE;
 }
@@ -2114,102 +2064,104 @@ static cee_boolean c_enum_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
         
 #ifdef DEBUG_ENUM
-    cee_source_symbol_print(definition);
+    if (definition)
+        cee_source_symbol_print(definition);
 #endif
+    
     return TRUE;
 }
 
-static CEEList* enumerators_extract(CEEList* tokens,
-                                    const cee_char* filepath,
-                                    const cee_char* subject)
+static cee_boolean c_enumerators_parse(CEESourceFregment* fregment)
 {
-    CEEList* p = TOKEN_FIRST(tokens);
-    CEEToken* token = NULL;
-    CEETokenID identifier = kCEETokenID_UNKNOW;
-    cee_boolean enumurating = TRUE;
-    CEEList* q = NULL;
-    CEESourceSymbol* enumerator = NULL;
-    CEEList* enumerators = NULL;
+    if (!cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition))
+        return FALSE;
+    
+    cee_boolean ret = FALSE;
     CEESourceFregment* grandfather = NULL;
     CEESourceSymbol* enum_symbol = NULL;
     CEEList* enum_symbols = NULL;
+    CEESourceSymbol* enumerator = NULL;
+    CEEList* enumerators = NULL;
+    CEEToken* token = NULL;
+    CEEList* p = NULL;
+    CEEList* q = NULL;
+    cee_boolean enumurating = TRUE;
     
-    if (p) {
-        token = p->data;
-        if (token) {
-            grandfather = cee_source_fregment_grandfather_get(token->fregment_ref);
-            if (grandfather) {
-                enum_symbols = cee_source_fregment_symbols_search_by_type(grandfather, 
-                                                                          kCEESourceSymbolTypeEnumDefinition);
-                if (enum_symbols)
-                    enum_symbol = cee_list_nth_data(enum_symbols, 0);
-            }
-        }
-    }
+    grandfather = cee_source_fregment_grandfather_get(fregment);
+    enum_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+                                                              kCEESourceSymbolTypeEnumDefinition);
+    if (enum_symbols)
+        enum_symbol = cee_list_nth_data(enum_symbols, 0);
     
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
-        
-        identifier = token->identifier;
-        
-        if (identifier == kCEETokenID_IDENTIFIER && !is_name_scope(p) && enumurating)
+        if (token->identifier == kCEETokenID_IDENTIFIER && enumurating)
             q = p;
         
-        if (identifier == ',' || identifier == ';' || !TOKEN_NEXT(p)) {
+        if (token->identifier == ',' || token->identifier == ';' || !TOKEN_NEXT(p)) {
             if (q) {
-                enumerator = cee_source_symbol_create_from_token_slice(filepath,
-                                                                       subject, 
-                                                                       q, 
-                                                                       q, 
-                                                                       kCEESourceSymbolTypeEnumerator, 
+                enumerator = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
+                                                                       fregment->subject_ref,
+                                                                       q,
+                                                                       q,
+                                                                       kCEESourceSymbolTypeEnumerator,
                                                                        "c",
                                                                        kCEETokenStringOptionCompact);
-                enumerator->proto = c_enumerator_proto_descriptor_create(token->fregment_ref,
-                                                                         enumerator,
-                                                                         q,
-                                                                         enum_symbol->name);
-                cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
-                enumerators = cee_list_prepend(enumerators, enumerator);
+                if (enumerator) {
+                    enumerator->proto_descriptor =
+                        c_enumerator_proto_descriptor_create(token->fregment_ref,
+                                                             enumerator,
+                                                             enum_symbol->name);
+                    cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
+                    enumerators = cee_list_prepend(enumerators, enumerator);
+                }
             }
             q = NULL;
             enumurating = TRUE;
         }
-        else if (token_id_is_assignment(identifier) && enumurating) {
+        else if (token_id_is_assignment(token->identifier) && enumurating) {
             enumurating = FALSE;
         }
         
         p = TOKEN_NEXT(p);
     }
     
-#ifdef DEBUG_ENUM
-    cee_source_symbols_print(enumerators);
-#endif
-    
     if (enum_symbols)
         cee_list_free(enum_symbols);
     
-    return enumerators;
+    if (enumerators) {
+        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeEnumerators);
+        fregment->symbols = cee_list_concat(fregment->symbols, enumerators);
+        ret = TRUE;
+    }
+    
+#ifdef DEBUG_ENUM
+    if (enumerators)
+        cee_source_symbols_print(enumerators);
+#endif
+    
+exit:
+    return ret;
 }
 
 static cee_char* c_enumerator_proto_descriptor_create(CEESourceFregment* fregment,
-                                                      CEESourceSymbol* declaration,
-                                                      CEEList* identifier,
+                                                      CEESourceSymbol* enumerator,
                                                       const cee_char* proto)
 {
-    if (!fregment || !declaration)
+    if (!fregment || !enumerator)
         return NULL;
     
     cee_char* descriptor = NULL;
-                                                      
     cee_strconcat0(&descriptor, "{", NULL);
         
-    cee_strconcat0(&descriptor, "\"type\":", "\"enumerator\"", ",", NULL);
+    cee_strconcat0(&descriptor, "\"type\":", "\"enumerator\"", NULL);
     
-    if (declaration->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", declaration->name, "\"", ",", NULL);
-        
     if (proto)
-        cee_strconcat0(&descriptor, "\"proto\":", "\"", proto, "\"", ",", NULL);
+        cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto, "\"", NULL);
+    
+    if (enumerator->name)
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", enumerator->name, "\"", NULL);
     
     cee_strconcat0(&descriptor, "}", NULL);
     
@@ -2232,7 +2184,8 @@ static cee_boolean c_union_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
         
 #ifdef DEBUG_UNION
-    cee_source_symbol_print(definition);
+    if (definition)
+        cee_source_symbol_print(definition);
 #endif
     return FALSE;
 }
@@ -2317,7 +2270,8 @@ static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
     
 #ifdef DEBUG_ENUM
-    cee_source_symbol_print(definition);
+    if (definition)
+        cee_source_symbol_print(definition);
 #endif
     
     return TRUE;
@@ -2556,7 +2510,6 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
     CEEList* identifier = NULL;
     CEEList* parameter_list = NULL;
     CEEList* parameter_list_end = NULL;
-    CEEList* overload = NULL;
     CEEList* trialing = NULL;
     CEESourceSymbol* definition = NULL;
     CEEToken* token = NULL;
@@ -2567,6 +2520,11 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
+        
+        if (cee_token_id_is_newline(token->identifier) ||
+            cee_token_id_is_whitespace(token->identifier))
+            goto next_token;
+        
         prev = current;
         current = c_function_definition_translate_table[current][token->identifier];
         
@@ -2587,8 +2545,7 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
             break;
         }
         else if (current == kCFunctionDefinitionTranslateStateOperator) {
-            if (token->identifier == kCEETokenID_OPERATOR)
-                overload = p;
+            identifier = p;
         }
         else if (current == kCFunctionDefinitionTranslateStateParameterList) {
             if (!identifier) {
@@ -2596,23 +2553,23 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
                 if (cee_token_is_identifier(q, kCEETokenID_IDENTIFIER))
                     identifier = q;
             }
-            if (!parameter_list && token->identifier == '(')
+            if (!parameter_list)
                 parameter_list = p;
         }
         else if (current == kCFunctionDefinitionTranslateStateParameterListEnd) {
-            if (!parameter_list_end && token->identifier == ')')
+            if (!parameter_list_end)
                 parameter_list_end = p;
         }
-        
+
+next_token:
         p = TOKEN_NEXT(p);
     }
     
     if (current == kCFunctionDefinitionTranslateStateConfirm ||
         current == kCFunctionDefinitionTranslateStateTrailing) {
-        if (overload) {
-            q = r = overload;
-        }
-        else if (identifier) {
+        
+        if (identifier) {
+            /** destructor detected */
             r = identifier;
             q = cee_token_not_whitespace_newline_before(identifier);
             if (!cee_token_is_identifier(q, '~'))
@@ -2629,20 +2586,19 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
         if (definition) {
             cee_token_slice_state_mark(q, r, kCEETokenStateSymbolOccupied);
             cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDefinition);
-            if (parameter_list) {
-                child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
-                if (child) {
-                    child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
-                    c_function_parameters_parse(child);
-                }
-        
-                if (q && c_function_definition_is_proto(fregment, q)) {
-                    definition->proto = c_function_definition_proto_descriptor_create(fregment,
-                                                                                      q,
-                                                                                      parameter_list,
-                                                                                      parameter_list_end,
-                                                                                      trialing);
-                }
+            child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
+            if (child) {
+                child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
+                c_function_parameters_parse(child);
+            }
+            
+            if (q && c_function_definition_is_proto(fregment, q)) {
+                definition->proto_descriptor = c_function_proto_descriptor_create(fregment,
+                                                                                  SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                                                  TOKEN_PREV(q),
+                                                                                  q,
+                                                                                  parameter_list,
+                                                                                  parameter_list_end);
             }
         }
     }
@@ -2654,238 +2610,18 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
     
 #ifdef DEBUG_FUNCTION_DEFINITION
-    cee_source_symbols_print(fregment->symbols);
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif
     
     return TRUE;
 }
 
 static cee_boolean c_function_definition_is_proto(CEESourceFregment* fregment,
-                                                  CEEList* identifier_p)
+                                                  CEEList* identifier)
 {
-    CEEList* p = cee_token_not_whitespace_newline_before(identifier_p);
+    CEEList* p = cee_token_not_whitespace_newline_before(identifier);
     return !cee_token_is_identifier(p, kCEETokenID_SCOPE);
-}
-
-static cee_char* c_function_definition_proto_descriptor_create(CEESourceFregment* fregment,
-                                                               CEEList* identifier_p,
-                                                               CEEList* parameter_list_p,
-                                                               CEEList* parameter_list_end_p,
-                                                               CEEList* trialing_p)
-{
-    if (!identifier_p || !parameter_list_p || !parameter_list_end_p)
-        return NULL;
-    
-    const cee_char* subject = fregment->subject_ref;
-    CEEList* tokens = cee_source_fregment_tokens_expand(fregment);
-    CEEList* p = NULL;
-    CEEToken* token = NULL;
-    CEEToken* token_prev = NULL;
-    
-    CEEList* header = NULL;
-    CEEList* name_chain = NULL;
-    CEEList* parameters = NULL;
-    CEEList* trialing = NULL;
-    
-    cee_char* descriptor = NULL;
-    cee_char* formater_str = NULL;
-    cee_size l = 0;
-    
-    p = TOKEN_FIRST(tokens);
-    
-    /** header */
-    while (p) {
-        if (p->data == identifier_p->data)
-            break;
-        
-        TOKEN_APPEND(header, p->data);
-        p = TOKEN_NEXT(p);
-    }
-    
-    /** name_chain */
-    while (p) {
-        if (p->data == parameter_list_p->data)
-            break;
-        TOKEN_APPEND(name_chain, p->data);
-        p = TOKEN_NEXT(p);
-    }
-    
-    p = TOKEN_NEXT(p);
-    /** parameters */
-    while (p) {
-        if (p->data == parameter_list_end_p->data)
-            break;
-        TOKEN_APPEND(parameters, p->data);
-        p = TOKEN_NEXT(p);
-    }
-    
-    /** trailing */
-    if (trialing_p) {
-        while (p) {
-            if (p->data == trialing_p->data)
-                break;
-            p = TOKEN_NEXT(p);
-        }
-        while (p) {
-            if (p == TOKEN_LAST(p))
-                break;
-            TOKEN_APPEND(trialing, p->data);
-            p = TOKEN_NEXT(p);
-        }
-    }
-    
-    cee_strconcat0(&descriptor, "{", NULL);
-    
-    /** create header descriptor */
-    token_prev = NULL;
-    cee_strconcat0(&descriptor, "\"header\":", NULL);
-    p = TOKEN_FIRST(header);
-    while (p) {
-        token = p->data;
-        
-        if (!token_id_is_c_function_proto_header_ignored(token->identifier) &&
-            !cee_token_id_is_newline(token->identifier) &&
-            !cee_token_id_is_whitespace(token->identifier)) {
-
-            if (should_proto_descriptor_append_whitespace(token, token_prev))
-                cee_strconcat0(&formater_str, " ", NULL);
-            cee_string_concat_with_token(&formater_str, subject, token);
-            token_prev = token;
-        }
-        
-        p = TOKEN_NEXT(p);
-    }
-    if (formater_str) {
-        cee_strconcat0(&descriptor, "\"", formater_str, "\"", NULL);
-        cee_free(formater_str);
-        formater_str = NULL;
-    }
-    else {
-        cee_strconcat0(&descriptor, "\"\"", NULL);
-    }
-    cee_strconcat0(&descriptor, ",", NULL);
-    
-    /** create identifier descriptor */
-    token_prev = NULL;
-    cee_strconcat0(&descriptor, "\"identifier\":", NULL);
-    p = TOKEN_FIRST(name_chain);
-    while (p) {
-        token = p->data;
-        
-        if (!cee_token_id_is_newline(token->identifier) &&
-            !cee_token_id_is_whitespace(token->identifier)) {
-            
-            if (should_proto_descriptor_append_whitespace(token, token_prev))
-                cee_strconcat0(&formater_str, " ", NULL);
-            cee_string_concat_with_token(&formater_str, subject, token);
-            token_prev = token;
-        }
-        
-        p = TOKEN_NEXT(p);
-    }
-    if (formater_str) {
-        cee_strconcat0(&descriptor, "\"", formater_str, "\"", NULL);
-        cee_free(formater_str);
-        formater_str = NULL;
-    }
-    else {
-        cee_strconcat0(&descriptor, "\"\"", NULL);
-    }
-    cee_strconcat0(&descriptor, ",", NULL);
-    
-    /** create parameters descriptor */
-    token_prev = NULL;
-    cee_strconcat0(&descriptor, "\"parameters\":[", NULL);
-    p = TOKEN_FIRST(parameters);
-    BRACKET_SIGN_DECLARATION();
-    while (p) {
-        token = p->data;
-        
-        SIGN_BRACKET(token->identifier);
-        
-        if (!cee_token_id_is_newline(token->identifier) &&
-            !cee_token_id_is_whitespace(token->identifier)) {
-            
-            if (should_proto_descriptor_append_whitespace(token, token_prev))
-                cee_strconcat0(&formater_str, " ", NULL);
-            cee_string_concat_with_token(&formater_str, subject, token);
-            
-            token_prev = token;
-        }
-        
-        if (BRACKETS_IS_CLEAN()) {
-            if (token->identifier == ',' || !TOKEN_NEXT(p)) {
-                if (formater_str) {
-                    l = strlen(formater_str);
-                    if (formater_str[l-1]== ',')
-                        formater_str[l-1] = '\0';
-                    
-                    cee_strconcat0(&descriptor, "\"", formater_str, "\"", ",", NULL);
-                    cee_free(formater_str);
-                    formater_str = NULL;
-                    token_prev = NULL;
-                }
-            }
-        }
-        
-        p = TOKEN_NEXT(p);
-    }
-    /** remove the last comma in jason array */
-    l = strlen(descriptor);
-    if (descriptor[l-1]== ',')
-        descriptor[l-1] = '\0';
-    cee_strconcat0(&descriptor, "],", NULL);
-    
-    /** create trialing descriptor */
-    token_prev = NULL;
-    cee_strconcat0(&descriptor, "\"trialing\":", NULL);
-    p = TOKEN_FIRST(trialing);
-    while (p) {
-        token = p->data;
-        
-        if (!cee_token_id_is_newline(token->identifier) &&
-            !cee_token_id_is_whitespace(token->identifier)) {
-            
-            if (should_proto_descriptor_append_whitespace(token, token_prev))
-                cee_strconcat0(&formater_str, " ", NULL);
-            cee_string_concat_with_token(&formater_str, subject, token);
-            
-            token_prev = token;
-        }
-        
-        p = TOKEN_NEXT(p);
-    }
-    if (formater_str) {
-        cee_strconcat0(&descriptor, "\"", formater_str, "\"", NULL);
-        cee_free(formater_str);
-        formater_str = NULL;
-    }
-    else {
-        cee_strconcat0(&descriptor, "\"\"", NULL);
-    }
-    
-    cee_strconcat0(&descriptor, "}", NULL);
-    
-exit:
-    
-    if (trialing)
-        cee_list_free(trialing);
-    
-    if (parameters)
-        cee_list_free(parameters);
-    
-    if (name_chain)
-        cee_list_free(name_chain);
-    
-    if (header)
-        cee_list_free(header);
-    
-       if (tokens)
-        cee_list_free(tokens);
-    
-    fprintf(stdout, "%s\n", descriptor);
-    
-    return descriptor;
 }
 
 static cee_boolean should_proto_descriptor_append_whitespace(CEEToken* token,
@@ -3012,7 +2748,7 @@ static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
 {
     CEEList* p = NULL;
     CEEList* q = NULL;
-    CEEList* head = NULL;
+    CEEList* prefix = NULL;
     CEEToken* token = NULL;
     CFunctionParametersDeclarationState current = kCFunctionParametersDeclarationTranslateStateInit;
     CFunctionParametersDeclarationState prev = kCFunctionParametersDeclarationTranslateStateInit;
@@ -3025,48 +2761,50 @@ static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
     CEEList* ellipsis = NULL;
     
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
-    head = p; 
+    prefix = p;
     while (p) {
         token = p->data;
+        
+        if (cee_token_id_is_newline(token->identifier) ||
+            cee_token_id_is_whitespace(token->identifier))
+            goto next_token;
+        
         prev = current;
         current = c_function_parameters_declaration_translate_table[current][token->identifier];
         
         if (current == kCFunctionParametersDeclarationTranslateStateError) {
             return FALSE;
         }
+        
         if (current == kCFunctionParametersDeclarationTranslateStateTemplateParameter) {
             p = skip_template_parameter_list(p, FALSE);
             if (!p) 
                 return FALSE;
             current = prev;
         }
+        
         if (current == kCFunctionParametersDeclarationTranslateStateIdentifier) {
             if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER))
                 identifier = p;
         }
+        
         if (current == kCFunctionParametersDeclarationTranslateStateParameterList) {
-            if (!parameter_list &&
-                cee_token_is_identifier(p, '('))
+            if (!parameter_list)
                 parameter_list = p;
         }
         
         if (current == kCFunctionParametersDeclarationTranslateStateParameterListEnd) {
-            if (!parameter_list_end &&
-                cee_token_is_identifier(p, ')'))
+            if (!parameter_list_end)
                 parameter_list_end = p;
         }
             
         if (current == kCFunctionParametersDeclarationTranslateStateSurrounded) {
-            if (!surrounded &&
-                (cee_token_is_identifier(p, '(') ||
-                 cee_token_is_identifier(p, '[')))
+            if (!surrounded)
                 surrounded = p;
         }
         
         if (current == kCFunctionParametersDeclarationTranslateStateSurroundedEnd) {
-            if (!surrounded_end &&
-                (cee_token_is_identifier(p, '(') ||
-                 cee_token_is_identifier(p, '[')))
+            if (!surrounded_end)
                 surrounded_end = p;
         }
                 
@@ -3076,25 +2814,21 @@ static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
         }
         
         if (current == kCFunctionParametersDeclarationTranslateStateConfirm || !TOKEN_NEXT(p)) {
-            
             if (surrounded) {
                 declaration = c_function_parameter_surrounded_create(fregment,
-                                                                     head,
+                                                                     prefix,
                                                                      parameter_list);
             }
             else if (parameter_list) {
                 q = cee_token_not_whitespace_newline_before(parameter_list);
-                if (cee_token_is_identifier(q, kCEETokenID_IDENTIFIER)) {
+                if (cee_token_is_identifier(q, kCEETokenID_IDENTIFIER))
                     declaration = c_function_parameter_identifier_create(fregment,
-                                                                         head,
-                                                                         q,
+                                                                         prefix,
                                                                          q);
-                }
             }
             else if (identifier) {
                 declaration = c_function_parameter_identifier_create(fregment,
-                                                                     head,
-                                                                     identifier,
+                                                                     prefix,
                                                                      identifier);
             }
             else if (ellipsis) {
@@ -3118,10 +2852,11 @@ static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
                     break;
             }
             
-            head = TOKEN_NEXT(p);
+            prefix = TOKEN_NEXT(p);
             current = kCFunctionParametersDeclarationTranslateStateInit;
         }
         
+next_token:
         p = TOKEN_NEXT(p);
     }
     
@@ -3129,43 +2864,38 @@ static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
         cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeDeclaration);
     
 #ifdef DEBUG_FUNCTION_DEFINITION
-    cee_source_symbols_print(fregment->symbols);
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif
 
     return TRUE;
 }
 
 static CEESourceSymbol* c_function_parameter_identifier_create(CEESourceFregment* fregment,
-                                                               CEEList* head,
-                                                               CEEList* begin,
-                                                               CEEList* end)
+                                                               CEEList* prefix,
+                                                               CEEList* identifier)
 {
     CEESourceSymbol* parameter = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
                                                                            fregment->subject_ref,
-                                                                           begin,
-                                                                           end,
+                                                                           identifier,
+                                                                           identifier,
                                                                            kCEESourceSymbolTypeFunctionParameter,
                                                                            "c",
                                                                            kCEETokenStringOptionCompact);
     if (!parameter)
         return NULL;
     
-    cee_token_slice_state_mark(begin, end, kCEETokenStateSymbolOccupied);
-    if (head && TOKEN_PREV(begin)) {
-        cee_char* type_str = c_type_descriptor_from_token_slice(fregment,
-                                                                head,
-                                                                TOKEN_PREV(begin));
-        parameter->proto = c_function_parameter_proto_descriptor_create(fregment,
-                                                                        parameter,
-                                                                        type_str);
-        if (type_str)
-            cee_free(type_str);
-    }
+    cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
+    if (prefix && TOKEN_PREV(identifier))
+        parameter->proto_descriptor = c_function_parameter_proto_descriptor_create(fregment,
+                                                                                   prefix,
+                                                                                   TOKEN_PREV(identifier),
+                                                                                   parameter);
     return parameter;
 }
 
 static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment* fregment,
-                                                               CEEList* head,
+                                                               CEEList* prefix,
                                                                CEEList* surrounded)
 {
     CEESourceSymbol* parameter = NULL;
@@ -3204,17 +2934,11 @@ static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment
             return NULL;
         
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
-        if (head && TOKEN_PREV(surrounded)) {
-            cee_char* type_str = c_type_descriptor_from_token_slice(fregment,
-                                                                    head,
-                                                                    TOKEN_PREV(surrounded));
-            parameter->proto = c_function_parameter_proto_descriptor_create(fregment,
-                                                                            parameter,
-                                                                            type_str);
-            if (type_str)
-                cee_free(type_str);
-            
-        }
+        if (prefix && TOKEN_PREV(surrounded))
+            parameter->proto_descriptor = c_function_parameter_proto_descriptor_create(fregment,
+                                                                                       prefix,
+                                                                                       TOKEN_PREV(surrounded),
+                                                                                       parameter);
     }
     cee_list_free(tokens);
     
@@ -3222,26 +2946,32 @@ static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment
 }
 
 static cee_char* c_function_parameter_proto_descriptor_create(CEESourceFregment* fregment,
-                                                              CEESourceSymbol* parameter,
-                                                              const cee_char* type_str)
+                                                              CEEList* prefix,
+                                                              CEEList* prefix_tail,
+                                                              CEESourceSymbol* parameter)
 {
     if (!fregment || !parameter)
         return NULL;
     
     cee_char* descriptor = NULL;
+    cee_char* proto_str = NULL;
     
     cee_strconcat0(&descriptor, "{", NULL);
     
-    cee_strconcat0(&descriptor, "\"type\":", "\"variable\"", ",", NULL);
+    cee_strconcat0(&descriptor, "\"type\":", "\"declaration\"", NULL);
     
     if (parameter->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", parameter->name, "\"", ",", NULL);
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", parameter->name, "\"", NULL);
     
-    if (type_str)
-        cee_strconcat0(&descriptor, "\"proto\":", "\"", type_str, "\"", ",", NULL);
-    
+    if (prefix && prefix_tail)
+        proto_str = c_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+    if (proto_str) {
+        cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto_str, "\"", NULL);
+        cee_free(proto_str);
+    }
+        
     cee_strconcat0(&descriptor, "}", NULL);
-    
+        
     return descriptor;
 }
 
@@ -3290,7 +3020,7 @@ static cee_boolean objective_c_message_parse(CEESourceFregment* fregment)
     CEEList* return_type_end = NULL;
     CEEList* parameter_types = NULL;
     CEEList* q = NULL;
-    cee_int parameter_index = 0;
+    cee_int i = 0;
     CEESourceSymbolType symbol_type = kCEESourceSymbolTypeUnknow;
     CEESourceFregmentType fregment_type = kCEESourceFregmentTypeStatement;
     ObjectiveCMessageTranslateState current = kObjectiveCMessageTranslateStateInit;
@@ -3298,44 +3028,34 @@ static cee_boolean objective_c_message_parse(CEESourceFregment* fregment)
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
+        
+        if (cee_token_id_is_newline(token->identifier) ||
+            cee_token_id_is_whitespace(token->identifier))
+            goto next_token;
+        
         current = objective_c_message_translate_table[current][token->identifier];
         
-        if (current == kObjectiveCMessageTranslateStateError) {
+        if (current == kObjectiveCMessageTranslateStateError)
             break;
-        }
-        else if (current == kObjectiveCMessageTranslateStateMessage) {
-            if (token->identifier == '-')
+        else if (current == kObjectiveCMessageTranslateStateMessage)
                 TOKEN_APPEND(message_begin, token);
-        }
-        else if (current == kObjectiveCMessageTranslateStateReturnType) {
-            if (token->identifier == '(')
+        else if (current == kObjectiveCMessageTranslateStateReturnType)
                 TOKEN_APPEND(return_type, token);
-        }
-        else if (current == kObjectiveCMessageTranslateStateReturnTypeEnd) {
-            if (token->identifier == ')')
+        else if (current == kObjectiveCMessageTranslateStateReturnTypeEnd)
                 TOKEN_APPEND(return_type_end, token);
-        }
-        else if (current == kObjectiveCMessageTranslateStateParameterType) {
-            if (token->identifier == '(')
+        else if (current == kObjectiveCMessageTranslateStateParameterType)
                 TOKEN_APPEND(parameter_types, token);
-        }
-        else if (current == kObjectiveCMessageTranslateStateComponent) {
-            if (token->identifier == kCEETokenID_IDENTIFIER)
+        else if (current == kObjectiveCMessageTranslateStateComponent)
                 TOKEN_APPEND(name_chain, token);
-        }
-        else if (current == kObjectiveCMessageTranslateStateColon) {
-            if (token->identifier == ':')
+        else if (current == kObjectiveCMessageTranslateStateColon)
                 TOKEN_APPEND(name_chain, token);
-        }
-        else if (current == kObjectiveCMessageTranslateStateParameter) {
-            if (token->identifier == kCEETokenID_IDENTIFIER)
+        else if (current == kObjectiveCMessageTranslateStateParameter)
                 TOKEN_APPEND(parameters, token);
-        }
         else if (current == kObjectiveCMessageTranslateStateDefinition ||
-                 current == kObjectiveCMessageTranslateStateDeclaration) {
+                 current == kObjectiveCMessageTranslateStateDeclaration)
             break;
-        }
         
+next_token:
         p = TOKEN_NEXT(p);
     }
     
@@ -3359,13 +3079,14 @@ static cee_boolean objective_c_message_parse(CEESourceFregment* fregment)
                                                       "c",
                                                       kCEETokenStringOptionCompact);
         if (symbol) {
-            symbol->proto = objective_c_message_proto_descriptor_create(fregment,
-                                                                        message_begin,
-                                                                        name_chain,
-                                                                        return_type,
-                                                                        return_type_end,
-                                                                        parameter_types,
-                                                                        parameters);
+            if (symbol_type == kCEESourceSymbolTypeMessageDeclaration)
+                symbol->proto_descriptor = objective_c_message_proto_descriptor_create(fregment,
+                                                                                       message_begin,
+                                                                                       return_type,
+                                                                                       return_type_end,
+                                                                                       name_chain,
+                                                                                       parameter_types,
+                                                                                       parameters);
             symbols = cee_list_prepend(symbols, symbol);
         }
         cee_tokens_state_mark(TOKEN_FIRST(name_chain), kCEETokenStateSymbolOccupied);
@@ -3373,7 +3094,7 @@ static cee_boolean objective_c_message_parse(CEESourceFregment* fregment)
                 
     if (parameters) {
         q = TOKEN_FIRST(parameters);
-        parameter_index = 0;
+        i = 0;
         while (q) {
             symbol = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
                                                                fregment->subject_ref,
@@ -3383,11 +3104,13 @@ static cee_boolean objective_c_message_parse(CEESourceFregment* fregment)
                                                                "c",
                                                                kCEETokenStringOptionCompact);
             if (symbol) {
-                symbol->proto = objective_c_message_parameter_proto_dump(fregment, parameter_index);
+                symbol->proto_descriptor = objective_c_message_parameter_proto_descriptor_create(fregment,
+                                                                                                 i,
+                                                                                                 symbol);
                 symbols = cee_list_prepend(symbols, symbol);
             }
             q = TOKEN_NEXT(q);
-            parameter_index ++;
+            i ++;
         }
         cee_tokens_state_mark(TOKEN_FIRST(parameters), kCEETokenStateSymbolOccupied);
     }
@@ -3417,20 +3140,30 @@ exit:
     if (message_begin)
         cee_list_free(message_begin);
     
-#ifdef DEBUG_MESSAGE_DEFINITION
-    cee_source_symbols_print(fregment->symbols);
+#ifdef DEBUG_MESSAGE
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif   
     return ret;
 }
 
 static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* fregment,
-                                                             CEEList* message,
-                                                             CEEList* components,
+                                                             CEEList* message_begin,
                                                              CEEList* return_type,
                                                              CEEList* return_type_end,
+                                                             CEEList* name_chain,
                                                              CEEList* parameter_types,
                                                              CEEList* parameters)
 {
+    if (!fregment ||
+        !message_begin ||
+        !name_chain ||
+        !return_type ||
+        !return_type_end ||
+        !parameter_types ||
+        !parameters)
+        return NULL;
+    
     const cee_char* subject = fregment->subject_ref;
     CEEList* tokens = cee_source_fregment_tokens_expand(fregment);
     CEEList* p = NULL;
@@ -3439,7 +3172,6 @@ static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* 
     CEEList* s = NULL;
     CEEToken* token = NULL;
     CEEToken* token_prev = NULL;
-    
     cee_char* descriptor = NULL;
     cee_char* formater_str = NULL;
     
@@ -3447,12 +3179,18 @@ static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* 
     cee_boolean found_parameter = FALSE;
     CEEList* header = NULL;
     cee_size l = 0;
+    CEESourceFregment* grandfather = NULL;
+    const cee_char* access_level = NULL;
+    
+    grandfather = cee_source_fregment_grandfather_get(fregment);
+    if (grandfather)
+        access_level = cee_source_fregment_attribute_get(grandfather, "access_level");
     
     p = TOKEN_FIRST(tokens);
     
     /** header */
     while (p) {
-        if (p->data == message->data)
+        if (p->data == message_begin->data)
             found_header = TRUE;
         
         if (found_header)
@@ -3466,9 +3204,13 @@ static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* 
     
     cee_strconcat0(&descriptor, "{", NULL);
     
+    cee_strconcat0(&descriptor, "\"type\":", "\"message\"", NULL);
+    
+    if (access_level)
+        cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
+    
     /** create header descriptor */
     token_prev = NULL;
-    cee_strconcat0(&descriptor, "\"header\":", NULL);
     q = TOKEN_FIRST(header);
     while (q) {
         token = q->data;
@@ -3485,31 +3227,22 @@ static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* 
         q = TOKEN_NEXT(q);
     }
     if (formater_str) {
-        cee_strconcat0(&descriptor, "\"", formater_str, "\"", NULL);
+        cee_strconcat0(&descriptor, ", \"header\":", "\"", formater_str, "\"", NULL);
         cee_free(formater_str);
         formater_str = NULL;
     }
-    else {
-        cee_strconcat0(&descriptor, "\"\"", NULL);
-    }
-    cee_strconcat0(&descriptor, ",", NULL);
     
-    cee_strconcat0(&descriptor, "\"identifier\":", NULL);
     formater_str = cee_string_from_tokens(subject,
-                                          TOKEN_FIRST(components),
+                                          TOKEN_FIRST(name_chain),
                                           kCEETokenStringOptionCompact);
     if (formater_str) {
-        cee_strconcat0(&descriptor, "\"", formater_str, "\"", NULL);
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", formater_str, "\"", NULL);
         cee_free(formater_str);
         formater_str = NULL;
     }
-    else {
-        cee_strconcat0(&descriptor, "\"\"", NULL);
-    }
-    cee_strconcat0(&descriptor, ",", NULL);
     
     token_prev = NULL;
-    cee_strconcat0(&descriptor, "\"parameters\":[", NULL);
+    cee_strconcat0(&descriptor, ", \"parameters\":[", NULL);
     r = TOKEN_FIRST(parameter_types);
     s = TOKEN_FIRST(parameters);
     while (r && s) {
@@ -3549,10 +3282,9 @@ static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* 
     l = strlen(descriptor);
     if (descriptor[l-1]== ',')
         descriptor[l-1] = '\0';
-    cee_strconcat0(&descriptor, "],", NULL);
+    cee_strconcat0(&descriptor, "]", NULL);
     
-    cee_strconcat0(&descriptor, "\"trialing\":\"\"", NULL);
-    
+    cee_strconcat0(&descriptor, "}", NULL);
 exit:
         
     if (header)
@@ -3561,15 +3293,14 @@ exit:
     if (tokens)
         cee_list_free(tokens);
     
-    fprintf(stdout, "%s\n", descriptor);
-    
     return descriptor;
 }
 
-static cee_char* objective_c_message_parameter_proto_dump(CEESourceFregment* fregment,
-                                                          cee_int parameter_index)
+static cee_char* objective_c_message_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+                                                                       cee_int index,
+                                                                       CEESourceSymbol* parameter)
 {
-    cee_char* proto = NULL;
+    cee_char* descriptor = NULL;
     cee_int i = 0;
     CEEList* p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
     if (!p)
@@ -3578,7 +3309,7 @@ static cee_char* objective_c_message_parameter_proto_dump(CEESourceFregment* fre
     /** first child is return type */
     p = SOURCE_FREGMENT_NEXT(p);
     while (p) {
-        if (i == parameter_index)
+        if (i == index)
             break;
         p = SOURCE_FREGMENT_NEXT(p);
         i ++;
@@ -3591,36 +3322,75 @@ static cee_char* objective_c_message_parameter_proto_dump(CEESourceFregment* fre
     if (!p)
         return NULL;
     
-    proto = c_type_descriptor_from_token_slice(fregment,
-                                               SOURCE_FREGMENT_TOKENS_FIRST(p->data),
-                                               NULL);
-    return proto;
+    descriptor = c_function_parameter_proto_descriptor_create(fregment,
+                                                              SOURCE_FREGMENT_TOKENS_FIRST(p->data),
+                                                              SOURCE_FREGMENT_TOKENS_LAST(p->data),
+                                                              parameter);
+    
+    return descriptor;
 }
 
 static void objective_c_property_translate_table_init(void)
 {
     /**
-     *                  @optional   @required   @property   (           )               ,           ;           others
-     *  Init            Init        Init        Property    Error       Error           Error       Terminate   Error
-     *  Property        Error       Error       Error       Attribute   Error           Confirm     Terminate   Property
-     *  Attribute       Error       Error       Error       Error       AttributeEnd    Error       Error       Error
-     *  AttributeEnd    Error       Error       Error       Error       Error           Confirm     Terminate   AttributeEnd
+     *                          @optional   @required   @property   (           )               declaration_specifier       builtin_type    object_specifier    identifier          *                       {                   }                       ,           ;           others
+     *  Init                    Init        Init        Property    Error       Error           Error                       Error           Error               Error               Error                   Error               Error                   Error       Confirm     Error
+     *  Property                Error       Error       Error       Attribute   Error           DeclarationSpecifier        BuiltinType     ObjectSpecifier     CustomType          Error                   Error               Error                   Error       Error       Error
+     *  Attribute               Error       Error       Error       Error       AttributeEnd    Error                       Error           Error               Error               Error                   Error               Error                   Error       Error       Error
+     *  AttributeEnd            Error       Error       Error       Error       Error           DeclarationSpecifier        BuiltinType     ObjectSpecifier     CustomType          Error                   Error               Error                   Error       Error       Error
+     *  BuiltinType             Error       Error       Error       Error       Error           DeclarationSpecifier        BuiltinType     Error               Identifier          BuiltinType             Error               Error                   Error       Error       Error
+     *  DeclarationSpecifier    Error       Error       Error       Error       Error           DeclarationSpecifier        BuiltinType     ObjectSpecifier     CustomType          DeclarationSpecifier    Error               Error                   Error       Error       Error
+     *  ObjectSpecifier         Error       Error       Error       Error       Error           Error                       Error           Error               ObjectIdentifier    Error                   ObjectDefinition    Error                   Error       Error       Error
+     *  ObjectIdentifier        Error       Error       Error       Error       Error           Error                       Error           Error               ObjectIdentifier    ObjectIdentifier        ObjectDefinition    Error                   Confirm     Error       Error
+     *  ObjectDefinition        Error       Error       Error       Error       Error           Error                       Error           Error               Error               Error                   Error               ObjectDefinitionEnd     Error       Error       Error
+     *  ObjectDefinitionEnd     Error       Error       Error       Error       Error           Error                       Error           Error               Identifier          ObjectDefinitionEnd     Error               Error                   Error       Error       Error
+     *  CustomType              Error       Error       Error       Error       Error           Error                       BuiltinType     Error               Identifier          CustomType              Error               Error                   Error       Error       Error
+     *  Identifier              Error       Error       Error       Error       Error           Error                       Error           Error               Identifier          Error                   Error               Error                   Confirm     Confirm     Error
+     *  TypeInit                Error       Error       Error       Error       Error           Error                       Error           Error               Identifier          TypeInit                Error               Error                   Confirm     Confirm     Error
+     *
      */
-    TRANSLATE_STATE_INI(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateMax           , kObjectiveCPropertyTranslateStateError                                                                     );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateInit          , kCEETokenID_AT_OPTIONAL                                   , kObjectiveCPropertyTranslateStateInit          );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateInit          , kCEETokenID_AT_REQUIRED                                   , kObjectiveCPropertyTranslateStateInit          );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateInit          , kCEETokenID_AT_PROPERTY                                   , kObjectiveCPropertyTranslateStateProperty      );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateInit          , ';'                                                       , kObjectiveCPropertyTranslateStateTerminate     );
-    TRANSLATE_STATE_ANY(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty      , kObjectiveCPropertyTranslateStateProperty                                                                  );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty      , kCEETokenID_AT_PROPERTY                                   , kObjectiveCPropertyTranslateStateError         );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty      , '('                                                       , kObjectiveCPropertyTranslateStateAttribute     );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty      , ')'                                                       , kObjectiveCPropertyTranslateStateError         );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty      , ','                                                       , kObjectiveCPropertyTranslateStateConfirm       );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty      , ';'                                                       , kObjectiveCPropertyTranslateStateTerminate     );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateAttribute     , ')'                                                       , kObjectiveCPropertyTranslateStateAttributeEnd  );
-    TRANSLATE_STATE_ANY(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateAttributeEnd  , kObjectiveCPropertyTranslateStateAttributeEnd                                                              );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateAttributeEnd  , ','                                                       , kObjectiveCPropertyTranslateStateConfirm       );
-    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateAttributeEnd  , ';'                                                       , kObjectiveCPropertyTranslateStateTerminate     );
+    TRANSLATE_STATE_INI(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateMax                  , kObjectiveCPropertyTranslateStateError                                                            );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateInit                 , kCEETokenID_AT_OPTIONAL                   , kObjectiveCPropertyTranslateStateInit                 );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateInit                 , kCEETokenID_AT_REQUIRED                   , kObjectiveCPropertyTranslateStateInit                 );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateInit                 , kCEETokenID_AT_PROPERTY                   , kObjectiveCPropertyTranslateStateProperty             );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateInit                 , ';'                                       , kObjectiveCPropertyTranslateStateConfirm              );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty             , '('                                       , kObjectiveCPropertyTranslateStateAttribute            );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty             , token_id_is_declaration_specifier         , kObjectiveCPropertyTranslateStateDeclarationSpecifier );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty             , token_id_is_builtin_type                  , kObjectiveCPropertyTranslateStateBuiltinType          );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty             , token_id_is_object_specifier              , kObjectiveCPropertyTranslateStateObjectSpecifier      );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateProperty             , kCEETokenID_IDENTIFIER                    , kObjectiveCPropertyTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateAttribute            , ')'                                       , kObjectiveCPropertyTranslateStateAttributeEnd         );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateAttributeEnd         , token_id_is_declaration_specifier         , kObjectiveCPropertyTranslateStateDeclarationSpecifier );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateAttributeEnd         , token_id_is_builtin_type                  , kObjectiveCPropertyTranslateStateBuiltinType          );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateAttributeEnd         , token_id_is_object_specifier              , kObjectiveCPropertyTranslateStateObjectSpecifier      );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateAttributeEnd         , kCEETokenID_IDENTIFIER                    , kObjectiveCPropertyTranslateStateCustomType           );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateBuiltinType          , token_id_is_declaration_specifier         , kObjectiveCPropertyTranslateStateDeclarationSpecifier );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateBuiltinType          , token_id_is_builtin_type                  , kObjectiveCPropertyTranslateStateBuiltinType          );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateBuiltinType          , kCEETokenID_IDENTIFIER                    , kObjectiveCPropertyTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateBuiltinType          , '*'                                       , kObjectiveCPropertyTranslateStateBuiltinType          );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateDeclarationSpecifier , token_id_is_declaration_specifier         , kObjectiveCPropertyTranslateStateDeclarationSpecifier );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateDeclarationSpecifier , token_id_is_builtin_type                  , kObjectiveCPropertyTranslateStateBuiltinType          );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateDeclarationSpecifier , token_id_is_object_specifier              , kObjectiveCPropertyTranslateStateObjectSpecifier      );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateDeclarationSpecifier , kCEETokenID_IDENTIFIER                    , kObjectiveCPropertyTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateDeclarationSpecifier , '*'                                       , kObjectiveCPropertyTranslateStateDeclarationSpecifier );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateObjectSpecifier      , kCEETokenID_IDENTIFIER                    , kObjectiveCPropertyTranslateStateObjectIdentifier     );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateObjectSpecifier      , '{'                                       , kObjectiveCPropertyTranslateStateObjectDefinition     );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateObjectIdentifier     , '*'                                       , kObjectiveCPropertyTranslateStateObjectIdentifier     );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateObjectIdentifier     , kCEETokenID_IDENTIFIER                    , kObjectiveCPropertyTranslateStateObjectIdentifier     );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateObjectIdentifier     , '{'                                       , kObjectiveCPropertyTranslateStateObjectDefinition     );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateObjectDefinition     , '}'                                       , kObjectiveCPropertyTranslateStateObjectDefinitionEnd  );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateObjectDefinitionEnd  , kCEETokenID_IDENTIFIER                    , kObjectiveCPropertyTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateObjectDefinitionEnd  , '*'                                       , kObjectiveCPropertyTranslateStateObjectDefinitionEnd  );
+    TRANSLATE_FUNCS_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateCustomType           , token_id_is_builtin_type                  , kObjectiveCPropertyTranslateStateBuiltinType          );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateCustomType           , kCEETokenID_IDENTIFIER                    , kObjectiveCPropertyTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateCustomType           , '*'                                       , kObjectiveCPropertyTranslateStateCustomType           );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateIdentifier           , kCEETokenID_IDENTIFIER                    , kObjectiveCPropertyTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateIdentifier           , ','                                       , kObjectiveCPropertyTranslateStateConfirm              );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateIdentifier           , ';'                                       , kObjectiveCPropertyTranslateStateConfirm              );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateTypeInit             , kCEETokenID_IDENTIFIER                    , kObjectiveCPropertyTranslateStateIdentifier           );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateTypeInit             , '*'                                       , kObjectiveCPropertyTranslateStateTypeInit             );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateTypeInit             , ','                                       , kObjectiveCPropertyTranslateStateConfirm              );
+    TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateTypeInit             , ';'                                       , kObjectiveCPropertyTranslateStateConfirm              );
 }
 
 static cee_boolean objective_c_property_parse(CEESourceFregment* fregment)
@@ -3628,21 +3398,23 @@ static cee_boolean objective_c_property_parse(CEESourceFregment* fregment)
     cee_boolean ret = FALSE;
     CEEList* declarations = NULL;
     CEESourceSymbol* declaration = NULL;
-    CEESourceSymbol* member_variable = NULL;
     CEEList* p = NULL;
-    CEEList* q = NULL;
     CEEToken* token = NULL;
-    cee_char* proto = NULL;
     CEEList* property = NULL;
     CEEList* attribute_end = NULL;
+    CEEList* identifier = NULL;
+    CEEList* prefix = NULL;
+    CEEList* prefix_tail = NULL;
+    cee_boolean prefix_parse = FALSE;
     ObjectiveCPropertyTranslateState current = kObjectiveCPropertyTranslateStateInit;
-    
+        
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
         
-        if (token->identifier == kCEETokenID_IDENTIFIER)
-            q = p;
+        if (cee_token_id_is_newline(token->identifier) ||
+            cee_token_id_is_whitespace(token->identifier))
+            goto next_token;
         
         current = objective_c_property_translate_table[current][token->identifier];
         
@@ -3650,61 +3422,67 @@ static cee_boolean objective_c_property_parse(CEESourceFregment* fregment)
             break;
         }
         else if (current == kObjectiveCPropertyTranslateStateProperty) {
-            if (token->identifier == kCEETokenID_AT_PROPERTY && !property)
+            if (!property)
                 property = p;
         }
         else if (current == kObjectiveCPropertyTranslateStateAttributeEnd) {
-            if (token->identifier == ')' && !attribute_end)
+            if (!attribute_end)
                 attribute_end = p;
         }
-        else if (current == kObjectiveCPropertyTranslateStateConfirm ||
-                 current == kObjectiveCPropertyTranslateStateTerminate) {
-            if (q) {
-                if (!proto) {
-                    if (attribute_end)
-                        proto = c_type_descriptor_from_token_slice(fregment,
-                                                                   TOKEN_NEXT(attribute_end),
-                                                                   TOKEN_PREV(q));
-                    else 
-                        proto = c_type_descriptor_from_token_slice(fregment,
-                                                                   TOKEN_NEXT(property),
-                                                                   TOKEN_PREV(q));
-                }
+        else if (current == kObjectiveCPropertyTranslateStateIdentifier) {
+            identifier = p;
+        }
+        else if (current == kObjectiveCPropertyTranslateStateObjectIdentifier) {
+            if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER))
+                identifier = p;
+        }
+        else if (current == kObjectiveCPropertyTranslateStateConfirm) {
+            
+            if (!prefix_parse) {
+                /**
+                 *  - property (strong) NSView *view0, *view1;
+                 *  ^~~~~~~~~~~~~~~~~~~~~~~~~~ prefix
+                 *                      ^
+                 *                      +~~~~~ prefix tail
+                 */
+                if (attribute_end)
+                    prefix = TOKEN_NEXT(attribute_end);
+                else if (property)
+                    prefix = TOKEN_NEXT(property);
                 
+                if (identifier)
+                    prefix_tail = TOKEN_PREV(identifier);
+                
+                prefix_parse = TRUE;
+            }
+            
+            if (identifier) {
                 declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
                                                                         fregment->subject_ref,
-                                                                        q,
-                                                                        q,
+                                                                        identifier,
+                                                                        identifier,
                                                                         kCEESourceSymbolTypePropertyDeclaration,
                                                                         "c",
                                                                         kCEETokenStringOptionCompact);
                 if (declaration) {
-                    declaration->proto = cee_strdup(proto);
+                    declaration->alias = cee_strconcat("_", declaration->name, NULL);
+                    declaration->proto_descriptor = c_declaration_proto_descriptor_create(fregment,
+                                                                                          prefix,
+                                                                                          prefix_tail,
+                                                                                          identifier);
                     declarations = cee_list_prepend(declarations, declaration);
-                    
-                    /** create member variable */
-                    member_variable = cee_source_symbol_copy(declaration);
-                    member_variable->name = cee_strconcat("_", declaration->name, NULL);
-                    member_variable->type = kCEESourceSymbolTypeVariableDeclaration;
-                    declarations = cee_list_prepend(declarations, member_variable);
+                    cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
                 }
-                cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
                 
-                
-                q = NULL;
+                identifier = NULL;
             }
             
-            if (current == kObjectiveCPropertyTranslateStateTerminate)
-                break;
-            
-            current = kObjectiveCPropertyTranslateStateProperty;
+            current = kObjectiveCPropertyTranslateStateTypeInit;
         }
         
+next_token:
         p = TOKEN_NEXT(p);
     }
-    
-    if (proto)
-        cee_free(proto);
     
     if (declarations) {
         fregment->symbols = cee_list_concat(declarations, fregment->symbols);
@@ -3712,8 +3490,9 @@ static cee_boolean objective_c_property_parse(CEESourceFregment* fregment)
         ret = TRUE;
     }
     
-#ifdef DEBUG_PROPERTY_DECLARATION
-    cee_source_symbols_print(fregment->symbols);
+#ifdef DEBUG_PROPERTY
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
@@ -3932,53 +3711,55 @@ static cee_char* c_type_descriptor_from_token_slice(CEESourceFregment* fregment,
 static void c_declaration_translate_table_init(void)
 {
     /**
-     *                              typedef     declaration_specifier   literal                 virtual         decltype_specifier  access_specifier    builtin_type    object_specifier    alignas_specifier       overload_operator   new             delete          virtual_specifier   identifier              noexcept    throw       assign_operator     <                   >           ::                          *                       &                       &&                      ~                       (                       )                           [                       ]                       :                   operator        ,               ;               {                   }                       ->          Const           others
-     *  Init                        Typedef     DeclarationSpecifier    Error                   Error           Decltype            AccessSpecifier     BuiltinType     ObjectSpecifier     AlignasSpecifier        Error               Error           Error           Error               CustomType              Error       Error       Error               Error               Error       CustomTypeScope             Error                   Error                   Error                   Init                    Error                   Error                       Init                    Init                    Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  Typedef                     Error       DeclarationSpecifier    Error                   Error           Decltype            AccessSpecifier     BuiltinType     ObjectSpecifier     AlignasSpecifier        Error               Error           Error           Error               CustomType              Error       Error       Error               Error               Error       CustomTypeScope             Error                   Error                   Error                   Init                    Error                   Error                       Init                    Init                    Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  DeclarationSpecifier        Error       DeclarationSpecifier    DeclarationSpecifier    Error           Decltype            Error               BuiltinType     objectSpecifier     Error                   Error               Error           Error           Error               CustomType              Error       Error       Error               Error               Error       CustomTypeScope             Error                   Error                   Error                   DeclarationSpecifier    Error                   Error                       DeclarationSpecifier    DeclarationSpecifier    Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  AccessSpecifier             Typedef     DeclarationSpecifier    Error                   Error           Decltype            AccessSpecifier     BuiltinType     ObjectSpecifier     AlignasSpecifier        Error               Error           Error           Error               CustomType              Error       Error       Error               Error               Error       CustomTypeScope             Error                   Error                   Error                   AccessSpecifier         Error                   Error                       AccessSpecifier         AccessSpecifier         AccessSpecifier     Error           Error           Error           Error               Error                   Error       Error           Error
-     *  BuiltinType                 Error       BuiltinType             Error                   Error           Decltype            Error               BuiltinType     Error               Error                   Error               Error           Error           Error               Identifier              Error       Error       Error               Error               Error       IdentifierScope             BuiltinType             BuiltinType             BuiltinType             BuiltinType             ParameterList           Error                       BuiltinType             BuiltinType             Error               Operator        Error           Error           Error               Error                   Error       Error           Error
-     *  CustomType                  Error       CustomType              Error                   Error           Decltype            AccessSpecifier     BuiltinType     ObjectSpecifier     Error                   Error               Error           Error           Error               Identifier              Error       Error       Error               *TemplateParameter  Error       CustomTypeScope             CustomType              CustomType              CustomType              CustomType              Structor                Error                       CustomType              CustomType              Error               Operator        Error           Error           Error               Error                   Error       Error           Error
-     *  Structor                    Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   StructorEnd                 Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  StructorEnd                 Error       StructorEnd             Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           StructorEnd         StructorEnd             Noexcept    Throw       Confirm             Error               Error       Error                       StructorEnd             StructorEnd             StructorEnd             Error                   Surrounded              Error                       Surrounded              Error                   Error               Error           Confirm         Confirm         Error               Error                   *Trailing   Error           Error
-     *  CustomTypeScope             Error       CustomType              Error                   Error           Error               Error               CustomType      Error               Error                   Error               Error           Error           Error               CustomType              Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  ObjectSpecifier             Error       Error                   Error                   Error           Error               Error               Error           ObjectSpecifier     ObjectAlignasSpecifier  Error               Error           Error           Error               ObjectIdentifier        Error       Error       Error               Error               Error       ObjectIdentifierScope       Error                   Error                   Error                   Error                   Error                   Error                       ObjectSpecifier         ObjectSpecifier         Error               Error           Error           Error           ObjectDefinition    Error                   Error       Error           Error
-     *  ObjectAlignasSpecifier      Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ObjectAlignasList       Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  ObjectAlignasList           Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   ObjectSpecifier             Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  ObjectIdentifier            Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               ObjectIdentifier        Error       Error       Confirm             Error               Error       ObjectIdentifierScope       ObjectIdentifier        ObjectIdentifier        ObjectIdentifier        Error                   Error                   Error                       ObjectIdentifier        ObjectIdentifier        ObjectDerive        Error           Confirm         Confirm         ObjectDefinition    Error                   Error       Error           Error
-     *  ObjectIdentifierScope       Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               ObjectIdentifier        Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  ObjectDerive                Error       Error                   Error                   ObjectDerive    Error               ObjectDerive        Error           Error               Error                   Error               Error           Error           Error               ObjectDeriveIdentifier  Error       Error       Error               Error               Error       ObjectDeriveIdentifierScope Error                   Error                   Error                   Error                   Error                   Error                       ObjectDerive            ObjectDerive            Error               Error           ObjectDerive    Error           Error               Error                   Error       Error           Error
-     *  ObjectDeriveIdentifier      Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               *TemplateParameter  Error       ObjectDeriveIdentifierScope Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error           ObjectDerive    Error           ObjectDefinition    Error                   Error       Error           Error
-     *  ObjectDeriveIdentifierScope Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               ObjectDeriveIdentifier  Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  ObjectDefinition            Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error           Error           Error           Error               ObjectDefinitionEnd     Error       Error           Error
-     *  ObjectDefinitionEnd         Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Identifier              Error       Error       Error               Error               Error       Error                       ObjectDefinitionEnd     ObjectDefinitionEnd     ObjectDefinitionEnd     Error                   Error                   Error                       ObjectDefinitionEnd     ObjectDefinitionEnd     Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  AlignasSpecifier            Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   AlignasList             Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  AlignasList                 Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Init                        Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  Decltype                    Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   DecltypeList            Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  DecltypeList                Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   BuiltinType                 Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  Identifier                  Error       DeclarationSpecifier    Error                   Error           Decltype            AccessSpecifier     BuiltinType     objectSpecifier     Error                   Error               Error           Error           Error               Identifier              Error       Error       Confirm             *TemplateParameter  Error       IdentifierScope             Identifier              Identifier              Identifier              Identifier              ParameterList           Error                       Identifier              Identifier              BitField            Operator        Confirm         Confirm         InitList            Error                   Error       Error           Error
-     *  IdentifierScope             Error       Identifier              Error                   Error           Error               Error               Identifier      Error               Error                   Error               Error           Error           Error               Identifier              Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   IdentifierScope         Error                   Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  ParameterList               Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   ParameterListEnd            Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  ParameterListEnd            Error       ParameterListEnd        Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           ParameterListEnd    ParameterListEnd        Noexcept    Throw       Confirm             Error               Error       Error                       ParameterListEnd        ParameterListEnd        ParameterListEnd        Error                   Surrounded              Error                       Surrounded              Error                   Error               Error           Confirm         Confirm         Error               Error                   *Trailing   Error           Error
-     *  InitList                    Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error           Error           Error           Error               InitListEnd             Error       Error           Error
-     *  InitListEnd                 Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error           Confirm         Confirm         Error               Error                   Error       Error           Error
-     *  Surrounded                  Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   SurroundedEnd               Error                   SurroundedEnd           Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  SurroundedEnd               Error       SurroundedEnd           Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           SurroundedEnd       SurroundedEnd           Noexcept    Throw       Confirm             Error               Error       Error                       SurroundedEnd           SurroundedEnd           SurroundedEnd           Error                   Error                   Error                       SurroundedEnd           SurroundedEnd           Error               Error           Confirm         Confirm         Error               Error                   *Trailing   Error           Error
-     *  Noexcept                    Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   NoexceptList            Error                       Error                   Error                   Error               Error           Confirm         Confirm         Error               Error                   *Trailing   Error           Error
-     *  NoexceptList                Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   ParameterListEnd            Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  Throw                       Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ThrowList               Error                       Error                   Error                   Error               Error           Confirm         Confirm         Error               Error                   *Trailing   Error           Error
-     *  ThrowList                   Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   ParameterListEnd            Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  TypeInit                    Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Identifier              Error       Error       Error               Error               Error       Error                       TypeConfirmed           TypeConfirmed           TypeConfirmed           TypeConfirmed           ParameterList           Error                       TypeConfirmed           TypeConfirmed           Error               Operator        Error           Error           Error               Error                   Error       Error           Error
-     *  BitField                    Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               *BitSize                Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       *BitSize        Error
-     *  Operator                    Error       Error                   Error                   Error           Error               Error               OverloadType    Error               Error                   OverloadOperator    OverloadNew     OverloadDelete  Error               OverloadType            Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   OverloadRoundBracket    Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  OverloadOperator            Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   OverloadOperator    Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ParameterList           Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  OverloadNew                 Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ParameterList           Error                       OverloadNew             OverloadNew             Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  OverloadDelete              Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ParameterList           Error                       OverloadDelete          OverloadDelete          Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  OverloadType                Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   OverloadTypeSurrounded  Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  OverloadTypeSurrounded      Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   OverloadTypeSurroundedEnd   Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  OverloadTypeSurroundedEnd   Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ParameterList           Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  OverloadRoundBracket        Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   OverloadRoundBracketEnd Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
-     *  OverloadRoundBracketEnd     Error       Error                   Error                   Error           Error               Error               Error           Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ParameterList           Error                       Error                   Error                   Error               Error           Error           Error           Error               Error                   Error       Error           Error
+     *                              typedef     declaration_specifier   literal                 virtual         decltype_specifier  access_specifier    builtin_type            object_specifier    alignas_specifier       overload_operator   new             delete          virtual_specifier   identifier              noexcept    throw       assign_operator     <                   >           ::                          *                       &                       &&                      ~                       (                       )                           [                       ]                       :                   operator    ,               ;           {                   }                       ->          Const       others
+     *  Init                        Typedef     DeclarationSpecifier    Error                   Error           Decltype            AccessSpecifier     BuiltinType             ObjectSpecifier     AlignasSpecifier        Error               Error           Error           Error               CustomType              Error       Error       Error               Error               Error       CustomTypeScope             Error                   Error                   Error                   Init                    Error                   Error                       Init                    Init                    Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  Typedef                     Error       DeclarationSpecifier    Error                   Error           Decltype            AccessSpecifier     BuiltinType             ObjectSpecifier     AlignasSpecifier        Error               Error           Error           Error               CustomType              Error       Error       Error               Error               Error       CustomTypeScope             Error                   Error                   Error                   Init                    Error                   Error                       Init                    Init                    Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  DeclarationSpecifier        Error       DeclarationSpecifier    DeclarationSpecifier    Error           Decltype            Error               BuiltinType             objectSpecifier     Error                   Error               Error           Error           Error               CustomType              Error       Error       Error               Error               Error       CustomTypeScope             Error                   Error                   Error                   DeclarationSpecifier    Error                   Error                       DeclarationSpecifier    DeclarationSpecifier    Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  AccessSpecifier             Typedef     DeclarationSpecifier    Error                   Error           Decltype            AccessSpecifier     BuiltinType             ObjectSpecifier     AlignasSpecifier        Error               Error           Error           Error               CustomType              Error       Error       Error               Error               Error       CustomTypeScope             Error                   Error                   Error                   AccessSpecifier         Error                   Error                       AccessSpecifier         AccessSpecifier         AccessSpecifier     Error       Error           Error       Error               Error                   Error       Error       Error
+     *  BuiltinType                 Error       BuiltinType             Error                   Error           Decltype            Error               BuiltinType             Error               Error                   Error               Error           Error           Error               Identifier              Error       Error       Error               Error               Error       IdentifierScope             BuiltinType             BuiltinType             BuiltinType             BuiltinType             ParameterList           Error                       BuiltinType             BuiltinType             Error               Operator    Error           Error       Error               Error                   Error       Error       Error
+     *  CustomType                  Error       CustomType              Error                   Error           Decltype            AccessSpecifier     BuiltinType             ObjectSpecifier     Error                   Error               Error           Error           Error               Identifier              Error       Error       Error               *TemplateParameter  Error       CustomTypeScope             CustomType              CustomType              CustomType              CustomType              Structor                Error                       CustomType              CustomType              Error               Operator    Error           Error       Error               Error                   Error       Error       Error
+     *  Structor                    Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   StructorEnd                 Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  StructorEnd                 Error       StructorEnd             Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           StructorEnd         StructorEnd             Noexcept    Throw       Confirm             Error               Error       Error                       StructorEnd             StructorEnd             StructorEnd             Error                   Surrounded              Error                       Surrounded              Error                   Error               Error       Confirm         Confirm     Error               Error                   *Trailing   Error       Error
+     *  CustomTypeScope             Error       CustomType              Error                   Error           Error               Error               CustomType              Error               Error                   Error               Error           Error           Error               CustomType              Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  ObjectSpecifier             Error       Error                   Error                   Error           Error               Error               Error                   ObjectSpecifier     ObjectAlignasSpecifier  Error               Error           Error           Error               ObjectIdentifier        Error       Error       Error               Error               Error       ObjectIdentifierScope       Error                   Error                   Error                   Error                   Error                   Error                       ObjectSpecifier         ObjectSpecifier         Error               Error       Error           Error       ObjectDefinition    Error                   Error       Error       Error
+     *  ObjectAlignasSpecifier      Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ObjectAlignasList       Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  ObjectAlignasList           Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   ObjectSpecifier             Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  ObjectIdentifier            Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               ObjectIdentifier        Error       Error       Confirm             Error               Error       ObjectIdentifierScope       ObjectIdentifier        ObjectIdentifier        ObjectIdentifier        Error                   Error                   Error                       ObjectIdentifier        ObjectIdentifier        ObjectDerive        Operator    Confirm         Confirm     ObjectDefinition    Error                   Error       Error       Error
+     *  ObjectIdentifierScope       Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               ObjectIdentifier        Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  ObjectDerive                Error       Error                   Error                   ObjectDerive    Error               ObjectDerive        ObjectDeriveIdentifier  Error               Error                   Error               Error           Error           Error               ObjectDeriveIdentifier  Error       Error       Error               Error               Error       ObjectDeriveIdentifierScope Error                   Error                   Error                   Error                   Error                   Error                       ObjectDerive            ObjectDerive            Error               Error       ObjectDerive    Error       Error               Error                   Error       Error       Error
+     *  ObjectDeriveIdentifier      Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               *TemplateParameter  Error       ObjectDeriveIdentifierScope Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error       ObjectDerive    Error       ObjectDefinition    Error                   Error       Error       Error
+     *  ObjectDeriveIdentifierScope Error       Error                   Error                   Error           Error               Error               ObjectDeriveIdentifier  Error               Error                   Error               Error           Error           Error               ObjectDeriveIdentifier  Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  ObjectDefinition            Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error       Error           Error       Error               ObjectDefinitionEnd     Error       Error       Error
+     *  ObjectDefinitionEnd         Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Identifier              Error       Error       Error               Error               Error       Error                       ObjectDefinitionEnd     ObjectDefinitionEnd     ObjectDefinitionEnd     Error                   Error                   Error                       ObjectDefinitionEnd     ObjectDefinitionEnd     Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  AlignasSpecifier            Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   AlignasList             Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  AlignasList                 Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Init                        Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  Decltype                    Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   DecltypeList            Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  DecltypeList                Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   BuiltinType                 Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  Identifier                  Error       DeclarationSpecifier    Error                   Error           Decltype            AccessSpecifier     BuiltinType             objectSpecifier     Error                   Error               Error           Error           Error               Identifier              Error       Error       Confirm             *TemplateParameter  Error       IdentifierScope             Identifier              Identifier              Identifier              Identifier              ParameterList           Error                       Identifier              Identifier              BitField            Operator    Confirm         Confirm     InitList            Error                   Error       Error       Error
+     *  IdentifierScope             Error       Identifier              Error                   Error           Error               Error               Identifier              Error               Error                   Error               Error           Error           Error               Identifier              Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   IdentifierScope         Error                   Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  ParameterList               Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   ParameterListEnd            Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  ParameterListEnd            Error       ParameterListEnd        Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           ParameterListEnd    ParameterListEnd        Noexcept    Throw       Confirm             Error               Error       Error                       ParameterListEnd        ParameterListEnd        ParameterListEnd        Error                   Surrounded              Error                       Surrounded              Error                   Error               Error       Confirm         Confirm     Error               Error                   *Trailing   Error       Error
+     *  InitList                    Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error       Error           Error       Error               InitListEnd             Error       Error       Error
+     *  InitListEnd                 Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error       Confirm         Confirm     Error               Error                   Error       Error       Error
+     *  Surrounded                  Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   SurroundedEnd               Error                   SurroundedEnd           Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  SurroundedEnd               Error       SurroundedEnd           Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           SurroundedEnd       SurroundedEnd           Noexcept    Throw       Confirm             Error               Error       Error                       SurroundedEnd           SurroundedEnd           SurroundedEnd           Error                   Error                   Error                       SurroundedEnd           SurroundedEnd           Error               Error       Confirm         Confirm     Error               Error                   *Trailing   Error       Error
+     *  Noexcept                    Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   NoexceptList            Error                       Error                   Error                   Error               Error       Confirm         Confirm     Error               Error                   *Trailing   Error       Error
+     *  NoexceptList                Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   NoexceptListEnd             Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  NoexceptListEnd             Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       NoexceptListEnd         NoexceptListEnd         Error               Error       Confirm         Confirm     Error               Error                   *Trailing   Error       Error
+     *  Throw                       Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ThrowList               Error                       Error                   Error                   Error               Error       Confirm         Confirm     Error               Error                   *Trailing   Error       Error
+     *  ThrowList                   Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   ThrowListEnd                Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  ThrowListEnd                Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       ThrowListEnd            ThrowListEnd            Error               Error       Confirm         Confirm     Error               Error                   *Trailing   Error       Error
+     *  BitField                    Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               *BitSize                Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       *BitSize    Error
+     *  Operator                    Error       Error                   Error                   Error           Error               Error               OverloadType            Error               Error                   OverloadOperator    OverloadNew     OverloadDelete  Error               OverloadType            Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   OverloadRoundBracket    Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  OverloadOperator            Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   OverloadOperator    Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ParameterList           Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  OverloadNew                 Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ParameterList           Error                       OverloadNew             OverloadNew             Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  OverloadDelete              Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ParameterList           Error                       OverloadDelete          OverloadDelete          Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  OverloadType                Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   OverloadTypeSurrounded  Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  OverloadTypeSurrounded      Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   OverloadTypeSurroundedEnd   Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  OverloadTypeSurroundedEnd   Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ParameterList           Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  OverloadRoundBracket        Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   Error                   OverloadRoundBracketEnd     Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  OverloadRoundBracketEnd     Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Error                   Error       Error       Error               Error               Error       Error                       Error                   Error                   Error                   Error                   ParameterList           Error                       Error                   Error                   Error               Error       Error           Error       Error               Error                   Error       Error       Error
+     *  TypeInit                    Error       Error                   Error                   Error           Error               Error               Error                   Error               Error                   Error               Error           Error           Error               Identifier              Error       Error       Error               Error               Error       Error                       TypeInit                TypeInit                TypeInit                TypeInit                ParameterList           Error                       TypeInit                TypeInit                Error               Operator    Error           Error       Error               Error                   Error       Error       Error
      *
      *  TemplateParameter: save 'current state', skip template parameterlist then restore 'current state'
      *  Assignment: skip to Confirm/Terminate
@@ -4097,12 +3878,14 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectIdentifier              , ';'                                   , kCDeclarationTranslateStateConfirm                    );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectIdentifier              , '*'                                   , kCDeclarationTranslateStateObjectIdentifier           );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectIdentifier              , '&'                                   , kCDeclarationTranslateStateObjectIdentifier           );
-    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectIdentifier              , kCEETokenID_LOGIC_AND                 , kCDeclarationTranslateStateConfirm                    );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectIdentifier              , kCEETokenID_LOGIC_AND                 , kCDeclarationTranslateStateObjectIdentifier           );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectIdentifier              , '['                                   , kCDeclarationTranslateStateObjectIdentifier           );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectIdentifier              , ']'                                   , kCDeclarationTranslateStateObjectIdentifier           );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectIdentifier              , kCEETokenID_OPERATOR                  , kCDeclarationTranslateStateOperator                   );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectIdentifierScope         , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateObjectIdentifier           );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDerive                  , kCEETokenID_VIRTUAL                   , kCDeclarationTranslateStateObjectDerive               );
     TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDerive                  , token_id_is_access_specifier          , kCDeclarationTranslateStateObjectDerive               );
+    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDerive                  , token_id_is_builtin_type              , kCDeclarationTranslateStateObjectDeriveIdentifier     );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDerive                  , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateObjectDeriveIdentifier     );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDerive                  , kCEETokenID_SCOPE                     , kCDeclarationTranslateStateObjectDeriveIdentifierScope);
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDerive                  , ','                                   , kCDeclarationTranslateStateObjectDerive               );
@@ -4112,6 +3895,7 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDeriveIdentifier        , kCEETokenID_SCOPE                     , kCDeclarationTranslateStateObjectDeriveIdentifierScope);
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDeriveIdentifier        , ','                                   , kCDeclarationTranslateStateObjectDerive               );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDeriveIdentifier        , '{'                                   , kCDeclarationTranslateStateObjectDefinition           );
+    TRANSLATE_FUNCS_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDeriveIdentifierScope   , token_id_is_builtin_type              , kCDeclarationTranslateStateObjectDeriveIdentifier     );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDeriveIdentifierScope   , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateObjectDeriveIdentifier     );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDefinition              , '}'                                   , kCDeclarationTranslateStateObjectDefinitionEnd        );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateObjectDefinitionEnd           , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateIdentifier                 );
@@ -4185,12 +3969,22 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateNoexcept                      , ','                                   , kCDeclarationTranslateStateConfirm                    );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateNoexcept                      , ';'                                   , kCDeclarationTranslateStateConfirm                    );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateNoexcept                      , kCEETokenID_MEMBER_POINTER            , kCDeclarationTranslateStateTrailing                   );
-    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateNoexceptList                  , ')'                                   , kCDeclarationTranslateStateParameterListEnd           );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateNoexceptList                  , ')'                                   , kCDeclarationTranslateStateNoexceptListEnd            );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateNoexceptListEnd               , '['                                   , kCDeclarationTranslateStateNoexceptListEnd            );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateNoexceptListEnd               , ']'                                   , kCDeclarationTranslateStateNoexceptListEnd            );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateNoexceptListEnd               , ','                                   , kCDeclarationTranslateStateConfirm                    );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateNoexceptListEnd               , ';'                                   , kCDeclarationTranslateStateConfirm                    );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateNoexceptListEnd               , kCEETokenID_MEMBER_POINTER            , kCDeclarationTranslateStateTrailing                   );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrow                         , '('                                   , kCDeclarationTranslateStateThrowList                  );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrow                         , ','                                   , kCDeclarationTranslateStateConfirm                    );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrow                         , ';'                                   , kCDeclarationTranslateStateConfirm                    );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrow                         , kCEETokenID_MEMBER_POINTER            , kCDeclarationTranslateStateTrailing                   );
-    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrowList                     , ')'                                   , kCDeclarationTranslateStateParameterListEnd           );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrowList                     , ')'                                   , kCDeclarationTranslateStateThrowListEnd               );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrowListEnd                  , '['                                   , kCDeclarationTranslateStateThrowListEnd               );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrowListEnd                  , ']'                                   , kCDeclarationTranslateStateThrowListEnd               );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrowListEnd                  , ','                                   , kCDeclarationTranslateStateConfirm                    );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrowListEnd                  , ';'                                   , kCDeclarationTranslateStateConfirm                    );
+    TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateThrowListEnd                  , kCEETokenID_MEMBER_POINTER            , kCDeclarationTranslateStateTrailing                   );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypeInit                      , kCEETokenID_IDENTIFIER                , kCDeclarationTranslateStateIdentifier                 );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypeInit                      , '*'                                   , kCDeclarationTranslateStateTypeInit                   );
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateTypeInit                      , '&'                                   , kCDeclarationTranslateStateTypeInit                   );
@@ -4233,19 +4027,18 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
     CEEList* p = NULL;
     CEEList* q = NULL;
     CEEToken* token = NULL;
-    CDeclarationTranslateState current = kCDeclarationTranslateStateInit;
-    CDeclarationTranslateState prev = kCDeclarationTranslateStateInit;
     CEEList* declarations = NULL;
     CEESourceSymbol* declaration = NULL;
     CEEList* identifier = NULL;
     CEEList* object_identifier = NULL;
     CEEList* parameter_list = NULL;
     CEEList* parameter_list_end = NULL;
-    CEEList* surrounded = FALSE;
-    CEEList* surrounded_end = FALSE;
-    CEEList* overload = NULL;
     cee_boolean is_typedef = FALSE;
-    cee_char* proto = NULL;
+    CEEList* prefix = NULL;
+    CEEList* prefix_tail = NULL;
+    cee_boolean prefix_parse = FALSE;
+    CDeclarationTranslateState current = kCDeclarationTranslateStateInit;
+    CDeclarationTranslateState prev = kCDeclarationTranslateStateInit;
     
     if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeClassDefinition) ||
         cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeStructDefinition))
@@ -4254,6 +4047,11 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
+        
+        if (cee_token_id_is_newline(token->identifier) ||
+            cee_token_id_is_whitespace(token->identifier))
+            goto next_token;
+                
         prev = current;
         current = c_declaration_translate_table[current][token->identifier];
         
@@ -4273,6 +4071,9 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
                 break;
             current = prev;
         }
+        else if (current == kCDeclarationTranslateStateCustomType) {
+            identifier = p;
+        }
         else if (current == kCDeclarationTranslateStateIdentifier) {
             if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER))
                 identifier = p;
@@ -4281,34 +4082,23 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
             if (!is_class_member)
                 break;
             
-            if (!parameter_list && cee_token_is_identifier(p, '('))
+            if (!parameter_list)
                 parameter_list = p;
         }
         else if (current == kCDeclarationTranslateStateStructorEnd) {
-            if (!parameter_list_end && cee_token_is_identifier(p, ')'))
+            if (!parameter_list_end)
                 parameter_list_end = p;
         }
         else if (current == kCDeclarationTranslateStateParameterList) {
-            if (!parameter_list && cee_token_is_identifier(p, '('))
+            if (!parameter_list)
                 parameter_list = p;
         }
         else if (current == kCDeclarationTranslateStateParameterListEnd) {
-            if (!parameter_list_end && cee_token_is_identifier(p, ')'))
+            if (!parameter_list_end)
                 parameter_list_end = p;
         }
-        else if (current == kCDeclarationTranslateStateSurrounded) {
-            if (!surrounded &&
-                (cee_token_is_identifier(p, '(') || cee_token_is_identifier(p, '[')))
-                surrounded = p;
-        }
-        else if (current == kCDeclarationTranslateStateSurroundedEnd) {
-            if (!surrounded_end &&
-                (cee_token_is_identifier(p, ')') || cee_token_is_identifier(p, ']')))
-                surrounded_end = p;
-        }
         else if (current == kCDeclarationTranslateStateOperator) {
-            if (cee_token_is_identifier(p, kCEETokenID_OPERATOR))
-                overload = p;
+            identifier = p;
         }
         else if (current == kCDeclarationTranslateStateObjectIdentifier) {
             if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER))
@@ -4317,43 +4107,41 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
         else if (current == kCDeclarationTranslateStateTrailing ||
                  current == kCDeclarationTranslateStateConfirm) {
             
-            if (!proto)
-                proto = c_declaration_proto_create(fregment,
-                                                   overload,
-                                                   surrounded,
-                                                   parameter_list,
-                                                   identifier,
-                                                   object_identifier);
-            if (overload) {
-                declaration = c_operator_overload_declaration_create(fregment,
-                                                                     proto,
-                                                                     overload,
-                                                                     parameter_list);
+            if (!prefix_parse) {
+                prefix = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+                prefix_tail = c_declaration_prefix_tail_get(fregment,
+                                                            identifier,
+                                                            object_identifier);
+                prefix_parse = TRUE;
             }
-            else if (surrounded) {
-                declaration = c_surrounded_declaration_create(fregment,
-                                                              proto,
-                                                              parameter_list);
-            }
-            else if (parameter_list) {
+            
+            if (parameter_list) {
                 declaration = c_function_declaration_create(fregment,
-                                                            proto,
-                                                            parameter_list);
+                                                            prefix,
+                                                            prefix_tail,
+                                                            identifier,
+                                                            parameter_list,
+                                                            parameter_list_end);
             }
             else if (identifier) {
                 declaration = c_identifier_declaration_create(fregment,
-                                                              proto,
+                                                              prefix,
+                                                              prefix_tail,
                                                               identifier);
             }
             else if (object_identifier) {
-                token = cee_token_not_whitespace_newline_before(object_identifier)->data;
+                q = cee_token_not_whitespace_newline_before(object_identifier);
+                if (q)
+                    token = q->data;
                 if (token_id_is_object_specifier(token->identifier))
                     declaration = c_custom_type_declaration_create(fregment,
-                                                                   proto,
+                                                                   prefix,
+                                                                   prefix_tail,
                                                                    object_identifier);
                 else
                     declaration = c_identifier_declaration_create(fregment,
-                                                                  proto,
+                                                                  prefix,
+                                                                  prefix_tail,
                                                                   object_identifier);
             }
             
@@ -4367,47 +4155,22 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
             identifier = NULL;
             parameter_list = NULL;
             parameter_list_end = NULL;
-            surrounded = NULL;
-            surrounded_end = NULL;
+            object_identifier = NULL;
             
-            if (overload) {
-                /** if it's "operator," skip the ',' */
-                q = cee_token_not_whitespace_newline_after(overload);
-                if (q && cee_token_is_identifier(q, ','))
-                    p = TOKEN_NEXT(q);
-                
-                /**
-                 * when "<<" overload, "skip_c_declaration_interval"
-                 * will failed, so we find the declaration interval
-                 * manually.
-                 */
-                while (p) {
-                    if (cee_token_is_identifier(p, ',') ||
-                        cee_token_is_identifier(p, ';'))
-                        break;
-                    p = TOKEN_NEXT(p);
-                }
+            if (!cee_token_is_identifier(p, ',') &&
+                !cee_token_is_identifier(p, ';')) {
+                p = skip_c_declaration_interval(p);
                 if (!p)
                     break;
-            }
-            else {
-                if (!cee_token_is_identifier(p, ',') &&
-                    !cee_token_is_identifier(p, ';')) {
-                    p = skip_c_declaration_interval(p);
-                    if (!p)
-                        break;
-                }
             }
             
             current = kCDeclarationTranslateStateTypeInit;
         }
         
+next_token:
         p = TOKEN_NEXT(p);
     }
-    
-    if (proto)
-        cee_free(proto);
-    
+        
     if (declarations) {
         fregment->symbols = cee_list_concat(fregment->symbols, declarations);
         cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeDeclaration);
@@ -4415,70 +4178,66 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
     }
     
 #ifdef DEBUG_DECLARATION
-    cee_source_symbols_print(declarations);
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
 }
 
-static cee_char* c_declaration_proto_create(CEESourceFregment* fregment,
-                                            CEEList* overload,
-                                            CEEList* surrounded,
-                                            CEEList* parameter_list,
-                                            CEEList* identifier,
-                                            CEEList* object_identifier)
+/**
+ *  "static int" is declaration prefix, "int" is prefix tail
+ *
+ *  static int a, func(), c = 1.0;
+ *  ^~~~~~~~~~ prefix
+ *         ^
+ *         +~~ prefix tail
+ *
+ */
+static CEEList* c_declaration_prefix_tail_get(CEESourceFregment* fregment,
+                                              CEEList* identifier,
+                                              CEEList* object_identifier)
 {
-    cee_char* proto = NULL;
-    CEEList* first_commit = NULL;
+    CEEList* tail = NULL;
     CEEList* q = NULL;
     CEEList* r = NULL;
     
-    if (overload) {
-        first_commit = overload;
-    }
-    else if (surrounded) {
-        first_commit = parameter_list;
-    }
-    else if (parameter_list) {
-        q = cee_token_not_whitespace_newline_before(parameter_list);
+    if (identifier) {
+        q = identifier;
         if (cee_token_is_identifier(q, kCEETokenID_IDENTIFIER)) {
             r = cee_token_not_whitespace_newline_before(q);
             if (cee_token_is_identifier(r, '~'))
                 q = r;
         }
-        first_commit = q;
-    }
-    else if (identifier) {
-        first_commit = identifier;
+        tail = TOKEN_PREV(q);
     }
     else if (object_identifier) {
-        first_commit = object_identifier;
+        tail = TOKEN_PREV(object_identifier);
     }
     
-    if (!first_commit || !TOKEN_PREV(first_commit))
-        proto = cee_strdup("?");
-    else
-        proto = c_type_descriptor_from_token_slice(fregment,
-                                                   SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                   TOKEN_PREV(first_commit));
-    return proto;
+    return tail;
 }
 
 static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregment,
-                                                      const cee_char* proto,
-                                                      CEEList* parameter_list)
+                                                      CEEList* prefix,
+                                                      CEEList* prefix_tail,
+                                                      CEEList* identifier,
+                                                      CEEList* parameter_list,
+                                                      CEEList* parameter_list_end)
 {
     CEESourceSymbol* declaration = NULL;
     CEESourceFregment* child = NULL;
     CEEList* q = NULL;
     CEEList* r = NULL;
     
-    q = cee_token_not_whitespace_newline_before(parameter_list);
-    if (!cee_token_is_identifier(q, kCEETokenID_IDENTIFIER))
+    if (!identifier ||
+        !parameter_list ||
+        !parameter_list_end)
         return NULL;
     
+    q = identifier;
     r = cee_token_not_whitespace_newline_before(q);
-    if (!cee_token_is_identifier(r, '~'))
+    if (!cee_token_is_identifier(r, '~')) /** cpp destructor */
         r = q;
     
     declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
@@ -4488,6 +4247,9 @@ static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregmen
                                                             kCEESourceSymbolTypeFunctionDeclaration,
                                                             "c",
                                                             kCEETokenStringOptionCompact);
+    if (!declaration)
+        return NULL;
+    
     cee_token_slice_state_mark(r, q, kCEETokenStateSymbolOccupied);
     
     child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
@@ -4496,14 +4258,315 @@ static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregmen
         c_function_parameters_parse(child);
     }
     
-    if (proto)
-        declaration->proto = cee_strdup(proto);
+    declaration->proto_descriptor = c_function_proto_descriptor_create(fregment,
+                                                                       prefix,
+                                                                       prefix_tail,
+                                                                       r,
+                                                                       parameter_list,
+                                                                       parameter_list_end);
+    return declaration;
+}
+
+static cee_char* c_function_proto_descriptor_create(CEESourceFregment* fregment,
+                                                    CEEList* prefix,
+                                                    CEEList* prefix_tail,
+                                                    CEEList* identifier,
+                                                    CEEList* parameter_list,
+                                                    CEEList* parameter_list_end)
+{
+    if (!fregment ||
+        !identifier ||
+        !parameter_list ||
+        !parameter_list_end)
+        return NULL;
     
+    const cee_char* subject = fregment->subject_ref;
+    CEEList* tokens = cee_source_fregment_tokens_expand(fregment);
+    CEEList* p = NULL;
+    CEEToken* token = NULL;
+    CEEToken* token_prev = NULL;
+    CEEList* header_tokens = NULL;
+    CEEList* name_chain_tokens = NULL;
+    CEEList* parameters_tokens = NULL;
+    CEEList* trialing_tokens = NULL;
+    cee_char* descriptor = NULL;
+    cee_char* formater_str = NULL;
+    cee_size l = 0;
+    cee_boolean is_class_member = FALSE;
+    CEEList* parent_symbols = NULL;
+    CEESourceFregment* grandfather = NULL;
+    const cee_char* access_level = NULL;
+    cee_char* return_type_str = NULL;
+    CEESourceSymbol* parent_symbol = NULL;
+    
+    grandfather = cee_source_fregment_grandfather_get(fregment);
+    if (grandfather) {
+        access_level = cee_source_fregment_attribute_get(grandfather, "access_level");
+        
+        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition))
+            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+                                                                        kCEESourceSymbolTypeClassDefinition);
+        else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition))
+            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+                                                                        kCEESourceSymbolTypeStructDefinition);
+        
+        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition))
+            is_class_member = TRUE;
+    }
+    
+    if (!access_level) {
+        if (grandfather) {
+            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition))
+                access_level = "private";
+            else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition))
+                access_level = "public";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+    
+    if (prefix && prefix_tail)
+        return_type_str = c_type_descriptor_from_token_slice(fregment,
+                                                             prefix,
+                                                             prefix_tail);
+    /**
+     * Constructor and Destructor doesn't has return type declaraton,
+     * use its parent symbol type as return type
+     */
+    if (!return_type_str && is_class_member && parent_symbols) {
+        parent_symbol = cee_list_nth_data(parent_symbols, 0);
+        return_type_str = cee_strdup(parent_symbol->name);
+    }
+    
+    p = TOKEN_FIRST(tokens);
+    
+    /** header */
+    if (prefix_tail) {
+        while (p) {
+            TOKEN_APPEND(header_tokens, p->data);
+            if (p->data == prefix_tail->data)
+                break;
+            p = TOKEN_NEXT(p);
+        }
+        p = TOKEN_NEXT(p);
+    }
+    
+    /** name_chain */
+    while (p) {
+        if (p->data == identifier->data)
+            break;
+        p = TOKEN_NEXT(p);
+    }
+    while (p) {
+        if (p->data == parameter_list->data)
+            break;
+        TOKEN_APPEND(name_chain_tokens, p->data);
+        p = TOKEN_NEXT(p);
+    }
+    
+    /** parameters */
+    if (p)
+        p = TOKEN_NEXT(p);
+    while (p) {
+        if (p->data == parameter_list_end->data)
+            break;
+        TOKEN_APPEND(parameters_tokens, p->data);
+        p = TOKEN_NEXT(p);
+    }
+    
+    /** trailing */
+    if (p)
+        p = TOKEN_NEXT(p);
+    BRACKET_SIGN_DECLARATION();
+    while (p) {
+        token = p->data;
+        SIGN_BRACKET(token->identifier);
+        if (BRACKETS_IS_CLEAN()) {
+            if (token->identifier == ',' ||
+                token->identifier == ';' ||
+                token->identifier == '{')
+                break;
+        }
+        TOKEN_APPEND(trialing_tokens, p->data);
+        p = TOKEN_NEXT(p);
+    }
+        
+    cee_strconcat0(&descriptor, "{", NULL);
+    
+    cee_strconcat0(&descriptor, "\"type\":", "\"function\"", NULL);
+        
+    if (access_level)
+        cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
+    
+    if (return_type_str)
+        cee_strconcat0(&descriptor, ", \"return_type\":", "\"", return_type_str, "\"", NULL);
+    
+    /** create header descriptor */
+    token_prev = NULL;
+    p = TOKEN_FIRST(header_tokens);
+    while (p) {
+        token = p->data;
+        
+        if (!token_id_is_c_function_proto_header_ignored(token->identifier) &&
+            !cee_token_id_is_newline(token->identifier) &&
+            !cee_token_id_is_whitespace(token->identifier)) {
+
+            if (should_proto_descriptor_append_whitespace(token, token_prev))
+                cee_strconcat0(&formater_str, " ", NULL);
+            cee_string_concat_with_token(&formater_str, subject, token);
+            token_prev = token;
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    if (formater_str) {
+        cee_strconcat0(&descriptor, ", \"header\":", "\"", formater_str, "\"", NULL);
+        cee_free(formater_str);
+        formater_str = NULL;
+    }
+    
+    /** create identifier descriptor */
+    token_prev = NULL;
+    p = TOKEN_FIRST(name_chain_tokens);
+    while (p) {
+        token = p->data;
+        
+        if (!cee_token_id_is_newline(token->identifier) &&
+            !cee_token_id_is_whitespace(token->identifier)) {
+            
+            if (should_proto_descriptor_append_whitespace(token, token_prev))
+                cee_strconcat0(&formater_str, " ", NULL);
+            cee_string_concat_with_token(&formater_str, subject, token);
+            token_prev = token;
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    if (formater_str) {
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", formater_str, "\"", NULL);
+        cee_free(formater_str);
+        formater_str = NULL;
+    }
+    
+    /** create parameters descriptor */
+    token_prev = NULL;
+    cee_strconcat0(&descriptor, ", \"parameters\":[", NULL);
+    p = TOKEN_FIRST(parameters_tokens);
+    CLEAR_BRACKETS();
+    while (p) {
+        token = p->data;
+        
+        SIGN_BRACKET(token->identifier);
+        
+        if (!cee_token_id_is_newline(token->identifier) &&
+            !cee_token_id_is_whitespace(token->identifier)) {
+            
+            if (should_proto_descriptor_append_whitespace(token, token_prev))
+                cee_strconcat0(&formater_str, " ", NULL);
+            cee_string_concat_with_token(&formater_str, subject, token);
+            
+            token_prev = token;
+        }
+        
+        if (BRACKETS_IS_CLEAN()) {
+            if (token->identifier == ',' || !TOKEN_NEXT(p)) {
+                if (formater_str) {
+                    l = strlen(formater_str);
+                    if (formater_str[l-1]== ',')
+                        formater_str[l-1] = '\0';
+                    
+                    cee_strconcat0(&descriptor, "\"", formater_str, "\"", ",", NULL);
+                    cee_free(formater_str);
+                    formater_str = NULL;
+                    token_prev = NULL;
+                }
+            }
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    /** remove the last comma in jason array */
+    l = strlen(descriptor);
+    if (descriptor[l-1]== ',')
+        descriptor[l-1] = '\0';
+    cee_strconcat0(&descriptor, "]", NULL);
+    
+    /** create trialing descriptor */
+    token_prev = NULL;
+    p = TOKEN_FIRST(trialing_tokens);
+    while (p) {
+        token = p->data;
+        
+        if (!cee_token_id_is_newline(token->identifier) &&
+            !cee_token_id_is_whitespace(token->identifier)) {
+            
+            if (should_proto_descriptor_append_whitespace(token, token_prev))
+                cee_strconcat0(&formater_str, " ", NULL);
+            cee_string_concat_with_token(&formater_str, subject, token);
+            
+            token_prev = token;
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    if (formater_str) {
+        cee_strconcat0(&descriptor, ", \"trialing\":", "\"", formater_str, "\"", NULL);
+        cee_free(formater_str);
+        formater_str = NULL;
+    }
+    cee_strconcat0(&descriptor, "}", NULL);
+    
+exit:
+    if (return_type_str)
+        cee_free(return_type_str);
+    
+    if (parent_symbols)
+        cee_list_free(parent_symbols);
+    
+    if (trialing_tokens)
+        cee_list_free(trialing_tokens);
+    
+    if (parameters_tokens)
+        cee_list_free(parameters_tokens);
+    
+    if (name_chain_tokens)
+        cee_list_free(name_chain_tokens);
+    
+    if (header_tokens)
+        cee_list_free(header_tokens);
+    
+    if (tokens)
+        cee_list_free(tokens);
+        
+    return descriptor;
+}
+
+static CEESourceSymbol* c_identifier_declaration_create(CEESourceFregment* fregment,
+                                                        CEEList* prefix,
+                                                        CEEList* prefix_tail,
+                                                        CEEList* identifier)
+{
+    CEESourceSymbol* declaration = NULL;
+    declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
+                                                            fregment->subject_ref,
+                                                            identifier,
+                                                            identifier,
+                                                            kCEESourceSymbolTypeVariableDeclaration,
+                                                            "c",
+                                                            kCEETokenStringOptionCompact);
+    cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
+    if (prefix && prefix_tail)
+        declaration->proto_descriptor = c_declaration_proto_descriptor_create(fregment,
+                                                                              prefix,
+                                                                              prefix_tail,
+                                                                              identifier);
     return declaration;
 }
 
 static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFregment* fregment,
-                                                         const cee_char* proto,
+                                                         CEEList* prefix,
+                                                         CEEList* prefix_tail,
                                                          CEEList* identifier)
 {
     CEESourceSymbol* declaration = NULL;
@@ -4516,106 +4579,66 @@ static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFregment* freg
                                                             kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
     
-    if (proto)
-        declaration->proto = cee_strdup(proto);
-    
+    if (prefix && prefix_tail)
+        declaration->proto_descriptor = c_declaration_proto_descriptor_create(fregment,
+                                                                              prefix,
+                                                                              prefix_tail,
+                                                                              identifier);
     return declaration;
 }
 
-static CEESourceSymbol* c_identifier_declaration_create(CEESourceFregment* fregment,
-                                                        const cee_char* proto,
-                                                        CEEList* identifier)
+static cee_char* c_declaration_proto_descriptor_create(CEESourceFregment* fregment,
+                                                       CEEList* prefix,
+                                                       CEEList* prefix_tail,
+                                                       CEEList* identifier)
 {
-    CEESourceSymbol* declaration = NULL;
-    declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                            fregment->subject_ref,
-                                                            identifier,
-                                                            identifier,
-                                                            kCEESourceSymbolTypeVariableDeclaration,
-                                                            "c",
-                                                            kCEETokenStringOptionCompact);
-    cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
+    CEESourceFregment* grandfather = NULL;
+    const cee_char* access_level = NULL;
+    cee_char* proto = NULL;
+    cee_char* descriptor = NULL;
+    const cee_char* subject = fregment->subject_ref;
+    cee_char* identifier_str = NULL;
     
-    if (proto)
-        declaration->proto = cee_strdup(proto);
+    grandfather = cee_source_fregment_grandfather_get(fregment);
+    if (grandfather)
+        access_level = cee_source_fregment_attribute_get(grandfather, "access_level");
     
-    return declaration;
-}
-
-static CEESourceSymbol* c_operator_overload_declaration_create(CEESourceFregment* fregment,
-                                                               const cee_char* proto,
-                                                               CEEList* overload,
-                                                               CEEList* parameter_list)
-{
-    CEESourceSymbol* declaration = NULL;
-    CEESourceFregment* child = NULL;
-    declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                            fregment->subject_ref,
-                                                            overload,
-                                                            overload,
-                                                            kCEESourceSymbolTypeFunctionDeclaration,
-                                                            "c",
-                                                            kCEETokenStringOptionCompact);
-    cee_token_slice_state_mark(overload, overload, kCEETokenStateSymbolOccupied);
-    
-    if (parameter_list) {
-        child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
-        if (child) {
-            child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
-            c_function_parameters_parse(child);
+    if (!access_level) {
+        if (grandfather) {
+            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDeclaration)) {
+                access_level = "private";
+            }
         }
+        if (!access_level)
+            access_level = "public";
     }
     
-    if (proto)
-        declaration->proto = cee_strdup(proto);
+    cee_strconcat0(&descriptor, "{", NULL);
     
-    return declaration;
-}
-
-static CEESourceSymbol* c_surrounded_declaration_create(CEESourceFregment* fregment,
-                                                        const cee_char* proto,
-                                                        CEEList* surrounded)
-{
-    CEESourceSymbol* declaration = NULL;
-    CEESourceFregment* child = NULL;
-    CEEList* tokens = NULL;
-    CEEList* p = NULL;
+    cee_strconcat0(&descriptor, "\"type\":", "\"declaration\"", NULL);
     
-    child = cee_source_fregment_child_index_by_leaf(fregment, surrounded->data);
-    if (!child)
-        return NULL;
+    if (access_level)
+        cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
     
-    child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
-    if (!child)
-        return NULL;
-    
-    tokens = cee_source_fregment_tokens_expand(child);
-    if (!tokens)
-        return NULL;
-    
-    p = TOKEN_FIRST(tokens);
-    while (p) {
-        if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER))
-            break;
-        p = TOKEN_NEXT(p);
+    if (prefix && prefix_tail)
+        proto = c_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+    if (proto) {
+        cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto, "\"", NULL);
+        cee_free(proto);
     }
     
-    if (p) {
-        declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                fregment->subject_ref,
-                                                                p, 
-                                                                p,
-                                                                kCEESourceSymbolTypeVariableDeclaration,
-                                                                "c",
-                                                                kCEETokenStringOptionCompact);
-        cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
+    if (identifier)
+        identifier_str = cee_string_from_token(subject, identifier->data);
+    if (identifier_str) {
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", identifier_str, "\"", NULL);
+        cee_free(identifier_str);
+    }
+    
+    cee_strconcat0(&descriptor, "}", NULL);
         
-        if (proto)
-            declaration->proto = cee_strdup(proto);
-    }
-    cee_list_free(tokens);
-    
-    return declaration;
+    return descriptor;
 }
 
 /**
@@ -4756,7 +4779,7 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
         }
         
         if (definition) {
-            definition->proto = c_namespace_proto_descriptor_create(fregment, definition);
+            definition->proto_descriptor = c_namespace_proto_descriptor_create(fregment, definition);
             fregment->symbols = cee_list_prepend(fregment->symbols, definition);
             cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeNamespaceDefinition);
             ret = TRUE;
@@ -4766,27 +4789,26 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
     
 #ifdef DEBUG_NAMESPACE
-    cee_source_symbols_print(fregment->symbols);
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
 }
 
 static cee_char* c_namespace_proto_descriptor_create(CEESourceFregment* fregment,
-                                                     CEESourceSymbol* definition)
+                                                     CEESourceSymbol* namespace)
 {
-    if (!fregment || !definition)
+    if (!fregment || !namespace)
         return NULL;
     
     cee_char* descriptor = NULL;
     cee_strconcat0(&descriptor, "{", NULL);
     
-    cee_strconcat0(&descriptor, "\"type\":", "\"namespace_definition\"", ",", NULL);
+    cee_strconcat0(&descriptor, "\"type\":", "\"namespace\"", NULL);
     
-    if (definition->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", definition->name, "\"", ",", NULL);
-    
-    cee_strconcat0(&descriptor, "\"access_level\":", "\"public\"", NULL);
+    if (namespace->name)
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", namespace->name, "\"", NULL);
     
     cee_strconcat0(&descriptor, "}", NULL);
     
@@ -4868,7 +4890,8 @@ static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
     }
     
 #ifdef DEBUG_DECLARATION
-    cee_source_symbol_print(extern_block);
+    if (extern_block)
+        cee_source_symbol_print(extern_block);
 #endif
     
     return ret;
@@ -4939,68 +4962,142 @@ static cee_boolean block_reduce(CParser* parser)
     return TRUE;
 }
 
-static void label_parse(CParser* parser)
+static cee_boolean colon_parse(CParser* parser)
 {
-    CEESourceFregment* fregment = NULL;
-    const cee_char* subject = NULL;
+    CEESourceFregment* fregment = parser->statement_current;
+    if (!fregment || !fregment->tokens_ref)
+        return FALSE;
+    
+    if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeFunctionDefinition) ||
+        cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeStatementBlock)) {
+        return label_parse(fregment);
+    }
+    else if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeClassDefinition) ||
+             cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeStructDefinition) ||
+             cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeUnionDefinition) ||
+             cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition) ) {
+        return access_level_parse(fregment);
+    }
+    return FALSE;
+}
+
+static cee_boolean label_parse(CEESourceFregment* fregment)
+{
+    const cee_char* subject = fregment->subject_ref;
+    cee_boolean ret = FALSE;
     CEEList* p = NULL;
     CEEList* q = NULL;
-    CEESourceSymbol* declaration = NULL;
-        
-    fregment = parser->statement_current;
-    if (!fregment || !fregment->tokens_ref)
-        return;
+    CEESourceSymbol* label = NULL;
     
-    if (!cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeFunctionDefinition) &&
-        !cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeStatementBlock))
-        return;
-    
-    subject = parser->subject_ref;
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         if (cee_token_is_identifier(p, kCEETokenID_NEW_LINE) ||
             cee_token_is_identifier(p, kCEETokenID_WHITE_SPACE)) {
-            p = TOKEN_NEXT(p);
-            continue;
+            goto next_token;
         }
         else {
             if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER)) {
                 q = cee_token_not_whitespace_newline_after(p);
                 if (q && cee_token_is_identifier(q, ':')) {
-                    declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                            subject, 
-                                                                            p, 
-                                                                            p,
-                                                                            kCEESourceSymbolTypeLabel,
-                                                                            "c",
-                                                                            kCEETokenStringOptionCompact);
-                    cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
-                    
-                    cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeLabelDeclaration);
-                    fregment->symbols = cee_list_prepend(fregment->symbols, declaration);
+                    label = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
+                                                                      subject,
+                                                                      p,
+                                                                      p,
+                                                                      kCEESourceSymbolTypeLabel,
+                                                                      "c",
+                                                                      kCEETokenStringOptionCompact);
+                    if (label) {
+                        cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
+                        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeLabelDeclaration);
+                        fregment->symbols = cee_list_prepend(fregment->symbols, label);
+                        ret = TRUE;
+                        break;
+                    }
                 }
+            }
+            else {
                 break;
             }
-            else
-                break;
         }
+next_token:
+        p = TOKEN_NEXT(p);
     }
     
 #ifdef DEBUG_LABEL
-    cee_source_symbol_print(declaration);
+    if (label)
+        cee_source_symbol_print(label);
 #endif
     
+    return ret;
 }
 
-static cee_boolean label_reduce(CParser* parser)
+static cee_boolean access_level_parse(CEESourceFregment* fregment)
 {
-    if (!parser->statement_current)
-        return FALSE;
+    cee_boolean ret = FALSE;
+    CEEList* p = NULL;
+    CEEList* q = NULL;
+    CEEToken* token = NULL;
     
-    if (cee_source_fregment_type_is(parser->statement_current, kCEESourceFregmentTypeLabelDeclaration))
-        statement_attach(parser, kCEESourceFregmentTypeStatement);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    while (p) {
+        token = p->data;
+        
+        if (cee_token_is_identifier(p, kCEETokenID_NEW_LINE) ||
+            cee_token_is_identifier(p, kCEETokenID_WHITE_SPACE))
+            goto next_token;
+        
+        if (cee_token_is_identifier(p, ':')) {
+            q = cee_token_not_whitespace_newline_before(p);
+            if (q) {
+                token = q->data;
+                if (token_id_is_access_specifier(token->identifier)) {
+                    access_level_transform(fregment, token);
+                    ret = TRUE;
+                }
+            }
+            break;
+        }
+        
+next_token:
+        p = TOKEN_NEXT(p);
+    }
     
-    return TRUE;
+    return ret;
+}
+
+static void parser_access_level_transform(CParser* parser,
+                                          CEEToken* token)
+{
+    if (!parser->statement_current || !token)
+        return;
+    access_level_transform(parser->statement_current, token);
+}
+
+static void access_level_transform(CEESourceFregment* fregment,
+                                   CEEToken* token)
+{
+    if (!fregment || !token)
+        return;
+    
+    CEESourceFregment* grandfather = cee_source_fregment_grandfather_get(fregment);
+    if (!grandfather)
+        return;
+    
+    if (token->identifier == kCEETokenID_PUBLIC ||
+        token->identifier == kCEETokenID_AT_PUBLIC)
+        cee_source_fregment_attribute_set(grandfather,
+                                          "access_level",
+                                          "public");
+    else if (token->identifier == kCEETokenID_PRIVATE ||
+             token->identifier == kCEETokenID_AT_PRIVATE)
+        cee_source_fregment_attribute_set(grandfather,
+                                          "access_level",
+                                          "private");
+    else if (token->identifier == kCEETokenID_PROTECTED ||
+             token->identifier == kCEETokenID_AT_PROTECTED)
+        cee_source_fregment_attribute_set(grandfather,
+                                          "access_level",
+                                          "protected");
 }
 
 /**
@@ -5237,9 +5334,9 @@ static CEESourceSymbol* objective_c_interface_extract(CEESourceFregment* fregmen
         cee_token_slice_state_mark(name, name, kCEETokenStateSymbolOccupied);
         if (derives)
             interface->derives = c_name_list_create(derives, subject);
-        interface->proto = objective_c_interface_proto_descriptor_create(fregment,
-                                                                         interface,
-                                                                         interface->derives);
+        interface->proto_descriptor = objective_c_interface_proto_descriptor_create(fregment,
+                                                                                    interface,
+                                                                                    interface->derives);
     }
     
     
@@ -5248,7 +5345,8 @@ exit:
         cee_list_free(derives);
     
 #ifdef DEBUG_INTERFACE
-    cee_source_symbol_print(interface);
+    if (interface)
+        cee_source_symbol_print(interface);
 #endif
     
     return interface;
@@ -5288,13 +5386,13 @@ static cee_char* objective_c_interface_proto_descriptor_create(CEESourceFregment
             
     cee_strconcat0(&descriptor, "{", NULL);
     
-    cee_strconcat0(&descriptor, "\"type\":", "\"interface_declaration\"", ",", NULL);
+    cee_strconcat0(&descriptor, "\"type\":", "\"interface\"", NULL);
     
     if (interface->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", interface->name, "\"", ",", NULL);
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", interface->name, "\"", NULL);
     
     if (derives_str)
-        cee_strconcat0(&descriptor, "\"derivers\":", "\"", derives_str, "\"", ",", NULL);
+        cee_strconcat0(&descriptor, ", \"derivers\":", "\"", derives_str, "\"", NULL);
     
     cee_strconcat0(&descriptor, "}", NULL);
     
@@ -5335,13 +5433,14 @@ static CEESourceSymbol* objective_c_implementation_extract(CEESourceFregment* fr
                                                                kCEETokenStringOptionCompact);
     if (implementation) {
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
-        implementation->proto = objective_c_implementation_proto_descriptor_create(fregment,
-                                                                                   implementation);
+        implementation->proto_descriptor = objective_c_implementation_proto_descriptor_create(fregment,
+                                                                                              implementation);
     }
     
 exit:
 #ifdef DEBUG_IMPLEMENTATION
-    cee_source_symbol_print(implementation);
+    if (implementation)
+        cee_source_symbol_print(implementation);
 #endif
     
     return implementation;
@@ -5357,11 +5456,11 @@ static cee_char* objective_c_implementation_proto_descriptor_create(CEESourceFre
             
     cee_strconcat0(&descriptor, "{", NULL);
     
-    cee_strconcat0(&descriptor, "\"type\":", "\"implementation_definition\"", ",", NULL);
+    cee_strconcat0(&descriptor, "\"type\":", "\"implementation\"", NULL);
     
-    if (implementation->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", implementation->name, "\"", ",", NULL);
-    
+    if (implementation->name) {
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", implementation->name, "\"", NULL);
+    }
     cee_strconcat0(&descriptor, "}", NULL);
     
     return descriptor;
@@ -5401,13 +5500,14 @@ static CEESourceSymbol* objective_c_protocol_extract(CEESourceFregment* fregment
                                                          kCEETokenStringOptionCompact);
     if (protocol) {
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
-        protocol->proto = objective_c_protocol_proto_descriptor_create(fregment,
-                                                                       protocol);
+        protocol->proto_descriptor = objective_c_protocol_proto_descriptor_create(fregment,
+                                                                                  protocol);
     }
     
 exit:
 #ifdef DEBUG_PROTOCOL
-    cee_source_symbol_print(protocol);
+    if (protocol)
+        cee_source_symbol_print(protocol);
 #endif
     
     return protocol;
@@ -5423,10 +5523,10 @@ static cee_char* objective_c_protocol_proto_descriptor_create(CEESourceFregment*
             
     cee_strconcat0(&descriptor, "{", NULL);
     
-    cee_strconcat0(&descriptor, "\"type\":", "\"protocol_declaration\"", ",", NULL);
+    cee_strconcat0(&descriptor, "\"type\":", "\"protocol\"", NULL);
     
     if (protocol->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", protocol->name, "\"", ",", NULL);
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", protocol->name, "\"", NULL);
     
     cee_strconcat0(&descriptor, "}", NULL);
     
@@ -5472,7 +5572,6 @@ CEESourceParserRef cee_c_parser_create(const cee_char* identifier)
     c_function_definition_translate_table_init();
     c_function_parameters_declaration_translate_table_init();
     c_inheritance_definition_translate_table_init();
-    c_template_parameters_declaration_translate_table_init();
     c_template_declaration_translate_table_init();
     c_declaration_translate_table_init();
     c_namespace_definition_translate_table_init();
@@ -5534,63 +5633,58 @@ static void symbol_parse_init(CParser* parser,
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
     
-    parser->prep_directive_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
-                                                             parser->filepath_ref,
-                                                             parser->subject_ref,
-                                                             "c");
-    parser->prep_directive_current = cee_source_fregment_sub_attach(parser->prep_directive_root, 
-                                                                    kCEESourceFregmentTypeSourceList, 
-                                                                    parser->filepath_ref,
-                                                                    parser->subject_ref,
-                                                                    "c");
-    parser->prep_directive_current = cee_source_fregment_sub_attach(parser->prep_directive_current, 
-                                                                    kCEESourceFregmentTypePrepDirective, 
-                                                                    parser->filepath_ref,
-                                                                    parser->subject_ref,
-                                                                    "c");
-    
-    parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
-                                                        parser->filepath_ref,
-                                                        parser->subject_ref,
-                                                        "c");
-    parser->statement_current = cee_source_fregment_sub_attach(parser->statement_root, 
-                                                               kCEESourceFregmentTypeSourceList, 
-                                                               parser->filepath_ref,
-                                                               parser->subject_ref,
-                                                               "c");
-    parser->statement_current = cee_source_fregment_sub_attach(parser->statement_current, 
-                                                               kCEESourceFregmentTypeStatement, 
-                                                               parser->filepath_ref,
-                                                               parser->subject_ref,
-                                                               "c");
-    
-    parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
-                                                      parser->filepath_ref,
-                                                      parser->subject_ref,
-                                                      "c");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
-                                                             kCEESourceFregmentTypeSourceList, 
-                                                             parser->filepath_ref,
-                                                             parser->subject_ref,
-                                                             "c");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
-                                                             kCEESourceFregmentTypeComment, 
-                                                             parser->filepath_ref,
-                                                             parser->subject_ref,
-                                                             "c");
+    parser->prep_directive_root =
+        cee_source_fregment_create(kCEESourceFregmentTypeRoot,
+                                   parser->filepath_ref,
+                                   parser->subject_ref,
+                                   "c");
+    parser->prep_directive_current =
+        cee_source_fregment_sub_attach(parser->prep_directive_root,
+                                       kCEESourceFregmentTypeSourceList,
+                                       parser->filepath_ref,
+                                       parser->subject_ref,
+                                       "c");
+    parser->prep_directive_current =
+        cee_source_fregment_sub_attach(parser->prep_directive_current,
+                                       kCEESourceFregmentTypePrepDirective,
+                                       parser->filepath_ref,
+                                       parser->subject_ref,
+                                       "c");
+    parser->statement_root =
+        cee_source_fregment_create(kCEESourceFregmentTypeRoot,
+                                   parser->filepath_ref,
+                                   parser->subject_ref,
+                                   "c");
+    parser->statement_current =
+        cee_source_fregment_sub_attach(parser->statement_root,
+                                       kCEESourceFregmentTypeSourceList,
+                                       parser->filepath_ref,
+                                       parser->subject_ref,
+                                       "c");
+    parser->statement_current =
+        cee_source_fregment_sub_attach(parser->statement_current,
+                                       kCEESourceFregmentTypeStatement,
+                                       parser->filepath_ref,
+                                       parser->subject_ref,
+                                       "c");
+    parser->comment_root =
+        cee_source_fregment_create(kCEESourceFregmentTypeRoot,
+                                   parser->filepath_ref,
+                                   parser->subject_ref,
+                                   "c");
+    parser->comment_current =
+        cee_source_fregment_sub_attach(parser->comment_root,
+                                       kCEESourceFregmentTypeSourceList,
+                                       parser->filepath_ref,
+                                       parser->subject_ref,
+                                       "c");
+    parser->comment_current =
+        cee_source_fregment_sub_attach(parser->comment_current,
+                                       kCEESourceFregmentTypeComment,
+                                       parser->filepath_ref,
+                                       parser->subject_ref,
+                                       "c");
     parser->state = kCParserStateStatementParsing;
-}
-
-static void symbol_parse_clear(CParser* parser)
-{
-    parser->subject_ref = NULL;
-    parser->filepath_ref = NULL;
-    parser->statement_root = NULL;
-    parser->statement_current = NULL;
-    parser->prep_directive_root = NULL;
-    parser->prep_directive_current = NULL;
-    parser->comment_root = NULL;
-    parser->comment_current = NULL;
 }
 
 static cee_boolean current_statement_type_is(CParser* parser,
@@ -5634,7 +5728,6 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
     CEEToken* token = NULL;
     CEESourceTokenMap* map = NULL;
     CEEList* tokens = NULL;
-    CEESourceFregment* grandfather = NULL;
     
     if (!subject)
         return FALSE;
@@ -5761,34 +5854,22 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                 }
                 else if (token->identifier == ':') {
                     statement_token_push(parser, token);
-                    label_parse(parser);
-                    label_reduce(parser);
+                    if (colon_parse(parser))
+                        statement_reduce(parser);
                 }
                 else if (token->identifier == ';') {
                     statement_token_push(parser, token);
                     statement_parse(parser);
                     statement_reduce(parser);
                 }
+                else if (token->identifier == kCEETokenID_AT_PUBLIC ||
+                         token->identifier == kCEETokenID_AT_PRIVATE ||
+                         token->identifier == kCEETokenID_AT_PROTECTED) {
+                    statement_token_push(parser, token);
+                    parser_access_level_transform(parser, token);
+                    statement_reduce(parser);
+                }
                 else {
-        
-                    grandfather = cee_source_fregment_grandfather_get(parser->statement_current);
-                    /** access_level setting */
-                    if (token->identifier == kCEETokenID_PUBLIC ||
-                        token->identifier == kCEETokenID_AT_PUBLIC)
-                        cee_source_fregment_attribute_set(grandfather,
-                                                          "access_level",
-                                                          "public");
-                    else if (token->identifier == kCEETokenID_PRIVATE ||
-                             token->identifier == kCEETokenID_AT_PRIVATE)
-                        cee_source_fregment_attribute_set(grandfather,
-                                                          "access_level",
-                                                          "private");
-                    else if (token->identifier == kCEETokenID_PROTECTED ||
-                             token->identifier == kCEETokenID_AT_PROTECTED)
-                        cee_source_fregment_attribute_set(grandfather,
-                                                          "access_level",
-                                                          "protected");
-        
                     statement_token_push(parser, token);
                 }
             }
@@ -5814,6 +5895,18 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
     cee_lexer_c_buffer_free();
         
     return TRUE;
+}
+
+static void symbol_parse_clear(CParser* parser)
+{
+    parser->subject_ref = NULL;
+    parser->filepath_ref = NULL;
+    parser->statement_root = NULL;
+    parser->statement_current = NULL;
+    parser->prep_directive_root = NULL;
+    parser->prep_directive_current = NULL;
+    parser->comment_root = NULL;
+    parser->comment_current = NULL;
 }
 
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,

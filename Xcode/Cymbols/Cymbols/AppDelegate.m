@@ -27,7 +27,7 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     self = [super init];
     if (!self)
         return nil;
-        
+    
     cee_parsers_create();
     
     [self setupSupportDirectory];
@@ -156,6 +156,7 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 - (void)application:(NSApplication *)application openURLs:(NSArray<NSURL *> *)urls {
     CEEProject* project = nil;
     CEESession* session = nil;
+    
     if (!_projectController.currentDocument) {
         project = [[CEEProject alloc] init];
         [_projectController addDocument:project];

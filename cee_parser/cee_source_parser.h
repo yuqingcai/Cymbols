@@ -34,7 +34,8 @@ typedef enum _CEESourceFregmentType {
     kCEESourceFregmentTypeUnionDefinition               ,
     kCEESourceFregmentTypeEnumDefinition                ,
     kCEESourceFregmentTypeDeclaration                   ,
-    kCEESourceFregmentTypeEnumurators                   ,
+    kCEESourceFregmentTypeEnumerators                   ,
+    kCEESourceFregmentTypeEnumeratorBlock               ,
     kCEESourceFregmentTypeInterfaceDefinition           ,
     kCEESourceFregmentTypeInterfaceDeclaration          ,
     kCEESourceFregmentTypeImplementationDefinition      ,
@@ -177,6 +178,8 @@ void cee_source_fregment_free(cee_pointer data);
 void cee_source_fregment_attribute_set(CEESourceFregment* fregment,
                                        const cee_char* name,
                                        const cee_char* value);
+const cee_char* cee_source_fregment_attribute_get(CEESourceFregment* fregment,
+                                                  const cee_char* name);
 void cee_source_fregment_free_full(cee_pointer data);
 CEESourceFregment* cee_source_fregment_attach(CEESourceFregment* sibling,
                                               CEESourceFregmentType type,
@@ -217,6 +220,8 @@ void cee_source_fregment_tokens_remove_from(CEESourceFregment* fregment,
 CEETree* cee_source_fregment_symbol_tree_create(CEESourceFregment* fregment);
 void cee_source_fregment_symbol_tree_dump_to_list(CEETree* tree,
                                                   CEEList** list);
+CEEList* cee_source_fregment_symbol_list_type_filter(CEEList* list,
+                                                     CEESourceSymbolType* types);
 CEEList* cee_source_fregment_symbol_tags_create(CEESourceFregment* fregment);
 CEESourceFregment* cee_source_fregment_parent_get(CEESourceFregment* fregment);
 CEESourceFregment* cee_source_fregment_grandfather_get(CEESourceFregment* fregment);

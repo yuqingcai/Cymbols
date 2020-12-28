@@ -183,6 +183,8 @@ typedef enum _CSharpUsingDirectiveTranslateState{
     kCSharpUsingDirectiveTranslateStateAssignment,
     kCSharpUsingDirectiveTranslateStateIdentifier,
     kCSharpUsingDirectiveTranslateStateIdentifierSeparator,
+    kCSharpUsingDirectiveTranslateStateAliasIdentifier,
+    kCSharpUsingDirectiveTranslateStateAliasIdentifierSeparator,
     kCSharpUsingDirectiveTranslateStateConfirm,
     kCSharpUsingDirectiveTranslateStateError,
     kCSharpUsingDirectiveTranslateStateMax,
@@ -240,7 +242,7 @@ static cee_int csharp_method_translate_table[kCSharpMethodTranslateStateMax][CEE
 static cee_int csharp_method_parameters_declaration_translate_table[kCSharpMethodParametersDeclarationTranslateStateMax][CEETokenID_MAX];
 static cee_int csharp_operator_translate_table[kCSharpOperatorTranslateStateMax][CEETokenID_MAX];
 static cee_int csharp_property_declaration_translate_table[kCSharpPropertyDeclarationTranslateStateMax][CEETokenID_MAX];
-static cee_int csharp_event_translate_table[kCSharpEventTranslateStateMax][CEETokenID_MAX];
+static cee_int csharp_event_declaration_table[kCSharpEventTranslateStateMax][CEETokenID_MAX];
 static cee_int csharp_declaration_translate_table[kCSharpDeclarationTranslateStateMax][CEETokenID_MAX];
 static cee_int csharp_indexer_declaration_translate_table[kCSharpIndexerDeclarationTranslateStateMax][CEETokenID_MAX];
 static cee_int csharp_namespace_definition_translate_table[kCSharpNamespaceDefinitionTranslateStateMax][CEETokenID_MAX];
@@ -357,18 +359,18 @@ static cee_boolean csharp_object_type_definition_trap(CEESourceFregment* fregmen
 static void csharp_enum_definition_translate_table_init(void);
 static cee_boolean csharp_enum_definition_trap(CEESourceFregment* fregment,
                                                CEEList** pp);
-static CEEList* enumerators_extract(CEEList* tokens,
-                                    const cee_char* filepath,
-                                    const cee_char* subject);
+static cee_boolean csharp_enumerators_parse(CEESourceFregment* fregment);
+static cee_char* csharp_enumerator_proto_descriptor_create(CEESourceFregment* fregment,
+                                                           CEESourceSymbol* enumerator,
+                                                           const cee_char* proto);
 static void base_free(cee_pointer data);
 static cee_char* csharp_object_type_proto_descriptor_create(CEESourceFregment* fregment,
                                                             CEESourceSymbol* definition,
-                                                            CEEList* identifier,
                                                             const cee_char* derives_str);
 static cee_char* csharp_declaration_proto_descriptor_create(CEESourceFregment* fregment,
-                                                            CEESourceSymbol* declaration,
-                                                            CEEList* identifier,
-                                                            const cee_char* type_str);
+                                                            CEEList* prefix,
+                                                            CEEList* prefix_tail,
+                                                            CEEList* identifier);
 static cee_char* csharp_namespace_proto_descriptor_create(CEESourceFregment* fregment,
                                                           CEESourceSymbol* definition);
 static cee_char* csharp_name_scope_list_string_create(CEEList* scopes,
@@ -380,17 +382,23 @@ static cee_boolean csharp_method_parse(CEESourceFregment* fregment);
 static void csharp_method_parameters_declaration_translate_table_init(void);
 static cee_boolean csharp_method_parameters_parse(CEESourceFregment* fregment);
 static CEESourceSymbol* csharp_method_parameter_create(CEESourceFregment* fregment,
-                                                       CEEList* head,
-                                                       CEEList* begin,
-                                                       CEEList* end);
+                                                       CEEList* prefix,
+                                                       CEEList* identifier);
+static cee_char* csharp_method_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+                                                                 CEEList* prefix,
+                                                                 CEEList* prefix_tail,
+                                                                 CEESourceSymbol* parameter);
 static cee_char* csharp_type_descriptor_from_token_slice(CEESourceFregment* fregment,
                                                          CEEList* p,
                                                          CEEList* q);
 static cee_char* csharp_method_proto_descriptor_create(CEESourceFregment* fregment,
-                                                       CEESourceSymbol* definition,
-                                                       CEEList* parameters,
-                                                       CEEList* method,
-                                                       const cee_char* type);
+                                                       CEEList* prefix,
+                                                       CEEList* prefix_tail,
+                                                       CEEList* identifier,
+                                                       CEEList* parameter_list,
+                                                       CEEList* parameter_list_end);
+static cee_boolean should_proto_descriptor_append_whitespace(CEEToken* token,
+                                                             CEEToken* token_prev);
 static const cee_char* csharp_access_level_search(CEESourceFregment* fregment,
                                                   CEEList* begin,
                                                   CEEList* end);
@@ -400,15 +408,29 @@ static cee_boolean csharp_operator_parse(CEESourceFregment* fregment);
 static cee_char* csharp_operator_name_create(CEESourceFregment* fregment);
 static void csharp_property_declaration_translate_table_init(void);
 static cee_boolean csharp_property_declaration_parse(CEESourceFregment* fregment);
-static void csharp_event_translate_table_init(void);
-static cee_boolean csharp_event_parse(CEESourceFregment* fregment);
+static cee_char* csharp_property_proto_descriptor_create(CEESourceFregment* fregment,
+                                                         CEEList* prefix,
+                                                         CEEList* prefix_tail,
+                                                         CEEList* identifier);
+static void csharp_event_declaration_table_init(void);
+static cee_boolean csharp_event_declaration_parse(CEESourceFregment* fregment);
+static cee_char* csharp_event_proto_descriptor_create(CEESourceFregment* fregment,
+                                                      CEEList* prefix,
+                                                      CEEList* prefix_tail,
+                                                      CEEList* identifier);
 static void csharp_indexer_declaration_translate_table_init(void);
 static cee_boolean csharp_indexer_declaration_parse(CEESourceFregment* fregment);
+static cee_char* csharp_indexer_proto_descriptor_create(CEESourceFregment* fregment,
+                                                        CEEList* prefix,
+                                                        CEEList* prefix_tail);
 static void csharp_namespace_definition_translate_table_init(void);
 static cee_boolean csharp_namespace_definition_trap(CEESourceFregment* fregment,
                                                     CEEList** pp);
 static void csharp_using_directive_translate_table_init(void);
 static cee_boolean csharp_using_directive_parse(CEESourceFregment* fregment);
+static cee_char* csharp_using_alias_proto_descriptor_create(CEESourceFregment* fregment,
+                                                            CEEList* identifier,
+                                                            CEEList* alias);
 static void csharp_delegate_declaration_translate_table_init(void);
 static cee_boolean csharp_delegate_declaration_parse(CEESourceFregment* fregment);
 
@@ -705,7 +727,7 @@ CEESourceParserRef cee_csharp_parser_create(const cee_char* identifier)
     csharp_method_parameters_declaration_translate_table_init();
     csharp_operator_translate_table_init();
     csharp_property_declaration_translate_table_init();
-    csharp_event_translate_table_init();
+    csharp_event_declaration_table_init();
     csharp_declaration_translate_table_init();
     csharp_indexer_declaration_translate_table_init();
     csharp_namespace_definition_translate_table_init();
@@ -1435,7 +1457,7 @@ static void block_header_parse(CSharpParser* parser)
     if (csharp_method_parse(current) ||
         csharp_operator_parse(current) ||
         csharp_property_declaration_parse(current) ||
-        csharp_event_parse(current) ||
+        csharp_event_declaration_parse(current) ||
         csharp_indexer_declaration_parse(current))
         return;
     
@@ -1512,22 +1534,7 @@ static cee_boolean block_pop(CSharpParser* parser)
 
 static void block_parse(CSharpParser* parser)
 {
-    CEESourceFregment* current = parser->statement_current;
-    const cee_char* subject = parser->subject_ref;
-    const cee_char* filepath = current->filepath_ref;
-    
-    if (!current || !current->tokens_ref)
-        return;
-    
-    /** enumerators parse */
-    if (cee_source_fregment_grandfather_type_is(current, kCEESourceFregmentTypeEnumDefinition)) {
-        CEEList* enumerators = NULL;
-        enumerators = enumerators_extract(current->tokens_ref, filepath, subject);
-        if (enumerators) {
-            current->symbols = cee_list_concat(current->symbols, enumerators);
-            cee_source_fregment_type_set(current, kCEESourceFregmentTypeEnumurators);
-        }
-    }
+    csharp_enumerators_parse(parser->statement_current);
 }
 
 static cee_boolean block_reduce(CSharpParser* parser)
@@ -1594,7 +1601,8 @@ static void label_parse(CSharpParser* parser)
     }
     
 #ifdef DEBUG_LABEL
-    cee_source_symbol_print(declaration);
+    if (declaration)
+        cee_source_symbol_print(declaration);
 #endif
     
 }
@@ -1623,7 +1631,7 @@ static void statement_parse(CSharpParser* parser)
         csharp_declaration_parse(current) ||
         csharp_operator_parse(current) ||
         csharp_property_declaration_parse(current) ||
-        csharp_event_parse(current) ||
+        csharp_event_declaration_parse(current) ||
         csharp_indexer_declaration_parse(current) ||
         csharp_using_directive_parse(current) ||
         csharp_delegate_declaration_parse(current))
@@ -1817,15 +1825,16 @@ static void csharp_declaration_translate_table_init(void)
 static cee_boolean csharp_declaration_parse(CEESourceFregment* fregment)
 {
     cee_boolean ret = FALSE;
-    CSharpDeclarationTranslateState current = kCSharpDeclarationTranslateStateInit;
-    CSharpDeclarationTranslateState prev = kCSharpDeclarationTranslateStateInit;
-    CEEToken* token = NULL;
     CEEList* p = NULL;
-    CEEList* identifier = NULL;
-    cee_char* type_str = NULL;
+    CEEToken* token = NULL;
     CEEList* declarations = NULL;
     CEESourceSymbol* declaration = NULL;
-    CEEList* first_identifier = NULL;
+    CEEList* identifier = NULL;
+    CEEList* prefix = NULL;
+    CEEList* prefix_tail = NULL;
+    cee_boolean prefix_parse = FALSE;
+    CSharpDeclarationTranslateState current = kCSharpDeclarationTranslateStateInit;
+    CSharpDeclarationTranslateState prev = kCSharpDeclarationTranslateStateInit;
         
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
@@ -1852,14 +1861,14 @@ static cee_boolean csharp_declaration_parse(CEESourceFregment* fregment)
                 identifier = p;
         }
         else if (current == kCSharpDeclarationTranslateStateConfirm) {
-            if (!type_str) {
+            if (!prefix_parse) {
+                prefix = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
                 if (identifier)
-                    type_str = csharp_type_descriptor_from_token_slice(fregment,
-                                                                       SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                                       TOKEN_PREV(identifier));
+                    prefix_tail = TOKEN_PREV(identifier);
+                prefix_parse = TRUE;
             }
             
-            if (identifier) {
+            if (identifier)
                 declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
                                                                         fregment->subject_ref,
                                                                         identifier,
@@ -1867,18 +1876,13 @@ static cee_boolean csharp_declaration_parse(CEESourceFregment* fregment)
                                                                         kCEESourceSymbolTypeVariableDeclaration,
                                                                         "csharp",
                                                                         kCEETokenStringOptionCompact);
-                if (!first_identifier)
-                    first_identifier = identifier;
-            }
-            
             if (declaration) {
-                cee_token_slice_state_mark(identifier,
-                                           identifier,
-                                           kCEETokenStateSymbolOccupied);
-                declaration->proto = csharp_declaration_proto_descriptor_create(fregment,
-                                                                                declaration,
-                                                                                first_identifier,
-                                                                                type_str);
+                cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
+                if (prefix && prefix_tail)
+                    declaration->proto_descriptor = csharp_declaration_proto_descriptor_create(fregment,
+                                                                                               prefix,
+                                                                                               prefix_tail,
+                                                                                               identifier);
                 declarations = cee_list_prepend(declarations, declaration);
             }
             
@@ -1904,13 +1908,11 @@ next_token:
     }
     
 #ifdef DEBUG_DECLARATION
-    cee_source_symbols_print(declarations);
+    if (declarations)
+        cee_source_symbols_print(declarations);
 #endif
     
 exit:
-    
-    if (type_str)
-        cee_free(type_str);
     
     return ret;
 }
@@ -2083,10 +2085,9 @@ next_token:
         
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
         definition->derives = bases_str;
-        definition->proto = csharp_object_type_proto_descriptor_create(fregment,
-                                                                       definition,
-                                                                       class_identifier,
-                                                                       bases_str);
+        definition->proto_descriptor = csharp_object_type_proto_descriptor_create(fregment,
+                                                                                  definition,
+                                                                                  definition->derives);
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
         cee_source_fregment_type_set_exclusive(fregment, fregment_type);
     }
@@ -2094,7 +2095,8 @@ next_token:
     *pp = NULL;
         
 #ifdef DEBUG_CLASS
-    cee_source_symbol_print(definition);
+    if (declaration)
+        cee_source_symbol_print(definition);
 #endif
     
 exit:
@@ -2136,16 +2138,13 @@ static cee_boolean csharp_enum_definition_trap(CEESourceFregment* fregment,
 {
     cee_boolean ret = FALSE;
     CEEList* p = *pp;
-    CSharpEnumDefinitionTranslateState current = kCSharpEnumDefinitionTranslateStateInit;
-    CSharpEnumDefinitionTranslateState prev = kCSharpEnumDefinitionTranslateStateInit;
     CEEToken* token = NULL;
-    
     CEEList* identifier = NULL;
-    
     CEEList* base = NULL;
     cee_char* bases_str = NULL;
-    
     CEESourceSymbol* definition = NULL;
+    CSharpEnumDefinitionTranslateState current = kCSharpEnumDefinitionTranslateStateInit;
+    CSharpEnumDefinitionTranslateState prev = kCSharpEnumDefinitionTranslateStateInit;
     
     while (p) {
         token = p->data;
@@ -2201,20 +2200,20 @@ next_token:
         cee_token_slice_state_mark(identifier,
                                    identifier,
                                    kCEETokenStateSymbolOccupied);
+        
         definition->derives = bases_str;
-        definition->proto = csharp_object_type_proto_descriptor_create(fregment,
-                                                                       definition,
-                                                                       identifier,
-                                                                       bases_str);
+        definition->proto_descriptor = csharp_object_type_proto_descriptor_create(fregment,
+                                                                                  definition,
+                                                                                  definition->derives);
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-        cee_source_fregment_type_set_exclusive(fregment,
-                                               kCEESourceFregmentTypeEnumDefinition);
+        cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeEnumDefinition);
     }
     
     *pp = NULL;
     
 #ifdef DEBUG_ENUM
-    cee_source_symbol_print(definition);
+    if (declaration)
+        cee_source_symbol_print(definition);
 #endif
     
 exit:
@@ -2222,56 +2221,48 @@ exit:
     return ret;
 }
 
-static CEEList* enumerators_extract(CEEList* tokens,
-                                    const cee_char* filepath,
-                                    const cee_char* subject)
+static cee_boolean csharp_enumerators_parse(CEESourceFregment* fregment)
 {
-    CEEList* p = TOKEN_FIRST(tokens);
-    CEEToken* token = NULL;
-    CEETokenID identifier = kCEETokenID_UNKNOW;
-    cee_boolean enumurating = TRUE;
-    CEEList* q = NULL;
-    CEESourceSymbol* enumerator = NULL;
-    CEEList* enumerators = NULL;
+    if (!cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition))
+        return FALSE;
+    
+    cee_boolean ret = FALSE;
     CEESourceFregment* grandfather = NULL;
     CEESourceSymbol* enum_symbol = NULL;
     CEEList* enum_symbols = NULL;
+    CEESourceSymbol* enumerator = NULL;
+    CEEList* enumerators = NULL;
+    CEEToken* token = NULL;
+    CEEList* p = NULL;
+    CEEList* q = NULL;
+    cee_boolean enumurating = TRUE;
     
-    if (p) {
-        token = p->data;
-        if (token) {
-            grandfather = cee_source_fregment_grandfather_get(token->fregment_ref);
-            if (grandfather) {
-                enum_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
-                                                                          kCEESourceSymbolTypeEnumDefinition);
-                if (enum_symbols)
-                    enum_symbol = cee_list_nth_data(enum_symbols, 0);
-            }
-        }
-    }
+    grandfather = cee_source_fregment_grandfather_get(fregment);
+    enum_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+                                                              kCEESourceSymbolTypeEnumDefinition);
+    if (enum_symbols)
+        enum_symbol = cee_list_nth_data(enum_symbols, 0);
     
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
         token = p->data;
-        
-        identifier = token->identifier;
-        
-        if (identifier == kCEETokenID_IDENTIFIER && enumurating)
+        if (token->identifier == kCEETokenID_IDENTIFIER && enumurating)
             q = p;
         
-        if (identifier == ',' || identifier == ';' || !TOKEN_NEXT(p)) {
+        if (token->identifier == ',' || token->identifier == ';' || !TOKEN_NEXT(p)) {
             if (q) {
-                enumerator = cee_source_symbol_create_from_token_slice(filepath,
-                                                                       subject,
+                enumerator = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
+                                                                       fregment->subject_ref,
                                                                        q,
                                                                        q,
                                                                        kCEESourceSymbolTypeEnumerator,
                                                                        "csharp",
                                                                        kCEETokenStringOptionCompact);
                 if (enumerator) {
-                    enumerator->proto = csharp_declaration_proto_descriptor_create(token->fregment_ref,
-                                                                                   enumerator,
-                                                                                   q,
-                                                                                   enum_symbol->name);
+                    enumerator->proto_descriptor =
+                        csharp_enumerator_proto_descriptor_create(token->fregment_ref,
+                                                                  enumerator,
+                                                                  enum_symbol->name);
                     cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
                     enumerators = cee_list_prepend(enumerators, enumerator);
                 }
@@ -2279,21 +2270,52 @@ static CEEList* enumerators_extract(CEEList* tokens,
             q = NULL;
             enumurating = TRUE;
         }
-        else if (token_id_is_assignment(identifier) && enumurating) {
+        else if (token_id_is_assignment(token->identifier) && enumurating) {
             enumurating = FALSE;
         }
         
         p = TOKEN_NEXT(p);
     }
     
-#ifdef DEBUG_ENUM
-    cee_source_symbols_print(enumerators);
-#endif
-    
     if (enum_symbols)
         cee_list_free(enum_symbols);
     
-    return enumerators;
+    if (enumerators) {
+        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeEnumerators);
+        fregment->symbols = cee_list_concat(fregment->symbols, enumerators);
+        ret = TRUE;
+    }
+    
+#ifdef DEBUG_ENUM
+    if (enumerators)
+        cee_source_symbols_print(enumerators);
+#endif
+    
+exit:
+    return ret;
+}
+
+static cee_char* csharp_enumerator_proto_descriptor_create(CEESourceFregment* fregment,
+                                                           CEESourceSymbol* enumerator,
+                                                           const cee_char* proto)
+{
+    if (!fregment || !enumerator)
+        return NULL;
+    
+    cee_char* descriptor = NULL;
+    cee_strconcat0(&descriptor, "{", NULL);
+        
+    cee_strconcat0(&descriptor, "\"type\":", "\"enumerator\"", NULL);
+    
+    if (proto)
+        cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto, "\"", NULL);
+    
+    if (enumerator->name)
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", enumerator->name, "\"", NULL);
+    
+    cee_strconcat0(&descriptor, "}", NULL);
+    
+    return descriptor;
 }
 
 static void base_free(cee_pointer data)
@@ -2306,25 +2328,22 @@ static void base_free(cee_pointer data)
 
 static cee_char* csharp_object_type_proto_descriptor_create(CEESourceFregment* fregment,
                                                             CEESourceSymbol* definition,
-                                                            CEEList* identifier,
                                                             const cee_char* derives_str)
 {
     if (!fregment || !definition)
         return NULL;
     
-    CEESourceFregment* grandfather_fregment = NULL;
+    CEESourceFregment* grandfather = NULL;
     const cee_char* access_level = "public";
     cee_char* descriptor = NULL;
     
-    if (identifier)
-        access_level = csharp_access_level_search(fregment,
-                                                  SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                  TOKEN_PREV(identifier));
+    access_level = csharp_access_level_search(fregment, SOURCE_FREGMENT_TOKENS_FIRST(fregment), NULL);
     if(!access_level) {
-        grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
-        if (grandfather_fregment) {
-            if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
-                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition))
+        grandfather = cee_source_fregment_grandfather_get(fregment);
+        if (grandfather) {
+            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
                 access_level = "private";
         }
         if (!access_level)
@@ -2334,22 +2353,22 @@ static cee_char* csharp_object_type_proto_descriptor_create(CEESourceFregment* f
     cee_strconcat0(&descriptor, "{", NULL);
     
     if (definition->type == kCEESourceSymbolTypeClassDefinition)
-        cee_strconcat0(&descriptor, "\"type\":", "\"class_definition\"", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"class\"", NULL);
     if (definition->type == kCEESourceSymbolTypeStructDefinition)
-        cee_strconcat0(&descriptor, "\"type\":", "\"struct_definition\"", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"struct\"", NULL);
     else if (definition->type == kCEESourceSymbolTypeInterfaceDefinition)
-        cee_strconcat0(&descriptor, "\"type\":", "\"interface_definition\"", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"interface\"", NULL);
     else if (definition->type == kCEESourceSymbolTypeEnumDefinition)
-        cee_strconcat0(&descriptor, "\"type\":", "\"enum_declaration\"", ",", NULL);
+        cee_strconcat0(&descriptor, "\"type\":", "\"enum\"", NULL);
     
     if (definition->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", definition->name, "\"", ",", NULL);
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", definition->name, "\"", NULL);
     
     if (access_level)
-        cee_strconcat0(&descriptor, "\"access_level\":", "\"", access_level, "\"", ",", NULL);
+        cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
     
     if (derives_str)
-        cee_strconcat0(&descriptor, "\"derivers\":", "\"", derives_str, "\"", ",", NULL);
+        cee_strconcat0(&descriptor, ", \"derivers\":", "\"", derives_str, "\"", NULL);
     
     cee_strconcat0(&descriptor, "}", NULL);
     
@@ -2357,26 +2376,27 @@ static cee_char* csharp_object_type_proto_descriptor_create(CEESourceFregment* f
 }
 
 static cee_char* csharp_declaration_proto_descriptor_create(CEESourceFregment* fregment,
-                                                            CEESourceSymbol* declaration,
-                                                            CEEList* identifier,
-                                                            const cee_char* type_str)
+                                                            CEEList* prefix,
+                                                            CEEList* prefix_tail,
+                                                            CEEList* identifier)
 {
-    if (!fregment || !declaration)
+    if (!fregment || !identifier)
         return NULL;
     
-    CEESourceFregment* grandfather_fregment = NULL;
+    CEESourceFregment* grandfather = NULL;
     const cee_char* access_level = "public";
+    cee_char* proto = NULL;
     cee_char* descriptor = NULL;
+    const cee_char* subject = fregment->subject_ref;
+    cee_char* identifier_str = NULL;
     
-    if (identifier)
-        access_level = csharp_access_level_search(fregment,
-                                                  SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                  TOKEN_PREV(identifier));
+    access_level = csharp_access_level_search(fregment, SOURCE_FREGMENT_TOKENS_FIRST(fregment), NULL);
     if (!access_level) {
-        grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
-        if (grandfather_fregment) {
-            if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
-                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition))
+        grandfather = cee_source_fregment_grandfather_get(fregment);
+        if (grandfather) {
+            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
                 access_level = "private";
         }
         if (!access_level)
@@ -2385,23 +2405,24 @@ static cee_char* csharp_declaration_proto_descriptor_create(CEESourceFregment* f
     
     cee_strconcat0(&descriptor, "{", NULL);
     
-    if (declaration->type == kCEESourceSymbolTypeLabel)
-        cee_strconcat0(&descriptor, "\"type\":", "\"label\"", ",", NULL);
-    else if (declaration->type == kCEESourceSymbolTypeEnumerator)
-        cee_strconcat0(&descriptor, "\"type\":", "\"enumerator\"", ",", NULL);
-    else if (declaration->type == kCEESourceSymbolTypePropertyDeclaration)
-        cee_strconcat0(&descriptor, "\"type\":", "\"property\"", ",", NULL);
-    else
-        cee_strconcat0(&descriptor, "\"type\":", "\"variable\"", ",", NULL);
-    
-    if (declaration->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", declaration->name, "\"", ",", NULL);
+    cee_strconcat0(&descriptor, "\"type\":", "\"declaration\"", NULL);
     
     if (access_level)
-        cee_strconcat0(&descriptor, "\"access_level\":", "\"", access_level, "\"", ",", NULL);
+        cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
     
-    if (type_str)
-        cee_strconcat0(&descriptor, "\"proto\":", "\"", type_str, "\"", ",", NULL);
+    if (prefix && prefix_tail)
+        proto = csharp_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+    if (proto) {
+        cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto, "\"", NULL);
+        cee_free(proto);
+    }
+    
+    if (identifier)
+        identifier_str = cee_string_from_token(subject, identifier->data);
+    if (identifier_str) {
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", identifier_str, "\"", NULL);
+        cee_free(identifier_str);
+    }
     
     cee_strconcat0(&descriptor, "}", NULL);
     
@@ -2417,13 +2438,11 @@ static cee_char* csharp_namespace_proto_descriptor_create(CEESourceFregment* fre
     cee_char* descriptor = NULL;
     cee_strconcat0(&descriptor, "{", NULL);
     
-    cee_strconcat0(&descriptor, "\"type\":", "\"namespace_definition\"", ",", NULL);
+    cee_strconcat0(&descriptor, "\"type\":", "\"namespace\"", ",", NULL);
     
     if (definition->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", definition->name, "\"", ",", NULL);
-    
-    cee_strconcat0(&descriptor, "\"access_level\":", "\"public\"", ",", NULL);
-    
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", definition->name, "\"", ",", NULL);
+        
     cee_strconcat0(&descriptor, "}", NULL);
     
     return descriptor;
@@ -2590,20 +2609,18 @@ static cee_boolean csharp_method_parse(CEESourceFregment* fregment)
     CEEList* p = NULL;
     CEEList* q = NULL;
     CEESourceFregment* child = NULL;
-    CEESourceFregment* grandfather_fregment = NULL;
-    
+    CEESourceFregment* grandfather = NULL;
     CEEList* identifier = NULL;
     CEEList* parameter_list = NULL;
-    
+    CEEList* parameter_list_end = NULL;
     CEESourceSymbol* method = NULL;
     CEESourceSymbolType symbol_type = kCEESourceSymbolTypeUnknow;
-    cee_char* type = "function_definition";
     
-    grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
-    if (grandfather_fregment) {
-        if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
-            cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition) ||
-            cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition))
+    grandfather = cee_source_fregment_grandfather_get(fregment);
+    if (grandfather) {
+        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
+            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
             is_class_member = TRUE;
     }
     
@@ -2634,6 +2651,10 @@ static cee_boolean csharp_method_parse(CEESourceFregment* fregment)
             if (!parameter_list)
                 parameter_list = p;
         }
+        else if (current == kCSharpMethodTranslateStateParameterListEnd) {
+            if (!parameter_list_end)
+                parameter_list_end = p;
+        }
         else if (current == kCSharpMethodTranslateStateDeclaration) {
             if (!is_class_member) {
                 current = kCSharpMethodTranslateStateError;
@@ -2663,6 +2684,7 @@ next_token:
         !identifier || !parameter_list)
         goto exit;
     
+    /** destructor detected */
     p = cee_token_not_whitespace_newline_before(identifier);
     if (p && cee_token_is_identifier(p, '~'))
         q = p;
@@ -2677,18 +2699,12 @@ next_token:
                                                        "csharp",
                                                        kCEETokenStringOptionCompact);
     if (method) {
-        cee_token_slice_state_mark(q,
-                                   identifier,
-                                   kCEETokenStateSymbolOccupied);
+        cee_token_slice_state_mark(q, identifier, kCEETokenStateSymbolOccupied);
         
-        if (symbol_type == kCEESourceSymbolTypeFunctionDefinition) {
+        if (symbol_type == kCEESourceSymbolTypeFunctionDefinition)
             cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDefinition);
-            type = "function_definition";
-        }
-        else if (symbol_type == kCEESourceSymbolTypeFunctionDeclaration) {
+        else if (symbol_type == kCEESourceSymbolTypeFunctionDeclaration)
             cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDeclaration);
-            type = "function_declaration";
-        }
         
         child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
         if (child) {
@@ -2696,16 +2712,18 @@ next_token:
             csharp_method_parameters_parse(child);
         }
         
-        method->proto = csharp_method_proto_descriptor_create(fregment,
-                                                              method,
-                                                              child->symbols,
-                                                              q,
-                                                              type);
+        method->proto_descriptor = csharp_method_proto_descriptor_create(fregment,
+                                                                         SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                                         TOKEN_PREV(q),
+                                                                         q,
+                                                                         parameter_list,
+                                                                         parameter_list_end);
         fregment->symbols = cee_list_prepend(fregment->symbols, method);
     }
         
 #ifdef DEBUG_METHOD_DEFINITION
-    cee_source_symbol_print(method);
+    if (method)
+        cee_source_symbol_print(method);
 #endif
     
 exit:
@@ -2779,11 +2797,11 @@ static cee_boolean csharp_method_parameters_parse(CEESourceFregment* fregment)
     CEESourceSymbol* parameter = NULL;
     CEEToken* token = NULL;
     CEEList* p = NULL;
-    CEEList* head = NULL;
+    CEEList* prefix = NULL;
     CEEList* identifier = NULL;
         
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
-    head = p;
+    prefix = p;
     while (p) {
         token = p->data;
         
@@ -2793,6 +2811,11 @@ static cee_boolean csharp_method_parameters_parse(CEESourceFregment* fregment)
         
         prev = current;
         current = csharp_method_parameters_declaration_translate_table[current][token->identifier];
+        
+        if (current == kCSharpMethodParametersDeclarationTranslateStateError) {
+            ret = FALSE;
+            break;
+        }
         
         if (current == kCSharpMethodParametersDeclarationTranslateStateTypeParameters) {
             p = skip_type_parameter_list(p, FALSE);
@@ -2807,13 +2830,9 @@ static cee_boolean csharp_method_parameters_parse(CEESourceFregment* fregment)
         }
                 
         if (current == kCSharpMethodParametersDeclarationTranslateStateConfirm || !TOKEN_NEXT(p)) {
-
             if (identifier)
-                parameter = csharp_method_parameter_create(fregment,
-                                                           head,
-                                                           identifier,
-                                                           identifier);
-                    
+                parameter = csharp_method_parameter_create(fregment, prefix, identifier);
+            
             if (parameter)
                 fregment->symbols = cee_list_append(fregment->symbols, parameter);
             
@@ -2826,15 +2845,10 @@ static cee_boolean csharp_method_parameters_parse(CEESourceFregment* fregment)
                     break;
             }
             
-            head = TOKEN_NEXT(p);
+            prefix = TOKEN_NEXT(p);
             current = kCSharpMethodParametersDeclarationTranslateStateInit;
         }
         
-        if (current == kCSharpMethodParametersDeclarationTranslateStateError) {
-            ret = FALSE;
-            break;
-        }
-
 next_token:
         p = TOKEN_NEXT(p);
     }
@@ -2843,40 +2857,65 @@ next_token:
         cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeDeclaration);
     
 #ifdef DEBUG_METHOD_DEFINITION
-    cee_source_symbols_print(fregment->symbols);
+    if (fregment->symbols)
+        cee_source_symbols_print(fregment->symbols);
 #endif
     
     return ret;
 }
 
 static CEESourceSymbol* csharp_method_parameter_create(CEESourceFregment* fregment,
-                                                       CEEList* head,
-                                                       CEEList* begin,
-                                                       CEEList* end)
+                                                       CEEList* prefix,
+                                                       CEEList* identifier)
 {
     CEESourceSymbol* parameter = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
                                                                            fregment->subject_ref,
-                                                                           begin,
-                                                                           end,
+                                                                           identifier,
+                                                                           identifier,
                                                                            kCEESourceSymbolTypeFunctionParameter,
                                                                            "csharp",
                                                                            kCEETokenStringOptionCompact);
     if (!parameter)
         return NULL;
     
-    cee_token_slice_state_mark(begin, end, kCEETokenStateSymbolOccupied);
-    if (head && TOKEN_PREV(begin)) {
-        cee_char* type_str = csharp_type_descriptor_from_token_slice(fregment,
-                                                                     head,
-                                                                     TOKEN_PREV(begin));
-        parameter->proto = csharp_declaration_proto_descriptor_create(fregment,
-                                                                      parameter,
-                                                                      NULL,
-                                                                      type_str);
-        if (type_str)
-            cee_free(type_str);
+    cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
+    if (prefix && TOKEN_PREV(identifier)) {
+        parameter->proto_descriptor = csharp_method_parameter_proto_descriptor_create(fregment,
+                                                                                      prefix,
+                                                                                      TOKEN_PREV(identifier),
+                                                                                      parameter);
     }
     return parameter;
+}
+
+static cee_char* csharp_method_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+                                                                 CEEList* prefix,
+                                                                 CEEList* prefix_tail,
+                                                                 CEESourceSymbol* parameter)
+{
+    if (!fregment || !parameter)
+        return NULL;
+    
+    cee_char* descriptor = NULL;
+    cee_char* proto_str = NULL;
+    
+    cee_strconcat0(&descriptor, "{", NULL);
+    
+    cee_strconcat0(&descriptor, "\"type\":", "\"declaration\"", NULL);
+    
+    if (parameter->name)
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", parameter->name, "\"", NULL);
+    
+    if (prefix && prefix_tail)
+        proto_str = csharp_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+    if (proto_str) {
+        cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto_str, "\"", NULL);
+        cee_free(proto_str);
+    }
+        
+    cee_strconcat0(&descriptor, "}", NULL);
+        
+    return descriptor;
 }
 
 static cee_char* csharp_type_descriptor_from_token_slice(CEESourceFregment* fregment,
@@ -2935,112 +2974,297 @@ static cee_char* csharp_type_descriptor_from_token_slice(CEESourceFregment* freg
 }
 
 static cee_char* csharp_method_proto_descriptor_create(CEESourceFregment* fregment,
-                                                       CEESourceSymbol* definition,
-                                                       CEEList* parameters,
-                                                       CEEList* method,
-                                                       const cee_char* type)
+                                                       CEEList* prefix,
+                                                       CEEList* prefix_tail,
+                                                       CEEList* identifier,
+                                                       CEEList* parameter_list,
+                                                       CEEList* parameter_list_end)
 {
-    if (!fregment || !definition)
+    if (!fregment ||
+        !identifier ||
+        !parameter_list ||
+        !parameter_list_end)
         return NULL;
     
-    cee_boolean is_class_member = FALSE;
-    cee_char* return_str = NULL;
-    cee_char* descriptor = NULL;
+    const cee_char* subject = fregment->subject_ref;
+    CEEList* tokens = cee_source_fregment_tokens_expand(fregment);
     CEEList* p = NULL;
+    CEEToken* token = NULL;
+    CEEToken* token_prev = NULL;
+    CEEList* header_tokens = NULL;
+    CEEList* name_chain_tokens = NULL;
+    CEEList* parameters_tokens = NULL;
+    CEEList* trialing_tokens = NULL;
+    cee_char* descriptor = NULL;
+    cee_char* formater_str = NULL;
+    cee_size l = 0;
+    cee_boolean is_class_member = FALSE;
     CEEList* parent_symbols = NULL;
     CEESourceSymbol* parent_symbol = NULL;
-    CEESourceFregment* grandfather_fregment = NULL;
+    CEESourceFregment* grandfather = NULL;
     const cee_char* access_level = "public";
+    cee_char* return_type_str = NULL;
     
-    grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
-    if (grandfather_fregment) {
-        if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition))
-            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
+    grandfather = cee_source_fregment_grandfather_get(fregment);
+    if (grandfather) {
+        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition))
+            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
                                                                         kCEESourceSymbolTypeClassDefinition);
-        else if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition))
-            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
+        else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition))
+            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
                                                                         kCEESourceSymbolTypeStructDefinition);
-        else if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition))
-            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather_fregment,
-                                                                        kCEESourceSymbolTypeInterfaceDefinition);
-        is_class_member = TRUE;
+        
+        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
+            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
+            is_class_member = TRUE;
     }
     
-    if (method)
-        access_level = csharp_access_level_search(fregment,
-                                                  SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                  TOKEN_PREV(method));
-    
+    access_level = csharp_access_level_search(fregment, SOURCE_FREGMENT_TOKENS_FIRST(fregment), NULL);
     if (!access_level) {
-        if (grandfather_fregment) {
-            if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
-                cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition))
+        if (grandfather) {
+            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
                 access_level = "private";
         }
         if (!access_level)
             access_level = "public";
     }
     
-    
-    return_str = csharp_type_descriptor_from_token_slice(fregment,
-                                                         SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                         TOKEN_PREV(method));
+    if (prefix && prefix_tail)
+        return_type_str = csharp_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
     /**
      * Constructor and Destructor doesn't has return type declaraton,
      * use its parent symbol type as return type
      */
-   if (!return_str) {
-       if (parent_symbols) {
-           parent_symbol = cee_list_nth_data(parent_symbols, 0);
-           return_str = cee_strdup(parent_symbol->name);
-       }
-   }
-    
-    
-    cee_strconcat0(&descriptor, "{", NULL);
-    if (type)
-        cee_strconcat0(&descriptor, "\"type\":", "\"", type, "\"", ",", NULL);
-    
-    if (return_str)
-        cee_strconcat0(&descriptor, "\"return_type\":", "\"", return_str, "\"", ",", NULL);
-    
-    if (definition->name)
-        cee_strconcat0(&descriptor, "\"name\":", "\"", definition->name, "\"", ",", NULL);
-    
-    if (access_level)
-        cee_strconcat0(&descriptor, "\"access_level\":", "\"", access_level, "\"", ",", NULL);
-    
-    cee_strconcat0(&descriptor, "\"parameters\": [", NULL);
-    p = parameters;
-    while (p) {
-        CEESourceSymbol* parameter = p->data;
-        
-        if (parameter->proto)
-            cee_strconcat0(&descriptor, parameter->proto, NULL);
-        
-        if (p->next)
-            cee_strconcat0(&descriptor, ",", NULL);
-            
-        p = p->next;
+    if (!return_type_str && is_class_member && parent_symbols) {
+        parent_symbol = cee_list_nth_data(parent_symbols, 0);
+        return_type_str = cee_strdup(parent_symbol->name);
     }
+    
+    p = TOKEN_FIRST(tokens);
+    
+    /** header */
+    if (prefix_tail) {
+        while (p) {
+            TOKEN_APPEND(header_tokens, p->data);
+            if (p->data == prefix_tail->data)
+                break;
+            p = TOKEN_NEXT(p);
+        }
+        p = TOKEN_NEXT(p);
+    }
+    
+    /** name_chain */
+    while (p) {
+        if (p->data == identifier->data)
+            break;
+        p = TOKEN_NEXT(p);
+    }
+    while (p) {
+        if (p->data == parameter_list->data)
+            break;
+        TOKEN_APPEND(name_chain_tokens, p->data);
+        p = TOKEN_NEXT(p);
+    }
+    
+    /** parameters */
+    if (p)
+        p = TOKEN_NEXT(p);
+    while (p) {
+        if (p->data == parameter_list_end->data)
+            break;
+        TOKEN_APPEND(parameters_tokens, p->data);
+        p = TOKEN_NEXT(p);
+    }
+    
+    /** trailing */
+    if (p)
+        p = TOKEN_NEXT(p);
+    BRACKET_SIGN_DECLARATION();
+    while (p) {
+        token = p->data;
+        SIGN_BRACKET(token->identifier);
+        if (BRACKETS_IS_CLEAN()) {
+            if (token->identifier == ',' ||
+                token->identifier == ';' ||
+                token->identifier == '{')
+                break;
+        }
+        TOKEN_APPEND(trialing_tokens, p->data);
+        p = TOKEN_NEXT(p);
+    }
+        
+    cee_strconcat0(&descriptor, "{", NULL);
+    
+    cee_strconcat0(&descriptor, "\"type\":", "\"function\"", NULL);
+        
+    if (access_level)
+        cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
+    
+    if (return_type_str)
+        cee_strconcat0(&descriptor, ", \"return_type\":", "\"", return_type_str, "\"", NULL);
+    
+    /** create header descriptor */
+    token_prev = NULL;
+    p = TOKEN_FIRST(header_tokens);
+    while (p) {
+        token = p->data;
+        
+        if (!cee_token_id_is_newline(token->identifier) &&
+            !cee_token_id_is_whitespace(token->identifier)) {
+
+            if (should_proto_descriptor_append_whitespace(token, token_prev))
+                cee_strconcat0(&formater_str, " ", NULL);
+            cee_string_concat_with_token(&formater_str, subject, token);
+            token_prev = token;
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    if (formater_str) {
+        cee_strconcat0(&descriptor, ", \"header\":", "\"", formater_str, "\"", NULL);
+        cee_free(formater_str);
+        formater_str = NULL;
+    }
+    
+    /** create identifier descriptor */
+    token_prev = NULL;
+    p = TOKEN_FIRST(name_chain_tokens);
+    while (p) {
+        token = p->data;
+        
+        if (!cee_token_id_is_newline(token->identifier) &&
+            !cee_token_id_is_whitespace(token->identifier)) {
+            
+            if (should_proto_descriptor_append_whitespace(token, token_prev))
+                cee_strconcat0(&formater_str, " ", NULL);
+            cee_string_concat_with_token(&formater_str, subject, token);
+            token_prev = token;
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    if (formater_str) {
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", formater_str, "\"", NULL);
+        cee_free(formater_str);
+        formater_str = NULL;
+    }
+    
+    /** create parameters descriptor */
+    token_prev = NULL;
+    cee_strconcat0(&descriptor, ", \"parameters\":[", NULL);
+    p = TOKEN_FIRST(parameters_tokens);
+    CLEAR_BRACKETS();
+    while (p) {
+        token = p->data;
+        
+        SIGN_BRACKET(token->identifier);
+        
+        if (!cee_token_id_is_newline(token->identifier) &&
+            !cee_token_id_is_whitespace(token->identifier)) {
+            
+            if (should_proto_descriptor_append_whitespace(token, token_prev))
+                cee_strconcat0(&formater_str, " ", NULL);
+            cee_string_concat_with_token(&formater_str, subject, token);
+            
+            token_prev = token;
+        }
+        
+        if (BRACKETS_IS_CLEAN()) {
+            if (token->identifier == ',' || !TOKEN_NEXT(p)) {
+                if (formater_str) {
+                    l = strlen(formater_str);
+                    if (formater_str[l-1]== ',')
+                        formater_str[l-1] = '\0';
+                    
+                    cee_strconcat0(&descriptor, "\"", formater_str, "\"", ",", NULL);
+                    cee_free(formater_str);
+                    formater_str = NULL;
+                    token_prev = NULL;
+                }
+            }
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    /** remove the last comma in jason array */
+    l = strlen(descriptor);
+    if (descriptor[l-1]== ',')
+        descriptor[l-1] = '\0';
     cee_strconcat0(&descriptor, "]", NULL);
+    
+    /** create trialing descriptor */
+    token_prev = NULL;
+    p = TOKEN_FIRST(trialing_tokens);
+    while (p) {
+        token = p->data;
+        
+        if (!cee_token_id_is_newline(token->identifier) &&
+            !cee_token_id_is_whitespace(token->identifier)) {
+            
+            if (should_proto_descriptor_append_whitespace(token, token_prev))
+                cee_strconcat0(&formater_str, " ", NULL);
+            cee_string_concat_with_token(&formater_str, subject, token);
+            
+            token_prev = token;
+        }
+        
+        p = TOKEN_NEXT(p);
+    }
+    if (formater_str) {
+        cee_strconcat0(&descriptor, ", \"trialing\":", "\"", formater_str, "\"", NULL);
+        cee_free(formater_str);
+        formater_str = NULL;
+    }
     cee_strconcat0(&descriptor, "}", NULL);
     
-    if (return_str)
-        free(return_str);
     
+exit:
+    if (return_type_str)
+        cee_free(return_type_str);
+    
+    if (parent_symbols)
+        cee_list_free(parent_symbols);
+    
+    if (trialing_tokens)
+        cee_list_free(trialing_tokens);
+    
+    if (parameters_tokens)
+        cee_list_free(parameters_tokens);
+    
+    if (name_chain_tokens)
+        cee_list_free(name_chain_tokens);
+    
+    if (header_tokens)
+        cee_list_free(header_tokens);
+    
+    if (tokens)
+        cee_list_free(tokens);
+        
     return descriptor;
+}
+
+static cee_boolean should_proto_descriptor_append_whitespace(CEEToken* token,
+                                                             CEEToken* token_prev)
+{
+    return (token_prev &&
+            (!token_id_is_punctuation(token_prev->identifier) &&
+             !token_id_is_punctuation(token->identifier)));
 }
 
 static const cee_char* csharp_access_level_search(CEESourceFregment* fregment,
                                                   CEEList* begin,
                                                   CEEList* end)
 {
-    if (!begin || !end)
+    
+    if (!begin)
         return NULL;
     
     CEEList* p = begin;
     CEEList* q = NULL;
+    
     while (p) {
         if (cee_token_is_identifier(p, kCEETokenID_PUBLIC)) {
             return "public";
@@ -3054,7 +3278,6 @@ static const cee_char* csharp_access_level_search(CEESourceFregment* fregment,
                 return "protected internal";
             else
                 return "protected";
-            
         }
         else if (cee_token_is_identifier(p, kCEETokenID_PRIVATE)) {
             q = cee_token_not_whitespace_newline_after(p);
@@ -3064,7 +3287,7 @@ static const cee_char* csharp_access_level_search(CEESourceFregment* fregment,
                 return "private";
         }
         
-        if (p == end)
+        if (end && p == end)
             break;
         
         p = TOKEN_NEXT(p);
@@ -3167,20 +3390,19 @@ static cee_boolean csharp_operator_parse(CEESourceFregment* fregment)
     CEEList* p = NULL;
     CEEList* q = NULL;
     CEESourceFregment* child = NULL;
-    CEESourceFregment* grandfather_fregment = NULL;
-        
+    CEESourceFregment* grandfather = NULL;
     CEEList* operator = NULL;
     CEEList* parameter_list = NULL;
-    
+    CEEList* parameter_list_end = NULL;
     CEESourceSymbol* operator_overload = NULL;
     CEESourceSymbolType symbol_type = kCEESourceSymbolTypeUnknow;
     cee_char* type = "function_definition";
         
-    grandfather_fregment = cee_source_fregment_grandfather_get(fregment);
-    if (grandfather_fregment) {
-        if (cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeClassDefinition) ||
-            cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeStructDefinition) ||
-            cee_source_fregment_type_is(grandfather_fregment, kCEESourceFregmentTypeInterfaceDefinition))
+    grandfather = cee_source_fregment_grandfather_get(fregment);
+    if (grandfather) {
+        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
+            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
             is_class_member = TRUE;
     }
     
@@ -3212,6 +3434,10 @@ static cee_boolean csharp_operator_parse(CEESourceFregment* fregment)
                 parameter_list = p;
                 q = cee_token_not_whitespace_newline_before(parameter_list);
             }
+        }
+        else if (current == kCSharpOperatorTranslateStateParameterListEnd) {
+            if (!parameter_list_end)
+                parameter_list_end = p;
         }
         else if (current == kCSharpOperatorTranslateStateDeclaration) {
             if (!is_class_member) {
@@ -3250,7 +3476,6 @@ next_token:
                                                                   "csharp",
                                                                   kCEETokenStringOptionCompact);
     if (operator_overload) {
-        
         if (symbol_type == kCEESourceSymbolTypeOperatorOverloadDefinition) {
             cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDefinition);
             type = "function_definition";
@@ -3271,16 +3496,18 @@ next_token:
             csharp_method_parameters_parse(child);
         }
         
-        operator_overload->proto = csharp_method_proto_descriptor_create(fregment,
-                                                                         operator_overload,
-                                                                         child->symbols,
-                                                                         operator,
-                                                                         type);
+        operator_overload->proto_descriptor = csharp_method_proto_descriptor_create(fregment,
+                                                                                    SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                                                    TOKEN_PREV(operator),
+                                                                                    operator,
+                                                                                    parameter_list,
+                                                                                    parameter_list_end);
         fregment->symbols = cee_list_prepend(fregment->symbols, operator_overload);
     }
     
 #ifdef DEBUG_METHOD_DEFINITION
-    cee_source_symbol_print(operator_overload);
+    if (operator_overload)
+        cee_source_symbol_print(operator_overload);
 #endif
     
 exit:
@@ -3398,14 +3625,13 @@ static void csharp_property_declaration_translate_table_init(void)
 static cee_boolean csharp_property_declaration_parse(CEESourceFregment* fregment)
 {
     cee_boolean ret = FALSE;
-    cee_char* type_str = NULL;
     CSharpPropertyDeclarationTranslateState current = kCSharpPropertyDeclarationTranslateStateInit;
     CSharpPropertyDeclarationTranslateState prev = kCSharpPropertyDeclarationTranslateStateInit;
     CEEToken* token = NULL;
     CEEList* p = NULL;
-    
+    CEEList* prefix = NULL;
+    CEEList* prefix_tail = NULL;
     CEEList* identifier = NULL;
-    
     CEESourceSymbol* declaration = NULL;
     
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
@@ -3430,6 +3656,9 @@ static cee_boolean csharp_property_declaration_parse(CEESourceFregment* fregment
                 identifier = p;
         }
         else if (current == kCSharpPropertyDeclarationTranslateStateConfirm) {
+            prefix = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+            if (identifier)
+                prefix_tail = TOKEN_PREV(identifier);
             ret = TRUE;
             break;
         }
@@ -3453,30 +3682,78 @@ next_token:
                                                             kCEETokenStringOptionCompact);
     if (declaration) {
         cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeDeclaration);
-        
-        type_str = csharp_type_descriptor_from_token_slice(fregment,
-                                                           SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                           TOKEN_PREV(identifier));
-        declaration->proto = csharp_declaration_proto_descriptor_create(fregment,
-                                                                        declaration,
-                                                                        identifier,
-                                                                        type_str);
+        declaration->proto_descriptor = csharp_property_proto_descriptor_create(fregment,
+                                                                                prefix,
+                                                                                prefix_tail,
+                                                                                identifier);
         fregment->symbols = cee_list_prepend(fregment->symbols, declaration);
     }
     
 #ifdef DEBUG_PROPERTY_DECLARATION
-    cee_source_symbol_print(declaration);
+    if (declaration)
+        cee_source_symbol_print(declaration);
 #endif
     
 exit:
     
-    if (type_str)
-        cee_free(type_str);
-    
     return ret;
 }
 
-static void csharp_event_translate_table_init(void)
+static cee_char* csharp_property_proto_descriptor_create(CEESourceFregment* fregment,
+                                                         CEEList* prefix,
+                                                         CEEList* prefix_tail,
+                                                         CEEList* identifier)
+{
+    if (!fregment || !identifier)
+        return NULL;
+    
+    CEESourceFregment* grandfather = NULL;
+    const cee_char* access_level = "public";
+    cee_char* proto = NULL;
+    cee_char* descriptor = NULL;
+    const cee_char* subject = fregment->subject_ref;
+    cee_char* identifier_str = NULL;
+    
+    access_level = csharp_access_level_search(fregment, SOURCE_FREGMENT_TOKENS_FIRST(fregment), NULL);
+    if (!access_level) {
+        grandfather = cee_source_fregment_grandfather_get(fregment);
+        if (grandfather) {
+            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
+                access_level = "private";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+    
+    cee_strconcat0(&descriptor, "{", NULL);
+    
+    cee_strconcat0(&descriptor, "\"type\":", "\"property\"", NULL);
+    
+    if (access_level)
+        cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
+    
+    if (prefix && prefix_tail)
+        proto = csharp_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+    if (proto) {
+        cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto, "\"", NULL);
+        cee_free(proto);
+    }
+    
+    if (identifier)
+        identifier_str = cee_string_from_token(subject, identifier->data);
+    if (identifier_str) {
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", identifier_str, "\"", NULL);
+        cee_free(identifier_str);
+    }
+    
+    cee_strconcat0(&descriptor, "}", NULL);
+        
+    return descriptor;
+}
+
+static void csharp_event_declaration_table_init(void)
 {
     /**
      *                          [                       ]                       declaration_specifier   event   builtin_type    builtin_reference   identifier      assign_operator     ?                   .                       <               ,       {       ;
@@ -3492,53 +3769,53 @@ static void csharp_event_translate_table_init(void)
      *
      *  TypeParameters: save 'current state', skip TypeParameterList then restore 'current state'
      */
-    TRANSLATE_STATE_INI(csharp_event_translate_table, kCSharpEventTranslateStateMax                     , kCSharpEventTranslateStateError                                                       );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateInit                    , '['                               , kCSharpEventTranslateStateInit                    );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateInit                    , ']'                               , kCSharpEventTranslateStateInit                    );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateInit                    , token_id_is_declaration_specifier , kCSharpEventTranslateStateDeclarationSpecifier    );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateInit                    , kCEETokenID_EVENT                 , kCSharpEventTranslateStateEvent                   );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateDeclarationSpecifier    , '['                               , kCSharpEventTranslateStateDeclarationSpecifier    );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateDeclarationSpecifier    , ']'                               , kCSharpEventTranslateStateDeclarationSpecifier    );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateDeclarationSpecifier    , token_id_is_declaration_specifier , kCSharpEventTranslateStateDeclarationSpecifier    );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateDeclarationSpecifier    , kCEETokenID_EVENT                 , kCSharpEventTranslateStateEvent                   );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateEvent                   , '['                               , kCSharpEventTranslateStateEvent                   );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateEvent                   , ']'                               , kCSharpEventTranslateStateEvent                   );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateEvent                   , token_id_is_builtin_type          , kCSharpEventTranslateStateBuiltinType             );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateEvent                   , token_id_is_builtin_reference     , kCSharpEventTranslateStateBuiltinReference        );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateEvent                   , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateCustomType              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , '['                               , kCSharpEventTranslateStateBuiltinType             );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , ']'                               , kCSharpEventTranslateStateBuiltinType             );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , '?'                               , kCSharpEventTranslateStateBuiltinType             );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , token_id_is_builtin_type          , kCSharpEventTranslateStateBuiltinType             );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , token_id_is_builtin_reference     , kCSharpEventTranslateStateBuiltinReference        );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinType             , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , '['                               , kCSharpEventTranslateStateBuiltinReference        );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , ']'                               , kCSharpEventTranslateStateBuiltinReference        );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , '?'                               , kCSharpEventTranslateStateBuiltinReference        );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , token_id_is_builtin_type          , kCSharpEventTranslateStateBuiltinType             );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , token_id_is_builtin_reference     , kCSharpEventTranslateStateBuiltinReference        );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateBuiltinReference        , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateCustomType              , '['                               , kCSharpEventTranslateStateCustomType              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateCustomType              , ']'                               , kCSharpEventTranslateStateCustomType              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateCustomType              , '?'                               , kCSharpEventTranslateStateCustomType              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateCustomType              , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateCustomType              , '.'                               , kCSharpEventTranslateStateCustomTypeSeparator     );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateCustomType              , '<'                               , kCSharpEventTranslateStateTypeParameters          );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateCustomTypeSeparator     , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateCustomType              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateIdentifier              , '['                               , kCSharpEventTranslateStateIdentifier              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateIdentifier              , ']'                               , kCSharpEventTranslateStateIdentifier              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateIdentifier              , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
-    TRANSLATE_FUNCS_SET(csharp_event_translate_table, kCSharpEventTranslateStateIdentifier              , token_id_is_assignment            , kCSharpEventTranslateStateConfirm                 );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateIdentifier              , ','                               , kCSharpEventTranslateStateConfirm                 );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateIdentifier              , ';'                               , kCSharpEventTranslateStateConfirm                 );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateIdentifier              , '{'                               , kCSharpEventTranslateStateConfirm                 );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateConfirm                 , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateConfirm                 , ','                               , kCSharpEventTranslateStateConfirm                 );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateConfirm                 , ';'                               , kCSharpEventTranslateStateConfirm                 );
-    TRANSLATE_STATE_SET(csharp_event_translate_table, kCSharpEventTranslateStateConfirm                 , '{'                               , kCSharpEventTranslateStateConfirm                 );
+    TRANSLATE_STATE_INI(csharp_event_declaration_table, kCSharpEventTranslateStateMax                     , kCSharpEventTranslateStateError                                                       );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateInit                    , '['                               , kCSharpEventTranslateStateInit                    );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateInit                    , ']'                               , kCSharpEventTranslateStateInit                    );
+    TRANSLATE_FUNCS_SET(csharp_event_declaration_table, kCSharpEventTranslateStateInit                    , token_id_is_declaration_specifier , kCSharpEventTranslateStateDeclarationSpecifier    );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateInit                    , kCEETokenID_EVENT                 , kCSharpEventTranslateStateEvent                   );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateDeclarationSpecifier    , '['                               , kCSharpEventTranslateStateDeclarationSpecifier    );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateDeclarationSpecifier    , ']'                               , kCSharpEventTranslateStateDeclarationSpecifier    );
+    TRANSLATE_FUNCS_SET(csharp_event_declaration_table, kCSharpEventTranslateStateDeclarationSpecifier    , token_id_is_declaration_specifier , kCSharpEventTranslateStateDeclarationSpecifier    );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateDeclarationSpecifier    , kCEETokenID_EVENT                 , kCSharpEventTranslateStateEvent                   );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateEvent                   , '['                               , kCSharpEventTranslateStateEvent                   );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateEvent                   , ']'                               , kCSharpEventTranslateStateEvent                   );
+    TRANSLATE_FUNCS_SET(csharp_event_declaration_table, kCSharpEventTranslateStateEvent                   , token_id_is_builtin_type          , kCSharpEventTranslateStateBuiltinType             );
+    TRANSLATE_FUNCS_SET(csharp_event_declaration_table, kCSharpEventTranslateStateEvent                   , token_id_is_builtin_reference     , kCSharpEventTranslateStateBuiltinReference        );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateEvent                   , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateCustomType              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinType             , '['                               , kCSharpEventTranslateStateBuiltinType             );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinType             , ']'                               , kCSharpEventTranslateStateBuiltinType             );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinType             , '?'                               , kCSharpEventTranslateStateBuiltinType             );
+    TRANSLATE_FUNCS_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinType             , token_id_is_builtin_type          , kCSharpEventTranslateStateBuiltinType             );
+    TRANSLATE_FUNCS_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinType             , token_id_is_builtin_reference     , kCSharpEventTranslateStateBuiltinReference        );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinType             , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinReference        , '['                               , kCSharpEventTranslateStateBuiltinReference        );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinReference        , ']'                               , kCSharpEventTranslateStateBuiltinReference        );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinReference        , '?'                               , kCSharpEventTranslateStateBuiltinReference        );
+    TRANSLATE_FUNCS_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinReference        , token_id_is_builtin_type          , kCSharpEventTranslateStateBuiltinType             );
+    TRANSLATE_FUNCS_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinReference        , token_id_is_builtin_reference     , kCSharpEventTranslateStateBuiltinReference        );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateBuiltinReference        , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateCustomType              , '['                               , kCSharpEventTranslateStateCustomType              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateCustomType              , ']'                               , kCSharpEventTranslateStateCustomType              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateCustomType              , '?'                               , kCSharpEventTranslateStateCustomType              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateCustomType              , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateCustomType              , '.'                               , kCSharpEventTranslateStateCustomTypeSeparator     );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateCustomType              , '<'                               , kCSharpEventTranslateStateTypeParameters          );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateCustomTypeSeparator     , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateCustomType              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateIdentifier              , '['                               , kCSharpEventTranslateStateIdentifier              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateIdentifier              , ']'                               , kCSharpEventTranslateStateIdentifier              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateIdentifier              , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
+    TRANSLATE_FUNCS_SET(csharp_event_declaration_table, kCSharpEventTranslateStateIdentifier              , token_id_is_assignment            , kCSharpEventTranslateStateConfirm                 );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateIdentifier              , ','                               , kCSharpEventTranslateStateConfirm                 );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateIdentifier              , ';'                               , kCSharpEventTranslateStateConfirm                 );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateIdentifier              , '{'                               , kCSharpEventTranslateStateConfirm                 );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateConfirm                 , kCEETokenID_IDENTIFIER            , kCSharpEventTranslateStateIdentifier              );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateConfirm                 , ','                               , kCSharpEventTranslateStateConfirm                 );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateConfirm                 , ';'                               , kCSharpEventTranslateStateConfirm                 );
+    TRANSLATE_STATE_SET(csharp_event_declaration_table, kCSharpEventTranslateStateConfirm                 , '{'                               , kCSharpEventTranslateStateConfirm                 );
 }
 
-static cee_boolean csharp_event_parse(CEESourceFregment* fregment)
+static cee_boolean csharp_event_declaration_parse(CEESourceFregment* fregment)
 {
     cee_boolean ret = FALSE;
     CSharpEventTranslateState current = kCSharpEventTranslateStateInit;
@@ -3546,10 +3823,11 @@ static cee_boolean csharp_event_parse(CEESourceFregment* fregment)
     CEEToken* token = NULL;
     CEEList* p = NULL;
     CEEList* identifier = NULL;
-    CEEList* first_identifier = NULL;
-    cee_char* type_str = NULL;
+    CEEList* prefix = NULL;
+    CEEList* prefix_tail = NULL;
     CEEList* declarations = NULL;
     CEESourceSymbol* declaration = NULL;
+    cee_boolean prefix_parse = FALSE;
         
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
@@ -3560,7 +3838,7 @@ static cee_boolean csharp_event_parse(CEESourceFregment* fregment)
             goto next_token;
         
         prev = current;
-        current = csharp_event_translate_table[current][token->identifier];
+        current = csharp_event_declaration_table[current][token->identifier];
         
         if (current == kCSharpEventTranslateStateError) {
             break;
@@ -3576,11 +3854,11 @@ static cee_boolean csharp_event_parse(CEESourceFregment* fregment)
                 identifier = p;
         }
         else if (current == kCSharpEventTranslateStateConfirm) {
-            if (!type_str) {
+            if (!prefix_parse) {
+                prefix = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
                 if (identifier)
-                    type_str = csharp_type_descriptor_from_token_slice(fregment,
-                                                                       SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                                       TOKEN_PREV(identifier));
+                    prefix_tail = TOKEN_PREV(identifier);
+                prefix_parse = TRUE;
             }
             
             if (identifier) {
@@ -3591,18 +3869,14 @@ static cee_boolean csharp_event_parse(CEESourceFregment* fregment)
                                                                         kCEESourceSymbolTypeVariableDeclaration,
                                                                         "csharp",
                                                                         kCEETokenStringOptionCompact);
-                if (!first_identifier)
-                    first_identifier = identifier;
             }
             
             if (declaration) {
-                cee_token_slice_state_mark(identifier,
-                                           identifier,
-                                           kCEETokenStateSymbolOccupied);
-                declaration->proto = csharp_declaration_proto_descriptor_create(fregment,
-                                                                                declaration,
-                                                                                first_identifier,
-                                                                                type_str);
+                cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
+                declaration->proto_descriptor = csharp_event_proto_descriptor_create(fregment,
+                                                                                     prefix,
+                                                                                     prefix_tail,
+                                                                                     identifier);
                 declarations = cee_list_prepend(declarations, declaration);
             }
             
@@ -3628,15 +3902,67 @@ next_token:
     }
     
 #ifdef DEBUG_EVENTS
-    cee_source_symbols_print(declarations);
+    if (declarations)
+        cee_source_symbols_print(declarations);
 #endif
     
 exit:
     
-    if (type_str)
-        cee_free(type_str);
-    
     return ret;
+}
+
+static cee_char* csharp_event_proto_descriptor_create(CEESourceFregment* fregment,
+                                                      CEEList* prefix,
+                                                      CEEList* prefix_tail,
+                                                      CEEList* identifier)
+{
+    if (!fregment || !identifier)
+        return NULL;
+    
+    CEESourceFregment* grandfather = NULL;
+    const cee_char* access_level = "public";
+    cee_char* proto = NULL;
+    cee_char* descriptor = NULL;
+    const cee_char* subject = fregment->subject_ref;
+    cee_char* identifier_str = NULL;
+    
+    access_level = csharp_access_level_search(fregment, SOURCE_FREGMENT_TOKENS_FIRST(fregment), NULL);
+    if (!access_level) {
+        grandfather = cee_source_fregment_grandfather_get(fregment);
+        if (grandfather) {
+            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
+                access_level = "private";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+    
+    cee_strconcat0(&descriptor, "{", NULL);
+    
+    cee_strconcat0(&descriptor, "\"type\":", "\"event\"", NULL);
+    
+    if (access_level)
+        cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
+    
+    if (prefix && prefix_tail)
+        proto = csharp_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+    if (proto) {
+        cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto, "\"", NULL);
+        cee_free(proto);
+    }
+    
+    if (identifier)
+        identifier_str = cee_string_from_token(subject, identifier->data);
+    if (identifier_str) {
+        cee_strconcat0(&descriptor, ", \"name\":", "\"", identifier_str, "\"", NULL);
+        cee_free(identifier_str);
+    }
+    
+    cee_strconcat0(&descriptor, "}", NULL);
+    
+    return descriptor;
 }
 
 static void csharp_indexer_declaration_translate_table_init(void)
@@ -3645,12 +3971,12 @@ static void csharp_indexer_declaration_translate_table_init(void)
      *                          [                       ]                       declaration_specifier   builtin_type    builtin_reference   identifier      ?                   <               .                       this    {       =>
      *  Init                    Init                    Init                    DeclarationSpecifier    BuiltinType     BuiltinReference    Type            Error               Error           Error                   Error   Error   Error
      *  DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    DeclarationSpecifier    BuiltinType     BuiltinReference    Type            Error               Error           Error                   Error   Error   Error
-     *  BuiltinType             BuiltinType             BuiltinType             Error                   BuiltinType     BuiltinReference    Type            BuiltinType         Error           Error                   This    Error   Error
-     *  BuiltinReference        BuiltinReference        BuiltinReference        Error                   BuiltinType     BuiltinReference    Type            BuiltinReference    Error           Error                   This    Error   Error
+     *  BuiltinType             BuiltinType             BuiltinType             Error                   BuiltinType     BuiltinReference    InterfaceType   BuiltinType         Error           Error                   This    Error   Error
+     *  BuiltinReference        BuiltinReference        BuiltinReference        Error                   BuiltinType     BuiltinReference    InterfaceType   BuiltinReference    Error           Error                   This    Error   Error
      *  Type                    Type                    Type                    Error                   Error           Error               InterfaceType   Type                *TypeParameters TypeSeparator           This    Error   Error
      *  TypeSeparator           Error                   Error                   Error                   Error           Error               Type            Error               Error           Error                   Error   Error   Error
      *  InterfaceType           Error                   Error                   Error                   Error           Error               Error           Error               *TypeParameters InterfaceTypeSeparator  Error   Error   Error
-     *  InterfaceTypeSeparator  Error                   Error                   Error                   Error           Error               Error           Error               Error           InterfaceType           This    Error   Error
+     *  InterfaceTypeSeparator  Error                   Error                   Error                   Error           Error               InterfaceType   Error               Error           Error                   This    Error   Error
      *  This                    ParameterList           Error                   Error                   Error           Error               Error           Error               Error           Error                   Error   Error   Error
      *  ParameterList           Error                   ParameterListEnd        Error                   Error           Error               Error           Error               Error           Error                   Error   Error   Error
      *  ParameterListEnd        Error                   Error                   Error                   Error           Error               Error           Error               Error           Error                   Error   Confirm Confirm
@@ -3676,14 +4002,14 @@ static void csharp_indexer_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , '?'                               , kCSharpIndexerDeclarationTranslateStateBuiltinType            );
     TRANSLATE_FUNCS_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , token_id_is_builtin_type          , kCSharpIndexerDeclarationTranslateStateBuiltinType            );
     TRANSLATE_FUNCS_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , token_id_is_builtin_reference     , kCSharpIndexerDeclarationTranslateStateBuiltinReference       );
-    TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , kCEETokenID_IDENTIFIER            , kCSharpIndexerDeclarationTranslateStateType                   );
+    TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , kCEETokenID_IDENTIFIER            , kCSharpIndexerDeclarationTranslateStateInterfaceType          );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinType              , kCEETokenID_THIS                  , kCSharpIndexerDeclarationTranslateStateThis                   );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , '['                               , kCSharpIndexerDeclarationTranslateStateBuiltinReference       );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , ']'                               , kCSharpIndexerDeclarationTranslateStateBuiltinReference       );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , '?'                               , kCSharpIndexerDeclarationTranslateStateBuiltinReference       );
     TRANSLATE_FUNCS_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , token_id_is_builtin_type          , kCSharpIndexerDeclarationTranslateStateBuiltinType            );
     TRANSLATE_FUNCS_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , token_id_is_builtin_reference     , kCSharpIndexerDeclarationTranslateStateBuiltinReference       );
-    TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , kCEETokenID_IDENTIFIER            , kCSharpIndexerDeclarationTranslateStateType                   );
+    TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , kCEETokenID_IDENTIFIER            , kCSharpIndexerDeclarationTranslateStateInterfaceType          );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateBuiltinReference         , kCEETokenID_THIS                  , kCSharpIndexerDeclarationTranslateStateThis                   );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateType                     , '['                               , kCSharpIndexerDeclarationTranslateStateType                   );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateType                     , ']'                               , kCSharpIndexerDeclarationTranslateStateType                   );
@@ -3692,7 +4018,7 @@ static void csharp_indexer_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateType                     , '<'                               , kCSharpIndexerDeclarationTranslateStateTypeParameters         );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateType                     , '.'                               , kCSharpIndexerDeclarationTranslateStateTypeSeparator          );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateType                     , kCEETokenID_THIS                  , kCSharpIndexerDeclarationTranslateStateThis                   );
-    TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateTypeSeparator            , '.'                               , kCSharpIndexerDeclarationTranslateStateType                   );
+    TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateTypeSeparator            , kCEETokenID_IDENTIFIER            , kCSharpIndexerDeclarationTranslateStateType                   );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateInterfaceType            , '<'                               , kCSharpIndexerDeclarationTranslateStateTypeParameters         );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateInterfaceType            , '.'                               , kCSharpIndexerDeclarationTranslateStateInterfaceTypeSeparator );
     TRANSLATE_STATE_SET(csharp_indexer_declaration_translate_table, kCSharpIndexerDeclarationTranslateStateInterfaceTypeSeparator   , kCEETokenID_IDENTIFIER            , kCSharpIndexerDeclarationTranslateStateInterfaceType          );
@@ -3714,9 +4040,11 @@ static cee_boolean csharp_indexer_declaration_parse(CEESourceFregment* fregment)
     CEEList* parameter_list_end = NULL;
     CEEList* this = NULL;
     CEEList* interface_type = NULL;
-    cee_char* type_str = NULL;
+    CEEList* prefix = NULL;
+    CEEList* prefix_tail = NULL;
     CEEList* declarations = NULL;
     CEESourceSymbol* declaration = NULL;
+    cee_boolean prefix_parse = FALSE;
         
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
@@ -3757,15 +4085,13 @@ static cee_boolean csharp_indexer_declaration_parse(CEESourceFregment* fregment)
                     interface_type = p;
         }
         else if (current == kCSharpIndexerDeclarationTranslateStateConfirm) {
-            if (!type_str) {
+            if (!prefix_parse) {
+                prefix = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
                 if (interface_type)
-                    type_str = csharp_type_descriptor_from_token_slice(fregment,
-                                                                       SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                                       TOKEN_PREV(interface_type));
+                    prefix_tail = TOKEN_PREV(interface_type);
                 else if (this)
-                    type_str = csharp_type_descriptor_from_token_slice(fregment,
-                                                                       SOURCE_FREGMENT_TOKENS_FIRST(fregment),
-                                                                       TOKEN_PREV(this));
+                    prefix_tail = TOKEN_PREV(this);
+                prefix_parse = TRUE;
             }
             
             if (parameter_list && parameter_list_end) {
@@ -3784,10 +4110,9 @@ static cee_boolean csharp_indexer_declaration_parse(CEESourceFregment* fregment)
                     declaration->name = cee_strdup("indexer[]");
                 }
                 
-                declaration->proto = csharp_declaration_proto_descriptor_create(fregment,
-                                                                                declaration,
-                                                                                this,
-                                                                                type_str);
+                declaration->proto_descriptor = csharp_indexer_proto_descriptor_create(fregment,
+                                                                                       prefix,
+                                                                                       prefix_tail);
                 declarations = cee_list_prepend(declarations, declaration);
             }
             
@@ -3807,15 +4132,59 @@ next_token:
     }
     
 #ifdef DEBUG_EVENTS
-    cee_source_symbols_print(declarations);
+    if (declarations)
+        cee_source_symbols_print(declarations);
 #endif
     
 exit:
     
-    if (type_str)
-        cee_free(type_str);
-    
     return ret;
+}
+
+static cee_char* csharp_indexer_proto_descriptor_create(CEESourceFregment* fregment,
+                                                        CEEList* prefix,
+                                                        CEEList* prefix_tail)
+{
+    if (!fregment)
+        return NULL;
+    
+    CEESourceFregment* grandfather = NULL;
+    const cee_char* access_level = "public";
+    cee_char* proto = NULL;
+    cee_char* descriptor = NULL;
+    
+    access_level = csharp_access_level_search(fregment, SOURCE_FREGMENT_TOKENS_FIRST(fregment), NULL);
+    if (!access_level) {
+        grandfather = cee_source_fregment_grandfather_get(fregment);
+        if (grandfather) {
+            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
+                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
+                access_level = "private";
+        }
+        if (!access_level)
+            access_level = "public";
+    }
+    
+    cee_strconcat0(&descriptor, "{", NULL);
+    
+    cee_strconcat0(&descriptor, "\"type\":", "\"indexer\"", NULL);
+    
+    if (access_level)
+        cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
+    
+    if (prefix && prefix_tail)
+        proto = csharp_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+    if (proto) {
+        cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto, "\"", NULL);
+        cee_free(proto);
+    }
+    
+    cee_strconcat0(&descriptor, "}", NULL);
+    
+    fprintf(stdout, "%s\n", descriptor);
+    
+    return descriptor;
 }
 
 static void csharp_namespace_definition_translate_table_init(void)
@@ -3891,10 +4260,8 @@ next_token:
             definition->name = csharp_name_scope_create(identifier, fregment->subject_ref);
         }
         
-        cee_token_slice_state_mark(TOKEN_FIRST(identifier),
-                                   TOKEN_LAST(identifier),
-                                   kCEETokenStateSymbolOccupied);
-        definition->proto = csharp_namespace_proto_descriptor_create(fregment, definition);
+        cee_token_slice_state_mark(TOKEN_FIRST(identifier), TOKEN_LAST(identifier), kCEETokenStateSymbolOccupied);
+        definition->proto_descriptor = csharp_namespace_proto_descriptor_create(fregment, definition);
         fregment->symbols = cee_list_prepend(fregment->symbols, definition);
         cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeNamespaceDefinition);
     }
@@ -3903,7 +4270,8 @@ next_token:
     *pp = NULL;
     
 #ifdef DEBUG_NAMESPACE
-    cee_source_symbol_print(definition);
+    if (definition)
+        cee_source_symbol_print(definition);
 #endif
     
 exit:
@@ -3918,25 +4286,29 @@ exit:
 static void csharp_using_directive_translate_table_init(void)
 {
     /**
-     *                          [       ]       using   static      Identifier      .                       =               ;
-     *  Init                    Init    Init    Using   Error       Error           Error                   Error           Error
-     *  Using                   Error   Error   Error   Using       Identifier      Error                   Error           Error
-     *  Identifier              Error   Error   Error   Error       Error           IdentifierSeparator     Assignment      Confirm
-     *  IdentifierSeparator     Error   Error   Error   Error       Identifier      Error                   Error           Error
-     *  Assignment              Error   Error   Error   Error       Identifier      Error                   Error           Error
+     *                          [       ]       using   static      Identifier      .                           =               ;
+     *  Init                    Init    Init    Using   Error       Error           Error                       Error           Error
+     *  Using                   Error   Error   Error   Using       Identifier      Error                       Error           Error
+     *  Identifier              Error   Error   Error   Error       Error           IdentifierSeparator         Assignment      Confirm
+     *  IdentifierSeparator     Error   Error   Error   Error       Identifier      Error                       Error           Error
+     *  Assignment              Error   Error   Error   Error       AliasIdentifier Error                       Error           Error
+     *  AliasIdentifier         Error   Error   Error   Error       Error           AliasIdentifierSeparator    Error           Confirm
      *
      */
-    TRANSLATE_STATE_INI(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateMax                  , kCSharpUsingDirectiveTranslateStateError                                              );
-    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateInit                 , '['                       , kCSharpUsingDirectiveTranslateStateInit                   );
-    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateInit                 , ']'                       , kCSharpUsingDirectiveTranslateStateInit                   );
-    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateInit                 , kCEETokenID_USING         , kCSharpUsingDirectiveTranslateStateUsing                  );
-    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateUsing                , kCEETokenID_STATIC        , kCSharpUsingDirectiveTranslateStateUsing                  );
-    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateUsing                , kCEETokenID_IDENTIFIER    , kCSharpUsingDirectiveTranslateStateIdentifier             );
-    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateIdentifier           , '.'                       , kCSharpUsingDirectiveTranslateStateIdentifierSeparator    );
-    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateIdentifier           , '='                       , kCSharpUsingDirectiveTranslateStateAssignment             );
-    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateIdentifier           , ';'                       , kCSharpUsingDirectiveTranslateStateConfirm                );
-    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateIdentifierSeparator  , kCEETokenID_IDENTIFIER    , kCSharpUsingDirectiveTranslateStateIdentifier             );
-    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateAssignment           , kCEETokenID_IDENTIFIER    , kCSharpUsingDirectiveTranslateStateIdentifier             );
+    TRANSLATE_STATE_INI(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateMax                      , kCSharpUsingDirectiveTranslateStateError                                                  );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateInit                     , '['                       , kCSharpUsingDirectiveTranslateStateInit                       );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateInit                     , ']'                       , kCSharpUsingDirectiveTranslateStateInit                       );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateInit                     , kCEETokenID_USING         , kCSharpUsingDirectiveTranslateStateUsing                      );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateUsing                    , kCEETokenID_STATIC        , kCSharpUsingDirectiveTranslateStateUsing                      );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateUsing                    , kCEETokenID_IDENTIFIER    , kCSharpUsingDirectiveTranslateStateIdentifier                 );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateIdentifier               , '.'                       , kCSharpUsingDirectiveTranslateStateIdentifierSeparator        );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateIdentifier               , '='                       , kCSharpUsingDirectiveTranslateStateAssignment                 );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateIdentifier               , ';'                       , kCSharpUsingDirectiveTranslateStateConfirm                    );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateIdentifierSeparator      , kCEETokenID_IDENTIFIER    , kCSharpUsingDirectiveTranslateStateIdentifier                 );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateAssignment               , kCEETokenID_IDENTIFIER    , kCSharpUsingDirectiveTranslateStateAliasIdentifier            );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateAliasIdentifier          , '.'                       , kCSharpUsingDirectiveTranslateStateAliasIdentifierSeparator   );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateAliasIdentifier          , ';'                       , kCSharpUsingDirectiveTranslateStateConfirm                    );
+    TRANSLATE_STATE_SET(csharp_using_directive_translate_table, kCSharpUsingDirectiveTranslateStateAliasIdentifierSeparator , kCEETokenID_IDENTIFIER    , kCSharpUsingDirectiveTranslateStateAliasIdentifier            );
 }
 
 static cee_boolean csharp_using_directive_parse(CEESourceFregment* fregment)
@@ -3947,10 +4319,10 @@ static cee_boolean csharp_using_directive_parse(CEESourceFregment* fregment)
     CSharpUsingDirectiveTranslateState current = kCSharpUsingDirectiveTranslateStateInit;
     CSharpUsingDirectiveTranslateState prev = kCSharpUsingDirectiveTranslateStateInit;
     CEEToken* token = NULL;
-    
-    cee_boolean assignment = FALSE;
+    cee_boolean alias = FALSE;
     CEEList* identifier = NULL;
-    CEESourceSymbol* definition = NULL;
+    CEEList* alias_identifier = NULL;
+    CEESourceSymbol* declaration = NULL;
     
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
@@ -3972,22 +4344,18 @@ static cee_boolean csharp_using_directive_parse(CEESourceFregment* fregment)
         prev = current;
         current = csharp_using_directive_translate_table[current][token->identifier];
         
-        if (current == kCSharpUsingDirectiveTranslateStateError) {
+        if (current == kCSharpUsingDirectiveTranslateStateError)
             break;
-        }
-        else if (current == kCSharpUsingDirectiveTranslateStateUsing) {
+        else if (current == kCSharpUsingDirectiveTranslateStateUsing)
             q = p;
-        }
-        else if (current == kCSharpUsingDirectiveTranslateStateIdentifier) {
-            if (!assignment)
-                TOKEN_APPEND(identifier, token);
-        }
-        else if (current == kCSharpUsingDirectiveTranslateStateAssignment) {
-            assignment = TRUE;
-        }
-        else if (current == kCSharpUsingDirectiveTranslateStateConfirm) {
+        else if (current == kCSharpUsingDirectiveTranslateStateIdentifier)
+            TOKEN_APPEND(identifier, token);
+        else if (current == kCSharpUsingDirectiveTranslateStateAssignment)
+            alias = TRUE;
+        else if (current == kCSharpUsingDirectiveTranslateStateAliasIdentifier)
+            TOKEN_APPEND(alias_identifier, token);
+        else if (current == kCSharpUsingDirectiveTranslateStateConfirm)
             break;
-        }
 
 next_token:
         p = TOKEN_NEXT(p);
@@ -3996,47 +4364,98 @@ next_token:
     if (current != kCSharpUsingDirectiveTranslateStateConfirm)
         goto exit;
     
-    definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
+    if (!alias) {
+        declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
+                                                                fregment->subject_ref,
+                                                                q,
+                                                                TOKEN_PREV(p),
+                                                                kCEESourceSymbolTypeUsingDeclaration,
+                                                                "csharp",
+                                                                kCEETokenStringOptionIncompact);
+    }
+    else {
+        declaration = cee_source_symbol_create_from_tokens(fregment->filepath_ref,
                                                            fregment->subject_ref,
-                                                           q,
-                                                           TOKEN_PREV(p),
-                                                           kCEESourceSymbolTypeUsingDeclaration,
+                                                           identifier,
+                                                           kCEESourceSymbolTypeVariableDeclaration,
                                                            "csharp",
                                                            kCEETokenStringOptionIncompact);
-    if (definition) {
-        fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-        cee_source_fregment_type_set_exclusive(fregment,
-                                               kCEESourceFregmentTypeDeclaration);
-        ret = TRUE;
-        
-        if (assignment) {
-            definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                   fregment->subject_ref,
-                                                                   TOKEN_FIRST(identifier),
-                                                                   TOKEN_LAST(identifier),
-                                                                   kCEESourceSymbolTypeVariableDeclaration,
-                                                                   "csharp",
-                                                                   kCEETokenStringOptionCompact);
-            if (definition) {
-                fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-                definition->proto = csharp_declaration_proto_descriptor_create(fregment,
-                                                                               definition,
-                                                                               NULL,
-                                                                               NULL);
-            }
-        }
+        declaration->proto_descriptor = csharp_using_alias_proto_descriptor_create(fregment,
+                                                                                   identifier,
+                                                                                   alias_identifier);
     }
     
-#ifdef DEBUG_USING_DIRECTIVE
-    cee_source_symbol_print(definition);
-#endif
+    if (declaration) {
+        fregment->symbols = cee_list_prepend(fregment->symbols, declaration);
+        cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeDeclaration);
+        ret = TRUE;
+    }
     
 exit:
     
     if (identifier)
         cee_list_free(identifier);
     
+    if (alias_identifier)
+        cee_list_free(alias_identifier);
+    
+#ifdef DEBUG_USING_DIRECTIVE
+    if (definition)
+        cee_source_symbol_print(definition);
+#endif
+    
     return ret;
+}
+
+static cee_char* csharp_using_alias_proto_descriptor_create(CEESourceFregment* fregment,
+                                                            CEEList* identifier,
+                                                            CEEList* alias)
+{
+    if (!fregment || !identifier || !alias)
+        return NULL;
+    
+    cee_char* descriptor = NULL;
+    cee_char* name = NULL;
+    cee_char* alias_str = NULL;
+    CEEList* p = NULL;
+    CEEToken* token = NULL;
+    
+    cee_strconcat0(&descriptor, "{", NULL);
+    
+    cee_strconcat0(&descriptor, "\"type\":", "\"alias\"", NULL);
+    
+    p = TOKEN_FIRST(identifier);
+    while (p) {
+        token = p->data;
+        cee_string_concat_with_token(&name, fregment->subject_ref, token);
+        if (TOKEN_NEXT(p))
+            cee_strconcat0(&name, ".", NULL);
+        p = TOKEN_NEXT(p);
+    }
+    
+    p = TOKEN_FIRST(alias);
+    while (p) {
+        token = p->data;
+        cee_string_concat_with_token(&alias_str, fregment->subject_ref, token);
+        if (TOKEN_NEXT(p))
+            cee_strconcat0(&alias_str, ".", NULL);
+        p = TOKEN_NEXT(p);
+    }
+    
+    if (name && alias_str) {
+        cee_strconcat0(&descriptor, ", \"name\":", name, NULL);
+        cee_strconcat0(&descriptor, ", \"alias\":", alias_str, NULL);
+    }
+        
+    cee_strconcat0(&descriptor, "}", NULL);
+    
+    if (name)
+        cee_free(name);
+    
+    if (alias_str)
+        cee_free(alias_str);
+        
+    return descriptor;
 }
 
 static void csharp_delegate_declaration_translate_table_init(void)
@@ -4135,7 +4554,7 @@ static cee_boolean csharp_delegate_declaration_parse(CEESourceFregment* fregment
     CEESourceFregment* child = NULL;
     CEEList* identifier = NULL;
     CEEList* parameter_list = NULL;
-            
+    CEEList* parameter_list_end = NULL;
     CEESourceSymbol* delegate = NULL;
     
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
@@ -4165,6 +4584,10 @@ static cee_boolean csharp_delegate_declaration_parse(CEESourceFregment* fregment
             if (!parameter_list)
                 parameter_list = p;
         }
+        else if (current == kCSharpDelegateDeclarationTranslateStateParameterListEnd) {
+            if (!parameter_list_end)
+                parameter_list_end = p;
+        }
         else if (current == kCSharpDelegateDeclarationTranslateStateConfirm) {
             ret = TRUE;
             break;
@@ -4177,8 +4600,7 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (current != kCSharpDelegateDeclarationTranslateStateConfirm ||
-        !identifier || !parameter_list)
+    if (current != kCSharpDelegateDeclarationTranslateStateConfirm || !identifier || !parameter_list)
         goto exit;
     
     delegate = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
@@ -4189,29 +4611,26 @@ next_token:
                                                          "csharp",
                                                          kCEETokenStringOptionCompact);
     if (delegate) {
-        cee_token_slice_state_mark(identifier,
-                                   identifier,
-                                   kCEETokenStateSymbolOccupied);
-        
-        cee_source_fregment_type_set_exclusive(fregment,
-                                               kCEESourceFregmentTypeFunctionDeclaration);
+        cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
+        cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDeclaration);
         
         child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
         if (child) {
             child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
             csharp_method_parameters_parse(child);
         }
-        
-        delegate->proto = csharp_method_proto_descriptor_create(fregment,
-                                                                delegate,
-                                                                child->symbols,
-                                                                identifier,
-                                                                "function_declaration");
+        delegate->proto_descriptor = csharp_method_proto_descriptor_create(fregment,
+                                                                           SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+                                                                           TOKEN_PREV(identifier),
+                                                                           identifier,
+                                                                           parameter_list,
+                                                                           parameter_list_end);
         fregment->symbols = cee_list_prepend(fregment->symbols, delegate);
     }
             
 #ifdef DEBUG_DELEGATE
-    cee_source_symbol_print(delegate);
+    if (delegate)
+        cee_source_symbol_print(delegate);
 #endif
     
 exit:

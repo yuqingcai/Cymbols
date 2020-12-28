@@ -280,16 +280,35 @@
     },
     
     "ClassToolbarButton [actived]" : {
+        "icon_color": "#EBEBEA",
     },
     
     "ClassToolbarButton [deactived]" : {
+        "icon_color": "#EBEBEA",
     },
     
     "ClassToolbarButton [clicked]" : {
+        "icon_color": "#EBEBEA",
     },
     
     "ClassToolbarButton [disabled]" : {
         "icon_color": "#CCCCCC",
+    },
+        
+    "ClassToolbarStateButton [actived]" : {
+        "icon_color": "#757575",
+    },
+    
+    "ClassToolbarStateButton [deactived]" : {
+        "icon_color": "#757575",
+    },
+    
+    "ClassToolbarStateButton [clicked]" : {
+        "icon_color": "#575757",
+    },
+    
+    "ClassToolbarStateButton [disabled]" : {
+        "icon_color" : "#737373",
     },
     
     "ClassTitlebarButton [actived]" : {
@@ -308,6 +327,22 @@
         "icon_color": "#737373",
     },
         
+    "ClassTitlebarStateButton [actived]" : {
+        "icon_color": "#757575",
+    },
+    
+    "ClassTitlebarStateButton [deactived]" : {
+        "icon_color": "#757575",
+    },
+    
+    "ClassTitlebarStateButton [clicked]" : {
+        "icon_color": "#575757",
+    },
+    
+    "ClassTitlebarStateButton [disabled]" : {
+        "icon_color": "#AD0000",
+    },
+    
     "ClassCheckBox [actived]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
         "text_color" : "#EBEBEA",
