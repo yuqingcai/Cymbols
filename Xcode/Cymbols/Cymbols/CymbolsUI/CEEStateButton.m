@@ -10,6 +10,11 @@
 
 @implementation CEEStateButton
 
+- (void)initProperties {
+    [super initProperties];
+    _isExclusive = NO;
+}
+
 - (void)mouseDown:(NSEvent *)event {
     
     BOOL keepOn = YES;
@@ -17,6 +22,9 @@
     NSPoint location;
     
     if (!self.isEnabled)
+        return;
+    
+    if (_isExclusive && self.state == NSControlStateValueOn)
         return;
     
     while (keepOn) {

@@ -301,19 +301,16 @@
     },
     
     "ClassToolbarButton [disabled]" : {
-        "icon_color": "#CCCCCC",
+        "icon_color": "#ADADAD",
     },
     
     "ClassToolbarStateButton [actived]" : {
-        "icon_color": "#757575",
     },
     
     "ClassToolbarStateButton [deactived]" : {
-        "icon_color": "#757575",
     },
     
     "ClassToolbarStateButton [clicked]" : {
-        "icon_color": "#575757",
     },
     
     "ClassToolbarStateButton [disabled]" : {

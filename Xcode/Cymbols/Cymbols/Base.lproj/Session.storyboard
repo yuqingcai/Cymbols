@@ -852,12 +852,6 @@
                                     <constraint firstAttribute="bottom" secondItem="kZo-Zp-bQU" secondAttribute="bottom" constant="1" id="x0p-lb-5Xe"/>
                                 </constraints>
                             </customView>
-                            <customView identifier="IDSessionFilePathTableView" translatesAutoresizingMaskIntoConstraints="NO" id="bOF-Rf-GvL" customClass="CEETableView">
-                                <rect key="frame" x="0.0" y="29" width="250" height="246"/>
-                                <connections>
-                                    <outlet property="menu" destination="0Mg-kP-LGS" id="qp8-xi-3PV"/>
-                                </connections>
-                            </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="jFl-ek-Wio" customClass="CEETextField">
                                 <rect key="frame" x="3" y="3" width="244" height="23"/>
                                 <constraints>
@@ -866,14 +860,10 @@
                             </customView>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="jFl-ek-Wio" firstAttribute="top" secondItem="bOF-Rf-GvL" secondAttribute="bottom" constant="3" id="GVb-31-gZB"/>
-                            <constraint firstItem="bOF-Rf-GvL" firstAttribute="top" secondItem="JV5-ZL-u9t" secondAttribute="bottom" id="MbR-pG-5iV"/>
                             <constraint firstItem="JV5-ZL-u9t" firstAttribute="top" secondItem="y23-1r-lvL" secondAttribute="top" id="boZ-7b-M73"/>
                             <constraint firstAttribute="trailing" secondItem="jFl-ek-Wio" secondAttribute="trailing" constant="3" id="ey6-Jq-a0Z"/>
-                            <constraint firstItem="bOF-Rf-GvL" firstAttribute="leading" secondItem="y23-1r-lvL" secondAttribute="leading" id="fKt-Co-CSz"/>
                             <constraint firstAttribute="bottom" secondItem="jFl-ek-Wio" secondAttribute="bottom" constant="3" id="orb-Xo-qnH"/>
                             <constraint firstItem="jFl-ek-Wio" firstAttribute="leading" secondItem="y23-1r-lvL" secondAttribute="leading" constant="3" id="tJO-7u-0g6"/>
-                            <constraint firstAttribute="trailing" secondItem="bOF-Rf-GvL" secondAttribute="trailing" id="vxF-a2-5Dy"/>
                             <constraint firstAttribute="trailing" secondItem="JV5-ZL-u9t" secondAttribute="trailing" id="wAd-jp-ymC"/>
                             <constraint firstItem="JV5-ZL-u9t" firstAttribute="leading" secondItem="y23-1r-lvL" secondAttribute="leading" id="yIA-Cr-grP"/>
                         </constraints>
@@ -883,7 +873,7 @@
                         <outlet property="filterInput" destination="jFl-ek-Wio" id="lAN-vS-tqd"/>
                         <outlet property="listButton" destination="kZo-Zp-bQU" id="9Ar-70-9HD"/>
                         <outlet property="removeSourceButton" destination="b4n-sQ-asi" id="DrZ-IV-gll"/>
-                        <outlet property="sourceTable" destination="bOF-Rf-GvL" id="Vji-eA-pkH"/>
+                        <outlet property="sourceTableMenu" destination="0Mg-kP-LGS" id="Dfh-bs-1gd"/>
                         <outlet property="titlebar" destination="JV5-ZL-u9t" id="BDa-du-fWb"/>
                         <outlet property="treeButton" destination="uMu-oU-HbU" id="IBn-7y-Hcm"/>
                     </connections>

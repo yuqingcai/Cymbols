@@ -95,7 +95,6 @@
     [_editViewController setEditable:NO];
     [_editViewController setIntelligence:NO];
     [_editViewController setWrap:YES];
-        
 }
 
 - (void)showContextTable {

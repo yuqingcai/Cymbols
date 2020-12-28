@@ -9,6 +9,7 @@
 #import "CEEViewController.h"
 #import "CEETitleView.h"
 #import "CEETableView.h"
+#import "CEETreeView.h"
 #import "CEETextField.h"
 #import "CEEProject.h"
 
