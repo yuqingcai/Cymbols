@@ -61,11 +61,11 @@
     [_sourceTree setTranslatesAutoresizingMaskIntoConstraints:NO];
     [_sourceTree setDataSource:self];
     [_sourceTree setDelegate:self];
-    [_sourceTree setNumberOfColumns:1];
+    [_sourceTree setNumberOfColumns:2];
     [_sourceTree setTarget:self];
     [_sourceTree setDoubleAction:@selector(openFilesFromSourceTree:)];
     [_sourceTree setAllowsMultipleSelection:YES];
-    [_sourceTree setEnableDrawHeader:NO];
+    [_sourceTree setEnableDrawHeader:YES];
     [_sourceTree setMenu:_sourceTableMenu];
     [_sourceTree setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
     [_sourceTree registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];

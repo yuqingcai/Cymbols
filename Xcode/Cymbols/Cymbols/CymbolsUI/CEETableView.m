@@ -943,22 +943,23 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     CGFloat y = 0.0;
     CGFloat rowHeight = 0.0;
     
-    NSArray* rowViewsRemoved = [_grid removeAllRowViews];
-    
+    NSArray* rowViewsRemoved = [_grid removeRowViews:-1];
+    // Save all row views to buffer.
     if (!_rowViewBuffer)
         _rowViewBuffer = [[NSMutableArray alloc] init];
+    [_rowViewBuffer addObjectsFromArray:rowViewsRemoved];
     
     if (!_cellViewBuffer)
         _cellViewBuffer = [[NSMutableArray alloc] init];
     
     for (CEEGridRowView* rowView in rowViewsRemoved) {
-        NSArray* cellViews = [rowView.subviews copy];
-        for (NSView* view in cellViews)
-            [view removeFromSuperview];
+        // Remove and Save cell views to buffer.
+        NSArray* cellViews = [rowView removeCellViews];
         [_cellViewBuffer addObjectsFromArray:cellViews];
+        
+        // Remove accessories
+        [rowView removeAccessories];
     }
-    
-    [_rowViewBuffer addObjectsFromArray:rowViewsRemoved];
     
     [_grid setColumnOffsets:[self columnOffsets]];
     [_grid setColumnWidths:[self columnWidths]];
@@ -1090,8 +1091,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         [rowView setStyleConfiguration:_styleConfiguration];
     }
     [rowView setFrame:NSMakeRect(0.0, 0.0, _grid.frame.size.width, rowHeight)];
-    for (CEEView* cellView in cellViews)
-        [rowView addSubview:cellView];
+    [rowView appendCellViews:cellViews];
     [rowView setIndex:row];
     
     return rowView;

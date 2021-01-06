@@ -8,14 +8,71 @@
 
 #import <objc/message.h>
 #import "CEEGridView.h"
+#import "CEEButton.h"
 
+@interface CEEGridRowView () {
+    NSMutableArray* _cellViews;
+    NSMutableArray* _accessories;
+}
 
-@interface CEEGridRowView ()
 @property CGFloat indent;
 @end
 
 @implementation CEEGridRowView
 
+@synthesize cellViews = _cellViews;
+@synthesize accessories = _accessories;
+
+- (NSUInteger)numberOfCells {
+    return _cellViews.count;
+}
+
+- (NSUInteger)numberOfAccessories {
+    return _accessories.count;
+}
+
+- (void)appendCellViews:(NSArray*)cellViews {
+    if (!_cellViews)
+        _cellViews = [[NSMutableArray alloc] init];
+    
+    [_cellViews addObjectsFromArray:cellViews];
+    
+    for (CEEView* view in cellViews)
+        [self addSubview:view];
+}
+
+- (NSArray*)cellViews {
+    return _cellViews;
+}
+
+- (void)appendAccessories:(NSArray*)accessories {
+    if (!_accessories)
+        _accessories = [[NSMutableArray alloc] init];
+    [_accessories addObjectsFromArray:accessories];
+    
+    for (CEEView* view in accessories)
+        [self addSubview:view];
+}
+
+- (NSArray*)accessories {
+    return _accessories;
+}
+
+- (NSArray*)removeCellViews {
+    NSArray* removes = [[self cellViews] copy];
+    for (NSView* view in removes)
+        [view removeFromSuperview];
+    _cellViews = nil;
+    return removes;
+}
+
+- (NSArray*)removeAccessories {
+    NSArray* removes = [[self accessories] copy];
+    for (NSView* view in removes)
+        [view removeFromSuperview];
+    _accessories = nil;
+    return removes;
+}
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
 }
@@ -66,8 +123,8 @@
     NSRect rect;
     for (int i = 0; i < self.subviews.count; i ++) {
         rowView = self.subviews[i];
-        for (int j = 0; j < rowView.subviews.count; j ++) {
-            cellView = rowView.subviews[j];
+        for (int j = 0; j < rowView.cellViews.count; j ++) {
+            cellView = rowView.cellViews[j];
             rect = cellView.frame;
             rect.origin.x = [_columnOffsets[j] floatValue];
             rect.size.width = [_columnWidths[j] floatValue];
@@ -97,10 +154,10 @@
     for (int i = 0; i < self.subviews.count; i ++) {
         rowView = self.subviews[i];
         
-        for (int j = 0; j < rowView.subviews.count; j ++) {
-            cellView = rowView.subviews[j];
+        for (int j = 0; j < rowView.cellViews.count; j ++) {
+            cellView = rowView.cellViews[j];
             rect = cellView.frame;
-                        
+            
             rect.size.width = [_columnWidths[j] floatValue];
             
             if (j == 0)
@@ -120,7 +177,40 @@
     CGFloat placeholder = indent * 16.0;
     CEEGridRowView* rowView = self.subviews[row];
     rowView.indent = indent;
-    CEEView* cellView = rowView.subviews[0];
+    CEEView* cellView = rowView.cellViews[0];
+    NSRect rect = cellView.frame;
+    rect.origin.x = placeholder;
+    rect.size.width = [_columnWidths[0] floatValue] - placeholder;
+    [cellView setFrame:rect];
+    [self setNeedsDisplay:YES];
+}
+
+- (void)setExpandButtonAtRow:(NSUInteger)row {
+    CEEGridRowView* rowView = self.subviews[row];
+    
+    if (rowView.accessories.count)
+        return;
+    
+    CGFloat placeholder = rowView.indent * 16.0;
+    NSButton* button = [[NSButton alloc] initWithFrame:NSMakeRect(placeholder, 0.0, 16.0, 16.0)];
+    [rowView appendAccessories:@[button]];
+    
+    if (rowView.cellViews) {
+        CEEView* cellView = rowView.cellViews[0];
+        NSRect rect = cellView.frame;
+        rect.origin.x = button.frame.origin.x + button.frame.size.width;
+        rect.size.width = [_columnWidths[0] floatValue] - placeholder - button.frame.size.width;
+        [cellView setFrame:rect];
+        [self setNeedsDisplay:YES];
+    }
+}
+
+- (void)removeExpandButtonAtRow:(NSUInteger)row {
+    CEEGridRowView* rowView = self.subviews[row];
+    [rowView removeAccessories];
+
+    CGFloat placeholder = rowView.indent * 16.0;
+    CEEView* cellView = rowView.cellViews[0];
     NSRect rect = cellView.frame;
     rect.origin.x = placeholder;
     rect.size.width = [_columnWidths[0] floatValue] - placeholder;
@@ -131,11 +221,11 @@
 - (void)appendRowViews:(NSArray*)rowViews {
     NSRect rect = [self.subviews lastObject].frame;
     CGFloat y = rect.origin.y + rect.size.height + _rowSpacing;
-    CEEView* rowView = nil;
+    CEEGridRowView* rowView = nil;
     for (int i = 0; i < rowViews.count; i ++) {
         rowView = rowViews[i];
-        for (int j = 0; j <  rowView.subviews.count; j ++) {
-            CEEView* cellView = rowView.subviews[j];
+        for (int j = 0; j <  rowView.cellViews.count; j ++) {
+            CEEView* cellView = rowView.cellViews[j];
             NSRect frame = NSMakeRect([_columnOffsets[j] floatValue], 0.0, [_columnWidths[j] floatValue], cellView.frame.size.height);
             [cellView setFrame:frame];
         }
@@ -145,9 +235,13 @@
     }
 }
 
-- (NSArray*)removeRowViews:(NSUInteger)numberOfRowViews {
-    if (!numberOfRowViews)
-        return nil;
+- (NSArray*)removeRowViews:(NSInteger)numberOfRowViews {
+    if (numberOfRowViews < 0) {
+        NSArray* removes = [[self subviews] copy];
+        for (NSView* view in removes)
+            [view removeFromSuperview];
+        return removes;
+    }
     
     NSMutableArray* removes = [[NSMutableArray alloc] init];
     NSInteger rowViewIndex = self.subviews.count - 1;
@@ -162,20 +256,12 @@
     return removes;
 }
 
-- (NSArray*)removeAllRowViews {
-    if (!self.subviews.count)
-        return nil;
-    
-    NSArray* removes = [[self subviews] copy];
-    for (NSView* view in removes)
-        [view removeFromSuperview];
-    return removes;
-}
-
 - (__kindof NSView*)cellViewInRow:(NSUInteger)row column:(NSUInteger)column {
     if (row >= self.subviews.count || column >= self.numberOfColumns)
         return nil;
-    return self.subviews[row].subviews[column];
+    
+    CEEGridRowView* rowView = self.subviews[row];
+    return rowView.cellViews[column];
 }
 
 - (void)drawRect:(NSRect)dirtyRect {

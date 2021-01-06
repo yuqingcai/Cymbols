@@ -171,6 +171,10 @@
     for (NSInteger i = 0; i < self.grid.subviews.count; i ++) {
         Wrapper* wrapper = _wrappers[row];
         [self.grid setIndent:wrapper.level row:i];
+        if ([self.dataSource treeView:self isItemExpandable:wrapper.leaf.item])
+            [self.grid setExpandButtonAtRow:i];
+        else
+            [self.grid removeExpandButtonAtRow:i];
         row ++;
     }
 }
