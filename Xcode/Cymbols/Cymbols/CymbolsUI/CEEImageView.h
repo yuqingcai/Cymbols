@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
     CEEUserInterfaceStyleConfiguration* _styleConfiguration;
     CEEViewStyleState _styleState;
 }
-@property NSPointerArray* userInterfaceStyles;
+@property (strong) NSPointerArray* userInterfaceStyles;
 @property (strong) NSColor* tintColor;
 - (void)initProperties;
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint;

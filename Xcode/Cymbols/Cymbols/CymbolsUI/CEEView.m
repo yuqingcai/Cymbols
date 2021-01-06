@@ -103,8 +103,8 @@
     
     if (!self.borders) {
         if (self.borderColor && self.borderWidth > FLT_EPSILON) {
-            NSRect borderRect = NSMakeRect(self.borderWidth / 2.0, 
-                                           self.borderWidth / 2.0,
+            NSRect borderRect = NSMakeRect(self.borderWidth/2.0,
+                                           self.borderWidth/2.0,
                                            frameSize.width - self.borderWidth,
                                            frameSize.height - self.borderWidth);
 

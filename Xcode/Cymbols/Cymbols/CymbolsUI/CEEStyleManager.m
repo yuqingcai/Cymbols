@@ -332,6 +332,10 @@ static CEEStyleManager* gStyleManager = nil;
     return [NSImage imageNamed:identifier];
 }
 
+- (NSImage*)iconFromName:(NSString*)name {
+    return [NSImage imageNamed:name];
+}
+
 @end
 
 

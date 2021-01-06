@@ -21,10 +21,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [_historyTable setNibNameOfCellView:@"TableCellViews"];
     [_historyTable setDataSource:self];
     [_historyTable setDelegate:self];
     [_historyTable setTarget:self];
-    [_historyTable setColumns:1];
+    [_historyTable setNumberOfColumns:1];
     [_historyTable setAction:@selector(selectRow:)];
     [_historyTable setEnableDrawHeader:NO];
 }
@@ -67,11 +68,6 @@
     cellView.title.stringValue = string;
     [cellView.icon setImage:[styleManager filetypeIconFromFileName:[reference.filePath lastPathComponent]]];
     return cellView;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (void)highlightSelectionInHistoryTable {    

@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
     CEEUserInterfaceStyleConfiguration* _styleConfiguration;
     CEEViewStyleState _styleState;
 }
-@property NSPointerArray* userInterfaceStyles;
+@property (strong) NSPointerArray* userInterfaceStyles;
 @property (strong) NSColor* dividerColorVertical;
 @property (strong) NSColor* dividerColorHorizontal;
 @property (strong) NSColor* borderColor;

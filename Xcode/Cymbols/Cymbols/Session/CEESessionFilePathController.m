@@ -25,8 +25,9 @@
 @property (weak) IBOutlet CEETitlebarButton *removeSourceButton;
 @property (weak) IBOutlet CEETitlebarStateButton *listButton;
 @property (weak) IBOutlet CEETitlebarStateButton *treeButton;
-@property (weak) IBOutlet CEEView *contentView;
+@property (weak) IBOutlet CEETitlebarButton *reloadButton;
 
+@property (weak) IBOutlet CEEView *contentView;
 @end
 
 @implementation CEESessionFilePathController
@@ -38,31 +39,38 @@
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [_titlebar setTitle:@"Untitled"];
     _sourceTable = [[CEETableView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 100.0, 100.0)];
+    [_sourceTable setNibNameOfCellView:@"TableCellViews"];
     [_sourceTable setIdentifier:@"IDSessionFilePathTableView"];
     [_sourceTable setTranslatesAutoresizingMaskIntoConstraints:NO];
     [_sourceTable setDataSource:self];
     [_sourceTable setDelegate:self];
-    [_sourceTable setColumns:1];
-    [_sourceTable reloadData];
+    [_sourceTable setNumberOfColumns:1];
     [_sourceTable setTarget:self];
-    [_sourceTable setDoubleAction:@selector(openFiles:)];
+    [_sourceTable setDoubleAction:@selector(openFilesFromSourceTable:)];
     [_sourceTable setAllowsMultipleSelection:YES];
     [_sourceTable setEnableDrawHeader:NO];
     [_sourceTable setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
     [_sourceTable registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
     [_sourceTable setMenu:_sourceTableMenu];
     [_sourceTable setStyleConfiguration:[styleManager userInterfaceConfiguration]];
+    [_sourceTable reloadData];
     
     _sourceTree = [[CEETreeView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 100.0, 100.0)];
+    [_sourceTree setNibNameOfCellView:@"TableCellViews"];
     [_sourceTree setIdentifier:@"IDSessionFilePathTreeView"];
     [_sourceTree setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [_sourceTree setColumns:1];
-    [_sourceTree setAllowsMultipleSelection:NO];
+    [_sourceTree setDataSource:self];
+    [_sourceTree setDelegate:self];
+    [_sourceTree setNumberOfColumns:1];
+    [_sourceTree setTarget:self];
+    [_sourceTree setDoubleAction:@selector(openFilesFromSourceTree:)];
+    [_sourceTree setAllowsMultipleSelection:YES];
     [_sourceTree setEnableDrawHeader:NO];
-    [_sourceTree setColumnAutoresizingStyle:kCEETableViewNoColumnAutoresizing];
-    [_sourceTree registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
     [_sourceTree setMenu:_sourceTableMenu];
+    [_sourceTree setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
+    [_sourceTree registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
     [_sourceTree setStyleConfiguration:[styleManager userInterfaceConfiguration]];
+    [_sourceTree reloadData];
     
     [_filterInput setDelegate:self];
     
@@ -75,6 +83,8 @@
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
+
+#pragma mark - table view delegate
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
     if (!_session)
@@ -99,14 +109,10 @@
     return cellView;
 }
 
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
-}
+#pragma mark - table view drag & drop
 
 - (BOOL)tableView:(CEETableView *)tableView writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pasteboard {
     NSMutableArray *filePaths = [[NSMutableArray alloc] init];
-    
     NSInteger i = [tableView.selectedRowIndexes firstIndex];
     while (i != NSNotFound) {
         [filePaths addObject:_filePathsInProject[i]];
@@ -131,6 +137,8 @@
     return NO;
 }
 
+#pragma mark - table view data source
+
 - (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session willBeginAtPoint:(NSPoint)screenPoint forRowIndexes:(NSIndexSet *)rowIndexes {
  session.animatesToStartingPositionsOnCancelOrFail = YES;
  }
@@ -140,9 +148,111 @@
  
 - (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
  }
- 
 
-- (IBAction)openFiles:(id)sender {
+
+#pragma mark - tree view drag & drop
+
+- (BOOL)treeView:(CEETreeView *)treeView writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pasteboard {
+    //NSMutableArray *filePaths = [[NSMutableArray alloc] init];
+    //NSInteger i = [treeView.selectedRowIndexes firstIndex];
+    //BOOL ret = NO;
+    //while (i != NSNotFound) {
+    //    if ([[NSFileManager defaultManager] fileExistsAtPath:_filePathsInProject[i] isDirectory:&ret]) {
+    //        if (!ret)
+    //            [filePaths addObject:_filePathsInProject[i]];
+    //    }
+    //    i = [treeView.selectedRowIndexes indexGreaterThanIndex:i];
+    //}
+    //[pasteboard setPropertyList:filePaths forType:NSFilenamesPboardType];
+    //return YES;
+    return NO;
+}
+
+- (NSDragOperation)treeView:(CEETreeView *)treeView validateDrop:(id<NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)dropOperation {
+    return NSDragOperationGeneric;
+}
+
+- (BOOL)treeView:(CEETreeView *)treeView acceptDrop:(id<NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)dropOperation
+{
+    //NSPasteboard* pasteboard = [info draggingPasteboard];
+    //if ([[pasteboard types] containsObject:NSFilenamesPboardType]) {
+    //    NSArray* filePaths = [pasteboard propertyListForType:NSFilenamesPboardType];
+    //    [_session.project addFilePaths:filePaths];
+    //    return YES;
+    //}
+    //return NO;
+    NSPasteboard* pasteboard = [info draggingPasteboard];
+    NSArray* filePaths = [pasteboard propertyListForType:NSFilenamesPboardType];
+    for (NSString* filePath in filePaths)
+        NSLog(@"%@", filePath);
+    return YES;
+}
+
+#pragma mark - tree view data source
+
+- (NSInteger)treeView:(CEETreeView *)treeView numberOfChildrenOfItem:(id)item {
+    if (!item)
+        return _session.project.properties.filePathsUserSelected.count;
+    
+    NSString* filePath = (NSString*)item;
+    BOOL ret = NO;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&ret] && ret)
+        return [[[NSFileManager defaultManager] contentsOfDirectoryAtPath:filePath error:NULL] count];
+    
+    return 0;
+}
+
+- (id)treeView:(CEETreeView *)treeView child:(NSInteger)index ofItem:(id)item {
+    if (!item)
+        return _session.project.properties.filePathsUserSelected[index];
+    
+    NSString* filePath = (NSString*)item;
+    NSString* subFilePath = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:filePath error:NULL][index];
+    
+    return [filePath stringByAppendingPathComponent:subFilePath];
+}
+
+- (BOOL)treeView:(CEETreeView *)treeView isItemExpandable:(id)item {
+    NSString* filePath = (NSString*)item;
+    BOOL ret = NO;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&ret] && ret)
+        return YES;
+    return NO;
+}
+
+- (NSString *)treeView:(CEETreeView *)treeView titleForColumn:(NSInteger)column {
+    return @"?";
+}
+
+- (CEEView*)treeView:(CEETreeView *)treeView viewForColumn:(NSInteger)column item:(id)item {
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    NSString* filePath = (NSString*)item;
+    NSString* string = [filePath lastPathComponent];
+    CEEFileNameCellView *cellView = [treeView makeViewWithIdentifier:@"IDFileNameCellView"];
+    BOOL fileExisted = [[NSFileManager defaultManager] fileExistsAtPath:filePath];
+    if (!fileExisted)
+        string = [string stringByAppendingString:@" (delete)"];
+    
+    cellView.title.stringValue = string;
+    BOOL isDirectory = NO;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&isDirectory]) {
+        if (!isDirectory)
+            [cellView.icon setImage:[styleManager filetypeIconFromFileName:[filePath lastPathComponent]]];
+        else
+            [cellView.icon setImage:[styleManager iconFromName:@"icon_directory_16x16"]];
+    }
+    return cellView;
+}
+
+- (BOOL)treeView:(CEETreeView *)treeView shouldExpandItem:(nullable id)item {
+    return YES;
+}
+
+- (BOOL)treeView:(CEETreeView *)treeView shouldCollapseItem:(nullable id)item {
+    return YES;
+}
+
+- (IBAction)openFilesFromSourceTable:(id)sender {
     if (!_sourceTable.selectedRowIndexes)
         return;
     
@@ -182,9 +292,36 @@
     [_session.project createSessionWithFilePaths:filePaths];
 }
 
+- (IBAction)openFilesFromSourceTree:(id)sender {
+    NSArray* items = [_sourceTree selectedItems];
+    if (!items)
+        return;
+    
+    for (id item in items) {
+        NSString* filePath = (NSString*)item;
+        BOOL isDirectory = NO;
+        if ([[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&isDirectory]) {
+            if (!isDirectory) {
+                if (!_session.activedPort)
+                    [_session setActivedPort:[_session createPort]];
+                [_session.activedPort openSourceBuffersWithFilePaths:@[filePath]];
+            }
+            else {
+                if (![_sourceTree itemIsExpanded:item])
+                    [_sourceTree expandItem:item];
+                else
+                    [_sourceTree collapseItem:item];
+            }
+        }
+    }
+}
+
 - (void)deserialize:(NSDictionary *)dict {
     _filePathsInProject = [_session filePathsFilter:_filterCondition];
-    [_sourceTable reloadData];
+    if (_sourceTable.superview)
+        [_sourceTable reloadData];
+    else if (_sourceTree.superview)
+        [_sourceTree reloadData];
 }
 
 - (void)addFilePathsResponse:(NSNotification*)notification {
@@ -218,6 +355,7 @@
     [_treeButton setHidden:hidden];
     [_listButton setIsExclusive:YES];
     [_treeButton setIsExclusive:YES];
+    [_reloadButton setHidden:hidden];
     
     [self presentPaths];
     [self presentTitle];
@@ -238,6 +376,7 @@
     [_treeButton setHidden:hidden];
     [_listButton setIsExclusive:YES];
     [_treeButton setIsExclusive:YES];
+    [_reloadButton setHidden:hidden];
     
     [self presentPaths];
     [self presentTitle];
@@ -253,7 +392,10 @@
 
 - (void)presentPaths {
     _filePathsInProject = [_session filePathsFilter:_filterCondition];
-    [_sourceTable reloadData];
+    if (_sourceTable.superview)
+        [_sourceTable reloadData];
+    else if (_sourceTree.superview)
+        [_sourceTree reloadData];
 }
 
 - (void)textViewTextChanged:(CEETextView *)textView {
@@ -351,6 +493,8 @@
     NSArray *constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[sourceTable]-0-[filterInput]-3-|" options:0 metrics:nil views:views];
     [self.view addConstraints:constraintsH];
     [self.view addConstraints:constraintsV];
+    
+    [_sourceTable reloadData];
 }
 
 - (void)showSourceTree {
@@ -372,6 +516,16 @@
     NSArray *constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[sourceTree]-0-[filterInput]-3-|" options:0 metrics:nil views:views];
     [self.view addConstraints:constraintsH];
     [self.view addConstraints:constraintsV];
+    
+    [_sourceTree reloadData];
+}
+
+- (IBAction)reload:(id)sender {
+    if (_sourceTree.superview)
+        [_sourceTree reloadData];
+    
+    if (_sourceTable.superview)
+        [_sourceTable reloadData];
 }
 
 @end

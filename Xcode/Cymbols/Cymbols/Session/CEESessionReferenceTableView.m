@@ -16,7 +16,7 @@
 
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
-    CEETableRowView* rowView = [self.grid rowViews][0];
+    CEEGridRowView* rowView = [self.grid rowViews][0];
     if (!rowView)
         return;
     
@@ -29,7 +29,7 @@
 
 - (void)hightlightRowRect:(NSInteger)rowIndex enable:(BOOL)flag {
     _alternativeRowRect = NSMakeRect(0.0, 0.0, 0.0, 0.0);
-    for (CEETableRowView* rowView in self.grid.subviews) {
+    for (CEEGridRowView* rowView in self.grid.subviews) {
         if (rowIndex == rowView.index) {
             if (flag)
                 _alternativeRowRect = rowView.frame;

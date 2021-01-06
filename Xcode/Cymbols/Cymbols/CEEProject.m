@@ -1191,7 +1191,6 @@ BOOL ContextContainSymbol(CEEList* context,
         return nil;
     
     NSMutableArray* filePaths = nil;
-    
     CEEList* file_paths = cee_database_filepaths_user_selected_get(_database);
     CEEList* p = NULL;
     p = file_paths;
@@ -1354,9 +1353,6 @@ BOOL ContextContainSymbol(CEEList* context,
         session = [self createSession];
         [session.project setCurrentSession:session];
     }
-    
-    for (NSString* filePath in _properties.filePathsUserSelected)
-        NSLog(@"%@", filePath);
 }
 
 - (void)validateDatabase {

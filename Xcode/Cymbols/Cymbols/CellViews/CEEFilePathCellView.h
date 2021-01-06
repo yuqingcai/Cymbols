@@ -7,12 +7,12 @@
 //
 
 #import "CEEView.h"
-#import "CEETextLabel.h"
+#import "CEETableCellViewTextLabel.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEFilePathCellView : CEEView
-@property (weak) IBOutlet CEETextLabel *title;
+@property (weak) IBOutlet CEETableCellViewTextLabel *title;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -59,6 +59,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    [_symbolTable setNibNameOfCellView:@"TableCellViews"];
     [_symbolTable setDataSource:self];
     [_symbolTable setDelegate:self];
     [_symbolTable setTarget:self];
@@ -135,11 +136,6 @@
     cellView.title.stringValue = [NSString stringWithFormat:@"%ld %@ - line %d", row, [filePath lastPathComponent], 0];
     [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
     return cellView;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (IBAction)selectRow:sender {

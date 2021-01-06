@@ -50,18 +50,21 @@ typedef NS_ENUM(NSInteger, CEEProjectRemoveFileScene) {
     _condition = nil;
     _filePathsRemoving = nil;
     _filePathsWithCondition = nil;
+    
+    [_removeFileSelectionView.sourceTable setNibNameOfCellView:@"TableCellViews"];
     [_removeFileSelectionView.sourceTable setDelegate:self];
     [_removeFileSelectionView.sourceTable setDataSource:self];
-    [_removeFileSelectionView.sourceTable setColumns:2];
+    [_removeFileSelectionView.sourceTable setNumberOfColumns:2];
     [_removeFileSelectionView.sourceTable setTarget:self];
     [_removeFileSelectionView.sourceTable registerForDraggedTypes: [NSArray arrayWithObjects: NSFilenamesPboardType, nil]];
     [_removeFileSelectionView.sourceTable setDraggingSourceOperationMask:NSDragOperationEvery forLocal:NO];
     [_removeFileSelectionView.sourceTable setAllowsMultipleSelection:YES];
     [_removeFileSelectionView.filePathInput setDelegate:self];
     
+    [_filePathConfirmView.sourceTable setNibNameOfCellView:@"TableCellViews"];
     [_filePathConfirmView.sourceTable setDelegate:self];
     [_filePathConfirmView.sourceTable setDataSource:self];
-    [_filePathConfirmView.sourceTable setColumns:2];
+    [_filePathConfirmView.sourceTable setNumberOfColumns:2];
     [_filePathConfirmView.sourceTable setTarget:self];
     [_filePathConfirmView.label setStringValue:@"The following Files is removing from Project"];
 }
@@ -202,11 +205,6 @@ typedef NS_ENUM(NSInteger, CEEProjectRemoveFileScene) {
             return @"";
     }
     return nil;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (void)textViewTextChanged:(CEETextView*)textView {

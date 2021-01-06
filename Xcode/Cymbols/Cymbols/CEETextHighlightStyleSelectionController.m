@@ -22,9 +22,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    [_styleTable setNibNameOfCellView:@"TableCellViews"];
     [_styleTable setDataSource:self];
     [_styleTable setDelegate:self];
-    [_styleTable setColumns:1];
+    [_styleTable setNumberOfColumns:1];
     [_styleTable setTarget:self];
     [_styleTable setAction:@selector(selectStyle:)];
     [_styleTable reloadData];
@@ -86,11 +88,6 @@
     cellView.title.stringValue = fileName;
     [cellView.icon setImage:[styleManager filetypeIconFromFileName:fileName]];
     return cellView;
-}
-
-- (CEEView *)tableView:(nonnull CEETableView *)tableView viewWithIdentifier:( NSString *)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (void)selectStyle:(id)sender {

@@ -60,13 +60,25 @@
                                     <constraint firstAttribute="height" constant="22" id="iSN-9m-yMA"/>
                                 </constraints>
                             </customView>
+                            <customView identifier="IDToolbarToggleButton" translatesAutoresizingMaskIntoConstraints="NO" id="1V1-8a-C38" customClass="CEETitlebarButton">
+                                <rect key="frame" x="392" y="276" width="24" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="24" id="8LU-0x-uL1"/>
+                                    <constraint firstAttribute="height" constant="24" id="K5X-dI-z2m"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_mail_16x16"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="W1l-Ce-q5b" secondAttribute="bottom" id="0NP-PX-IGD"/>
                             <constraint firstItem="W1l-Ce-q5b" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" id="9fe-FU-06q"/>
                             <constraint firstItem="0Ah-4l-1PM" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" constant="20" id="BEm-F4-MxH"/>
+                            <constraint firstItem="ObT-tL-nor" firstAttribute="leading" secondItem="1V1-8a-C38" secondAttribute="trailing" constant="4" id="Ch7-yV-hpi"/>
                             <constraint firstAttribute="trailing" secondItem="ObT-tL-nor" secondAttribute="trailing" constant="6" id="Cid-ym-emH"/>
                             <constraint firstAttribute="trailing" secondItem="0Ah-4l-1PM" secondAttribute="trailing" id="Cyq-Gn-u0b"/>
+                            <constraint firstItem="1V1-8a-C38" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" id="fqT-47-Teb"/>
                             <constraint firstItem="W1l-Ce-q5b" firstAttribute="top" secondItem="0Ah-4l-1PM" secondAttribute="bottom" id="p0Z-C0-8qr"/>
                             <constraint firstItem="0Ah-4l-1PM" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" id="qvW-mx-INQ"/>
                             <constraint firstAttribute="trailing" secondItem="W1l-Ce-q5b" secondAttribute="trailing" id="t3K-ne-xdw"/>
@@ -75,6 +87,7 @@
                     </view>
                     <connections>
                         <outlet property="containerView" destination="0Ah-4l-1PM" id="ZAC-ig-vOz"/>
+                        <outlet property="messageButton" destination="1V1-8a-C38" id="TPp-Wc-gyI"/>
                         <outlet property="sessionView" destination="ERx-hH-rdd" id="V96-BY-J64"/>
                         <outlet property="statusBar" destination="W1l-Ce-q5b" id="GoT-TU-iwd"/>
                         <segue destination="6xp-Eq-nBo" kind="sheet" identifier="IDProjectCreatorSegue" id="7qL-y0-Ikn"/>
@@ -783,7 +796,7 @@
                                 <rect key="frame" x="0.0" y="275" width="250" height="25"/>
                                 <subviews>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="YDf-kJ-1Yl" customClass="CEETitlebarButton">
-                                        <rect key="frame" x="196" y="1" width="24" height="24"/>
+                                        <rect key="frame" x="190" y="1" width="24" height="24"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="24" id="0wN-vR-03J"/>
                                             <constraint firstAttribute="height" constant="24" id="V0V-2d-e0d"/>
@@ -809,46 +822,57 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="uMu-oU-HbU" customClass="CEETitlebarStateButton">
-                                        <rect key="frame" x="172" y="1" width="24" height="24"/>
+                                        <rect key="frame" x="130" y="1" width="24" height="24"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="24" id="bLQ-Gr-1uh"/>
                                             <constraint firstAttribute="width" constant="24" id="fKT-AP-D5U"/>
-                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="24" id="j9d-YF-xI7"/>
                                             <constraint firstAttribute="height" constant="24" id="nWk-FZ-WmJ"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_tree_16x16"/>
+                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_directory_tree_16x16"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
                                             <action selector="toggleTreeView:" target="ZM5-zG-qt6" id="A2I-KY-sNh"/>
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="kZo-Zp-bQU" customClass="CEETitlebarStateButton">
-                                        <rect key="frame" x="148" y="1" width="24" height="24"/>
+                                        <rect key="frame" x="160" y="1" width="24" height="24"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="24" id="DQs-ai-3Nv"/>
-                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="24" id="MKG-ms-ayl"/>
-                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="24" id="tzv-GN-Qp8"/>
                                             <constraint firstAttribute="width" constant="24" id="uHE-CY-HGe"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_list_16x16"/>
+                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_file_list_16x16"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
                                             <action selector="toggleListView:" target="ZM5-zG-qt6" id="Yom-En-LRH"/>
                                         </connections>
                                     </customView>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="jfX-C8-fxZ" customClass="CEETitlebarButton">
+                                        <rect key="frame" x="100" y="1" width="24" height="24"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="24" id="Dha-8P-4aW"/>
+                                            <constraint firstAttribute="width" constant="24" id="ejq-AJ-Xwc"/>
+                                        </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_reload_16x16"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="reload:" target="ZM5-zG-qt6" id="gm9-NI-HHG"/>
+                                        </connections>
+                                    </customView>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="YDf-kJ-1Yl" firstAttribute="leading" secondItem="uMu-oU-HbU" secondAttribute="trailing" id="2Zl-7H-hq7"/>
                                     <constraint firstAttribute="bottom" secondItem="uMu-oU-HbU" secondAttribute="bottom" constant="1" id="48A-il-iSD"/>
-                                    <constraint firstItem="uMu-oU-HbU" firstAttribute="leading" secondItem="kZo-Zp-bQU" secondAttribute="trailing" id="9U5-ls-lqv"/>
+                                    <constraint firstItem="uMu-oU-HbU" firstAttribute="leading" secondItem="jfX-C8-fxZ" secondAttribute="trailing" constant="6" id="7LB-Dx-CCL"/>
                                     <constraint firstAttribute="height" constant="25" id="CYu-7U-rfV"/>
+                                    <constraint firstAttribute="bottom" secondItem="jfX-C8-fxZ" secondAttribute="bottom" constant="1" id="N2B-Lz-NSX"/>
+                                    <constraint firstItem="YDf-kJ-1Yl" firstAttribute="leading" secondItem="kZo-Zp-bQU" secondAttribute="trailing" constant="6" id="PHY-qO-Yei"/>
                                     <constraint firstAttribute="trailing" secondItem="b4n-sQ-asi" secondAttribute="trailing" constant="6" id="deL-mW-n1z"/>
                                     <constraint firstItem="YDf-kJ-1Yl" firstAttribute="top" secondItem="JV5-ZL-u9t" secondAttribute="top" id="iTP-nf-tML"/>
-                                    <constraint firstItem="b4n-sQ-asi" firstAttribute="leading" secondItem="YDf-kJ-1Yl" secondAttribute="trailing" id="mXN-eO-rHu"/>
+                                    <constraint firstItem="b4n-sQ-asi" firstAttribute="leading" secondItem="YDf-kJ-1Yl" secondAttribute="trailing" constant="6" id="mXN-eO-rHu"/>
                                     <constraint firstItem="b4n-sQ-asi" firstAttribute="top" secondItem="JV5-ZL-u9t" secondAttribute="top" id="r12-OV-Var"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="250" id="sT2-gy-1Gs"/>
+                                    <constraint firstItem="kZo-Zp-bQU" firstAttribute="leading" secondItem="uMu-oU-HbU" secondAttribute="trailing" constant="6" id="t1B-hl-d5E"/>
                                     <constraint firstAttribute="bottom" secondItem="kZo-Zp-bQU" secondAttribute="bottom" constant="1" id="x0p-lb-5Xe"/>
                                 </constraints>
                             </customView>
@@ -872,6 +896,7 @@
                         <outlet property="addSourceButton" destination="YDf-kJ-1Yl" id="FFi-Mc-B87"/>
                         <outlet property="filterInput" destination="jFl-ek-Wio" id="lAN-vS-tqd"/>
                         <outlet property="listButton" destination="kZo-Zp-bQU" id="9Ar-70-9HD"/>
+                        <outlet property="reloadButton" destination="jfX-C8-fxZ" id="fLe-gp-iuB"/>
                         <outlet property="removeSourceButton" destination="b4n-sQ-asi" id="DrZ-IV-gll"/>
                         <outlet property="sourceTableMenu" destination="0Mg-kP-LGS" id="Dfh-bs-1gd"/>
                         <outlet property="titlebar" destination="JV5-ZL-u9t" id="BDa-du-fWb"/>
@@ -901,6 +926,9 @@
                             </connections>
                         </menuItem>
                         <menuItem isSeparatorItem="YES" id="42P-Lt-gPi"/>
+                        <menuItem title="Refresh" id="d0j-SM-GzP">
+                            <modifierMask key="keyEquivalentModifierMask"/>
+                        </menuItem>
                         <menuItem title="Add Files" id="ynh-E1-LYa">
                             <modifierMask key="keyEquivalentModifierMask"/>
                             <connections>
@@ -1120,7 +1148,7 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="4rd-3j-KKc" customClass="CEETitlebarButton">
-                                        <rect key="frame" x="54" y="1" width="24" height="24"/>
+                                        <rect key="frame" x="60" y="1" width="24" height="24"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="24" id="p4s-yL-R9a"/>
                                             <constraint firstAttribute="width" constant="24" id="zmI-FA-1cu"/>
@@ -1140,7 +1168,7 @@
                                     <constraint firstItem="Qre-Qb-fU9" firstAttribute="leading" secondItem="rrf-r7-pxV" secondAttribute="leading" constant="6" id="LZ4-wP-f2z"/>
                                     <constraint firstItem="Nul-Mx-cFN" firstAttribute="top" secondItem="rrf-r7-pxV" secondAttribute="top" id="ODi-Ot-M3A"/>
                                     <constraint firstItem="kwv-2q-eZc" firstAttribute="top" secondItem="rrf-r7-pxV" secondAttribute="top" id="Wc7-3e-mSf"/>
-                                    <constraint firstItem="4rd-3j-KKc" firstAttribute="leading" secondItem="kwv-2q-eZc" secondAttribute="trailing" id="o2R-sU-zXV"/>
+                                    <constraint firstItem="4rd-3j-KKc" firstAttribute="leading" secondItem="kwv-2q-eZc" secondAttribute="trailing" constant="6" id="o2R-sU-zXV"/>
                                     <constraint firstItem="Qre-Qb-fU9" firstAttribute="top" secondItem="rrf-r7-pxV" secondAttribute="top" id="tTz-vK-TwH"/>
                                     <constraint firstAttribute="trailing" secondItem="Nul-Mx-cFN" secondAttribute="trailing" constant="6" id="tZx-Su-wBK"/>
                                     <constraint firstAttribute="height" constant="25" id="tzU-h2-Arx"/>
@@ -1175,8 +1203,10 @@
         <image name="icon_database_new_16x16" width="16" height="16"/>
         <image name="icon_database_search_16x16" width="16" height="16"/>
         <image name="icon_database_sync_16x16" width="16" height="16"/>
-        <image name="icon_list_16x16" width="16.5" height="16"/>
+        <image name="icon_directory_tree_16x16" width="16" height="16"/>
+        <image name="icon_file_list_16x16" width="16" height="16"/>
         <image name="icon_list_window_16x16" width="16" height="16"/>
+        <image name="icon_mail_16x16" width="16" height="16"/>
         <image name="icon_navigate_backward_16x16" width="16" height="16"/>
         <image name="icon_navigate_forward_16x16" width="16" height="16"/>
         <image name="icon_new_file_16x16" width="16" height="16"/>
@@ -1184,6 +1214,7 @@
         <image name="icon_open_file_16x16" width="16" height="16"/>
         <image name="icon_paste_16x16" width="16" height="16"/>
         <image name="icon_redo_16x16" width="16" height="16"/>
+        <image name="icon_reload_16x16" width="16" height="16"/>
         <image name="icon_remove_16x16" width="16" height="16"/>
         <image name="icon_sand_clock_16x16" width="16" height="16"/>
         <image name="icon_save_16x16" width="16" height="16"/>
@@ -1197,7 +1228,6 @@
         <image name="icon_split_horizontal_16x16" width="16" height="16"/>
         <image name="icon_split_vertical_16x16" width="16" height="16"/>
         <image name="icon_toolbar_toggle_16x16" width="16" height="16"/>
-        <image name="icon_tree_16x16" width="16" height="16"/>
         <image name="icon_undo_16x16" width="16" height="16"/>
         <image name="imageCell:8lr-R7-1tu:image" width="16" height="16">
             <mutableData key="keyedArchiveRepresentation">

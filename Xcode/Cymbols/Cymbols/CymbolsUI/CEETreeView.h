@@ -10,7 +10,41 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CEETreeView : CEETableView
+@protocol CEETreeViewDelegate, CEETreeViewDataSource;
+
+@interface CEETreeView : CEETableView <NSDraggingDestination, NSDraggingSource, NSPasteboardWriting>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincompatible-property-type"
+
+@property (nullable, weak) id <CEETreeViewDelegate> delegate;
+@property (nullable, weak) id <CEETreeViewDataSource> dataSource;
+
+#pragma clang diagnostic pop
+
+- (void)expandItem:(id)item;
+- (void)collapseItem:(id)item;
+- (BOOL)itemIsExpanded:(id)item;
+- (NSArray*)selectedItems;
+@end
+
+@protocol CEETreeViewDelegate <NSObject>
+@required
+- (NSString *)treeView:(CEETreeView *)treeView titleForColumn:(NSInteger)column;
+- (CEEView*)treeView:(CEETreeView *)treeView viewForColumn:(NSInteger)column item:(id)item;
+- (BOOL)treeView:(CEETreeView *)treeView shouldExpandItem:(nullable id)item;
+- (BOOL)treeView:(CEETreeView *)treeView shouldCollapseItem:(nullable id)item;
+@end
+
+@protocol CEETreeViewDataSource <NSObject>
+@required
+- (id)treeView:(CEETreeView *)treeView child:(NSInteger)index ofItem:(nullable id)item;
+- (BOOL)treeView:(CEETreeView *)treeView isItemExpandable:(nullable id)item;
+- (NSInteger)treeView:(CEETreeView *)treeView numberOfChildrenOfItem:(nullable id)item;
+@optional
+- (NSDragOperation)treeView:(CEETreeView *)treeView validateDrop:(id<NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)dropOperation;
+- (BOOL)treeView:(CEETreeView *)treeView acceptDrop:(id<NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)dropOperation;
+- (BOOL)treeView:(CEETreeView *)treeView writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pasteboard;
 @end
 
 NS_ASSUME_NONNULL_END

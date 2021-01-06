@@ -12,14 +12,61 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class CEETableView;
-@class CEETableRowView;
+@protocol CEETableViewDelegate, CEETableViewDataSource;
+
+@interface CEETableViewHeader : CEEView
+- (void)setColumnTitles:(NSArray*)titles;
+@end
+
+typedef NS_ENUM(NSInteger, CEETableViewColumnAutoresizingStyle) {
+    kCEETableViewNoColumnAutoresizing,
+    kCEETableViewUniformColumnAutoresizingStyle,
+};
+
+@interface CEETableView : CEEView <NSDraggingDestination, NSDraggingSource, NSPasteboardWriting>
+@property (nullable, weak) id<CEETableViewDelegate> delegate;
+@property (nullable, weak) id<CEETableViewDataSource> dataSource;
+@property (strong) CEEScroller* verticalScroller;
+@property (strong) CEEScroller* horizontalScroller;
+@property (strong) CEETableViewHeader* header;
+@property (strong) CEETableViewHeader* headerPadding;
+@property (strong) CEEGridView* grid;
+@property (strong) NSPasteboard* draggingSessionPasteboard;
+@property BOOL enableDrawHeader;
+@property (readonly) NSInteger selectedRow;
+@property (readonly) NSIndexSet* selectedRowIndexes;
+@property BOOL allowsMultipleSelection;
+@property SEL action;
+@property SEL doubleAction;
+@property id target;
+@property (readonly) NSInteger clickedRow;
+@property CEETableViewColumnAutoresizingStyle columnAutoresizingStyle;
+@property (readonly) NSInteger numberOfRows;
+@property NSInteger numberOfColumns;
+@property (strong) NSString* nibNameOfCellView;
+@property (readonly) NSInteger firstRowIndex;
+
+- (CGFloat)rowHeight;
+- (void)scrollRowToVisible:(NSInteger)row;
+- (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)extend;
+- (void)setDraggingSourceOperationMask:(NSDragOperation)mask forLocal:(BOOL)isLocal;
+- (void)setColumnWidth:(CGFloat)width atIndex:(NSInteger)column;
+- (void)adjustHorizontalOffsetWithDelta:(CGFloat)delta;
+- (void)reloadData;
+- (__kindof NSView*)makeViewWithIdentifier:(NSUserInterfaceItemIdentifier)identifier;
+
+- (void)gridAdjustRows;
+- (void)updateGrid;
+- (void)tintedGridRowViews;
+- (void)adjustHorizontalScroller;
+- (void)adjustVerticalScroller;
+
+@end
 
 @protocol CEETableViewDelegate <NSObject>
 @required
 - (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column;
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row;
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier;
 @end
 
 @protocol CEETableViewDataSource <NSObject>
@@ -29,49 +76,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSDragOperation)tableView:(CEETableView *)tableView validateDrop:(id<NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)dropOperation;
 - (BOOL)tableView:(CEETableView *)tableView acceptDrop:(id<NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)dropOperation;
 - (BOOL)tableView:(CEETableView *)tableView writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pasteboard;
-@end
-
-@interface CEETableViewHeader : CEEView
-@end
-
-@interface CEETableRowView : CEEView
-@property NSInteger index;
-@end
-
-typedef NS_ENUM(NSInteger, CEETableViewColumnAutoresizingStyle) {
-    kCEETableViewNoColumnAutoresizing,
-    kCEETableViewUniformColumnAutoresizingStyle,
-};
-
-@interface CEETableView : CEEView <NSDraggingDestination, NSDraggingSource, NSPasteboardWriting>
-@property (strong) CEEScroller* verticalScroller;
-@property (strong) CEEScroller* horizontalScroller;
-@property (strong) CEETableViewHeader* header;
-@property (strong) CEETableViewHeader* headerPadding;
-@property (strong) CEEGridView* grid;
-@property BOOL enableDrawHeader;
-@property (readonly) NSInteger selectedRow;
-@property (readonly) NSIndexSet* selectedRowIndexes;
-@property (weak) id<CEETableViewDelegate> delegate;
-@property (weak) id<CEETableViewDataSource> dataSource;
-@property BOOL allowsMultipleSelection;
-@property SEL action;
-@property SEL doubleAction;
-@property id target;
-@property(readonly) NSInteger clickedRow;
-@property CEETableViewColumnAutoresizingStyle columnAutoresizingStyle;
-
-- (void)reloadData;
-- (__kindof NSView*)makeViewWithIdentifier:(NSUserInterfaceItemIdentifier)identifier;
-- (void)setColumns:(NSUInteger)columns;
-- (NSUInteger)columns;
-- (CGFloat)rowHeight;
-- (void)scrollRowToVisible:(NSInteger)row;
-- (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)extend;
-- (void)setDraggingSourceOperationMask:(NSDragOperation)mask forLocal:(BOOL)isLocal;
-- (NSInteger)tableRowIndexByLocation:(NSPoint)point;
-- (void)setColumnWidth:(CGFloat)width atIndex:(NSInteger)column;
-- (void)adjustHorizontalOffsetWithDelta:(CGFloat)delta;
 @end
 
 NS_ASSUME_NONNULL_END

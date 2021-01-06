@@ -26,9 +26,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [_titlebar setTitle:@"Files Opened"];
+    [_referenceTable setNibNameOfCellView:@"TableCellViews"];
     [_referenceTable setDataSource:self];
     [_referenceTable setDelegate:self];
-    [_referenceTable setColumns:1];
+    [_referenceTable setNumberOfColumns:1];
     [_referenceTable setTarget:self];
     [_referenceTable setAction:@selector(selectRow:)];
     [_referenceTable setAllowsMultipleSelection:NO];
@@ -80,11 +81,6 @@
     cellView.title.stringValue = string;
     [cellView.icon setImage:[styleManager filetypeIconFromFileName:[buffer.filePath lastPathComponent]]];
     return cellView;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (void)highlightSelectionInReferenceTable {

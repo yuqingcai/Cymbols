@@ -80,10 +80,11 @@
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     _contextTable = [[CEETableView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 300, 100.0)];
     [_contextTable setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_contextTable setNibNameOfCellView:@"TableCellViews"];
     [_contextTable setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     [_contextTable setDelegate:self];
     [_contextTable setDataSource:self];
-    [_contextTable setColumns:2];
+    [_contextTable setNumberOfColumns:2];
     [_contextTable setEnableDrawHeader:YES];
     [_contextTable setTarget:self];
     [_contextTable setAction:@selector(selectRow:)];
@@ -329,11 +330,6 @@
         return cellView;
     }
     return nil;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (IBAction)selectRow:(id)sender {

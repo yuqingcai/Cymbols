@@ -237,12 +237,10 @@ static void binary_buffer_modified(cee_pointer buffer,
         cee_tree_free(_statement_symbol_tree);
     
     if (_storage) {
-        if (_encodeType == kCEEBufferEncodeTypeUTF8)
-            cee_text_storage_free(_storage);
-        else if (_encodeType == kCEEBufferEncodeTypeUnknow)
+        if (_encodeType == kCEEBufferEncodeTypeUnknow)
             cee_binary_storage_free(_storage);
         else
-            assert(0);
+            cee_text_storage_free(_storage);
     }
     
     //NSLog(@"- cee_tree_count_get: %d", cee_tree_count_get());

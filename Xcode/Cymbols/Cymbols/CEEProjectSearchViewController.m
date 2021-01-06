@@ -74,7 +74,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [_resultTable setColumns:2];
+    [_resultTable setNibNameOfCellView:@"TableCellViews"];
+    [_resultTable setNumberOfColumns:2];
     [_resultTable setDataSource:self];
     [_resultTable setDelegate:self];
     [_resultTable setTarget:self];
@@ -582,11 +583,6 @@
         return cellView;
     }
     return nil;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (IBAction)selectRow:sender {

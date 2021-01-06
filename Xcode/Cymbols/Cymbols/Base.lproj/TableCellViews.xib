@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
-        <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -13,7 +12,7 @@
             <rect key="frame" x="0.0" y="0.0" width="394" height="22"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="uM5-2f-o0s" customClass="CEETableRowCellViewTextLabel">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="uM5-2f-o0s" customClass="CEETableCellViewTextLabel">
                     <rect key="frame" x="28" y="4" width="366" height="18"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="18" id="RAO-en-bRF"/>
@@ -35,8 +34,8 @@
                 <constraint firstAttribute="bottom" secondItem="uM5-2f-o0s" secondAttribute="bottom" constant="4" id="1NC-FJ-Iyy"/>
                 <constraint firstItem="y5a-5g-jck" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="8" id="HUb-da-8Ss"/>
                 <constraint firstAttribute="bottom" secondItem="y5a-5g-jck" secondAttribute="bottom" constant="1" id="aWp-h9-uKz"/>
-                <constraint firstItem="uM5-2f-o0s" firstAttribute="leading" secondItem="y5a-5g-jck" secondAttribute="trailing" id="gDK-ce-Jao"/>
                 <constraint firstAttribute="trailing" secondItem="uM5-2f-o0s" secondAttribute="trailing" id="rCx-yV-JdJ"/>
+                <constraint firstItem="uM5-2f-o0s" firstAttribute="leading" secondItem="y5a-5g-jck" secondAttribute="trailing" id="xqJ-Vp-QAp"/>
             </constraints>
             <connections>
                 <outlet property="icon" destination="y5a-5g-jck" id="l23-Cw-d2E"/>
@@ -58,7 +57,7 @@
                         <action selector="select:" target="DOt-U7-aqq" id="6la-N2-jOR"/>
                     </connections>
                 </customView>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Zy4-MJ-sZa" customClass="CEETableRowCellViewTextLabel">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Zy4-MJ-sZa" customClass="CEETableCellViewTextLabel">
                     <rect key="frame" x="30" y="4" width="364" height="18"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="18" id="wSr-61-mGD"/>
@@ -69,15 +68,15 @@
                 </customView>
             </subviews>
             <constraints>
-                <constraint firstItem="Zy4-MJ-sZa" firstAttribute="leading" secondItem="rwX-pp-pnv" secondAttribute="trailing" id="GS6-9P-h0x"/>
                 <constraint firstAttribute="trailing" secondItem="Zy4-MJ-sZa" secondAttribute="trailing" id="VI7-rJ-Phc"/>
+                <constraint firstItem="Zy4-MJ-sZa" firstAttribute="leading" secondItem="rwX-pp-pnv" secondAttribute="trailing" id="Yiz-i9-LIV"/>
                 <constraint firstAttribute="bottom" secondItem="Zy4-MJ-sZa" secondAttribute="bottom" constant="4" id="knd-77-egU"/>
                 <constraint firstItem="rwX-pp-pnv" firstAttribute="leading" secondItem="DOt-U7-aqq" secondAttribute="leading" constant="8" id="rTY-ze-kjh"/>
                 <constraint firstAttribute="bottom" secondItem="rwX-pp-pnv" secondAttribute="bottom" constant="3" id="u0Y-pH-8RT"/>
             </constraints>
             <connections>
                 <outlet property="check" destination="rwX-pp-pnv" id="Rtr-su-aZX"/>
-                <outlet property="title" destination="Zy4-MJ-sZa" id="43M-8y-v2F"/>
+                <outlet property="title" destination="Zy4-MJ-sZa" id="Nh7-mF-Jcg"/>
             </connections>
             <point key="canvasLocation" x="96" y="111"/>
         </customView>
@@ -85,7 +84,7 @@
             <rect key="frame" x="0.0" y="0.0" width="394" height="22"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="uFF-Nx-0gN" customClass="CEETableRowCellViewTextLabel">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="uFF-Nx-0gN" customClass="CEETableCellViewTextLabel">
                     <rect key="frame" x="8" y="4" width="386" height="18"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="18" id="CEv-ro-eAt"/>
@@ -101,7 +100,7 @@
                 <constraint firstAttribute="bottom" secondItem="uFF-Nx-0gN" secondAttribute="bottom" constant="4" id="CC7-8Z-zfR"/>
             </constraints>
             <connections>
-                <outlet property="title" destination="uFF-Nx-0gN" id="cQT-gU-m4U"/>
+                <outlet property="title" destination="uFF-Nx-0gN" id="x8w-Y0-eqd"/>
             </connections>
             <point key="canvasLocation" x="96" y="185"/>
         </customView>
@@ -109,7 +108,7 @@
             <rect key="frame" x="0.0" y="0.0" width="394" height="22"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Nfa-Pw-8hN" customClass="CEETableRowCellViewTextLabel">
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Nfa-Pw-8hN" customClass="CEETableCellViewTextLabel">
                     <rect key="frame" x="28" y="4" width="366" height="18"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="18" id="zXQ-OH-1ZW"/>
@@ -132,12 +131,12 @@
                 <constraint firstAttribute="bottom" secondItem="8DZ-xr-nvr" secondAttribute="bottom" constant="1" id="ScR-CI-Ryy"/>
                 <constraint firstItem="8DZ-xr-nvr" firstAttribute="leading" secondItem="yiQ-nJ-vxH" secondAttribute="leading" constant="8" id="SyC-dx-WrX"/>
                 <constraint firstAttribute="bottom" secondItem="Nfa-Pw-8hN" secondAttribute="bottom" constant="4" id="bBj-eZ-R5n"/>
-                <constraint firstItem="Nfa-Pw-8hN" firstAttribute="leading" secondItem="8DZ-xr-nvr" secondAttribute="trailing" id="rlS-Ac-Fb6"/>
+                <constraint firstItem="Nfa-Pw-8hN" firstAttribute="leading" secondItem="8DZ-xr-nvr" secondAttribute="trailing" id="xln-UK-2b6"/>
             </constraints>
             <connections>
                 <outlet property="icon" destination="8DZ-xr-nvr" id="v7E-Yt-Caa"/>
                 <outlet property="leading" destination="SyC-dx-WrX" id="8EA-Mx-QVh"/>
-                <outlet property="title" destination="Nfa-Pw-8hN" id="mHc-V0-kot"/>
+                <outlet property="title" destination="Nfa-Pw-8hN" id="KSI-J4-VyL"/>
             </connections>
             <point key="canvasLocation" x="96" y="255"/>
         </customView>

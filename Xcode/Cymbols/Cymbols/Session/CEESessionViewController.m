@@ -20,8 +20,10 @@
 #import "CEEProjectContextViewController.h"
 #import "CEEProjectCleanViewController.h"
 #import "CEEProjectSearchViewController.h"
+#import "CEETitlebarButton.h"
 
 @interface CEESessionViewController ()
+
 @property (strong) IBOutlet CEESessionView *sessionView;
 @property (strong) CEESessionToolbar* toolbar;
 @property (weak) IBOutlet CEESessionStatusBar *statusBar;
@@ -34,6 +36,8 @@
 @property (strong) NSWindowController* contextWindowController;
 @property (strong) NSWindowController* userInterfaceStyleSelectionWindowController;
 @property (strong) NSWindowController* textHighlightStyleSelectionWindowController;
+@property (weak) IBOutlet CEETitlebarButton *messageButton;
+
 @end
 
 @implementation CEESessionViewController
@@ -44,7 +48,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [_containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
-    _titleHeight = 25;
+    _titleHeight = 26;
+    [_messageButton setEnabled:NO];
+    [_messageButton setHidden:YES];
     
     _toolbar = [[NSStoryboard storyboardWithName:@"Session" bundle:nil] instantiateControllerWithIdentifier:@"IDSessionToolbar"];
     [self addChildViewController:_toolbar];
@@ -77,17 +83,17 @@
     [_statusBar removeFromSuperview];
     
     NSDictionary* views = @{
-              @"toolbarView" : _toolbar.view,
-              @"containerView" : _containerView,
-              @"statusBar": _statusBar,
-              };
+        @"toolbarView" : _toolbar.view,
+        @"containerView" : _containerView,
+        @"statusBar": _statusBar,
+    };
     
     NSDictionary* metrics = @{
-                @"titleHeight" : @(_titleHeight),
-                @"toolbarHeight" : @(_toolbar.view.frame.size.height),
-                @"interval0" : @(_sessionView.seperateLineSize),
-                @"interval1" : @(_sessionView.seperateLineSize + _titleHeight)
-                };
+        @"titleHeight" : @(_titleHeight),
+        @"toolbarHeight" : @(_toolbar.view.frame.size.height),
+        @"interval0" : @(_sessionView.seperateLineSize),
+        @"interval1" : @(_sessionView.seperateLineSize + _titleHeight)
+    };
     
     NSArray* constraints;
     if (shown) {

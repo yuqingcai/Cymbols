@@ -29,6 +29,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [_titlebar setTitle:@"Symbols"];
+    [_symbolTable setNibNameOfCellView:@"TableCellViews"];
     [_symbolTable setDataSource:self];
     [_symbolTable setDelegate:self];
     [_symbolTable setTarget:self];
@@ -104,11 +105,6 @@
     [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
     [cellView.leading setConstant:wrapper->level*12];
     return cellView;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (IBAction)selectRow:sender {

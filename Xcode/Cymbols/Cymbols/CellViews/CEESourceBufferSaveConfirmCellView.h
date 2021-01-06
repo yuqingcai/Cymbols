@@ -7,7 +7,7 @@
 //
 
 #import "CEEView.h"
-#import "CEETextLabel.h"
+#import "CEETableCellViewTextLabel.h"
 #import "CEECheckBox.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface CEESourceBufferSaveConfirmCellView : CEEView
-@property (weak) IBOutlet CEETextLabel* title;
+@property (weak) IBOutlet CEETableCellViewTextLabel *title;
 @property (weak) IBOutlet CEECheckBox* check;
 @property (weak) id<CEESourceBufferSaveConfirmCellDelegate> delegate;
 @property (strong) NSString* sourceBufferIdentifier;

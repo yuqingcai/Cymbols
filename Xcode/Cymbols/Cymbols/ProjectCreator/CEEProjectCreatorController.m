@@ -44,20 +44,24 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
     _propertyView = (CEEProjectPropertyView*)[delegate nibObjectWithClass:[CEEProjectPropertyView class] fromNibNamed:@"ProjectPropertyView"];
     [_propertyView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     
+    
+    [_settingView.filePathTable setNibNameOfCellView:@"TableCellViews"];
     [_settingView.filePathTable registerForDraggedTypes: [NSArray arrayWithObjects: NSFilenamesPboardType, nil]];
     [_settingView.filePathTable setDraggingSourceOperationMask:NSDragOperationEvery forLocal:NO];
     [_settingView.filePathTable setDataSource:self];
     [_settingView.filePathTable setDelegate:self];
-    [_settingView.filePathTable setColumns:2];
+    [_settingView.filePathTable setNumberOfColumns:2];
     [_settingView.filePathTable setAllowsMultipleSelection:YES];
     [_settingView.addFilePathButton setTarget:self];
     [_settingView.addFilePathButton setAction:@selector(addUserSelectedFilePaths:)];
     [_settingView.removeFilePathsButton setTarget:self];
     [_settingView.removeFilePathsButton setAction:@selector(removeUserSelectedFilePaths:)];
     
+    
+    [_propertyView.filePathTable setNibNameOfCellView:@"TableCellViews"];
     [_propertyView.filePathTable setDataSource:self];
     [_propertyView.filePathTable setDelegate:self];
-    [_propertyView.filePathTable setColumns:2];
+    [_propertyView.filePathTable setNumberOfColumns:2];
     [_propertyView.filePathTable setAllowsMultipleSelection:NO];
 }
 
@@ -210,11 +214,6 @@ typedef NS_ENUM(NSInteger, CEEProjectCreateScene) {
             return @"";
     }
     return nil;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (IBAction)selectSavePath:(id)sender {

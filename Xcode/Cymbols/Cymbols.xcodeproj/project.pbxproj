@@ -15,6 +15,9 @@
 		26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */ = {isa = PBXBuildFile; fileRef = 26308593254263DA000A8CB5 /* cee_regex_macos.m */; };
 		26381F282564A692004CC769 /* cee_csharp.c in Sources */ = {isa = PBXBuildFile; fileRef = 26381F252564A692004CC769 /* cee_csharp.c */; };
 		26381F292564A692004CC769 /* cee_csharp.l in Sources */ = {isa = PBXBuildFile; fileRef = 26381F272564A692004CC769 /* cee_csharp.l */; };
+		264607A9259C1C6D004462AF /* icon_file_list_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 264607A8259C1C6D004462AF /* icon_file_list_16x16@2x.png */; };
+		264607AB259C1C87004462AF /* icon_directory_tree_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 264607AA259C1C87004462AF /* icon_directory_tree_16x16@2x.png */; };
+		264607AD259C572E004462AF /* icon_mail_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 264607AC259C572E004462AF /* icon_mail_16x16@2x.png */; };
 		2647CE3925309A1700970FE4 /* WelcomeGuide in Resources */ = {isa = PBXBuildFile; fileRef = 2647CE3825309A1700970FE4 /* WelcomeGuide */; };
 		2647CE3E25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3C25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m */; };
 		2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */; };
@@ -234,7 +237,7 @@
 		269204BD252FF54000D6E2DC /* CEEFilePathCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204B5252FF54000D6E2DC /* CEEFilePathCellView.m */; };
 		269204BE252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204B7252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.m */; };
 		269204BF252FF54000D6E2DC /* CEESymbolCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204B9252FF54000D6E2DC /* CEESymbolCellView.m */; };
-		269204C0252FF54000D6E2DC /* CEETableRowCellViewTextLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204BB252FF54000D6E2DC /* CEETableRowCellViewTextLabel.m */; };
+		269204C0252FF54000D6E2DC /* CEETableCellViewTextLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204BB252FF54000D6E2DC /* CEETableCellViewTextLabel.m */; };
 		269204C2252FF55600D6E2DC /* CEESessionDescriptor.c in Sources */ = {isa = PBXBuildFile; fileRef = 269204C1252FF55600D6E2DC /* CEESessionDescriptor.c */; };
 		269204C5252FF57500D6E2DC /* CEEProject.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204C3252FF57400D6E2DC /* CEEProject.m */; };
 		269204C8252FF58200D6E2DC /* CEESearcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204C7252FF58200D6E2DC /* CEESearcher.m */; };
@@ -331,6 +334,9 @@
 		26381F252564A692004CC769 /* cee_csharp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_csharp.c; sourceTree = "<group>"; };
 		26381F262564A692004CC769 /* cee_csharp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_csharp.h; sourceTree = "<group>"; };
 		26381F272564A692004CC769 /* cee_csharp.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_csharp.l; sourceTree = "<group>"; };
+		264607A8259C1C6D004462AF /* icon_file_list_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_list_16x16@2x.png"; sourceTree = "<group>"; };
+		264607AA259C1C87004462AF /* icon_directory_tree_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_directory_tree_16x16@2x.png"; sourceTree = "<group>"; };
+		264607AC259C572E004462AF /* icon_mail_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_mail_16x16@2x.png"; sourceTree = "<group>"; };
 		2647CE3825309A1700970FE4 /* WelcomeGuide */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WelcomeGuide; path = ../../../../Resources/WelcomeGuide; sourceTree = "<group>"; };
 		2647CE3A25309ACC00970FE4 /* CEEUserInterfaceStyleSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEUserInterfaceStyleSelectionController.h; sourceTree = "<group>"; };
 		2647CE3B25309ACC00970FE4 /* CEETextHighlightStyleSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETextHighlightStyleSelectionController.h; sourceTree = "<group>"; };
@@ -664,8 +670,8 @@
 		269204B7252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESourceBufferSaveConfirmCellView.m; sourceTree = "<group>"; };
 		269204B8252FF54000D6E2DC /* CEESymbolCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESymbolCellView.h; sourceTree = "<group>"; };
 		269204B9252FF54000D6E2DC /* CEESymbolCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESymbolCellView.m; sourceTree = "<group>"; };
-		269204BA252FF54000D6E2DC /* CEETableRowCellViewTextLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETableRowCellViewTextLabel.h; sourceTree = "<group>"; };
-		269204BB252FF54000D6E2DC /* CEETableRowCellViewTextLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETableRowCellViewTextLabel.m; sourceTree = "<group>"; };
+		269204BA252FF54000D6E2DC /* CEETableCellViewTextLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETableCellViewTextLabel.h; sourceTree = "<group>"; };
+		269204BB252FF54000D6E2DC /* CEETableCellViewTextLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETableCellViewTextLabel.m; sourceTree = "<group>"; };
 		269204C1252FF55600D6E2DC /* CEESessionDescriptor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CEESessionDescriptor.c; sourceTree = "<group>"; };
 		269204C3252FF57400D6E2DC /* CEEProject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProject.m; sourceTree = "<group>"; };
 		269204C4252FF57500D6E2DC /* CEEProject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProject.h; sourceTree = "<group>"; };
@@ -1054,6 +1060,9 @@
 		269202E4252FF3E300D6E2DC /* 2x */ = {
 			isa = PBXGroup;
 			children = (
+				264607AC259C572E004462AF /* icon_mail_16x16@2x.png */,
+				264607AA259C1C87004462AF /* icon_directory_tree_16x16@2x.png */,
+				264607A8259C1C6D004462AF /* icon_file_list_16x16@2x.png */,
 				26C9B00F2599A30A00A24B60 /* icon_list_16x16@2x.png */,
 				26C9B00E2599A30A00A24B60 /* icon_tree_16x16@2x.png */,
 				268531912571F7E2004724F9 /* icon_using_declaration_16x16@2x.png */,
@@ -1373,8 +1382,8 @@
 				269204B7252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.m */,
 				269204B8252FF54000D6E2DC /* CEESymbolCellView.h */,
 				269204B9252FF54000D6E2DC /* CEESymbolCellView.m */,
-				269204BA252FF54000D6E2DC /* CEETableRowCellViewTextLabel.h */,
-				269204BB252FF54000D6E2DC /* CEETableRowCellViewTextLabel.m */,
+				269204BA252FF54000D6E2DC /* CEETableCellViewTextLabel.h */,
+				269204BB252FF54000D6E2DC /* CEETableCellViewTextLabel.m */,
 			);
 			path = CellViews;
 			sourceTree = "<group>";
@@ -1477,6 +1486,7 @@
 				2692037A252FF3E400D6E2DC /* icon_implementation_definition_16x16@2x.png in Resources */,
 				260D7DF225470231003BDC42 /* icon_xml_tag_16x16@2x.png in Resources */,
 				26920391252FF3E400D6E2DC /* icon_protocol_declaration_16x16@2x.png in Resources */,
+				264607AD259C572E004462AF /* icon_mail_16x16@2x.png in Resources */,
 				26920377252FF3E400D6E2DC /* icon_focus_16x16@2x.png in Resources */,
 				269203B4252FF3E400D6E2DC /* logo_butterfly_16x16@2x.png in Resources */,
 				269203AB252FF3E400D6E2DC /* icon_template_declaration_16x16@2x.png in Resources */,
@@ -1519,6 +1529,7 @@
 				268531922571F7E2004724F9 /* icon_using_declaration_16x16@2x.png in Resources */,
 				269203B3252FF3E400D6E2DC /* logo_butterfly_128x128@2x.png in Resources */,
 				26920372252FF3E400D6E2DC /* icon_file_type_makefile_16x16@2x.png in Resources */,
+				264607A9259C1C6D004462AF /* icon_file_list_16x16@2x.png in Resources */,
 				269203AA252FF3E400D6E2DC /* icon_sync_16x16@2x.png in Resources */,
 				26C9B0102599A30B00A24B60 /* icon_tree_16x16@2x.png in Resources */,
 				269203A7252FF3E400D6E2DC /* icon_split_vertical_16x16@2x.png in Resources */,
@@ -1582,6 +1593,7 @@
 				269203B9252FF3E400D6E2DC /* logo_butterfly_8x8@2x.png in Resources */,
 				269203B8252FF3E400D6E2DC /* logo_butterfly_64x64@2x.png in Resources */,
 				2692039D252FF3E400D6E2DC /* icon_select_16x16@2x.png in Resources */,
+				264607AB259C1C87004462AF /* icon_directory_tree_16x16@2x.png in Resources */,
 				269203BA252FF3E400D6E2DC /* logo_lazycatdesign@2x.png in Resources */,
 				26920378252FF3E400D6E2DC /* icon_function_declaration_16x16@2x.png in Resources */,
 				261B0782256E46EA00D1C48D /* icon_property_declaration_16x16@2x.png in Resources */,
@@ -1679,7 +1691,7 @@
 				2692042A252FF4F400D6E2DC /* CEEImageView.m in Sources */,
 				2692043C252FF4F400D6E2DC /* CEETitleView.m in Sources */,
 				26920299252FF35600D6E2DC /* cee_strfuncs.c in Sources */,
-				269204C0252FF54000D6E2DC /* CEETableRowCellViewTextLabel.m in Sources */,
+				269204C0252FF54000D6E2DC /* CEETableCellViewTextLabel.m in Sources */,
 				26381F282564A692004CC769 /* cee_csharp.c in Sources */,
 				26920440252FF4F400D6E2DC /* CEEViewController.m in Sources */,
 				2647CE3E25309ACD00970FE4 /* CEETextHighlightStyleSelectionController.m in Sources */,

@@ -46,9 +46,11 @@ typedef NS_ENUM(NSInteger, CEEProjectAddFileScene) {
     _filePathConfirmView = (CEEFilePathConfirmView*)[delegate nibObjectWithClass:[CEEFilePathConfirmView class] fromNibNamed:@"FilePathConfirmView"];
     [_filePathConfirmView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
     
+    
+    [_addFileSelectionView.sourceTable setNibNameOfCellView:@"TableCellViews"];
     [_addFileSelectionView.sourceTable setDelegate:self];
     [_addFileSelectionView.sourceTable setDataSource:self];
-    [_addFileSelectionView.sourceTable setColumns:2];
+    [_addFileSelectionView.sourceTable setNumberOfColumns:2];
     [_addFileSelectionView.sourceTable setTarget:self];
     [_addFileSelectionView.sourceTable registerForDraggedTypes: [NSArray arrayWithObjects: NSFilenamesPboardType, nil]];
     [_addFileSelectionView.sourceTable setDraggingSourceOperationMask:NSDragOperationEvery forLocal:NO];
@@ -58,10 +60,11 @@ typedef NS_ENUM(NSInteger, CEEProjectAddFileScene) {
     [_addFileSelectionView.openFilePanelButton setAction:@selector(openFilePanel:)];
     [_addFileSelectionView.removeFilePathsButton setTarget:self];
     [_addFileSelectionView.removeFilePathsButton setAction:@selector(removeFilePathsFromSourceTable:)];
-    
+        
+    [_filePathConfirmView.sourceTable setNibNameOfCellView:@"TableCellViews"];
     [_filePathConfirmView.sourceTable setDelegate:self];
     [_filePathConfirmView.sourceTable setDataSource:self];
-    [_filePathConfirmView.sourceTable setColumns:2];
+    [_filePathConfirmView.sourceTable setNumberOfColumns:2];
     [_filePathConfirmView.sourceTable setTarget:self];
     [_filePathConfirmView.label setStringValue:@"The following Files is adding to Project"];
     _addFilePaths = [[NSMutableArray alloc] init];
@@ -190,11 +193,6 @@ typedef NS_ENUM(NSInteger, CEEProjectAddFileScene) {
             return @"";
     }
     return nil;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 -(IBAction)removeFilePathsFromSourceTable:(id)sender {

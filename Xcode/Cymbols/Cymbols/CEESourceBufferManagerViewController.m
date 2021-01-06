@@ -25,9 +25,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    [_sourceBufferTable setNibNameOfCellView:@"TableCellViews"];
     [_sourceBufferTable setDelegate:self];
     [_sourceBufferTable setDataSource:self];
-    [_sourceBufferTable setColumns:1];
+    [_sourceBufferTable setNumberOfColumns:1];
     [_sourceBufferTable setTarget:self];
     [_sourceBufferTable setAction:@selector(selectRow:)];
     [_sourceBufferTable setAllowsMultipleSelection:YES];
@@ -94,11 +96,6 @@
             
     }
     return cellView;
-}
-
-- (CEEView*)tableView:(CEETableView*)tableView viewWithIdentifier:(NSString*)identifier {
-    AppDelegate* delegate = [NSApp delegate];
-    return (CEEView*)[delegate nibObjectWithIdentifier:identifier fromNibNamed:@"TableCellViews"];
 }
 
 - (IBAction)cancel:(id)sender {

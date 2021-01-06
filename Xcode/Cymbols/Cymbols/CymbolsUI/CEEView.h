@@ -27,7 +27,7 @@ typedef NS_ENUM(NSInteger, CEEViewRegion) {
     CEEViewStyleState _styleState;
 }
 @property (strong) NSTrackingArea *trackingArea;
-@property NSPointerArray* userInterfaceStyles;
+@property (strong) NSPointerArray* userInterfaceStyles;
 @property (strong) NSFont* font;
 @property (strong) NSColor* textColor;
 @property (strong) NSColor* backgroundColor;

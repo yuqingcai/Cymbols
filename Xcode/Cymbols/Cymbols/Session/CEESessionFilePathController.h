@@ -15,7 +15,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CEESessionFilePathController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, CEETextViewDelegate>
+@interface CEESessionFilePathController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, CEETextViewDelegate, CEETreeViewDelegate, CEETreeViewDataSource>
 @property (weak) CEESession* session;
 @end
 
