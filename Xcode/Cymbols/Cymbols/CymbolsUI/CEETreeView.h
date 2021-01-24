@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)expandItem:(id)item;
 - (void)collapseItem:(id)item;
+- (void)reloadItem:(id)item;
 - (BOOL)itemIsExpanded:(id)item;
 - (NSArray*)selectedItems;
 @end

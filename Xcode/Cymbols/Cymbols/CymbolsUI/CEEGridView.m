@@ -8,79 +8,200 @@
 
 #import <objc/message.h>
 #import "CEEGridView.h"
-#import "CEEButton.h"
+#import "CEETitlebarButton.h"
+
+#define EXPAND_BUTTON_WIDTH 16.0
+#define EXPAND_BUTTON_HEIGHT 16.0
 
 @interface CEEGridRowView () {
     NSMutableArray* _cellViews;
-    NSMutableArray* _accessories;
 }
+@property (strong) CEETitlebarButton* expandButton;
 
-@property CGFloat indent;
 @end
 
 @implementation CEEGridRowView
 
 @synthesize cellViews = _cellViews;
-@synthesize accessories = _accessories;
+@synthesize indent = _indent;
+@synthesize columnOffsets = _columnOffsets;
+@synthesize columnWidths = _columnWidths;
 
 - (NSUInteger)numberOfCells {
     return _cellViews.count;
 }
 
-- (NSUInteger)numberOfAccessories {
-    return _accessories.count;
-}
-
-- (void)appendCellViews:(NSArray*)cellViews {
-    if (!_cellViews)
-        _cellViews = [[NSMutableArray alloc] init];
-    
-    [_cellViews addObjectsFromArray:cellViews];
-    
-    for (CEEView* view in cellViews)
-        [self addSubview:view];
-}
-
-- (NSArray*)cellViews {
-    return _cellViews;
-}
-
-- (void)appendAccessories:(NSArray*)accessories {
-    if (!_accessories)
-        _accessories = [[NSMutableArray alloc] init];
-    [_accessories addObjectsFromArray:accessories];
-    
-    for (CEEView* view in accessories)
-        [self addSubview:view];
-}
-
-- (NSArray*)accessories {
-    return _accessories;
-}
-
-- (NSArray*)removeCellViews {
-    NSArray* removes = [[self cellViews] copy];
+- (NSArray*)removeAllCellViews {
+    NSArray* removes = [_cellViews copy];
     for (NSView* view in removes)
         [view removeFromSuperview];
     _cellViews = nil;
     return removes;
 }
 
-- (NSArray*)removeAccessories {
-    NSArray* removes = [[self accessories] copy];
-    for (NSView* view in removes)
-        [view removeFromSuperview];
-    _accessories = nil;
-    return removes;
-}
-- (void)drawRect:(NSRect)dirtyRect {
-    [super drawRect:dirtyRect];
-}
-
 - (void)setStyleState:(CEEViewStyleState)state {
     [super setStyleState:state];
     for (NSView* view in self.subviews)
         [view setStyleState:state];
+}
+
+- (void)setCellViews:(NSArray*)cellViews {
+    if (!_cellViews)
+        _cellViews = [[NSMutableArray alloc] init];
+    [_cellViews addObjectsFromArray:cellViews];
+            
+    for (int i = 0; i <  _cellViews.count; i ++) {
+        CEEView* cellView = _cellViews[i];
+        NSRect rect = NSMakeRect([_columnOffsets[i] floatValue],
+                                 0.0,
+                                 [_columnWidths[i] floatValue],
+                                 cellView.frame.size.height);
+        if (i == 0)
+            rect.origin.x += [self placeholder];
+        
+        [cellView setFrame:rect];
+        [self addSubview:cellView];
+    }
+}
+
+- (NSArray*)cellViews {
+    return _cellViews;
+}
+
+- (void)setIndent:(CGFloat)indent {
+    _indent = indent;
+    
+    for (int i = 0; i < _cellViews.count; i ++) {
+        CEEView* cellView = _cellViews[i];
+        NSRect rect = NSMakeRect([_columnOffsets[i] floatValue],
+                                  0.0,
+                                  [_columnWidths[i] floatValue],
+                                  cellView.frame.size.height);
+        if (i == 0) {
+            rect.origin.x += [self placeholder];
+            rect.size.width -= [self placeholder];
+        }
+        [cellView setFrame:rect];
+    }
+    [self setNeedsDisplay:YES];
+}
+
+- (CGFloat)indent {
+    return _indent;
+}
+
+- (void)setColumnOffsets:(NSArray *)columnOffsets {
+    _columnOffsets = columnOffsets;
+    
+    for (int i = 0; i < _cellViews.count; i ++) {
+        CEEView* cellView = _cellViews[i];
+        NSRect cellViewRect = cellView.frame;
+        cellViewRect.origin.x = [_columnOffsets[i] floatValue];
+        
+        if (i == 0) {
+            if ([self expandButtonShown]) {
+                NSRect buttonFrame = _expandButton.frame;
+                buttonFrame.origin.x = cellViewRect.origin.x;
+                buttonFrame.origin.x += [self placeholder];
+                [_expandButton setFrameOrigin:buttonFrame.origin];
+                cellViewRect.origin.x = _expandButton.frame.origin.x + _expandButton.frame.size.width;
+            }
+            else {
+                cellViewRect.origin.x += [self placeholder];
+            }
+        }
+        
+        [cellView setFrameOrigin:cellViewRect.origin];
+    }
+    [self setNeedsDisplay:YES];
+}
+
+- (NSArray*)columnOffsets {
+    return _columnOffsets;
+}
+
+- (void)setColumnWidths:(NSArray *)columnWidths {
+    _columnWidths = columnWidths;
+    
+    for (int i = 0; i < _cellViews.count; i ++) {
+        CEEView* cellView = _cellViews[i];
+        NSRect cellViewRect = cellView.frame;
+        cellViewRect.size.width = [_columnWidths[i] floatValue];
+        
+        if (i == 0) {
+            cellViewRect.size.width -= [self placeholder];
+            if ([self expandButtonShown]) {
+                NSRect buttonFrame = _expandButton.frame;
+                cellViewRect.size.width -= buttonFrame.size.width;
+            }
+        }
+        
+        if (cellViewRect.size.width < 0.0)
+            cellViewRect.size.width = 0.0;
+        
+        [cellView setFrameSize:cellViewRect.size];
+    }
+    [self setNeedsDisplay:YES];
+}
+
+- (NSArray*)columnWidths {
+    return _columnWidths;
+}
+
+- (CGFloat)placeholder {
+    return _indent * 32.0;
+}
+
+- (void)setExpandable:(BOOL)expandable {
+    if (expandable) {
+        if (!_expandButton) {
+            NSRect buttonFrame = NSMakeRect(0.0,
+                                            (self.frame.size.height - EXPAND_BUTTON_HEIGHT) / 2.0,
+                                            EXPAND_BUTTON_WIDTH,
+                                            EXPAND_BUTTON_HEIGHT);
+            _expandButton = [[CEETitlebarButton alloc] initWithFrame:buttonFrame];
+        }
+        
+        if (![self expandButtonShown])
+            [self addSubview:_expandButton];
+    }
+    else {
+        if ([self expandButtonShown])
+            [_expandButton removeFromSuperview];
+    }
+    
+    if ([self expandButtonShown]) {
+        NSRect buttonFrame = _expandButton.frame;
+        buttonFrame.origin.x = [self placeholder];
+        [_expandButton setFrameOrigin:buttonFrame.origin];
+        CEEView* cellView0 = self.cellViews[0];
+        NSRect cellView0Frame = cellView0.frame;
+        cellView0Frame.origin.x = buttonFrame.origin.x + buttonFrame.size.width;
+        cellView0Frame.size.width = [_columnWidths[0] floatValue] - buttonFrame.size.width;
+        [cellView0 setFrame:cellView0Frame];
+    }
+    else {
+        CEEView* cellView0 = self.cellViews[0];
+        NSRect cellView0Frame = cellView0.frame;
+        cellView0Frame.origin.x = [self placeholder];
+        cellView0Frame.size.width = [_columnWidths[0] floatValue];
+        [cellView0 setFrame:cellView0Frame];
+    }
+}
+
+- (void)setExpanded:(BOOL)expanded {
+    if (_expandButton && _expandButton.superview) {
+        if (expanded)
+            [_expandButton setIcon:[NSImage imageNamed:@"icon_navigate_down_16x16"]];
+        else
+            [_expandButton setIcon:[NSImage imageNamed:@"icon_navigate_forward_16x16"]];
+    }
+}
+
+- (BOOL)expandButtonShown {
+    if (_expandButton && _expandButton.superview)
+        return YES;
+    return NO;
 }
 
 @end
@@ -117,27 +238,9 @@
 
 - (void)setColumnOffsets:(NSArray *)columnOffsets {
     _columnOffsets = columnOffsets;
-    
-    CEEGridRowView* rowView = nil;
-    CEEView* cellView = nil;
-    NSRect rect;
     for (int i = 0; i < self.subviews.count; i ++) {
-        rowView = self.subviews[i];
-        for (int j = 0; j < rowView.cellViews.count; j ++) {
-            cellView = rowView.cellViews[j];
-            rect = cellView.frame;
-            rect.origin.x = [_columnOffsets[j] floatValue];
-            rect.size.width = [_columnWidths[j] floatValue];
-            
-            if (j == 0) {
-                rect.origin.x += rowView.indent * 16.0;
-                rect.size.width -= rowView.indent * 16.0;
-                [cellView setFrame:rect];
-            }
-            else {
-                [cellView setFrameOrigin:rect.origin];
-            }
-        }
+        CEEGridRowView* rowView = self.subviews[i];
+        [rowView setColumnOffsets:columnOffsets];
     }
     [self setNeedsDisplay:YES];
 }
@@ -148,23 +251,9 @@
 
 - (void)setColumnWidths:(NSArray *)columnWidths {
     _columnWidths = columnWidths;
-    CEEGridRowView* rowView = nil;
-    CEEView* cellView = nil;
-    NSRect rect;
     for (int i = 0; i < self.subviews.count; i ++) {
-        rowView = self.subviews[i];
-        
-        for (int j = 0; j < rowView.cellViews.count; j ++) {
-            cellView = rowView.cellViews[j];
-            rect = cellView.frame;
-            
-            rect.size.width = [_columnWidths[j] floatValue];
-            
-            if (j == 0)
-                rect.size.width -= rowView.indent * 16.0;
-                        
-            [cellView setFrameSize:rect.size];
-        }
+        CEEGridRowView* rowView = self.subviews[i];
+        [rowView setColumnWidths:columnWidths];
     }
     [self setNeedsDisplay:YES];
 }
@@ -173,87 +262,41 @@
     return _columnWidths;
 }
 
-- (void)setIndent:(CGFloat)indent row:(NSUInteger)row {
-    CGFloat placeholder = indent * 16.0;
-    CEEGridRowView* rowView = self.subviews[row];
-    rowView.indent = indent;
-    CEEView* cellView = rowView.cellViews[0];
-    NSRect rect = cellView.frame;
-    rect.origin.x = placeholder;
-    rect.size.width = [_columnWidths[0] floatValue] - placeholder;
-    [cellView setFrame:rect];
-    [self setNeedsDisplay:YES];
-}
-
-- (void)setExpandButtonAtRow:(NSUInteger)row {
-    CEEGridRowView* rowView = self.subviews[row];
-    
-    if (rowView.accessories.count)
-        return;
-    
-    CGFloat placeholder = rowView.indent * 16.0;
-    NSButton* button = [[NSButton alloc] initWithFrame:NSMakeRect(placeholder, 0.0, 16.0, 16.0)];
-    [rowView appendAccessories:@[button]];
-    
-    if (rowView.cellViews) {
-        CEEView* cellView = rowView.cellViews[0];
-        NSRect rect = cellView.frame;
-        rect.origin.x = button.frame.origin.x + button.frame.size.width;
-        rect.size.width = [_columnWidths[0] floatValue] - placeholder - button.frame.size.width;
-        [cellView setFrame:rect];
-        [self setNeedsDisplay:YES];
-    }
-}
-
-- (void)removeExpandButtonAtRow:(NSUInteger)row {
-    CEEGridRowView* rowView = self.subviews[row];
-    [rowView removeAccessories];
-
-    CGFloat placeholder = rowView.indent * 16.0;
-    CEEView* cellView = rowView.cellViews[0];
-    NSRect rect = cellView.frame;
-    rect.origin.x = placeholder;
-    rect.size.width = [_columnWidths[0] floatValue] - placeholder;
-    [cellView setFrame:rect];
-    [self setNeedsDisplay:YES];
-}
-
 - (void)appendRowViews:(NSArray*)rowViews {
     NSRect rect = [self.subviews lastObject].frame;
     CGFloat y = rect.origin.y + rect.size.height + _rowSpacing;
-    CEEGridRowView* rowView = nil;
     for (int i = 0; i < rowViews.count; i ++) {
-        rowView = rowViews[i];
-        for (int j = 0; j <  rowView.cellViews.count; j ++) {
-            CEEView* cellView = rowView.cellViews[j];
-            NSRect frame = NSMakeRect([_columnOffsets[j] floatValue], 0.0, [_columnWidths[j] floatValue], cellView.frame.size.height);
-            [cellView setFrame:frame];
-        }
+        CEEGridRowView* rowView = rowViews[i];
         [rowView setFrame:NSMakeRect(0.0, y, self.frame.size.width, rowView.frame.size.height)];
         [self addSubview:rowView];
+        [rowView setColumnWidths:_columnWidths];
+        [rowView setColumnOffsets:_columnOffsets];
         y += rowView.frame.size.height + _rowSpacing;
     }
 }
 
-- (NSArray*)removeRowViews:(NSInteger)numberOfRowViews {
-    if (numberOfRowViews < 0) {
-        NSArray* removes = [[self subviews] copy];
-        for (NSView* view in removes)
-            [view removeFromSuperview];
-        return removes;
-    }
+- (NSArray*)removeRowViewsFromTail:(NSInteger)n {
+    NSMutableArray* rowViews = nil;
     
-    NSMutableArray* removes = [[NSMutableArray alloc] init];
+    if (n <= 0)
+        return nil;
+    
+    rowViews = [[NSMutableArray alloc] init];
     NSInteger rowViewIndex = self.subviews.count - 1;
-    for (NSInteger i = 0; i < numberOfRowViews; i ++) {
-        CEEView* rowView = self.subviews[rowViewIndex - i];
-        [removes addObject:rowView];
-    }
+    for (NSInteger i = 0; i < n; i ++)
+        [rowViews addObject:self.subviews[rowViewIndex - i]];
     
-    for (CEEView* rowView in removes)
+    for (CEEView* rowView in rowViews)
         [rowView removeFromSuperview];
     
-    return removes;
+    return rowViews;
+}
+
+- (NSArray*)removeAllRowViews {
+    NSMutableArray* rowViews = [[self subviews] copy];
+    for (NSView* view in rowViews)
+        [view removeFromSuperview];
+    return rowViews;
 }
 
 - (__kindof NSView*)cellViewInRow:(NSUInteger)row column:(NSUInteger)column {
@@ -327,9 +370,9 @@
 }
 
 - (NSArray*)rowViews {
-    if (self.subviews.count)
-        return self.subviews;
-    return nil;
+    if (!self.subviews || !self.subviews.count)
+        return nil;
+    return self.subviews;
 }
 
 - (void)updateUserInterface {

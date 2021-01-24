@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CEESessionReferenceTableView : CEETableView
-- (void)hightlightRowRect:(NSInteger)rowIndex enable:(BOOL)flag;
+- (void)highlightRowRect:(NSInteger)rowIndex enable:(BOOL)flag;
 @end
 
 NS_ASSUME_NONNULL_END

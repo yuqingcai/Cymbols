@@ -469,7 +469,7 @@ static CEEStyleManager* gStyleManager = nil;
     if ([descriptor caseInsensitiveCompare:@"disabled"] == NSOrderedSame)
         state = kCEEViewStyleStateDisabled;
     if ([descriptor caseInsensitiveCompare:@"highlighted"] == NSOrderedSame)
-        state = kCEEViewStyleStateHeighLighted;
+        state = kCEEViewStyleStateHighLighted;
     
     return state;
 }

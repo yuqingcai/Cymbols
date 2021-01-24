@@ -44,7 +44,7 @@ typedef NS_ENUM(NSInteger, CEETableViewColumnAutoresizingStyle) {
 @property (readonly) NSInteger numberOfRows;
 @property NSInteger numberOfColumns;
 @property (strong) NSString* nibNameOfCellView;
-@property (readonly) NSInteger firstRowIndex;
+@property NSInteger firstRowIndex;
 
 - (CGFloat)rowHeight;
 - (void)scrollRowToVisible:(NSInteger)row;
@@ -52,14 +52,9 @@ typedef NS_ENUM(NSInteger, CEETableViewColumnAutoresizingStyle) {
 - (void)setDraggingSourceOperationMask:(NSDragOperation)mask forLocal:(BOOL)isLocal;
 - (void)setColumnWidth:(CGFloat)width atIndex:(NSInteger)column;
 - (void)adjustHorizontalOffsetWithDelta:(CGFloat)delta;
-- (void)reloadData;
 - (__kindof NSView*)makeViewWithIdentifier:(NSUserInterfaceItemIdentifier)identifier;
-
-- (void)gridAdjustRows;
-- (void)updateGrid;
-- (void)tintedGridRowViews;
-- (void)adjustHorizontalScroller;
-- (void)adjustVerticalScroller;
+- (void)reloadData;
+- (void)reloadHeader;
 
 @end
 

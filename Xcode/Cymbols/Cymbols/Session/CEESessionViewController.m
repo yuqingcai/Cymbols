@@ -36,7 +36,7 @@
 @property (strong) NSWindowController* contextWindowController;
 @property (strong) NSWindowController* userInterfaceStyleSelectionWindowController;
 @property (strong) NSWindowController* textHighlightStyleSelectionWindowController;
-@property (weak) IBOutlet CEETitlebarButton *messageButton;
+@property (weak) IBOutlet CEEToolbarButton *messageButton;
 
 @end
 
@@ -49,8 +49,8 @@
     [super viewDidLoad];
     [_containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
     _titleHeight = 26;
-    [_messageButton setEnabled:NO];
-    [_messageButton setHidden:YES];
+    [_messageButton setEnabled:YES];
+    [_messageButton setHidden:NO];
     
     _toolbar = [[NSStoryboard storyboardWithName:@"Session" bundle:nil] instantiateControllerWithIdentifier:@"IDSessionToolbar"];
     [self addChildViewController:_toolbar];

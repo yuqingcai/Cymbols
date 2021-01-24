@@ -17,7 +17,7 @@ typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
     kCEEViewStyleStateDeactived     = 1,
     kCEEViewStyleStateClicked       = 2,
     kCEEViewStyleStateDisabled      = 3,
-    kCEEViewStyleStateHeighLighted  = 4,
+    kCEEViewStyleStateHighLighted   = 4,
     kCEEViewStyleStateMax           = 6,
 };
 

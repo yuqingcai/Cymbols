@@ -8,36 +8,39 @@
 
 #import <objc/message.h>
 #import "CEETreeView.h"
+#import "CEETitlebarButton.h"
 
-@interface Leaf : NSObject
-@property (weak) Leaf* parent;
-@property (strong) NSMutableArray<Leaf*>* children;
+@interface Tree : NSObject
+@property (weak) Tree* parent;
+@property (strong) NSMutableArray<Tree*>* children;
 @property id item;
 @property BOOL expanded;
 @end
 
-@implementation Leaf
+@implementation Tree
 @end
 
 @interface Wrapper : NSObject
-@property (strong) Leaf* leaf;
+@property (strong) Tree* leaf;
 @property NSInteger level;
 @end
 
 @implementation Wrapper
 @end
 
-
-
 @interface CEETreeView()
 @property (strong) NSMutableArray<Wrapper*>* wrappers;
-@property (strong) Leaf* root;
+@property (strong) Tree* root;
 @end
 
 @implementation CEETreeView
 
 @dynamic delegate;
 @dynamic dataSource;
+
+- (void)initProperties {
+    [super initProperties];
+}
 
 - (NSInteger)numberOfRows {
     return _wrappers.count;
@@ -46,37 +49,38 @@
 - (void)reloadData {
     if (!self.dataSource || !self.delegate)
         return;
-        
-    _root = [[Leaf alloc] init];
-    _root.children = [[NSMutableArray alloc] init];
-    _root.parent = nil;
     
-    NSInteger count = [self.dataSource treeView:self numberOfChildrenOfItem:nil];
-    for (NSInteger i = 0; i < count; i ++) {
-        Leaf* leaf = [[Leaf alloc] init];
-        leaf.parent = _root;
-        leaf.item = [self.dataSource treeView:self child:i ofItem:nil];
-        [_root.children addObject:leaf];
+    if (_root && _root.children.count) {
+        Tree* root = [[Tree alloc] init];
+        root.children = [[NSMutableArray alloc] init];
+        root.parent = nil;
+        if (_root.expanded)
+            [self expandTree:root compareToTree:_root];
+        _root = root;
     }
-    _root.expanded = YES;
+    else {
+        _root = [[Tree alloc] init];
+        _root.children = [[NSMutableArray alloc] init];
+        _root.parent = nil;
+        NSInteger count = [self.dataSource treeView:self numberOfChildrenOfItem:nil];
+        for (NSInteger i = 0; i < count; i ++) {
+            Tree* tree = [[Tree alloc] init];
+            tree.parent = _root;
+            tree.item = [self.dataSource treeView:self child:i ofItem:nil];
+            [_root.children addObject:tree];
+            [_root setExpanded:YES];
+        }
+    }
     
     NSMutableArray* wrappers = [[NSMutableArray alloc] init];
-    [self expandLeaf:_root toWrappers:&wrappers level:0];
+    [self tree:_root toList:&wrappers level:0];
     _wrappers = wrappers;
     
     [super reloadData];
 }
 
-- (void)expandLeaf:(Leaf*)leaf toWrappers:(NSMutableArray**)wrappers level:(NSInteger)level {
-    NSMutableArray* _wrappers = *wrappers;
-    for (Leaf* child in leaf.children) {
-        Wrapper* wrapper = [[Wrapper alloc] init];
-        wrapper.leaf = child;
-        wrapper.level = level;
-        [_wrappers addObject:wrapper];
-        if (child.expanded)
-            [self expandLeaf:child toWrappers:wrappers level:level+1];
-    }
+- (void)reloadItem:(id)item {
+    
 }
 
 - (BOOL)itemIsExpanded:(id)item {
@@ -91,12 +95,16 @@
     if ([self itemIsExpanded:item])
         return;
     
-    Leaf* leaf = nil;
+    Tree* leaf = nil;
+    NSInteger i = 0;
+    NSUInteger n = 0;
+    
     for (Wrapper* wrapper in _wrappers) {
         if (wrapper.leaf.item == item) {
             leaf = wrapper.leaf;
             break;
         }
+        i ++;
     }
     
     if (!leaf)
@@ -105,18 +113,17 @@
     if (leaf.children) {
         leaf.expanded = YES;
         NSMutableArray* wrappers = [[NSMutableArray alloc] init];
-        [self expandLeaf:_root toWrappers:&wrappers level:0];
+        [self tree:_root toList:&wrappers level:0];
         _wrappers = wrappers;
-        
     }
     else {
         if (![self.dataSource treeView:self isItemExpandable:leaf.item])
             return;
         
         leaf.children = [[NSMutableArray alloc] init];
-        NSUInteger n = [self.dataSource treeView:self numberOfChildrenOfItem:leaf.item];
+        n = [self.dataSource treeView:self numberOfChildrenOfItem:leaf.item];
         for (NSInteger i = 0; i < n; i ++) {
-            Leaf* sub = [[Leaf alloc] init];
+            Tree* sub = [[Tree alloc] init];
             sub.parent = leaf;
             sub.item = [self.dataSource treeView:self child:i ofItem:leaf.item];
             [leaf.children addObject:sub];
@@ -124,59 +131,126 @@
         
         leaf.expanded = YES;
         NSMutableArray* wrappers = [[NSMutableArray alloc] init];
-        [self expandLeaf:_root toWrappers:&wrappers level:0];
+        [self tree:_root toList:&wrappers level:0];
         _wrappers = wrappers;
     }
-        
-    [self gridAdjustRows];
-    [self tintedGridRowViews];
-    [self adjustVerticalScroller];
-    [self adjustHorizontalScroller];
-    [self updateGrid];
+    
+    [super reloadData];
 }
 
 - (void)collapseItem:(id)item {
     if (![self itemIsExpanded:item])
         return;
     
-    Leaf* leaf = nil;
+    Tree* leaf = nil;
+    NSInteger i = 0;
+    
     for (Wrapper* wrapper in _wrappers) {
         if (wrapper.leaf.item == item) {
             leaf = wrapper.leaf;
             break;
         }
+        i ++;
     }
     
     if (!leaf)
         return;
     
     if (leaf.children) {
-        leaf.expanded = NO;
         NSMutableArray* wrappers = [[NSMutableArray alloc] init];
-        [self expandLeaf:_root toWrappers:&wrappers level:0];
+        leaf.expanded = NO;
+        [self tree:_root toList:&wrappers level:0];
         _wrappers = wrappers;
     }
     
-    [self gridAdjustRows];
-    [self tintedGridRowViews];
-    [self adjustVerticalScroller];
-    [self adjustHorizontalScroller];
-    [self updateGrid];
+    [super reloadData];
 }
 
-- (void)updateGrid {
-    [super updateGrid];
+- (BOOL)item:(id)item1 equalToItem:(id)item2 {
+    if ([item1 isKindOfClass:[NSString class]] && [item2 isKindOfClass:[NSString class]])
+        return [(NSString*)item1 isEqualToString:(NSString*)item2];
+    else
+        return item1 == item2;
+    return NO;
+}
+
+- (void)expandTree:(Tree*)tree1 compareToTree:(Tree*)tree2 {
+    NSInteger count = [self.dataSource treeView:self numberOfChildrenOfItem:tree1.item];
+    tree1.expanded = YES;
+    tree1.children = [[NSMutableArray alloc] init];
     
-    NSInteger row = self.firstRowIndex;
-    for (NSInteger i = 0; i < self.grid.subviews.count; i ++) {
-        Wrapper* wrapper = _wrappers[row];
-        [self.grid setIndent:wrapper.level row:i];
-        if ([self.dataSource treeView:self isItemExpandable:wrapper.leaf.item])
-            [self.grid setExpandButtonAtRow:i];
-        else
-            [self.grid removeExpandButtonAtRow:i];
-        row ++;
+    for (NSInteger i = 0; i < count; i ++) {
+        Tree* childOfTree1 = [[Tree alloc] init];
+        childOfTree1.parent = tree1;
+        childOfTree1.item = [self.dataSource treeView:self child:i ofItem:tree1.item];
+        [tree1.children addObject:childOfTree1];
+        
+        for (Tree* childOfTree2 in tree2.children) {
+            if (childOfTree2.expanded &&
+                [self item:childOfTree1.item equalToItem:childOfTree2.item])
+                [self expandTree:childOfTree1 compareToTree:childOfTree2];
+        }
     }
+}
+
+- (void)tree:(Tree*)tree toList:(NSMutableArray**)wrappers level:(NSInteger)level {
+    NSMutableArray* _wrappers = *wrappers;
+    for (Tree* child in tree.children) {
+        Wrapper* wrapper = [[Wrapper alloc] init];
+        wrapper.leaf = child;
+        wrapper.level = level;
+        [_wrappers addObject:wrapper];
+        if (child.expanded)
+            [self tree:child toList:wrappers level:level+1];
+    }
+}
+
+- (BOOL)isRowViewExpandable:(NSInteger)index {
+    Wrapper* wrapper = _wrappers[index];
+    return [self.dataSource treeView:self isItemExpandable:wrapper.leaf.item];
+}
+
+- (BOOL)isRowViewExpanded:(NSInteger)index {
+    Wrapper* wrapper = _wrappers[index];
+    return [self itemIsExpanded:wrapper.leaf.item];
+}
+
+- (NSInteger)rowViewIndent:(NSInteger)index {
+    return _wrappers[index].level;
+}
+
+- (void)cellViewAddOffsetSubview:(NSView*)cellView {
+    for (NSView* view in cellView.subviews) {
+        NSRect rect  = view.frame;
+        rect.origin.x += 8.0;
+        [view setFrame:rect];
+    }
+}
+
+- (void)cellViewMinusOffsetSubview:(NSView*)cellView {
+    for (NSView* view in cellView.subviews) {
+        NSRect rect  = view.frame;
+        rect.origin.x -= 8.0;
+        [view setFrame:rect];
+    }
+}
+
+- (CEETitlebarButton*)cellViewHasbutton:(NSView*)cellView {
+    for (NSView* view in cellView.subviews) {
+        if ([view isKindOfClass:[CEETitlebarButton class]])
+            return (CEETitlebarButton*)view;
+    }
+    return nil;
+}
+
+- (void)toggleItemExpand:(id)sender {
+    NSInteger row = self.firstRowIndex;
+    NSButton* button = (NSButton*)sender;
+    Wrapper* wrapper = _wrappers[row + button.tag];
+    if ([self itemIsExpanded:wrapper.leaf.item])
+        [self collapseItem:wrapper.leaf.item];
+    else
+        [self expandItem:wrapper.leaf.item];
 }
 
 - (__kindof NSView*)viewForColumn:(NSInteger)column row:(NSInteger)row {
@@ -220,7 +294,7 @@
         return NSDragOperationNone;
     
     if ([self.dataSource respondsToSelector:@selector(treeView:validateDrop:proposedRow:proposedDropOperation:)])
-        return [self.dataSource treeView:self validateDrop:sender proposedRow:(self.firstRowIndex + self.grid.subviews.count - 1)  proposedDropOperation:NSTableViewDropOn];
+        return [self.dataSource treeView:self validateDrop:sender proposedRow:(self.firstRowIndex + self.grid.rowViews.count - 1)  proposedDropOperation:NSTableViewDropOn];
     
     return NSDragOperationNone;
 }
@@ -233,7 +307,7 @@
         return NO;
     
     if ([self.dataSource respondsToSelector:@selector(treeView:acceptDrop:row:dropOperation:)])
-        return [self.dataSource treeView:self acceptDrop:sender row:(self.firstRowIndex + self.grid.subviews.count - 1) dropOperation:NSTableViewDropOn];
+        return [self.dataSource treeView:self acceptDrop:sender row:(self.firstRowIndex + self.grid.rowViews.count - 1) dropOperation:NSTableViewDropOn];
     
     return NO;
 }

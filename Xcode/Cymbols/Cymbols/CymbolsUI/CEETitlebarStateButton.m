@@ -10,9 +10,4 @@
 
 @implementation CEETitlebarStateButton
 
-- (void)initProperties {
-    [super initProperties];
-    self.backgroundColor = [NSColor clearColor];
-}
-
 @end

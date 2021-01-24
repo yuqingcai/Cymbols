@@ -12,15 +12,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEGridRowView : CEEView
 @property NSInteger index;
+@property CGFloat indent;
+@property NSArray* columnWidths;
+@property NSArray* columnOffsets;
 @property (strong, readonly) NSArray* cellViews;
-@property (strong, readonly) NSArray* accessories;
 - (NSUInteger)numberOfCells;
-- (NSUInteger)numberOfAccessories;
-- (void)appendCellViews:(NSArray*)cellViews;
-- (void)appendAccessories:(NSArray*)accessories;
-- (NSArray*)removeCellViews;
-- (NSArray*)removeAccessories;
-
+- (void)setCellViews:(NSArray*)cellViews;
+- (NSArray*)removeAllCellViews;
+- (void)setExpandable:(BOOL)expandable;
+- (void)setExpanded:(BOOL)expanded;
 @end
 
 @interface CEEGridView : CEEView
@@ -30,20 +30,17 @@ NS_ASSUME_NONNULL_BEGIN
 @property BOOL enableDrawHorizontalGrid;
 @property BOOL enableDrawVerticalGrid;
 @property NSUInteger numberOfColumns;
-@property NSArray* columnOffsets;
 @property NSArray* columnWidths;
+@property NSArray* columnOffsets;
 @property (readonly) NSArray* rowViews;
 
 - (CGFloat)rowHeight;
 - (NSUInteger)numberOfRows;
 - (void)appendRowViews:(NSArray*)rowViews;
-- (NSArray*)removeRowViews:(NSInteger)numberOfRowViews;
+- (NSArray*)removeRowViewsFromTail:(NSInteger)n;
+- (NSArray*)removeAllRowViews;
 - (__kindof NSView*)cellViewInRow:(NSUInteger)row column:(NSUInteger)column;
-- (void)setColumnOffsets:(NSArray *)columnOffsets;
-- (void)setColumnWidths:(NSArray *)columnWidths;
-- (void)setIndent:(CGFloat)indent row:(NSUInteger)row;
-- (void)setExpandButtonAtRow:(NSUInteger)row;
-- (void)removeExpandButtonAtRow:(NSUInteger)row;
+
 @end
 
 NS_ASSUME_NONNULL_END

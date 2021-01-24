@@ -12,6 +12,7 @@
 
 @synthesize title = _title;
 @synthesize state = _state;
+@synthesize icon = _icon;
 
 - (void)initProperties { 
     [super initProperties];
@@ -52,7 +53,7 @@
         if (self.state == NSControlStateValueOff) {
             style = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:kCEEViewStyleStateActived];
             if (self.isHighlighted) {
-                CEEUserInterfaceStyle* highlightStyle = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:kCEEViewStyleStateHeighLighted];
+                CEEUserInterfaceStyle* highlightStyle = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:kCEEViewStyleStateHighLighted];
                 if (highlightStyle)
                     style = highlightStyle;
             }
@@ -171,6 +172,15 @@
         CGPoint p0 = CGPointMake(offsetX, offsetY);
         [tintedIcon drawAtPoint:p0 fromRect:r0 operation:NSCompositingOperationSourceOver fraction:1.0];
     }
+}
+
+- (void)setIcon:(NSImage *)icon {
+    _icon = icon;
+    [self setNeedsDisplay:YES];
+}
+
+- (NSImage*)icon {
+    return _icon;
 }
 
 - (void)mouseDown:(NSEvent *)event {    

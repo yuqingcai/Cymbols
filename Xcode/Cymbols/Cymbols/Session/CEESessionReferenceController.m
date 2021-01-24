@@ -273,10 +273,10 @@
 }
 
 - (void)menuWillOpen:(NSMenu *)menu {
-    [_referenceTable hightlightRowRect:[_referenceTable clickedRow] enable:YES];
+    [_referenceTable highlightRowRect:[_referenceTable clickedRow] enable:YES];
 }
 
 - (void)menuDidClose:(NSMenu *)menu {
-    [_referenceTable hightlightRowRect:[_referenceTable clickedRow] enable:NO];
+    [_referenceTable highlightRowRect:[_referenceTable clickedRow] enable:NO];
 }
 @end

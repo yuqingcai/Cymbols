@@ -26,7 +26,6 @@
 @property (weak) IBOutlet CEETitlebarStateButton *listButton;
 @property (weak) IBOutlet CEETitlebarStateButton *treeButton;
 @property (weak) IBOutlet CEETitlebarButton *reloadButton;
-
 @property (weak) IBOutlet CEEView *contentView;
 @end
 
@@ -61,11 +60,11 @@
     [_sourceTree setTranslatesAutoresizingMaskIntoConstraints:NO];
     [_sourceTree setDataSource:self];
     [_sourceTree setDelegate:self];
-    [_sourceTree setNumberOfColumns:2];
+    [_sourceTree setNumberOfColumns:1];
     [_sourceTree setTarget:self];
     [_sourceTree setDoubleAction:@selector(openFilesFromSourceTree:)];
     [_sourceTree setAllowsMultipleSelection:YES];
-    [_sourceTree setEnableDrawHeader:YES];
+    [_sourceTree setEnableDrawHeader:NO];
     [_sourceTree setMenu:_sourceTableMenu];
     [_sourceTree setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
     [_sourceTree registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
@@ -526,6 +525,17 @@
     
     if (_sourceTable.superview)
         [_sourceTable reloadData];
+}
+
+- (IBAction)refresh:(id)sender {
+    if (_sourceTree.superview) {
+        NSArray* items = [_sourceTree selectedItems];
+        if (!items)
+            return;
+        
+        id item = items[0];
+        [_sourceTree reloadItem:item];
+    }
 }
 
 @end
