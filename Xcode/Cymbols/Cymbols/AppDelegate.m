@@ -27,7 +27,7 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     self = [super init];
     if (!self)
         return nil;
-    
+        
     cee_parsers_create();
     
     [self setupSupportDirectory];
@@ -104,6 +104,7 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    //[[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"NSConstraintBasedLayoutVisualizeMutuallyExclusiveConstraints"];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {

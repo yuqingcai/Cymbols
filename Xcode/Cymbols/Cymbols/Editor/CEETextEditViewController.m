@@ -39,8 +39,8 @@
 @property BOOL searchCaseSensitive;
 @property BOOL searchRegex;
 @property BOOL searchMarchWord;
-@property BOOL searchTimeout;
 @property BOOL searchTextWhenModifing;
+@property cee_boolean searchTimeout;
 @property CEEList* symbolReferences;
 @end
 
@@ -94,7 +94,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     _searchCaseSensitive = NO;
     _searchRegex = NO;
     _searchMarchWord = NO;
-    _searchTimeout = NO;
+    _searchTimeout = FALSE;
     _searchTextWhenModifing = YES;
     
     [_textView setDelegate:self];
@@ -334,7 +334,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
         cee_text_edit_insert(_searchInput.edit, 
                              (const cee_uchar*)"search timeout");
         cee_text_edit_select_all(_searchInput.edit);
-        _searchTimeout = NO;
+        _searchTimeout = FALSE;
     }
     
     CEEList* ranges = cee_text_edit_searched_ranges_get(_textView.edit);
@@ -555,7 +555,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     CEETextStorageLineBreakType line_break_type = cee_text_storage_line_break_type_get(self.buffer.storage);
     NSString* sourceType = [sourceBufferManager sourceType:self.buffer];
     NSString* lineBreakTypeString = @"";
-    NSString* encodeType = @"";
+    NSString* encodeType = [NSString stringWithUTF8String:self.buffer.encodeType];
     
     if (line_break_type == kCEETextStorageLineBreakTypeCR)
         lineBreakTypeString = @"CR";
@@ -563,18 +563,7 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
         lineBreakTypeString = @"LF";
     else if (line_break_type == kCEETextStorageLineBreakTypeCRLF)
         lineBreakTypeString = @"CRLF";
-    
-    if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF8)
-        encodeType = @"UTF-8";
-    else if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF16BE)
-        encodeType = @"UTF-16BE";
-    else if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF16LE)
-        encodeType = @"UTF-16LE";
-    else if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF32BE)
-        encodeType = @"UTF-32BE";
-    else if (self.buffer.encodeType == kCEEBufferEncodeTypeUTF32LE)
-        encodeType = @"UTF-32LE";
-    
+        
     if ([self.buffer withBOM])
         encodeType = [encodeType stringByAppendingString:@" with BOM"];
     

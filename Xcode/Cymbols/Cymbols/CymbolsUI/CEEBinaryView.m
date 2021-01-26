@@ -13,7 +13,7 @@
 - (void)initProperties {
     [super initProperties];
     cee_text_edit_wrap_set(_edit, YES);
-    cee_text_edit_insert(_edit, (const cee_uchar*)[@"It seems you open a binary file, Cymbols does't support binary file edit yet." UTF8String]);
+    cee_text_edit_insert(_edit, (const cee_uchar*)[@"It seems you open a binary file, Cymbols does't support binary file yet.\nIf the file you opened is a text file but not encoding in UTF-8, please \nconvert it to UTF-8 then open again." UTF8String]);
     [self setEditable:NO];
 }
 

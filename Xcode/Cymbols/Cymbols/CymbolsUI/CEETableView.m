@@ -9,7 +9,7 @@
 #import <objc/message.h>
 #import "CEETableView.h"
 
-#define MIN_COLUMN_WIDTH 24.0
+#define MIN_COLUMN_WIDTH 5.0
 #define HEADER_HEIGHT 25.0
 #define SCROLLER_WIDTH 15.0
 
@@ -771,26 +771,6 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     _columnWidths[column] = @(width);
 }
 
-- (void)adjustGridRowsCapability {
-    if (!_grid.numberOfRows)
-        return;
-    
-    CGFloat gridHeight = _grid.frame.size.height;
-    CGFloat itemHeight = _grid.rowHeight + _grid.rowSpacing;
-    NSUInteger rowCapability = gridHeight / itemHeight;
-    
-    if (rowCapability < 1)
-        return;
-    
-    if (fmod(gridHeight, itemHeight) > (itemHeight / 3.0))
-        rowCapability ++;
-    
-    if (_grid.numberOfRows < rowCapability)
-        [self insertRowViewsAtTail:rowCapability - _grid.numberOfRows];
-    else if (_grid.numberOfRows > rowCapability)
-        [self removeRowViewsAtTail:_grid.numberOfRows - rowCapability];
-}
-
 - (void)adjustHorizontalOffsetWithDelta:(CGFloat)delta {
     if (_horizontalOffset < 0.0) {
         if (delta > 0.0) {
@@ -964,7 +944,6 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     CEEGridRowView* rowView = nil;
     NSInteger row = -1;
     CGFloat y = 0.0;
-    CGFloat rowHeight = 0.0;
     
     [self invalidateAndRecycleViewsInGrid];
     
@@ -981,9 +960,9 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         rowView = [self createRowViewWithIndex:row];
         if (rowView)
             [rowViews addObject:rowView];
-        rowHeight = rowView.frame.size.height;
-        y += _grid.rowSpacing + rowHeight;
+        y += _grid.rowSpacing + rowView.frame.size.height;
         row ++;
+        
         if (y > _grid.frame.size.height || row >= self.numberOfRows)
             break;
     }
@@ -998,14 +977,14 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     CGFloat gridHeight = self.grid.frame.size.height;
     CGFloat itemHeight = self.grid.rowHeight + self.grid.rowSpacing;
     NSUInteger rowCapability = gridHeight / itemHeight;
+    
     if (rowCapability < 1)
         return;
     
-    if (fmod(gridHeight, itemHeight) > (itemHeight / 3.0))
-        rowCapability ++;
+    //if (fmod(gridHeight, itemHeight) > (itemHeight / 3.0))
+    //    rowCapability ++;
     
     NSUInteger n = [self numberOfRows];
-    
     if (n - self.firstRowIndex >= self.grid.numberOfRows &&
         rowCapability > self.grid.numberOfRows) {
         NSUInteger n1 = MIN((n - self.firstRowIndex) - self.grid.numberOfRows,
@@ -1027,6 +1006,26 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     else {
         self.firstRowIndex -= n0;
     }
+}
+
+- (void)adjustGridRowsCapability {
+    if (!_grid.numberOfRows)
+        return;
+    
+    CGFloat gridHeight = _grid.frame.size.height;
+    CGFloat itemHeight = _grid.rowHeight + _grid.rowSpacing;
+    NSUInteger rowCapability = gridHeight / itemHeight;
+    
+    if (rowCapability < 1)
+        return;
+    
+    //if (fmod(gridHeight, itemHeight) > (itemHeight / 3.0))
+    //    rowCapability ++;
+    
+    if (_grid.numberOfRows < rowCapability)
+        [self insertRowViewsAtTail:rowCapability - _grid.numberOfRows];
+    else if (_grid.numberOfRows > rowCapability)
+        [self removeRowViewsAtTail:_grid.numberOfRows - rowCapability];
 }
 
 - (void)updateGrid {
@@ -1057,17 +1056,21 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         }
     }
     _update = NO;
+    [self.grid setColumnWidths:_columnWidths];
+    [self.grid setColumnOffsets:self.columnOffsets];
 }
 
-- (BOOL)isRowViewExpandable:(NSInteger)index {
+- (BOOL)isRowViewExpandable:(NSInteger)row {
     return FALSE;
 }
 
-- (BOOL)isRowViewExpanded:(NSInteger)index {
+- (BOOL)isRowViewExpanded:(NSInteger)row {
     return FALSE;
 }
 
-- (NSInteger)rowViewIndent:(NSInteger)index {
+- (NSInteger)rowViewIndent:(NSInteger)row {
+    if ([self.delegate respondsToSelector:@selector(tableView:indentForRow:)])
+        return [self.delegate tableView:self indentForRow:row];
     return 0.0;
 }
 
@@ -1688,7 +1691,6 @@ exit:
                 _horizontalScroller.floatValue = 0.0;
             [_header setColumnOffsets:[self columnOffsets]];
             [_grid setColumnOffsets:[self columnOffsets]];
-            //[_grid setColumnWidths:[self columnWidths]];
         }
     }
 }
@@ -1703,7 +1705,6 @@ exit:
                 _horizontalScroller.floatValue = 1.0;
             [_header setColumnOffsets:[self columnOffsets]];
             [_grid setColumnOffsets:[self columnOffsets]];
-            //[_grid setColumnWidths:[self columnWidths]];
         }
     }
 }

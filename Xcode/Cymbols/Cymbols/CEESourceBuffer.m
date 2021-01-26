@@ -149,13 +149,13 @@ static void binary_buffer_modified(cee_pointer buffer,
     if (!self)
         return nil;
     
-    memset(_byteOrderMarks, 0, 4);
-    
     _referenceCount = 0;
+    
+    memset(_byteOrderMarks, 0, 4);
     
     if (!filePath) {
         _filePath = nil;
-        _encodeType = kCEEBufferEncodeTypeUTF8;
+        _encodeType = "UTF-8";
         _storage = cee_text_storage_create((__bridge cee_pointer)self,
                                            (const cee_uchar*)"",
                                            text_buffer_modified);
@@ -169,16 +169,15 @@ static void binary_buffer_modified(cee_pointer buffer,
         cee_uchar* converted_bytes = NULL;
         
         cee_file_contents_get([_filePath UTF8String], &content, &length);
-        
         if (!content)
             return nil;
         
         if (cee_codec_has_bom(content)) {
             cee_codec_export_bom(content, _byteOrderMarks);
             _encodeType = cee_codec_type_from_bom(_byteOrderMarks);
-            converted_bytes = cee_codec_convert_to_utf8(content,
-                                                        length,
-                                                        _encodeType);
+            converted_bytes = cee_codec_convert_to_utf8_with_bom(content,
+                                                                 length,
+                                                                 _byteOrderMarks);
             if (converted_bytes) {
                 _storage = cee_text_storage_create((__bridge cee_pointer)self,
                                                    converted_bytes,
@@ -188,22 +187,37 @@ static void binary_buffer_modified(cee_pointer buffer,
         }
         else {
             if (cee_codec_encoding_utf8(content, length)) {
-                _encodeType = kCEEBufferEncodeTypeUTF8;
+                _encodeType = "UTF-8";
                 _storage = cee_text_storage_create((__bridge cee_pointer)self,
                                                    content,
                                                    text_buffer_modified);
             }
             else {
-                _encodeType = kCEEBufferEncodeTypeUnknow;
-                _storage = cee_binary_storage_create((__bridge cee_pointer)self,
-                                                     content,
-                                                     length,
-                                                     binary_buffer_modified);
+                //_encodeType = "Unknow";
+                //_storage = cee_binary_storage_create((__bridge cee_pointer)self,
+                //                                     content,
+                //                                     length,
+                //                                     binary_buffer_modified);
+                
+                converted_bytes = cee_codec_convert_to_utf8(content, "GB2312");
+                if (converted_bytes) {
+                    _encodeType = "GB2312";
+                    _storage = cee_text_storage_create((__bridge cee_pointer)self,
+                                                       converted_bytes,
+                                                       text_buffer_modified);
+                    cee_free(converted_bytes);
+                }
+                else {
+                    _encodeType = "Unknow";
+                    _storage = cee_binary_storage_create((__bridge cee_pointer)self,
+                                                         content,
+                                                         length,
+                                                         binary_buffer_modified);
+                }
             }
         }
-        
-        _state = kCEESourceBufferStateNormal;
         cee_free(content);
+        _state = kCEESourceBufferStateNormal;
     }
     
     _fileLastModifiedDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:_filePath error:nil] fileModificationDate];
@@ -237,7 +251,7 @@ static void binary_buffer_modified(cee_pointer buffer,
         cee_tree_free(_statement_symbol_tree);
     
     if (_storage) {
-        if (_encodeType == kCEEBufferEncodeTypeUnknow)
+        if (strcmp(_encodeType, "Unknow"))
             cee_binary_storage_free(_storage);
         else
             cee_text_storage_free(_storage);
@@ -297,9 +311,9 @@ static void binary_buffer_modified(cee_pointer buffer,
     if (cee_codec_has_bom(content)) {
         cee_codec_export_bom(content, _byteOrderMarks);
         _encodeType = cee_codec_type_from_bom(_byteOrderMarks);
-        converted_bytes = cee_codec_convert_to_utf8(content,
-                                                    length,
-                                                    _encodeType);
+        converted_bytes = cee_codec_convert_to_utf8_with_bom(content,
+                                                             length,
+                                                             _byteOrderMarks);
         if (converted_bytes) {
             cee_text_storage_buffer_set(_storage, converted_bytes);
             cee_free(converted_bytes);
@@ -307,12 +321,28 @@ static void binary_buffer_modified(cee_pointer buffer,
     }
     else {
         if (cee_codec_encoding_utf8(content, length)) {
-            _encodeType = kCEEBufferEncodeTypeUTF8;
+            _encodeType = "UTF-8";
             cee_text_storage_buffer_set(_storage, content);
         }
         else {
-            _encodeType = kCEEBufferEncodeTypeUnknow;
+            _encodeType = "Unknow";
             cee_text_storage_buffer_set(_storage, content);
+            
+            //converted_bytes = cee_codec_convert_to_utf8_full(content, "GB2312");
+            //if (converted_bytes) {
+            //    _encodeType = kCEEBufferEncodeTypeUTF8;
+            //    _storage = cee_text_storage_create((__bridge cee_pointer)self,
+            //                                       converted_bytes,
+            //                                       text_buffer_modified);
+            //    cee_free(converted_bytes);
+            //}
+            //else {
+            //    _encodeType = kCEEBufferEncodeTypeUnknow;
+            //    _storage = cee_binary_storage_create((__bridge cee_pointer)self,
+            //                                         content,
+            //                                         length,
+            //                                         binary_buffer_modified);
+            //}
         }
     }
     cee_free(content);
@@ -370,7 +400,7 @@ static void binary_buffer_modified(cee_pointer buffer,
     if (!subject)
         return;
     
-    if (_encodeType != kCEEBufferEncodeTypeUTF8) {
+    if (strcmp(_encodeType, "UTF-8")) {
         cee_uchar* convertedBytes = NULL;
         cee_size convertedLength = 0;
         cee_codec_convert_from_utf8(subject,
@@ -551,7 +581,7 @@ static void binary_buffer_modified(cee_pointer buffer,
     NSString* fileName = [buffer.filePath lastPathComponent];
     NSString* extension = [buffer.filePath pathExtension];
     
-    if (buffer.encodeType == kCEEBufferEncodeTypeUnknow)
+    if (!strcmp(buffer.encodeType, "Unknow"))
         return @"Binary File";
     
     if (![extension isEqualToString:@""]) {

@@ -20,16 +20,16 @@
 @implementation Tree
 @end
 
-@interface Wrapper : NSObject
-@property (strong) Tree* leaf;
+@interface ListWrapper : NSObject
+@property (strong) Tree* tree;
 @property NSInteger level;
 @end
 
-@implementation Wrapper
+@implementation ListWrapper
 @end
 
 @interface CEETreeView()
-@property (strong) NSMutableArray<Wrapper*>* wrappers;
+@property (strong) NSMutableArray<ListWrapper*>* listWrappers;
 @property (strong) Tree* root;
 @end
 
@@ -43,49 +43,82 @@
 }
 
 - (NSInteger)numberOfRows {
-    return _wrappers.count;
+    return _listWrappers.count;
 }
 
 - (void)reloadData {
     if (!self.dataSource || !self.delegate)
         return;
     
-    if (_root && _root.children.count) {
-        Tree* root = [[Tree alloc] init];
-        root.children = [[NSMutableArray alloc] init];
-        root.parent = nil;
-        if (_root.expanded)
-            [self expandTree:root compareToTree:_root];
-        _root = root;
-    }
-    else {
-        _root = [[Tree alloc] init];
-        _root.children = [[NSMutableArray alloc] init];
-        _root.parent = nil;
+    if (!_root) {
         NSInteger count = [self.dataSource treeView:self numberOfChildrenOfItem:nil];
-        for (NSInteger i = 0; i < count; i ++) {
-            Tree* tree = [[Tree alloc] init];
-            tree.parent = _root;
-            tree.item = [self.dataSource treeView:self child:i ofItem:nil];
-            [_root.children addObject:tree];
-            [_root setExpanded:YES];
+        if (count) {
+            _root = [[Tree alloc] init];
+            _root.children = [[NSMutableArray alloc] init];
+            _root.expanded = YES;
+            _root.parent = nil;
+            for (NSInteger i = 0; i < count; i ++) {
+                Tree* tree = [[Tree alloc] init];
+                tree.parent = _root;
+                tree.item = [self.dataSource treeView:self child:i ofItem:nil];
+                [_root.children addObject:tree];
+            }
         }
     }
+    else {
+        Tree* tree = [[Tree alloc] init];
+        tree.parent = nil;
+        if (_root.expanded)
+            [self expandTree:tree compareToTree:_root];
+        _root = tree;
+    }
     
-    NSMutableArray* wrappers = [[NSMutableArray alloc] init];
-    [self tree:_root toList:&wrappers level:0];
-    _wrappers = wrappers;
+    if (!_root)
+        return;
+    
+    NSMutableArray* listWrappers = [[NSMutableArray alloc] init];
+    [self tree:_root toList:&listWrappers level:0];
+    _listWrappers = listWrappers;
     
     [super reloadData];
 }
 
 - (void)reloadItem:(id)item {
+    Tree* tree = nil;
+    for (ListWrapper* listWrapper in _listWrappers) {
+        if (listWrapper.tree.item == item) {
+            tree = listWrapper.tree;
+            break;
+        }
+    }
     
+    if (!tree)
+        return;
+    
+    Tree* reload = [[Tree alloc] init];
+    reload.parent = tree.parent;
+    reload.item = tree.item;
+    if (tree.expanded)
+        [self expandTree:reload compareToTree:tree];
+    
+    NSInteger i = 0;
+    while (i < tree.parent.children.count) {
+        if (tree.parent.children[i] == tree)
+            break;
+        i ++;
+    }
+    [tree.parent.children replaceObjectAtIndex:i withObject:reload];
+    
+    NSMutableArray* listWrappers = [[NSMutableArray alloc] init];
+    [self tree:_root toList:&listWrappers level:0];
+    _listWrappers = listWrappers;
+    
+    [super reloadData];
 }
 
 - (BOOL)itemIsExpanded:(id)item {
-    for (Wrapper* wrapper in _wrappers) {
-        if (wrapper.leaf.item == item && wrapper.leaf.expanded)
+    for (ListWrapper* listWrapper in _listWrappers) {
+        if (listWrapper.tree.item == item && listWrapper.tree.expanded)
             return YES;
     }
     return NO;
@@ -95,44 +128,44 @@
     if ([self itemIsExpanded:item])
         return;
     
-    Tree* leaf = nil;
+    Tree* tree = nil;
     NSInteger i = 0;
     NSUInteger n = 0;
     
-    for (Wrapper* wrapper in _wrappers) {
-        if (wrapper.leaf.item == item) {
-            leaf = wrapper.leaf;
+    for (ListWrapper* listWrapper in _listWrappers) {
+        if (listWrapper.tree.item == item) {
+            tree = listWrapper.tree;
             break;
         }
         i ++;
     }
     
-    if (!leaf)
+    if (!tree)
         return;
     
-    if (leaf.children) {
-        leaf.expanded = YES;
-        NSMutableArray* wrappers = [[NSMutableArray alloc] init];
-        [self tree:_root toList:&wrappers level:0];
-        _wrappers = wrappers;
+    if (tree.children) {
+        tree.expanded = YES;
+        NSMutableArray* listWrapper = [[NSMutableArray alloc] init];
+        [self tree:_root toList:&listWrapper level:0];
+        _listWrappers = listWrapper;
     }
     else {
-        if (![self.dataSource treeView:self isItemExpandable:leaf.item])
+        if (![self.dataSource treeView:self isItemExpandable:tree.item])
             return;
         
-        leaf.children = [[NSMutableArray alloc] init];
-        n = [self.dataSource treeView:self numberOfChildrenOfItem:leaf.item];
+        tree.children = [[NSMutableArray alloc] init];
+        n = [self.dataSource treeView:self numberOfChildrenOfItem:tree.item];
         for (NSInteger i = 0; i < n; i ++) {
-            Tree* sub = [[Tree alloc] init];
-            sub.parent = leaf;
-            sub.item = [self.dataSource treeView:self child:i ofItem:leaf.item];
-            [leaf.children addObject:sub];
+            Tree* child = [[Tree alloc] init];
+            child.parent = tree;
+            child.item = [self.dataSource treeView:self child:i ofItem:tree.item];
+            [tree.children addObject:child];
         }
         
-        leaf.expanded = YES;
-        NSMutableArray* wrappers = [[NSMutableArray alloc] init];
-        [self tree:_root toList:&wrappers level:0];
-        _wrappers = wrappers;
+        tree.expanded = YES;
+        NSMutableArray* listWrapper = [[NSMutableArray alloc] init];
+        [self tree:_root toList:&listWrapper level:0];
+        _listWrappers = listWrapper;
     }
     
     [super reloadData];
@@ -142,25 +175,25 @@
     if (![self itemIsExpanded:item])
         return;
     
-    Tree* leaf = nil;
+    Tree* tree = nil;
     NSInteger i = 0;
     
-    for (Wrapper* wrapper in _wrappers) {
-        if (wrapper.leaf.item == item) {
-            leaf = wrapper.leaf;
+    for (ListWrapper* listWrapper in _listWrappers) {
+        if (listWrapper.tree.item == item) {
+            tree = listWrapper.tree;
             break;
         }
         i ++;
     }
     
-    if (!leaf)
+    if (!tree)
         return;
     
-    if (leaf.children) {
-        NSMutableArray* wrappers = [[NSMutableArray alloc] init];
-        leaf.expanded = NO;
-        [self tree:_root toList:&wrappers level:0];
-        _wrappers = wrappers;
+    if (tree.children) {
+        NSMutableArray* listWrappers = [[NSMutableArray alloc] init];
+        tree.expanded = NO;
+        [self tree:_root toList:&listWrappers level:0];
+        _listWrappers = listWrappers;
     }
     
     [super reloadData];
@@ -186,45 +219,35 @@
         [tree1.children addObject:childOfTree1];
         
         for (Tree* childOfTree2 in tree2.children) {
-            if (childOfTree2.expanded &&
-                [self item:childOfTree1.item equalToItem:childOfTree2.item])
+            if (childOfTree2.expanded && [self item:childOfTree1.item equalToItem:childOfTree2.item])
                 [self expandTree:childOfTree1 compareToTree:childOfTree2];
         }
     }
 }
 
-- (void)tree:(Tree*)tree toList:(NSMutableArray**)wrappers level:(NSInteger)level {
-    NSMutableArray* _wrappers = *wrappers;
+- (void)tree:(Tree*)tree toList:(NSMutableArray**)listWrappers level:(NSInteger)level {
     for (Tree* child in tree.children) {
-        Wrapper* wrapper = [[Wrapper alloc] init];
-        wrapper.leaf = child;
-        wrapper.level = level;
-        [_wrappers addObject:wrapper];
+        ListWrapper* listWrapper = [[ListWrapper alloc] init];
+        listWrapper.tree = child;
+        listWrapper.level = level;
+        [*listWrappers addObject:listWrapper];
         if (child.expanded)
-            [self tree:child toList:wrappers level:level+1];
+            [self tree:child toList:listWrappers level:level + 1];
     }
 }
 
-- (BOOL)isRowViewExpandable:(NSInteger)index {
-    Wrapper* wrapper = _wrappers[index];
-    return [self.dataSource treeView:self isItemExpandable:wrapper.leaf.item];
+- (BOOL)isRowViewExpandable:(NSInteger)row {
+    ListWrapper* listWrapper = _listWrappers[row];
+    return [self.dataSource treeView:self isItemExpandable:listWrapper.tree.item];
 }
 
-- (BOOL)isRowViewExpanded:(NSInteger)index {
-    Wrapper* wrapper = _wrappers[index];
-    return [self itemIsExpanded:wrapper.leaf.item];
+- (BOOL)isRowViewExpanded:(NSInteger)row {
+    ListWrapper* listWrapper = _listWrappers[row];
+    return [self itemIsExpanded:listWrapper.tree.item];
 }
 
-- (NSInteger)rowViewIndent:(NSInteger)index {
-    return _wrappers[index].level;
-}
-
-- (void)cellViewAddOffsetSubview:(NSView*)cellView {
-    for (NSView* view in cellView.subviews) {
-        NSRect rect  = view.frame;
-        rect.origin.x += 8.0;
-        [view setFrame:rect];
-    }
+- (NSInteger)rowViewIndent:(NSInteger)row {
+    return _listWrappers[row].level;
 }
 
 - (void)cellViewMinusOffsetSubview:(NSView*)cellView {
@@ -243,19 +266,9 @@
     return nil;
 }
 
-- (void)toggleItemExpand:(id)sender {
-    NSInteger row = self.firstRowIndex;
-    NSButton* button = (NSButton*)sender;
-    Wrapper* wrapper = _wrappers[row + button.tag];
-    if ([self itemIsExpanded:wrapper.leaf.item])
-        [self collapseItem:wrapper.leaf.item];
-    else
-        [self expandItem:wrapper.leaf.item];
-}
-
 - (__kindof NSView*)viewForColumn:(NSInteger)column row:(NSInteger)row {
-    Wrapper* wrapper = _wrappers[row];
-    return [self.delegate treeView:self viewForColumn:column item:wrapper.leaf.item];
+    ListWrapper* listWrapper = _listWrappers[row];
+    return [self.delegate treeView:self viewForColumn:column item:listWrapper.tree.item];
 }
 
 - (NSString*)titleForColumn:(NSInteger)column {
@@ -277,12 +290,11 @@
     NSMutableArray* items = [[NSMutableArray alloc] init];
     NSInteger i = [self.selectedRowIndexes firstIndex];
     while (i != NSNotFound) {
-        [items addObject: _wrappers[i].leaf.item];
+        [items addObject:_listWrappers[i].tree.item];
         i = [self.selectedRowIndexes indexGreaterThanIndex:i];
     }
     return items;
 }
-
 
 #pragma mark - protocol NSDraggingDestination
 

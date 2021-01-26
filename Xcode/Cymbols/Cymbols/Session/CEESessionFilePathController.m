@@ -527,7 +527,7 @@
         [_sourceTable reloadData];
 }
 
-- (IBAction)refresh:(id)sender {
+- (IBAction)reloadItem:(id)sender {
     if (_sourceTree.superview) {
         NSArray* items = [_sourceTree selectedItems];
         if (!items)

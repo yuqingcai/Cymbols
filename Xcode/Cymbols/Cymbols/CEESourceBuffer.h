@@ -33,7 +33,7 @@ typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
 
 @interface CEESourceBuffer : NSObject
 @property (strong) NSString* filePath;
-@property CEEBufferEncodeType encodeType;
+@property const cee_char* encodeType;
 @property cee_pointer storage;
 @property CEESourceBufferState state;
 @property CEESourceFregment* comment;

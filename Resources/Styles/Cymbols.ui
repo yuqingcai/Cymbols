@@ -318,7 +318,7 @@
     },
     
     "ClassTitlebarButton [actived]" : {
-        "icon_color": "#757575",
+        "icon_color": "#858585",
     },
     
     "ClassTitlebarButton [deactived]" : {
@@ -334,7 +334,7 @@
     },
     
     "ClassTitlebarStateButton [actived]" : {
-        "icon_color": "#757575",
+        "icon_color": "#858585",
     },
     
     "ClassTitlebarStateButton [deactived]" : {

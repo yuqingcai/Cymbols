@@ -62,6 +62,7 @@ typedef NS_ENUM(NSInteger, CEETableViewColumnAutoresizingStyle) {
 @required
 - (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column;
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row;
+- (CGFloat)tableView:(CEETableView *)tableView indentForRow:(NSInteger)row;
 @end
 
 @protocol CEETableViewDataSource <NSObject>

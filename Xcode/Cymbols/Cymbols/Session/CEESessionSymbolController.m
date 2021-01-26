@@ -88,23 +88,27 @@
     CEESourceSymbol* symbol = wrapper->symbol_ref;
     NSString* string = [NSString stringWithUTF8String:symbol->name];
     
-    switch (symbol->type) {
-        case kCEESourceSymbolTypeFunctionDefinition:
-            string = [string stringByAppendingString:@"()"];
-            break;
-        case kCEESourceSymbolTypeFunctionDeclaration:
-            string = [string stringByAppendingString:@"()"];
-            break;
-        //case kCEESourceSymbolTypeTemplateDeclaration:
-        //    string = [string stringByAppendingString:@"<>"];
-        //    break;
-        default:
-            break;
-    }
+    //switch (symbol->type) {
+    //    case kCEESourceSymbolTypeFunctionDefinition:
+    //        string = [string stringByAppendingString:@"()"];
+    //        break;
+    //    case kCEESourceSymbolTypeFunctionDeclaration:
+    //        string = [string stringByAppendingString:@"()"];
+    //        break;
+    //    case kCEESourceSymbolTypeTemplateDeclaration:
+    //        string = [string stringByAppendingString:@"<>"];
+    //        break;
+    //    default:
+    //        break;
+    //}
     cellView.title.stringValue = string;
     [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
-    [cellView.leading setConstant:wrapper->level*12];
     return cellView;
+}
+
+- (CGFloat)tableView:(CEETableView *)tableView indentForRow:(NSInteger)row {
+    CEESourceSymbolWrapper* wrapper = cee_list_nth_data(_symbol_wrappers, (cee_uint)row);
+    return wrapper->level - 1;
 }
 
 - (IBAction)selectRow:sender {

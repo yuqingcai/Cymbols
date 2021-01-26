@@ -49,7 +49,7 @@
     if (!_cellViews)
         _cellViews = [[NSMutableArray alloc] init];
     [_cellViews addObjectsFromArray:cellViews];
-            
+    
     for (int i = 0; i <  _cellViews.count; i ++) {
         CEEView* cellView = _cellViews[i];
         NSRect rect = NSMakeRect([_columnOffsets[i] floatValue],
@@ -83,7 +83,7 @@
         }
         [cellView setFrame:rect];
     }
-    [self setNeedsDisplay:YES];
+    //[self setNeedsDisplay:YES];
 }
 
 - (CGFloat)indent {
@@ -113,7 +113,6 @@
         
         [cellView setFrameOrigin:cellViewRect.origin];
     }
-    [self setNeedsDisplay:YES];
 }
 
 - (NSArray*)columnOffsets {
@@ -136,12 +135,11 @@
             }
         }
         
-        if (cellViewRect.size.width < 0.0)
+        if (cellViewRect.size.width <= FLT_EPSILON)
             cellViewRect.size.width = 0.0;
         
         [cellView setFrameSize:cellViewRect.size];
     }
-    [self setNeedsDisplay:YES];
 }
 
 - (NSArray*)columnWidths {
@@ -149,7 +147,7 @@
 }
 
 - (CGFloat)placeholder {
-    return _indent * 32.0;
+    return _indent * 16.0;
 }
 
 - (void)setExpandable:(BOOL)expandable {

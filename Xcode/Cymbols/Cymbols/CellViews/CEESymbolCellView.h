@@ -15,7 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CEESymbolCellView : CEEView
 @property (weak) IBOutlet CEEImageView *icon;
 @property (weak) IBOutlet CEETableCellViewTextLabel *title;
-@property (weak) IBOutlet NSLayoutConstraint *leading;
 
 @end
 

@@ -1241,7 +1241,8 @@ CEEList* cee_source_fregment_symbols_search_by_name(CEESourceFregment* fregment,
     CEEList* p = fregment->symbols;
     while (p) {
         CEESourceSymbol* symbol = p->data;
-        if (symbol->name && !strcmp(symbol->name, name))
+        if ((symbol->name && !strcmp(symbol->name, name)) ||
+            (symbol->alias && !strcmp(symbol->alias, name)))
             symbols = cee_list_prepend(symbols, symbol);
         
         p = p->next;
@@ -1386,6 +1387,8 @@ CEEList* cee_symbols_search_by_reference(CEESourceSymbolReference* reference,
     
     if (options & kCEESourceReferenceSearchOptionGlobal) {
         global = cee_database_symbols_search_by_name(database, reference->name);
+        if (!global)
+            global = cee_database_symbols_search_by_alias(database, reference->name);
     }
     
     if (local && global) {
