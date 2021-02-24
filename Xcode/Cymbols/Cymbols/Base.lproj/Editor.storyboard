@@ -218,7 +218,7 @@
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="E4V-hL-D43" customClass="CEETextView">
                                 <rect key="frame" x="60" y="81" width="500" height="219"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="150" id="4gy-YX-OZP"/>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="80" id="4gy-YX-OZP"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="250" id="bQg-LJ-ETY"/>
                                 </constraints>
                                 <connections>

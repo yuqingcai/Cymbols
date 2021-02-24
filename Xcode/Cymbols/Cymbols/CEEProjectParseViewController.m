@@ -34,59 +34,6 @@
     _sync = NO;
 }
 
-- (BOOL)project:(CEEProject*)project securitySaveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {
-    if (!project || !buffer || !filePath)
-        return FALSE;
-    
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    NSArray* bookmarks = nil;
-    BOOL ret = NO;
-    if (access([filePath UTF8String], W_OK) != 0) {
-        bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
-        if (bookmarks) {
-            [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
-            [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-        }
-    }
-    else {
-        ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
-    }
-    return ret;
-}
-
-- (CEESourceBuffer*)project:(CEEProject*)project securityOpenSourceBufferWithFilePath:(NSString*)filePath {
-    if (!project || !filePath)
-        return nil;
-    
-    CEESourceBuffer* buffer = nil;
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    if (access([filePath UTF8String], R_OK) != 0) {
-        NSArray* bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
-        if (bookmarks) {
-            [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
-            [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-        }
-    }
-    else {
-        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
-    }
-    
-    return buffer;
-}
-
-- (void)project:(CEEProject*)project securityCloseSourceBuffer:(CEESourceBuffer*)buffer {
-    if (!project || !buffer)
-        return;
-    
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    [sourceBufferManager closeSourceBuffer:buffer];
-}
-
 - (void)viewWillAppear {
     [super viewWillAppear];
     if (self->_sync)
@@ -109,7 +56,7 @@
 - (void)viewDidAppear {
     [super viewDidAppear];
     
-    AppDelegate* delegate = [NSApp delegate];
+    __block AppDelegate* delegate = [NSApp delegate];
     _project = [delegate currentProject];
     
     _cancel = NO;
@@ -119,7 +66,7 @@
     [self saveModifiedBuffers];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        CEEList* infos = cee_database_filepath_entry_infos_get(self->_project.database);
+        CEEList* infos = cee_database_file_reference_infos_get(self->_project.database);
         
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self->_progressBar setMinValue:0.0];
@@ -145,6 +92,7 @@
         
         int i = 0;
         CEEList* p = infos;
+        CEEList* unreferences = NULL;
         
         CEESourceSymbolType filter_types[] = {
             kCEESourceSymbolTypePrepDirectiveInclude,
@@ -159,12 +107,18 @@
             
             @autoreleasepool {
                 
-                CEEProjectFilePathEntryInfo* info = p->data;
+                CEEFileReferenceInfo* info = p->data;
                 NSString* filePath = [NSString stringWithUTF8String:info->file_path];
                 CEEList* list = NULL;
                 BOOL shouldParsed = YES;
+                BOOL fileExisted = YES;
                 
-                if (self->_sync && info->last_parsed_time) {
+                if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+                    unreferences = cee_list_prepend(unreferences, cee_strdup([filePath UTF8String]));
+                    fileExisted = NO;
+                }
+                
+                if (fileExisted && self->_sync && info->last_parsed_time) {
                     NSDate* lastModifiedDate = [[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:nil] fileModificationDate];
                     NSDate* lastParsedDate = [dateFormatter dateFromString:[NSString stringWithUTF8String:info->last_parsed_time]];
                     if ([lastModifiedDate compare:lastParsedDate] == NSOrderedSame ||
@@ -172,16 +126,19 @@
                         shouldParsed = NO;
                 }
                 
+                if (!fileExisted)
+                    shouldParsed = NO;
+                
                 if (shouldParsed) {
                     __block CEESourceBuffer* buffer = nil;
                     // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                     dispatch_sync(dispatch_get_main_queue(), ^{
-                        buffer = [self project:self->_project securityOpenSourceBufferWithFilePath:filePath];
+                        buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
                     });
                     
                     if (self->_sync && info->symbol_count)
-                        cee_database_symbols_delete_by_filepath(self->_project.database,
-                                                                [buffer.filePath UTF8String]);
+                        cee_database_symbols_delete_by_file_path(self->_project.database,
+                                                                 [buffer.filePath UTF8String]);
                     
                     cee_source_buffer_parse(buffer, 0);
                     
@@ -194,21 +151,21 @@
                         // update last parsed time to buffer
                         cee_char* time_str = cee_time_to_iso8601(cee_time_current());
                         if (time_str) {
-                            cee_database_filepath_last_parsed_time_set(self->_project.database,
-                                                                       [buffer.filePath UTF8String],
-                                                                       time_str);
+                            cee_database_file_reference_last_parsed_time_set(self->_project.database,
+                                                                             [buffer.filePath UTF8String],
+                                                                             time_str);
                             cee_free(time_str);
                         }
                         cee_database_symbols_write(self->_project.database, list);
-                        cee_database_filepath_symbols_count_set(self->_project.database,
-                                                                [filePath UTF8String],
-                                                                cee_list_length(list));
+                        cee_database_file_reference_symbols_count_set(self->_project.database,
+                                                                      [filePath UTF8String],
+                                                                      cee_list_length(list));
                         cee_list_free(list);
                     }
                     
                     // close source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                     dispatch_sync(dispatch_get_main_queue(), ^{
-                        [self project:self->_project securityCloseSourceBuffer:buffer];
+                        [delegate.sourceBufferManager closeSourceBuffer:buffer];
                     });
                 }
                 
@@ -228,14 +185,25 @@
                         [self->_progressBar setDoubleValue:(double)i];
                     } // autoreleasepool
                 });
-
+                
             } // autoreleasepool
                         
             if (self->_cancel)
                 break;
         }
+        cee_list_free_full(infos, cee_file_reference_info_free);
         
-        cee_list_free_full(infos, cee_project_file_path_entry_info_free);
+        if (unreferences) {
+            cee_database_file_references_remove(self->_project.database, unreferences);
+            
+            p = unreferences;
+            while (p) {
+                cee_database_symbols_delete_by_file_path(self->_project.database, p->data);
+                p = p->next;
+            }
+            
+            cee_list_free_full(unreferences, cee_free);
+        }
         
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self->_label1 setStringValue:@"Complete!"];
@@ -245,56 +213,6 @@
     });
 }
 
-/*
-- (void)viewDidAppear {
-    [super viewDidAppear];
-    AppDelegate* delegate = [NSApp delegate];
-    _project = [delegate currentProject];
-    CEEList* infos = cee_database_filepath_entry_infos_get(self->_project.database);
-    CEEList* p = infos;
-    while (p) {
-
-        int bst_0 = cee_bst_count_get();
-        int list_0 = cee_list_count_get();
-        int symbol_0 = cee_source_symbol_count_get();
-        int fregment_0 = cee_source_fregment_count_get();
-        int token_0 = cee_token_count_get();
-        
-        CEEProjectFilePathEntryInfo* info = p->data;
-        NSString* filePath = [NSString stringWithUTF8String:info->file_path];
-        @autoreleasepool {
-            //for (int i = 0; i < 2000; i ++) {
-                NSLog(@"%@", filePath);
-                CEESourceBuffer* buffer = [self project:self->_project securityOpenSourceBufferWithFilePath:filePath];
-                cee_source_buffer_parse(buffer, 0);
-                [self project:self->_project securityCloseSourceBuffer:buffer];
-            //}
-        } // autoreleasepool
-        
-        p = p->next;
-
-        int bst_1 = cee_bst_count_get();
-        int list_1 = cee_list_count_get();
-        int symbol_1 = cee_source_symbol_count_get();
-        int fregment_1 = cee_source_fregment_count_get();
-        int token_1 = cee_token_count_get();
-
-        if (bst_0 != bst_1 ||
-            list_0 != list_1 ||
-            symbol_0 != symbol_1 ||
-            fregment_0 != fregment_1 ||
-            token_0 != token_1) {
-            fprintf(stdout, "oops!!\n");
-        }
-    }
-
-    cee_list_free_full(infos, cee_project_file_path_entry_info_free);
-
-    [_label1 setStringValue:@"Complete!"];
-    [_button setTitle:@"OK"];
-    [_button setHighlighted:YES];
-}
-*/
 - (NSDateFormatter*)createISO8601DateFormatter {
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     NSLocale *enUSPOSIXLocale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
@@ -305,6 +223,7 @@
 }
 
 - (void)saveModifiedBuffers {
+    AppDelegate* delegate = [NSApp delegate];
     NSMutableArray* buffers = nil;
     for (CEESession* session in self->_project.sessions) {
         for (CEESessionPort* port in session.ports) {
@@ -322,9 +241,9 @@
             }
         }
     }
-       
+    
     for (CEESourceBuffer* buffer in buffers)
-        [self project:_project securitySaveSourceBuffer:buffer atFilePath:buffer.filePath];
+        [delegate.sourceBufferManager saveSourceBuffer:buffer atFilePath:buffer.filePath];
 }
 
 - (IBAction)cancel:(id)sender {

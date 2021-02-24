@@ -8,11 +8,11 @@
 
 #import "CEEViewController.h"
 #import "CEETableView.h"
-#import "CEESourceBufferSaveConfirmCellView.h"
+#import "CEECheckboxTableCellView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CEESourceBufferManagerViewController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, NSOpenSavePanelDelegate, CEESourceBufferSaveConfirmCellDelegate>
+@interface CEESourceBufferManagerViewController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, NSOpenSavePanelDelegate, CEECheckboxTableCellViewDelegate>
 @property (strong, nullable) NSArray* modifiedSourceBuffers;
 @end
 

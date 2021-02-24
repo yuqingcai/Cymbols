@@ -9,24 +9,46 @@
 
 #import "CEETitleView.h"
 
+@interface CEETitleView()
+@property CGFloat iconWidth;
+@property CGFloat iconHeight;
+@property CGFloat iconLeading;
+
+@end
+
 @implementation CEETitleView
 
 @synthesize title = _title;
+@synthesize icon = _icon;
 
 - (void)initProperties {
     [super initProperties];
     _kern = 0.22;
-    _leadingOffset = 5.0;
-    _tailingOffset = 5.0;
+    _titleLeading = 5.0;
+    _titleTailing = 5.0;
+    _iconLeading = 0.0;
+    _iconWidth = 0.0;
+    _iconHeight = 0.0;
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
-    CGFloat diff = 0.0;
-    NSRect rect;
+    
+    if (_icon) {
+        if (_iconWidth < FLT_EPSILON)
+            _iconWidth = 16.0;
+        if (_iconHeight < FLT_EPSILON)
+            _iconHeight = 16.0;
         
+        CGRect r0 = CGRectMake(0.0, 0.0, _iconWidth, _iconHeight);
+        CGPoint p0 = CGPointMake(_iconLeading, (dirtyRect.size.height - _iconHeight) / 2.0);
+        [_icon drawAtPoint:p0 fromRect:r0 operation:NSCompositingOperationSourceOver fraction:1.0];
+    }
+    
     if (_title) {
         NSMutableDictionary* attributes = [[NSMutableDictionary alloc] init];
+        NSRect titleRect;
+        CGFloat diff = (self.font.ascender + fabs(self.font.descender)) / 2.0 - fabs(self.font.descender);
         [attributes setValue:self.font forKey:NSFontAttributeName];
         [attributes setValue:self.textColor forKey:NSForegroundColorAttributeName];
         [attributes setValue: @(_kern) forKey:NSKernAttributeName];
@@ -37,14 +59,14 @@
         NSSize minimalStringSize = [[[NSAttributedString alloc] initWithString:@"..." attributes:attributes] size];
         NSAttributedString *drawingString = [[NSAttributedString alloc] initWithString:_title attributes:attributes];
         NSSize drawingSize = [drawingString size];
-        CGFloat captionWidth = self.frame.size.width - (_leadingOffset + _tailingOffset);
-        if (minimalStringSize.width < captionWidth) {
-            if (drawingSize.width < captionWidth) {
-                rect = dirtyRect;
-                rect.origin.x = _leadingOffset;
-                diff = (self.font.ascender + fabs(self.font.descender)) / 2.0 - fabs(self.font.descender);
-                rect.origin.y = (self.frame.size.height / 2.0) - diff;
-                [drawingString drawWithRect:rect options:0 context:nil];
+        CGFloat titleWidth = 0.0;
+        
+        titleWidth = dirtyRect.size.width - (_iconLeading + _iconWidth + _titleLeading + _titleTailing);
+        titleRect = NSMakeRect(_iconLeading + _iconWidth + _titleLeading, (dirtyRect.size.height / 2.0) - diff, titleWidth, dirtyRect.size.height);
+        
+        if (minimalStringSize.width < titleWidth) {
+            if (drawingSize.width < titleWidth) {
+                [drawingString drawWithRect:titleRect options:0 context:nil];
             }
             else {
                 NSInteger subIndex = 1;
@@ -53,15 +75,11 @@
                     subjectString = [@"..." stringByAppendingString:[_title substringFromIndex:subIndex]];
                     drawingString = [[NSAttributedString alloc] initWithString:subjectString attributes:attributes];
                     drawingSize = [drawingString size];
-                    if (drawingSize.width < captionWidth)
+                    if (drawingSize.width < titleWidth)
                         break;
                     subIndex ++;
                 }
-                rect = dirtyRect;
-                rect.origin.x = _leadingOffset;
-                diff = (self.font.ascender + fabs(self.font.descender)) / 2.0 - fabs(self.font.descender);
-                rect.origin.y = (self.frame.size.height / 2.0) - diff;
-                [drawingString drawWithRect:rect options:0 context:nil];
+                [drawingString drawWithRect:titleRect options:0 context:nil];
             }
         }
     }
@@ -91,6 +109,21 @@
 
 - (NSString*)title {
     return _title;
+}
+
+- (void)setIcon:(NSImage *)icon {
+    _icon = icon;
+    
+    if (_iconWidth < FLT_EPSILON)
+        _iconWidth = 16.0;
+    if (_iconHeight < FLT_EPSILON)
+        _iconHeight = 16.0;
+    _iconLeading = 5.0;
+    [self setNeedsDisplay:YES];
+}
+
+- (NSImage*)icon {
+    return _icon;
 }
 
 - (NSImage*)createDraggingHint {    

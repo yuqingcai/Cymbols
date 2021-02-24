@@ -43,11 +43,9 @@
     
     [_titlebar setDelegate:self];
     [_titlebar setDraggingSource:(CEESessionFrameView*)self.view];
-    CGFloat leadingOffset = _previousButton.frame.size.width + 
-        _nextButton.frame.size.width + _bufferListButton.frame.size.width + 18.0;
-    CGFloat tailingOffset = self.view.frame.size.width - _closeButton.frame.origin.x;
-    [_titlebar setLeadingOffset:leadingOffset];
-    [_titlebar setTailingOffset:tailingOffset];
+    [_titlebar setTitleLeading:_previousButton.frame.origin.x + _previousButton.frame.size.width +
+     _nextButton.frame.size.width + _bufferListButton.frame.size.width + 18.0];
+    [_titlebar setTitleTailing:_closeButton.frame.size.width];
     
     [(CEESessionFrameView*)self.view setDelegate:self];
     
@@ -226,7 +224,7 @@
     NSString* filePath = _port.jumpPoint.filePath;
     CEEList* ranges = cee_ranges_from_string([_port.jumpPoint.locations UTF8String]);
     if (ranges) {
-        [_port openSourceBuffersWithFilePaths:@[filePath]];
+        [_port openSourceBufferWithFilePath:filePath];
         [self.editViewController highlightRanges:ranges];
         cee_list_free_full(ranges, cee_range_free);
     }

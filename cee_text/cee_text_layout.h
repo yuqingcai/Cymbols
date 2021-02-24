@@ -106,7 +106,8 @@ void cee_text_layout_attribute_generate_set(CEETextLayoutRef layout,
 CEETag* cee_text_layout_tag_get(CEETextLayoutRef layout,
                                 cee_long buffer_offset);
 void cee_text_layout_reset(CEETextLayoutRef layout);
-
+void cee_text_layout_wrap_indent_set(CEETextLayoutRef layout,
+                                     cee_boolean wrap_with_indent);
 
 #ifdef __cplusplus
 }

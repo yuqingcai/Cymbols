@@ -30,27 +30,27 @@
 }
 
 - (void)toggleSymbolView {
-    [self toggleViewByIdentifier:@"IDSessionSymbolController"];
+    [self toggleViewByIdentifier:@"IDSessionSymbolViewController"];
 }
 
-- (void)toggleReferenceView {
-    [self toggleViewByIdentifier:@"IDSessionReferenceController"];
+- (void)toggleSourceBufferView {
+    [self toggleViewByIdentifier:@"IDSessionSourceBufferViewController"];
 }
 
-- (void)togglePathView {
-    [self toggleViewByIdentifier:@"IDSessionFilePathController"];
+- (void)toggleFileReferenceView {
+    [self toggleViewByIdentifier:@"IDSessionFileReferenceViewController"];
 }
 
 - (void)showSymbolView:(BOOL)shown {
-    [self showView:shown byIdentifier:@"IDSessionSymbolController"];
+    [self showView:shown byIdentifier:@"IDSessionSymbolViewController"];
 }
 
-- (void)showReferenceView:(BOOL)shown {
-    [self showView:shown byIdentifier:@"IDSessionReferenceController"];
+- (void)showSourceBufferView:(BOOL)shown {
+    [self showView:shown byIdentifier:@"IDSessionSourceBufferViewController"];
 }
 
-- (void)showPathView:(BOOL)shown {
-    [self showView:shown byIdentifier:@"IDSessionFilePathController"];
+- (void)showFileReferenceView:(BOOL)shown {
+    [self showView:shown byIdentifier:@"IDSessionFileReferenceViewController"];
 }
 
 

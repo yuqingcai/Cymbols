@@ -14,8 +14,10 @@
 #import "CEESecurityBookmark.h"
 
 extern NSNotificationName CEENotificationProjectSettingProperties;
-extern NSNotificationName CEENotificationProjectAddFilePaths;
-extern NSNotificationName CEENotificationProjectRemoveFilePaths;
+extern NSNotificationName CEENotificationProjectAddReference;
+extern NSNotificationName CEENotificationProjectRemoveReference;
+extern NSNotificationName CEENotificationProjectCreateFile;
+extern NSNotificationName CEENotificationProjectRemoveFile;
 extern NSNotificationName CEENotificationSessionPortOpenSourceBuffer;
 extern NSNotificationName CEENotificationSessionPortCloseSourceBuffer;
 extern NSNotificationName CEENotificationSessionPortActiveSourceBuffer;
@@ -36,18 +38,16 @@ extern NSNotificationName CEENotificationSessionPortSearchReference;
 @class CEESession;
 @class CEESessionPort;
 
-NSArray* ExclusiveFilePaths(NSArray* paths);
 NSArray* ExpandFilePaths(NSArray* paths);
 NSDictionary* JSONDictionaryFromString(NSString* string);
 
 @interface CEEProjectSetting : NSObject
 @property (strong) NSString* name;
 @property (strong) NSString* path;
-@property (strong) CEESecurityBookmark* bookmark;
-@property (strong) NSArray* filePathsUserSelected;
-@property (strong) NSArray* filePathsExpanded;
-- (NSString*)databasePath;
-+ (CEEProjectSetting*)projectSettingWithName:(NSString*)name path:(NSString*)path filePaths:(NSArray*)filePaths filePathsUserSelected:(NSArray*)filePathsUserSelected;
+@property (strong) CEESecurityBookmark* pathBookmark;
+@property (strong) NSString* databasePath;
+@property (strong) NSArray* referenceRoots;
+- (void)saveAsDefaultSetting;
 @end
 
 CEESecurityBookmark* CreateBookmarkWithFilePath(NSString* filePath);
@@ -76,17 +76,19 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 - (void)setActivedSourceBuffer:(CEESourceBuffer*)buffer;
 - (CEESourceBuffer*)activedSourceBuffer;
 - (void)presentHistory:(CEESourceBufferReferenceContext*)reference;
-- (NSArray*)openSourceBuffersWithFilePaths:(NSArray*)filePaths;
+- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString*)filePath;
 - (CEESourceBuffer*)openUntitledSourceBuffer;
-- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath;
+- (void)closeSourceBuffer:(CEESourceBuffer*)buffer;
 - (void)closeSourceBuffers:(NSArray*)buffers;
 - (void)closeAllSourceBuffers;
+- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath;
 - (void)discardReferences;
 - (void)createContextByCluster:(CEETokenCluster*)cluster;
 - (void)setSelectedSourceSymbol:(CEESourceSymbol*)symbol;
 - (void)searchReferencesByCluster:(CEETokenCluster*)cluster;
 - (void)jumpToSourceSymbolByCluster:(CEETokenCluster*)cluster;
 - (void)jumpToSourcePoint:(CEESourcePoint*)sourcePoint;
+
 @end
 
 @interface CEESession : NSObject <CEESerialization>
@@ -108,24 +110,35 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 @property (strong, readonly) NSMutableArray* sessions;
 @property (strong) CEESession* currentSession;
 @property (readonly) cee_pointer database;
-@property (strong) CEEProjectSetting* properties;
+@property (readonly) NSString* name;
+@property (readonly) NSString* databasePath;
 @property (strong, readonly) CEEProjectSearcher* searcher;
-
+- (void)setProperties:(CEEProjectSetting*)properties;
 - (void)serialize;
+- (void)deserialize:(NSString*)filePath;
 - (void)createSessionWithFilePaths:(NSArray*)filePaths;
-- (NSArray*)getFilePathsWithCondition:(NSString*)condition;
-- (void)addFilePaths:(NSArray*)filePaths;
-- (void)removeFilePaths:(NSArray*)filePaths;
-- (CEEProjectSetting*)createEmptyProjectSetting;
-- (void)saveProjectSettingAsDefault:(CEEProjectSetting*)setting;
 - (void)deleteAllSessions;
+- (NSArray*)getReferenceRoots;
+- (NSArray*)getReferenceFilePathsWithCondition:(NSString*)condition;
+- (void)addReferenceRoot:(NSString*)filePath;
+- (void)addReferenceRoots:(NSArray*)roots;
+- (void)removeReferenceRoot:(NSString*)filePath;
+- (void)removeReferenceRoots:(NSArray*)roots;
+- (void)addReference:(NSString*)filePath;
+- (void)addReferences:(NSArray*)filePaths;
+- (void)removeReference:(NSString*)filePath;
+- (void)removeReferences:(NSArray*)filePaths;
+- (BOOL)filePathIsReferenced:(NSString*)filePath;
+- (BOOL)filePathIsReferenceRoot:(NSString*)filePath;
 - (void)syncSourceSymbols:(CEESourceBuffer*)buffer;
-- (void)addSecurityBookmarksWithFilePaths:(NSArray*)filePaths;
-- (void)removeSecurityBookmarksWithFilePaths:(NSArray*)filePaths;
-- (NSArray*)getSecurityBookmarksWithFilePaths:(NSArray*)filePaths;
-- (void)startAccessSecurityScopedResourcesWithBookmarks:(NSArray*)bookmarks;
-- (void)stopAccessSecurityScopedResourcesWithBookmarks:(NSArray*)bookmarks;
 - (BOOL)isUntitled;
+- (BOOL)createFile:(NSString*)filePath;
+- (BOOL)createDirectory:(NSString*)directoryPath;
+- (BOOL)removeFile:(NSString*)filePath;
+- (BOOL)removeFiles:(NSArray*)filePaths;
+- (CEESecurityBookmark*)addSecurityBookmarkWithFilePath:(NSString*)filePath;
+- (CEESecurityBookmark*)getSecurityBookmarkWithFilePath:(NSString*)filePath;
+- (NSString*)shortFilePath:(NSString*)filePath;
 @end
 
 @interface CEEProjectController : NSDocumentController

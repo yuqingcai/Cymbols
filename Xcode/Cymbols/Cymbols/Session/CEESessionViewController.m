@@ -10,16 +10,15 @@
 #import "CEESessionSpliter0.h"
 #import "CEESessionToolbar.h"
 #import "CEEProjectCreatorController.h"
-#import "CEEProjectAddFileController.h"
-#import "CEEProjectRemoveFileController.h"
 #import "AppDelegate.h"
 #import "CEESessionView.h"
-#import "CEESessionSourceController.h"
+#import "CEESessionSourceViewController.h"
 #import "CEESessionStatusBar.h"
 #import "CEEProjectParseViewController.h"
 #import "CEEProjectContextViewController.h"
 #import "CEEProjectCleanViewController.h"
 #import "CEEProjectSearchViewController.h"
+#import "CEEUpdateInfoViewController.h"
 #import "CEETitlebarButton.h"
 
 @interface CEESessionViewController ()
@@ -30,12 +29,17 @@
 @property (weak) IBOutlet CEEView *containerView;
 @property (weak) CEESessionSpliter0* spliter;
 @property CGFloat titleHeight;
+@property (strong) NSWindowController* projectCreatorWindowController;
 @property (strong) NSWindowController* projectParseWindowController;
 @property (strong) NSWindowController* projectCleanWindowController;
 @property (strong) NSWindowController* projectSearchWindowController;
 @property (strong) NSWindowController* contextWindowController;
 @property (strong) NSWindowController* userInterfaceStyleSelectionWindowController;
 @property (strong) NSWindowController* textHighlightStyleSelectionWindowController;
+@property (strong) NSWindowController* addReferenceWindowController;
+@property (strong) NSWindowController* removeReferenceWindowController;
+@property (strong) NSWindowController* referenceRootScannerWindowController;
+@property (strong) NSWindowController* updateInfoWindowController;
 @property (weak) IBOutlet CEEToolbarButton *messageButton;
 
 @end
@@ -49,8 +53,8 @@
     [super viewDidLoad];
     [_containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
     _titleHeight = 26;
-    [_messageButton setEnabled:YES];
-    [_messageButton setHidden:NO];
+    [self checkUpdate];
+    
     
     _toolbar = [[NSStoryboard storyboardWithName:@"Session" bundle:nil] instantiateControllerWithIdentifier:@"IDSessionToolbar"];
     [self addChildViewController:_toolbar];
@@ -66,6 +70,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferCloseResponse:) name:CEENotificationSessionPortCloseSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(requestJumpSourcePointSelectionResponse:) name:CEENotificationSessionPortRequestJumpSourcePointSelection object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(searchReferenceResponse:) name:CEENotificationSessionPortSearchReference object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cymbolsUpdateNotifyResponse:) name:CEENotificationCymbolsUpdateNotify object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cymbolsUpdateConfirmResponse:) name:CEENotificationCymbolsUpdateConfirm object:nil];
 }
 
 - (CGFloat)sheetOffset {
@@ -129,20 +135,6 @@
 - (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender {
     if ([[segue identifier] caseInsensitiveCompare:@"IDSessionViewEmbedSegue"] == NSOrderedSame)
         _spliter = [segue destinationController];
-    
-    if ([[segue identifier] caseInsensitiveCompare:@"IDProjectCreatorSegue"] == NSOrderedSame) {
-        CEEProjectCreatorController* projectCreatorController = (CEEProjectCreatorController*)[segue destinationController];
-        [projectCreatorController setSession:self.session];
-    }
-    
-    if ([[segue identifier] caseInsensitiveCompare:@"IDProjectAddFileSegue"] == NSOrderedSame) {
-        CEEProjectAddFileController* projectAddFileController = (CEEProjectAddFileController*)[segue destinationController];
-        [projectAddFileController setSession:self.session];
-    }
-    if ([[segue identifier] caseInsensitiveCompare:@"IDProjectRemoveFileSegue"] == NSOrderedSame) {
-        CEEProjectRemoveFileController* projectRemoveFileController = (CEEProjectRemoveFileController*)[segue destinationController];
-        [projectRemoveFileController setSession:self.session];
-    }
 }
 
 - (IBAction)toggleToolbar:(id)sender {
@@ -156,26 +148,26 @@
     [_spliter toggleSymbolView];
 }
 
-- (IBAction)toggleReferenceView:(id)sender {
-    [_spliter toggleReferenceView];
+- (IBAction)toggleSourceBufferView:(id)sender {
+    [_spliter toggleSourceBufferView];
 }
 
-- (IBAction)togglePathView:(id)sender {
-    [_spliter togglePathView];
+- (IBAction)toggleFileReferenceView:(id)sender {
+    [_spliter toggleFileReferenceView];
 }
 
 - (IBAction)toggleContextView:(id)sender {
-    CEESessionSourceController* controller = (CEESessionSourceController*)[_spliter viewControllerByIdentifier:@"IDSessionSourceController"];
+    CEESessionSourceViewController* controller = (CEESessionSourceViewController*)[_spliter viewControllerByIdentifier:@"IDSessionSourceViewController"];
     [controller toggleContextView];
 }
 
 - (IBAction)splitHorizontally:(id)sender {
-    CEESessionSourceController* controller = (CEESessionSourceController*)[_spliter viewControllerByIdentifier:@"IDSessionSourceController"];
+    CEESessionSourceViewController* controller = (CEESessionSourceViewController*)[_spliter viewControllerByIdentifier:@"IDSessionSourceViewController"];
     [controller splitViewHorizontally];
 }
 
 - (IBAction)splitVertically:(id)sender {
-    CEESessionSourceController* controller = (CEESessionSourceController*)[_spliter viewControllerByIdentifier:@"IDSessionSourceController"];
+    CEESessionSourceViewController* controller = (CEESessionSourceViewController*)[_spliter viewControllerByIdentifier:@"IDSessionSourceViewController"];
     [controller splitViewVertically];
 }
 
@@ -216,7 +208,13 @@
 }
 
 - (IBAction)newProject:(id)sender {
-    [self performSegueWithIdentifier:@"IDProjectCreatorSegue" sender:self];
+    if (!_projectCreatorWindowController)
+        _projectCreatorWindowController = [[NSStoryboard storyboardWithName:@"ProjectCreator" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectCreatorWindowController"];
+    
+    [self.view.window beginSheet:_projectCreatorWindowController.window completionHandler:(^(NSInteger result) {
+        [NSApp stopModalWithCode:result];
+    })];
+    [NSApp runModalForWindow:self.view.window];
 }
 
 - (NSArray*)filePathsFromOpenPanel {
@@ -279,8 +277,7 @@
             }
         }
         else {
-            [_session.project addSecurityBookmarksWithFilePaths:@[filePath]];
-            [_session.activedPort openSourceBuffersWithFilePaths:@[filePath]];
+            [_session.activedPort openSourceBufferWithFilePath:filePath];
         }
     }
 }
@@ -338,18 +335,35 @@
     return _session;
 }
 
-- (IBAction)projectAddFile:(id)sender {
-    if (_session.project.database)
-        [self performSegueWithIdentifier:@"IDProjectAddFileSegue" sender:self]; 
+- (IBAction)addReferencesToProject:(id)sender {
+    if (!_addReferenceWindowController)
+        _addReferenceWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDAddReferenceWindowController"];
+    [self.view.window beginSheet:_addReferenceWindowController.window completionHandler:(^(NSInteger result) {
+        [NSApp stopModalWithCode:result];
+    })];
+    [NSApp runModalForWindow:self.view.window];
 }
 
-- (IBAction)projectRemoveFile:(id)sender {
-    if (_session.project.database)
-        [self performSegueWithIdentifier:@"IDProjectRemoveFileSegue" sender:self];
+- (IBAction)removeReferencesFromProject:(id)sender {
+    if (!_removeReferenceWindowController)
+        _removeReferenceWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDRemoveReferenceWindowController"];
+    [self.view.window beginSheet:_removeReferenceWindowController.window completionHandler:(^(NSInteger result) {
+        [NSApp stopModalWithCode:result];
+    })];
+    [NSApp runModalForWindow:self.view.window];
+}
+
+- (IBAction)scanReferenceRoots:(id)sender {
+    if (!_referenceRootScannerWindowController)
+        _referenceRootScannerWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDReferenceRootScannerWindowController"];
+    [self.view.window beginSheet:_referenceRootScannerWindowController.window completionHandler:(^(NSInteger result) {
+        [NSApp stopModalWithCode:result];
+    })];
+    [NSApp runModalForWindow:self.view.window];
 }
 
 - (void)setFrameAttachable:(BOOL)enable {
-    CEESessionSourceController* controller = (CEESessionSourceController*)[_spliter viewControllerByIdentifier:@"IDSessionSourceController"];
+    CEESessionSourceViewController* controller = (CEESessionSourceViewController*)[_spliter viewControllerByIdentifier:@"IDSessionSourceViewController"];
     [controller setFrameAttachable:enable];
 }
 
@@ -419,7 +433,7 @@
     if (configurations[@"show_opened_files_list"]) {
         NSString* configuration = configurations[@"show_opened_files_list"];
         if ([configuration compare:@"auto" options:NSCaseInsensitiveSearch] == NSOrderedSame) {
-            [_spliter showReferenceView:YES];
+            [_spliter showSourceBufferView:YES];
         }
     }
 }
@@ -503,7 +517,7 @@
         CEEProjectContextViewController* contextViewController = (CEEProjectContextViewController*)_contextWindowController.contentViewController;
         if (contextViewController.selectedSymbol) {
             CEESourceSymbol* symbol = contextViewController.selectedSymbol;
-            CEESourcePoint* sourcePoint = [[CEESourcePoint alloc] initWithFilePath:[NSString stringWithUTF8String:symbol->filepath] andLocations:[NSString stringWithUTF8String:symbol->locations]];
+            CEESourcePoint* sourcePoint = [[CEESourcePoint alloc] initWithFilePath:[NSString stringWithUTF8String:symbol->file_path] andLocations:[NSString stringWithUTF8String:symbol->locations]];
             [port jumpToSourcePoint:sourcePoint];
         }
     }
@@ -514,7 +528,7 @@
     CEESessionPort* port = notification.object;
     if (port.session != _session)
         return;
-        
+    
     if (!_projectSearchWindowController)
         _projectSearchWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSearchWindowController"];
     
@@ -561,7 +575,45 @@
 - (IBAction)setPreferences:(id)sender {
     AppDelegate* delegate = [NSApp delegate];
     CEESessionPort* port = self.session.activedPort;
-    [port openSourceBuffersWithFilePaths:@[[delegate configurationFilePath]]];
+    [port openSourceBufferWithFilePath:[delegate configurationFilePath]];
 }
+
+- (void)cymbolsUpdateNotifyResponse:(id)sender {
+    [_messageButton setEnabled:YES];
+    [_messageButton setHidden:NO];
+}
+
+- (void)cymbolsUpdateConfirmResponse:(id)sender {
+    [_messageButton setEnabled:NO];
+    [_messageButton setHidden:YES];
+}
+
+- (void)checkUpdate {
+    AppDelegate* delegate = [NSApp delegate];
+    if ([delegate.network updateFlagSet]) {
+        [_messageButton setEnabled:YES];
+        [_messageButton setHidden:NO];
+    }
+    else {
+        [_messageButton setEnabled:NO];
+        [_messageButton setHidden:YES];
+    }
+}
+
+- (IBAction)update:(id)sender {
+    if (!_updateInfoWindowController)
+        _updateInfoWindowController = [[NSStoryboard storyboardWithName:@"UpdateInfo" bundle:nil] instantiateControllerWithIdentifier:@"IDUpdateInfoWindowController"];
+    
+    AppDelegate* delegate = [NSApp delegate];
+    CEEUpdateInfoViewController* viewController = (CEEUpdateInfoViewController*)_updateInfoWindowController.contentViewController;
+    viewController.infoString = [delegate.network updateInfoString];
+    [self.view.window beginSheet:_updateInfoWindowController.window completionHandler:(^(NSInteger result) {
+        [NSApp stopModalWithCode:result];
+    })];
+    [NSApp runModalForWindow:self.view.window];
+    [delegate.network cleanUpdateFlag];
+
+}
+
 
 @end

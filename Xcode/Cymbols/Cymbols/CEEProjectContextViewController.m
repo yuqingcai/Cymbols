@@ -7,7 +7,7 @@
 //
 #import "AppDelegate.h"
 #import "CEEProjectContextViewController.h"
-#import "CEESymbolCellView.h"
+#import "CEEImageTextTableCellView.h"
 #import "CEEEditViewController.h"
 #import "CEETextLabel.h"
 #import "CEETitleView.h"
@@ -24,37 +24,6 @@
 @end
 
 @implementation CEEProjectContextViewController
-
-- (CEESourceBuffer*)project:(CEEProject*)project securityOpenSourceBufferWithFilePath:(NSString*)filePath {
-    if (!project || !filePath)
-        return nil;
-        
-    CEESourceBuffer* buffer = nil;
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    if (access([filePath UTF8String], R_OK) != 0) {
-        NSArray* bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
-        if (bookmarks) {
-            [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
-            [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-        }
-    }
-    else {
-        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
-    }
-    
-    return buffer;
-}
-
-- (void)project:(CEEProject*)project securityCloseSourceBuffer:(CEESourceBuffer*)buffer {
-    if (!project || !buffer)
-        return;
-    
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    [sourceBufferManager closeSourceBuffer:buffer];
-}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -130,21 +99,24 @@
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    CEESymbolCellView* cellView = [tableView makeViewWithIdentifier:@"IDSymbolCellView"];
+    CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
     CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)row);
-    NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-    cellView.title.stringValue = [NSString stringWithFormat:@"%ld %@ - line %d", row, [filePath lastPathComponent], 0];
+    NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
+    cellView.text.stringValue = [NSString stringWithFormat:@"%ld %@ - line %d", row, [filePath lastPathComponent], 0];
     [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
     return cellView;
 }
 
 - (IBAction)selectRow:sender {
     @autoreleasepool {
+        
+        AppDelegate* delegate = [NSApp delegate];
+        
         if (!_symbolTable.selectedRowIndexes || _symbolTable.selectedRow == -1)
             return;
         CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)_symbolTable.selectedRow);
-        NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-        CEESourceBuffer* buffer = [self project:_project securityOpenSourceBufferWithFilePath:filePath];
+        NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
+        CEESourceBuffer* buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent ];
         cee_source_buffer_parse(buffer, 0);
         [_editViewController setBuffer:buffer];
         CEEList* ranges = cee_ranges_from_string(symbol->locations);
@@ -153,7 +125,7 @@
             cee_list_free_full(ranges, cee_range_free);
         }
         [_titlebar setTitle:filePath];
-        [self project:_project securityCloseSourceBuffer:buffer];
+        [delegate.sourceBufferManager closeSourceBuffer:buffer];;
         return;
     }
 }

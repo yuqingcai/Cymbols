@@ -91,9 +91,9 @@
     NSSize frameSize = self.frame.size;
     NSRect contentRect = NSMakeRect(0.0,
                                     0.0,
-                             frameSize.width,
-                             frameSize.height);
-        
+                                    frameSize.width,
+                                    frameSize.height);
+    
     NSBezierPath* contentPath = [NSBezierPath bezierPathWithRoundedRect:contentRect xRadius:self.cornerRadius yRadius:self.cornerRadius];
     
     if (self.backgroundColor) {

@@ -8,7 +8,7 @@
 #import "AppDelegate.h"
 #import "CEEStyleManager.h"
 #import "CEEUserInterfaceStyleSelectionController.h"
-#import "CEEFileNameCellView.h"
+#import "CEEImageTextTableCellView.h"
 #import "CEEButton.h"
 
 @interface CEEUserInterfaceStyleSelectionController ()
@@ -83,9 +83,9 @@
 - (CEEView*)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     NSArray* names = [styleManager userInterfaceStyleNames];
-    CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFileNameCellView"];
+    CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
     NSString* fileName = names[row];
-    cellView.title.stringValue = fileName;
+    cellView.text.stringValue = fileName;
     [cellView.icon setImage:[styleManager filetypeIconFromFileName:fileName]];
     return cellView;
 }

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner"/>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="c22-O7-iKe" customClass="CEEFilePathSelectionView">
+            <rect key="frame" x="0.0" y="0.0" width="542" height="485"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="VaM-of-dTF" customClass="CEETextTitle">
+                    <rect key="frame" x="20" y="445" width="502" height="24"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="24" id="phg-O5-bHJ"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Label"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="tgh-bf-VI9" customClass="CEEContainerView">
+                    <rect key="frame" x="20" y="31" width="502" height="406"/>
+                    <subviews>
+                        <customView translatesAutoresizingMaskIntoConstraints="NO" id="Gm4-8E-8ED" customClass="CEETableView">
+                            <rect key="frame" x="1" y="1" width="500" height="404"/>
+                            <constraints>
+                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="400" id="DnG-NJ-lVb"/>
+                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="500" id="P5d-56-qZS"/>
+                            </constraints>
+                        </customView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="Gm4-8E-8ED" secondAttribute="trailing" constant="1" id="Apb-Rz-TyK"/>
+                        <constraint firstAttribute="bottom" secondItem="Gm4-8E-8ED" secondAttribute="bottom" constant="1" id="c6G-a6-Dcm"/>
+                        <constraint firstItem="Gm4-8E-8ED" firstAttribute="leading" secondItem="tgh-bf-VI9" secondAttribute="leading" constant="1" id="dmZ-m3-Xhs"/>
+                        <constraint firstItem="Gm4-8E-8ED" firstAttribute="top" secondItem="tgh-bf-VI9" secondAttribute="top" constant="1" id="zFW-FB-vTT"/>
+                    </constraints>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="CyO-t4-23Y" customClass="CEECheckBox">
+                    <rect key="frame" x="20" y="0.0" width="94" height="23"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="23" id="A1e-nf-0HU"/>
+                        <constraint firstAttribute="width" constant="94" id="P5w-VS-8MG"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="title" value="Select All"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="VaM-of-dTF" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="16" id="6Ed-cL-Edy"/>
+                <constraint firstItem="tgh-bf-VI9" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" symbolic="YES" id="9eA-mN-YHv"/>
+                <constraint firstAttribute="trailing" secondItem="tgh-bf-VI9" secondAttribute="trailing" constant="20" symbolic="YES" id="D13-GL-O1J"/>
+                <constraint firstItem="VaM-of-dTF" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" symbolic="YES" id="GFs-m8-4tt"/>
+                <constraint firstItem="CyO-t4-23Y" firstAttribute="top" secondItem="tgh-bf-VI9" secondAttribute="bottom" constant="8" id="HLR-mZ-0rA"/>
+                <constraint firstItem="CyO-t4-23Y" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" symbolic="YES" id="OOh-VE-a8N"/>
+                <constraint firstAttribute="bottom" secondItem="CyO-t4-23Y" secondAttribute="bottom" id="YhX-2c-zph"/>
+                <constraint firstAttribute="trailing" secondItem="VaM-of-dTF" secondAttribute="trailing" constant="20" symbolic="YES" id="adU-zG-rod"/>
+                <constraint firstItem="tgh-bf-VI9" firstAttribute="top" secondItem="VaM-of-dTF" secondAttribute="bottom" constant="8" id="vS4-Nr-8mL"/>
+            </constraints>
+            <connections>
+                <outlet property="filePathLabel" destination="VaM-of-dTF" id="Gqw-lE-LRB"/>
+                <outlet property="filePathTable" destination="Gm4-8E-8ED" id="81D-w2-WO9"/>
+                <outlet property="selectAllButton" destination="CyO-t4-23Y" id="Dug-g6-Hfb"/>
+            </connections>
+            <point key="canvasLocation" x="202" y="171"/>
+        </customView>
+    </objects>
+</document>

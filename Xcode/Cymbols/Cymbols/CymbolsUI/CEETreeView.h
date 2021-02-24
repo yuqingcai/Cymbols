@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nullable, weak) id <CEETreeViewDelegate> delegate;
 @property (nullable, weak) id <CEETreeViewDataSource> dataSource;
+@property BOOL autosaveExpandedItems;
 
 #pragma clang diagnostic pop
 
@@ -27,6 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reloadItem:(id)item;
 - (BOOL)itemIsExpanded:(id)item;
 - (NSArray*)selectedItems;
+- (NSString*)serialize;
+- (void)deserialize:(NSDictionary*)dict;
 @end
 
 @protocol CEETreeViewDelegate <NSObject>
@@ -35,6 +38,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (CEEView*)treeView:(CEETreeView *)treeView viewForColumn:(NSInteger)column item:(id)item;
 - (BOOL)treeView:(CEETreeView *)treeView shouldExpandItem:(nullable id)item;
 - (BOOL)treeView:(CEETreeView *)treeView shouldCollapseItem:(nullable id)item;
+@optional
+- (id)treeView:(CEETreeView *)treeView itemForPersistentObject:(id)object;
+- (id)treeView:(CEETreeView *)treeView persistentObjectForItem:(id)item;
 @end
 
 @protocol CEETreeViewDataSource <NSObject>

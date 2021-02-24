@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Window Controller-->
+        <scene sceneID="Iw4-Xf-gYb">
+            <objects>
+                <windowController storyboardIdentifier="IDUpdateInfoWindowController" id="vEZ-v5-BPJ" customClass="CEEWindowController" sceneMemberID="viewController">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="1Qh-8m-VOz" customClass="CEEWindow">
+                        <windowStyleMask key="styleMask" titled="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="425" y="462" width="480" height="170"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
+                        <view key="contentView" id="vfr-dp-vdq">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="170"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="vEZ-v5-BPJ" id="N4G-dV-fRZ"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="l5T-5P-FX3" kind="relationship" relationship="window.shadowedContentViewController" id="cQC-0q-nc4"/>
+                    </connections>
+                </windowController>
+                <customObject id="n9b-sI-fxO" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="16" y="-26"/>
+        </scene>
+        <!--Update Info View Controller-->
+        <scene sceneID="h8L-N6-H49">
+            <objects>
+                <viewController id="l5T-5P-FX3" customClass="CEEUpdateInfoViewController" sceneMemberID="viewController">
+                    <view key="view" id="SUn-mg-XDn" customClass="CEEWindowContentView">
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="170"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="6eo-dD-jnO" customClass="CEETextTitle">
+                                <rect key="frame" x="52" y="117" width="404" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="I1J-Bo-QDs"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Cymbols Update"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="g58-O3-ZtM" customClass="CEETextLabel">
+                                <rect key="frame" x="20" y="70" width="440" height="27"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="27" id="bcq-ie-Iho"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Update "/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="rNx-ou-kzJ" customClass="CEEButton">
+                                <rect key="frame" x="363" y="20" width="97" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="1mJ-Hd-prs"/>
+                                    <constraint firstAttribute="width" constant="97" id="Diy-Is-Z1B"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="View Details"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="viewDetails:" target="l5T-5P-FX3" id="v7Y-W8-D5B"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="2e5-5Q-UsB" customClass="CEEButton">
+                                <rect key="frame" x="258" y="20" width="97" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="1XM-US-Pi2"/>
+                                    <constraint firstAttribute="width" constant="97" id="iLZ-8h-wxo"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Close"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="closeWindow:" target="l5T-5P-FX3" id="PPR-lP-03y"/>
+                                </connections>
+                            </customView>
+                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="iwl-4A-8LX" customClass="CEEImageView">
+                                <rect key="frame" x="20" y="118" width="32" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="32" id="E07-Th-LWn"/>
+                                    <constraint firstAttribute="height" constant="32" id="brs-fT-cFi"/>
+                                </constraints>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_cymbols_32x32" id="Koa-zH-xfc"/>
+                            </imageView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="6eo-dD-jnO" firstAttribute="leading" secondItem="iwl-4A-8LX" secondAttribute="trailing" id="0GH-U1-lO6"/>
+                            <constraint firstItem="iwl-4A-8LX" firstAttribute="leading" secondItem="SUn-mg-XDn" secondAttribute="leading" constant="20" symbolic="YES" id="0dE-KJ-riK"/>
+                            <constraint firstAttribute="trailing" secondItem="6eo-dD-jnO" secondAttribute="trailing" constant="24" id="2bE-nB-Qhd"/>
+                            <constraint firstItem="6eo-dD-jnO" firstAttribute="top" secondItem="SUn-mg-XDn" secondAttribute="top" constant="23" id="GJO-U1-93f"/>
+                            <constraint firstAttribute="bottom" secondItem="2e5-5Q-UsB" secondAttribute="bottom" constant="20" symbolic="YES" id="Oxt-zx-mf6"/>
+                            <constraint firstAttribute="bottom" secondItem="rNx-ou-kzJ" secondAttribute="bottom" constant="20" symbolic="YES" id="Rn1-bd-nUW"/>
+                            <constraint firstAttribute="trailing" secondItem="g58-O3-ZtM" secondAttribute="trailing" constant="20" symbolic="YES" id="WiP-bg-3w6"/>
+                            <constraint firstItem="g58-O3-ZtM" firstAttribute="leading" secondItem="SUn-mg-XDn" secondAttribute="leading" constant="20" symbolic="YES" id="aIG-oC-Fp0"/>
+                            <constraint firstItem="g58-O3-ZtM" firstAttribute="top" secondItem="iwl-4A-8LX" secondAttribute="bottom" constant="21" id="abe-cE-Uzu"/>
+                            <constraint firstItem="rNx-ou-kzJ" firstAttribute="leading" secondItem="2e5-5Q-UsB" secondAttribute="trailing" constant="8" symbolic="YES" id="bCZ-GJ-9Gh"/>
+                            <constraint firstItem="iwl-4A-8LX" firstAttribute="top" secondItem="SUn-mg-XDn" secondAttribute="top" constant="20" id="bgp-Nb-AJc"/>
+                            <constraint firstAttribute="trailing" secondItem="rNx-ou-kzJ" secondAttribute="trailing" constant="20" id="zF2-zl-Kgc"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="updateLabel" destination="g58-O3-ZtM" id="N2F-o8-zhG"/>
+                        <outlet property="updateTitle" destination="6eo-dD-jnO" id="JGo-0h-MEz"/>
+                    </connections>
+                </viewController>
+                <customObject id="caK-5Y-LT7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="600" y="-25.5"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="icon_cymbols_32x32" width="32" height="32"/>
+    </resources>
+</document>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -46,7 +45,7 @@
                 </windowController>
                 <customObject id="bOf-EL-3yd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1565" y="172"/>
+            <point key="canvasLocation" x="119" y="801"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="jwU-wC-3z4">
@@ -67,7 +66,7 @@
                 </windowController>
                 <customObject id="keL-m7-76q" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="797" y="-28"/>
+            <point key="canvasLocation" x="131" y="253"/>
         </scene>
         <!--Project Clean View Controller-->
         <scene sceneID="gR4-GX-ULI">
@@ -121,7 +120,7 @@
                 </viewController>
                 <customObject id="82V-sh-piu" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="797" y="251"/>
+            <point key="canvasLocation" x="778" y="254"/>
         </scene>
         <!--Project Context View Controller-->
         <scene sceneID="vwU-hl-noS">
@@ -213,7 +212,7 @@
                 </viewController>
                 <customObject id="2YE-zF-sr9" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1565" y="861"/>
+            <point key="canvasLocation" x="1012" y="801"/>
         </scene>
         <!--Project Parse View Controller-->
         <scene sceneID="flR-ls-bna">
@@ -234,13 +233,8 @@
                                 <rect key="frame" x="20" y="50" width="440" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             </progressIndicator>
-                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bMW-iq-kzp" customClass="CEEImageView">
-                                <rect key="frame" x="20" y="100" width="32" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_database_build_16x16" id="Qin-sM-itA"/>
-                            </imageView>
                             <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Emj-kp-XoR" customClass="CEETextTitle">
-                                <rect key="frame" x="52" y="102" width="408" height="25"/>
+                                <rect key="frame" x="51" y="102" width="408" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Building Project"/>
@@ -256,6 +250,11 @@
                                     <action selector="cancel:" target="yWT-YM-JDm" id="Nhs-PU-yb3"/>
                                 </connections>
                             </customView>
+                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bMW-iq-kzp" customClass="CEEImageView">
+                                <rect key="frame" x="20" y="98" width="32" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_database_build_16x16" id="Qin-sM-itA"/>
+                            </imageView>
                         </subviews>
                     </view>
                     <connections>
@@ -268,7 +267,7 @@
                 </viewController>
                 <customObject id="jdD-72-784" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="131" y="251"/>
+            <point key="canvasLocation" x="778" y="-28"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="Z3r-Qz-Flm">
@@ -289,7 +288,7 @@
                 </windowController>
                 <customObject id="SaZ-qW-nM1" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="98" y="797"/>
+            <point key="canvasLocation" x="123" y="1577"/>
         </scene>
         <!--Project Search View Controller-->
         <scene sceneID="aN9-Ae-8x4">
@@ -532,7 +531,7 @@
                 </viewController>
                 <customObject id="DnK-ZQ-oAU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="102.5" y="1482"/>
+            <point key="canvasLocation" x="1096" y="1577"/>
         </scene>
     </scenes>
     <resources>

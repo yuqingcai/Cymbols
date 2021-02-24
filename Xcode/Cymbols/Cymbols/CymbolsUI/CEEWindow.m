@@ -17,6 +17,7 @@
         return nil;
     
     self.titlebarAppearsTransparent = YES;
+    self.backgroundColor = [NSColor clearColor];
     
     return self;
 }

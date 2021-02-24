@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner"/>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="c22-O7-iKe" customClass="CEEFileSettingView">
+            <rect key="frame" x="0.0" y="0.0" width="340" height="124"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="Sye-BU-pvV" customClass="CEETextField">
+                    <rect key="frame" x="20" y="52" width="300" height="24"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="24" id="TIH-DI-9PQ"/>
+                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="i5m-7M-saI"/>
+                    </constraints>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="v4A-Aa-YAX" customClass="CEETextTitle">
+                    <rect key="frame" x="36" y="84" width="284" height="24"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="24" id="F1N-T1-BgZ"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Label"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="6rG-aG-j6g" customClass="CEECheckBox">
+                    <rect key="frame" x="20" y="15" width="300" height="29"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="29" id="JHx-fA-Mnc"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="title" value="checkBox"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="TG5-xX-8xA" customClass="CEEImageView">
+                    <rect key="frame" x="20" y="89" width="16" height="16"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="16" id="3rg-zb-Wu2"/>
+                        <constraint firstAttribute="width" constant="16" id="4Wm-iq-aBs"/>
+                    </constraints>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_file_16x16" id="nN7-pt-xoL"/>
+                </imageView>
+            </subviews>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="v4A-Aa-YAX" secondAttribute="trailing" constant="20" symbolic="YES" id="0sk-uc-sCg"/>
+                <constraint firstItem="TG5-xX-8xA" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="19" id="1eg-G3-ZBj"/>
+                <constraint firstItem="v4A-Aa-YAX" firstAttribute="leading" secondItem="TG5-xX-8xA" secondAttribute="trailing" id="4Nl-Dk-HQw"/>
+                <constraint firstItem="6rG-aG-j6g" firstAttribute="top" secondItem="Sye-BU-pvV" secondAttribute="bottom" constant="8" id="Jdo-Qg-n4T"/>
+                <constraint firstItem="6rG-aG-j6g" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" symbolic="YES" id="MK1-4M-eMI"/>
+                <constraint firstAttribute="bottom" secondItem="6rG-aG-j6g" secondAttribute="bottom" constant="15" id="Z8H-Ia-RO9"/>
+                <constraint firstItem="TG5-xX-8xA" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" symbolic="YES" id="fbG-Pi-kH2"/>
+                <constraint firstItem="v4A-Aa-YAX" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="16" id="l5J-q7-EzM"/>
+                <constraint firstItem="Sye-BU-pvV" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" symbolic="YES" id="smt-bp-ZZe"/>
+                <constraint firstAttribute="trailing" secondItem="Sye-BU-pvV" secondAttribute="trailing" constant="20" symbolic="YES" id="t9b-Xd-8ac"/>
+                <constraint firstItem="Sye-BU-pvV" firstAttribute="top" secondItem="v4A-Aa-YAX" secondAttribute="bottom" constant="8" id="uVv-Sr-ZOf"/>
+                <constraint firstAttribute="trailing" secondItem="6rG-aG-j6g" secondAttribute="trailing" constant="20" symbolic="YES" id="vkt-Uo-3uc"/>
+            </constraints>
+            <connections>
+                <outlet property="nameInput" destination="Sye-BU-pvV" id="fq5-7M-6mT"/>
+                <outlet property="referenceCheckbox" destination="6rG-aG-j6g" id="IEZ-MF-T8o"/>
+                <outlet property="titleIcon" destination="TG5-xX-8xA" id="8yQ-37-rTA"/>
+                <outlet property="titleLabel" destination="v4A-Aa-YAX" id="QNC-LK-M3Z"/>
+            </connections>
+            <point key="canvasLocation" x="38.5" y="-30"/>
+        </customView>
+    </objects>
+    <resources>
+        <image name="icon_file_16x16" width="16" height="16"/>
+    </resources>
+</document>

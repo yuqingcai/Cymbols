@@ -8,8 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		2602A92D254BFB010011FBD5 /* cee_java.c in Sources */ = {isa = PBXBuildFile; fileRef = 2602A92A254BFB000011FBD5 /* cee_java.c */; };
+		2602BB0B25C7D2D5004B5D52 /* CEEReferenceRootScannerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2602BB0925C7D2D5004B5D52 /* CEEReferenceRootScannerViewController.m */; };
+		2602BB0E25C7D417004B5D52 /* FilePathSelectionView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2602BB0C25C7D417004B5D52 /* FilePathSelectionView.xib */; };
+		2602BB1125C7D443004B5D52 /* CEEFilePathSelectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2602BB1025C7D443004B5D52 /* CEEFilePathSelectionView.m */; };
+		2602BB1425C7DDB5004B5D52 /* FilePathScannerView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2602BB1225C7DDB5004B5D52 /* FilePathScannerView.xib */; };
+		2602BB1725C7DF4B004B5D52 /* CEEFilePathScannerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2602BB1625C7DF4B004B5D52 /* CEEFilePathScannerView.m */; };
+		2608E27F25CA4141002D709D /* icon_trash_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2608E27E25CA4141002D709D /* icon_trash_16x16@2x.png */; };
 		260D7DF225470231003BDC42 /* icon_xml_tag_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */; };
+		2610A12425D1855B00DB2AA9 /* icon_caution_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2610A12325D1855B00DB2AA9 /* icon_caution_16x16@2x.png */; };
+		2617758325CA4D1300CBA692 /* CEERemoveFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2617758125CA4D1300CBA692 /* CEERemoveFileViewController.m */; };
 		261B0782256E46EA00D1C48D /* icon_property_declaration_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 261B0780256E46EA00D1C48D /* icon_property_declaration_16x16@2x.png */; };
+		261BE13B25C79F4C0099158E /* ReferenceManager.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 261BE13925C79F4C0099158E /* ReferenceManager.storyboard */; };
+		261BE13E25C7AB960099158E /* ProjectCreator.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 261BE13C25C7AB960099158E /* ProjectCreator.storyboard */; };
+		2625379B25DCF3280060E922 /* UpdateInfo.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2625379925DCF3270060E922 /* UpdateInfo.storyboard */; };
+		2625379E25DCF37C0060E922 /* CEEUpdateInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2625379C25DCF37B0060E922 /* CEEUpdateInfoViewController.m */; };
 		2629886F25765A36001F1190 /* iconvFrameworks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2629886E25765A36001F1190 /* iconvFrameworks.framework */; };
 		2629887025765A36001F1190 /* iconvFrameworks.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2629886E25765A36001F1190 /* iconvFrameworks.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */ = {isa = PBXBuildFile; fileRef = 26308593254263DA000A8CB5 /* cee_regex_macos.m */; };
@@ -23,19 +35,18 @@
 		2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */; };
 		264EA89C25480CFD005042EA /* icon_file_type_css_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */; };
 		26548527254150AC00E1D0DE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 26548526254150AC00E1D0DE /* Credits.rtf */; };
+		2660770F25D80A870087D883 /* CEETimerFreezer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2660770D25D80A860087D883 /* CEETimerFreezer.m */; };
+		2660771225D816930087D883 /* TimeFreezer.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2660771025D816930087D883 /* TimeFreezer.storyboard */; };
+		2660771525D8188F0087D883 /* CEETimeFreezerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2660771425D8188F0087D883 /* CEETimeFreezerViewController.m */; };
 		266FEED525707D3300775864 /* icon_interface_definition_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 266FEED425707D3300775864 /* icon_interface_definition_16x16@2x.png */; };
 		268376E025490C720066305C /* cee_swift.c in Sources */ = {isa = PBXBuildFile; fileRef = 268376DD25490C720066305C /* cee_swift.c */; };
 		268531922571F7E2004724F9 /* icon_using_declaration_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 268531912571F7E2004724F9 /* icon_using_declaration_16x16@2x.png */; };
 		26899B5325B17FA600C84815 /* icon_add_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B4E25B17FA500C84815 /* icon_add_16x16@2x.png */; };
 		26899B5425B17FA600C84815 /* icon_file_list_carved_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B4F25B17FA500C84815 /* icon_file_list_carved_16x16@2x.png */; };
 		26899B5525B17FA600C84815 /* icon_reload_carved_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B5025B17FA500C84815 /* icon_reload_carved_16x16@2x.png */; };
-		26899B5625B17FA600C84815 /* icon_remove_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B5125B17FA600C84815 /* icon_remove_16x16@2x.png */; };
 		26899B5725B17FA600C84815 /* icon_mail_carved_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B5225B17FA600C84815 /* icon_mail_carved_16x16@2x.png */; };
-		26899B5E25B17FEF00C84815 /* icon_mail_carved_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B5825B17FEF00C84815 /* icon_mail_carved_16x16@2x.png */; };
-		26899B5F25B17FEF00C84815 /* icon_reload_carved_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B5925B17FEF00C84815 /* icon_reload_carved_16x16@2x.png */; };
 		26899B6025B17FEF00C84815 /* icon_remove_carved_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B5A25B17FEF00C84815 /* icon_remove_carved_16x16@2x.png */; };
 		26899B6125B17FEF00C84815 /* icon_directory_tree_carved_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B5B25B17FEF00C84815 /* icon_directory_tree_carved_16x16@2x.png */; };
-		26899B6225B17FEF00C84815 /* icon_file_list_carved_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B5C25B17FEF00C84815 /* icon_file_list_carved_16x16@2x.png */; };
 		26899B6325B17FEF00C84815 /* icon_add_carved_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26899B5D25B17FEF00C84815 /* icon_add_carved_16x16@2x.png */; };
 		269201A1252FF30D00D6E2DC /* cJSON_Utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 26920091252FF30D00D6E2DC /* cJSON_Utils.c */; };
 		2692026F252FF33300D6E2DC /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 2692026E252FF33300D6E2DC /* cJSON.c */; };
@@ -72,7 +83,6 @@
 		269202DF252FF39000D6E2DC /* cee_text_storage.c in Sources */ = {isa = PBXBuildFile; fileRef = 269202D5252FF39000D6E2DC /* cee_text_storage.c */; };
 		269202E0252FF39000D6E2DC /* cee_text_macos_attribute.m in Sources */ = {isa = PBXBuildFile; fileRef = 269202D8252FF39000D6E2DC /* cee_text_macos_attribute.m */; };
 		26920351252FF3E300D6E2DC /* cymbols_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202E5252FF3E300D6E2DC /* cymbols_logo@2x.png */; };
-		26920352252FF3E300D6E2DC /* icon_add_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202E6252FF3E300D6E2DC /* icon_add_16x16@2x.png */; };
 		26920353252FF3E300D6E2DC /* icon_broom_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202E7252FF3E300D6E2DC /* icon_broom_16x16@2x.png */; };
 		26920354252FF3E300D6E2DC /* icon_buffer_list_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202E8252FF3E300D6E2DC /* icon_buffer_list_16x16@2x.png */; };
 		26920355252FF3E300D6E2DC /* icon_character_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 269202E9252FF3E300D6E2DC /* icon_character_16x16@2x.png */; };
@@ -217,37 +227,36 @@
 		26920455252FF50300D6E2DC /* CEETextEditViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920451252FF50300D6E2DC /* CEETextEditViewController.m */; };
 		26920459252FF50E00D6E2DC /* CEEAutoCompleteViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920458252FF50E00D6E2DC /* CEEAutoCompleteViewController.m */; };
 		26920483252FF51A00D6E2DC /* CEESessionContextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692045C252FF51A00D6E2DC /* CEESessionContextViewController.m */; };
-		26920484252FF51A00D6E2DC /* CEESessionFilePathController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692045E252FF51A00D6E2DC /* CEESessionFilePathController.m */; };
+		26920484252FF51A00D6E2DC /* CEESessionFileReferenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692045E252FF51A00D6E2DC /* CEESessionFileReferenceViewController.m */; };
 		26920485252FF51A00D6E2DC /* CEESessionFrameManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920460252FF51A00D6E2DC /* CEESessionFrameManager.m */; };
 		26920486252FF51A00D6E2DC /* CEESessionFrameManagerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920462252FF51A00D6E2DC /* CEESessionFrameManagerView.m */; };
 		26920487252FF51A00D6E2DC /* CEESessionFrameSplitView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920464252FF51A00D6E2DC /* CEESessionFrameSplitView.m */; };
 		26920488252FF51A00D6E2DC /* CEESessionFrameTitleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920466252FF51A00D6E2DC /* CEESessionFrameTitleView.m */; };
 		26920489252FF51A00D6E2DC /* CEESessionFrameView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920468252FF51A00D6E2DC /* CEESessionFrameView.m */; };
 		2692048A252FF51A00D6E2DC /* CEESessionFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692046A252FF51A00D6E2DC /* CEESessionFrameViewController.m */; };
-		2692048B252FF51A00D6E2DC /* CEESessionReferenceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692046C252FF51A00D6E2DC /* CEESessionReferenceController.m */; };
-		2692048C252FF51A00D6E2DC /* CEESessionReferenceTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692046E252FF51A00D6E2DC /* CEESessionReferenceTableView.m */; };
-		2692048D252FF51A00D6E2DC /* CEESessionSourceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920470252FF51A00D6E2DC /* CEESessionSourceController.m */; };
+		2692048B252FF51A00D6E2DC /* CEESessionSourceBufferViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692046C252FF51A00D6E2DC /* CEESessionSourceBufferViewController.m */; };
+		2692048C252FF51A00D6E2DC /* CEESessionSourceBufferTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692046E252FF51A00D6E2DC /* CEESessionSourceBufferTableView.m */; };
+		2692048D252FF51A00D6E2DC /* CEESessionSourceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920470252FF51A00D6E2DC /* CEESessionSourceViewController.m */; };
 		2692048E252FF51A00D6E2DC /* CEESessionSpliter0.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920472252FF51A00D6E2DC /* CEESessionSpliter0.m */; };
 		2692048F252FF51A00D6E2DC /* CEESessionSpliter1.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920474252FF51A00D6E2DC /* CEESessionSpliter1.m */; };
 		26920490252FF51A00D6E2DC /* CEESessionStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920476252FF51A00D6E2DC /* CEESessionStatusBar.m */; };
-		26920491252FF51A00D6E2DC /* CEESessionSymbolController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920478252FF51A00D6E2DC /* CEESessionSymbolController.m */; };
+		26920491252FF51A00D6E2DC /* CEESessionSymbolViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920478252FF51A00D6E2DC /* CEESessionSymbolViewController.m */; };
 		26920492252FF51A00D6E2DC /* CEESessionToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692047A252FF51A00D6E2DC /* CEESessionToolbar.m */; };
 		26920493252FF51A00D6E2DC /* CEESessionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692047C252FF51A00D6E2DC /* CEESessionView.m */; };
 		26920494252FF51A00D6E2DC /* CEESessionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692047E252FF51A00D6E2DC /* CEESessionViewController.m */; };
 		26920495252FF51A00D6E2DC /* CEESessionWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920480252FF51A00D6E2DC /* CEESessionWindowController.m */; };
 		26920496252FF51A00D6E2DC /* CEESourceHistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920482252FF51A00D6E2DC /* CEESourceHistoryViewController.m */; };
-		269204A2252FF52700D6E2DC /* CEEAddFileSelectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920499252FF52700D6E2DC /* CEEAddFileSelectionView.m */; };
-		269204A3252FF52700D6E2DC /* CEEFilePathConfirmView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692049B252FF52700D6E2DC /* CEEFilePathConfirmView.m */; };
-		269204A4252FF52700D6E2DC /* CEEProjectAddFileController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692049D252FF52700D6E2DC /* CEEProjectAddFileController.m */; };
-		269204A5252FF52700D6E2DC /* CEEProjectRemoveFileController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692049F252FF52700D6E2DC /* CEEProjectRemoveFileController.m */; };
-		269204A6252FF52700D6E2DC /* CEERemoveFileSelectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204A1252FF52700D6E2DC /* CEERemoveFileSelectionView.m */; };
+		269204A2252FF52700D6E2DC /* CEEAddReferenceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26920499252FF52700D6E2DC /* CEEAddReferenceView.m */; };
+		269204A3252FF52700D6E2DC /* CEEFilePathView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692049B252FF52700D6E2DC /* CEEFilePathView.m */; };
+		269204A4252FF52700D6E2DC /* CEEAddReferenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692049D252FF52700D6E2DC /* CEEAddReferenceViewController.m */; };
+		269204A5252FF52700D6E2DC /* CEERemoveReferenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692049F252FF52700D6E2DC /* CEERemoveReferenceViewController.m */; };
+		269204A6252FF52700D6E2DC /* CEERemoveReferenceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204A1252FF52700D6E2DC /* CEERemoveReferenceView.m */; };
 		269204AE252FF53100D6E2DC /* CEEProjectCreatorController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204A9252FF53100D6E2DC /* CEEProjectCreatorController.m */; };
 		269204AF252FF53100D6E2DC /* CEEProjectPropertyView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204AB252FF53100D6E2DC /* CEEProjectPropertyView.m */; };
 		269204B0252FF53100D6E2DC /* CEEProjectSettingView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204AD252FF53100D6E2DC /* CEEProjectSettingView.m */; };
-		269204BC252FF54000D6E2DC /* CEEFileNameCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204B3252FF54000D6E2DC /* CEEFileNameCellView.m */; };
-		269204BD252FF54000D6E2DC /* CEEFilePathCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204B5252FF54000D6E2DC /* CEEFilePathCellView.m */; };
-		269204BE252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204B7252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.m */; };
-		269204BF252FF54000D6E2DC /* CEESymbolCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204B9252FF54000D6E2DC /* CEESymbolCellView.m */; };
+		269204BC252FF54000D6E2DC /* CEEImageTextTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204B3252FF54000D6E2DC /* CEEImageTextTableCellView.m */; };
+		269204BD252FF54000D6E2DC /* CEETextTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204B5252FF54000D6E2DC /* CEETextTableCellView.m */; };
+		269204BE252FF54000D6E2DC /* CEECheckboxTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204B7252FF54000D6E2DC /* CEECheckboxTableCellView.m */; };
 		269204C0252FF54000D6E2DC /* CEETableCellViewTextLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204BB252FF54000D6E2DC /* CEETableCellViewTextLabel.m */; };
 		269204C2252FF55600D6E2DC /* CEESessionDescriptor.c in Sources */ = {isa = PBXBuildFile; fileRef = 269204C1252FF55600D6E2DC /* CEESessionDescriptor.c */; };
 		269204C5252FF57500D6E2DC /* CEEProject.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204C3252FF57400D6E2DC /* CEEProject.m */; };
@@ -263,7 +272,7 @@
 		26920500252FF60300D6E2DC /* SourceHistory.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 269204E4252FF60000D6E2DC /* SourceHistory.storyboard */; };
 		26920501252FF60300D6E2DC /* TableCellViews.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204E6252FF60000D6E2DC /* TableCellViews.xib */; };
 		26920502252FF60300D6E2DC /* ProjectSettingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204E8252FF60100D6E2DC /* ProjectSettingView.xib */; };
-		26920503252FF60300D6E2DC /* RemoveFileSelectionView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204EA252FF60100D6E2DC /* RemoveFileSelectionView.xib */; };
+		26920503252FF60300D6E2DC /* RemoveReferenceView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204EA252FF60100D6E2DC /* RemoveReferenceView.xib */; };
 		26920504252FF60300D6E2DC /* Session.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 269204EC252FF60100D6E2DC /* Session.storyboard */; };
 		26920505252FF60300D6E2DC /* Theme.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 269204EE252FF60100D6E2DC /* Theme.storyboard */; };
 		26920506252FF60300D6E2DC /* ProjectPropertyView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204F0252FF60100D6E2DC /* ProjectPropertyView.xib */; };
@@ -271,8 +280,8 @@
 		26920508252FF60300D6E2DC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 269204F4252FF60200D6E2DC /* Main.storyboard */; };
 		26920509252FF60300D6E2DC /* AutoComplete.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 269204F6252FF60200D6E2DC /* AutoComplete.storyboard */; };
 		2692050A252FF60300D6E2DC /* Editor.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 269204F8252FF60200D6E2DC /* Editor.storyboard */; };
-		2692050B252FF60300D6E2DC /* FilePathConfirmView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204FA252FF60200D6E2DC /* FilePathConfirmView.xib */; };
-		2692050C252FF60300D6E2DC /* AddFileSelectionView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204FC252FF60300D6E2DC /* AddFileSelectionView.xib */; };
+		2692050B252FF60300D6E2DC /* FilePathView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204FA252FF60200D6E2DC /* FilePathView.xib */; };
+		2692050C252FF60300D6E2DC /* AddReferenceView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204FC252FF60300D6E2DC /* AddReferenceView.xib */; };
 		2692050D252FF60300D6E2DC /* SourceBufferManager.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 269204FE252FF60300D6E2DC /* SourceBufferManager.storyboard */; };
 		2692050F252FF6AE00D6E2DC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692050E252FF6AD00D6E2DC /* main.m */; };
 		26920511252FF71400D6E2DC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2667ECFB25037D8000ED5010 /* Assets.xcassets */; };
@@ -317,11 +326,33 @@
 		26C9B0142599A49100A24B60 /* CEEToolbarStateButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C9B0132599A49100A24B60 /* CEEToolbarStateButton.m */; };
 		26C9B0172599A5E200A24B60 /* CEETitlebarStateButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C9B0162599A5E200A24B60 /* CEETitlebarStateButton.m */; };
 		26C9B01A2599C01300A24B60 /* CEETreeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C9B0192599C01300A24B60 /* CEETreeView.m */; };
+		26CBA6B525C8DA3700062C23 /* icon_finder_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6B425C8DA3700062C23 /* icon_finder_16x16@2x.png */; };
+		26CBA6B725C8F6E400062C23 /* icon_edit_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6B625C8F6E400062C23 /* icon_edit_16x16@2x.png */; };
+		26CBA6B925C8F9C900062C23 /* icon_new_directory_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6B825C8F9C900062C23 /* icon_new_directory_16x16@2x.png */; };
+		26CBA6BB25C8FBDC00062C23 /* icon_add_file_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6BA25C8FBDC00062C23 /* icon_add_file_16x16@2x.png */; };
+		26CBA6BD25C8FBE500062C23 /* icon_remove_file_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6BC25C8FBE500062C23 /* icon_remove_file_16x16@2x.png */; };
+		26CBA6C225C91ADD00062C23 /* icon_close_tinted_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6BE25C91ADD00062C23 /* icon_close_tinted_16x16@2x.png */; };
+		26CBA6C325C91ADD00062C23 /* icon_close_other_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6BF25C91ADD00062C23 /* icon_close_other_16x16@2x.png */; };
+		26CBA6C425C91ADD00062C23 /* icon_close_above_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6C025C91ADD00062C23 /* icon_close_above_16x16@2x.png */; };
+		26CBA6C525C91ADD00062C23 /* icon_close_below_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6C125C91ADD00062C23 /* icon_close_below_16x16@2x.png */; };
+		26CBA6C725C91CD700062C23 /* icon_clean_symbols_in_file_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6C625C91CD700062C23 /* icon_clean_symbols_in_file_16x16@2x.png */; };
+		26CBA6C925C9221300062C23 /* icon_edit_in_new_window_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6C825C9221200062C23 /* icon_edit_in_new_window_16x16@2x.png */; };
+		26CBA6CC25C9237200062C23 /* FileSettingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26CBA6CA25C9237200062C23 /* FileSettingView.xib */; };
+		26CBA6CF25C9253E00062C23 /* CEEFileSettingView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CBA6CD25C9253E00062C23 /* CEEFileSettingView.m */; };
+		26CBA6D225C927B100062C23 /* CEECreateFileAtPathViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CBA6D125C927B100062C23 /* CEECreateFileAtPathViewController.m */; };
+		26CBA6D725C9496200062C23 /* CEECreateFileNotificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CBA6D625C9496200062C23 /* CEECreateFileNotificationViewController.m */; };
 		26D5315A2581B97D00AFBEF6 /* cee_xml.c in Sources */ = {isa = PBXBuildFile; fileRef = 26D531572581B97D00AFBEF6 /* cee_xml.c */; };
 		26D5315B2581B97D00AFBEF6 /* cee_xml.l in Sources */ = {isa = PBXBuildFile; fileRef = 26D531592581B97D00AFBEF6 /* cee_xml.l */; };
 		26DAE285255C0A16005C8A2D /* CEESecurityBookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DAE284255C0A16005C8A2D /* CEESecurityBookmark.m */; };
 		26DDED402547B6A500BD8246 /* cee_css.c in Sources */ = {isa = PBXBuildFile; fileRef = 26DDED3D2547B6A500BD8246 /* cee_css.c */; };
 		26DDED422547FC0800BD8246 /* icon_css_selector_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */; };
+		8A05D7A025DDECB50094FE11 /* icon_cymbols_gray_32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A05D79F25DDECB50094FE11 /* icon_cymbols_gray_32x32@2x.png */; };
+		8A05D7A225DDEEAE0094FE11 /* icon_cymbols_32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A05D7A125DDEEAE0094FE11 /* icon_cymbols_32x32@2x.png */; };
+		8A66A4E625DF507D003244E3 /* CEETableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A66A4E525DF507C003244E3 /* CEETableCellView.m */; };
+		8AA1C87225E0966B005317D6 /* icon_expanded_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA1C87025E0966B005317D6 /* icon_expanded_16x16@2x.png */; };
+		8AA1C87325E0966B005317D6 /* icon_expandable_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA1C87125E0966B005317D6 /* icon_expandable_16x16@2x.png */; };
+		8AB3191125E32D1300A58824 /* Welcome.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8AB3190F25E32D1300A58824 /* Welcome.storyboard */; };
+		8AB3191625E33C9700A58824 /* CEETrialVersionWelcomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AB3191525E33C9700A58824 /* CEETrialVersionWelcomeViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -360,8 +391,25 @@
 		2338333222CDD555002C004E /* Cymbols.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Cymbols.entitlements; sourceTree = "<group>"; };
 		2602A92A254BFB000011FBD5 /* cee_java.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_java.c; sourceTree = "<group>"; };
 		2602A92B254BFB000011FBD5 /* cee_java.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_java.h; sourceTree = "<group>"; };
+		2602BB0925C7D2D5004B5D52 /* CEEReferenceRootScannerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEReferenceRootScannerViewController.m; sourceTree = "<group>"; };
+		2602BB0A25C7D2D5004B5D52 /* CEEReferenceRootScannerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEReferenceRootScannerViewController.h; sourceTree = "<group>"; };
+		2602BB0D25C7D417004B5D52 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/FilePathSelectionView.xib; sourceTree = "<group>"; };
+		2602BB0F25C7D443004B5D52 /* CEEFilePathSelectionView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEEFilePathSelectionView.h; sourceTree = "<group>"; };
+		2602BB1025C7D443004B5D52 /* CEEFilePathSelectionView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEEFilePathSelectionView.m; sourceTree = "<group>"; };
+		2602BB1325C7DDB5004B5D52 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/FilePathScannerView.xib; sourceTree = "<group>"; };
+		2602BB1525C7DF4B004B5D52 /* CEEFilePathScannerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEEFilePathScannerView.h; sourceTree = "<group>"; };
+		2602BB1625C7DF4B004B5D52 /* CEEFilePathScannerView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEEFilePathScannerView.m; sourceTree = "<group>"; };
+		2608E27E25CA4141002D709D /* icon_trash_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_trash_16x16@2x.png"; sourceTree = "<group>"; };
 		260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_xml_tag_16x16@2x.png"; sourceTree = "<group>"; };
+		2610A12325D1855B00DB2AA9 /* icon_caution_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_caution_16x16@2x.png"; sourceTree = "<group>"; };
+		2617758125CA4D1300CBA692 /* CEERemoveFileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEERemoveFileViewController.m; sourceTree = "<group>"; };
+		2617758225CA4D1300CBA692 /* CEERemoveFileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEERemoveFileViewController.h; sourceTree = "<group>"; };
 		261B0780256E46EA00D1C48D /* icon_property_declaration_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_property_declaration_16x16@2x.png"; sourceTree = "<group>"; };
+		261BE13A25C79F4C0099158E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/ReferenceManager.storyboard; sourceTree = "<group>"; };
+		261BE13D25C7AB960099158E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/ProjectCreator.storyboard; sourceTree = "<group>"; };
+		2625379A25DCF3270060E922 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/UpdateInfo.storyboard; sourceTree = "<group>"; };
+		2625379C25DCF37B0060E922 /* CEEUpdateInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEUpdateInfoViewController.m; sourceTree = "<group>"; };
+		2625379D25DCF37B0060E922 /* CEEUpdateInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEUpdateInfoViewController.h; sourceTree = "<group>"; };
 		2629886E25765A36001F1190 /* iconvFrameworks.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = iconvFrameworks.framework; sourceTree = "<group>"; };
 		26308593254263DA000A8CB5 /* cee_regex_macos.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = cee_regex_macos.m; sourceTree = "<group>"; };
 		26308595254263F2000A8CB5 /* cee_regex_macos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cee_regex_macos.h; sourceTree = "<group>"; };
@@ -378,6 +426,11 @@
 		2647CE3D25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEUserInterfaceStyleSelectionController.m; sourceTree = "<group>"; };
 		264EA89B25480CFD005042EA /* icon_file_type_css_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_css_16x16@2x.png"; sourceTree = "<group>"; };
 		26548526254150AC00E1D0DE /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
+		2660770D25D80A860087D883 /* CEETimerFreezer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETimerFreezer.m; sourceTree = "<group>"; };
+		2660770E25D80A870087D883 /* CEETimerFreezer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETimerFreezer.h; sourceTree = "<group>"; };
+		2660771125D816930087D883 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/TimeFreezer.storyboard; sourceTree = "<group>"; };
+		2660771325D8188F0087D883 /* CEETimeFreezerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEETimeFreezerViewController.h; sourceTree = "<group>"; };
+		2660771425D8188F0087D883 /* CEETimeFreezerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEETimeFreezerViewController.m; sourceTree = "<group>"; };
 		2667ECFB25037D8000ED5010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		266FEED425707D3300775864 /* icon_interface_definition_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_interface_definition_16x16@2x.png"; sourceTree = "<group>"; };
 		268376DD25490C720066305C /* cee_swift.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_swift.c; sourceTree = "<group>"; };
@@ -386,13 +439,9 @@
 		26899B4E25B17FA500C84815 /* icon_add_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_add_16x16@2x.png"; sourceTree = "<group>"; };
 		26899B4F25B17FA500C84815 /* icon_file_list_carved_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_list_carved_16x16@2x.png"; sourceTree = "<group>"; };
 		26899B5025B17FA500C84815 /* icon_reload_carved_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_reload_carved_16x16@2x.png"; sourceTree = "<group>"; };
-		26899B5125B17FA600C84815 /* icon_remove_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_remove_16x16@2x.png"; sourceTree = "<group>"; };
 		26899B5225B17FA600C84815 /* icon_mail_carved_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_mail_carved_16x16@2x.png"; sourceTree = "<group>"; };
-		26899B5825B17FEF00C84815 /* icon_mail_carved_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_mail_carved_16x16@2x.png"; sourceTree = "<group>"; };
-		26899B5925B17FEF00C84815 /* icon_reload_carved_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_reload_carved_16x16@2x.png"; sourceTree = "<group>"; };
 		26899B5A25B17FEF00C84815 /* icon_remove_carved_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_remove_carved_16x16@2x.png"; sourceTree = "<group>"; };
 		26899B5B25B17FEF00C84815 /* icon_directory_tree_carved_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_directory_tree_carved_16x16@2x.png"; sourceTree = "<group>"; };
-		26899B5C25B17FEF00C84815 /* icon_file_list_carved_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_list_carved_16x16@2x.png"; sourceTree = "<group>"; };
 		26899B5D25B17FEF00C84815 /* icon_add_carved_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_add_carved_16x16@2x.png"; sourceTree = "<group>"; };
 		26920091252FF30D00D6E2DC /* cJSON_Utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON_Utils.c; sourceTree = "<group>"; };
 		26920092252FF30D00D6E2DC /* cJSON_Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON_Utils.h; sourceTree = "<group>"; };
@@ -464,7 +513,6 @@
 		269202D8252FF39000D6E2DC /* cee_text_macos_attribute.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cee_text_macos_attribute.m; sourceTree = "<group>"; };
 		269202D9252FF39000D6E2DC /* cee_text_macos_attribute.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_text_macos_attribute.h; sourceTree = "<group>"; };
 		269202E5252FF3E300D6E2DC /* cymbols_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cymbols_logo@2x.png"; sourceTree = "<group>"; };
-		269202E6252FF3E300D6E2DC /* icon_add_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_add_16x16@2x.png"; sourceTree = "<group>"; };
 		269202E7252FF3E300D6E2DC /* icon_broom_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_broom_16x16@2x.png"; sourceTree = "<group>"; };
 		269202E8252FF3E300D6E2DC /* icon_buffer_list_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_buffer_list_16x16@2x.png"; sourceTree = "<group>"; };
 		269202E9252FF3E300D6E2DC /* icon_character_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_character_16x16@2x.png"; sourceTree = "<group>"; };
@@ -653,8 +701,8 @@
 		26920458252FF50E00D6E2DC /* CEEAutoCompleteViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEAutoCompleteViewController.m; sourceTree = "<group>"; };
 		2692045B252FF51A00D6E2DC /* CEESessionContextViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionContextViewController.h; sourceTree = "<group>"; };
 		2692045C252FF51A00D6E2DC /* CEESessionContextViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionContextViewController.m; sourceTree = "<group>"; };
-		2692045D252FF51A00D6E2DC /* CEESessionFilePathController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionFilePathController.h; sourceTree = "<group>"; };
-		2692045E252FF51A00D6E2DC /* CEESessionFilePathController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionFilePathController.m; sourceTree = "<group>"; };
+		2692045D252FF51A00D6E2DC /* CEESessionFileReferenceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionFileReferenceViewController.h; sourceTree = "<group>"; };
+		2692045E252FF51A00D6E2DC /* CEESessionFileReferenceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionFileReferenceViewController.m; sourceTree = "<group>"; };
 		2692045F252FF51A00D6E2DC /* CEESessionFrameManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionFrameManager.h; sourceTree = "<group>"; };
 		26920460252FF51A00D6E2DC /* CEESessionFrameManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionFrameManager.m; sourceTree = "<group>"; };
 		26920461252FF51A00D6E2DC /* CEESessionFrameManagerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionFrameManagerView.h; sourceTree = "<group>"; };
@@ -667,20 +715,20 @@
 		26920468252FF51A00D6E2DC /* CEESessionFrameView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionFrameView.m; sourceTree = "<group>"; };
 		26920469252FF51A00D6E2DC /* CEESessionFrameViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionFrameViewController.h; sourceTree = "<group>"; };
 		2692046A252FF51A00D6E2DC /* CEESessionFrameViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionFrameViewController.m; sourceTree = "<group>"; };
-		2692046B252FF51A00D6E2DC /* CEESessionReferenceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionReferenceController.h; sourceTree = "<group>"; };
-		2692046C252FF51A00D6E2DC /* CEESessionReferenceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionReferenceController.m; sourceTree = "<group>"; };
-		2692046D252FF51A00D6E2DC /* CEESessionReferenceTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionReferenceTableView.h; sourceTree = "<group>"; };
-		2692046E252FF51A00D6E2DC /* CEESessionReferenceTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionReferenceTableView.m; sourceTree = "<group>"; };
-		2692046F252FF51A00D6E2DC /* CEESessionSourceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionSourceController.h; sourceTree = "<group>"; };
-		26920470252FF51A00D6E2DC /* CEESessionSourceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionSourceController.m; sourceTree = "<group>"; };
+		2692046B252FF51A00D6E2DC /* CEESessionSourceBufferViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionSourceBufferViewController.h; sourceTree = "<group>"; };
+		2692046C252FF51A00D6E2DC /* CEESessionSourceBufferViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionSourceBufferViewController.m; sourceTree = "<group>"; };
+		2692046D252FF51A00D6E2DC /* CEESessionSourceBufferTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionSourceBufferTableView.h; sourceTree = "<group>"; };
+		2692046E252FF51A00D6E2DC /* CEESessionSourceBufferTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionSourceBufferTableView.m; sourceTree = "<group>"; };
+		2692046F252FF51A00D6E2DC /* CEESessionSourceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionSourceViewController.h; sourceTree = "<group>"; };
+		26920470252FF51A00D6E2DC /* CEESessionSourceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionSourceViewController.m; sourceTree = "<group>"; };
 		26920471252FF51A00D6E2DC /* CEESessionSpliter0.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionSpliter0.h; sourceTree = "<group>"; };
 		26920472252FF51A00D6E2DC /* CEESessionSpliter0.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionSpliter0.m; sourceTree = "<group>"; };
 		26920473252FF51A00D6E2DC /* CEESessionSpliter1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionSpliter1.h; sourceTree = "<group>"; };
 		26920474252FF51A00D6E2DC /* CEESessionSpliter1.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionSpliter1.m; sourceTree = "<group>"; };
 		26920475252FF51A00D6E2DC /* CEESessionStatusBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionStatusBar.h; sourceTree = "<group>"; };
 		26920476252FF51A00D6E2DC /* CEESessionStatusBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionStatusBar.m; sourceTree = "<group>"; };
-		26920477252FF51A00D6E2DC /* CEESessionSymbolController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionSymbolController.h; sourceTree = "<group>"; };
-		26920478252FF51A00D6E2DC /* CEESessionSymbolController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionSymbolController.m; sourceTree = "<group>"; };
+		26920477252FF51A00D6E2DC /* CEESessionSymbolViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionSymbolViewController.h; sourceTree = "<group>"; };
+		26920478252FF51A00D6E2DC /* CEESessionSymbolViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionSymbolViewController.m; sourceTree = "<group>"; };
 		26920479252FF51A00D6E2DC /* CEESessionToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionToolbar.h; sourceTree = "<group>"; };
 		2692047A252FF51A00D6E2DC /* CEESessionToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionToolbar.m; sourceTree = "<group>"; };
 		2692047B252FF51A00D6E2DC /* CEESessionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESessionView.h; sourceTree = "<group>"; };
@@ -691,30 +739,28 @@
 		26920480252FF51A00D6E2DC /* CEESessionWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESessionWindowController.m; sourceTree = "<group>"; };
 		26920481252FF51A00D6E2DC /* CEESourceHistoryViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESourceHistoryViewController.h; sourceTree = "<group>"; };
 		26920482252FF51A00D6E2DC /* CEESourceHistoryViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESourceHistoryViewController.m; sourceTree = "<group>"; };
-		26920498252FF52700D6E2DC /* CEEAddFileSelectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEAddFileSelectionView.h; sourceTree = "<group>"; };
-		26920499252FF52700D6E2DC /* CEEAddFileSelectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEAddFileSelectionView.m; sourceTree = "<group>"; };
-		2692049A252FF52700D6E2DC /* CEEFilePathConfirmView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEFilePathConfirmView.h; sourceTree = "<group>"; };
-		2692049B252FF52700D6E2DC /* CEEFilePathConfirmView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEFilePathConfirmView.m; sourceTree = "<group>"; };
-		2692049C252FF52700D6E2DC /* CEEProjectAddFileController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectAddFileController.h; sourceTree = "<group>"; };
-		2692049D252FF52700D6E2DC /* CEEProjectAddFileController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectAddFileController.m; sourceTree = "<group>"; };
-		2692049E252FF52700D6E2DC /* CEEProjectRemoveFileController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectRemoveFileController.h; sourceTree = "<group>"; };
-		2692049F252FF52700D6E2DC /* CEEProjectRemoveFileController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectRemoveFileController.m; sourceTree = "<group>"; };
-		269204A0252FF52700D6E2DC /* CEERemoveFileSelectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEERemoveFileSelectionView.h; sourceTree = "<group>"; };
-		269204A1252FF52700D6E2DC /* CEERemoveFileSelectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEERemoveFileSelectionView.m; sourceTree = "<group>"; };
+		26920498252FF52700D6E2DC /* CEEAddReferenceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEAddReferenceView.h; sourceTree = "<group>"; };
+		26920499252FF52700D6E2DC /* CEEAddReferenceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEAddReferenceView.m; sourceTree = "<group>"; };
+		2692049A252FF52700D6E2DC /* CEEFilePathView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEFilePathView.h; sourceTree = "<group>"; };
+		2692049B252FF52700D6E2DC /* CEEFilePathView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEFilePathView.m; sourceTree = "<group>"; };
+		2692049C252FF52700D6E2DC /* CEEAddReferenceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEAddReferenceViewController.h; sourceTree = "<group>"; };
+		2692049D252FF52700D6E2DC /* CEEAddReferenceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEAddReferenceViewController.m; sourceTree = "<group>"; };
+		2692049E252FF52700D6E2DC /* CEERemoveReferenceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEERemoveReferenceViewController.h; sourceTree = "<group>"; };
+		2692049F252FF52700D6E2DC /* CEERemoveReferenceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEERemoveReferenceViewController.m; sourceTree = "<group>"; };
+		269204A0252FF52700D6E2DC /* CEERemoveReferenceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEERemoveReferenceView.h; sourceTree = "<group>"; };
+		269204A1252FF52700D6E2DC /* CEERemoveReferenceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEERemoveReferenceView.m; sourceTree = "<group>"; };
 		269204A8252FF53100D6E2DC /* CEEProjectCreatorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectCreatorController.h; sourceTree = "<group>"; };
 		269204A9252FF53100D6E2DC /* CEEProjectCreatorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectCreatorController.m; sourceTree = "<group>"; };
 		269204AA252FF53100D6E2DC /* CEEProjectPropertyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectPropertyView.h; sourceTree = "<group>"; };
 		269204AB252FF53100D6E2DC /* CEEProjectPropertyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectPropertyView.m; sourceTree = "<group>"; };
 		269204AC252FF53100D6E2DC /* CEEProjectSettingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectSettingView.h; sourceTree = "<group>"; };
 		269204AD252FF53100D6E2DC /* CEEProjectSettingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectSettingView.m; sourceTree = "<group>"; };
-		269204B2252FF54000D6E2DC /* CEEFileNameCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEFileNameCellView.h; sourceTree = "<group>"; };
-		269204B3252FF54000D6E2DC /* CEEFileNameCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEFileNameCellView.m; sourceTree = "<group>"; };
-		269204B4252FF54000D6E2DC /* CEEFilePathCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEFilePathCellView.h; sourceTree = "<group>"; };
-		269204B5252FF54000D6E2DC /* CEEFilePathCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEFilePathCellView.m; sourceTree = "<group>"; };
-		269204B6252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESourceBufferSaveConfirmCellView.h; sourceTree = "<group>"; };
-		269204B7252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESourceBufferSaveConfirmCellView.m; sourceTree = "<group>"; };
-		269204B8252FF54000D6E2DC /* CEESymbolCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESymbolCellView.h; sourceTree = "<group>"; };
-		269204B9252FF54000D6E2DC /* CEESymbolCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESymbolCellView.m; sourceTree = "<group>"; };
+		269204B2252FF54000D6E2DC /* CEEImageTextTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEImageTextTableCellView.h; sourceTree = "<group>"; };
+		269204B3252FF54000D6E2DC /* CEEImageTextTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEImageTextTableCellView.m; sourceTree = "<group>"; };
+		269204B4252FF54000D6E2DC /* CEETextTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETextTableCellView.h; sourceTree = "<group>"; };
+		269204B5252FF54000D6E2DC /* CEETextTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETextTableCellView.m; sourceTree = "<group>"; };
+		269204B6252FF54000D6E2DC /* CEECheckboxTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEECheckboxTableCellView.h; sourceTree = "<group>"; };
+		269204B7252FF54000D6E2DC /* CEECheckboxTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEECheckboxTableCellView.m; sourceTree = "<group>"; };
 		269204BA252FF54000D6E2DC /* CEETableCellViewTextLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETableCellViewTextLabel.h; sourceTree = "<group>"; };
 		269204BB252FF54000D6E2DC /* CEETableCellViewTextLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETableCellViewTextLabel.m; sourceTree = "<group>"; };
 		269204C1252FF55600D6E2DC /* CEESessionDescriptor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CEESessionDescriptor.c; sourceTree = "<group>"; };
@@ -741,7 +787,7 @@
 		269204E5252FF60000D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/SourceHistory.storyboard; sourceTree = "<group>"; };
 		269204E7252FF60000D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/TableCellViews.xib; sourceTree = "<group>"; };
 		269204E9252FF60100D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/ProjectSettingView.xib; sourceTree = "<group>"; };
-		269204EB252FF60100D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/RemoveFileSelectionView.xib; sourceTree = "<group>"; };
+		269204EB252FF60100D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/RemoveReferenceView.xib; sourceTree = "<group>"; };
 		269204ED252FF60100D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Session.storyboard; sourceTree = "<group>"; };
 		269204EF252FF60100D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Theme.storyboard; sourceTree = "<group>"; };
 		269204F1252FF60100D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/ProjectPropertyView.xib; sourceTree = "<group>"; };
@@ -749,8 +795,8 @@
 		269204F5252FF60200D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		269204F7252FF60200D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/AutoComplete.storyboard; sourceTree = "<group>"; };
 		269204F9252FF60200D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Editor.storyboard; sourceTree = "<group>"; };
-		269204FB252FF60200D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/FilePathConfirmView.xib; sourceTree = "<group>"; };
-		269204FD252FF60300D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/AddFileSelectionView.xib; sourceTree = "<group>"; };
+		269204FB252FF60200D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/FilePathView.xib; sourceTree = "<group>"; };
+		269204FD252FF60300D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/AddReferenceView.xib; sourceTree = "<group>"; };
 		269204FF252FF60300D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/SourceBufferManager.storyboard; sourceTree = "<group>"; };
 		2692050E252FF6AD00D6E2DC /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2693B21B2530015200D21FD3 /* Cymbols.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cymbols.cfg; path = ../../../../Resources/Cymbols.cfg; sourceTree = "<group>"; };
@@ -797,6 +843,24 @@
 		26C9B0162599A5E200A24B60 /* CEETitlebarStateButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETitlebarStateButton.m; sourceTree = "<group>"; };
 		26C9B0182599C01300A24B60 /* CEETreeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETreeView.h; sourceTree = "<group>"; };
 		26C9B0192599C01300A24B60 /* CEETreeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETreeView.m; sourceTree = "<group>"; };
+		26CBA6B425C8DA3700062C23 /* icon_finder_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_finder_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6B625C8F6E400062C23 /* icon_edit_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_edit_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6B825C8F9C900062C23 /* icon_new_directory_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_new_directory_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6BA25C8FBDC00062C23 /* icon_add_file_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_add_file_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6BC25C8FBE500062C23 /* icon_remove_file_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_remove_file_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6BE25C91ADD00062C23 /* icon_close_tinted_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_close_tinted_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6BF25C91ADD00062C23 /* icon_close_other_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_close_other_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6C025C91ADD00062C23 /* icon_close_above_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_close_above_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6C125C91ADD00062C23 /* icon_close_below_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_close_below_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6C625C91CD700062C23 /* icon_clean_symbols_in_file_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_clean_symbols_in_file_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6C825C9221200062C23 /* icon_edit_in_new_window_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_edit_in_new_window_16x16@2x.png"; sourceTree = "<group>"; };
+		26CBA6CB25C9237200062C23 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/FileSettingView.xib; sourceTree = "<group>"; };
+		26CBA6CD25C9253E00062C23 /* CEEFileSettingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEFileSettingView.m; sourceTree = "<group>"; };
+		26CBA6CE25C9253E00062C23 /* CEEFileSettingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEFileSettingView.h; sourceTree = "<group>"; };
+		26CBA6D025C927B100062C23 /* CEECreateFileAtPathViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEECreateFileAtPathViewController.h; sourceTree = "<group>"; };
+		26CBA6D125C927B100062C23 /* CEECreateFileAtPathViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEECreateFileAtPathViewController.m; sourceTree = "<group>"; };
+		26CBA6D525C9496200062C23 /* CEECreateFileNotificationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEECreateFileNotificationViewController.h; sourceTree = "<group>"; };
+		26CBA6D625C9496200062C23 /* CEECreateFileNotificationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEECreateFileNotificationViewController.m; sourceTree = "<group>"; };
 		26CBE684252FECA20047771D /* Cymbols.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cymbols.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		26D531572581B97D00AFBEF6 /* cee_xml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_xml.c; sourceTree = "<group>"; };
 		26D531582581B97D00AFBEF6 /* cee_xml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_xml.h; sourceTree = "<group>"; };
@@ -806,6 +870,15 @@
 		26DDED3D2547B6A500BD8246 /* cee_css.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_css.c; sourceTree = "<group>"; };
 		26DDED3E2547B6A500BD8246 /* cee_css.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_css.h; sourceTree = "<group>"; };
 		26DDED412547FC0800BD8246 /* icon_css_selector_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_css_selector_16x16@2x.png"; sourceTree = "<group>"; };
+		8A05D79F25DDECB50094FE11 /* icon_cymbols_gray_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_cymbols_gray_32x32@2x.png"; sourceTree = "<group>"; };
+		8A05D7A125DDEEAE0094FE11 /* icon_cymbols_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_cymbols_32x32@2x.png"; sourceTree = "<group>"; };
+		8A66A4E425DF507C003244E3 /* CEETableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETableCellView.h; sourceTree = "<group>"; };
+		8A66A4E525DF507C003244E3 /* CEETableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETableCellView.m; sourceTree = "<group>"; };
+		8AA1C87025E0966B005317D6 /* icon_expanded_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_expanded_16x16@2x.png"; sourceTree = "<group>"; };
+		8AA1C87125E0966B005317D6 /* icon_expandable_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_expandable_16x16@2x.png"; sourceTree = "<group>"; };
+		8AB3191025E32D1300A58824 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Welcome.storyboard; sourceTree = "<group>"; };
+		8AB3191425E33C9700A58824 /* CEETrialVersionWelcomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETrialVersionWelcomeViewController.h; sourceTree = "<group>"; };
+		8AB3191525E33C9700A58824 /* CEETrialVersionWelcomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETrialVersionWelcomeViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -860,7 +933,7 @@
 				26920449252FF50300D6E2DC /* Editor */,
 				26920456252FF50E00D6E2DC /* AutoComplete */,
 				2692045A252FF51A00D6E2DC /* Session */,
-				26920497252FF52700D6E2DC /* FilePathManager */,
+				26920497252FF52700D6E2DC /* ReferenceManager */,
 				269204A7252FF53100D6E2DC /* ProjectCreator */,
 				269204B1252FF54000D6E2DC /* CellViews */,
 				269204C1252FF55600D6E2DC /* CEESessionDescriptor.c */,
@@ -890,21 +963,37 @@
 				269204D7252FF5BC00D6E2DC /* CEEProjectContextViewController.m */,
 				269204DF252FF5E800D6E2DC /* CEENetwork.h */,
 				269204DE252FF5E800D6E2DC /* CEENetwork.m */,
+				2660770E25D80A870087D883 /* CEETimerFreezer.h */,
+				2660770D25D80A860087D883 /* CEETimerFreezer.m */,
 				269204E2252FF5F100D6E2DC /* AppDelegate.h */,
 				269204E1252FF5F100D6E2DC /* AppDelegate.m */,
+				2660771325D8188F0087D883 /* CEETimeFreezerViewController.h */,
+				2660771425D8188F0087D883 /* CEETimeFreezerViewController.m */,
+				2625379D25DCF37B0060E922 /* CEEUpdateInfoViewController.h */,
+				2625379C25DCF37B0060E922 /* CEEUpdateInfoViewController.m */,
+				8AB3191425E33C9700A58824 /* CEETrialVersionWelcomeViewController.h */,
+				8AB3191525E33C9700A58824 /* CEETrialVersionWelcomeViewController.m */,
 				2667ECFB25037D8000ED5010 /* Assets.xcassets */,
 				26548526254150AC00E1D0DE /* Credits.rtf */,
 				269204F4252FF60200D6E2DC /* Main.storyboard */,
 				269204EC252FF60100D6E2DC /* Session.storyboard */,
-				269204FC252FF60300D6E2DC /* AddFileSelectionView.xib */,
-				269204EA252FF60100D6E2DC /* RemoveFileSelectionView.xib */,
+				2660771025D816930087D883 /* TimeFreezer.storyboard */,
+				8AB3190F25E32D1300A58824 /* Welcome.storyboard */,
+				2625379925DCF3270060E922 /* UpdateInfo.storyboard */,
+				261BE13925C79F4C0099158E /* ReferenceManager.storyboard */,
+				269204FE252FF60300D6E2DC /* SourceBufferManager.storyboard */,
+				261BE13C25C7AB960099158E /* ProjectCreator.storyboard */,
+				269204F2252FF60200D6E2DC /* ProjectProcess.storyboard */,
+				26CBA6CA25C9237200062C23 /* FileSettingView.xib */,
+				269204FC252FF60300D6E2DC /* AddReferenceView.xib */,
+				269204EA252FF60100D6E2DC /* RemoveReferenceView.xib */,
+				269204FA252FF60200D6E2DC /* FilePathView.xib */,
+				2602BB0C25C7D417004B5D52 /* FilePathSelectionView.xib */,
+				2602BB1225C7DDB5004B5D52 /* FilePathScannerView.xib */,
 				269204F6252FF60200D6E2DC /* AutoComplete.storyboard */,
 				269204F8252FF60200D6E2DC /* Editor.storyboard */,
-				269204FA252FF60200D6E2DC /* FilePathConfirmView.xib */,
-				269204F2252FF60200D6E2DC /* ProjectProcess.storyboard */,
-				269204F0252FF60100D6E2DC /* ProjectPropertyView.xib */,
 				269204E8252FF60100D6E2DC /* ProjectSettingView.xib */,
-				269204FE252FF60300D6E2DC /* SourceBufferManager.storyboard */,
+				269204F0252FF60100D6E2DC /* ProjectPropertyView.xib */,
 				269204E4252FF60000D6E2DC /* SourceHistory.storyboard */,
 				269204E6252FF60000D6E2DC /* TableCellViews.xib */,
 				269204EE252FF60100D6E2DC /* Theme.storyboard */,
@@ -1128,17 +1217,30 @@
 		269202E4252FF3E300D6E2DC /* 2x */ = {
 			isa = PBXGroup;
 			children = (
+				8AA1C87125E0966B005317D6 /* icon_expandable_16x16@2x.png */,
+				8AA1C87025E0966B005317D6 /* icon_expanded_16x16@2x.png */,
+				8A05D7A125DDEEAE0094FE11 /* icon_cymbols_32x32@2x.png */,
+				8A05D79F25DDECB50094FE11 /* icon_cymbols_gray_32x32@2x.png */,
+				2610A12325D1855B00DB2AA9 /* icon_caution_16x16@2x.png */,
+				2608E27E25CA4141002D709D /* icon_trash_16x16@2x.png */,
+				26CBA6C825C9221200062C23 /* icon_edit_in_new_window_16x16@2x.png */,
+				26CBA6C625C91CD700062C23 /* icon_clean_symbols_in_file_16x16@2x.png */,
+				26CBA6C025C91ADD00062C23 /* icon_close_above_16x16@2x.png */,
+				26CBA6C125C91ADD00062C23 /* icon_close_below_16x16@2x.png */,
+				26CBA6BF25C91ADD00062C23 /* icon_close_other_16x16@2x.png */,
+				26CBA6BE25C91ADD00062C23 /* icon_close_tinted_16x16@2x.png */,
+				26CBA6BA25C8FBDC00062C23 /* icon_add_file_16x16@2x.png */,
+				26CBA6BC25C8FBE500062C23 /* icon_remove_file_16x16@2x.png */,
+				26CBA6B825C8F9C900062C23 /* icon_new_directory_16x16@2x.png */,
+				26CBA6B625C8F6E400062C23 /* icon_edit_16x16@2x.png */,
+				26CBA6B425C8DA3700062C23 /* icon_finder_16x16@2x.png */,
 				26899B5D25B17FEF00C84815 /* icon_add_carved_16x16@2x.png */,
 				26899B5B25B17FEF00C84815 /* icon_directory_tree_carved_16x16@2x.png */,
-				26899B5C25B17FEF00C84815 /* icon_file_list_carved_16x16@2x.png */,
-				26899B5825B17FEF00C84815 /* icon_mail_carved_16x16@2x.png */,
-				26899B5925B17FEF00C84815 /* icon_reload_carved_16x16@2x.png */,
 				26899B5A25B17FEF00C84815 /* icon_remove_carved_16x16@2x.png */,
 				26899B4E25B17FA500C84815 /* icon_add_16x16@2x.png */,
 				26899B4F25B17FA500C84815 /* icon_file_list_carved_16x16@2x.png */,
 				26899B5225B17FA600C84815 /* icon_mail_carved_16x16@2x.png */,
 				26899B5025B17FA500C84815 /* icon_reload_carved_16x16@2x.png */,
-				26899B5125B17FA600C84815 /* icon_remove_16x16@2x.png */,
 				26AFC63A25AD8DEB006B2C67 /* icon_database_build_carved_16x16@2x.png */,
 				26AFC63725AD8DEB006B2C67 /* icon_database_carved_16x16@2x.png */,
 				26AFC63825AD8DEB006B2C67 /* icon_database_clean_carved_16x16@2x.png */,
@@ -1172,7 +1274,6 @@
 				260D7DF125470230003BDC42 /* icon_xml_tag_16x16@2x.png */,
 				26BC7E7A2539301800AD8992 /* icon_alert_32x32@2x.png */,
 				269202E5252FF3E300D6E2DC /* cymbols_logo@2x.png */,
-				269202E6252FF3E300D6E2DC /* icon_add_16x16@2x.png */,
 				269202E7252FF3E300D6E2DC /* icon_broom_16x16@2x.png */,
 				269202E8252FF3E300D6E2DC /* icon_buffer_list_16x16@2x.png */,
 				269202E9252FF3E300D6E2DC /* icon_character_16x16@2x.png */,
@@ -1290,6 +1391,20 @@
 				269203DF252FF4F400D6E2DC /* CEEControl.m */,
 				269203D8252FF4F400D6E2DC /* CEEButton.h */,
 				269203D9252FF4F400D6E2DC /* CEEButton.m */,
+				269203F5252FF4F400D6E2DC /* CEEStateButton.h */,
+				269203F6252FF4F400D6E2DC /* CEEStateButton.m */,
+				269203F9252FF4F400D6E2DC /* CEETabbarButton.h */,
+				269203FA252FF4F400D6E2DC /* CEETabbarButton.m */,
+				269203FB252FF4F400D6E2DC /* CEETabbarStateButton.h */,
+				269203FC252FF4F400D6E2DC /* CEETabbarStateButton.m */,
+				2692040B252FF4F400D6E2DC /* CEEToolbarButton.h */,
+				2692040C252FF4F400D6E2DC /* CEEToolbarButton.m */,
+				26C9B0122599A49100A24B60 /* CEEToolbarStateButton.h */,
+				26C9B0132599A49100A24B60 /* CEEToolbarStateButton.m */,
+				26920407252FF4F400D6E2DC /* CEETitlebarButton.h */,
+				26920408252FF4F400D6E2DC /* CEETitlebarButton.m */,
+				26C9B0152599A5E200A24B60 /* CEETitlebarStateButton.h */,
+				26C9B0162599A5E200A24B60 /* CEETitlebarStateButton.m */,
 				269203DA252FF4F400D6E2DC /* CEECheckBox.h */,
 				269203DB252FF4F400D6E2DC /* CEECheckBox.m */,
 				269203DC252FF4F400D6E2DC /* CEEContainerView.h */,
@@ -1311,20 +1426,6 @@
 				269203F2252FF4F400D6E2DC /* CEESplitView.m */,
 				269203F3252FF4F400D6E2DC /* CEESplitViewController.h */,
 				269203F4252FF4F400D6E2DC /* CEESplitViewController.m */,
-				269203F5252FF4F400D6E2DC /* CEEStateButton.h */,
-				269203F6252FF4F400D6E2DC /* CEEStateButton.m */,
-				269203F9252FF4F400D6E2DC /* CEETabbarButton.h */,
-				269203FA252FF4F400D6E2DC /* CEETabbarButton.m */,
-				269203FB252FF4F400D6E2DC /* CEETabbarStateButton.h */,
-				269203FC252FF4F400D6E2DC /* CEETabbarStateButton.m */,
-				2692040B252FF4F400D6E2DC /* CEEToolbarButton.h */,
-				2692040C252FF4F400D6E2DC /* CEEToolbarButton.m */,
-				26C9B0122599A49100A24B60 /* CEEToolbarStateButton.h */,
-				26C9B0132599A49100A24B60 /* CEEToolbarStateButton.m */,
-				26920407252FF4F400D6E2DC /* CEETitlebarButton.h */,
-				26920408252FF4F400D6E2DC /* CEETitlebarButton.m */,
-				26C9B0152599A5E200A24B60 /* CEETitlebarStateButton.h */,
-				26C9B0162599A5E200A24B60 /* CEETitlebarStateButton.m */,
 				269203FD252FF4F400D6E2DC /* CEETableView.h */,
 				269203FE252FF4F400D6E2DC /* CEETableView.m */,
 				26C9B0182599C01300A24B60 /* CEETreeView.h */,
@@ -1408,16 +1509,16 @@
 				26920472252FF51A00D6E2DC /* CEESessionSpliter0.m */,
 				26920473252FF51A00D6E2DC /* CEESessionSpliter1.h */,
 				26920474252FF51A00D6E2DC /* CEESessionSpliter1.m */,
-				2692046F252FF51A00D6E2DC /* CEESessionSourceController.h */,
-				26920470252FF51A00D6E2DC /* CEESessionSourceController.m */,
-				26920477252FF51A00D6E2DC /* CEESessionSymbolController.h */,
-				26920478252FF51A00D6E2DC /* CEESessionSymbolController.m */,
-				2692046B252FF51A00D6E2DC /* CEESessionReferenceController.h */,
-				2692046C252FF51A00D6E2DC /* CEESessionReferenceController.m */,
-				2692046D252FF51A00D6E2DC /* CEESessionReferenceTableView.h */,
-				2692046E252FF51A00D6E2DC /* CEESessionReferenceTableView.m */,
-				2692045D252FF51A00D6E2DC /* CEESessionFilePathController.h */,
-				2692045E252FF51A00D6E2DC /* CEESessionFilePathController.m */,
+				2692046F252FF51A00D6E2DC /* CEESessionSourceViewController.h */,
+				26920470252FF51A00D6E2DC /* CEESessionSourceViewController.m */,
+				26920477252FF51A00D6E2DC /* CEESessionSymbolViewController.h */,
+				26920478252FF51A00D6E2DC /* CEESessionSymbolViewController.m */,
+				2692046B252FF51A00D6E2DC /* CEESessionSourceBufferViewController.h */,
+				2692046C252FF51A00D6E2DC /* CEESessionSourceBufferViewController.m */,
+				2692046D252FF51A00D6E2DC /* CEESessionSourceBufferTableView.h */,
+				2692046E252FF51A00D6E2DC /* CEESessionSourceBufferTableView.m */,
+				2692045D252FF51A00D6E2DC /* CEESessionFileReferenceViewController.h */,
+				2692045E252FF51A00D6E2DC /* CEESessionFileReferenceViewController.m */,
 				2692045F252FF51A00D6E2DC /* CEESessionFrameManager.h */,
 				26920460252FF51A00D6E2DC /* CEESessionFrameManager.m */,
 				26920461252FF51A00D6E2DC /* CEESessionFrameManagerView.h */,
@@ -1440,21 +1541,35 @@
 			path = Session;
 			sourceTree = "<group>";
 		};
-		26920497252FF52700D6E2DC /* FilePathManager */ = {
+		26920497252FF52700D6E2DC /* ReferenceManager */ = {
 			isa = PBXGroup;
 			children = (
-				2692049C252FF52700D6E2DC /* CEEProjectAddFileController.h */,
-				2692049D252FF52700D6E2DC /* CEEProjectAddFileController.m */,
-				2692049E252FF52700D6E2DC /* CEEProjectRemoveFileController.h */,
-				2692049F252FF52700D6E2DC /* CEEProjectRemoveFileController.m */,
-				26920498252FF52700D6E2DC /* CEEAddFileSelectionView.h */,
-				26920499252FF52700D6E2DC /* CEEAddFileSelectionView.m */,
-				2692049A252FF52700D6E2DC /* CEEFilePathConfirmView.h */,
-				2692049B252FF52700D6E2DC /* CEEFilePathConfirmView.m */,
-				269204A0252FF52700D6E2DC /* CEERemoveFileSelectionView.h */,
-				269204A1252FF52700D6E2DC /* CEERemoveFileSelectionView.m */,
+				2692049C252FF52700D6E2DC /* CEEAddReferenceViewController.h */,
+				2692049D252FF52700D6E2DC /* CEEAddReferenceViewController.m */,
+				2692049E252FF52700D6E2DC /* CEERemoveReferenceViewController.h */,
+				2692049F252FF52700D6E2DC /* CEERemoveReferenceViewController.m */,
+				2602BB0A25C7D2D5004B5D52 /* CEEReferenceRootScannerViewController.h */,
+				2602BB0925C7D2D5004B5D52 /* CEEReferenceRootScannerViewController.m */,
+				26CBA6D025C927B100062C23 /* CEECreateFileAtPathViewController.h */,
+				26CBA6D125C927B100062C23 /* CEECreateFileAtPathViewController.m */,
+				26CBA6D525C9496200062C23 /* CEECreateFileNotificationViewController.h */,
+				26CBA6D625C9496200062C23 /* CEECreateFileNotificationViewController.m */,
+				2617758225CA4D1300CBA692 /* CEERemoveFileViewController.h */,
+				2617758125CA4D1300CBA692 /* CEERemoveFileViewController.m */,
+				2602BB0F25C7D443004B5D52 /* CEEFilePathSelectionView.h */,
+				2602BB1025C7D443004B5D52 /* CEEFilePathSelectionView.m */,
+				26920498252FF52700D6E2DC /* CEEAddReferenceView.h */,
+				26920499252FF52700D6E2DC /* CEEAddReferenceView.m */,
+				269204A0252FF52700D6E2DC /* CEERemoveReferenceView.h */,
+				269204A1252FF52700D6E2DC /* CEERemoveReferenceView.m */,
+				2602BB1525C7DF4B004B5D52 /* CEEFilePathScannerView.h */,
+				2602BB1625C7DF4B004B5D52 /* CEEFilePathScannerView.m */,
+				2692049A252FF52700D6E2DC /* CEEFilePathView.h */,
+				2692049B252FF52700D6E2DC /* CEEFilePathView.m */,
+				26CBA6CE25C9253E00062C23 /* CEEFileSettingView.h */,
+				26CBA6CD25C9253E00062C23 /* CEEFileSettingView.m */,
 			);
-			path = FilePathManager;
+			path = ReferenceManager;
 			sourceTree = "<group>";
 		};
 		269204A7252FF53100D6E2DC /* ProjectCreator */ = {
@@ -1473,14 +1588,14 @@
 		269204B1252FF54000D6E2DC /* CellViews */ = {
 			isa = PBXGroup;
 			children = (
-				269204B2252FF54000D6E2DC /* CEEFileNameCellView.h */,
-				269204B3252FF54000D6E2DC /* CEEFileNameCellView.m */,
-				269204B4252FF54000D6E2DC /* CEEFilePathCellView.h */,
-				269204B5252FF54000D6E2DC /* CEEFilePathCellView.m */,
-				269204B6252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.h */,
-				269204B7252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.m */,
-				269204B8252FF54000D6E2DC /* CEESymbolCellView.h */,
-				269204B9252FF54000D6E2DC /* CEESymbolCellView.m */,
+				8A66A4E425DF507C003244E3 /* CEETableCellView.h */,
+				8A66A4E525DF507C003244E3 /* CEETableCellView.m */,
+				269204B2252FF54000D6E2DC /* CEEImageTextTableCellView.h */,
+				269204B3252FF54000D6E2DC /* CEEImageTextTableCellView.m */,
+				269204B6252FF54000D6E2DC /* CEECheckboxTableCellView.h */,
+				269204B7252FF54000D6E2DC /* CEECheckboxTableCellView.m */,
+				269204B4252FF54000D6E2DC /* CEETextTableCellView.h */,
+				269204B5252FF54000D6E2DC /* CEETextTableCellView.m */,
 				269204BA252FF54000D6E2DC /* CEETableCellViewTextLabel.h */,
 				269204BB252FF54000D6E2DC /* CEETableCellViewTextLabel.m */,
 			);
@@ -1576,25 +1691,31 @@
 				2692036E252FF3E400D6E2DC /* icon_file_type_html_16x16@2x.png in Resources */,
 				26920507252FF60300D6E2DC /* ProjectProcess.storyboard in Resources */,
 				26920396252FF3E400D6E2DC /* icon_remove_16x16@2x.png in Resources */,
+				26CBA6C725C91CD700062C23 /* icon_clean_symbols_in_file_16x16@2x.png in Resources */,
 				26920384252FF3E400D6E2DC /* icon_navigate_down_16x16@2x.png in Resources */,
 				26AFC62E25AD871E006B2C67 /* icon_split_vertical_carved_16x16@2x.png in Resources */,
 				26920366252FF3E400D6E2DC /* icon_file_switch_16x16@2x.png in Resources */,
 				26920383252FF3E400D6E2DC /* icon_navigate_backward_16x16@2x.png in Resources */,
 				2692050D252FF60300D6E2DC /* SourceBufferManager.storyboard in Resources */,
+				261BE13B25C79F4C0099158E /* ReferenceManager.storyboard in Resources */,
 				269203B7252FF3E400D6E2DC /* logo_butterfly_512x512@2x.png in Resources */,
-				26920503252FF60300D6E2DC /* RemoveFileSelectionView.xib in Resources */,
+				26920503252FF60300D6E2DC /* RemoveReferenceView.xib in Resources */,
 				26C9B0112599A30B00A24B60 /* icon_list_16x16@2x.png in Resources */,
 				2692037A252FF3E400D6E2DC /* icon_implementation_definition_16x16@2x.png in Resources */,
 				260D7DF225470231003BDC42 /* icon_xml_tag_16x16@2x.png in Resources */,
 				26920391252FF3E400D6E2DC /* icon_protocol_declaration_16x16@2x.png in Resources */,
 				264607AD259C572E004462AF /* icon_mail_16x16@2x.png in Resources */,
 				26AFC63425AD89E4006B2C67 /* icon_redo_carved_16x16@2x.png in Resources */,
+				26CBA6C525C91ADD00062C23 /* icon_close_below_16x16@2x.png in Resources */,
+				8AB3191125E32D1300A58824 /* Welcome.storyboard in Resources */,
 				26920377252FF3E400D6E2DC /* icon_focus_16x16@2x.png in Resources */,
 				269203B4252FF3E400D6E2DC /* logo_butterfly_16x16@2x.png in Resources */,
 				269203AB252FF3E400D6E2DC /* icon_template_declaration_16x16@2x.png in Resources */,
 				26920397252FF3E400D6E2DC /* icon_sand_clock_16x16@2x.png in Resources */,
+				8AA1C87225E0966B005317D6 /* icon_expanded_16x16@2x.png in Resources */,
 				2692050A252FF60300D6E2DC /* Editor.storyboard in Resources */,
 				26A761E5255A8BB20032A06D /* icon_import_16x16@2x.png in Resources */,
+				8A05D7A025DDECB50094FE11 /* icon_cymbols_gray_32x32@2x.png in Resources */,
 				26899B5425B17FA600C84815 /* icon_file_list_carved_16x16@2x.png in Resources */,
 				26920373252FF3E400D6E2DC /* icon_file_type_objective_c_16x16@2x.png in Resources */,
 				2692038A252FF3E400D6E2DC /* icon_open_file_16x16@2x.png in Resources */,
@@ -1605,6 +1726,7 @@
 				26920394252FF3E400D6E2DC /* icon_relation_16x16@2x.png in Resources */,
 				26920376252FF3E400D6E2DC /* icon_file_type_text_16x16@2x.png in Resources */,
 				269203B2252FF3E400D6E2DC /* logo_butterfly@2x.png in Resources */,
+				2660771225D816930087D883 /* TimeFreezer.storyboard in Resources */,
 				26920368252FF3E400D6E2DC /* icon_file_type_c_16x16@2x.png in Resources */,
 				26920382252FF3E400D6E2DC /* icon_namespace_definition_16x16@2x.png in Resources */,
 				26920363252FF3E400D6E2DC /* icon_enumerator_16x16@2x.png in Resources */,
@@ -1614,8 +1736,8 @@
 				26920354252FF3E300D6E2DC /* icon_buffer_list_16x16@2x.png in Resources */,
 				269203A4252FF3E400D6E2DC /* icon_split3_16x16@2x.png in Resources */,
 				2692035B252FF3E300D6E2DC /* icon_database_16x16@2x.png in Resources */,
-				26899B5625B17FA600C84815 /* icon_remove_16x16@2x.png in Resources */,
 				2692035E252FF3E300D6E2DC /* icon_database_new_16x16@2x.png in Resources */,
+				8A05D7A225DDEEAE0094FE11 /* icon_cymbols_32x32@2x.png in Resources */,
 				26920399252FF3E400D6E2DC /* icon_save_all_16x16@2x.png in Resources */,
 				26AFC62B25AD871E006B2C67 /* icon_split4_carved_16x16@2x.png in Resources */,
 				26920393252FF3E400D6E2DC /* icon_regex_16x16@2x.png in Resources */,
@@ -1626,22 +1748,25 @@
 				26920388252FF3E400D6E2DC /* icon_new_window_16x16@2x.png in Resources */,
 				26920355252FF3E300D6E2DC /* icon_character_16x16@2x.png in Resources */,
 				26920381252FF3E400D6E2DC /* icon_message_definition_16x16@2x.png in Resources */,
-				2692050C252FF60300D6E2DC /* AddFileSelectionView.xib in Resources */,
+				2692050C252FF60300D6E2DC /* AddReferenceView.xib in Resources */,
 				2692039A252FF3E400D6E2DC /* icon_search_16x16@2x.png in Resources */,
 				2692039B252FF3E400D6E2DC /* icon_search_next_16x16@2x.png in Resources */,
 				269203A6252FF3E400D6E2DC /* icon_split_horizontal_16x16@2x.png in Resources */,
 				2692039F252FF3E400D6E2DC /* icon_source_block_16x16@2x.png in Resources */,
 				26AFC62C25AD871E006B2C67 /* icon_new_window_carved_16x16@2x.png in Resources */,
+				2602BB0E25C7D417004B5D52 /* FilePathSelectionView.xib in Resources */,
 				269203A2252FF3E400D6E2DC /* icon_split2_16x16@2x.png in Resources */,
 				268531922571F7E2004724F9 /* icon_using_declaration_16x16@2x.png in Resources */,
 				269203B3252FF3E400D6E2DC /* logo_butterfly_128x128@2x.png in Resources */,
+				2610A12425D1855B00DB2AA9 /* icon_caution_16x16@2x.png in Resources */,
 				26920372252FF3E400D6E2DC /* icon_file_type_makefile_16x16@2x.png in Resources */,
 				264607A9259C1C6D004462AF /* icon_file_list_16x16@2x.png in Resources */,
 				269203AA252FF3E400D6E2DC /* icon_sync_16x16@2x.png in Resources */,
 				26C9B0102599A30B00A24B60 /* icon_tree_16x16@2x.png in Resources */,
 				269203A7252FF3E400D6E2DC /* icon_split_vertical_16x16@2x.png in Resources */,
-				26899B5F25B17FEF00C84815 /* icon_reload_carved_16x16@2x.png in Resources */,
+				26CBA6BD25C8FBE500062C23 /* icon_remove_file_16x16@2x.png in Resources */,
 				26920395252FF3E400D6E2DC /* icon_reload_16x16@2x.png in Resources */,
+				8AA1C87325E0966B005317D6 /* icon_expandable_16x16@2x.png in Resources */,
 				26920365252FF3E400D6E2DC /* icon_file_not_existed_16x16@2x.png in Resources */,
 				26548527254150AC00E1D0DE /* Credits.rtf in Resources */,
 				2692037F252FF3E400D6E2DC /* icon_list_window_16x16@2x.png in Resources */,
@@ -1657,16 +1782,16 @@
 				26899B5525B17FA600C84815 /* icon_reload_carved_16x16@2x.png in Resources */,
 				26920385252FF3E400D6E2DC /* icon_navigate_forward_16x16@2x.png in Resources */,
 				26920353252FF3E300D6E2DC /* icon_broom_16x16@2x.png in Resources */,
+				2625379B25DCF3280060E922 /* UpdateInfo.storyboard in Resources */,
+				26CBA6B525C8DA3700062C23 /* icon_finder_16x16@2x.png in Resources */,
 				26920380252FF3E400D6E2DC /* icon_message_declaration_16x16@2x.png in Resources */,
 				26920358252FF3E300D6E2DC /* icon_copy_16x16@2x.png in Resources */,
-				26920352252FF3E300D6E2DC /* icon_add_16x16@2x.png in Resources */,
 				26920504252FF60300D6E2DC /* Session.storyboard in Resources */,
 				269203B0252FF3E400D6E2DC /* icon_variable_declaration_16x16@2x.png in Resources */,
 				26899B6125B17FEF00C84815 /* icon_directory_tree_carved_16x16@2x.png in Resources */,
 				2693B21C2530015200D21FD3 /* Cymbols.cfg in Resources */,
 				26899B5725B17FA600C84815 /* icon_mail_carved_16x16@2x.png in Resources */,
 				2692038E252FF3E400D6E2DC /* icon_prep_directive_define_16x16@2x.png in Resources */,
-				26899B6225B17FEF00C84815 /* icon_file_list_carved_16x16@2x.png in Resources */,
 				269203A5252FF3E400D6E2DC /* icon_split4_16x16@2x.png in Resources */,
 				26A761E7255A8D420032A06D /* icon_package_16x16@2x.png in Resources */,
 				26AFC63D25AD8DEC006B2C67 /* icon_database_carved_16x16@2x.png in Resources */,
@@ -1675,6 +1800,8 @@
 				2692036C252FF3E400D6E2DC /* icon_file_type_cpp_16x16@2x.png in Resources */,
 				2692038B252FF3E400D6E2DC /* icon_opened_files_16x16@2x.png in Resources */,
 				269203A1252FF3E400D6E2DC /* icon_split1_16x16@2x.png in Resources */,
+				2602BB1425C7DDB5004B5D52 /* FilePathScannerView.xib in Resources */,
+				261BE13E25C7AB960099158E /* ProjectCreator.storyboard in Resources */,
 				26920505252FF60300D6E2DC /* Theme.storyboard in Resources */,
 				2693B8CC2565F9910021E246 /* icon_file_type_csharp_16x16@2x.png in Resources */,
 				269203AF252FF3E400D6E2DC /* icon_union_definition_16x16@2x.png in Resources */,
@@ -1684,6 +1811,7 @@
 				264EA89C25480CFD005042EA /* icon_file_type_css_16x16@2x.png in Resources */,
 				269203AE252FF3E400D6E2DC /* icon_undo_16x16@2x.png in Resources */,
 				2693B227253001D700D21FD3 /* Styles in Resources */,
+				26CBA6CC25C9237200062C23 /* FileSettingView.xib in Resources */,
 				26DDED422547FC0800BD8246 /* icon_css_selector_16x16@2x.png in Resources */,
 				26920506252FF60300D6E2DC /* ProjectPropertyView.xib in Resources */,
 				26920387252FF3E400D6E2DC /* icon_new_file_16x16@2x.png in Resources */,
@@ -1692,19 +1820,23 @@
 				26920360252FF3E400D6E2DC /* icon_database_sync_16x16@2x.png in Resources */,
 				26920386252FF3E400D6E2DC /* icon_navigate_up_16x16@2x.png in Resources */,
 				26AFC62925AD871E006B2C67 /* icon_split1_carved_16x16@2x.png in Resources */,
+				2608E27F25CA4141002D709D /* icon_trash_16x16@2x.png in Resources */,
+				26CBA6B725C8F6E400062C23 /* icon_edit_16x16@2x.png in Resources */,
 				2692036D252FF3E400D6E2DC /* icon_file_type_cpp_header_16x16@2x.png in Resources */,
 				26AFC62725AD871E006B2C67 /* icon_list_window_carved_16x16@2x.png in Resources */,
 				2692038D252FF3E400D6E2DC /* icon_pin_16x16@2x.png in Resources */,
+				26CBA6C325C91ADD00062C23 /* icon_close_other_16x16@2x.png in Resources */,
 				26920508252FF60300D6E2DC /* Main.storyboard in Resources */,
-				2692050B252FF60300D6E2DC /* FilePathConfirmView.xib in Resources */,
+				2692050B252FF60300D6E2DC /* FilePathView.xib in Resources */,
 				2692035C252FF3E300D6E2DC /* icon_database_build_16x16@2x.png in Resources */,
 				26899B6325B17FEF00C84815 /* icon_add_carved_16x16@2x.png in Resources */,
 				26920500252FF60300D6E2DC /* SourceHistory.storyboard in Resources */,
 				26920511252FF71400D6E2DC /* Assets.xcassets in Resources */,
+				26CBA6BB25C8FBDC00062C23 /* icon_add_file_16x16@2x.png in Resources */,
 				26AFC64225AD8DEC006B2C67 /* icon_database_search_carved_16x16@2x.png in Resources */,
 				2692037D252FF3E400D6E2DC /* icon_lamp_16x16@2x.png in Resources */,
 				26AFC63625AD89E4006B2C67 /* icon_search_carved_16x16@2x.png in Resources */,
-				26899B5E25B17FEF00C84815 /* icon_mail_carved_16x16@2x.png in Resources */,
+				26CBA6B925C8F9C900062C23 /* icon_new_directory_16x16@2x.png in Resources */,
 				26920371252FF3E400D6E2DC /* icon_file_type_javascript_16x16@2x.png in Resources */,
 				26AFC62A25AD871E006B2C67 /* icon_split2_carved_16x16@2x.png in Resources */,
 				26920370252FF3E400D6E2DC /* icon_file_type_java_16x16@2x.png in Resources */,
@@ -1717,11 +1849,14 @@
 				269203B1252FF3E400D6E2DC /* icon_whole_word_16x16@2x.png in Resources */,
 				26920364252FF3E400D6E2DC /* icon_file_16x16@2x.png in Resources */,
 				269203B9252FF3E400D6E2DC /* logo_butterfly_8x8@2x.png in Resources */,
+				26CBA6C225C91ADD00062C23 /* icon_close_tinted_16x16@2x.png in Resources */,
+				26CBA6C425C91ADD00062C23 /* icon_close_above_16x16@2x.png in Resources */,
 				26AFC63525AD89E4006B2C67 /* icon_paste_carved_16x16@2x.png in Resources */,
 				269203B8252FF3E400D6E2DC /* logo_butterfly_64x64@2x.png in Resources */,
 				2692039D252FF3E400D6E2DC /* icon_select_16x16@2x.png in Resources */,
 				264607AB259C1C87004462AF /* icon_directory_tree_16x16@2x.png in Resources */,
 				269203BA252FF3E400D6E2DC /* logo_lazycatdesign@2x.png in Resources */,
+				26CBA6C925C9221300062C23 /* icon_edit_in_new_window_16x16@2x.png in Resources */,
 				26920378252FF3E400D6E2DC /* icon_function_declaration_16x16@2x.png in Resources */,
 				261B0782256E46EA00D1C48D /* icon_property_declaration_16x16@2x.png in Resources */,
 				26AFC61C25AD8503006B2C67 /* icon_cut_carved_16x16@2x.png in Resources */,
@@ -1765,6 +1900,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26CBA6CF25C9253E00062C23 /* CEEFileSettingView.m in Sources */,
 				269202DC252FF39000D6E2DC /* cee_text_edit.c in Sources */,
 				269204DA252FF5BC00D6E2DC /* CEEProjectSearchViewController.m in Sources */,
 				26920432252FF4F400D6E2DC /* CEEStateButton.m in Sources */,
@@ -1774,18 +1910,20 @@
 				26B3F0772560F403007D902C /* cee_gnu_asm.l in Sources */,
 				26920294252FF35600D6E2DC /* cee_lib.c in Sources */,
 				26920495252FF51A00D6E2DC /* CEESessionWindowController.m in Sources */,
-				269204A6252FF52700D6E2DC /* CEERemoveFileSelectionView.m in Sources */,
+				269204A6252FF52700D6E2DC /* CEERemoveReferenceView.m in Sources */,
 				269204CE252FF5A000D6E2DC /* CEESourceBufferManagerViewController.m in Sources */,
-				2692048B252FF51A00D6E2DC /* CEESessionReferenceController.m in Sources */,
+				2692048B252FF51A00D6E2DC /* CEESessionSourceBufferViewController.m in Sources */,
 				26920297252FF35600D6E2DC /* cee_range.c in Sources */,
 				2692029F252FF37400D6E2DC /* cee_backend.c in Sources */,
+				26CBA6D725C9496200062C23 /* CEECreateFileNotificationViewController.m in Sources */,
 				26920485252FF51A00D6E2DC /* CEESessionFrameManager.m in Sources */,
 				2692048A252FF51A00D6E2DC /* CEESessionFrameViewController.m in Sources */,
 				26C9B0172599A5E200A24B60 /* CEETitlebarStateButton.m in Sources */,
+				2617758325CA4D1300CBA692 /* CEERemoveFileViewController.m in Sources */,
 				269202C3252FF38400D6E2DC /* cee_source_parser.c in Sources */,
 				26920431252FF4F400D6E2DC /* CEESplitViewController.m in Sources */,
 				269204E0252FF5E800D6E2DC /* CEENetwork.m in Sources */,
-				269204BD252FF54000D6E2DC /* CEEFilePathCellView.m in Sources */,
+				269204BD252FF54000D6E2DC /* CEETextTableCellView.m in Sources */,
 				2692043D252FF4F400D6E2DC /* CEEToolbarButton.m in Sources */,
 				26D5315B2581B97D00AFBEF6 /* cee_xml.l in Sources */,
 				26D5315A2581B97D00AFBEF6 /* cee_xml.c in Sources */,
@@ -1795,21 +1933,24 @@
 				269204C8252FF58200D6E2DC /* CEESearcher.m in Sources */,
 				26B3F0792560F410007D902C /* cee_c.l in Sources */,
 				26C9B01A2599C01300A24B60 /* CEETreeView.m in Sources */,
+				8A66A4E625DF507D003244E3 /* CEETableCellView.m in Sources */,
 				26920446252FF4F400D6E2DC /* NSSplitView+UIStyle.m in Sources */,
+				2602BB0B25C7D2D5004B5D52 /* CEEReferenceRootScannerViewController.m in Sources */,
 				269202BD252FF38400D6E2DC /* cee_arm_asm.c in Sources */,
 				2692042F252FF4F400D6E2DC /* CEEScroller.m in Sources */,
 				26920455252FF50300D6E2DC /* CEETextEditViewController.m in Sources */,
 				26B3F07B2560F41B007D902C /* cee_css.l in Sources */,
 				26B3F0812560F434007D902C /* cee_swift.l in Sources */,
 				26920496252FF51A00D6E2DC /* CEESourceHistoryViewController.m in Sources */,
-				26920484252FF51A00D6E2DC /* CEESessionFilePathController.m in Sources */,
+				26920484252FF51A00D6E2DC /* CEESessionFileReferenceViewController.m in Sources */,
 				269202C9252FF38400D6E2DC /* cee_html.c in Sources */,
 				2647CE3F25309ACD00970FE4 /* CEEUserInterfaceStyleSelectionController.m in Sources */,
 				269202E0252FF39000D6E2DC /* cee_text_macos_attribute.m in Sources */,
 				269202DB252FF39000D6E2DC /* cee_text_autocomplete.c in Sources */,
-				269204BC252FF54000D6E2DC /* CEEFileNameCellView.m in Sources */,
-				269204A5252FF52700D6E2DC /* CEEProjectRemoveFileController.m in Sources */,
+				269204BC252FF54000D6E2DC /* CEEImageTextTableCellView.m in Sources */,
+				269204A5252FF52700D6E2DC /* CEERemoveReferenceViewController.m in Sources */,
 				2692028E252FF35600D6E2DC /* cee_bst.c in Sources */,
+				2602BB1725C7DF4B004B5D52 /* CEEFilePathScannerView.m in Sources */,
 				26B3F07F2560F42B007D902C /* cee_java.l in Sources */,
 				269204AE252FF53100D6E2DC /* CEEProjectCreatorController.m in Sources */,
 				269202C7252FF38400D6E2DC /* cee_token.c in Sources */,
@@ -1828,7 +1969,10 @@
 				269201A1252FF30D00D6E2DC /* cJSON_Utils.c in Sources */,
 				26920487252FF51A00D6E2DC /* CEESessionFrameSplitView.m in Sources */,
 				269202DA252FF39000D6E2DC /* cee_binary_storage.c in Sources */,
+				26CBA6D225C927B100062C23 /* CEECreateFileAtPathViewController.m in Sources */,
 				26920424252FF4F400D6E2DC /* CEEButton.m in Sources */,
+				2660770F25D80A870087D883 /* CEETimerFreezer.m in Sources */,
+				2660771525D8188F0087D883 /* CEETimeFreezerViewController.m in Sources */,
 				26920291252FF35600D6E2DC /* cee_error.c in Sources */,
 				2692048F252FF51A00D6E2DC /* CEESessionSpliter1.m in Sources */,
 				2692028F252FF35600D6E2DC /* cee_codec.c in Sources */,
@@ -1836,9 +1980,10 @@
 				269204B0252FF53100D6E2DC /* CEEProjectSettingView.m in Sources */,
 				26920423252FF4F400D6E2DC /* CEEBinaryView.m in Sources */,
 				26920290252FF35600D6E2DC /* cee_datetime.c in Sources */,
-				2692048D252FF51A00D6E2DC /* CEESessionSourceController.m in Sources */,
+				2692048D252FF51A00D6E2DC /* CEESessionSourceViewController.m in Sources */,
 				26920488252FF51A00D6E2DC /* CEESessionFrameTitleView.m in Sources */,
-				2692048C252FF51A00D6E2DC /* CEESessionReferenceTableView.m in Sources */,
+				2692048C252FF51A00D6E2DC /* CEESessionSourceBufferTableView.m in Sources */,
+				2602BB1125C7D443004B5D52 /* CEEFilePathSelectionView.m in Sources */,
 				26920448252FF4F400D6E2DC /* NSViewController+UIStyle.m in Sources */,
 				26920437252FF4F400D6E2DC /* CEETextField.m in Sources */,
 				269204CB252FF58F00D6E2DC /* CEESourceBuffer.m in Sources */,
@@ -1852,14 +1997,14 @@
 				26920483252FF51A00D6E2DC /* CEESessionContextViewController.m in Sources */,
 				26920486252FF51A00D6E2DC /* CEESessionFrameManagerView.m in Sources */,
 				26920433252FF4F400D6E2DC /* CEEStyleManager.m in Sources */,
-				269204A2252FF52700D6E2DC /* CEEAddFileSelectionView.m in Sources */,
+				269204A2252FF52700D6E2DC /* CEEAddReferenceView.m in Sources */,
 				2692043A252FF4F400D6E2DC /* CEETextView.m in Sources */,
 				26920296252FF35600D6E2DC /* cee_mem.c in Sources */,
 				26DAE285255C0A16005C8A2D /* CEESecurityBookmark.m in Sources */,
 				26920492252FF51A00D6E2DC /* CEESessionToolbar.m in Sources */,
 				268376E025490C720066305C /* cee_swift.c in Sources */,
 				269204C2252FF55600D6E2DC /* CEESessionDescriptor.c in Sources */,
-				269204A4252FF52700D6E2DC /* CEEProjectAddFileController.m in Sources */,
+				269204A4252FF52700D6E2DC /* CEEAddReferenceViewController.m in Sources */,
 				269202C5252FF38400D6E2DC /* cee_symbol.c in Sources */,
 				26920453252FF50300D6E2DC /* CEEEditViewController.m in Sources */,
 				2692042B252FF4F400D6E2DC /* CEEJSONReader.m in Sources */,
@@ -1869,7 +2014,7 @@
 				269204C5252FF57500D6E2DC /* CEEProject.m in Sources */,
 				26920429252FF4F400D6E2DC /* CEEIdentifier.m in Sources */,
 				26920442252FF4F400D6E2DC /* CEEWindowContentView.m in Sources */,
-				26920491252FF51A00D6E2DC /* CEESessionSymbolController.m in Sources */,
+				26920491252FF51A00D6E2DC /* CEESessionSymbolViewController.m in Sources */,
 				26308594254263DA000A8CB5 /* cee_regex_macos.m in Sources */,
 				26920439252FF4F400D6E2DC /* CEETextTitle.m in Sources */,
 				269202C1252FF38400D6E2DC /* cee_c.c in Sources */,
@@ -1892,28 +2037,77 @@
 				269204DC252FF5BC00D6E2DC /* CEEProjectContextViewController.m in Sources */,
 				26920447252FF4F400D6E2DC /* NSView+UIStyle.m in Sources */,
 				269204D9252FF5BC00D6E2DC /* CEEProjectCleanViewController.m in Sources */,
+				8AB3191625E33C9700A58824 /* CEETrialVersionWelcomeViewController.m in Sources */,
 				2692043B252FF4F400D6E2DC /* CEETitlebarButton.m in Sources */,
 				26920438252FF4F400D6E2DC /* CEETextLabel.m in Sources */,
 				269202BF252FF38400D6E2DC /* cee_gnu_asm.c in Sources */,
 				2692048E252FF51A00D6E2DC /* CEESessionSpliter0.m in Sources */,
-				269204BF252FF54000D6E2DC /* CEESymbolCellView.m in Sources */,
 				2692042E252FF4F400D6E2DC /* CEEPopupPanel.m in Sources */,
-				269204A3252FF52700D6E2DC /* CEEFilePathConfirmView.m in Sources */,
+				269204A3252FF52700D6E2DC /* CEEFilePathView.m in Sources */,
 				2692029A252FF35600D6E2DC /* cee_tree.c in Sources */,
 				269202C6252FF38400D6E2DC /* cee_tag.c in Sources */,
 				269202DE252FF39000D6E2DC /* cee_text_modify.c in Sources */,
 				26920426252FF4F400D6E2DC /* CEEContainerView.m in Sources */,
 				2602A92D254BFB010011FBD5 /* cee_java.c in Sources */,
+				2625379E25DCF37C0060E922 /* CEEUpdateInfoViewController.m in Sources */,
 				269202C4252FF38400D6E2DC /* cee_source_parsers.c in Sources */,
 				26920489252FF51A00D6E2DC /* CEESessionFrameView.m in Sources */,
 				2692050F252FF6AE00D6E2DC /* main.m in Sources */,
-				269204BE252FF54000D6E2DC /* CEESourceBufferSaveConfirmCellView.m in Sources */,
+				269204BE252FF54000D6E2DC /* CEECheckboxTableCellView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		2602BB0C25C7D417004B5D52 /* FilePathSelectionView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2602BB0D25C7D417004B5D52 /* Base */,
+			);
+			name = FilePathSelectionView.xib;
+			sourceTree = "<group>";
+		};
+		2602BB1225C7DDB5004B5D52 /* FilePathScannerView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2602BB1325C7DDB5004B5D52 /* Base */,
+			);
+			name = FilePathScannerView.xib;
+			sourceTree = "<group>";
+		};
+		261BE13925C79F4C0099158E /* ReferenceManager.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				261BE13A25C79F4C0099158E /* Base */,
+			);
+			name = ReferenceManager.storyboard;
+			sourceTree = "<group>";
+		};
+		261BE13C25C7AB960099158E /* ProjectCreator.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				261BE13D25C7AB960099158E /* Base */,
+			);
+			name = ProjectCreator.storyboard;
+			sourceTree = "<group>";
+		};
+		2625379925DCF3270060E922 /* UpdateInfo.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2625379A25DCF3270060E922 /* Base */,
+			);
+			name = UpdateInfo.storyboard;
+			sourceTree = "<group>";
+		};
+		2660771025D816930087D883 /* TimeFreezer.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2660771125D816930087D883 /* Base */,
+			);
+			name = TimeFreezer.storyboard;
+			sourceTree = "<group>";
+		};
 		269204E4252FF60000D6E2DC /* SourceHistory.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1938,12 +2132,12 @@
 			name = ProjectSettingView.xib;
 			sourceTree = "<group>";
 		};
-		269204EA252FF60100D6E2DC /* RemoveFileSelectionView.xib */ = {
+		269204EA252FF60100D6E2DC /* RemoveReferenceView.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
 				269204EB252FF60100D6E2DC /* Base */,
 			);
-			name = RemoveFileSelectionView.xib;
+			name = RemoveReferenceView.xib;
 			sourceTree = "<group>";
 		};
 		269204EC252FF60100D6E2DC /* Session.storyboard */ = {
@@ -2002,20 +2196,20 @@
 			name = Editor.storyboard;
 			sourceTree = "<group>";
 		};
-		269204FA252FF60200D6E2DC /* FilePathConfirmView.xib */ = {
+		269204FA252FF60200D6E2DC /* FilePathView.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
 				269204FB252FF60200D6E2DC /* Base */,
 			);
-			name = FilePathConfirmView.xib;
+			name = FilePathView.xib;
 			sourceTree = "<group>";
 		};
-		269204FC252FF60300D6E2DC /* AddFileSelectionView.xib */ = {
+		269204FC252FF60300D6E2DC /* AddReferenceView.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
 				269204FD252FF60300D6E2DC /* Base */,
 			);
-			name = AddFileSelectionView.xib;
+			name = AddReferenceView.xib;
 			sourceTree = "<group>";
 		};
 		269204FE252FF60300D6E2DC /* SourceBufferManager.storyboard */ = {
@@ -2024,6 +2218,22 @@
 				269204FF252FF60300D6E2DC /* Base */,
 			);
 			name = SourceBufferManager.storyboard;
+			sourceTree = "<group>";
+		};
+		26CBA6CA25C9237200062C23 /* FileSettingView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				26CBA6CB25C9237200062C23 /* Base */,
+			);
+			name = FileSettingView.xib;
+			sourceTree = "<group>";
+		};
+		8AB3190F25E32D1300A58824 /* Welcome.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8AB3191025E32D1300A58824 /* Base */,
+			);
+			name = Welcome.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

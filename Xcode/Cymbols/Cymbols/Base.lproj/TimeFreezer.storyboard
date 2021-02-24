@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Window Controller-->
+        <scene sceneID="Iw4-Xf-gYb">
+            <objects>
+                <windowController storyboardIdentifier="IDTimeFreezerWindowController" id="vEZ-v5-BPJ" customClass="CEEWindowController" sceneMemberID="viewController">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="1Qh-8m-VOz" customClass="CEEWindow">
+                        <windowStyleMask key="styleMask" titled="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="425" y="462" width="480" height="182"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
+                        <view key="contentView" id="vfr-dp-vdq">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="182"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="vEZ-v5-BPJ" id="N4G-dV-fRZ"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="l5T-5P-FX3" kind="relationship" relationship="window.shadowedContentViewController" id="cQC-0q-nc4"/>
+                    </connections>
+                </windowController>
+                <customObject id="n9b-sI-fxO" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="24" y="-11"/>
+        </scene>
+        <!--Time Freezer View Controller-->
+        <scene sceneID="h8L-N6-H49">
+            <objects>
+                <viewController id="l5T-5P-FX3" customClass="CEETimeFreezerViewController" sceneMemberID="viewController">
+                    <view key="view" id="SUn-mg-XDn" customClass="CEEWindowContentView">
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="209"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iwl-4A-8LX" customClass="CEEImageView">
+                                <rect key="frame" x="207" y="125" width="64" height="64"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="cymbols_logo" id="Koa-zH-xfc"/>
+                            </imageView>
+                            <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I1J-5D-Vpd" customClass="CEEButton">
+                                <rect key="frame" x="161" y="29" width="157" height="24"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Purchase Offical Version"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="buyReleaseVersion:" target="l5T-5P-FX3" id="VXQ-jr-gQi"/>
+                                </connections>
+                            </customView>
+                            <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BwN-gF-edQ" customClass="CEETextTitle">
+                                <rect key="frame" x="207" y="102" width="64" height="24"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Cymbols"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                            <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6eo-dD-jnO" customClass="CEETextLabel">
+                                <rect key="frame" x="152" y="64" width="174" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Trail Version Time Freeze 5s"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                        </subviews>
+                    </view>
+                    <connections>
+                        <outlet property="freezeTitle" destination="6eo-dD-jnO" id="sx8-ev-39A"/>
+                    </connections>
+                </viewController>
+                <customObject id="caK-5Y-LT7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="606" y="-24.5"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="cymbols_logo" width="128" height="128"/>
+    </resources>
+</document>

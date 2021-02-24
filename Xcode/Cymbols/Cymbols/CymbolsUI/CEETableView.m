@@ -9,7 +9,7 @@
 #import <objc/message.h>
 #import "CEETableView.h"
 
-#define MIN_COLUMN_WIDTH 5.0
+#define MIN_COLUMN_WIDTH 30.0
 #define HEADER_HEIGHT 25.0
 #define SCROLLER_WIDTH 15.0
 
@@ -41,7 +41,7 @@
 - (NSRect)titleRect:(NSInteger)index {
     if (!_tableView)
         return NSMakeRect(0.0, 0.0, 0.0, 0.0);
-        
+    
     CGFloat offset = [_columnOffsets[index] floatValue];
     CGFloat width = [_columnWidths[index] floatValue];
     NSRect rect = NSMakeRect(offset,
@@ -306,6 +306,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 @property NSMutableArray* cellViewBuffer;
 @property BOOL clickDetect;
 @property NSMutableIndexSet* selectedRowIndexesClip;
+@property NSMutableArray* cellViewTemplates;
 - (CGFloat)columnsWidth;
 - (NSArray*)columnOffsets;
 @end
@@ -337,7 +338,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     self.borderWidth = 0.0;
     
     [self createComponents];
-    [self enableComponents: kComponentStateHeader | kComponentStateGrid];
+    [self enableComponents:kComponentStateHeader | kComponentStateGrid];
     [self setNumberOfColumns:1];
 }
 
@@ -396,13 +397,12 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         [_grid setIdentifier:[self createComponentIdentifier:@"IDGridView"]];
 }
 
-- (NSInteger) numberOfRows {
+- (NSInteger)numberOfRows {
     return [self.dataSource numberOfRowsInTableView:self];
 }
 
 - (void)createHeader {
-    NSRect frame = NSMakeRect(0, 0, 0, 0);
-    _header = [[CEETableViewHeader alloc] initWithFrame:frame];
+    _header = [[CEETableViewHeader alloc] init];
     [_header setAutoresizingMask:NSViewWidthSizable];
     [_header setTableView: self];
     [_header setDragDividerAction:@selector(dragHeaderDivider:)];
@@ -410,15 +410,13 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 }
 
 - (void)createHeaderPadding {
-    NSRect frame = NSMakeRect(0, 0, 0, 0);
-    _headerPadding = [[CEETableViewHeader alloc] initWithFrame:frame];
+    _headerPadding = [[CEETableViewHeader alloc] init];
     [_headerPadding setAutoresizingMask:NSViewMinXMargin];
     [_headerPadding setIdentifier:[self createComponentIdentifier:@"IDHeaderPadding"]];
 }
 
 - (void)createVerticalScroller {
-    NSRect frame = NSMakeRect(0, 0, 0, 0);
-    _verticalScroller = [[CEEScroller alloc] initWithFrame:frame];
+    _verticalScroller = [[CEEScroller alloc] init];
     [_verticalScroller setDirection:kCEEScrollerDirectionVertical];
     [_verticalScroller setScrollerStyle:NSScrollerStyleOverlay];
     [_verticalScroller setKnobStyle:NSScrollerKnobStyleDefault];
@@ -432,8 +430,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 }
 
 - (void)createHorizontalScroller {
-    NSRect frame = NSMakeRect(0, 0, 0, 0);
-    _horizontalScroller = [[CEEScroller alloc] initWithFrame:frame];
+    _horizontalScroller = [[CEEScroller alloc] init];
     [_horizontalScroller setDirection:kCEEScrollerDirectionHorizontal];
     [_horizontalScroller setScrollerStyle:NSScrollerStyleOverlay];
     [_horizontalScroller setKnobStyle:NSScrollerKnobStyleDefault];
@@ -447,8 +444,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 }
 
 - (void)createGrid {
-    NSRect frame = NSMakeRect(0, 0, 0, 0);
-    _grid = [[CEEGridView alloc] initWithFrame:frame];
+    _grid = [[CEEGridView alloc] init];
     [_grid setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [_grid setIdentifier:[self createComponentIdentifier:@"IDGridView"]];
 }
@@ -469,19 +465,16 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 
 - (void)updateComponentRects {
     _contentRect = NSMakeRect(self.borderWidth,
-                              self.borderWidth, 
-                              self.frame.size.width - self.borderWidth * 2, 
+                              self.borderWidth,
+                              self.frame.size.width - self.borderWidth * 2,
                               self.frame.size.height - self.borderWidth * 2);
     
     if (_componentState & kComponentStateHeader) {
         if (_componentState & kComponentStateVerticalScroller) {
-            _headerRect = NSMakeRect(_contentRect.origin.x, 
-                                     _contentRect.origin.y, 
-                                     _contentRect.size.width - 
-                                     SCROLLER_WIDTH, 
-                                     HEADER_HEIGHT);
-            _headerPaddingRect = NSMakeRect(_headerRect.origin.x + 
-                                            _headerRect.size.width,
+            _headerRect = NSMakeRect(_contentRect.origin.x,
+                                     _contentRect.origin.y,
+                                     _contentRect.size.width -  SCROLLER_WIDTH,  HEADER_HEIGHT);
+            _headerPaddingRect = NSMakeRect(_headerRect.origin.x +  _headerRect.size.width,
                                             _headerRect.origin.y,
                                             SCROLLER_WIDTH,
                                             HEADER_HEIGHT);
@@ -492,8 +485,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
                                      _contentRect.origin.y,
                                      _contentRect.size.width,
                                      HEADER_HEIGHT);
-            _headerPaddingRect = NSMakeRect(_headerRect.origin.x + 
-                                            _headerRect.size.width,
+            _headerPaddingRect = NSMakeRect(_headerRect.origin.x + _headerRect.size.width,
                                             _headerRect.origin.y,
                                             0,
                                             HEADER_HEIGHT);
@@ -507,7 +499,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
                                      _contentRect.size.width - 
                                      SCROLLER_WIDTH,
                                      0);
-            _headerPaddingRect = NSMakeRect(_headerRect.origin.x + 
+            _headerPaddingRect = NSMakeRect(_headerRect.origin.x +
                                             _headerRect.size.width,
                                             _headerRect.origin.y,
                                             SCROLLER_WIDTH,
@@ -519,7 +511,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
                                      _contentRect.origin.y,
                                      _contentRect.size.width,
                                      0);
-            _headerPaddingRect = NSMakeRect(_headerRect.origin.x + 
+            _headerPaddingRect = NSMakeRect(_headerRect.origin.x +
                                             _headerRect.size.width,
                                             _headerRect.origin.y,
                                             0,
@@ -530,7 +522,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         
     if (_componentState & kComponentStateVerticalScroller) {
         if (_componentState & kComponentStateHeader) {
-            _verticalScrollerRect = NSMakeRect(_contentRect.origin.x + 
+            _verticalScrollerRect = NSMakeRect(_contentRect.origin.x +
                                                _contentRect.size.width - 
                                                SCROLLER_WIDTH,
                                                _headerPaddingRect.origin.y + 
@@ -707,7 +699,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 - (void)setFrameSize:(NSSize)newSize {
     CGFloat delta = newSize.width - self.frame.size.width;
     [super setFrameSize:newSize];
-    
+        
     if (_columnAutoresizingStyle == kCEETableViewUniformColumnAutoresizingStyle) {
         [self updateColumnWidthsFromFrameSizeWithDelta:delta];
         [_header setColumnOffsets:[self columnOffsets]];
@@ -846,6 +838,9 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     
     [self reloadHeader];
     
+    if (self.firstRowIndex >= [self numberOfRows])
+        self.firstRowIndex = 0;
+    
     if (!self.grid.rowViews.count)
         [self createGridRowViews];
     else
@@ -874,15 +869,17 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
    return [self.delegate tableView:self titleForColumn:column];
 }
 
-- (void)invalidateAndRecycleViewsInGrid {
+- (void)recycleGridRowViews {
     // Save all row views to buffer.
     NSArray* rowViews = [_grid removeAllRowViews];
-    [_rowViewBuffer addObjectsFromArray:rowViews];
-    for (CEEGridRowView* rowView in rowViews) {
-        // Remove and Save cell views to buffer.
-        NSArray* cellViews = [rowView removeAllCellViews];
-        [_cellViewBuffer addObjectsFromArray:cellViews];
-    }
+    for (CEEGridRowView* rowView in rowViews)
+        [self recycleGridRowView:rowView];
+}
+
+- (void)recycleGridRowView:(CEEGridRowView*)rowView {
+    [_rowViewBuffer addObject:rowView];
+    NSArray* cellViews = [rowView removeAllCellViews];
+    [_cellViewBuffer addObjectsFromArray:cellViews];
 }
 
 - (void)insertRowViewsAtTail:(NSUInteger)n {
@@ -945,7 +942,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     NSInteger row = -1;
     CGFloat y = 0.0;
     
-    [self invalidateAndRecycleViewsInGrid];
+    [self recycleGridRowViews];
     
     [_grid setColumnOffsets:[self columnOffsets]];
     [_grid setColumnWidths:[self columnWidths]];
@@ -958,12 +955,19 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     rowViews = [[NSMutableArray alloc] init];
     while(TRUE) {
         rowView = [self createRowViewWithIndex:row];
-        if (rowView)
-            [rowViews addObject:rowView];
+        if (!rowView)
+            break;
+        
+        if (y + _grid.rowSpacing + rowView.frame.size.height > _grid.frame.size.height) {
+            [self recycleGridRowView:rowView];
+            break;
+        }
+        
+        [rowViews addObject:rowView];
         y += _grid.rowSpacing + rowView.frame.size.height;
         row ++;
         
-        if (y > _grid.frame.size.height || row >= self.numberOfRows)
+        if (row >= self.numberOfRows)
             break;
     }
     
@@ -980,9 +984,6 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     
     if (rowCapability < 1)
         return;
-    
-    //if (fmod(gridHeight, itemHeight) > (itemHeight / 3.0))
-    //    rowCapability ++;
     
     NSUInteger n = [self numberOfRows];
     if (n - self.firstRowIndex >= self.grid.numberOfRows &&
@@ -1019,9 +1020,6 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     if (rowCapability < 1)
         return;
     
-    //if (fmod(gridHeight, itemHeight) > (itemHeight / 3.0))
-    //    rowCapability ++;
-    
     if (_grid.numberOfRows < rowCapability)
         [self insertRowViewsAtTail:rowCapability - _grid.numberOfRows];
     else if (_grid.numberOfRows > rowCapability)
@@ -1046,6 +1044,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         
         if ([self isRowViewExpandable:_firstRowIndex + i]) {
             [rowView setExpandable:YES];
+            
             if ([self isRowViewExpanded:_firstRowIndex + i])
                 [rowView setExpanded:YES];
             else
@@ -1104,8 +1103,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     if ([[NSBundle mainBundle] loadNibNamed:_nibNameOfCellView owner:self topLevelObjects:&objects]) {
         for (NSObject* object in objects) {
             if ([object conformsToProtocol:@protocol(NSUserInterfaceItemIdentification)]) {
-                NSString* _identifier = [((id<NSUserInterfaceItemIdentification>)object) identifier];
-                if ([_identifier isEqualToString:identifier])
+                if ([[((id<NSUserInterfaceItemIdentification>)object) identifier] isEqualToString:identifier])
                     return (NSView*)object;
             }
         }
@@ -1173,8 +1171,14 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     [rowView setFrame:NSMakeRect(0.0, 0.0, _grid.frame.size.width, rowHeight)];
     [rowView setIndex:row];
     [rowView setCellViews:cellViews];
+    [rowView setTarget:self];
+    [rowView setAction:@selector(clickAction:)];
     
     return rowView;
+}
+
+- (void)clickAction:(id)sender {
+    NSLog(@"table view click");
 }
 
 - (void)mouseDown:(NSEvent*)event {
@@ -1759,6 +1763,7 @@ exit:
     [_headerPadding setStyleState:state];
     [self tintedGridRowViews];
 }
+
 
 - (void)updateUserInterface {
     CEEUserInterfaceStyle* current = (CEEUserInterfaceStyle*)[self.userInterfaceStyles pointerAtIndex:self.styleState];

@@ -639,7 +639,7 @@
         },
     },
     
-    "IDSessionReferenceTableView [actived]" : {
+    "ClassSessionSourceBufferTableView [actived]" : {
         "background_color" : "#252226",
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
         "text_color" : "#EBEBEA",
@@ -674,7 +674,7 @@
         },
     },
     
-    "IDSessionReferenceTableView [deactived]" : {
+    "ClassSessionSourceBufferTableView [deactived]" : {
         "background_color" : "#252226",
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
         "text_color" : "#EBEBEA",
@@ -885,6 +885,47 @@
             "knob_color" : "#4B464D",
             "background_color" : "#252226",
         },
-    }
+    },
+        
+    "IDContextTitleView [actived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"italic\", 5.0)",
+        "background_color" : "#1C1A1F",
+        "text_color" : "#EBEBEA",
+        "icon_color" : "#EBEBEA",
+    },
     
+    "IDContextTitleView [deactived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"italic\", 5.0)",
+        "background_color" : "#1C1A1F",
+        "text_color" : "#B4B4B4",
+        "icon_color" : "#B4B4B4",
+    },
+        
+    "IDTextTitleTrial [actived]" : {
+        "font" : "font(\"Helvetica\", 24.0, \"bold\", 5.0)",
+        "text_color" : "#EBEBEA",
+        "aligment" : "left",
+    },
+    
+    "IDTextTitleTrial [deactived]" : {
+        "font" : "font(\"Helvetica\", 24.0, \"bold\", 5.0)",
+        "text_color" : "#EBEBEA",
+        "aligment" : "left",
+    },
+    
+    "IDTextTitleTrial [highlighted]" : {
+        "font" : "font(\"Helvetica\", 24.0, \"bold\", 5.0)",
+        "text_color" : "#EBEBEA",
+        "aligment" : "left",
+    },
+        
+    "IDWelcomeView [actived]" : {
+        "background_color" : "#212121",
+        "corner_radius" : "10.0"
+    },
+
+    "IDWelcomeView [deactived]" : {
+        "background_color" : "#212121",
+        "corner_radius" : "10.0"
+    }
 }

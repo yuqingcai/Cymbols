@@ -656,7 +656,10 @@ CEETextEditRef cee_text_edit_create(cee_pointer host_ref,
                                           layout_aligment,
                                           4,
                                           3.0,
-                                          6.0, 6.0, 6.0, 6.0,
+                                          6.0,
+                                          6.0,
+                                          6.0,
+                                          6.0,
                                           cee_rect_make(0.0, 0.0, 0.0, 0.0));
     edit->horizontal_scroll_margin = 0.0;
     edit->paragraph_vertical_margin = 4;
@@ -697,6 +700,14 @@ void cee_text_edit_wrap_set(CEETextEditRef edit,
 
 cee_boolean cee_text_edit_wrap_get(CEETextEditRef edit) {
     return edit->wrap;
+}
+
+void cee_text_edit_wrap_with_indent_set(CEETextEditRef edit,
+                                        cee_boolean wrap_with_indent) {
+    CEETextLayoutRef layout = edit->layout;
+    cee_text_layout_wrap_indent_set(layout, wrap_with_indent);
+    cee_text_layout_run(layout);
+    layout_adjust_to_buffer_offset_if_need(edit, edit->caret.buffer_offset);
 }
 
 void cee_text_edit_container_size_set(CEETextEditRef edit,

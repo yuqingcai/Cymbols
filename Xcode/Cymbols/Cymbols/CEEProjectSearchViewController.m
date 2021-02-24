@@ -8,8 +8,8 @@
 #import "AppDelegate.h"
 #import "CEEProjectSearchViewController.h"
 #import "CEEEditViewController.h"
-#import "CEEFileNameCellView.h"
-#import "CEEFilePathCellView.h"
+#import "CEEImageTextTableCellView.h"
+#import "CEETextTableCellView.h"
 #import "CEECheckBox.h"
 #import "cee_backend.h"
 #import "cee_datetime.h"
@@ -40,36 +40,6 @@
 @end
 
 @implementation CEEProjectSearchViewController
-
-- (CEESourceBuffer*)project:(CEEProject*)project securityOpenSourceBufferWithFilePath:(NSString*)filePath {
-    if (!project || !filePath)
-        return nil;
-    
-    CEESourceBuffer* buffer = nil;
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    if (access([filePath UTF8String], R_OK) != 0) {
-        NSArray* bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
-        if (bookmarks) {
-            [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
-            [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-        }
-    }
-    else {
-        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
-    }
-    return buffer;
-}
-
-- (void)project:(CEEProject*)project securityCloseSourceBuffer:(CEESourceBuffer*)buffer {
-    if (!project || !buffer)
-        return;
-    
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    [sourceBufferManager closeSourceBuffer:buffer];
-}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -153,7 +123,8 @@
 }
 
 - (void)serchReference {
-    __block NSArray* filePaths = [_project getFilePathsWithCondition:_project.searcher.filePattern];
+    __block AppDelegate* delegate = [NSApp delegate];
+    __block NSArray* filePaths = [_project getReferenceFilePathsWithCondition:_project.searcher.filePattern];
     if (!filePaths)
         return;
     
@@ -175,7 +146,7 @@
                 __block CEESourceBuffer* buffer = nil;
                 // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    buffer = [self project:self->_project securityOpenSourceBufferWithFilePath:filePath];
+                    buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
                 });
                 
                 const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
@@ -215,7 +186,7 @@
                 
                 // close source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    [self project:self->_project securityCloseSourceBuffer:buffer];
+                    [delegate.sourceBufferManager closeSourceBuffer:buffer];
                 });
                 
                 if (self->_cancel)
@@ -237,7 +208,8 @@
 }
 
 - (void)searchRegex {
-    __block NSArray* filePaths = [_project getFilePathsWithCondition:_project.searcher.filePattern];
+    __block AppDelegate* delegate = [NSApp delegate];
+    __block NSArray* filePaths = [_project getReferenceFilePathsWithCondition:_project.searcher.filePattern];
     if (!filePaths)
         return;
     
@@ -258,7 +230,7 @@
                 __block CEESourceBuffer* buffer = nil;
                 // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    buffer = [self project:self->_project securityOpenSourceBufferWithFilePath:filePath];
+                    buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
                 });
                 
                 const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
@@ -287,7 +259,7 @@
                 
                 // close source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    [self project:self->_project securityCloseSourceBuffer:buffer];
+                    [delegate.sourceBufferManager closeSourceBuffer:buffer];
                 });
                 
                 dispatch_sync(dispatch_get_main_queue(), ^{
@@ -314,7 +286,8 @@
 }
 
 - (void)searchString {
-    __block NSArray* filePaths = [_project getFilePathsWithCondition:_project.searcher.filePattern];
+    __block AppDelegate* delegate = [NSApp delegate];
+    __block NSArray* filePaths = [_project getReferenceFilePathsWithCondition:_project.searcher.filePattern];
     if (!filePaths)
         return;
     
@@ -345,7 +318,7 @@
                 __block CEESourceBuffer* buffer = nil;
                 // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    buffer = [self project:self->_project securityOpenSourceBufferWithFilePath:filePath];
+                    buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
                 });
                 
                 const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
@@ -373,7 +346,7 @@
                 
                 // close source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    [self project:self->_project securityCloseSourceBuffer:buffer];
+                    [delegate.sourceBufferManager closeSourceBuffer:buffer];
                 });
                 
                 dispatch_sync(dispatch_get_main_queue(), ^{
@@ -406,7 +379,7 @@
     _project.searcher.results = nil;
     [_resultTable reloadData];
     _cancel = NO;
-    [_editViewController setBuffer:nil];
+    //[_editViewController setBuffer:nil];
     
     if (_project.searcher.mode == kCEESearchModeReference)
         [self serchReference];
@@ -571,15 +544,15 @@
     CEESearchResult* result = _project.searcher.results[row];
         
     if (column == 0) {
-        CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFileNameCellView"];
+        CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
         NSString* fileName = [result.filePath lastPathComponent];
-        cellView.title.stringValue = fileName;        
+        cellView.text.stringValue = fileName;        
         [cellView.icon setImage:[styleManager filetypeIconFromFileName:fileName]];
         return cellView;
     }
     else if (column == 1) {
-        CEEFilePathCellView* cellView = [tableView makeViewWithIdentifier:@"IDFilePathCellView"];
-        cellView.title.stringValue = result.filePath;
+        CEETextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDTextTableCellView"];
+        cellView.text.stringValue = result.filePath;
         return cellView;
     }
     return nil;
@@ -589,8 +562,9 @@
     if (!_resultTable.selectedRowIndexes || _resultTable.selectedRow == -1 || _isSearching)
         return;
     
+    AppDelegate* delegate = [NSApp delegate];
     CEESearchResult* result = _project.searcher.results[_resultTable.selectedRow];
-    CEESourceBuffer* buffer = [self project:_project securityOpenSourceBufferWithFilePath:result.filePath];
+    CEESourceBuffer* buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:result.filePath andOption:kCEESourceBufferOpenOptionIndependent];
         
     cee_source_buffer_parse(buffer, 0);
     [_editViewController setBuffer:buffer];
@@ -600,7 +574,7 @@
         cee_list_free_full(ranges, cee_range_free);
     }
     [_titlebar setTitle:result.filePath];
-    [self project:_project securityCloseSourceBuffer:buffer];
+    [delegate.sourceBufferManager closeSourceBuffer:buffer];
     
     return;
 }
@@ -610,7 +584,6 @@
         _selectedResult = _project.searcher.results[(cee_int)_resultTable.selectedRow];
     [NSApp stopModalWithCode:NSModalResponseOK];
 }
-
 
 - (void)textViewTextChanged:(CEETextView *)textView {
     if (textView == _targetInput)

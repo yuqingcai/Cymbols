@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -111,7 +110,7 @@
                 </viewController>
                 <customObject id="tYT-gr-us4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="533" y="-144"/>
+            <point key="canvasLocation" x="1321" y="-768"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="w65-Ki-y4l">
@@ -132,7 +131,7 @@
                 </windowController>
                 <customObject id="zYW-53-QMV" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1332" y="-768"/>
+            <point key="canvasLocation" x="533" y="-115"/>
         </scene>
         <!--Text Highlight Style Selection Controller-->
         <scene sceneID="cyH-kp-0p4">
@@ -160,6 +159,10 @@
                                 <subviews>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="OYp-BM-Fwf" customClass="CEETableView">
                                         <rect key="frame" x="1" y="1" width="598" height="359"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="400" id="IZU-8D-0kn"/>
+                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="300" id="odb-mE-ujp"/>
+                                        </constraints>
                                     </customView>
                                 </subviews>
                                 <constraints>
@@ -214,7 +217,7 @@
                 </viewController>
                 <customObject id="sPr-Nx-dSn" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1332" y="-144"/>
+            <point key="canvasLocation" x="1321" y="-115"/>
         </scene>
     </scenes>
 </document>

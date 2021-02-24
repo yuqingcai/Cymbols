@@ -11,12 +11,18 @@
 #import "CEEJSONReader.h"
 #import "cee_lib.h"
 #import "cee_source_parsers.h"
+#import "CEETimerFreezer.h"
 
 NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 
 @interface AppDelegate()
 @property (strong) NSTimer* heartBeatTimer;
 @property (strong) NSMutableDictionary* activedConfigurations;
+@property (strong) NSMutableArray* securityBookmarks;
+#ifdef TRIAL_VERSION
+@property (strong) CEETimerFreezer* timeFreezer;
+@property (strong) CEEWindowController* welcomeWindowController;
+#endif
 @end
 
 @implementation AppDelegate
@@ -34,6 +40,10 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     [self configure];
     [self createHeartBeatTimer];
     [self createNetwork];
+    
+#ifdef TRIAL_VERSION
+    [self createTimeFreezer];
+#endif
     
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [styleManager setDirectory:[_supportDirectory stringByAppendingPathComponent:@"Styles"]];
@@ -78,6 +88,12 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     _network = [[CEENetwork alloc] init];
 }
 
+#ifdef TRIAL_VERSION
+- (void)createTimeFreezer {
+    _timeFreezer = [[CEETimerFreezer alloc] init];
+}
+#endif
+
 - (NSString*)welcomeGuidePath {
     return [[_supportDirectory stringByAppendingPathComponent:@"WelcomeGuide"] stringByAppendingPathComponent:@"WelcomeGuide"];
 }
@@ -87,7 +103,6 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     _activedConfigurations = [CEEJSONReader objectFromFile:filePath];
     _configurations = _activedConfigurations;
 }
-
 
 - (NSString*)configurationFilePath {
     return [_supportDirectory stringByAppendingPathComponent:@"Cymbols.cfg"];
@@ -104,7 +119,11 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-    //[[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"NSConstraintBasedLayoutVisualizeMutuallyExclusiveConstraints"];
+#ifdef TRIAL_VERSION
+    [self trialVersionSmilingFace];
+#endif
+    
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"NSConstraintBasedLayoutVisualizeMutuallyExclusiveConstraints"];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -116,9 +135,9 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
             
         [project serialize];
         [project deleteAllSessions];
-        [project close];
     }
     [_sourceBufferManager discardUntitleSourceBuffers];
+    [self stopAccessingSecurityScopedResourceWithLoggedBookmarks];
 }
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender {
@@ -174,7 +193,7 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     }
     
     for (NSURL* url in urls) {
-        [project.currentSession.activedPort openSourceBuffersWithFilePaths:@[[url path]]];
+        [project.currentSession.activedPort openSourceBufferWithFilePath:[url path]];
         [_projectController noteNewRecentDocumentURL:url];
     }
 }
@@ -202,11 +221,18 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 }
 
 - (NSString*)serializerVersionString {
-    return @"CymbolsSerializer_1_0_0";
+    return @"Serializer_1_0_0";
 }
 
 - (NSString*)infoString {
-    return @"CymbolsApplication_1_0_0";
+    NSString* version = [self versionString];
+    version = [version stringByReplacingOccurrencesOfString:@"." withString:@"_"];
+    NSString* infoString = [NSString stringWithFormat:@"Application_%@", version, nil];
+    return infoString;
+}
+
+- (NSString*)versionString {
+    return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
 }
 
 - (void)setConfiguration:(NSString*)configuration value:(NSString*)value {
@@ -233,13 +259,51 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     [CEEJSONReader object:dict toFile:defaultWindowSettingPath];
 }
 
-- (NSString*) defaultWindowSettingPath {
+- (NSString*)defaultWindowSettingPath {
     return [_supportDirectory stringByAppendingPathComponent:@"DefaultWindowSetting.cfg"];
 }
 
-- (NSString*) defaultProjectSettingPath {
-    
+- (NSString*)defaultProjectSettingPath {
     return [_supportDirectory stringByAppendingPathComponent:@"DefaultProjectSetting.cfg"];
 }
 
+- (void)startAccessingSecurityScopedResourceWithBookmark:(CEESecurityBookmark*)bookmark {
+    BOOL isStale = NO;
+    NSError* error = nil;
+    BOOL isSuccess = NO;
+    NSData* bookmarkData = [[NSData alloc] initWithBase64EncodedString:bookmark.content options:NSDataBase64DecodingIgnoreUnknownCharacters];
+    NSURL *allowedURL = [NSURL URLByResolvingBookmarkData:bookmarkData options:NSURLBookmarkResolutionWithSecurityScope relativeToURL:nil bookmarkDataIsStale:&isStale error:&error];
+    if (allowedURL)
+        isSuccess = [allowedURL startAccessingSecurityScopedResource];
+    
+    [self logSecurityBookmarks:bookmark];
+}
+
+- (void)stopAccessingSecurityScopedResourceWithBookmark:(CEESecurityBookmark*)bookmark {
+    BOOL isStale = NO;
+    NSError* error = nil;
+    NSData* bookmarkData = [[NSData alloc] initWithBase64EncodedString:bookmark.content options:NSDataBase64DecodingIgnoreUnknownCharacters];
+    NSURL *allowedURL = [NSURL URLByResolvingBookmarkData:bookmarkData options:NSURLBookmarkResolutionWithSecurityScope relativeToURL:nil bookmarkDataIsStale:&isStale error:&error];
+    if (allowedURL)
+        [allowedURL stopAccessingSecurityScopedResource];
+}
+
+- (void)stopAccessingSecurityScopedResourceWithLoggedBookmarks {
+    for (CEESecurityBookmark* bookmark in _securityBookmarks)
+        [self stopAccessingSecurityScopedResourceWithBookmark:bookmark];
+}
+
+- (void)logSecurityBookmarks:(CEESecurityBookmark*)bookmark {
+    if (!_securityBookmarks)
+        _securityBookmarks = [[NSMutableArray alloc] init];
+    [_securityBookmarks addObject:bookmark];
+}
+#ifdef TRIAL_VERSION
+- (void)trialVersionSmilingFace {
+    if (!_welcomeWindowController)
+        _welcomeWindowController = [[NSStoryboard storyboardWithName:@"Welcome" bundle:nil] instantiateControllerWithIdentifier:@"IDTrialVersionWelcomeWindowController"];
+    [_welcomeWindowController showWindow:self];
+    [_welcomeWindowController.window setLevel:NSModalPanelWindowLevel];
+}
+#endif
 @end

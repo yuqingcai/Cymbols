@@ -544,36 +544,37 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
 }
 
 - (NSString*)createPortDescriptor {
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    
-    cee_long buffer_offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
-    cee_long paragraph = cee_text_edit_paragraph_index_by_buffer_offset_get(_textView.edit, 
-                                                                            buffer_offset);
-    cee_long character = cee_text_edit_character_index_in_paragraph_by_buffer_offset_get(_textView.edit, 
-                                                                                         buffer_offset);
-    CEETextStorageLineBreakType line_break_type = cee_text_storage_line_break_type_get(self.buffer.storage);
-    NSString* sourceType = [sourceBufferManager sourceType:self.buffer];
-    NSString* lineBreakTypeString = @"";
-    NSString* encodeType = [NSString stringWithUTF8String:self.buffer.encodeType];
-    
-    if (line_break_type == kCEETextStorageLineBreakTypeCR)
-        lineBreakTypeString = @"CR";
-    else if (line_break_type == kCEETextStorageLineBreakTypeLF)
-        lineBreakTypeString = @"LF";
-    else if (line_break_type == kCEETextStorageLineBreakTypeCRLF)
-        lineBreakTypeString = @"CRLF";
-        
-    if ([self.buffer withBOM])
-        encodeType = [encodeType stringByAppendingString:@" with BOM"];
-    
-    return [NSString stringWithFormat:@"Offset:%ld, Line:%ld, Column:%ld    %@    %@    %@",
-                buffer_offset,
-                paragraph + 1,
-                character + 1,
-                lineBreakTypeString,
-                encodeType,
-                sourceType];
+    //AppDelegate* delegate = [NSApp delegate];
+    //CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    //
+    //cee_long buffer_offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
+    //cee_long paragraph = cee_text_edit_paragraph_index_by_buffer_offset_get(_textView.edit,
+    //                                                                        buffer_offset);
+    //cee_long character = cee_text_edit_character_index_in_paragraph_by_buffer_offset_get(_textView.edit,
+    //                                                                                     buffer_offset);
+    //CEETextStorageLineBreakType line_break_type = cee_text_storage_line_break_type_get(self.buffer.storage);
+    //NSString* sourceType = [sourceBufferManager sourceType:self.buffer];
+    //NSString* lineBreakTypeString = @"";
+    //NSString* encodeType = [NSString stringWithUTF8String:self.buffer.encodeType];
+    //
+    //if (line_break_type == kCEETextStorageLineBreakTypeCR)
+    //    lineBreakTypeString = @"CR";
+    //else if (line_break_type == kCEETextStorageLineBreakTypeLF)
+    //    lineBreakTypeString = @"LF";
+    //else if (line_break_type == kCEETextStorageLineBreakTypeCRLF)
+    //    lineBreakTypeString = @"CRLF";
+    //
+    //if ([self.buffer withBOM])
+    //    encodeType = [encodeType stringByAppendingString:@" with BOM"];
+    //
+    //return [NSString stringWithFormat:@"Offset:%ld, Line:%ld, Column:%ld    %@    %@    %@",
+    //            buffer_offset,
+    //            paragraph + 1,
+    //            character + 1,
+    //            lineBreakTypeString,
+    //            encodeType,
+    //            sourceType];
+    return @"";
 }
 
 #pragma mark - CEETextViewDelegate protocol
@@ -619,6 +620,8 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
         
         [_lineNmberView setLineNumberTags:[self createlineNumberTags]];
         [self.port setDescriptor:[self createPortDescriptor]];
+        
+        //[self textViewCreateContext:textView];
     }
 }
 
@@ -801,54 +804,61 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
     if ([self filePathIsSource:self.buffer.filePath]) {
         name = [[self.buffer.filePath lastPathComponent] stringByDeletingPathExtension];
         targetName = [name stringByAppendingPathExtension:@"h"];
-        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        filePaths = [self.port.session.project getReferenceFilePathsWithCondition:targetName];
         if (filePaths) {
-            [self.port openSourceBuffersWithFilePaths:filePaths];
+            for (NSString* filePath in filePaths)
+                [self.port openSourceBufferWithFilePath:filePath];
             return;
         }
         
         targetName = [name stringByAppendingPathExtension:@"hpp"];
-        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        filePaths = [self.port.session.project getReferenceFilePathsWithCondition:targetName];
         if (filePaths) {
-            [self.port openSourceBuffersWithFilePaths:filePaths];
+            for (NSString* filePath in filePaths)
+                [self.port openSourceBufferWithFilePath:filePath];
             return;
         }
     }
     else if ([self filePathIsHeader:self.buffer.filePath]) {
         name = [[self.buffer.filePath lastPathComponent] stringByDeletingPathExtension];
         targetName = [name stringByAppendingPathExtension:@"c"];
-        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        filePaths = [self.port.session.project getReferenceFilePathsWithCondition:targetName];
         
         if (filePaths) {
-            [self.port openSourceBuffersWithFilePaths:filePaths];
+            for (NSString* filePath in filePaths)
+                [self.port openSourceBufferWithFilePath:filePath];
             return;
         }
         
         targetName = [name stringByAppendingPathExtension:@"cpp"];
-        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        filePaths = [self.port.session.project getReferenceFilePathsWithCondition:targetName];
         if (filePaths) {
-            [self.port openSourceBuffersWithFilePaths:filePaths];
+            for (NSString* filePath in filePaths)
+                [self.port openSourceBufferWithFilePath:filePath];
             return;
         }
         
         targetName = [name stringByAppendingPathExtension:@"cc"];
-        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        filePaths = [self.port.session.project getReferenceFilePathsWithCondition:targetName];
         if (filePaths) {
-            [self.port openSourceBuffersWithFilePaths:filePaths];
+            for (NSString* filePath in filePaths)
+                [self.port openSourceBufferWithFilePath:filePath];
             return;
         }
         
         targetName = [name stringByAppendingPathExtension:@"m"];
-        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        filePaths = [self.port.session.project getReferenceFilePathsWithCondition:targetName];
         if (filePaths) {
-            [self.port openSourceBuffersWithFilePaths:filePaths];
+            for (NSString* filePath in filePaths)
+                [self.port openSourceBufferWithFilePath:filePath];
             return;
         }
         
         targetName = [name stringByAppendingPathExtension:@"mm"];
-        filePaths = [self.port.session.project getFilePathsWithCondition:targetName];
+        filePaths = [self.port.session.project getReferenceFilePathsWithCondition:targetName];
         if (filePaths) {
-            [self.port openSourceBuffersWithFilePaths:filePaths];
+            for (NSString* filePath in filePaths)
+                [self.port openSourceBufferWithFilePath:filePath];
             return;
         }
     }

@@ -16,7 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSArray* columnWidths;
 @property NSArray* columnOffsets;
 @property (strong, readonly) NSArray* cellViews;
-- (NSUInteger)numberOfCells;
+@property id target;
+@property SEL action;
+- (NSUInteger)numberOfCellViews;
 - (void)setCellViews:(NSArray*)cellViews;
 - (NSArray*)removeAllCellViews;
 - (void)setExpandable:(BOOL)expandable;

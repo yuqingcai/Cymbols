@@ -37,6 +37,7 @@ typedef struct _CEETextLine {
 
 typedef struct _CEETextLayout {
     CEERect bounds;
+    cee_boolean wrap_with_indent;
     cee_ulong tab_size;
     cee_float line_space;
     cee_pointer platform_ref;
@@ -47,7 +48,6 @@ typedef struct _CEETextLayout {
     CEEList* lines;
     cee_float max_line_width;
     cee_float horizontal_offset;
-    
     cee_float left_margin;
     cee_float right_margin;
     cee_float top_margin;
@@ -178,8 +178,12 @@ static void line_wrap(CEETextLine* line,
     CEETextLayout* layout = line->layout_ref;
     if (!layout->line_wrapped) {
         layout->line_wrapped = TRUE;
-        layout->wrap_indent = paragraph_margin(line) + 
-            (white_space_width_get(layout) * layout->tab_size);
+        
+        if (layout->wrap_with_indent)
+            layout->wrap_indent = paragraph_margin(line) +
+                (white_space_width_get(layout) * layout->tab_size);
+        else
+            layout->wrap_indent = paragraph_margin(line);
     }
     
     if (cee_list_length(line->units) == 1)
@@ -497,6 +501,8 @@ CEETextLayoutRef cee_text_layout_create(CEETextStorageRef storage,
     layout->top_margin = top_margin;
     layout->bottom_margin = bottom_margin;
     layout->aligment = aligment;
+    
+    layout->wrap_with_indent = TRUE;
     
     return layout;
 }
@@ -1244,4 +1250,10 @@ CEETag* cee_text_layout_tag_get(CEETextLayoutRef layout,
         }
     }
     return NULL;
+}
+
+void cee_text_layout_wrap_indent_set(CEETextLayoutRef layout,
+                                     cee_boolean wrap_with_indent)
+{
+    layout->wrap_with_indent = wrap_with_indent;
 }

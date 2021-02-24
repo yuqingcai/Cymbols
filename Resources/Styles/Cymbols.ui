@@ -221,7 +221,7 @@
     
     "ClassButton [actived]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
-        "background_color" : "#C8C8C8",
+        "background_color" : "#E0E0E0",
         "text_color" : "#757575",
         "icon_color": "#757575",
         "corner_radius" : "2.0",
@@ -229,7 +229,7 @@
     
     "ClassButton [deactived]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
-        "background_color" : "#C8C8C8",
+        "background_color" : "#E0E0E0",
         "text_color" : "#757575",
         "icon_color": "#757575",
         "corner_radius" : "2.0",
@@ -253,7 +253,7 @@
     
     "ClassButton [disabled]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
-        "background_color" : "#C8C8C8",
+        "background_color" : "#E0E0E0",
         "text_color" : "#ADADAD",
         "icon_color": "#ADADAD",
         "corner_radius" : "2.0",
@@ -261,7 +261,7 @@
     
     "ClassStateButton [actived]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
-        "background_color" : "#C8C8C8",
+        "background_color" : "#E0E0E0",
         "text_color" : "#757575",
         "icon_color": "#757575",
         "corner_radius" : "2.0",
@@ -269,7 +269,7 @@
     
     "ClassStateButton [deactived]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
-        "background_color" : "#C8C8C8",
+        "background_color" : "#E0E0E0",
         "text_color" : "#757575",
         "icon_color": "#757575",
         "corner_radius" : "2.0",
@@ -285,7 +285,7 @@
     
     "ClassStateButton [disabled]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
-        "background_color" : "#C8C8C8",
+        "background_color" : "#E0E0E0",
         "text_color" : "#ADADAD",
         "icon_color": "#ADADAD",
         "corner_radius" : "2.0",
@@ -653,7 +653,7 @@
         },
     },
     
-    "IDSessionReferenceTableView [actived]" : {
+    "ClassSessionSourceBufferTableView [actived]" : {
         "background_color" : "#F5F5F5",
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
         "text_color" : "#757575",
@@ -688,7 +688,7 @@
         },
     },
     
-    "IDSessionReferenceTableView [deactived]" : {
+    "ClassSessionSourceBufferTableView [deactived]" : {
         "background_color" : "#F5F5F5",
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
         "text_color" : "#757575",
@@ -905,5 +905,54 @@
             "knob_color" : "#B4B4B4",
             "background_color" : "#F5F5F5",
         },
+    },
+        
+    "IDContextTitleView [actived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"italic\", 5.0)",
+        "background_color" : "#F5F5F5",
+        "border_color" : "#E0E0E0",
+        "text_color" : "#757575",
+        "borders" : "bottom",
+        "border_width" : "1.0",
+        "icon_color" : "#757575",
+    },
+    
+    "IDContextTitleView [deactived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"italic\", 5.0)",
+        "background_color" : "#F5F5F5",
+        "border_color" : "#E0E0E0",
+        "text_color" : "#757575",
+        "borders" : "bottom",
+        "border_width" : "1.0",
+        "icon_color" : "#757575",
+    },
+    
+    "IDTextTitleTrial [actived]" : {
+        "font" : "font(\"Helvetica\", 24.0, \"bold\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "IDTextTitleTrial [deactived]" : {
+        "font" : "font(\"Helvetica\", 24.0, \"bold\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "IDTextTitleTrial [highlighted]" : {
+        "font" : "font(\"Helvetica\", 24.0, \"bold\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "IDWelcomeView [actived]" : {
+        "background_color" : "#fafafa",
+        "corner_radius" : "10.0"
+    },
+
+    "IDWelcomeView [deactived]" : {
+        "background_color" : "#fafafa",
+        "corner_radius" : "10.0"
     }
+    
 }

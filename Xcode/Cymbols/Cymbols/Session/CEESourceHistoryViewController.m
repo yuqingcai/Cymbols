@@ -8,7 +8,7 @@
 
 #import "AppDelegate.h"
 #import "CEESourceHistoryViewController.h"
-#import "CEEFileNameCellView.h"
+#import "CEEImageTextTableCellView.h"
 #import "CEEProject.h"
 
 @interface CEESourceHistoryViewController ()
@@ -62,10 +62,10 @@
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEESourceBufferReferenceContext* reference = _port.sourceBufferReferences[row];
-    CEEFileNameCellView *cellView = [_historyTable makeViewWithIdentifier:@"IDFileNameCellView"];
+    CEEImageTextTableCellView *cellView = [_historyTable makeViewWithIdentifier:@"IDImageTextTableCellView"];
     NSString* string = [reference.filePath lastPathComponent];
     
-    cellView.title.stringValue = string;
+    cellView.text.stringValue = string;
     [cellView.icon setImage:[styleManager filetypeIconFromFileName:[reference.filePath lastPathComponent]]];
     return cellView;
 }

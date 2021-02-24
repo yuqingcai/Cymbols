@@ -14,11 +14,11 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CEESessionSpliter0 : CEESplitViewController
 @property (weak) CEESession* session;
 - (void)toggleSymbolView;
-- (void)toggleReferenceView;
-- (void)togglePathView;
+- (void)toggleSourceBufferView;
+- (void)toggleFileReferenceView;
 - (void)showSymbolView:(BOOL)shown;
-- (void)showReferenceView:(BOOL)shown;
-- (void)showPathView:(BOOL)shown;
+- (void)showSourceBufferView:(BOOL)shown;
+- (void)showFileReferenceView:(BOOL)shown;
 @end
 
 NS_ASSUME_NONNULL_END

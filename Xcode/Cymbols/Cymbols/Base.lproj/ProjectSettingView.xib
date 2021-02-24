@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
-        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -10,17 +9,17 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView id="c22-O7-iKe" customClass="CEEProjectSettingView">
-            <rect key="frame" x="0.0" y="0.0" width="600" height="500"/>
+            <rect key="frame" x="0.0" y="0.0" width="542" height="499"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="OFt-FS-1Bm" customClass="CEETextField">
-                    <rect key="frame" x="126" y="428" width="454" height="24"/>
+                    <rect key="frame" x="126" y="427" width="396" height="24"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="24" id="VGq-4n-j8f"/>
                     </constraints>
                 </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="w9P-Lo-li0" customClass="CEETextTitle">
-                    <rect key="frame" x="20" y="460" width="124" height="24"/>
+                    <rect key="frame" x="20" y="459" width="124" height="24"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="24" id="Ib3-Ih-4wR"/>
                         <constraint firstAttribute="width" constant="124" id="Jgj-aQ-NW4"/>
@@ -30,7 +29,7 @@
                     </userDefinedRuntimeAttributes>
                 </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="Ie8-uo-OBP" customClass="CEETextLabel">
-                    <rect key="frame" x="20" y="394" width="124" height="24"/>
+                    <rect key="frame" x="20" y="393" width="124" height="24"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="124" id="1lD-RL-12O"/>
                         <constraint firstAttribute="height" constant="24" id="hUP-Wf-Is7"/>
@@ -78,10 +77,14 @@
                     </userDefinedRuntimeAttributes>
                 </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="J9L-pL-Jti" customClass="CEEContainerView">
-                    <rect key="frame" x="20" y="30" width="560" height="363"/>
+                    <rect key="frame" x="20" y="30" width="502" height="362"/>
                     <subviews>
                         <customView translatesAutoresizingMaskIntoConstraints="NO" id="XGl-be-vic" customClass="CEETableView">
-                            <rect key="frame" x="1" y="1" width="558" height="361"/>
+                            <rect key="frame" x="1" y="1" width="500" height="360"/>
+                            <constraints>
+                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="360" id="1mZ-Ah-zSN"/>
+                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="500" id="VtV-2N-Ubw"/>
+                            </constraints>
                         </customView>
                     </subviews>
                     <constraints>
@@ -94,7 +97,7 @@
                     </constraints>
                 </customView>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="Nq6-Dd-10K" customClass="CEETextLabel">
-                    <rect key="frame" x="20" y="428" width="98" height="24"/>
+                    <rect key="frame" x="20" y="427" width="98" height="24"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="24" id="7ZQ-VH-bd6"/>
                         <constraint firstAttribute="width" constant="98" id="GRQ-3u-xEK"/>
@@ -117,18 +120,18 @@
                 <constraint firstItem="OFt-FS-1Bm" firstAttribute="top" secondItem="w9P-Lo-li0" secondAttribute="bottom" constant="8" id="TUz-1m-dIt"/>
                 <constraint firstAttribute="trailing" secondItem="J9L-pL-Jti" secondAttribute="trailing" constant="20" id="aeI-qU-5Nt"/>
                 <constraint firstAttribute="bottom" secondItem="a32-f4-9IG" secondAttribute="bottom" id="crf-oG-0K8"/>
+                <constraint firstItem="a32-f4-9IG" firstAttribute="leading" secondItem="qo6-mS-OmK" secondAttribute="trailing" constant="5" id="hW1-EO-htZ"/>
                 <constraint firstItem="J9L-pL-Jti" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="iMW-qL-JSl"/>
                 <constraint firstItem="J9L-pL-Jti" firstAttribute="top" secondItem="Ie8-uo-OBP" secondAttribute="bottom" constant="1" id="lMH-tP-q8k"/>
-                <constraint firstItem="a32-f4-9IG" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="48" id="pvb-GK-EhE"/>
                 <constraint firstItem="Ie8-uo-OBP" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="rgV-Dk-eC7"/>
                 <constraint firstAttribute="bottom" secondItem="qo6-mS-OmK" secondAttribute="bottom" id="wNG-DR-PjQ"/>
             </constraints>
             <connections>
-                <outlet property="addFilePathButton" destination="qo6-mS-OmK" id="t14-nC-jpj"/>
-                <outlet property="filePathTable" destination="XGl-be-vic" id="Bg1-Bv-RbI"/>
+                <outlet property="addFileButton" destination="qo6-mS-OmK" id="aZH-m4-m1u"/>
+                <outlet property="filePathTable" destination="XGl-be-vic" id="XpW-kt-Vqn"/>
                 <outlet property="nameInput" destination="OFt-FS-1Bm" id="M1J-rF-7kg"/>
                 <outlet property="projectNameLabel" destination="Nq6-Dd-10K" id="AS6-lA-qAe"/>
-                <outlet property="removeFilePathsButton" destination="a32-f4-9IG" id="dG1-hV-uQZ"/>
+                <outlet property="removeFileButton" destination="a32-f4-9IG" id="GfG-Fu-nPD"/>
             </connections>
             <point key="canvasLocation" x="75" y="162"/>
         </customView>

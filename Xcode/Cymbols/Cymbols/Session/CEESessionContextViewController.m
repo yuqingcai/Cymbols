@@ -10,22 +10,22 @@
 #import "CEEStyleManager.h"
 #import "CEESessionContextViewController.h"
 #import "CEEEditViewController.h"
+#import "CEESplitView.h"
 #import "CEETitlebarButton.h"
-#import "CEESymbolCellView.h"
-#import "CEEFileNameCellView.h"
-#import "CEEFilePathCellView.h"
+#import "CEEImageTextTableCellView.h"
 #import "CEEImageView.h"
 #import "cee_symbol.h"
 
 @interface CEESessionContextViewController ()
-@property (strong) IBOutlet CEETitleView *titlebar;
-@property (strong) IBOutlet CEEImageView *titleIcon;
+@property (weak) IBOutlet CEETitleView *titlebar;
 @property (weak) IBOutlet CEETitlebarButton* toggleButton;
-@property (strong) CEEEditViewController *editViewController;
-@property (strong) CEETableView *contextTable;
-
-@property CEESessionPort* port;
-@property CEEList* context_symbols;
+@property (strong) CEESplitView *splitView;
+@property (strong) CEETableView *symbolTable;
+@property (strong) NSView *detailView;
+@property (strong) CEETitleView* detailTitlebar;
+@property (strong) CEEEditViewController *monitor;
+@property CEEList* symbols;
+@property BOOL adjustSplitView;
 @end
 
 @implementation CEESessionContextViewController
@@ -34,279 +34,220 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [self.view setTranslatesAutoresizingMaskIntoConstraints:NO];
-    CGFloat leadingOffset = _titleIcon.frame.size.width ;
-    CGFloat tailingOffset = self.view.frame.size.width - _toggleButton.frame.origin.x;
-    [_titlebar setLeadingOffset:leadingOffset];
-    [_titlebar setTailingOffset:tailingOffset];
+    [_titlebar setTitleLeading:5.0];
+    [_titlebar setTitleTailing:_toggleButton.frame.size.width];
     [_titlebar setTitle:@"Context"];
-    [self createSubviews];
+    [_titlebar setIcon:[styleManager iconFromName:@"icon_relation_16x16"]];
+    _adjustSplitView = NO;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortCreateContextResponse:) name:CEENotificationSessionPortCreateContext object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateViewStyleConfiguration:) name:CEENotificationUserInterfaceStyleUpdate object:nil];
-}
-
-- (void)viewWillAppear {
-    [super viewWillAppear];
-    
-    _port = _session.activedPort;
-    
-    [self createContextSymbols];
-    
-    if (!_context_symbols)
-        return;
-    
-    if (cee_list_length(_context_symbols) > 1) {
-        [self showContextTable];
-        [_contextTable reloadData];
-    }
-    else {
-        [self showEditor];
-        CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, 0);
-        NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-        [self presentContextBufferWithSymbol:symbol];
-        [_titlebar setTitle:filePath];
-    }
-    
 }
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    if (_context_symbols)
-        cee_list_free(_context_symbols);
-    _context_symbols = NULL;
+    if (_symbols)
+        cee_list_free(_symbols);
+    _symbols = NULL;
 }
 
-- (void)createSubviews {
+- (void)viewWillAppear {
+    [super viewWillAppear];
+
+    if (!_splitView)
+        [self createSplitView];
+
+    [self createContextSymbols];
+
+    if (!_symbols)
+        return;
+
+    [_symbolTable reloadData];
+
+    CEESourceSymbol* symbol = cee_list_nth_data(_symbols, 0);
+    [self presentContextBufferWithSymbol:symbol];
+}
+
+- (void)createSplitView {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    _contextTable = [[CEETableView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 300, 100.0)];
-    [_contextTable setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [_contextTable setNibNameOfCellView:@"TableCellViews"];
-    [_contextTable setStyleConfiguration:[styleManager userInterfaceConfiguration]];
-    [_contextTable setDelegate:self];
-    [_contextTable setDataSource:self];
-    [_contextTable setNumberOfColumns:2];
-    [_contextTable setEnableDrawHeader:YES];
-    [_contextTable setTarget:self];
-    [_contextTable setAction:@selector(selectRow:)];
-    [_contextTable setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
+    NSArray *constraintsH = nil;
+    NSArray *constraintsV = nil;
     
-    _editViewController =  [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
-    [_editViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
-        
-    [_editViewController setEditable:NO];
-    [_editViewController setIntelligence:NO];
-    [_editViewController setWrap:YES];
-}
-
-- (void)showContextTable {
+    _splitView = [[CEESplitView alloc] init];
+    [_splitView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_splitView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
+    [_splitView setStyleState:kCEEViewStyleStateActived];
+    [_splitView setDividerStyle:NSSplitViewDividerStyleThin];
+    [_splitView setVertical:NO];
+    
     NSDictionary *views = @{
         @"titlebar" : _titlebar,
-        @"contextTable" : _contextTable,
+        @"splitView" : _splitView,
     };
     
-    if (_contextTable.superview)
-        return;
-    
-    if (_editViewController.view.superview) {
-        NSMutableArray* constraints = nil;       
-        constraints = [[NSMutableArray alloc] init];
-        for (NSLayoutConstraint *constraint in _editViewController.view.superview.constraints)
-            [constraints addObject:constraint];
-        for (NSLayoutConstraint *constraint in constraints) {
-            if (constraint.firstItem == _editViewController.view || 
-                constraint.secondItem == _editViewController.view) {
-                [_editViewController.view.superview removeConstraint:constraint];
-            }
-        }
-        
-        constraints = [[NSMutableArray alloc] init];
-        for (NSLayoutConstraint *constraint in _titlebar.constraints)
-            [constraints addObject:constraint];
-        for (NSLayoutConstraint *constraint in constraints) {
-            if (constraint.firstItem == _editViewController.view || 
-                constraint.secondItem == _editViewController.view) {
-                [_titlebar removeConstraint:constraint];
-            }
-        }
-        
-        constraints = [[NSMutableArray alloc] init];
-        for (NSLayoutConstraint *constraint in _editViewController.view.constraints)
-            [constraints addObject:constraint];
-        for (NSLayoutConstraint *constraint in constraints) {
-            if (constraint.firstItem == _editViewController.view.superview || 
-                constraint.secondItem == _editViewController.view.superview || 
-                constraint.firstItem == _titlebar || 
-                constraint.secondItem == _titlebar) {
-                [_editViewController.view removeConstraint:constraint];
-            }
-        }
-        [_editViewController.view removeFromSuperview];
-    }
-    
-    [self.view addSubview:_contextTable];
-    NSArray *constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[contextTable]-0-|" options:0 metrics:nil views:views];
-    NSArray *constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[contextTable]-0-|" options:0 metrics:nil views:views];
+    [self.view addSubview:_splitView];
+    constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[splitView]-0-|" options:0 metrics:nil views:views];
+    constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[splitView]-0-|" options:0 metrics:nil views:views];
     [self.view addConstraints:constraintsH];
     [self.view addConstraints:constraintsV];
+    
+    _symbolTable = [[CEETableView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 100.0, 100.0)];
+    [_symbolTable setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_symbolTable setNibNameOfCellView:@"TableCellViews"];
+    [_symbolTable setStyleConfiguration:[styleManager userInterfaceConfiguration]];
+    [_symbolTable setDelegate:self];
+    [_symbolTable setDataSource:self];
+    [_symbolTable setNumberOfColumns:2];
+    [_symbolTable setEnableDrawHeader:YES];
+    [_symbolTable setTarget:self];
+    [_symbolTable setAction:@selector(selectRow:)];
+    [_symbolTable setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
+    
+    _detailView = [[CEEView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 100.0, 100.0)];
+    [_detailView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    
+    _detailTitlebar = [[CEETitleView alloc] init];
+    [_detailTitlebar setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_detailTitlebar setStyleConfiguration:[styleManager userInterfaceConfiguration]];
+    
+    _monitor =  [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
+    [_monitor.view setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_monitor setEditable:NO];
+    [_monitor setIntelligence:NO];
+    [_monitor setWrap:YES];
+    
+    views = @{
+        @"detailTitlebar" : _detailTitlebar,
+        @"monitorView" : _monitor.view,
+    };
+    
+    [_detailView addSubview:_detailTitlebar];
+    [_detailView addSubview:_monitor.view];
+    constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[detailTitlebar]-0-|" options:0 metrics:nil views:views];
+    [_detailView addConstraints:constraintsH];
+    constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[monitorView]-0-|" options:0 metrics:nil views:views];
+    [_detailView addConstraints:constraintsH];
+    constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[detailTitlebar(==25.0)]-0-[monitorView]-0-|" options:0 metrics:nil views:views];
+    [_detailView addConstraints:constraintsV];
+    
+    [_splitView addSubview:_symbolTable];
+    [_splitView addSubview:_detailView];
 }
 
-- (void)showEditor {
-    NSDictionary *views = @{
-        @"titlebar" : _titlebar,
-        @"editView" : _editViewController.view,
-    };
+- (void)viewDidAppear {
+    [super viewDidAppear];
     
-    if (_editViewController.view.superview)
-        return;
-    
-    if (_contextTable.superview) {        
-        NSMutableArray* constraints = nil;       
-        constraints = [[NSMutableArray alloc] init];
-        for (NSLayoutConstraint *constraint in _contextTable.superview.constraints)
-            [constraints addObject:constraint];
-        for (NSLayoutConstraint *constraint in constraints) {
-            if (constraint.firstItem == _contextTable || 
-                constraint.secondItem == _contextTable) {
-                [_contextTable.superview removeConstraint:constraint];
-            }
-        }
-        
-        constraints = [[NSMutableArray alloc] init];
-        for (NSLayoutConstraint *constraint in _titlebar.constraints)
-            [constraints addObject:constraint];
-        for (NSLayoutConstraint *constraint in constraints) {
-            if (constraint.firstItem == _contextTable || 
-                constraint.secondItem == _contextTable) {
-                [_titlebar removeConstraint:constraint];
-            }
-        }
-        
-        constraints = [[NSMutableArray alloc] init];
-        for (NSLayoutConstraint *constraint in _contextTable.constraints)
-            [constraints addObject:constraint];
-        for (NSLayoutConstraint *constraint in constraints) {
-            if (constraint.firstItem == _contextTable.superview || 
-                constraint.secondItem == _contextTable.superview ||
-                constraint.firstItem == _titlebar ||
-                constraint.secondItem == _titlebar) {
-                [_contextTable removeConstraint:constraint];
-            }
-        }
-        [_contextTable removeFromSuperview];
+    if (!_adjustSplitView) {
+        [self setHoldingPrioritiesInSplitView:_splitView];
+        [self setDividersPositionInSplitView:_splitView];
+        [_splitView adjustSubviews];
+        _adjustSplitView = YES;
     }
+}
+
+- (void)setDividersPositionInSplitView:(NSSplitView*)splitView {
+    CGFloat position;
+    CGFloat distance;
     
-    [self.view addSubview:_editViewController.view];
-    NSArray *constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[editView]-0-|" options:0 metrics:nil views:views];
-    NSArray *constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[editView]-0-|" options:0 metrics:nil views:views];
-    [self.view addConstraints:constraintsH];
-    [self.view addConstraints:constraintsV];
+    CGFloat splitViewWidth = splitView.frame.size.width;
+    CGFloat splitViewHeight = splitView.frame.size.height;
+    
+    if (splitView.vertical)
+        distance = (splitViewWidth - (splitView.dividerThickness * (splitView.subviews.count - 1))) / splitView.subviews.count;
+    else
+        distance = (splitViewHeight - (splitView.dividerThickness * (splitView.subviews.count - 1))) / splitView.subviews.count;
+    
+    for (NSInteger i = 0; i < splitView.subviews.count - 1; i ++) {
+        position = distance + ((distance + splitView.dividerThickness) * i);
+        [splitView setPosition:position ofDividerAtIndex:i];
+    }
+}
+
+- (void)setHoldingPrioritiesInSplitView:(NSSplitView*)splitView {
+    for (NSInteger i = 0; i < splitView.subviews.count; i ++)
+        [splitView setHoldingPriority:250 - i forSubviewAtIndex:i];
 }
 
 - (void)presentContextBufferWithSymbol:(CEESourceSymbol*)symbol {
-    @autoreleasepool {
-        NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-        CEESourceBuffer* buffer = nil;
-        AppDelegate* delegate = [NSApp delegate];
-        CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-        // fucking app sandbox make this code so tedious!!!
-        if (access([filePath UTF8String], R_OK) != 0) {
-            NSArray* bookmarks = [self.session.project getSecurityBookmarksWithFilePaths:@[filePath]];
-            if (bookmarks) {
-                [self.session.project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-                //buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
-                buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
-                [self.session.project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            }
-        }
-        else {
-            //buffer = [[CEESourceBuffer alloc] initWithFilePath:filePath];
-            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
-        }
-        
-        if (!buffer)
-            return;
-        
-        cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
-        [_editViewController setBuffer:buffer];
-        CEEList* ranges = cee_ranges_from_string(symbol->locations);
-        if (ranges) {
-            [_editViewController highlightRanges:ranges];
-            cee_list_free_full(ranges, cee_range_free);
-        }
-        
-        [sourceBufferManager closeSourceBuffer:buffer];
+    NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    CEESourceBuffer* buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+    if (!buffer)
+        return;
+    
+    cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
+    [_monitor setBuffer:buffer];
+    CEEList* ranges = cee_ranges_from_string(symbol->locations);
+    if (ranges) {
+        [_monitor highlightRanges:ranges];
+        cee_list_free_full(ranges, cee_range_free);
     }
+    [sourceBufferManager closeSourceBuffer:buffer];
+
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    [_titlebar setTitle:[NSString stringWithFormat:@"Context of \"%s\"", symbol->name, nil]];
+    if (_session.project)
+        [_detailTitlebar setTitle:[_session.project shortFilePath:filePath]];
+    else
+        [_detailTitlebar setTitle:filePath];
+    [_detailTitlebar setIcon:[styleManager filetypeIconFromFilePath:filePath]];
 }
 
 - (void)sessionPortCreateContextResponse:(NSNotification*)notification {
     CEESessionPort* port = notification.object;
     if (port.session != _session)
         return;
-    
-    _port = port;
-    
+
     [self createContextSymbols];
-    
-    if (!_context_symbols)
+
+    if (!_symbols)
         return;
     
-    if (cee_list_length(_context_symbols) > 1) {
-        [self showContextTable];
-        [_contextTable reloadData];
-    }
-    else {
-        [self showEditor];
-        CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, 0);
-        NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-        [self presentContextBufferWithSymbol:symbol];
-        [_titlebar setTitle:filePath];
-    }
+    [_symbolTable reloadData];
+        
+    CEESourceSymbol* symbol = cee_list_nth_data(_symbols, 0);
+    [self presentContextBufferWithSymbol:symbol];
+    
 }
 
 - (void)createContextSymbols {
-    if (_context_symbols)
-        cee_list_free(_context_symbols);
-    _context_symbols = NULL;
+    if (_symbols)
+        cee_list_free(_symbols);
+    _symbols = NULL;
     
-    if (!_port.context)
+    if (!_session.activedPort.context)
         return;
     
-    CEEList* p = _port.context;
+    CEEList* p = NULL;
+    
+    p = _session.activedPort.context;
     while (p) {
-        CEESourceSymbol* symbol = p->data;
-        if (cee_source_symbol_is_definition(symbol))
-            _context_symbols = cee_list_prepend(_context_symbols, symbol);
+        if (cee_source_symbol_is_definition(p->data))
+            _symbols = cee_list_prepend(_symbols, p->data);
         p = p->next;
     }
     
-    if (!_context_symbols) {
-        p = _port.context;
+    if (!_symbols) {
+        p = _session.activedPort.context;
         while (p) {
-            _context_symbols = cee_list_prepend(_context_symbols, p->data);
+            _symbols = cee_list_prepend(_symbols, p->data);
             p = p->next;
         }
     }
 }
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
-    if (!_context_symbols)
+    if (!_symbols)
         return 0;
-    return cee_list_length(_context_symbols);
+    return cee_list_length(_symbols);
 }
 
 - (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column {
-    if (!_context_symbols)
-        return @"Related Source";
-    CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, 0);
-    if (column == 0) {
-        //NSString* name = [NSString stringWithUTF8String:symbol->name];
-        //return [NSString stringWithFormat:@"\"%@\" Releated Sources", name];
-        return @"Name";
-    }
-    else if (column == 1) {
+    if (column == 0)
+        return @"File";
+    else if (column == 1)
         return @"Path";
-    }
-    
     return @"";
 }
 
@@ -314,44 +255,33 @@
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     
     if (column == 0) {
-        CEESymbolCellView* cellView = [tableView makeViewWithIdentifier:@"IDSymbolCellView"];
-        CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, (cee_int)row);
-        NSString* name = [NSString stringWithUTF8String:symbol->name];
-        NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-        cellView.title.stringValue = [NSString stringWithFormat:@"%@", [filePath lastPathComponent]];
+        CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
+        CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)row);
+        NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
+        cellView.text.stringValue = [NSString stringWithFormat:@"%@", [filePath lastPathComponent]];
         [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
         return cellView;
     }
     else if (column == 1) {
-        CEEFileNameCellView* cellView = [tableView makeViewWithIdentifier:@"IDFilePathCellView"];
-        CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, (cee_int)row);
-        NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
-        cellView.title.stringValue = filePath;
+        CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
+        CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)row);
+        NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
+        if (_session.project)
+            cellView.text.stringValue = [_session.project shortFilePath:filePath];
+        else
+            cellView.text.stringValue = filePath;
+        [cellView.icon setImage:[styleManager filetypeIconFromFilePath:filePath]];
         return cellView;
     }
     return nil;
 }
 
 - (IBAction)selectRow:(id)sender {
-    if (!_contextTable.selectedRowIndexes || _contextTable.selectedRow == -1)
+    if (!_symbolTable.selectedRowIndexes || _symbolTable.selectedRow == -1)
         return;
     
-    [self showEditor];
-    CEESourceSymbol* symbol = cee_list_nth_data(_context_symbols, (cee_int)_contextTable.selectedRow);    
-    NSString* filePath = [NSString stringWithUTF8String:symbol->filepath];
+    CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)_symbolTable.selectedRow);
     [self presentContextBufferWithSymbol:symbol];
-    [_titlebar setTitle:filePath];
-}
-
-- (void)updateViewStyleConfiguration:(NSNotification*)notification {
-    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    [self.view setStyleConfiguration:[styleManager userInterfaceConfiguration]];
-    
-    if (!_contextTable.superview)
-        [_contextTable setStyleConfiguration:[styleManager userInterfaceConfiguration]];
-    
-    if (!_editViewController.view.superview)
-        [_editViewController setViewStyleConfiguration:[styleManager userInterfaceConfiguration]];
 }
 
 @end

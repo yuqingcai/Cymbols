@@ -53,6 +53,7 @@ typedef NS_ENUM(NSInteger, CEETableViewColumnAutoresizingStyle) {
 - (void)setColumnWidth:(CGFloat)width atIndex:(NSInteger)column;
 - (void)adjustHorizontalOffsetWithDelta:(CGFloat)delta;
 - (__kindof NSView*)makeViewWithIdentifier:(NSUserInterfaceItemIdentifier)identifier;
+- (NSInteger)rowIndexByLocation:(NSPoint)point;
 - (void)reloadData;
 - (void)reloadHeader;
 

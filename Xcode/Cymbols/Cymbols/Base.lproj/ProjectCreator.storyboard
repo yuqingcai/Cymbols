@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Window Controller-->
+        <scene sceneID="NCs-G3-mgK">
+            <objects>
+                <windowController storyboardIdentifier="IDProjectCreatorWindowController" id="qiW-h0-1Dh" sceneMemberID="viewController">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="Dcf-Cj-COH">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="425" y="462" width="480" height="270"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
+                        <view key="contentView" id="o0b-Hn-dIa">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="qiW-h0-1Dh" id="S2S-b8-gvT"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="Rvt-AF-Mbb" kind="relationship" relationship="window.shadowedContentViewController" id="pXK-8Z-4lj"/>
+                    </connections>
+                </windowController>
+                <customObject id="FFU-ZW-vIT" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="80" y="-284"/>
+        </scene>
+        <!--Project Creator Controller-->
+        <scene sceneID="V0a-ne-QyD">
+            <objects>
+                <viewController storyboardIdentifier="IDProjectCreatorController" id="Rvt-AF-Mbb" customClass="CEEProjectCreatorController" sceneMemberID="viewController">
+                    <view key="view" id="58m-b3-MAP" customClass="CEEWindowContentView">
+                        <rect key="frame" x="0.0" y="0.0" width="498" height="302"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="9BZ-vA-Cbx" customClass="CEEButton">
+                                <rect key="frame" x="384" y="20" width="94" height="23"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="94" id="GeU-i5-67F"/>
+                                    <constraint firstAttribute="height" constant="23" id="at2-N3-OAo"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Button1"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="button1Action:" target="Rvt-AF-Mbb" id="BjQ-fb-2kt"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="nLR-zc-Zke" customClass="CEEButton">
+                                <rect key="frame" x="282" y="20" width="94" height="23"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="23" id="0dW-u8-ELg"/>
+                                    <constraint firstAttribute="width" constant="94" id="Ggt-Qd-NgR"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Button0"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="button0Action:" target="Rvt-AF-Mbb" id="wTA-W1-spI"/>
+                                </connections>
+                            </customView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="9BZ-vA-Cbx" firstAttribute="leading" secondItem="nLR-zc-Zke" secondAttribute="trailing" constant="8" id="2EP-PF-fpk"/>
+                            <constraint firstAttribute="trailing" secondItem="9BZ-vA-Cbx" secondAttribute="trailing" constant="20" id="QDc-Vs-3kh"/>
+                            <constraint firstAttribute="bottom" secondItem="nLR-zc-Zke" secondAttribute="bottom" constant="20" id="gw5-uy-LcK"/>
+                            <constraint firstAttribute="bottom" secondItem="9BZ-vA-Cbx" secondAttribute="bottom" constant="20" id="xfK-AS-hOE"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="button0" destination="nLR-zc-Zke" id="4yR-Mv-rDD"/>
+                        <outlet property="button1" destination="9BZ-vA-Cbx" id="Vwd-ey-mWP"/>
+                    </connections>
+                </viewController>
+                <customObject id="k5W-41-WfD" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="661" y="-293"/>
+        </scene>
+    </scenes>
+</document>

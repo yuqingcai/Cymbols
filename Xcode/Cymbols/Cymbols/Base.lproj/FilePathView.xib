@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner"/>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="c22-O7-iKe" customClass="CEEFilePathView">
+            <rect key="frame" x="0.0" y="0.0" width="542" height="462"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="vBB-AC-Fae" customClass="CEETextTitle">
+                    <rect key="frame" x="40" y="422" width="482" height="24"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="24" id="DBI-hf-NDh"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Label"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="HMB-Vr-cPE" customClass="CEEContainerView">
+                    <rect key="frame" x="20" y="8" width="502" height="406"/>
+                    <subviews>
+                        <customView translatesAutoresizingMaskIntoConstraints="NO" id="bVe-1j-cU4" customClass="CEETableView">
+                            <rect key="frame" x="1" y="1" width="500" height="404"/>
+                            <constraints>
+                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="500" id="HMU-0z-C2G"/>
+                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="400" id="nav-SD-D8K"/>
+                            </constraints>
+                        </customView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="bVe-1j-cU4" firstAttribute="top" secondItem="HMB-Vr-cPE" secondAttribute="top" constant="1" id="22U-6H-hb8"/>
+                        <constraint firstItem="bVe-1j-cU4" firstAttribute="leading" secondItem="HMB-Vr-cPE" secondAttribute="leading" constant="1" id="Dal-JJ-fg4"/>
+                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="500" id="XkO-cN-Mu6"/>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="300" id="ZQp-IN-lj6"/>
+                        <constraint firstAttribute="bottom" secondItem="bVe-1j-cU4" secondAttribute="bottom" constant="1" id="dOM-UP-LOn"/>
+                        <constraint firstAttribute="trailing" secondItem="bVe-1j-cU4" secondAttribute="trailing" constant="1" id="djz-NM-6DM"/>
+                    </constraints>
+                </customView>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="455-cn-s5s" customClass="CEEImageView">
+                    <rect key="frame" x="20" y="427" width="16" height="16"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="16" id="EL6-Mj-nxW"/>
+                        <constraint firstAttribute="width" constant="16" id="NhL-lM-JLT"/>
+                    </constraints>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_caution_16x16" id="k4H-fg-aqd"/>
+                </imageView>
+            </subviews>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="vBB-AC-Fae" secondAttribute="trailing" constant="20" id="1dH-hn-0hE"/>
+                <constraint firstAttribute="trailing" secondItem="HMB-Vr-cPE" secondAttribute="trailing" constant="20" id="6RH-J3-AgS"/>
+                <constraint firstItem="HMB-Vr-cPE" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="BhT-d6-lAa"/>
+                <constraint firstItem="HMB-Vr-cPE" firstAttribute="top" secondItem="vBB-AC-Fae" secondAttribute="bottom" constant="8" id="Dn0-fz-vbF"/>
+                <constraint firstItem="vBB-AC-Fae" firstAttribute="leading" secondItem="455-cn-s5s" secondAttribute="trailing" constant="4" id="LkC-CY-KuI"/>
+                <constraint firstAttribute="bottom" secondItem="HMB-Vr-cPE" secondAttribute="bottom" constant="8" id="Xtk-ab-MlW"/>
+                <constraint firstItem="455-cn-s5s" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" symbolic="YES" id="ld2-Xx-Wbf"/>
+                <constraint firstItem="vBB-AC-Fae" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="16" id="obe-ps-nx8"/>
+                <constraint firstItem="455-cn-s5s" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="19" id="yM3-Lz-JDx"/>
+            </constraints>
+            <connections>
+                <outlet property="filePathLabel" destination="vBB-AC-Fae" id="cXQ-ir-hb3"/>
+                <outlet property="filePathTable" destination="bVe-1j-cU4" id="cuZ-QP-Rjy"/>
+                <outlet property="icon" destination="455-cn-s5s" id="xXC-5O-Uxz"/>
+            </connections>
+            <point key="canvasLocation" x="175" y="229"/>
+        </customView>
+    </objects>
+    <resources>
+        <image name="icon_caution_16x16" width="16" height="16"/>
+    </resources>
+</document>

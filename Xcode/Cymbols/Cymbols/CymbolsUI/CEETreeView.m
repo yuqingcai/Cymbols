@@ -11,9 +11,9 @@
 #import "CEETitlebarButton.h"
 
 @interface Tree : NSObject
+@property id item;
 @property (weak) Tree* parent;
 @property (strong) NSMutableArray<Tree*>* children;
-@property id item;
 @property BOOL expanded;
 @end
 
@@ -54,9 +54,11 @@
         NSInteger count = [self.dataSource treeView:self numberOfChildrenOfItem:nil];
         if (count) {
             _root = [[Tree alloc] init];
+            _root.item = @"root";
             _root.children = [[NSMutableArray alloc] init];
             _root.expanded = YES;
             _root.parent = nil;
+            
             for (NSInteger i = 0; i < count; i ++) {
                 Tree* tree = [[Tree alloc] init];
                 tree.parent = _root;
@@ -71,6 +73,7 @@
         if (_root.expanded)
             [self expandTree:tree compareToTree:_root];
         _root = tree;
+        _root.item = @"root";
     }
     
     if (!_root)
@@ -81,6 +84,22 @@
     _listWrappers = listWrappers;
     
     [super reloadData];
+}
+
+- (void)clickAction:(id)sender {
+    NSPoint location = [NSEvent mouseLocation];
+    location = [self.window convertPointFromScreen:location];
+    location = [self convertPoint:location fromView:nil];
+    NSInteger i = [self rowIndexByLocation:location];
+    
+    if (![self isRowViewExpandable:i])
+        return;
+    
+    if ([self isRowViewExpanded:i])
+        [self collapseItem:_listWrappers[i].tree.item];
+    else
+        [self expandItem:_listWrappers[i].tree.item];
+    
 }
 
 - (void)reloadItem:(id)item {
@@ -294,6 +313,55 @@
         i = [self.selectedRowIndexes indexGreaterThanIndex:i];
     }
     return items;
+}
+
+- (NSString*)jsonString:(Tree*)tree {
+    NSString* string = @"";
+        
+    id object = [self.delegate treeView:self persistentObjectForItem:tree.item];
+    string = [string stringByAppendingFormat:@"{\"%@\":[", object];
+        
+    for (int i = 0; i < tree.children.count; i ++) {
+        string = [string stringByAppendingFormat:@"%@", [self jsonString:tree.children[i]]];
+        if (i < tree.children.count - 1)
+            string = [string stringByAppendingFormat:@","];
+    }
+    
+    string = [string stringByAppendingFormat:@"]}"];
+    return string;
+}
+
+- (NSString*)serialize {
+    if (![self.delegate respondsToSelector:@selector(treeView:persistentObjectForItem:)])
+        return nil;
+    return [self jsonString:_root];
+}
+
+- (Tree*)createTreeFromDict:(NSDictionary*)dict parent:(Tree*)parent {
+    NSString* item = dict.allKeys[0];
+    NSArray* children = dict[item];
+    
+    Tree* tree = [[Tree alloc] init];
+    tree.item = item;
+    tree.parent = parent;
+    tree.children = [[NSMutableArray alloc] init];
+    
+    if (children.count) {
+        tree.expanded = YES;
+        for (NSDictionary* dict in children) {
+            [tree.children addObject:[self createTreeFromDict:dict parent:tree]];
+        }
+    }
+    return tree;
+}
+
+- (void)deserialize:(NSDictionary*)dict {
+    
+    _root = [self createTreeFromDict:dict parent:nil];
+    NSMutableArray* listWrappers = [[NSMutableArray alloc] init];
+    [self tree:_root toList:&listWrappers level:0];
+    _listWrappers = listWrappers;
+    [super reloadData];
 }
 
 #pragma mark - protocol NSDraggingDestination

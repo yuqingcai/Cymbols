@@ -8,12 +8,15 @@
 
 #import "CEENetwork.h"
 #import "AppDelegate.h"
-#include <CoreFoundation/CoreFoundation.h>
-#include <IOKit/IOKitLib.h>
-#include <IOKit/network/IOEthernetInterface.h>
-#include <IOKit/network/IONetworkInterface.h>
-#include <IOKit/network/IOEthernetController.h>
+#import "cee_datetime.h"
+#import <CoreFoundation/CoreFoundation.h>
+#import <IOKit/IOKitLib.h>
+#import <IOKit/network/IOEthernetInterface.h>
+#import <IOKit/network/IONetworkInterface.h>
+#import <IOKit/network/IOEthernetController.h>
 
+NSNotificationName CEENotificationCymbolsUpdateNotify = @"CEENotificationCymbolsUpdateNotify";
+NSNotificationName CEENotificationCymbolsUpdateConfirm = @"CEENotificationCymbolsUpdateConfirm";
 
 static kern_return_t FindEthernetInterfaces(io_iterator_t *matchingServices);
 static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress, UInt8 bufferSize);
@@ -22,9 +25,9 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
 // releasing the iterator after the caller is done with it.
 static kern_return_t FindEthernetInterfaces(io_iterator_t *matchingServices)
 {
-    kern_return_t           kernResult; 
-    CFMutableDictionaryRef    matchingDict;
-    CFMutableDictionaryRef    propertyMatchDict;
+    kern_return_t kernResult;
+    CFMutableDictionaryRef matchingDict;
+    CFMutableDictionaryRef propertyMatchDict;
     
     // Ethernet interfaces are instances of class kIOEthernetInterfaceClass. 
     // IOServiceMatching is a convenience function to create a dictionary with the key kIOProviderClassKey and 
@@ -96,9 +99,9 @@ static kern_return_t FindEthernetInterfaces(io_iterator_t *matchingServices)
 // In this sample the iterator should contain just the primary interface.
 static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress, UInt8 bufferSize)
 {
-    io_object_t     intfService;
-    io_object_t     controllerService;
-    kern_return_t   kernResult = KERN_FAILURE;
+    io_object_t intfService;
+    io_object_t controllerService;
+    kern_return_t kernResult = KERN_FAILURE;
     
     // Make sure the caller provided enough buffer space. Protect against buffer overflow problems.
     if (bufferSize < kIOEthernetAddressSize) {
@@ -151,6 +154,7 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
     return kernResult;
 }
 
+#define TRIGGER_SECOND 60
 
 @interface CEENetwork() {
     UInt8 _MACAddress[kIOEthernetAddressSize];
@@ -158,7 +162,8 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
 
 @property NSInteger beatCount;
 @property BOOL isMACAddressFound;
-@property BOOL isRequesting;
+@property BOOL isSendingUserInfo;
+@property BOOL isAcquiringUpdateInfo;
 @property NSInteger notifyInterval;
 @end
 
@@ -170,15 +175,15 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
         return nil;
     
     [self getMACAddress];
-    _isRequesting = NO;
-    _notifyInterval = (NSInteger)(60.0 / CEE_APP_HEART_BEAT_INTERVAL); //60s
+    _isSendingUserInfo = NO;
+    _isAcquiringUpdateInfo = NO;
+    _notifyInterval = (NSInteger)(TRIGGER_SECOND / CEE_APP_HEART_BEAT_INTERVAL);
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(heartBeatResponse:) name:CEENotificationHeartBeat object:nil];
     
     return self;
 }
 
 - (void)getMACAddress {
-    
     kern_return_t kernResult = KERN_SUCCESS;
     io_iterator_t intfIterator;
     _isMACAddressFound = NO;
@@ -207,13 +212,23 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
 
 - (void)heartBeatResponse:(NSNotification*)notification {
     _beatCount ++;
-    if (_beatCount % _notifyInterval || !_isMACAddressFound || _isRequesting)
+    
+    if (_beatCount % _notifyInterval)
         return;
     
-    _isRequesting = YES;
+    [self sendUserInfo];
+    [self scanUpdateInfo];
+}
+
+- (void)sendUserInfo {
+    if (!_isMACAddressFound || _isSendingUserInfo)
+        return;
     
-    NSString* MACAddressString = [NSString stringWithFormat:@"%02x:%02x:%02x:%02x:%02x:%02x", 
-                                  _MACAddress[0], _MACAddress[1], _MACAddress[2], _MACAddress[3], _MACAddress[4], _MACAddress[5]];
+    _isSendingUserInfo = YES;
+    
+    NSString* MACAddressString = [NSString stringWithFormat:@"%02x:%02x:%02x:%02x:%02x:%02x",
+                                  _MACAddress[0], _MACAddress[1], _MACAddress[2],
+                                  _MACAddress[3], _MACAddress[4], _MACAddress[5]];
     
     NSString* URLString = [NSString stringWithFormat:@"%@?version=%%22%@%%22&mac_address=%%22%@%%22",
                            @"https://cymbols.io/cgi-bin/cymbols_user_notify",
@@ -226,16 +241,190 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
     NSURLSession *session = [NSURLSession sharedSession];
     NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
-        self->_isRequesting = NO;
+        self->_isSendingUserInfo = NO;
         NSString* string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         NSLog(@"%@", string);
+        
         if(httpResponse.statusCode == 200) {
         }
         else {
         }
     }];
     [dataTask resume];
+}
+
+- (void)scanUpdateInfo {
+    if (_isAcquiringUpdateInfo)
+        return;
     
+    _isAcquiringUpdateInfo = YES;
+    
+    NSString* URLString = @"https://cymbols.io/cymbols_update_info";
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:URLString] cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:20.0];
+    [request setHTTPMethod:@"GET"];
+    
+    NSURLSession *session = [NSURLSession sharedSession];
+    NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
+        self->_isAcquiringUpdateInfo = NO;
+        
+        NSString* update = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        
+        if(httpResponse.statusCode == 200) {
+            
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                AppDelegate* delegate = [NSApp delegate];
+                NSString* filePath = [[delegate supportDirectory] stringByAppendingPathComponent:@"UpdateInfo.cfg"];
+                
+                if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+                    NSString* origin = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+                    
+                    if ([self compareUpdateInfo:origin with:update]) {
+                        [update writeToURL:[NSURL fileURLWithPath:filePath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
+                        [self setUpdateFlag];
+                    }
+                }
+                else {
+                    [update writeToURL:[NSURL fileURLWithPath:filePath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
+                    [self setUpdateFlag];
+                }
+                
+            });
+        }
+        
+    }];
+    [dataTask resume];
+}
+
+- (BOOL)compareUpdateInfo:(NSString*)origin with:(NSString*)update {
+    NSString* time0 = nil;
+    NSString* time1 = nil;
+    NSString* patternString = @"\\[(.*)\\]\\s*:\\s*.*";
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSArray *matches = nil;
+    NSTextCheckingResult *match = nil;
+    
+    matches = [regex matchesInString:origin options:0 range:NSMakeRange(0, [origin length])];
+    if (matches.count) {
+        match = matches[0];
+        time0 = [origin substringWithRange:[match rangeAtIndex:1]];
+    }
+    
+    matches = [regex matchesInString:update options:0 range:NSMakeRange(0, [update length])];
+    if (matches.count) {
+        match = matches[0];
+        time1 = [update substringWithRange:[match rangeAtIndex:1]];
+    }
+    
+    if (!time0 || !time1)
+        return NO;
+    
+    time_t t0 = cee_time_from_iso8601([time0 UTF8String]);
+    time_t t1 = cee_time_from_iso8601([time1 UTF8String]);
+    
+    if (cee_time_compare(t0, t1) == -1)
+        return YES;
+    
+    return NO;
+}
+
+- (void)setUpdateFlag {
+    AppDelegate* delegate = [NSApp delegate];
+    NSString* filePath = [[delegate supportDirectory] stringByAppendingPathComponent:@"UpdateInfo.cfg"];
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
+        return;
+    
+    NSString* string = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+    string = [self appendUpdateFlagInString:string];
+    [string writeToURL:[NSURL fileURLWithPath:filePath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationCymbolsUpdateNotify object:self];
+}
+
+- (void)cleanUpdateFlag {
+    AppDelegate* delegate = [NSApp delegate];
+    NSString* filePath = [[delegate supportDirectory] stringByAppendingPathComponent:@"UpdateInfo.cfg"];
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
+        return;
+    
+    NSString* string = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+    string = [self cleanUpdateFlagInString:string];
+    [string writeToURL:[NSURL fileURLWithPath:filePath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationCymbolsUpdateConfirm object:self];
+}
+
+- (BOOL)updateFlagSet {
+    AppDelegate* delegate = [NSApp delegate];
+    NSString* filePath = [[delegate supportDirectory] stringByAppendingPathComponent:@"UpdateInfo.cfg"];
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
+        return NO;
+    
+    NSString* string = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+    return [self updateFlagSetInString:string];
+}
+
+- (NSString*)updateInfoString {
+    AppDelegate* delegate = [NSApp delegate];
+    NSString* filePath = [[delegate supportDirectory] stringByAppendingPathComponent:@"UpdateInfo.cfg"];
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
+        return nil;
+    
+    NSString* string = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+    NSString* patternString = @"\\[.*\\]\\s*:\\s*(.*)";
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSArray *matches = nil;
+    NSString* infoString = nil;
+    matches = [regex matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+    if (matches.count) {
+        NSTextCheckingResult *match = matches[0]; // first line in  update info string
+        NSRange range = [match rangeAtIndex:1];
+        infoString = [string substringWithRange:range];
+        infoString = [infoString stringByReplacingOccurrencesOfString:@"*" withString:@""];
+    }
+    return infoString;
+}
+
+- (NSString*)appendUpdateFlagInString:(NSString*)string {
+    NSString* patternString = @"\\[.*\\]\\s*:\\s*.*";
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSArray *matches = nil;
+    
+    matches = [regex matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+    if (matches.count) {
+        NSTextCheckingResult *match = matches[0]; // first line in  update info string
+        NSRange range = [match rangeAtIndex:0];
+        NSString* str = [string substringWithRange:range];
+        str = [str stringByAppendingFormat:@"*", nil];
+        string = [string stringByReplacingCharactersInRange:range withString:str];
+    }
+    
+    return string;
+}
+
+- (NSString*)cleanUpdateFlagInString:(NSString*)string {
+    return [string stringByReplacingOccurrencesOfString:@"*" withString:@""];
+}
+
+- (BOOL)updateFlagSetInString:(NSString*)string {
+    NSString* patternString = @"\\[.*\\]\\s*:\\s*.*";
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSArray *matches = nil;
+    
+    matches = [regex matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+    if (matches.count) {
+        NSTextCheckingResult *match = matches[0]; // first line in  update info string
+        NSRange range = [match rangeAtIndex:0];
+        NSString* str = [string substringWithRange:range];
+        return [str containsString:@"*"];
+    }
+    
+    return NO;
 }
 
 @end

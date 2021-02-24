@@ -80,19 +80,19 @@
 }
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
-    CEESourceBufferSaveConfirmCellView *cellView = nil;
+    CEECheckboxTableCellView *cellView = nil;
     CEESourceBuffer* buffer = _modifiedSourceBuffers[row];
-    cellView = [_sourceBufferTable makeViewWithIdentifier:@"IDSourceBufferSaveConfirmCellView"];
+    cellView = [_sourceBufferTable makeViewWithIdentifier:@"IDCheckboxTableCellView"];
     if (cellView) {
         if (!cellView.delegate)
             [cellView setDelegate:self];
         
-        cellView.title.stringValue = [buffer.filePath lastPathComponent];
-        cellView.sourceBufferIdentifier = buffer.filePath;
+        cellView.checkbox.title = [buffer.filePath lastPathComponent];
+        cellView.selectedIdentifier = buffer.filePath;
         if ([self sourceBufferIsSelected:buffer.filePath])
-            [cellView.check setState:NSControlStateValueOn];
+            [cellView.checkbox setState:NSControlStateValueOn];
         else
-            [cellView.check setState:NSControlStateValueOff];
+            [cellView.checkbox setState:NSControlStateValueOff];
             
     }
     return cellView;
@@ -111,25 +111,6 @@
             return buffer;
     }
     return nil;
-}
-
-- (BOOL)project:(CEEProject*)project securitySaveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    NSArray* bookmarks = nil;
-    BOOL ret = NO;
-    if (access([filePath UTF8String], W_OK) != 0) {
-        bookmarks = [project getSecurityBookmarksWithFilePaths:@[filePath]];
-        if (bookmarks) {
-            [project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
-            [project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-        }
-    }
-    else {
-        ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
-    }
-    return ret;
 }
 
 - (IBAction)save:(id)sender {
@@ -171,7 +152,6 @@
                         NSLog(@"Save Source Buffer Failed!");
                         continue;
                     }
-                    [project addSecurityBookmarksWithFilePaths:@[savePath]];
                     CEEProjectController* controller = (CEEProjectController*)[NSDocumentController sharedDocumentController];
                     [controller replaceSourceBufferReferenceFilePath:filePathBeforeSave to:savePath];
                     _directory = [savePath stringByDeletingLastPathComponent];
@@ -179,7 +159,7 @@
             }
         }
         else {
-            [self project:project securitySaveSourceBuffer:buffer atFilePath:buffer.filePath];
+            [sourceBufferManager saveSourceBuffer:buffer atFilePath:buffer.filePath];
         }
         
         [project syncSourceSymbols:buffer];
@@ -225,13 +205,13 @@
     [_editViewController setBuffer:buffer];
 }
 
-#pragma mark - protocol CEESourceBufferSaveConfirmCellDelegate
-- (void)sourceBufferSelect:(NSString*)filePath {
+#pragma mark - protocol CEEFilePathConfirmCellDelegate
+- (void)select:(NSString*)filePath {
     if (![self sourceBufferIsSelected:filePath])
         [_selectedSourceBufferFilePaths addObject:filePath];
 }
 
-- (void)sourceBufferDeselect:(NSString*)filePath {
+- (void)deselect:(NSString*)filePath {
     if ([self sourceBufferIsSelected:filePath])
         [_selectedSourceBufferFilePaths removeObject:filePath];
 }

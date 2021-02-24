@@ -21,8 +21,10 @@ extern char* init_descriptor_template;
 extern char* open_file_descriptor_template;
 
 NSNotificationName CEENotificationProjectSettingProperties = @"CEENotificationProjectSettingProperties";
-NSNotificationName CEENotificationProjectAddFilePaths = @"CEENotificationProjectAddFilePaths";
-NSNotificationName CEENotificationProjectRemoveFilePaths = @"CEENotificationProjectRemoveFilePaths";
+NSNotificationName CEENotificationProjectAddReference = @"CEENotificationProjectAddReference";
+NSNotificationName CEENotificationProjectRemoveReference = @"CEENotificationProjectRemoveReference";
+NSNotificationName CEENotificationProjectCreateFile = @"CEENotificationProjectCreateFile";
+NSNotificationName CEENotificationProjectRemoveFile = @"CEENotificationProjectRemoveFile";
 NSNotificationName CEENotificationSessionPortOpenSourceBuffer = @"CEENotificationSessionPortOpenSourceBuffer";
 NSNotificationName CEENotificationSessionPortCloseSourceBuffer = @"CEENotificationSessionPortCloseSourceBuffer";
 NSNotificationName CEENotificationSessionPortActiveSourceBuffer = @"CEENotificationSessionPortActiveSourceBuffer";
@@ -39,44 +41,14 @@ NSNotificationName CEENotificationSessionPortSaveSourceBuffer = @"CEENotificatio
 NSNotificationName CEENotificationSessionPortSetDescriptor = @"CEENotificationSessionPortSetDescriptor";
 NSNotificationName CEENotificationSessionPortSearchReference = @"CEENotificationSessionPortSearchReference";
 
-
-NSArray* ExclusiveFilePaths(NSArray* filePaths)
-{
-    if (!filePaths)
-        return nil;
-    
-    CEEList* file_paths = NULL;
-    for (NSString* filePath in filePaths)
-        file_paths = cee_list_prepend(file_paths, (cee_pointer)[filePath UTF8String]);
-    
-    if (!file_paths)
-        return nil;
-    
-    CEEList* exclusiveds = cee_paths_uniform(file_paths);
-    cee_list_free(file_paths);
-    
-    if (!exclusiveds)
-        return nil;
-    
-    NSMutableArray* _exclusiveds = [[NSMutableArray alloc] init];
-    CEEList* p = exclusiveds;
-    while (p) {
-        [_exclusiveds addObject:[NSString stringWithUTF8String:p->data]];
-        p = p->next;
-    }
-    cee_list_free_full(exclusiveds, cee_free);
-    return _exclusiveds;
-}
-
 NSArray* ExpandFilePaths(NSArray* filePaths)
-{    
-    filePaths = ExclusiveFilePaths(filePaths);
-    
+{
     NSMutableArray* expand = [[NSMutableArray alloc] init];
     NSNumber *isDirectory;
     
     for (NSString* filePath in filePaths) {
         [[NSURL fileURLWithPath:filePath] getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL];
+        
         if (![isDirectory boolValue]) {
             [expand addObject:filePath];
         }
@@ -121,8 +93,7 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths)
 
 CEESecurityBookmark* CreateBookmarkWithFilePath(NSString* filePath)
 {
-    CEESecurityBookmark* bookmark = [[CEESecurityBookmark alloc] initWithFilePath:filePath];
-    return bookmark;
+    return [[CEESecurityBookmark alloc] initWithFilePath:filePath];
 }
 
 BOOL ContextContainSymbol(CEEList* context,
@@ -134,7 +105,7 @@ BOOL ContextContainSymbol(CEEList* context,
     CEEList* p = context;
     while (p) {
         CEESourceSymbol* test = p->data;
-        if (!strcmp(test->filepath, symbol->filepath) &&
+        if (!strcmp(test->file_path, symbol->file_path) &&
             !strcmp(test->locations, symbol->locations))
             return YES;
         p = p->next;
@@ -159,22 +130,36 @@ BOOL ContextContainSymbol(CEEList* context,
 @end
 
 @implementation CEEProjectSetting
-+ (CEEProjectSetting*)projectSettingWithName:(NSString*)name path:(NSString*)path filePaths:(NSArray*)filePaths filePathsUserSelected:(NSArray*)filePathsUserSelected {
-    CEEProjectSetting* setting = [[CEEProjectSetting alloc] init];
-    if (setting) {
-        setting.name = name;
-        setting.path = path;
-        setting.filePathsExpanded = filePaths;
-        setting.filePathsUserSelected = filePathsUserSelected;
+
+- (instancetype)init {
+    self = [super init];
+    if (!self)
+        return nil;
+    
+    AppDelegate* delegate = [NSApp delegate];
+    NSString* filePath = [delegate defaultProjectSettingPath];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        NSMutableDictionary* descriptor = [CEEJSONReader objectFromFile:filePath];
+        CEESecurityBookmark* bookmark = [[CEESecurityBookmark alloc] init];
+        bookmark.filePath = descriptor[@"filePath"];
+        bookmark.content = descriptor[@"bookmarkContent"];
+        self.pathBookmark = bookmark;
+        self.path = bookmark.filePath;
     }
-    return setting;
+    self.name = @"NewProject";
+    return self;
 }
 
-- (NSString*)databasePath {
-    NSString* path = [[_path stringByAppendingPathComponent:_name] stringByAppendingPathExtension:@"cymd"];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:path])
-        return path;
-    return nil;
+- (void)saveAsDefaultSetting {
+    AppDelegate* delegate = [NSApp delegate];
+    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+    CEESecurityBookmark* bookmark = self.pathBookmark;
+    if (bookmark) {
+        [dict setValue:bookmark.filePath forKey:@"filePath"];
+        [dict setValue:bookmark.content forKey:@"bookmarkContent"];
+    }
+    NSString* filePath = [delegate defaultProjectSettingPath];
+    [CEEJSONReader object:dict toFile:filePath];
 }
 
 @end
@@ -198,56 +183,12 @@ BOOL ContextContainSymbol(CEEList* context,
     return self;
 }
 
-- (CEESourceBuffer*)securityOpenSourceBufferWithFilePath:(NSString*)filePath {
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    CEESourceBuffer* buffer = nil;
-    NSArray* bookmarks = nil;
-    
-    if (access([filePath UTF8String], R_OK) != 0) {
-        bookmarks = [self.session.project getSecurityBookmarksWithFilePaths:@[filePath]];
-        if (bookmarks) {
-            [self.session.project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionShare];
-            [self.session.project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-        }
-        else {
-            buffer = nil;
-        }
-    }
-    else {
-        buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionShare];
-    }
-    
-    return buffer;
-}
-
-- (BOOL)securitySaveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    NSArray* bookmarks = nil;
-    BOOL ret = NO;
-    if (access([filePath UTF8String], W_OK) != 0) {
-        bookmarks = [self.session.project getSecurityBookmarksWithFilePaths:@[filePath]];
-        if (bookmarks) {
-            [self.session.project startAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-            ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
-            [self.session.project stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-        }
-    }
-    else {
-        ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
-    }
-    return ret;
-}
-
 - (CEESourceBuffer*)bufferInContext:(CEESourceBufferReferenceContext*)context {
     for (CEESourceBuffer* buffer in _openedSourceBuffers) {
         if ([buffer.filePath isEqualToString:context.filePath])
             return buffer;
     }
-    CEESourceBuffer* buffer = [self securityOpenSourceBufferWithFilePath:context.filePath];
-    return buffer;
+    return [self openSourceBufferWithFilePath:context.filePath];
 }
 
 - (void)appendBufferReference:(CEESourceBuffer*)buffer {
@@ -310,14 +251,13 @@ BOOL ContextContainSymbol(CEEList* context,
     }
     
     if (!target) {
-        target = [self securityOpenSourceBufferWithFilePath:reference.filePath];
+        target = [self openSourceBufferWithFilePath:reference.filePath];
         if (target)
             [_openedSourceBuffers addObject:target];
     }
 
     if (target) {
-        if (!target.prep_directive && !target.statement)
-            cee_source_buffer_parse(target, kCEESourceBufferParserOptionCreateSymbolWrapper);
+        cee_source_buffer_parse(target, kCEESourceBufferParserOptionCreateSymbolWrapper);
         [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortPresentHistory object:self];
     }
 }
@@ -337,50 +277,43 @@ BOOL ContextContainSymbol(CEEList* context,
     return bufferOffsets;
 }
 
-- (NSArray*)openSourceBuffersWithFilePaths:(NSArray*)filePaths {
-    NSMutableArray* targets = nil;
+- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString*)filePath {
     NSDictionary* bufferOffsets = nil;
     NSInteger lineBufferOffset = 0;
     NSInteger caretBufferOffset = 0;
     
-    for (NSString* filePath in filePaths) {
-        CEESourceBuffer* target = nil;
-        for (CEESourceBuffer* buffer in _openedSourceBuffers) {
-            if ([buffer.filePath isEqualToString:filePath]) {
-                target = buffer;
-                break;
-            }
-        }
-        
-        if (!target) {
-            target = [self securityOpenSourceBufferWithFilePath:filePath];
-            if (target)
-                [_openedSourceBuffers addObject:target];
-        }
-        
-        if (target) {
-            if (!targets)
-                targets = [[NSMutableArray alloc] init];
-            
-            [targets addObject:target];
-            
-            if (!target.symbol_wrappers)
-                cee_source_buffer_parse(target, kCEESourceBufferParserOptionCreateSymbolWrapper);
-            
-            bufferOffsets = [self lastPresentedBufferOffsetInHistory:target.filePath];
-            if (bufferOffsets) {
-                lineBufferOffset = [bufferOffsets[@"lineBufferOffset"] integerValue];
-                caretBufferOffset = [bufferOffsets[@"caretBufferOffset"] integerValue];
-            }
-            
-            [self appendBufferReference:target];
-            [self.currentSourceBufferReference setLineBufferOffset:lineBufferOffset];
-            [self.currentSourceBufferReference setCaretBufferOffset:caretBufferOffset];
+    CEESourceBuffer* target = nil;
+    for (CEESourceBuffer* buffer in _openedSourceBuffers) {
+        if ([buffer.filePath isEqualToString:filePath]) {
+            target = buffer;
+            break;
         }
     }
     
+    if (!target) {
+        target = [self securityOpenSourceBufferWithFilePath:filePath];
+        if (target)
+            [_openedSourceBuffers addObject:target];
+    }
+    
+    if (target) {
+        if (!target.symbol_wrappers)
+            cee_source_buffer_parse(target, kCEESourceBufferParserOptionCreateSymbolWrapper);
+        
+        bufferOffsets = [self lastPresentedBufferOffsetInHistory:target.filePath];
+        if (bufferOffsets) {
+            lineBufferOffset = [bufferOffsets[@"lineBufferOffset"] integerValue];
+            caretBufferOffset = [bufferOffsets[@"caretBufferOffset"] integerValue];
+        }
+        
+        [self appendBufferReference:target];
+        [self.currentSourceBufferReference setLineBufferOffset:lineBufferOffset];
+        [self.currentSourceBufferReference setCaretBufferOffset:caretBufferOffset];
+    }
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortOpenSourceBuffer object:self];
-    return targets;
+    
+    return target;
 }
 
 - (CEESourceBuffer*)openUntitledSourceBuffer {
@@ -392,6 +325,112 @@ BOOL ContextContainSymbol(CEEList* context,
         [self appendBufferReference:buffer];
         [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortOpenSourceBuffer object:self];
     }
+    return buffer;
+}
+
+- (void)closeSourceBuffers:(NSArray*)buffers {
+    CEESourceBuffer* currentActived = [self activedSourceBuffer];
+    CEESourceBuffer* nextActived = nil;
+    if ([buffers containsObject:currentActived])
+        nextActived = [self findNextActivedWithCloseSourceBuffers:buffers];
+    
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    for (CEESourceBuffer* buffer in buffers) {
+        [sourceBufferManager closeSourceBuffer:buffer];
+        [_openedSourceBuffers removeObject:buffer];
+    }
+    _descriptor = @"";
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCloseSourceBuffer object:self];
+    
+    if (nextActived)
+        [self setActivedSourceBuffer:nextActived];
+    
+    if (!_openedSourceBuffers.count)
+        [self.session deletePort:self];
+}
+
+- (void)closeAllSourceBuffers {
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    for (CEESourceBuffer* buffer in _openedSourceBuffers)
+        [sourceBufferManager closeSourceBuffer:buffer];
+    [_openedSourceBuffers removeAllObjects];
+    _descriptor = @"";
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCloseSourceBuffer object:self];
+}
+
+- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    NSString* filePathBeforeSave = buffer.filePath;
+    BOOL ret = NO;
+    BOOL withNewFilePath = NO;
+    if (![buffer.filePath isEqualToString:filePath])
+        withNewFilePath = YES;
+    
+    if (withNewFilePath) {
+        ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
+        if (!ret) {
+            NSLog(@"ERROR: Save source buffer failed!");
+            return;
+        }
+        
+        if (![self.session.project addSecurityBookmarkWithFilePath:filePath]) {
+            NSLog(@"ERROR: Create save path bookmark failed!");
+            return;
+        }
+        
+        if ([sourceBufferManager isTemporaryFilePath:filePathBeforeSave]) {
+            CEEProjectController* controller = (CEEProjectController*)[NSDocumentController sharedDocumentController];
+            [controller replaceSourceBufferReferenceFilePath:filePathBeforeSave to:filePath];
+        }
+        else {
+            [self openSourceBufferWithFilePath:filePath];
+        }
+    }
+    else {
+        ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
+    }
+    
+    [self.session.project syncSourceSymbols:buffer];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSaveSourceBuffer object:self userInfo:@{@"sourceBuffer" : buffer}];
+}
+
+- (CEESourceBuffer*)securityOpenSourceBufferWithFilePath:(NSString*)filePath {
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+    CEESourceBuffer* buffer = nil;
+    CEESecurityBookmark* bookmark = nil;
+    
+    // create bookmark if doesn't exist
+    bookmark = [self.session.project getSecurityBookmarkWithFilePath:filePath];
+    if (!bookmark) {
+        if (![self.session.project addSecurityBookmarkWithFilePath:filePath]) {
+#ifdef DEBUG
+            NSLog(@"ERROR: Create bookmark failed!");
+#endif
+            goto exit;
+        }
+        bookmark = [self.session.project getSecurityBookmarkWithFilePath:filePath];
+    }
+    
+    if (access([filePath UTF8String], R_OK) != 0) {
+        if (bookmark) {
+            [delegate startAccessingSecurityScopedResourceWithBookmark:bookmark];
+        }
+        else {
+#ifdef DEBUG
+            NSLog(@"ERROR: Access security scoped resource but bookmark is nil!");
+#endif
+            goto exit;
+        }
+    }
+    
+    buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionShare];
+
+exit:
     return buffer;
 }
 
@@ -452,72 +491,6 @@ BOOL ContextContainSymbol(CEEList* context,
     return nextActivedBeforeCurrent ? nextActivedBeforeCurrent : nextActivedAfterCurrent;    
 }
 
-- (void)closeSourceBuffers:(NSArray*)buffers {    
-    CEESourceBuffer* currentActived = [self activedSourceBuffer];
-    CEESourceBuffer* nextActived = nil;
-    if ([buffers containsObject:currentActived]) 
-        nextActived = [self findNextActivedWithCloseSourceBuffers:buffers];
-    
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    for (CEESourceBuffer* buffer in buffers) {
-        [sourceBufferManager closeSourceBuffer:buffer];
-        [_openedSourceBuffers removeObject:buffer];
-    }
-    _descriptor = @"";
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCloseSourceBuffer object:self];
-    
-    if (nextActived)
-        [self setActivedSourceBuffer:nextActived];
-    
-    if (!_openedSourceBuffers.count)
-        [self.session deletePort:self];
-}
-
-- (void)closeAllSourceBuffers {
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    for (CEESourceBuffer* buffer in _openedSourceBuffers)
-        [sourceBufferManager closeSourceBuffer:buffer];
-    _openedSourceBuffers = [[NSMutableArray alloc] init];
-    _descriptor = @"";
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCloseSourceBuffer object:self];
-}
-
-- (void)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath {
-    AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    
-    NSString* filePathBeforeSave = buffer.filePath;
-    
-    BOOL withNewFilePath = NO;
-    if (![buffer.filePath isEqualToString:filePath])
-        withNewFilePath = YES;
-    
-    if (withNewFilePath) {
-        BOOL ret = [sourceBufferManager saveSourceBuffer:buffer atFilePath:filePath];
-        if (!ret) {
-            NSLog(@"Save Source Buffer Failed!");
-            return;
-        }
-        [self.session.project addSecurityBookmarksWithFilePaths:@[filePath]];
-        
-        if ([sourceBufferManager isTemporaryFilePath:filePathBeforeSave]) {
-            CEEProjectController* controller = (CEEProjectController*)[NSDocumentController sharedDocumentController];
-            [controller replaceSourceBufferReferenceFilePath:filePathBeforeSave to:filePath];
-        }
-        else {
-            [self openSourceBuffersWithFilePaths:@[filePath]];
-        }
-    }
-    else {
-        [self securitySaveSourceBuffer:buffer atFilePath:filePath];
-    }
-    
-    [self.session.project syncSourceSymbols:buffer];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSaveSourceBuffer object:self userInfo:@{@"sourceBuffer" : buffer}];
-}
 
 - (NSString*)serialize {
     AppDelegate* delegate = [NSApp delegate];
@@ -599,20 +572,19 @@ BOOL ContextContainSymbol(CEEList* context,
 - (void)deserialize:(NSDictionary*)dict {
     NSString* identifier = [dict allKeys][0];
     NSDictionary* descriptor = dict[identifier];
-    CEESourceBuffer* buffer = nil;
     CEESourceBufferReferenceContext* reference = nil;
     
-    // recover Opened Source Buffers
+    // Recover Opened Source Buffers
     NSArray* openBufferDescriptors = descriptor[@"openedSourceBuffers"];
     for (NSDictionary* openBufferDescriptor in openBufferDescriptors) {
-        NSString* filePath = openBufferDescriptor[@"filePath"];        
-        buffer = [self securityOpenSourceBufferWithFilePath:filePath];
+        NSString* filePath = openBufferDescriptor[@"filePath"];
+        CEESourceBuffer* buffer = [self securityOpenSourceBufferWithFilePath:filePath];
         if (buffer)
             [_openedSourceBuffers addObject:buffer];
     }
     
     // Make sure there is always an opened source buffer existed when deserializing.
-    // We open an untitled source buffer when _openedSourceBuffers is empty, then 
+    // Cymbols open an untitled source buffer when _openedSourceBuffers is empty, then
     // manual init the _sourceBufferReferences and _bufferReferenceIndex. 
     if (!_openedSourceBuffers.count) {
         AppDelegate* delegate = [NSApp delegate];
@@ -620,9 +592,11 @@ BOOL ContextContainSymbol(CEEList* context,
         CEESourceBuffer* buffer = [sourceBufferManager openUntitledSourceBuffer];
         if (buffer) {
             [_openedSourceBuffers addObject:buffer];
-            CEESourceBufferReferenceContext* refernce = [[CEESourceBufferReferenceContext alloc] initWithFilePath:buffer.filePath];
-            [_sourceBufferReferences addObject:refernce];
-            _bufferReferenceIndex ++;
+            reference = [[CEESourceBufferReferenceContext alloc] initWithFilePath:buffer.filePath];
+            if (reference) {
+                [_sourceBufferReferences addObject:reference];
+                _bufferReferenceIndex ++;
+            }
         }
     }
     else {
@@ -632,10 +606,16 @@ BOOL ContextContainSymbol(CEEList* context,
             NSString* filePath = referenceDescriptor[@"filePath"];
             NSString* lineBufferOffset = referenceDescriptor[@"lineBufferOffset"];
             NSString* caretBufferOffset = referenceDescriptor[@"caretBufferOffset"];
+            
+            if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
+                continue;
+            
             reference = [[CEESourceBufferReferenceContext alloc] initWithFilePath:filePath];
-            [reference setLineBufferOffset:[lineBufferOffset integerValue]];
-            [reference setCaretBufferOffset:[caretBufferOffset integerValue]];
-            [_sourceBufferReferences addObject:reference];
+            if (reference) {
+                [reference setLineBufferOffset:[lineBufferOffset integerValue]];
+                [reference setCaretBufferOffset:[caretBufferOffset integerValue]];
+                [_sourceBufferReferences addObject:reference];
+            }
         }
         
         // recover Source Buffer Reference Index
@@ -814,7 +794,7 @@ BOOL ContextContainSymbol(CEEList* context,
     
     if (cee_list_length(_context) == 1) {
         CEESourceSymbol* symbol = cee_list_nth_data(_context, 0);
-        CEESourcePoint* sourcePoint = [[CEESourcePoint alloc] initWithFilePath:[NSString stringWithUTF8String:symbol->filepath] andLocations:[NSString stringWithUTF8String:symbol->locations]];
+        CEESourcePoint* sourcePoint = [[CEESourcePoint alloc] initWithFilePath:[NSString stringWithUTF8String:symbol->file_path] andLocations:[NSString stringWithUTF8String:symbol->locations]];
         [self jumpToSourcePoint:sourcePoint];
     }
     else
@@ -895,7 +875,7 @@ BOOL ContextContainSymbol(CEEList* context,
 }
 
 - (NSArray*)filePathsFilter:(NSString*)condition {
-    return [_project getFilePathsWithCondition:condition];
+    return [_project getReferenceFilePathsWithCondition:condition];
 }
 
 - (NSString*)serialize {
@@ -1022,13 +1002,10 @@ BOOL ContextContainSymbol(CEEList* context,
 
 @implementation CEEProject
 
-@synthesize properties = _properties;
-
 - (instancetype)init {
     self = [super init];
     if (!self)
         return nil;
-    _properties = [CEEProjectSetting projectSettingWithName:nil path:nil filePaths:nil filePathsUserSelected:nil];
     _sessions = nil;
     // create an init session
     CEESession* session = [self createSession];
@@ -1094,36 +1071,20 @@ BOOL ContextContainSymbol(CEEList* context,
     }
 }
 
-- (void)createSessionWithFilePaths:(NSArray*)filePaths {
-    CEESession* session = [self createSession];
-    [session.project setCurrentSession:session];
-    [session.activedPort openSourceBuffersWithFilePaths:filePaths];
-    [session createDescriptor:open_file_descriptor_template];
-    [self makeWindowControllerFromSession:session];
-}
-
-- (void)deleteAllSessions {
-    for (CEESession* session in _sessions)
-        [session deleteAllPorts];
-    
-    _sessions = nil;
-    self.currentSession = nil;
-}
-
 - (void)setProperties:(CEEProjectSetting*)properties {
     AppDelegate* delegate = [NSApp delegate];
     
     if (!properties || !properties.name || !properties.path)
         return;
-    
-    _properties = properties;
-    
+        
     NSString* backendName = [properties.name stringByAppendingPathExtension:@"cymd"];
     NSString* projectPath = [properties.path stringByAppendingPathComponent:properties.name];
     NSString* backendPath = [projectPath stringByAppendingPathComponent:backendName];
     
     [[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:backendPath]];
     _database = cee_database_create([backendPath UTF8String]);
+    _databasePath = backendPath;
+    _name = properties.name;
     
     // turn off journal mode
     if (!_database)
@@ -1135,34 +1096,34 @@ BOOL ContextContainSymbol(CEEList* context,
     // turn off journal mode, apple's sandbox forbid the journal file created
     sqlite3_exec(_database, "PRAGMA journal_mode=MEMORY;", NULL, 0, 0);
 
-    // { save filePathsExpanded
-    NSArray* filePaths = properties.filePathsExpanded;
-    CEEList* file_paths_expanded = NULL;
-    for (NSString* filePath in filePaths)
-        file_paths_expanded = cee_list_prepend(file_paths_expanded, 
-                                               cee_strdup([filePath UTF8String]));
-    cee_database_filepaths_append(_database, file_paths_expanded);
-    cee_list_free_full(file_paths_expanded, cee_free);
-    file_paths_expanded = NULL;
-    // save filePathsExpanded }
+    CEEList* file_paths = NULL;
     
-    // { save User Selected File Path Bookmark and bookmarks
-    NSArray* filePathsUserSelected = properties.filePathsUserSelected;
-    CEEList* file_paths_user_selected = NULL;
-    for (NSString* filePath in filePathsUserSelected)
-        file_paths_user_selected = cee_list_prepend(file_paths_user_selected, 
-                                                    cee_strdup([filePath UTF8String]));
-    cee_database_filepaths_user_selected_append(_database, file_paths_user_selected);
-    cee_list_free_full(file_paths_user_selected, cee_free);
-    file_paths_user_selected = NULL;
+    // { save referenceRoots
+    for (NSString* filePath in properties.referenceRoots)
+        file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
+    file_paths = cee_list_reverse(file_paths);
+    cee_database_file_reference_roots_append(_database, file_paths);
+    cee_list_free_full(file_paths, cee_free);
+    file_paths = NULL;
+    // save referenceRoots }
     
-    NSArray* bookmarks = CreateBookmarksWithFilePaths(properties.filePathsUserSelected);
-    for (CEESecurityBookmark* bookmark in bookmarks) {
-        cee_database_security_bookmark_append(_database,
-                                              [bookmark.filePath UTF8String], 
-                                              [bookmark.content UTF8String]);
+    // { save referenceFilePaths
+    NSArray* referenceFilePaths = ExpandFilePaths(properties.referenceRoots);
+    for (NSString* filePath in referenceFilePaths)
+        file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
+    file_paths = cee_list_reverse(file_paths);
+    cee_database_file_references_append(_database, file_paths);
+    cee_list_free_full(file_paths, cee_free);
+    file_paths = NULL;
+    // save referencedFilePaths }
+    
+    
+    // { add referenceRoots bookmarks then enable accessing
+    for (NSString* filePath in properties.referenceRoots) {
+        CEESecurityBookmark* bookmark = [self addSecurityBookmarkWithFilePath:filePath];
+        [delegate startAccessingSecurityScopedResourceWithBookmark:bookmark];
     }
-    // save User Selected File Path Bookmark and bookmarks }
+    // add referenceRoots bookmarks then enable accessing }
     
     for (CEESession* session in self.sessions) {
         for (CEESessionPort* port in session.ports) {
@@ -1171,144 +1132,24 @@ BOOL ContextContainSymbol(CEEList* context,
         }
     }
     
-    [self startAccessSecurityScopedDirectories];
-    
-    if (properties.filePathsExpanded) {
-        for (CEESession* session in self.sessions) {
-            [session.activedPort openSourceBuffersWithFilePaths:@[properties.filePathsExpanded[0]]];
-        }
+    if (referenceFilePaths) {
+        for (CEESession* session in self.sessions)
+            [session.activedPort openSourceBufferWithFilePath:referenceFilePaths[0]];
     }
     
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectSettingProperties object:self];
 }
 
-- (CEEProjectSetting*)properties {
-    return _properties;
-}
-
-- (NSArray*)getFilePathsUserSelected {
-    if (!_database)
-        return nil;
-    
-    NSMutableArray* filePaths = nil;
-    CEEList* file_paths = cee_database_filepaths_user_selected_get(_database);
-    CEEList* p = NULL;
-    p = file_paths;
-    while (p) {
-        cee_char* str = p->data;
-        if (!filePaths)
-            filePaths = [[NSMutableArray alloc] init];
-        [filePaths addObject:[NSString stringWithUTF8String:str]];
-        p = p->next;
+- (void)serialize {
+    cee_database_session_descriptors_remove(_database);
+    for (CEESessionWindowController* controller in self.windowControllers) {
+        CEESession* session = controller.session;
+        NSString* string = [session serialize];
+        cee_database_session_descriptor_append(_database, [string UTF8String]);
     }
-    cee_list_free_full(file_paths, cee_free);
-    return filePaths;
 }
 
-- (NSArray*)getFilePathsWithCondition:(nullable NSString*)condition {
-    if (!_database)
-        return nil;
-    
-    NSMutableArray* filePaths = nil;
-    condition = [condition stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    if ([condition isEqualToString:@"*"] || 
-        [condition isEqualToString:@""])
-        condition = nil;
-        
-    CEEList* file_paths = cee_database_filepaths_get(_database, [condition UTF8String]);
-    CEEList* p = NULL;
-    p = file_paths;
-    while (p) {
-        cee_char* str = p->data;
-        if (!filePaths)
-            filePaths = [[NSMutableArray alloc] init];
-        [filePaths addObject:[NSString stringWithUTF8String:str]];
-        p = p->next;
-    }
-    cee_list_free_full(file_paths, cee_free);
-    return filePaths;
-}
-
-- (void)addFilePaths:(NSArray*)filePaths {
-    filePaths = ExpandFilePaths(filePaths);
-    if (!filePaths)
-        return;
-    
-    CEEList* file_paths = NULL;
-    for (NSString* filePath in filePaths)
-        file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
-    file_paths = cee_list_reverse(file_paths);
-    
-    cee_database_filepaths_append(_database, file_paths);
-    cee_list_free_full(file_paths, cee_free);
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectAddFilePaths object:self];
-}
-
-- (void)removeFilePaths:(NSArray*)filePaths {
-    filePaths = ExpandFilePaths(filePaths);
-    if (!filePaths)
-        return;
-    
-    CEEList* file_paths = NULL;
-    for (NSString* filePath in filePaths)
-        file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
-    file_paths = cee_list_reverse(file_paths);
-    
-    cee_database_filepaths_remove(_database, file_paths);
-    cee_list_free_full(file_paths, cee_free);
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectRemoveFilePaths object:self];
-}
-
-- (CEEProjectSetting*)createEmptyProjectSetting {
-    AppDelegate* delegate = [NSApp delegate];
-    CEEProjectSetting* setting = nil;
-    NSString* filePath = [delegate defaultProjectSettingPath];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSMutableDictionary* descriptor = [CEEJSONReader objectFromFile:filePath];
-        CEESecurityBookmark* bookmark = [[CEESecurityBookmark alloc] init];
-        bookmark.filePath = descriptor[@"filePath"];
-        bookmark.content = descriptor[@"bookmarkContent"];
-        
-        setting = [CEEProjectSetting projectSettingWithName:@"NewProject" path:bookmark.filePath filePaths:nil filePathsUserSelected:nil];
-        setting.bookmark = bookmark;
-    }
-    else {
-        setting = [CEEProjectSetting projectSettingWithName:@"NewProject" path:nil filePaths:nil filePathsUserSelected:nil];
-    }
-    return setting;
-}
-
-
-- (void)saveProjectSettingAsDefault:(CEEProjectSetting*)setting {
-    AppDelegate* delegate = [NSApp delegate];
-    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
-    NSString* path = setting.path;
-    CEESecurityBookmark* bookmark = CreateBookmarkWithFilePath(path);
-    if (bookmark) {
-        [dict setValue:bookmark.filePath forKey:@"filePath"];
-        [dict setValue:bookmark.content forKey:@"bookmarkContent"];
-    }
-    NSString* filePath = [delegate defaultProjectSettingPath];
-    [CEEJSONReader object:dict toFile:filePath];
-}
-
-- (NSArray*)directoriesFromFilePaths:(NSArray*)filePaths {
-    NSMutableArray* directorise = nil;
-    for (NSString* filePath in filePaths) {
-        BOOL isDirectory = NO;
-        if ([[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&isDirectory] && isDirectory) {
-            if (!directorise)
-                directorise = [[NSMutableArray alloc] init];
-            [directorise addObject:filePath];
-        }
-    }
-    return directorise;
-}
-
-- (void)deserialize:(NSString*)filePath {    
+- (void)deserialize:(NSString*)filePath {
     CEEList* descriptors = NULL;
     CEEList* p = NULL;
     cee_char* descriptor_string = NULL;
@@ -1317,7 +1158,7 @@ BOOL ContextContainSymbol(CEEList* context,
     
     _database = cee_database_open([filePath UTF8String]);
     if (!_database)
-        return ;
+        return;
     
     // turn off journal mode, apple's sandbox forbid the journal file created
     sqlite3_exec(_database, "PRAGMA journal_mode=MEMORY;", NULL, 0, 0);
@@ -1328,12 +1169,9 @@ BOOL ContextContainSymbol(CEEList* context,
     [self deleteAllSessions];
     
     NSString* regularFormat = [filePath stringByDeletingLastPathComponent];
-    NSString* name = [[regularFormat lastPathComponent] stringByDeletingPathExtension];
-    NSString* path = [regularFormat stringByDeletingLastPathComponent];
-    
-    _properties = [CEEProjectSetting projectSettingWithName:name path:path filePaths:[self getFilePathsWithCondition:nil] filePathsUserSelected:[self getFilePathsUserSelected]];
-    
-    [self startAccessSecurityScopedDirectories];
+    _name = [[regularFormat lastPathComponent] stringByDeletingPathExtension];
+        
+    [self startAccessFilePathsReferenced];
     
     // create sessions from session descriptors
     descriptors = cee_database_session_descriptors_get(_database);
@@ -1362,40 +1200,194 @@ BOOL ContextContainSymbol(CEEList* context,
     if (!info_string)
         [self createCurrentVersionDatabaseContent];
     
-    NSString* infoStringLog = [NSString stringWithUTF8String:info_string];
+    NSString* infoStringLogged = [NSString stringWithUTF8String:info_string];
     NSString* infoStringCurrent = [delegate infoString];
     
-    infoStringLog = [infoStringLog stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    infoStringLogged = [infoStringLogged stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     infoStringCurrent = [infoStringCurrent stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     
-    if ([infoStringLog compare:infoStringCurrent options:NSCaseInsensitiveSearch] != NSOrderedSame)
+    if ([infoStringLogged compare:infoStringCurrent options:NSCaseInsensitiveSearch] != NSOrderedSame)
         [self createCurrentVersionDatabaseContent];
     
     cee_free(info_string);
+}
+
+- (void)createSessionWithFilePaths:(NSArray*)filePaths {
+    CEESession* session = [self createSession];
+    [session.project setCurrentSession:session];
+    
+    for (NSString* filePath in filePaths)
+        [session.activedPort openSourceBufferWithFilePath:filePath];
+    
+    [session createDescriptor:open_file_descriptor_template];
+    [self makeWindowControllerFromSession:session];
+}
+
+- (void)deleteAllSessions {
+    for (CEESession* session in _sessions)
+        [session deleteAllPorts];
+    
+    _sessions = nil;
+    self.currentSession = nil;
+}
+
+- (NSArray*)getReferenceRoots {
+    if (!_database)
+        return nil;
+    
+    NSMutableArray* filePaths = nil;
+    CEEList* file_paths = cee_database_file_reference_roots_get(_database);
+    CEEList* p = NULL;
+    p = file_paths;
+    while (p) {
+        cee_char* str = p->data;
+        if (!filePaths)
+            filePaths = [[NSMutableArray alloc] init];
+        [filePaths addObject:[NSString stringWithUTF8String:str]];
+        p = p->next;
+    }
+    cee_list_free_full(file_paths, cee_free);
+    return filePaths;
+}
+
+- (NSArray*)getReferenceFilePathsWithCondition:(nullable NSString*)condition {
+    if (!_database)
+        return nil;
+    
+    NSMutableArray* filePaths = nil;
+    condition = [condition stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    if ([condition isEqualToString:@"*"] || 
+        [condition isEqualToString:@""])
+        condition = nil;
+        
+    CEEList* file_paths = cee_database_file_reference_paths_get(_database, [condition UTF8String]);
+    CEEList* p = NULL;
+    p = file_paths;
+    while (p) {
+        cee_char* str = p->data;
+        if (!filePaths)
+            filePaths = [[NSMutableArray alloc] init];
+        [filePaths addObject:[NSString stringWithUTF8String:str]];
+        p = p->next;
+    }
+    cee_list_free_full(file_paths, cee_free);
+    return filePaths;
+}
+
+- (void)addReferenceRoot:(NSString*)filePath {
+    AppDelegate* delegate = [NSApp delegate];
+    
+    CEEList* file_paths = NULL;
+    
+    // { save roots
+    file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
+    cee_database_file_reference_roots_append(_database, file_paths);
+    cee_list_free_full(file_paths, cee_free);
+    file_paths = NULL;
+    // save roots }
+    
+    NSArray* filePaths = ExpandFilePaths(@[filePath]);
+    for (NSString* filePath in filePaths)
+        file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
+    file_paths = cee_list_reverse(file_paths);
+    cee_database_file_references_append(_database, file_paths);
+    cee_list_free_full(file_paths, cee_free);
+    file_paths = NULL;
+    // save referencedFilePaths }
+        
+    // { add roots bookmarks then enable accessing
+    CEESecurityBookmark* bookmark = [self addSecurityBookmarkWithFilePath:filePath];
+    [delegate startAccessingSecurityScopedResourceWithBookmark:bookmark];
+    // save roots bookmarks then enable accessing }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectAddReference object:self];
+}
+
+- (void)addReferenceRoots:(NSArray*)roots {
+    for (NSString* root in roots)
+        [self addReferenceRoot:root];
+}
+
+- (void)removeReferenceRoot:(NSString*)filePath {    
+    CEEList* file_paths = NULL;
+    
+    // { remove referenceFilePaths
+    NSArray* filePaths = ExpandFilePaths(@[filePath]);
+    for (NSString* filePath in filePaths)
+        file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
+    cee_database_file_references_remove(_database, file_paths);
+    cee_list_free_full(file_paths, cee_free);
+    file_paths = NULL;
+    // remove referencedFilePaths }
+    
+    // { remove roots
+    file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
+    cee_database_file_reference_roots_remove(_database, file_paths);
+    cee_list_free_full(file_paths, cee_free);
+    file_paths = NULL;
+    // remove roots }
+    
+    [self removeSecurityBookmarkWithFilePath:filePath];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectRemoveReference object:self];
+}
+
+- (void)removeReferenceRoots:(NSArray*)roots {
+    for (NSString* root in roots)
+        [self removeReferenceRoot:root];
+}
+
+- (void)addReference:(NSString*)filePath {
+    cee_database_file_reference_append(_database, [filePath UTF8String]);
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectAddReference object:self];
+}
+
+- (void)addReferences:(NSArray*)filePaths {
+    CEEList* file_paths = NULL;
+    NSArray* expandedFilePaths = ExpandFilePaths(filePaths);
+    for (NSString* filePath in expandedFilePaths)
+        file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
+    file_paths = cee_list_reverse(file_paths);
+    cee_database_file_references_append(_database, file_paths);
+    cee_list_free_full(file_paths, cee_free);
+    file_paths = NULL;
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectAddReference object:self];
+}
+
+- (void)removeReference:(NSString*)filePath {
+    cee_database_file_reference_remove(_database, [filePath UTF8String]);
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectRemoveReference object:self];
+}
+
+- (void)removeReferences:(NSArray*)filePaths {
+    CEEList* file_paths = NULL;
+    NSArray* expandedFilePaths = ExpandFilePaths(filePaths);
+    for (NSString* filePath in expandedFilePaths)
+        file_paths = cee_list_prepend(file_paths, cee_strdup([filePath UTF8String]));
+    file_paths = cee_list_reverse(file_paths);
+    cee_database_file_references_remove(_database, file_paths);
+    cee_list_free_full(file_paths, cee_free);
+    file_paths = NULL;
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectRemoveReference object:self];
+}
+
+- (BOOL)filePathIsReferenced:(NSString*)filePath {
+    return cee_database_file_reference_is_existed(_database, [filePath UTF8String]);
+}
+
+- (BOOL)filePathIsReferenceRoot:(NSString*)filePath {
+    return cee_database_file_reference_root_is_existed(_database, [filePath UTF8String]);
 }
 
 - (void)createCurrentVersionDatabaseContent {
     // TODO: create current version database content
 }
 
-- (void)startAccessSecurityScopedDirectories {
-    NSArray* directories = [self directoriesFromFilePaths:[self getFilePathsUserSelected]];
-    NSArray* bookmarks = [self getSecurityBookmarksWithFilePaths:directories];
-    [self startAccessSecurityScopedResourcesWithBookmarks:bookmarks];    
-}
-
-- (void)stopAccessSecurityScopedDirectories {
-    NSArray* directories = [self directoriesFromFilePaths:[self getFilePathsUserSelected]];
-    NSArray* bookmarks = [self getSecurityBookmarksWithFilePaths:directories];
-    [self stopAccessSecurityScopedResourcesWithBookmarks:bookmarks];
-}
-
-- (void)serialize {
-    cee_database_session_descriptors_remove(_database);
-    for (CEESessionWindowController* controller in self.windowControllers) {
-        CEESession* session = controller.session;
-        NSString* string = [session serialize];
-        cee_database_session_descriptor_append(_database, [string UTF8String]);
+- (void)startAccessFilePathsReferenced {
+    AppDelegate* delegate = [NSApp delegate];
+    NSArray* filePaths = [self getReferenceRoots];
+    for (NSString* filePath in filePaths) {
+        CEESecurityBookmark* bookmark = [self getSecurityBookmarkWithFilePath:filePath];
+        [delegate startAccessingSecurityScopedResourceWithBookmark:bookmark];
     }
 }
 
@@ -1404,10 +1396,10 @@ BOOL ContextContainSymbol(CEEList* context,
         return;
     
     CEEList* list = NULL;
-    cee_int symbols_count = cee_database_filepath_symbols_count_get(_database, 
-                                                                    [buffer.filePath UTF8String]);
+    cee_int symbols_count = cee_database_file_reference_symbols_count_get(_database,
+                                                                          [buffer.filePath UTF8String]);
     if (symbols_count)
-        cee_database_symbols_delete_by_filepath(_database, [buffer.filePath UTF8String]);
+        cee_database_symbols_delete_by_file_path(_database, [buffer.filePath UTF8String]);
     
     cee_source_fregment_symbol_tree_dump_to_list(buffer.prep_directive_symbol_tree, &list);
     cee_source_fregment_symbol_tree_dump_to_list(buffer.statement_symbol_tree, &list);
@@ -1415,81 +1407,179 @@ BOOL ContextContainSymbol(CEEList* context,
         // update last parsed time to buffer
         cee_char* time_str = cee_time_to_iso8601(cee_time_current());
         if (time_str) {
-            cee_database_filepath_last_parsed_time_set(_database,
-                                                       [buffer.filePath UTF8String],
-                                                       time_str);
+            cee_database_file_reference_last_parsed_time_set(_database,
+                                                             [buffer.filePath UTF8String],
+                                                             time_str);
             cee_free(time_str);
         }       
         cee_database_symbols_write(_database, list);
-        cee_database_filepath_symbols_count_set(_database, 
-                                                [buffer.filePath UTF8String], 
-                                                cee_list_length(list));
+        cee_database_file_reference_symbols_count_set(_database,
+                                                      [buffer.filePath UTF8String],
+                                                      cee_list_length(list));
         cee_list_free(list);
     }
 }
 
-- (void)addSecurityBookmarksWithFilePaths:(NSArray*)filePaths {
-    NSArray* bookmarks = CreateBookmarksWithFilePaths(filePaths);
-    for (CEESecurityBookmark* bookmark in bookmarks) {
-        cee_database_security_bookmark_append(_database,
-                                              [bookmark.filePath UTF8String],
-                                              [bookmark.content UTF8String]);
-    }
-}
-
-- (void)removeSecurityBookmarksWithFilePaths:(NSArray*)filePaths {
-    for (NSString* filePath in filePaths)
-        cee_database_security_bookmark_remove(_database, [filePath UTF8String]);
-}
-
-- (NSArray*)getSecurityBookmarksWithFilePaths:(NSArray*)filePaths {
-    NSMutableArray* bookmarks = nil;
-    for (NSString* filePath in filePaths) {
-        cee_char* content = cee_database_security_bookmark_content_get(_database, [filePath UTF8String]);
-        if (content) {
-            CEESecurityBookmark* bookmark = [[CEESecurityBookmark alloc] init];
-            bookmark.filePath = filePath;
-            bookmark.content = [NSString stringWithUTF8String:content];
-            cee_free(content);
-            if (!bookmarks)
-                bookmarks = [[NSMutableArray alloc] init];
-            [bookmarks addObject:bookmark];
-        }
-    }
-    return bookmarks;
-}
-
-- (void)startAccessSecurityScopedResourcesWithBookmarks:(NSArray*)bookmarks {
-    for (CEESecurityBookmark* bookmark in bookmarks) {
-        BOOL isStale = NO;
-        NSError* error = nil;
-        BOOL isSuccess = NO;
-        NSData* bookmarkData = [[NSData alloc] initWithBase64EncodedString:bookmark.content options:NSDataBase64DecodingIgnoreUnknownCharacters];
-        NSURL *allowedUrl = [NSURL URLByResolvingBookmarkData:bookmarkData options:NSURLBookmarkResolutionWithSecurityScope relativeToURL:nil bookmarkDataIsStale:&isStale error:&error];
-        if (allowedUrl)
-            isSuccess = [allowedUrl startAccessingSecurityScopedResource];
-    }
-}
-
-- (void)stopAccessSecurityScopedResourcesWithBookmarks:(NSArray*)bookmarks {
-    for (CEESecurityBookmark* bookmark in bookmarks) {
-        BOOL isStale = NO;
-        NSError* error = nil;
-        NSData* bookmarkData = [[NSData alloc] initWithBase64EncodedString:bookmark.content options:NSDataBase64DecodingIgnoreUnknownCharacters];
-        NSURL *allowedUrl = [NSURL URLByResolvingBookmarkData:bookmarkData options:NSURLBookmarkResolutionWithSecurityScope relativeToURL:nil bookmarkDataIsStale:&isStale error:&error];
-        if (allowedUrl)
-            [allowedUrl stopAccessingSecurityScopedResource];
-    }
-}
-
 - (void)close {
-    [self stopAccessSecurityScopedDirectories];
     cee_database_close(_database);
+    _database = NULL;
     [super close];
 }
 
 - (BOOL)isUntitled {
     return self.database == NULL;
+}
+
+- (BOOL)createFile:(NSString*)filePath {
+    BOOL ret = [[NSFileManager defaultManager] createFileAtPath:filePath contents:nil attributes:nil];
+    if (ret)
+        [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectCreateFile object:self];
+    return ret;
+}
+
+- (BOOL)createDirectory:(NSString*)path {
+    BOOL ret = [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:NO attributes:nil error:nil];
+    if (ret)
+        [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectCreateFile object:self];
+    return ret;
+}
+
+
+- (BOOL)removeFile:(NSString*)filePath {
+    NSURL* URL = [NSURL fileURLWithPath:filePath];
+    NSError* error;
+    NSArray* expandedFilePaths = ExpandFilePaths(@[filePath]);
+    BOOL ret = [[NSFileManager defaultManager] trashItemAtURL:URL resultingItemURL:nil error:&error];
+    if (!ret) {
+#ifdef DEBUG
+        NSLog(@"ERROR: remove file path %@ failed!", filePath);
+#endif
+    }
+    if (ret) {
+        if (cee_database_file_reference_root_is_existed(_database, [filePath UTF8String]))
+            cee_database_file_reference_root_remove(_database, [filePath UTF8String]);
+        
+        if (expandedFilePaths)
+            [self removeReferences:expandedFilePaths];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectRemoveFile object:self];
+        
+        AppDelegate* delegate = [NSApp delegate];
+        CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+        [sourceBufferManager syncSourceBuffersFromFiles];
+        
+    }
+    return ret;
+}
+
+- (BOOL)removeFiles:(NSArray*)filePaths {
+    BOOL ret = FALSE;
+    for (NSString* filePath in filePaths) {
+        NSArray* expandedFilePaths = ExpandFilePaths(@[filePath]);
+        NSURL* URL = [NSURL fileURLWithPath:filePath];
+        NSError* error;
+        ret = [[NSFileManager defaultManager] trashItemAtURL:URL resultingItemURL:nil error:&error];
+        if (ret) {
+            if (cee_database_file_reference_root_is_existed(_database, [filePath UTF8String]))
+                cee_database_file_reference_root_remove(_database, [filePath UTF8String]);
+            
+            if (expandedFilePaths)
+                [self removeReferences:expandedFilePaths];
+        }
+        else {
+#ifdef DEBUG
+            NSLog(@"ERROR: remove file path %@ failed!", filePath);
+#endif
+            break;
+        }
+    }
+    
+    if (ret) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationProjectRemoveFile object:self];
+                
+        AppDelegate* delegate = [NSApp delegate];
+        CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
+        [sourceBufferManager syncSourceBuffersFromFiles];
+    }
+    return ret;
+}
+
+
+- (CEESecurityBookmark*)addSecurityBookmarkWithFilePath:(NSString*)filePath {
+    CEESecurityBookmark* bookmark = CreateBookmarkWithFilePath(filePath);
+    if (!bookmark) {
+#ifdef DEBUG
+        NSLog(@"ERROR: add security bookmark for %@ failed!", filePath);
+#endif
+        return nil;
+    }
+    
+    cee_database_security_bookmark_append(_database,
+                                          [bookmark.filePath UTF8String],
+                                          [bookmark.content UTF8String]);
+    
+#ifdef DEBUG
+        NSLog(@"INFO: add security bookmark for %@ successed!", filePath);
+#endif
+    return bookmark;
+}
+
+- (void)removeSecurityBookmarkWithFilePath:(NSString*)filePath {
+    cee_boolean ret = cee_database_security_bookmark_remove(_database,
+                                                            [filePath UTF8String]);
+#ifdef DEBUG
+    if (!ret)
+        NSLog(@"ERROR: remove security bookmark for %@ failed!", filePath);
+    else
+        NSLog(@"INFO: remove security bookmark for %@ successed!", filePath);
+#endif
+}
+
+- (CEESecurityBookmark*)getSecurityBookmarkWithFilePath:(NSString*)filePath {
+    cee_char* content = cee_database_security_bookmark_content_get(_database,
+                                                                   [filePath UTF8String]);
+    if (!content)
+        return nil;
+    
+    CEESecurityBookmark* bookmark = [[CEESecurityBookmark alloc] init];
+    bookmark.filePath = filePath;
+    bookmark.content = [NSString stringWithUTF8String:content];
+    cee_free(content);
+    return bookmark;
+}
+
+- (NSString*)shortFilePath:(NSString*)filePath {
+    
+    NSString* shortFilePath = filePath;
+    CEEList* roots = cee_database_file_reference_roots_get(_database);
+    CEEList* p = roots;
+    
+    while (p) {
+        BOOL isDirectory = NO;
+        NSString* root = [NSString stringWithUTF8String:p->data];
+        
+        if (![[NSFileManager defaultManager] fileExistsAtPath:root isDirectory:&isDirectory])
+            goto next;
+                
+        if (!isDirectory && [filePath compare:root options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+            shortFilePath = [filePath lastPathComponent];
+            break;
+        }
+        
+        if (isDirectory && filePath.length > root.length) {
+            NSString* prefix = [filePath substringWithRange:NSMakeRange(0, root.length)];
+            if ([prefix compare:root options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+                NSInteger location = prefix.length;
+                NSUInteger length = filePath.length - prefix.length;
+                shortFilePath = [NSString stringWithFormat:@"%@%@", [root lastPathComponent], [filePath substringWithRange:NSMakeRange(location, length)]];
+                break;
+            }
+        }
+next:
+        p = p->next;
+    }
+    
+    return shortFilePath;
 }
 
 @end
@@ -1498,12 +1588,11 @@ BOOL ContextContainSymbol(CEEList* context,
 
 - (CEEProject*)createProjectFromSetting:(CEEProjectSetting*)setting {
     CEEProject* project = [[CEEProject alloc] init];
-    NSString* databasPath = [project.properties databasePath];
-    [self addDocument:project];    
+    [self addDocument:project];
     [project setProperties:setting];
     [project makeWindowControllers];
-    if (databasPath)
-        [self noteNewRecentDocumentURL:[NSURL fileURLWithPath:databasPath]];
+    if (project.databasePath)
+        [self noteNewRecentDocumentURL:[NSURL fileURLWithPath:project.databasePath]];
     return project;
 }
 
@@ -1529,7 +1618,7 @@ BOOL ContextContainSymbol(CEEList* context,
 
 - (__kindof NSDocument *)documentForURL:(NSURL *)url {
     for (CEEProject* project in self.documents) {
-        if ([[project.properties databasePath] isEqualToString:[url path]])
+        if ([project.databasePath isEqualToString:[url path]])
             return project;
     }
     return nil;

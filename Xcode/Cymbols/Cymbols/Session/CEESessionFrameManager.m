@@ -41,7 +41,6 @@
 - (CEESessionFrameSplitView*)createSplitViewWithFrame:(NSRect)theFrame vertical:(BOOL)vertical splitViewDelegate:(id<NSSplitViewDelegate>)splitViewDelegate {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEESessionFrameSplitView * splitView = [[CEESessionFrameSplitView alloc] initWithFrame:theFrame];
-    
     [splitView setStyleState:kCEEViewStyleStateActived];
     [splitView setDelegate:splitViewDelegate];
     [splitView setStyleConfiguration:[styleManager userInterfaceConfiguration]];
@@ -50,7 +49,6 @@
     [splitView setTranslatesAutoresizingMaskIntoConstraints:NO];
     [splitView setDividerStyle:NSSplitViewDividerStyleThin];
     [splitView setVertical:vertical];
-    
     return splitView;
 }
 
@@ -397,10 +395,9 @@
     if (region == kCEEViewRegionNone || !frame)
         return;
     
-    [self.session.project addSecurityBookmarksWithFilePaths:filePaths];
-    
     if (region == kCEEViewRegionEntire) {
-        [frame.port openSourceBuffersWithFilePaths:filePaths];
+        for (NSString* filePath in filePaths)
+            [frame.port openSourceBufferWithFilePath:filePath];
         return;
     }
     else {
@@ -418,7 +415,9 @@
         [self addChildViewController:newFrame];
         [self attach:newFrame at:region relateTo:frame];
         
-        [newFrame.port openSourceBuffersWithFilePaths:filePaths];        
+        for (NSString* filePath in filePaths)
+            [newFrame.port openSourceBufferWithFilePath:filePath];
+        
         [self selectFrame:newFrame];
     }
 }
@@ -443,7 +442,7 @@
 - (void)split:(CEESplitFrameDirection)direction {
     CEESessionFrameViewController* frame = nil;
     CEESessionPort* port = nil;
-    NSArray* duplicatedBuffers = nil;
+    NSMutableArray* duplicatedBuffers = nil;
     CEESourceBuffer* activedSourceBuffer = nil;
     
     activedSourceBuffer = [_session.activedPort activedSourceBuffer];
@@ -466,10 +465,16 @@
     
     @autoreleasepool {
         NSMutableArray* filePaths = [[NSMutableArray alloc] init];
-        for (CEESourceBuffer* buffer in [_session.activedPort openedSourceBuffers]) {
+        for (CEESourceBuffer* buffer in [_session.activedPort openedSourceBuffers])
             [filePaths addObject:buffer.filePath];
+        
+        duplicatedBuffers = [[NSMutableArray alloc] init];
+        for (NSString* filePath in filePaths) {
+            CEESourceBuffer* buffer = [frame.port openSourceBufferWithFilePath:filePath];
+            if (buffer)
+                [duplicatedBuffers addObject:buffer];
         }
-        duplicatedBuffers = [frame.port openSourceBuffersWithFilePaths:filePaths];
+        
         if (duplicatedBuffers) {
             if ([duplicatedBuffers containsObject:activedSourceBuffer])
                 [frame.port setActivedSourceBuffer:activedSourceBuffer];
@@ -478,20 +483,6 @@
             [self selectFrame:frame];
         }
     }
-    
-    //if ([activedSourceBuffer stateSet:kCEESourceBufferStateFileTemporary]) {
-    //    activedSourceBuffer = [frame.port openUntitledSourceBuffer];
-    //}
-    //else {
-    //    duplicatedBuffers = [frame.port openSourceBuffersWithFilePaths:@[activedSourceBuffer.filePath]];
-    //    if (duplicatedBuffers)
-    //        activedSourceBuffer = duplicatedBuffers[0];
-    //}
-    //
-    //if (activedSourceBuffer) {
-    //    [frame.port setActivedSourceBuffer:activedSourceBuffer];
-    //    [self selectFrame:frame];
-    //}
 }
 
 - (void)mouseDown:(NSEvent *)event {
@@ -761,13 +752,14 @@
     
     if (!_session.activedPort)
         [_session setActivedPort:[_session createPort]];
-    
-    [self.session.project addSecurityBookmarksWithFilePaths:filePaths];
-    
+        
     [frame setPort:_session.activedPort];
     [frame setIdentifier:[self frame:frame identifierFromPort:_session.activedPort]];
     [frame.view setIdentifier:[self frameView:frame.view identifierFromPort:_session.activedPort]];
-    [frame.port openSourceBuffersWithFilePaths:filePaths];
+    
+    for (NSString* filePath in filePaths)
+        [frame.port openSourceBufferWithFilePath:filePath];
+    
     [self selectFrame:frame];
 }
 

@@ -193,27 +193,27 @@ static void binary_buffer_modified(cee_pointer buffer,
                                                    text_buffer_modified);
             }
             else {
-                //_encodeType = "Unknow";
-                //_storage = cee_binary_storage_create((__bridge cee_pointer)self,
-                //                                     content,
-                //                                     length,
-                //                                     binary_buffer_modified);
+                _encodeType = "Unknow";
+                _storage = cee_binary_storage_create((__bridge cee_pointer)self,
+                                                     content,
+                                                     length,
+                                                     binary_buffer_modified);
                 
-                converted_bytes = cee_codec_convert_to_utf8(content, "GB2312");
-                if (converted_bytes) {
-                    _encodeType = "GB2312";
-                    _storage = cee_text_storage_create((__bridge cee_pointer)self,
-                                                       converted_bytes,
-                                                       text_buffer_modified);
-                    cee_free(converted_bytes);
-                }
-                else {
-                    _encodeType = "Unknow";
-                    _storage = cee_binary_storage_create((__bridge cee_pointer)self,
-                                                         content,
-                                                         length,
-                                                         binary_buffer_modified);
-                }
+                //converted_bytes = cee_codec_convert_to_utf8(content, "GB2312");
+                //if (converted_bytes) {
+                //    _encodeType = "GB2312";
+                //    _storage = cee_text_storage_create((__bridge cee_pointer)self,
+                //                                       converted_bytes,
+                //                                       text_buffer_modified);
+                //    cee_free(converted_bytes);
+                //}
+                //else {
+                //    _encodeType = "Unknow";
+                //    _storage = cee_binary_storage_create((__bridge cee_pointer)self,
+                //                                         content,
+                //                                         length,
+                //                                         binary_buffer_modified);
+                //}
             }
         }
         cee_free(content);
@@ -251,7 +251,7 @@ static void binary_buffer_modified(cee_pointer buffer,
         cee_tree_free(_statement_symbol_tree);
     
     if (_storage) {
-        if (strcmp(_encodeType, "Unknow"))
+        if (!strcmp(_encodeType, "Unknow"))
             cee_binary_storage_free(_storage);
         else
             cee_text_storage_free(_storage);
@@ -578,6 +578,9 @@ static void binary_buffer_modified(cee_pointer buffer,
 }
 
 - (NSString*)sourceType:(CEESourceBuffer*)buffer {
+    if (!buffer)
+        return @"Binary File";
+    
     NSString* fileName = [buffer.filePath lastPathComponent];
     NSString* extension = [buffer.filePath pathExtension];
     

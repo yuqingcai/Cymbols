@@ -22,6 +22,8 @@ CEETextStorageRef cee_text_edit_storage_get(CEETextEditRef edit);
 void cee_text_edit_wrap_set(CEETextEditRef edit,
                             cee_boolean wrap);
 cee_boolean cee_text_edit_wrap_get(CEETextEditRef edit);
+void cee_text_edit_wrap_with_indent_set(CEETextEditRef edit,
+                                        cee_boolean wrap_with_indent);
 void cee_text_edit_aligment_set(CEETextEditRef edit,
                                 CEETextLayoutAlignment aligment);
 void cee_text_edit_free(CEETextEditRef edit);

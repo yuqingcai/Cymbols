@@ -60,7 +60,7 @@ typedef struct _CEESourceSymbol {
     cee_char* name;
     cee_char* alias;
     cee_char* language;
-    cee_char* filepath;
+    cee_char* file_path;
     cee_char* parent;
     cee_char* derives;
     cee_char* locations;
@@ -75,20 +75,20 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* derived,
                                           const cee_char* proto_descriptor,
                                           const cee_char* language,
-                                          const cee_char* filepath,
+                                          const cee_char* file_path,
                                           const cee_char* locations,
                                           const cee_char* block_range);
 void cee_source_symbol_free(cee_pointer data);
 cee_int cee_source_symbol_count_get(void);
 CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol);
-CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* filepath,
+CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* file_path,
                                                            const cee_char* subject,
                                                            CEEList* begin,
                                                            CEEList* end,
                                                            CEESourceSymbolType type,
                                                            const cee_char* language,
                                                            CEETokenStringOption option);
-CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* filepath,
+CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* file_path,
                                                       const cee_char* subject,
                                                       CEEList* tokens,
                                                       CEESourceSymbolType type,

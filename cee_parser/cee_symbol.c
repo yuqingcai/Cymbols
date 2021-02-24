@@ -18,7 +18,7 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* derives,
                                           const cee_char* proto_descriptor,
                                           const cee_char* language,
-                                          const cee_char* filepath,
+                                          const cee_char* file_path,
                                           const cee_char* locations,
                                           const cee_char* fregment_range)
 {
@@ -44,8 +44,8 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
     if (language)
         symbol->language = cee_strdup(language);
     
-    if (filepath)
-        symbol->filepath = cee_strdup(filepath);
+    if (file_path)
+        symbol->file_path = cee_strdup(file_path);
     
     if (locations)
         symbol->locations = cee_strdup(locations);
@@ -74,8 +74,8 @@ void cee_source_symbol_free(cee_pointer data)
     if (symbol->language)
         cee_free(symbol->language);
         
-    if (symbol->filepath)
-        cee_free(symbol->filepath);
+    if (symbol->file_path)
+        cee_free(symbol->file_path);
     
     if (symbol->parent)
         cee_free(symbol->parent);
@@ -113,13 +113,13 @@ CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol)
                                                      symbol->derives,
                                                      symbol->proto_descriptor,
                                                      symbol->language,
-                                                     symbol->filepath,
+                                                     symbol->file_path,
                                                      symbol->locations,
                                                      symbol->fregment_range);
     return copy;
 }
 
-CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* filepath,
+CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* file_path,
                                                            const cee_char* subject,
                                                            CEEList* begin,
                                                            CEEList* end,
@@ -137,7 +137,7 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* filep
                                                        NULL,
                                                        NULL,
                                                        NULL);
-    symbol->filepath = cee_strdup(filepath);
+    symbol->file_path = cee_strdup(file_path);
     symbol->type = type;
     symbol->language = cee_strdup(language);
     symbol->name = cee_string_from_token_slice(subject,
@@ -151,7 +151,7 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* filep
     return symbol;
 }
 
-CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* filepath,
+CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* file_path,
                                                       const cee_char* subject,
                                                       CEEList* tokens,
                                                       CEESourceSymbolType type,
@@ -168,7 +168,7 @@ CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* filepath,
                                                        NULL,
                                                        NULL,
                                                        NULL);
-    symbol->filepath = cee_strdup(filepath);
+    symbol->file_path = cee_strdup(file_path);
     symbol->type = type;
     symbol->language = cee_strdup(language);
     symbol->name = cee_string_from_tokens(subject,
@@ -232,8 +232,8 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     if (symbol->locations)
         locations = symbol->locations;
     
-    if (symbol->filepath)
-        filepath = symbol->filepath;
+    if (symbol->file_path)
+        filepath = symbol->file_path;
     
     if (symbol->fregment_range)
         fregment_range = symbol->fregment_range;
@@ -377,7 +377,7 @@ cee_boolean cee_source_symbol_matcher_by_name(cee_pointer data,
 cee_boolean cee_source_symbols_are_equal(CEESourceSymbol* symbol0,
                                          CEESourceSymbol* symbol1)
 {
-    if (!strcmp(symbol0->filepath, symbol1->filepath) &&
+    if (!strcmp(symbol0->file_path, symbol1->file_path) &&
         !strcmp(symbol0->locations, symbol1->locations)) 
         return TRUE;
     return FALSE;

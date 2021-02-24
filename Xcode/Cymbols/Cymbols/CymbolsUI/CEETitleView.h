@@ -19,9 +19,10 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface CEETitleView : CEEView
-@property CGFloat leadingOffset;
-@property CGFloat tailingOffset;
+@property CGFloat titleLeading;
+@property CGFloat titleTailing;
 @property NSString* title;
+@property IBInspectable NSImage* icon;
 @property CGFloat kern;
 @property (weak) id<CEETitleViewDelegate> delegate;
 @property (weak) CEEView* draggingSource;
