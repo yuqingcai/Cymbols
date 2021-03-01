@@ -641,33 +641,33 @@ void cee_text_layout_run(CEETextLayoutRef layout)
     
     text_layout(layout, FALSE);
     
-    head_unit = cee_text_layout_head_unit_get(layout);
-    if (!head_unit)
-        return;
-    
-    tail_unit = cee_text_layout_tail_unit_get(layout);
-    if (!tail_unit)
-        return;
-    
-    offset = cee_text_unit_buffer_offset_get(head_unit);
-    length = cee_text_unit_buffer_offset_get(tail_unit) +
-        cee_text_unit_buffer_length_get(tail_unit) -
-        cee_text_unit_buffer_offset_get(head_unit);
-    range = cee_range_make(offset, length);
-    
-    if (layout->attribute_generate) {
-        if (layout->tags)
-            cee_list_free_full(layout->tags, cee_tag_free);
-        layout->tags =
-            layout->attribute_generate(layout->attribute_generator_ref,
-                                       range);
-        if (layout->tags_bst)
-            cee_bst_free(layout->tags_bst);
-        
-        layout->tags_bst = cee_bst_create(layout->tags);
-        
-        text_layout(layout, TRUE);
-    }
+    //head_unit = cee_text_layout_head_unit_get(layout);
+    //if (!head_unit)
+    //    return;
+    //
+    //tail_unit = cee_text_layout_tail_unit_get(layout);
+    //if (!tail_unit)
+    //    return;
+    //
+    //offset = cee_text_unit_buffer_offset_get(head_unit);
+    //length = cee_text_unit_buffer_offset_get(tail_unit) +
+    //    cee_text_unit_buffer_length_get(tail_unit) -
+    //    cee_text_unit_buffer_offset_get(head_unit);
+    //range = cee_range_make(offset, length);
+    //
+    //if (layout->attribute_generate) {
+    //    if (layout->tags)
+    //        cee_list_free_full(layout->tags, cee_tag_free);
+    //    layout->tags =
+    //        layout->attribute_generate(layout->attribute_generator_ref,
+    //                                   range);
+    //    if (layout->tags_bst)
+    //        cee_bst_free(layout->tags_bst);
+    //
+    //    layout->tags_bst = cee_bst_create(layout->tags);
+    //
+    //    text_layout(layout, TRUE);
+    //}
 }
 
 cee_boolean cee_text_layout_paragraph_index_is_invalid(CEETextLayoutRef layout)

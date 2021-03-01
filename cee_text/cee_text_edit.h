@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-    
+
 #include "cee_lib.h"
 #include "cee_text_layout.h"
 #include "cee_text_storage.h"
