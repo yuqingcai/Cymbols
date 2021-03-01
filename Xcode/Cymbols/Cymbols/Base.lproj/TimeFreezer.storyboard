@@ -41,7 +41,7 @@
                             <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iwl-4A-8LX" customClass="CEEImageView">
                                 <rect key="frame" x="207" y="125" width="64" height="64"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="cymbols_logo" id="Koa-zH-xfc"/>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_butterfly_128x128" id="Koa-zH-xfc"/>
                             </imageView>
                             <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I1J-5D-Vpd" customClass="CEEButton">
                                 <rect key="frame" x="161" y="29" width="157" height="24"/>
@@ -79,6 +79,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="cymbols_logo" width="128" height="128"/>
+        <image name="icon_butterfly_128x128" width="128" height="128"/>
     </resources>
 </document>

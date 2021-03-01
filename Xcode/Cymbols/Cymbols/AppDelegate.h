@@ -35,6 +35,7 @@ extern NSNotificationName CEENotificationTimeFreeze;
 - (NSString*)serializerVersionString;
 - (NSString*)infoString;
 - (NSString*)versionString;
+- (NSString*)bundleVersionString;
 - (void)setConfiguration:(NSString*)configuration value:(NSString*)value;
 - (NSString*)configurationFilePath;
 - (void)saveWindowSettingAsDefault:(CEEWindowController*)controller;

@@ -602,7 +602,7 @@
                 </viewController>
                 <customObject id="TCU-lx-KPR" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-297" y="1513"/>
+            <point key="canvasLocation" x="-387" y="1511"/>
         </scene>
         <!--Session Source View Controller-->
         <scene sceneID="OKB-F7-0R6">
@@ -629,7 +629,7 @@
                 </viewController>
                 <customObject id="3vj-8P-FqR" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="48" y="1513"/>
+            <point key="canvasLocation" x="-42" y="1511"/>
         </scene>
         <!--Session File Reference View Controller-->
         <scene sceneID="U6g-gR-SMX">
@@ -743,13 +743,6 @@
                                 <action selector="removeReferencesFromProject:" target="8hu-ou-ny9" id="gbz-Vh-t0G"/>
                             </connections>
                         </menuItem>
-                        <menuItem isSeparatorItem="YES" id="9Ft-71-w5e"/>
-                        <menuItem title="dump" image="icon_directory_tree_16x16" tag="10" id="1fA-TB-csH">
-                            <modifierMask key="keyEquivalentModifierMask"/>
-                            <connections>
-                                <action selector="dumpTree:" target="ZM5-zG-qt6" id="ZRU-eR-vf7"/>
-                            </connections>
-                        </menuItem>
                     </items>
                     <connections>
                         <outlet property="delegate" destination="ZM5-zG-qt6" id="gE8-HE-kX4"/>
@@ -802,7 +795,7 @@
                     </connections>
                 </menu>
             </objects>
-            <point key="canvasLocation" x="806" y="1513"/>
+            <point key="canvasLocation" x="716" y="1511"/>
         </scene>
         <!--Session Source Buffer View Controller-->
         <scene sceneID="PUE-oB-dOr">
@@ -881,7 +874,7 @@
                     </connections>
                 </menu>
             </objects>
-            <point key="canvasLocation" x="417" y="1513"/>
+            <point key="canvasLocation" x="327" y="1511"/>
         </scene>
         <!--Session Context View Controller-->
         <scene sceneID="Y5y-z2-X76">
@@ -1056,7 +1049,6 @@
         <image name="icon_database_new_16x16" width="16" height="16"/>
         <image name="icon_database_search_16x16" width="16" height="16"/>
         <image name="icon_database_sync_16x16" width="16" height="16"/>
-        <image name="icon_directory_tree_16x16" width="16" height="16"/>
         <image name="icon_edit_16x16" width="16" height="16"/>
         <image name="icon_edit_in_new_window_16x16" width="16" height="16"/>
         <image name="icon_finder_16x16" width="16" height="16"/>

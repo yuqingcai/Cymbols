@@ -235,6 +235,10 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
 }
 
+- (NSString*)bundleVersionString {
+    return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+}
+
 - (void)setConfiguration:(NSString*)configuration value:(NSString*)value {
     [_activedConfigurations setValue:value forKey:configuration];
     _configurations = _activedConfigurations;

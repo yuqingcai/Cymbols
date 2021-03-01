@@ -627,18 +627,15 @@
     return item;
 }
 
-
 - (NSString*)serialize {
     NSString* serializing = [NSString stringWithFormat:@"\"%@\": ", self.view.identifier];
     serializing = [serializing stringByAppendingFormat:@"{"];
     serializing = [serializing stringByAppendingFormat:@"\"size\":\"%@\",", NSStringFromSize(self.view.frame.size)];
     serializing = [serializing stringByAppendingString:@"\"subviews\":["];
-    
-    serializing = [serializing stringByAppendingFormat:@"{ \"%@\":%@ }", _filePathTree.identifier,
-                   [_filePathTree serialize]];
-    
+    serializing = [serializing stringByAppendingFormat:@"{ %@ }", [_filePathTree serialize]];
     serializing = [serializing stringByAppendingFormat:@"]"];
     serializing = [serializing stringByAppendingFormat:@"}"];
+        
     return serializing;
 }
 
@@ -654,8 +651,10 @@
         }
     }
     
-    if (filePathTreeDescriptor) {
-        [_filePathTree deserialize:filePathTreeDescriptor];
+    if (filePathTreeDescriptor[@"content"]) {
+        [_filePathTree deserialize:filePathTreeDescriptor[@"content"]];
+        NSInteger firstRowIndex = [filePathTreeDescriptor[@"firstRowIndex"] integerValue];
+        [_filePathTree setFirstRowIndex:firstRowIndex];
     }
     else {
         _filePaths = [_session filePathsFilter:_filterCondition];
@@ -829,11 +828,6 @@
     [self.view addConstraints:constraintsV];
     
     [_filePathTree reloadData];
-}
-
-- (IBAction)dumpTree:(id)sender {
-    NSString* string = [_filePathTree serialize];
-    NSLog(@"%@", string);
 }
 
 @end

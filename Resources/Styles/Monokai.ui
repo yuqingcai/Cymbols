@@ -927,5 +927,41 @@
     "IDWelcomeView [deactived]" : {
         "background_color" : "#212121",
         "corner_radius" : "10.0"
+    },
+    
+    "IDWelcomeViewCopyrightTextLabel [actived]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "IDWelcomeViewCopyrightTextLabel [deactived]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "IDWelcomeViewCopyrightTextLabel [highlighted]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+        
+    "IDWelcomeViewLinkTextLabel [actived]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "IDWelcomeViewLinkTextLabel [deactived]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "IDWelcomeViewLinkTextLabel [highlighted]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
     }
 }

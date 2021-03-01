@@ -16,10 +16,10 @@
     NSRect iconRect = _icon.frame;
     NSRect textRect = _text.frame;
     
-    iconRect.origin.x = 0.0;
+    iconRect.origin.x = 4.0;
     [_icon setFrame:iconRect];
     
-    textRect.origin.x = iconRect.size.width;
+    textRect.origin.x = iconRect.origin.x + iconRect.size.width;
     textRect.size.width = newSize.width - iconRect.origin.x - iconRect.size.width;
     if (textRect.size.width <= 0.0)
         textRect.size.width = 1.0;

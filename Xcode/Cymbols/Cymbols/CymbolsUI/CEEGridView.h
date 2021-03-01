@@ -10,19 +10,26 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSInteger, CEEGridRowViewStyle) {
+    kCEEGridRowViewStylePlain,
+    kCEEGridRowViewStyleHierarchical,
+};
+
 @interface CEEGridRowView : CEEView
 @property NSInteger index;
 @property CGFloat indent;
 @property NSArray* columnWidths;
 @property NSArray* columnOffsets;
 @property (strong, readonly) NSArray* cellViews;
+@property CEEGridRowViewStyle rowStyle;
+@property BOOL expandable;
+@property BOOL expanded;
 @property id target;
-@property SEL action;
+@property SEL expandAction;
+
 - (NSUInteger)numberOfCellViews;
 - (void)setCellViews:(NSArray*)cellViews;
 - (NSArray*)removeAllCellViews;
-- (void)setExpandable:(BOOL)expandable;
-- (void)setExpanded:(BOOL)expanded;
 @end
 
 @interface CEEGridView : CEEView

@@ -86,7 +86,7 @@
     [super reloadData];
 }
 
-- (void)clickAction:(id)sender {
+- (void)expandAction:(id)sender {
     NSPoint location = [NSEvent mouseLocation];
     location = [self.window convertPointFromScreen:location];
     location = [self convertPoint:location fromView:nil];
@@ -255,6 +255,10 @@
     }
 }
 
+- (CEEGridRowViewStyle)rowGridRowViewStyle {
+    return kCEEGridRowViewStyleHierarchical;
+}
+
 - (BOOL)isRowViewExpandable:(NSInteger)row {
     ListWrapper* listWrapper = _listWrappers[row];
     return [self.dataSource treeView:self isItemExpandable:listWrapper.tree.item];
@@ -267,22 +271,6 @@
 
 - (NSInteger)rowViewIndent:(NSInteger)row {
     return _listWrappers[row].level;
-}
-
-- (void)cellViewMinusOffsetSubview:(NSView*)cellView {
-    for (NSView* view in cellView.subviews) {
-        NSRect rect  = view.frame;
-        rect.origin.x -= 8.0;
-        [view setFrame:rect];
-    }
-}
-
-- (CEETitlebarButton*)cellViewHasbutton:(NSView*)cellView {
-    for (NSView* view in cellView.subviews) {
-        if ([view isKindOfClass:[CEETitlebarButton class]])
-            return (CEETitlebarButton*)view;
-    }
-    return nil;
 }
 
 - (__kindof NSView*)viewForColumn:(NSInteger)column row:(NSInteger)row {
@@ -316,47 +304,66 @@
 }
 
 - (NSString*)jsonString:(Tree*)tree {
-    NSString* string = @"";
-        
+    
     id object = [self.delegate treeView:self persistentObjectForItem:tree.item];
-    string = [string stringByAppendingFormat:@"{\"%@\":[", object];
+    NSString* string = [NSString stringWithFormat:@"{\"%@\": {", object];
         
+    if (tree.expanded)
+        string = [string stringByAppendingFormat:@"\"expanded\": \"YES\","];
+    else
+        string = [string stringByAppendingFormat:@"\"expanded\": \"NO\","];
+    
+    string = [string stringByAppendingFormat:@"\"children\": ["];
     for (int i = 0; i < tree.children.count; i ++) {
         string = [string stringByAppendingFormat:@"%@", [self jsonString:tree.children[i]]];
         if (i < tree.children.count - 1)
             string = [string stringByAppendingFormat:@","];
     }
+    string = [string stringByAppendingFormat:@"]"];
     
-    string = [string stringByAppendingFormat:@"]}"];
+    string = [string stringByAppendingFormat:@"}"];
+    string = [string stringByAppendingFormat:@"}"];
+    
     return string;
 }
 
 - (NSString*)serialize {
     if (![self.delegate respondsToSelector:@selector(treeView:persistentObjectForItem:)])
         return nil;
-    return [self jsonString:_root];
+    
+    NSString* serializing = [NSString stringWithFormat:@"\"%@\": ", self.identifier];
+    serializing = [serializing stringByAppendingFormat:@"{"];
+    serializing = [serializing stringByAppendingFormat:@"\"firstRowIndex\": %ld,", self.firstRowIndex];
+    serializing = [serializing stringByAppendingFormat:@"\"content\": %@", [self jsonString:_root]];
+    serializing = [serializing stringByAppendingFormat:@"}"];
+        
+    return serializing;
 }
 
 - (Tree*)createTreeFromDict:(NSDictionary*)dict parent:(Tree*)parent {
     NSString* item = dict.allKeys[0];
-    NSArray* children = dict[item];
+    NSDictionary* descriptor = dict[item];
+    NSArray* children = descriptor[@"children"];
     
     Tree* tree = [[Tree alloc] init];
     tree.item = item;
     tree.parent = parent;
     tree.children = [[NSMutableArray alloc] init];
     
-    if (children.count) {
+    if ([descriptor[@"expanded"] compare:@"YES" options:NSCaseInsensitiveSearch] == NSOrderedSame)
         tree.expanded = YES;
-        for (NSDictionary* dict in children) {
+    else
+        tree.expanded = NO;
+    
+    if (children && children.count) {
+        for (NSDictionary* dict in children)
             [tree.children addObject:[self createTreeFromDict:dict parent:tree]];
-        }
     }
+    
     return tree;
 }
 
 - (void)deserialize:(NSDictionary*)dict {
-    
     _root = [self createTreeFromDict:dict parent:nil];
     NSMutableArray* listWrappers = [[NSMutableArray alloc] init];
     [self tree:_root toList:&listWrappers level:0];

@@ -25,14 +25,12 @@
 @synthesize indent = _indent;
 @synthesize columnOffsets = _columnOffsets;
 @synthesize columnWidths = _columnWidths;
+@synthesize rowStyle = _rowStyle;
+@synthesize expandable = _expandable;
+@synthesize expanded = _expanded;
 
 - (void)initProperties {
     [super initProperties];
-    NSRect buttonFrame = NSMakeRect(0.0,
-                                    (self.frame.size.height - EXPAND_BUTTON_HEIGHT) / 2.0,
-                                    EXPAND_BUTTON_WIDTH,
-                                    EXPAND_BUTTON_HEIGHT);
-    _expandButton = [[CEETitlebarButton alloc] initWithFrame:buttonFrame];
 }
 
 - (NSUInteger)numberOfCellViews {
@@ -51,44 +49,12 @@
     if (!_cellViews)
         _cellViews = [[NSMutableArray alloc] init];
     [_cellViews addObjectsFromArray:cellViews];
-    
-    for (int i = 0; i <  _cellViews.count; i ++) {
-        CEEView* cellView = _cellViews[i];
-        NSRect rect = NSMakeRect([_columnOffsets[i] floatValue],
-                                 0.0,
-                                 [_columnWidths[i] floatValue],
-                                 cellView.frame.size.height);
-        if (i == 0)
-            rect.origin.x += [self placeholder];
-        
-        [cellView setFrame:rect];
+    for (CEEView* cellView in _cellViews)
         [self addSubview:cellView];
-    }
 }
 
 - (NSArray*)cellViews {
     return _cellViews;
-}
-
-- (void)setIndent:(CGFloat)indent {
-    _indent = indent;
-    
-    for (int i = 0; i < _cellViews.count; i ++) {
-        CEEView* cellView = _cellViews[i];
-        NSRect rect = NSMakeRect([_columnOffsets[i] floatValue],
-                                  0.0,
-                                  [_columnWidths[i] floatValue],
-                                  cellView.frame.size.height);
-        if (i == 0) {
-            rect.origin.x += [self placeholder];
-            rect.size.width -= [self placeholder];
-        }
-        [cellView setFrame:rect];
-    }
-}
-
-- (CGFloat)indent {
-    return _indent;
 }
 
 - (void)setColumnOffsets:(NSArray *)columnOffsets {
@@ -100,11 +66,15 @@
         cellViewRect.origin.x = [_columnOffsets[i] floatValue];
         
         if (i == 0) {
-            NSRect buttonFrame = _expandButton.frame;
-            buttonFrame.origin.x = cellViewRect.origin.x;
-            buttonFrame.origin.x += [self placeholder];
-            [_expandButton setFrameOrigin:buttonFrame.origin];
-            cellViewRect.origin.x = _expandButton.frame.origin.x + _expandButton.frame.size.width;
+            cellViewRect.origin.x += [self placeholder];
+            if (_rowStyle == kCEEGridRowViewStyleHierarchical) {
+                NSRect buttonFrame = NSMakeRect(0.0, 0.0, 0.0, 0.0);
+                if (_expandButton)
+                    buttonFrame = _expandButton.frame;
+                buttonFrame.origin.x = cellViewRect.origin.x;
+                cellViewRect.origin.x = buttonFrame.origin.x + buttonFrame.size.width;
+                [_expandButton setFrameOrigin:buttonFrame.origin];
+            }
         }
         
         [cellView setFrameOrigin:cellViewRect.origin];
@@ -125,16 +95,18 @@
         
         if (i == 0) {
             cellViewRect.size.width -= [self placeholder];
-            NSRect buttonFrame = _expandButton.frame;
-            cellViewRect.size.width -= buttonFrame.size.width;
-            
-            if ([self expandButtonShown]) {
+            if (_rowStyle == kCEEGridRowViewStyleHierarchical) {
+                NSRect buttonFrame = NSMakeRect(0.0, 0.0, 0.0, 0.0);
+                if (_expandButton)
+                    buttonFrame = _expandButton.frame;
+                cellViewRect.size.width -= buttonFrame.size.width;
                 
-                if ((buttonFrame.origin.x + buttonFrame.size.width > [_columnWidths[0] floatValue]) && !_expandButton.hidden)
+                if ((buttonFrame.origin.x + buttonFrame.size.width > [_columnWidths[0] floatValue]) &&
+                    _expandable && !_expandButton.hidden)
                     [_expandButton setHidden:YES];
-                else if ((buttonFrame.origin.x + buttonFrame.size.width < [_columnWidths[0] floatValue]) && _expandButton.hidden)
+                else if ((buttonFrame.origin.x + buttonFrame.size.width < [_columnWidths[0] floatValue]) &&
+                         _expandable && _expandButton.hidden)
                     [_expandButton setHidden:NO];
-                
             }
         }
         
@@ -153,49 +125,88 @@
     return _indent * 16.0;
 }
 
-- (void)setExpandable:(BOOL)expandable {
-    if (expandable) {
-        NSRect buttonFrame = NSMakeRect(0.0,
-                                        (self.frame.size.height - EXPAND_BUTTON_HEIGHT) / 2.0,
-                                        EXPAND_BUTTON_WIDTH,
-                                        EXPAND_BUTTON_HEIGHT);
-        [_expandButton setFrame:buttonFrame];
-        if (!_expandButton.target)
-            [_expandButton setTarget:self.target];
-        if (!_expandButton.action)
-            [_expandButton setAction:self.action];
-        
-        if (![self expandButtonShown])
+- (void)setRowStyle:(CEEGridRowViewStyle)rowStyle {
+    _rowStyle = rowStyle;
+    if (_rowStyle == kCEEGridRowViewStyleHierarchical) {
+        NSRect buttonFrame;
+        if (!_expandButton) {
+            buttonFrame = NSMakeRect(0.0,
+                                     (self.frame.size.height - EXPAND_BUTTON_HEIGHT) / 2.0,
+                                     EXPAND_BUTTON_WIDTH,
+                                     EXPAND_BUTTON_HEIGHT);
+            _expandButton = [[CEETitlebarButton alloc] initWithFrame:buttonFrame];
             [self addSubview:_expandButton];
+            if (!_expandButton.target)
+                [_expandButton setTarget:self.target];
+            if (!_expandButton.action)
+                [_expandButton setAction:self.expandAction];
+        }
+    }
+}
+
+- (CEEGridRowViewStyle)rowStyle {
+    return _rowStyle;
+}
+
+- (void)setIndent:(CGFloat)indent {
+    _indent = indent;
+    
+    if (_rowStyle == kCEEGridRowViewStyleHierarchical) {
+        NSRect buttonFrame = NSMakeRect(0.0, 0.0, 0.0, 0.0);
+        if (_expandButton)
+            buttonFrame = _expandButton.frame;
+        buttonFrame.origin.x = [self placeholder];
+        [_expandButton setFrameOrigin:buttonFrame.origin];
+        CEEView* cellView0 = self.cellViews[0];
+        NSRect cellView0Frame = cellView0.frame;
+        cellView0Frame.origin.x = buttonFrame.origin.x + buttonFrame.size.width;
+        cellView0Frame.size.width = [_columnWidths[0] floatValue] - cellView0Frame.origin.x - buttonFrame.size.width;
+        [cellView0 setFrame:cellView0Frame];
     }
     else {
-        if ([self expandButtonShown])
-            [_expandButton removeFromSuperview];
+        CEEView* cellView0 = self.cellViews[0];
+        NSRect cellView0Frame = cellView0.frame;
+        cellView0Frame.origin.x = [self placeholder];
+        cellView0Frame.size.width = [_columnWidths[0] floatValue] - [self placeholder];
+        [cellView0 setFrame:cellView0Frame];
     }
+}
+
+- (CGFloat)indent {
+    return _indent;
+}
+
+- (void)setExpandable:(BOOL)expandable {
+    _expandable = expandable;
     
-    NSRect buttonFrame = _expandButton.frame;
-    buttonFrame.origin.x = [self placeholder];
-    [_expandButton setFrameOrigin:buttonFrame.origin];
-    CEEView* cellView0 = self.cellViews[0];
-    NSRect cellView0Frame = cellView0.frame;
-    cellView0Frame.origin.x = buttonFrame.origin.x + buttonFrame.size.width;
-    cellView0Frame.size.width = [_columnWidths[0] floatValue] - buttonFrame.size.width;
-    [cellView0 setFrame:cellView0Frame];
+    if (!_expandButton)
+        return;
+    
+    if (_expandable && _expandButton.hidden)
+        [_expandButton setHidden:NO];
+    else if (!_expandable && !_expandButton.hidden)
+        [_expandButton setHidden:YES];
+}
+
+- (BOOL)expandable {
+    return _expandable;
 }
 
 - (void)setExpanded:(BOOL)expanded {
-    if (_expandButton && _expandButton.superview) {
-        if (expanded)
-            [_expandButton setIcon:[NSImage imageNamed:@"icon_expanded_16x16"]];
-        else
-            [_expandButton setIcon:[NSImage imageNamed:@"icon_expandable_16x16"]];
-    }
+    _expanded = expanded;
+    
+    if (!_expandButton)
+        return;
+    
+    if (_expanded)
+        [_expandButton setIcon:[NSImage imageNamed:@"icon_expanded_16x16"]];
+    else
+        [_expandButton setIcon:[NSImage imageNamed:@"icon_expandable_16x16"]];
+    
 }
 
-- (BOOL)expandButtonShown {
-    if (_expandButton.superview)
-        return YES;
-    return NO;
+- (BOOL)expanded {
+    return _expanded;
 }
 
 @end

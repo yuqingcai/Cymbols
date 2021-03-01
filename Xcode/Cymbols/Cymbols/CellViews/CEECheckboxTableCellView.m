@@ -14,8 +14,8 @@
     [super setFrameSize:newSize];
         
     NSRect checkboxRect = _checkbox.frame;
-    checkboxRect.origin.x = 0.0;
-    checkboxRect.size.width = newSize.width;
+    checkboxRect.origin.x = 4.0;
+    checkboxRect.size.width = newSize.width - checkboxRect.origin.x;
     [_checkbox setFrame:checkboxRect];
 }
 

@@ -299,7 +299,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 @property NSUInteger clickTicktack;
 @property BOOL autoScrollSelecting;
 @property NSInteger keySelectedRowIndex;
-@property BOOL update;
+@property BOOL updating;
 @property NSInteger updateRow;
 @property NSInteger updateColumn;
 @property NSMutableArray* rowViewBuffer;
@@ -318,6 +318,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 @synthesize columnAutoresizingStyle = _columnAutoresizingStyle;
 @synthesize numberOfColumns = _numberOfColumns;
 @synthesize numberOfRows = _numberOfRows;
+@synthesize firstRowIndex = _firstRowIndex;
 
 - (void)initProperties {
     [super initProperties];
@@ -325,7 +326,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     _draggingSessionPasteboard = [NSPasteboard pasteboardWithName:@"IDDraggingSessionPasteboard"];
     _keySelectedRowIndex = -1;
     _firstRowIndex = 0;
-    _update = NO;
+    _updating = NO;
     _updateRow = -1;
     _updateColumn = -1;
     _allowsMultipleSelection = NO;
@@ -708,20 +709,20 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         [_grid setColumnWidths:[self columnWidths]];
     }
     
+    [self adjustGridRowViewsWhenFrameSizeChanged];
+    [self updateGrid];
+    [self tintedGridRowViews];
     [self adjustHorizontalScroller];
     [self adjustHorizontalOffsetWithDelta:delta];
-    [self adjustGridRowsCapability];
-    [self tintedGridRowViews];
     [self adjustVerticalScroller];
-    [self updateGrid];
 }
 
 - (void)dragHeaderDivider:(id)sender {
     [self adjustHorizontalScroller];
     [_header setColumnOffsets:[self columnOffsets]];
     [_header setColumnWidths:[self columnWidths]];
-    [_grid setColumnOffsets:self.columnOffsets];
-    [_grid setColumnWidths:self.columnWidths];
+    [_grid setColumnOffsets:[self columnOffsets]];
+    [_grid setColumnWidths:[self columnWidths]];
     [self tintedGridRowViews];
 }
 
@@ -838,13 +839,13 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     
     [self reloadHeader];
     
-    if (self.firstRowIndex >= [self numberOfRows])
-        self.firstRowIndex = 0;
+    if (_firstRowIndex >= [self numberOfRows])
+        _firstRowIndex = 0;
     
     if (!self.grid.rowViews.count)
         [self createGridRowViews];
     else
-        [self adjustGridRowViews];
+        [self adjustGridRowViewsWhenDataReload];
     
     [self updateGrid];
     [self tintedGridRowViews];
@@ -882,78 +883,27 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     [_cellViewBuffer addObjectsFromArray:cellViews];
 }
 
-- (void)insertRowViewsAtTail:(NSUInteger)n {
-    if (!n)
-        return;
-    
-    NSUInteger tail = 0;
-    NSUInteger head = 0;
-    NSArray* rowViews = nil;
-    NSInteger lastRowIndex = _firstRowIndex + _grid.rowViews.count - 1;
-    if (lastRowIndex + n >= self.numberOfRows)
-        tail = self.numberOfRows - (lastRowIndex + 1);
-    else
-        tail = n;
-    
-    n -= tail;
-    if (n) {
-        if (n >= _firstRowIndex)
-            head = _firstRowIndex;
-        else
-            head = n;
-    }
-    
-    if (tail) {
-        rowViews = [self createRowViewsInRange:NSMakeRange(lastRowIndex+1, tail)];
-        [_grid appendRowViews:rowViews];
-    }
-    
-    if (head) {
-        rowViews = [self createRowViewsInRange:NSMakeRange(_firstRowIndex-head, head)];
-        [_grid appendRowViews:rowViews];
-        _firstRowIndex -= head;
-    }
-}
-
-- (void)appendRowViewsAtTail:(NSUInteger)n {
-    NSInteger lastRowIndex = _firstRowIndex + _grid.rowViews.count - 1;
-    NSArray* rowViews = [self createRowViewsInRange:NSMakeRange(lastRowIndex+1, n)];
-    [_grid appendRowViews:rowViews];
-}
-
-- (void)removeRowViewsAtTail:(NSUInteger)n {
-    if (!_rowViewBuffer)
-        _rowViewBuffer = [[NSMutableArray alloc] init];
-    NSArray* rowViews = [_grid removeRowViewsFromTail:n];
-    [_rowViewBuffer addObjectsFromArray:rowViews];
-    
-    if (!_cellViewBuffer)
-        _cellViewBuffer = [[NSMutableArray alloc] init];
-    for (CEEGridRowView* rowView in rowViews) {
-        // Remove and Save cell views to buffer.
-        NSArray* cellViews = [rowView removeAllCellViews];
-        [_cellViewBuffer addObjectsFromArray:cellViews];
-    }
+- (NSUInteger)gridRowCapability {
+    return _grid.frame.size.height / _grid.rowHeight + _grid.rowSpacing;
 }
 
 - (void)createGridRowViews {
-    NSMutableArray* rowViews = nil;
-    CEEGridRowView* rowView = nil;
-    NSInteger row = -1;
-    CGFloat y = 0.0;
+    NSUInteger numberOfRows = [self numberOfRows];
     
-    [self recycleGridRowViews];
-    
-    [_grid setColumnOffsets:[self columnOffsets]];
-    [_grid setColumnWidths:[self columnWidths]];
-    
-    if (!self.numberOfRows)
+    if (!numberOfRows)
         return;
     
+    if (_grid.rowViews)
+        [self recycleGridRowViews];
+    
     _firstRowIndex = 0;
-    row = _firstRowIndex;
-    rowViews = [[NSMutableArray alloc] init];
+    NSMutableArray* rowViews = [[NSMutableArray alloc] init];
+    CEEGridRowView* rowView = nil;
+    NSInteger row = _firstRowIndex;
+    CGFloat y = 0.0;
+    
     while(TRUE) {
+        
         rowView = [self createRowViewWithIndex:row];
         if (!rowView)
             break;
@@ -967,96 +917,141 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         y += _grid.rowSpacing + rowView.frame.size.height;
         row ++;
         
-        if (row >= self.numberOfRows)
+        if (row >= numberOfRows)
             break;
     }
     
     [_grid appendRowViews:rowViews];
-    
-    _keySelectedRowIndex = 0;
-    _selectedRowIndexes = [NSMutableIndexSet indexSetWithIndex:_keySelectedRowIndex];
 }
 
-- (void)adjustGridRowViews {
-    CGFloat gridHeight = self.grid.frame.size.height;
-    CGFloat itemHeight = self.grid.rowHeight + self.grid.rowSpacing;
-    NSUInteger rowCapability = gridHeight / itemHeight;
+- (void)adjustGridRowViewsWhenDataReload {
+    NSUInteger rowCapability = [self gridRowCapability];
     
-    if (rowCapability < 1)
+    if (!rowCapability)
         return;
     
-    NSUInteger n = [self numberOfRows];
-    if (n - self.firstRowIndex >= self.grid.numberOfRows &&
-        rowCapability > self.grid.numberOfRows) {
-        NSUInteger n1 = MIN((n - self.firstRowIndex) - self.grid.numberOfRows,
-                            rowCapability - self.grid.numberOfRows);
-        [self appendRowViewsAtTail:n1];
+    NSUInteger numberOfRows = [self numberOfRows];
+    if (!numberOfRows) {
+        [self recycleGridRowViews];
         return;
     }
     
-    if (n - self.firstRowIndex >= rowCapability)
-        return;
+    NSUInteger n = numberOfRows - _firstRowIndex;
     
-    NSUInteger nn = MIN(rowCapability, self.grid.numberOfRows);
-    NSUInteger n0 = nn - (n - self.firstRowIndex);
-    if (n0 > self.firstRowIndex) {
-        NSUInteger n1 = n0 - self.firstRowIndex;
-        self.firstRowIndex = 0;
-        [self removeRowViewsAtTail:n1];
+    if (n > _grid.numberOfRows) {
+        // append row views
+        if (rowCapability > _grid.numberOfRows) {
+            NSUInteger append = MIN(numberOfRows - _firstRowIndex - _grid.numberOfRows,
+                                    rowCapability - _grid.numberOfRows);
+            [self insertRowViewsAtTail:append];
+        }
     }
-    else {
-        self.firstRowIndex -= n0;
+    else if (n < _grid.numberOfRows) {
+        NSUInteger m = _firstRowIndex;
+        NSUInteger d = _grid.numberOfRows - n;
+        
+        // remove row views
+        if (d > m) {
+            _firstRowIndex = 0;
+            [self removeRowViewsAtTail:(d - m)];
+        }
+        else { // scroll up
+            _firstRowIndex -= m;
+        }
     }
 }
 
-- (void)adjustGridRowsCapability {
+- (void)adjustGridRowViewsWhenFrameSizeChanged {
     if (!_grid.numberOfRows)
         return;
     
-    CGFloat gridHeight = _grid.frame.size.height;
-    CGFloat itemHeight = _grid.rowHeight + _grid.rowSpacing;
-    NSUInteger rowCapability = gridHeight / itemHeight;
-    
-    if (rowCapability < 1)
+    NSUInteger rowCapability = [self gridRowCapability];
+    if (!rowCapability)
         return;
     
     if (_grid.numberOfRows < rowCapability)
-        [self insertRowViewsAtTail:rowCapability - _grid.numberOfRows];
+        [self insertRowViewsAtTailIfNeed:rowCapability - _grid.numberOfRows];
     else if (_grid.numberOfRows > rowCapability)
         [self removeRowViewsAtTail:_grid.numberOfRows - rowCapability];
+}
+
+- (void)insertRowViewsAtTailIfNeed:(NSUInteger)n {
+    if (!n)
+        return;
+    
+    NSUInteger tail = 0;
+    NSUInteger head = 0;
+    NSArray* rowViews = nil;
+    NSInteger lastRowIndex = _firstRowIndex + _grid.rowViews.count - 1;
+    
+    if (lastRowIndex + n >= self.numberOfRows)
+        tail = self.numberOfRows - (lastRowIndex + 1);
+    else
+        tail = n;
+    
+    n -= tail;
+    if (n) {
+        if (n >= _firstRowIndex)
+            head = _firstRowIndex;
+        else
+            head = n;
+    }
+    
+    // append row views
+    if (tail) {
+        rowViews = [self createRowViewsInRange:NSMakeRange(lastRowIndex+1, tail)];
+        [_grid appendRowViews:rowViews];
+    }
+    
+    // scroll up
+    if (head) {
+        rowViews = [self createRowViewsInRange:NSMakeRange(_firstRowIndex-head, head)];
+        [_grid appendRowViews:rowViews];
+        _firstRowIndex -= head;
+    }
+}
+
+- (void)insertRowViewsAtTail:(NSUInteger)n {
+    NSInteger lastRowIndex = _firstRowIndex + _grid.rowViews.count - 1;
+    NSArray* rowViews = [self createRowViewsInRange:NSMakeRange(lastRowIndex+1, n)];
+    [_grid appendRowViews:rowViews];
+}
+
+- (void)removeRowViewsAtTail:(NSUInteger)n {
+    NSArray* rowViews = [_grid removeRowViewsFromTail:n];
+    [_rowViewBuffer addObjectsFromArray:rowViews];
+    for (CEEGridRowView* rowView in rowViews) {
+        // Remove and Save cell views to buffer.
+        NSArray* cellViews = [rowView removeAllCellViews];
+        [_cellViewBuffer addObjectsFromArray:cellViews];
+    }
 }
 
 - (void)updateGrid {
     if (!self.numberOfRows)
         return;
     
-    _update = YES;
+    _updating = YES;
     _updateRow = 0;
     _updateColumn = 0;
     
     for (NSInteger i = 0; i < _grid.numberOfRows; i ++) {
+        
+        NSInteger rowIndex = _firstRowIndex + i;
         CEEGridRowView* rowView = _grid.rowViews[i];
-        [rowView setIndex:_firstRowIndex + i];
-        [rowView setIndent:[self rowViewIndent:_firstRowIndex + i]];
+        
+        [rowView setIndex:rowIndex];
         
         for (NSInteger j = 0; j < _grid.numberOfColumns; j ++)
-            [self viewForColumn:j row:_firstRowIndex + i];
+            [self viewForColumn:j row:rowIndex];
         
-        if ([self isRowViewExpandable:_firstRowIndex + i]) {
-            [rowView setExpandable:YES];
-            
-            if ([self isRowViewExpanded:_firstRowIndex + i])
-                [rowView setExpanded:YES];
-            else
-                [rowView setExpanded:NO];
-        }
-        else {
-            [rowView setExpandable:NO];
-        }
+        [rowView setRowStyle:[self rowGridRowViewStyle]];
+        [rowView setIndent:[self rowViewIndent:rowIndex]];
+        [rowView setExpandable:[self isRowViewExpandable:rowIndex]];
+        [rowView setExpanded:[self isRowViewExpanded:rowIndex]];
     }
-    _update = NO;
-    [self.grid setColumnWidths:_columnWidths];
-    [self.grid setColumnOffsets:self.columnOffsets];
+    
+    _updating = NO;
 }
 
 - (BOOL)isRowViewExpandable:(NSInteger)row {
@@ -1065,6 +1060,10 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 
 - (BOOL)isRowViewExpanded:(NSInteger)row {
     return FALSE;
+}
+
+- (CEEGridRowViewStyle)rowGridRowViewStyle {
+    return kCEEGridRowViewStylePlain;
 }
 
 - (NSInteger)rowViewIndent:(NSInteger)row {
@@ -1079,7 +1078,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 
 - (__kindof NSView*)makeViewWithIdentifier:(NSUserInterfaceItemIdentifier)identifier {
     NSView* cellView = nil;
-    if (_update) {
+    if (_updating) {
         cellView = [_grid cellViewInRow:_updateRow column:_updateColumn];
         _updateColumn ++;
         if (_updateColumn == _grid.numberOfColumns) {
@@ -1112,7 +1111,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 }
 
 - (CEEGridRowView*)getRowViewFromBuffer {
-    if (!_rowViewBuffer || !_rowViewBuffer.count)
+    if (!_rowViewBuffer.count)
         return nil;
     
     CEEGridRowView* view = [_rowViewBuffer objectAtIndex:0];
@@ -1121,7 +1120,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 }
 
 - (NSView*)getCellViewFromBufferWithIdentifier:(NSString*)identifier {
-    if (!_cellViewBuffer || !_cellViewBuffer.count)
+    if (!_cellViewBuffer.count)
         return nil;
     
     NSView* view = nil;
@@ -1166,19 +1165,16 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
         [rowView setAutoresizingMask:NSViewWidthSizable];
         [rowView setStyleConfiguration:_styleConfiguration];
     }
-    [rowView setColumnWidths:[self columnWidths]];
-    [rowView setColumnOffsets:[self columnOffsets]];
     [rowView setFrame:NSMakeRect(0.0, 0.0, _grid.frame.size.width, rowHeight)];
     [rowView setIndex:row];
     [rowView setCellViews:cellViews];
     [rowView setTarget:self];
-    [rowView setAction:@selector(clickAction:)];
+    [rowView setExpandAction:@selector(expandAction:)];
     
     return rowView;
 }
 
-- (void)clickAction:(id)sender {
-    NSLog(@"table view click");
+- (void)expandAction:(id)sender {
 }
 
 - (void)mouseDown:(NSEvent*)event {
@@ -1751,6 +1747,15 @@ exit:
 
 - (CGFloat)rowHeight {
     return _grid.rowHeight;
+}
+
+- (void)setFirstRowIndex:(NSInteger)firstRowIndex {
+    _firstRowIndex = firstRowIndex;
+    [self reloadData];
+}
+
+- (NSInteger)firstRowIndex {
+    return _firstRowIndex;
 }
 
 - (void)setStyleState:(CEEViewStyleState)state {

@@ -10,7 +10,7 @@
 #import "CEETextLabel.h"
 #import "CEETextTitle.h"
 
-#define FREEZE_SECOND 10
+#define FREEZE_SECOND 200
 
 @interface CEETrialVersionWelcomeViewController ()
 @property (strong) NSTimer* freezeTimer;
@@ -29,14 +29,14 @@
     _freezeTimer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(freeze:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:_freezeTimer forMode:NSRunLoopCommonModes];
     
-    _versionTitle.stringValue = [NSString stringWithFormat:@"Trial Version(%@)", [delegate versionString]];
-    _freezeTitle.stringValue = [NSString stringWithFormat:@"Time Freeze %lds", _freezeCounter, nil];
+    _versionTitle.stringValue = [NSString stringWithFormat:@"Version %@ (%@)", [delegate versionString], [delegate bundleVersionString]];
+    _freezeTitle.stringValue = [NSString stringWithFormat:@"Trial Version Time Freeze %lds", _freezeCounter, nil];
 }
 
 - (void)freeze:(NSTimer *)timer {
     _freezeCounter --;
     
-    _freezeTitle.stringValue = [NSString stringWithFormat:@"Time Freeze %lds", _freezeCounter, nil];
+    _freezeTitle.stringValue = [NSString stringWithFormat:@"Trial Version Time Freeze %lds", _freezeCounter, nil];
     
     if (_freezeCounter == 0) {
         _freezeCounter = FREEZE_SECOND;

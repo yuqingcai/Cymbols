@@ -20,7 +20,7 @@
 - (void)initProperties {
     [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
     _kern = 0.22;
-    _icon = [NSImage imageNamed:@"cymbols_logo"];
+    _icon = [NSImage imageNamed:@"icon_butterfly_128x128"];
     _iconColor = [NSColor grayColor];
 }
 

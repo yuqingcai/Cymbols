@@ -14,8 +14,8 @@
     [super setFrameSize:newSize];
         
     NSRect textRect = _text.frame;
-    textRect.origin.x = 0.0;
-    textRect.size.width = newSize.width;
+    textRect.origin.x = 4.0;
+    textRect.size.width = newSize.width - textRect.origin.x;
     [_text setFrame:textRect];
 }
 

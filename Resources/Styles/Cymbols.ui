@@ -953,6 +953,41 @@
     "IDWelcomeView [deactived]" : {
         "background_color" : "#fafafa",
         "corner_radius" : "10.0"
-    }
+    },
     
+    "IDWelcomeViewCopyrightTextLabel [actived]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#9e9e9e",
+        "aligment" : "left",
+    },
+    
+    "IDWelcomeViewCopyrightTextLabel [deactived]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#9e9e9e",
+        "aligment" : "left",
+    },
+    
+    "IDWelcomeViewCopyrightTextLabel [highlighted]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#9e9e9e",
+        "aligment" : "left",
+    },
+        
+    "IDWelcomeViewLinkTextLabel [actived]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#9e9e9e",
+        "aligment" : "left",
+    },
+    
+    "IDWelcomeViewLinkTextLabel [deactived]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#9e9e9e",
+        "aligment" : "left",
+    },
+    
+    "IDWelcomeViewLinkTextLabel [highlighted]" : {
+        "font" : "font(\"Helvetica\", 10.0, \"regular\", 5.0)",
+        "text_color" : "#9e9e9e",
+        "aligment" : "left",
+    }
 }

@@ -654,15 +654,16 @@ void cee_text_layout_run(CEETextLayoutRef layout)
         cee_text_unit_buffer_length_get(tail_unit) -
         cee_text_unit_buffer_offset_get(head_unit);
     range = cee_range_make(offset, length);
+    
     if (layout->attribute_generate) {
-        
         if (layout->tags)
             cee_list_free_full(layout->tags, cee_tag_free);
-        layout->tags = layout->attribute_generate(layout->attribute_generator_ref,
-                                                  range);
+        layout->tags =
+            layout->attribute_generate(layout->attribute_generator_ref,
+                                       range);
         if (layout->tags_bst)
             cee_bst_free(layout->tags_bst);
-                
+        
         layout->tags_bst = cee_bst_create(layout->tags);
         
         text_layout(layout, TRUE);
