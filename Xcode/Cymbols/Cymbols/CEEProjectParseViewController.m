@@ -133,7 +133,8 @@
                     __block CEESourceBuffer* buffer = nil;
                     // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                     dispatch_sync(dispatch_get_main_queue(), ^{
-                        buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+                        //buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+                        buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
                     });
                     
                     if (self->_sync && info->symbol_count)

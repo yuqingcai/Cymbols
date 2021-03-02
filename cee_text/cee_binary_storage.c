@@ -9,7 +9,7 @@ typedef struct _CEEBinaryStorage {
 } CEEBinaryStorage;
 
 CEEBinaryStorageRef cee_binary_storage_create(cee_pointer host_ref,
-                                              const cee_uchar* string,
+                                              const cee_uchar* content,
                                               cee_ulong length,
                                               void (*buffer_update)(cee_pointer, 
                                                                     CEEBinaryStorageRef,
@@ -28,4 +28,10 @@ void cee_binary_storage_free(CEEBinaryStorageRef data)
     CEEBinaryStorage* storage = (CEEBinaryStorage*)data;
     
     cee_free(storage);
+}
+
+void cee_binary_storage_buffer_set(CEEBinaryStorageRef storage,
+                                   const cee_uchar* content,
+                                   cee_ulong length)
+{
 }

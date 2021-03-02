@@ -6,8 +6,8 @@
 #include <iconv.h>
 #include "cee_codec.h"
 
-cee_boolean cee_codec_encoding_utf8(const cee_uchar* subject,
-                                    cee_ulong length)
+cee_boolean cee_codec_is_encoded_utf8(const cee_uchar* subject,
+                                      cee_ulong length)
 {
     if(!subject)
         return FALSE;
@@ -47,6 +47,23 @@ cee_boolean cee_codec_encoding_utf8(const cee_uchar* subject,
     return TRUE;
 }
 
+cee_boolean cee_codec_is_binary(const cee_uchar* subject,
+                                cee_ulong length)
+{
+    if(!subject)
+        return FALSE;
+    
+    cee_uchar* bytes = (cee_uchar*)subject;
+    
+    cee_uint i = 0;
+    while (i < length) {
+        if (bytes[i] == 0)
+            return TRUE;
+        i ++;
+    }
+    return FALSE;
+}
+
 /**
  * when return value equals -1, that means "offset" is the tail of storage buffer,
  * the "codepoint" is CEE_UNICODE_POINT_NUL
@@ -66,11 +83,6 @@ void cee_codec_utf8_decode(const cee_uchar* subject,
         _next = -1;
         goto exit;
     }
-    
-    assert(!(ptr[0] & 0x80) || 
-           (ptr[0] >> 5) == 0x6 || 
-           (ptr[0] >> 4) == 0xe ||
-           (ptr[0] >> 3) == 0x1e);
     
     if (*ptr == 0) {
         _codepoint = CEE_UNICODE_POINT_NUL;
@@ -102,6 +114,10 @@ void cee_codec_utf8_decode(const cee_uchar* subject,
                         (ptr[3] & 0x3F);
         _length = 4;
     }
+    else {
+        _codepoint = ptr[0];
+        _length = 1;
+    }
     
     if (_codepoint == CEE_UNICODE_POINT_NUL)
         _next = -1;
@@ -131,28 +147,64 @@ void cee_codec_utf8_decode_reversed(const cee_uchar* subject,
                                     cee_ulong* length,
                                     cee_long* prev)
 {
-    if (offset <= 0) {
-        if (prev)
-            *prev = -1;
-        
-        if (codepoint)
-            *codepoint = CEE_UNICODE_POINT_INVALID;
-        
-        if (length)
-            *length = 0;
-        
-        return;
-    }
+    cee_ulong _length = 0;
+    CEEUnicodePoint _codepoint = CEE_UNICODE_POINT_INVALID;
+    cee_long _prev = 0;
+    const cee_uchar* ptr = NULL;
     
-    offset --;
-    offset = cee_codec_utf8_encoded_byte0_get(subject, offset);
-    cee_codec_utf8_decode(subject,
-                          offset,
-                          codepoint,
-                          length,
-                          NULL);
+    if (offset <= 0) {
+        _prev = -1;
+        goto exit;
+    }
+        
+    if ((subject[offset-4] >> 3) == 0x1e) {
+        _length = 4;
+        _prev = offset - _length;
+        ptr = &subject[_prev];
+        _codepoint = ((ptr[0] & 0x07) << 18) |
+                    ((ptr[1] & 0x3F) << 12) |
+                    ((ptr[2] & 0x3F) << 6) |
+                    (ptr[3] & 0x3F);
+    }
+    else if ((subject[offset-3] >> 4) == 0xe) {
+        _length = 3;
+        _prev = offset - _length;
+        ptr = &subject[_prev];
+        _codepoint = ((ptr[0] & 0x0F) << 12) |
+                        ((ptr[1] & 0x3F) << 6) |
+                        (ptr[2] & 0x3F);
+    }
+    else if ((subject[offset-2] >> 5) == 0x6) {
+        _length = 2;
+        _prev = offset - _length;
+        ptr = &subject[_prev];
+        _codepoint = ((ptr[0] & 0x1F) << 6) |
+                        (ptr[1] & 0x3F);
+        
+    }
+    else if (!(subject[offset-1] & 0x80)) {
+        _length = 1;
+        _prev = offset - _length;
+        ptr = &subject[_prev];
+        _codepoint = ptr[0] & 0x7F;
+    }
+    else {
+        _length = 1;
+        _prev = offset - _length;
+        ptr = &subject[offset];
+        _codepoint = ptr[0];
+    }
+
+    
+exit:
+    if (codepoint)
+        *codepoint = _codepoint;
+    
+    if (length)
+        *length = _length;
+    
     if (prev)
-        *prev = offset;
+        *prev = _prev;
     
     return;
 }
@@ -165,13 +217,7 @@ cee_ulong cee_codec_utf8_decode_length(const cee_uchar* subject,
     
     if (offset < 0)
         return 0;
-    
-    assert(*ptr == 0 || 
-           !(ptr[0] & 0x80) || 
-           (ptr[0] >> 5) == 0x6 || 
-           (ptr[0] >> 4) == 0xe ||
-           (ptr[0] >> 3) == 0x1e);
-    
+        
     if (*ptr == 0)
         length = 1;
     else if (!(ptr[0] & 0x80))
@@ -239,25 +285,6 @@ cee_ulong cee_codec_utf8_nb_codepoint(const cee_uchar* subject,
         current = next;
     }
     return nb_decoded;
-}
-
-cee_long cee_codec_utf8_encoded_byte0_get(const cee_uchar* subject,
-                                          cee_long offset)
-{
-    while (TRUE) {
-        
-        if (!(subject[offset] & 0x80) ||
-            (subject[offset] >> 5) == 0x6 ||
-            (subject[offset] >> 4) == 0xe ||
-            (subject[offset] >> 3) == 0x1e)
-            break;
-            
-        offset --;
-        
-        assert(offset >= 0);
-    }
-    
-    return offset;
 }
 
 cee_boolean cee_codec_has_bom(const cee_uchar* buffer)
@@ -336,39 +363,55 @@ void cee_codec_export_bom(const cee_uchar* buffer,
     }
 }
 
-const cee_char* cee_codec_type_from_bom(const cee_uchar* bom)
+CEECodecEncodedType cee_codec_type_from_bom(const cee_uchar* bom)
 {
     if (bom[0] == 0xEF &&
         bom[1] == 0xBB &&
         bom[2] == 0xBF) {
         /** UTF-8 */
-        return "UTF-8";
+        return kCEECodecEncodedTypeUTF8;
     }
     else if (bom[0] == 0xFE &&
              bom[1] == 0xFF) {
         /** UTF-16 (big-endian) */
-        return "UTF-16BE";
+        return kCEECodecEncodedTypeUTF16BE;
     }
     else if (bom[0] == 0xFF &&
              bom[1] == 0xFE) {
         /** UTF-16 (little-endian) */
-        return "UTF-16LE";
+        return kCEECodecEncodedTypeUTF16LE;
     }
     else if (bom[0] == 0x00 &&
              bom[1] == 0x00 &&
              bom[2] == 0xFE &&
              bom[3] == 0xFF) {
         /** UTF-32 (big-endian) */
-        return "UTF-32BE";
+        return kCEECodecEncodedTypeUTF32BE;
     }
     else if (bom[0] == 0xFF &&
              bom[1] == 0xFE &&
              bom[2] == 0x00 &&
              bom[3] == 0x00) {
         /** UTF-32 (little-endian) */
-        return "UTF-32LE";
+        return kCEECodecEncodedTypeUTF32LE;
     }
-    return "Unknow";
+    return kCEECodecEncodedTypeBinary;
+}
+
+const cee_char* cee_codec_encoded_type_string(CEECodecEncodedType type)
+{
+    if (type == kCEECodecEncodedTypeUTF8)
+        return "UTF-8";
+    else if (type == kCEECodecEncodedTypeUTF16BE)
+        return "UTF-16BE";
+    else if (type == kCEECodecEncodedTypeUTF16LE)
+        return "UTF-16LE";
+    else if (type == kCEECodecEncodedTypeUTF32BE)
+        return "UTF-32BE";
+    else if (type == kCEECodecEncodedTypeUTF32LE)
+        return "UTF-32LE";
+    
+    return NULL;
 }
 
 cee_uchar* cee_codec_convert_to_utf8_with_bom(const cee_uchar* subject,
@@ -379,7 +422,11 @@ cee_uchar* cee_codec_convert_to_utf8_with_bom(const cee_uchar* subject,
      * subject should begin with BOM
      */
     const cee_char* to = "UTF-8";
-    const cee_char* from = cee_codec_type_from_bom(bom);
+    CEECodecEncodedType type = cee_codec_type_from_bom(bom);
+    const cee_char* from = cee_codec_encoded_type_string(type);
+    if (!from)
+        return NULL;
+    
     cee_char* origin = (cee_char*)subject;
     cee_size mark_length = 0;
     if (!strcmp(from, "UTF-8")) {

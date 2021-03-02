@@ -33,7 +33,7 @@ typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
 
 @interface CEESourceBuffer : NSObject
 @property (strong) NSString* filePath;
-@property const cee_char* encodeType;
+@property CEECodecEncodedType encodedType;
 @property cee_pointer storage;
 @property CEESourceBufferState state;
 @property CEESourceFregment* comment;
@@ -63,10 +63,10 @@ typedef enum _CEESourceBufferParserOption {
     kCEESourceBufferParserOptionCreateSymbolWrapper = 1 << 0,
 } CEESourceBufferParserOption;
 
-typedef enum _CEESourceBufferOpenOption {
-    kCEESourceBufferOpenOptionShare = 1 << 0,
-    kCEESourceBufferOpenOptionIndependent = 1 << 1,
-} CEESourceBufferOpenOption;
+//typedef enum _CEESourceBufferOpenOption {
+//    kCEESourceBufferOpenOptionShare = 1 << 0,
+//    kCEESourceBufferOpenOptionIndependent = 1 << 1,
+//} CEESourceBufferOpenOption;
 
 void cee_source_buffer_parse(CEESourceBuffer* buffer,
                              CEESourceBufferParserOption options);
@@ -75,7 +75,8 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
 @property (readonly, strong) NSMutableArray* buffers;
 @property (strong, readonly) NSString* temporaryDirectory;
 
-- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath andOption:(CEESourceBufferOpenOption)option;
+//- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath andOption:(CEESourceBufferOpenOption)option;
+- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath;
 - (CEESourceBuffer*)openUntitledSourceBuffer;
 - (void)closeSourceBuffer:(CEESourceBuffer*)buffer;
 - (BOOL)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath;

@@ -172,11 +172,12 @@
     NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
     AppDelegate* delegate = [NSApp delegate];
     CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    CEESourceBuffer* buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+    //CEESourceBuffer* buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+    CEESourceBuffer* buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
     if (!buffer)
         return;
     
-    cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
+    //cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
     [_monitor setBuffer:buffer];
     CEEList* ranges = cee_ranges_from_string(symbol->locations);
     if (ranges) {

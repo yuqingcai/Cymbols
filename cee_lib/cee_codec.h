@@ -78,10 +78,15 @@ typedef uint32_t CEEUnicodePoint;
 #define CEE_UNICODE_POINT_APC       0x0000009F
 #define CEE_UNICODE_POINT_UNKONW    0x000025A1
 
+typedef enum _CEECodecEncodedType {
+    kCEECodecEncodedTypeUTF8,
+    kCEECodecEncodedTypeUTF16BE,
+    kCEECodecEncodedTypeUTF16LE,
+    kCEECodecEncodedTypeUTF32BE,
+    kCEECodecEncodedTypeUTF32LE,
+    kCEECodecEncodedTypeBinary
+} CEECodecEncodedType;
 
-#define CODEC_ENCODING_UTF8         "encoding_utf8"
-#define CODEC_ENCODING_UNKNOW       "encoding_unknow"
-    
 typedef enum _CEEUnicodePointType {
     kCEEUnicodePointTypeControl,
     kCEEUnicodePointTypeASCIIPunctuation,
@@ -89,8 +94,10 @@ typedef enum _CEEUnicodePointType {
     kCEEUnicodePointTypeWorldWideCharacter,
 } CEEUnicodePointType;
 
-cee_boolean cee_codec_encoding_utf8(const cee_uchar* subject,
+cee_boolean cee_codec_is_encoded_utf8(const cee_uchar* subject,
                                     cee_ulong length);
+cee_boolean cee_codec_is_binary(const cee_uchar* subject,
+                                cee_ulong length);
 void cee_codec_utf8_decode(const cee_uchar* subject,
                            cee_long offset,
                            CEEUnicodePoint* codepoint,
@@ -106,14 +113,13 @@ cee_ulong cee_codec_utf8_decode_length(const cee_uchar* subject,
 CEEUnicodePointType cee_codec_unicode_point_type(CEEUnicodePoint codepoint);
 cee_ulong cee_codec_utf8_nb_codepoint(const cee_uchar* subject,
                                       cee_ulong length);
-cee_long cee_codec_utf8_encoded_byte0_get(const cee_uchar* subject,
-                                          cee_long offset);
 CEERange cee_codec_utf8_range_decoded_to_encoded(const cee_uchar* subject,
                                                  CEERange range);
 cee_boolean cee_codec_has_bom(const cee_uchar* buffer);
 void cee_codec_export_bom(const cee_uchar* buffer,
                           cee_uchar* bom);
-const cee_char* cee_codec_type_from_bom(const cee_uchar* bom);
+CEECodecEncodedType cee_codec_type_from_bom(const cee_uchar* bom);
+const cee_char* cee_codec_encoded_type_string(CEECodecEncodedType type);
 cee_uchar* cee_codec_convert_to_utf8_with_bom(const cee_uchar* subject,
                                               cee_size length,
                                               const cee_uchar* bom);

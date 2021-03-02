@@ -10,13 +10,17 @@ extern "C" {
 typedef struct _CEEBinaryStorage* CEEBinaryStorageRef;
 
 CEEBinaryStorageRef cee_binary_storage_create(cee_pointer host_ref,
-                                              const cee_uchar* string,
+                                              const cee_uchar* content,
                                               cee_ulong length,
                                               void (*buffer_update)(cee_pointer, 
                                                                     CEEBinaryStorageRef,
                                                                     CEERange,
                                                                     CEERange));
 void cee_binary_storage_free(CEEBinaryStorageRef data);
+
+void cee_binary_storage_buffer_set(CEEBinaryStorageRef storage,
+                                   const cee_uchar* content,
+                                   cee_ulong length);
 
 #ifdef __cplusplus
 }

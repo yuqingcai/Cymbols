@@ -117,14 +117,13 @@
     
     CEEEditViewController* viewController = nil;
     
-    if (!strcmp(_sourceBuffer.encodeType, "UTF-8") ||
-        !strcmp(_sourceBuffer.encodeType, "UTF-16BE") ||
-        !strcmp(_sourceBuffer.encodeType, "UTF-16LE") ||
-        !strcmp(_sourceBuffer.encodeType, "UTF-32BE") ||
-        !strcmp(_sourceBuffer.encodeType, "UTF-32LE") ||
-        !strcmp(_sourceBuffer.encodeType, "GB2312"))
+    if (_sourceBuffer.encodedType == kCEECodecEncodedTypeUTF8 ||
+        _sourceBuffer.encodedType == kCEECodecEncodedTypeUTF16BE ||
+        _sourceBuffer.encodedType == kCEECodecEncodedTypeUTF16LE ||
+        _sourceBuffer.encodedType == kCEECodecEncodedTypeUTF32BE ||
+        _sourceBuffer.encodedType == kCEECodecEncodedTypeUTF32LE)
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
-    else if (!strcmp(_sourceBuffer.encodeType, "Unknow"))
+    else if (_sourceBuffer.encodedType == kCEECodecEncodedTypeBinary)
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDBinaryEditViewController"];
     else
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDNotSupportedEditViewController"];

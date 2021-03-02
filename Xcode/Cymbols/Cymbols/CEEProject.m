@@ -428,7 +428,8 @@ BOOL ContextContainSymbol(CEEList* context,
         }
     }
     
-    buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionShare];
+    //buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionShare];
+    buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
 
 exit:
     return buffer;

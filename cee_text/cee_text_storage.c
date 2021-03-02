@@ -166,7 +166,7 @@ static cee_long storage_paragraph_beginning_get(const cee_uchar* buffer,
     cee_long prev = -1;
     CEEUnicodePoint codepoint = CEE_UNICODE_POINT_INVALID;
     
-    current = cee_codec_utf8_encoded_byte0_get(buffer, offset);
+    current = offset;
     while (TRUE) {
         storage_buffer_decode_reversed(buffer, current, &codepoint, NULL, &prev);
         /** 
@@ -188,7 +188,7 @@ static cee_long storage_paragraph_end_get(const cee_uchar* buffer,
     cee_long next = -1;
     CEEUnicodePoint codepoint = CEE_UNICODE_POINT_INVALID;
     
-    current = cee_codec_utf8_encoded_byte0_get(buffer, offset);
+    current = offset;
     while (TRUE) {
         storage_buffer_decode(buffer, current, &codepoint, NULL, &next);
         /**
@@ -721,7 +721,6 @@ cee_long cee_text_storage_paragraph_prev_get(CEETextStorageRef storage,
         return 0;
     
     cee_long prev = -1;
-    buffer_offset = cee_codec_utf8_encoded_byte0_get(storage->buffer, buffer_offset);
     buffer_offset = storage_paragraph_beginning_get(storage->buffer, buffer_offset);
     if (buffer_offset == 0)
         return -1;
@@ -742,7 +741,6 @@ cee_long cee_text_storage_paragraph_next_get(CEETextStorageRef storage,
         return 0;
     
     cee_long next = -1;
-    buffer_offset = cee_codec_utf8_encoded_byte0_get(storage->buffer, buffer_offset);
     buffer_offset = storage_paragraph_end_get(storage->buffer, buffer_offset);
     if (buffer_offset == -1)
         return -1;
@@ -771,6 +769,9 @@ cee_long cee_text_storage_character_index_in_paragraph(CEETextStorageRef storage
             return i;
         
         storage_buffer_decode(storage->buffer, current, NULL, NULL, &next);
+        if (next == -1)
+            break;
+        
         current = next;
         i ++;
     }

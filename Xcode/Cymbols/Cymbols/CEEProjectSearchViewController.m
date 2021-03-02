@@ -146,7 +146,8 @@
                 __block CEESourceBuffer* buffer = nil;
                 // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+                    //buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+                    buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
                 });
                 
                 const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
@@ -230,7 +231,8 @@
                 __block CEESourceBuffer* buffer = nil;
                 // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+                    //buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+                    buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
                 });
                 
                 const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
@@ -318,7 +320,8 @@
                 __block CEESourceBuffer* buffer = nil;
                 // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+                    //buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+                    buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
                 });
                 
                 const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
@@ -564,8 +567,9 @@
     
     AppDelegate* delegate = [NSApp delegate];
     CEESearchResult* result = _project.searcher.results[_resultTable.selectedRow];
-    CEESourceBuffer* buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:result.filePath andOption:kCEESourceBufferOpenOptionIndependent];
-        
+    //CEESourceBuffer* buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:result.filePath andOption:kCEESourceBufferOpenOptionIndependent];
+    CEESourceBuffer* buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:result.filePath];
+    
     cee_source_buffer_parse(buffer, 0);
     [_editViewController setBuffer:buffer];
     CEEList* ranges = cee_ranges_from_string([result.locations UTF8String]);

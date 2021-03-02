@@ -116,7 +116,8 @@
             return;
         CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)_symbolTable.selectedRow);
         NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
-        CEESourceBuffer* buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent ];
+        //CEESourceBuffer* buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
+        CEESourceBuffer* buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
         cee_source_buffer_parse(buffer, 0);
         [_editViewController setBuffer:buffer];
         CEEList* ranges = cee_ranges_from_string(symbol->locations);

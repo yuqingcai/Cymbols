@@ -1065,7 +1065,6 @@ CEETextUnitRef cee_text_layout_tail_unit_get(CEETextLayoutRef layout)
 CEEList* cee_text_layout_rects_create(CEETextLayoutRef layout,
                                       CEERange range)
 {
-    CEETextStorageRef storage = layout->storage_ref;
     CEETextUnitRef head_unit = cee_text_layout_head_unit_get(layout);
     CEETextUnitRef tail_unit = cee_text_layout_tail_unit_get(layout);
     cee_long head_offset = cee_text_unit_buffer_offset_get(head_unit);
@@ -1080,7 +1079,6 @@ CEEList* cee_text_layout_rects_create(CEETextLayoutRef layout,
     CEERect unit0_bounds;
     CEERect unit1_bounds;
     
-    const cee_uchar* buffer = cee_text_storage_buffer_get(storage);
     cee_long start_offset = -1;
     cee_long end_offset = -1;
     
@@ -1099,7 +1097,7 @@ CEEList* cee_text_layout_rects_create(CEETextLayoutRef layout,
     }
     else {
         start_offset = range.location;
-        end_offset = cee_codec_utf8_encoded_byte0_get(buffer, range.location + range.length - 1);
+        end_offset = range.location + range.length - 1;
         
         if (start_offset >= tail_offset + tail_length || end_offset < head_offset) {
             return NULL;
