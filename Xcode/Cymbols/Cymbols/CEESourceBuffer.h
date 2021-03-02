@@ -56,6 +56,7 @@ typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
 - (void)increaseReferenceCount;
 - (void)decreaseReferenceCount;
 - (BOOL)withBOM;
+
 @end
 
 typedef enum _CEESourceBufferParserOption {

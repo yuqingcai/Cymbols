@@ -8,6 +8,8 @@
 
 #import "CEESourceBuffer.h"
 
+#define PARSE_BUFFER
+
 NSNotificationName CEENotificationSourceBufferChangeState = @"CEENotificationSourceBufferChangeState";
 NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBufferReload";
 
@@ -30,6 +32,7 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
 void cee_source_buffer_parse(CEESourceBuffer* buffer,
                              CEESourceBufferParserOption options)
 {
+#ifdef PARSE_BUFFER
     if (!buffer.parser_ref) {
         buffer.parser_ref = cee_source_parser_get([buffer.filePath UTF8String]);
         if (!buffer.parser_ref)
@@ -108,6 +111,7 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
     //NSLog(@"+ source_fregment_count: %d", cee_source_fregment_count_get());
     //NSLog(@"+ source_symbol_count: %d", cee_source_symbol_count_get());
     //NSLog(@"+ cee_tree_count_get: %d", cee_tree_count_get());
+#endif
 }
 
 static void text_buffer_modified(cee_pointer buffer, 

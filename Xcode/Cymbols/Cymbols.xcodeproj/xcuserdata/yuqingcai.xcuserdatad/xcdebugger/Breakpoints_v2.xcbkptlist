@@ -212,5 +212,69 @@
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "52056ECF-5593-4576-BAF0-625CD201491B"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../cee_lib/cee_codec.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "134"
+            endingLineNumber = "134"
+            landmarkName = "cee_codec_utf8_decode_reversed(subject, offset, codepoint, length, prev)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "78B6AE9D-EAEF-4C35-B171-7EEE673639CB"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Cymbols/CEEProject.m"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1610"
+            endingLineNumber = "1610"
+            landmarkName = "-openDocumentWithContentsOfURL:display:completionHandler:"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "78B6AE9D-EAEF-4C35-B171-7EEE673639CB - 1092348eeb334041"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "-[CEEProjectController openDocumentWithContentsOfURL:display:completionHandler:]"
+                  moduleName = "Cymbols"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Volumes/VolumeEXT/Project/LazycatDesign/Cymbols/Xcode/Cymbols/Cymbols/CEEProject.m"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1610"
+                  endingLineNumber = "1610"
+                  offsetFromSymbolStart = "108">
+               </Location>
+               <Location
+                  uuid = "78B6AE9D-EAEF-4C35-B171-7EEE673639CB - 9d8ff7f6493e67f4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "__80-[CEEProjectController openDocumentWithContentsOfURL:display:completionHandler:]_block_invoke"
+                  moduleName = "Cymbols"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Volumes/VolumeEXT/Project/LazycatDesign/Cymbols/Xcode/Cymbols/Cymbols/CEEProject.m"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1611"
+                  endingLineNumber = "1611"
+                  offsetFromSymbolStart = "108">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

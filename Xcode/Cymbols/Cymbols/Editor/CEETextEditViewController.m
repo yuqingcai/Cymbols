@@ -78,7 +78,6 @@ static CEEList* buffer_tags_generate(cee_pointer generator,
                                   database, 
                                   range, 
                                   controller.symbolReferences);
-    
     return tags;
 }
 

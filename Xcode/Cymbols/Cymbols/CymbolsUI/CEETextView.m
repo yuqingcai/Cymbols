@@ -353,7 +353,11 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         buffer_offset = cee_text_storage_buffer_offset_by_character_index(_storage, 
                                                                           paragraph, 
                                                                           index + selectedRange.location + i);
-        cee_text_storage_buffer_character_next(_storage, buffer_offset, NULL, &length);
+        cee_text_storage_buffer_character_next(_storage,
+                                               buffer_offset,
+                                               NULL,
+                                               NULL,
+                                               &length);
         range.length += length;
     }
     

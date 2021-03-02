@@ -91,15 +91,16 @@ typedef enum _CEEUnicodePointType {
 
 cee_boolean cee_codec_encoding_utf8(const cee_uchar* subject,
                                     cee_ulong length);
-
-cee_long cee_codec_utf8_decode_next(const cee_uchar* subject,
+void cee_codec_utf8_decode(const cee_uchar* subject,
+                           cee_long offset,
+                           CEEUnicodePoint* codepoint,
+                           cee_ulong* length,
+                           cee_long* next);
+void cee_codec_utf8_decode_reversed(const cee_uchar* subject,
                                     cee_long offset,
                                     CEEUnicodePoint* codepoint,
-                                    cee_ulong* length);
-cee_long cee_codec_utf8_decode_prev(const cee_uchar* subject,
-                                    cee_long offset,
-                                    CEEUnicodePoint* codepoint,
-                                    cee_ulong* length);
+                                    cee_ulong* length,
+                                    cee_long* prev);
 cee_ulong cee_codec_utf8_decode_length(const cee_uchar* subject,
                                       cee_long offset);
 CEEUnicodePointType cee_codec_unicode_point_type(CEEUnicodePoint codepoint);

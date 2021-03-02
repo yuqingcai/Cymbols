@@ -220,8 +220,8 @@ static void selection_complete(CEETextEditRef edit,
 {
     CEETextStorageRef storage = edit->storage_ref;
     const cee_uchar* buffer = cee_text_storage_buffer_get(storage);
-    cee_float start_offset = 0;
-    cee_float end_offset = 0;
+    cee_long start_offset = 0;
+    cee_long end_offset = 0;
     cee_ulong length = 0;
     
     if (buffer_offset == edit->selection.anchor) {
@@ -231,17 +231,19 @@ static void selection_complete(CEETextEditRef edit,
     
     if (edit->selection.anchor < buffer_offset) {
         start_offset = edit->selection.anchor;
-        end_offset = cee_codec_utf8_decode_prev(buffer,
-                                                buffer_offset,
-                                                NULL,
-                                                NULL);
+        cee_codec_utf8_decode_reversed(buffer,
+                                       buffer_offset,
+                                       NULL,
+                                       NULL,
+                                       &end_offset);
     }
     else if (edit->selection.anchor > buffer_offset) {
         start_offset = buffer_offset;
-        end_offset = cee_codec_utf8_decode_prev(buffer,
-                                                edit->selection.anchor,
-                                                NULL,
-                                                NULL);
+        cee_codec_utf8_decode_reversed(buffer,
+                                       edit->selection.anchor,
+                                       NULL,
+                                       NULL,
+                                       &end_offset);
     }
     
     length = cee_codec_utf8_decode_length(buffer, end_offset);
@@ -758,7 +760,7 @@ void cee_text_edit_caret_move_right(CEETextEditRef edit)
     if (!edit)
         return;
     
-    cee_float buffer_offset = edit->caret.buffer_offset;
+    cee_long buffer_offset = edit->caret.buffer_offset;
     CEETextStorageRef storage = edit->storage_ref;
     
     layout_adjust_to_buffer_offset_if_need(edit, buffer_offset);
@@ -768,10 +770,11 @@ void cee_text_edit_caret_move_right(CEETextEditRef edit)
         return ;
     }
     
-    buffer_offset = cee_text_storage_buffer_character_next(storage,
-                                                           buffer_offset,
-                                                           NULL,
-                                                           NULL);
+    cee_text_storage_buffer_character_next(storage,
+                                           buffer_offset,
+                                           &buffer_offset,
+                                           NULL,
+                                           NULL);
     if (buffer_offset == -1)
         return;
     
@@ -786,7 +789,7 @@ void cee_text_edit_caret_move_left(CEETextEditRef edit)
     if (!edit)
         return;
     
-    cee_float buffer_offset = edit->caret.buffer_offset;
+    cee_long buffer_offset = edit->caret.buffer_offset;
     CEETextStorageRef storage = edit->storage_ref;
     
     layout_adjust_to_buffer_offset_if_need(edit, buffer_offset);
@@ -796,10 +799,11 @@ void cee_text_edit_caret_move_left(CEETextEditRef edit)
         return ;
     }
     
-    buffer_offset = cee_text_storage_buffer_character_prev(storage,
-                                                           buffer_offset,
-                                                           NULL,
-                                                           NULL);
+    cee_text_storage_buffer_character_prev(storage,
+                                           buffer_offset,
+                                           &buffer_offset,
+                                           NULL,
+                                           NULL);
     if (buffer_offset == -1)
         return;
     
@@ -900,7 +904,7 @@ void cee_text_edit_caret_move_word_right(CEETextEditRef edit)
     if (!edit)
         return;
     
-    cee_float buffer_offset = edit->caret.buffer_offset;
+    cee_long buffer_offset = edit->caret.buffer_offset;
     CEETextStorageRef storage = edit->storage_ref;
     
     layout_adjust_to_buffer_offset_if_need(edit, buffer_offset);
@@ -910,8 +914,9 @@ void cee_text_edit_caret_move_word_right(CEETextEditRef edit)
         return ;
     }
     
-    buffer_offset = cee_text_storage_buffer_word_next(storage,
-                                                      buffer_offset);
+    cee_text_storage_buffer_word_next(storage,
+                                      buffer_offset,
+                                      &buffer_offset);
     caret_buffer_offset_set(edit, buffer_offset, TRUE);
     selection_anchor_set(edit, buffer_offset);
     
@@ -923,7 +928,7 @@ void cee_text_edit_caret_move_word_left(CEETextEditRef edit)
     if (!edit)
         return;
     
-    cee_float buffer_offset = edit->caret.buffer_offset;
+    cee_long buffer_offset = edit->caret.buffer_offset;
     CEETextStorageRef storage = edit->storage_ref;
     
     layout_adjust_to_buffer_offset_if_need(edit, buffer_offset);
@@ -933,8 +938,9 @@ void cee_text_edit_caret_move_word_left(CEETextEditRef edit)
         return ;
     }
     
-    buffer_offset = cee_text_storage_buffer_word_prev(storage,
-                                                      buffer_offset);
+    cee_text_storage_buffer_word_prev(storage,
+                                      buffer_offset,
+                                      &buffer_offset);
     caret_buffer_offset_set(edit, buffer_offset, TRUE);
     selection_anchor_set(edit, buffer_offset);
     
@@ -1042,15 +1048,16 @@ void cee_text_edit_caret_move_right_selection(CEETextEditRef edit)
     if (!edit)
         return;
     
-    cee_float buffer_offset = edit->caret.buffer_offset;
+    cee_long buffer_offset = edit->caret.buffer_offset;
     CEETextStorageRef storage = edit->storage_ref;
     
     layout_adjust_to_buffer_offset_if_need(edit, buffer_offset);
     
-    buffer_offset = cee_text_storage_buffer_character_next(storage,
-                                                           buffer_offset,
-                                                           NULL,
-                                                           NULL);
+    cee_text_storage_buffer_character_next(storage,
+                                           buffer_offset,
+                                           &buffer_offset,
+                                           NULL,
+                                           NULL);
     
     caret_buffer_offset_set(edit, buffer_offset, TRUE);
     selection_complete(edit, buffer_offset);
@@ -1063,15 +1070,16 @@ void cee_text_edit_caret_move_left_selection(CEETextEditRef edit)
     if (!edit)
         return;
     
-    cee_float buffer_offset = edit->caret.buffer_offset;
+    cee_long buffer_offset = edit->caret.buffer_offset;
     CEETextStorageRef storage = edit->storage_ref;
     
     layout_adjust_to_buffer_offset_if_need(edit, buffer_offset);
     
-    buffer_offset = cee_text_storage_buffer_character_prev(storage,
-                                                           buffer_offset,
-                                                           NULL,
-                                                           NULL);
+    cee_text_storage_buffer_character_prev(storage,
+                                           buffer_offset,
+                                           &buffer_offset,
+                                           NULL,
+                                           NULL);
 
     caret_buffer_offset_set(edit, buffer_offset, TRUE);
     selection_complete(edit, buffer_offset);
@@ -1160,13 +1168,14 @@ void cee_text_edit_caret_move_word_right_selection(CEETextEditRef edit)
     if (!edit)
         return;
     
-    cee_float buffer_offset = edit->caret.buffer_offset;
+    cee_long buffer_offset = edit->caret.buffer_offset;
     CEETextStorageRef storage = edit->storage_ref;
     
     layout_adjust_to_buffer_offset_if_need(edit, buffer_offset);
     
-    buffer_offset = cee_text_storage_buffer_word_next(storage,
-                                                      buffer_offset);
+    cee_text_storage_buffer_word_next(storage,
+                                      buffer_offset,
+                                      &buffer_offset);
     
     caret_buffer_offset_set(edit, buffer_offset, TRUE);
     selection_complete(edit, buffer_offset);
@@ -1179,13 +1188,14 @@ void cee_text_edit_caret_move_word_left_selection(CEETextEditRef edit)
     if (!edit)
         return;
     
-    cee_float buffer_offset = edit->caret.buffer_offset;
+    cee_long buffer_offset = edit->caret.buffer_offset;
     CEETextStorageRef storage = edit->storage_ref;
     
     layout_adjust_to_buffer_offset_if_need(edit, buffer_offset);
     
-    buffer_offset = cee_text_storage_buffer_word_prev(storage,
-                                                      buffer_offset);
+    cee_text_storage_buffer_word_prev(storage,
+                                      buffer_offset,
+                                      &buffer_offset);
     
     caret_buffer_offset_set(edit, buffer_offset, TRUE);
     selection_complete(edit, buffer_offset);
@@ -1449,10 +1459,11 @@ void cee_text_edit_delete_forward(CEETextEditRef edit)
     }
     else {
         layout_adjust_to_buffer_offset_if_need(edit, edit->caret.buffer_offset);
-        next = cee_text_storage_buffer_character_next(storage,
-                                                      edit->caret.buffer_offset,
-                                                      NULL,
-                                                      &length);
+        cee_text_storage_buffer_character_next(storage,
+                                               edit->caret.buffer_offset,
+                                               &next,
+                                               NULL,
+                                               &length);
         if (next == -1)
             return;
         
@@ -1506,10 +1517,11 @@ void cee_text_edit_delete_backward(CEETextEditRef edit)
     else {
         layout_adjust_to_buffer_offset_if_need(edit, edit->caret.buffer_offset);
         
-        prev = cee_text_storage_buffer_character_prev(storage,
-                                                      edit->caret.buffer_offset,
-                                                      NULL,
-                                                      &length);
+        cee_text_storage_buffer_character_prev(storage,
+                                               edit->caret.buffer_offset,
+                                               &prev,
+                                               NULL,
+                                               &length);
         if (prev == -1)
             return;
         
@@ -1575,8 +1587,9 @@ void cee_text_edit_delete_word_forward(CEETextEditRef edit)
     }
     else {
         layout_adjust_to_buffer_offset_if_need(edit, edit->caret.buffer_offset);
-        next = cee_text_storage_buffer_word_next(storage,
-                                                 edit->caret.buffer_offset);
+        cee_text_storage_buffer_word_next(storage,
+                                          edit->caret.buffer_offset,
+                                          &next);
         if (next == -1)
             return;
         
@@ -1634,8 +1647,9 @@ void cee_text_edit_delete_word_backward(CEETextEditRef edit)
     else {
         layout_adjust_to_buffer_offset_if_need(edit, edit->caret.buffer_offset);
         
-        prev = cee_text_storage_buffer_word_prev(storage,
-                                                 edit->caret.buffer_offset);
+        cee_text_storage_buffer_word_prev(storage,
+                                          edit->caret.buffer_offset,
+                                          &prev);
         if (prev == -1)
             return;
         
@@ -1713,10 +1727,11 @@ void cee_text_edit_delete_to_paragraph_beginning(CEETextEditRef edit)
             return;
         
         if (prev == edit->caret.buffer_offset) {
-            prev = cee_text_storage_buffer_character_prev(storage,
-                                                          edit->caret.buffer_offset,
-                                                          NULL,
-                                                          &length);
+            cee_text_storage_buffer_character_prev(storage,
+                                                   edit->caret.buffer_offset,
+                                                   &prev,
+                                                   NULL,
+                                                   &length);
         }
         else {
             length = edit->caret.buffer_offset - prev;
@@ -1790,10 +1805,11 @@ void cee_text_edit_delete_to_paragraph_end(CEETextEditRef edit)
             return;
         
         if (next == edit->caret.buffer_offset) {
-            next = cee_text_storage_buffer_character_next(storage,
-                                                          edit->caret.buffer_offset,
-                                                          NULL,
-                                                          &length);
+            cee_text_storage_buffer_character_next(storage,
+                                                   edit->caret.buffer_offset,
+                                                   &next,
+                                                   NULL,
+                                                   &length);
         }
         else {
             length = next - edit->caret.buffer_offset;
@@ -2584,10 +2600,11 @@ cee_ulong cee_text_edit_marked_character_count_get(CEETextEditRef edit)
     
     if (has_marked(edit)) {
         while (TRUE) {
-            current = cee_text_storage_buffer_character_next(storage,
-                                                             current,
-                                                             NULL,
-                                                             NULL);
+            cee_text_storage_buffer_character_next(storage,
+                                                   current,
+                                                   &current,
+                                                   NULL,
+                                                   NULL);
             count ++;
             
             if (current >= range.location + range.length)

@@ -542,8 +542,9 @@ static void text_layout(CEETextLayoutRef layout,
     CEEUnicodePoint codepoint = CEE_UNICODE_POINT_INVALID;
     cee_size length = 0;
     cee_long paragraph_index = layout->paragraph_index;
-    cee_long current = cee_text_storage_buffer_offset_by_paragraph_index(layout->storage_ref,
-                                                                         paragraph_index);
+    cee_long current =
+        cee_text_storage_buffer_offset_by_paragraph_index(layout->storage_ref,
+                                                          paragraph_index);
     cee_long next = -1;
     CEETextLine* line = NULL;
     CEETextUnit* unit = NULL;
@@ -571,10 +572,11 @@ static void text_layout(CEETextLayoutRef layout,
                 line_paragraph_index_set(line, paragraph_index ++);
         }
         
-        next = cee_text_storage_buffer_character_next(storage,
-                                                      current,
-                                                      &codepoint,
-                                                      &length);
+        cee_text_storage_buffer_character_next(storage,
+                                               current,
+                                               &next,
+                                               &codepoint,
+                                               &length);
         if (codepoint == CEE_UNICODE_POINT_NUL)
             layout->terminate = TRUE;
         else if (codepoint == CEE_UNICODE_POINT_LF)
@@ -641,33 +643,33 @@ void cee_text_layout_run(CEETextLayoutRef layout)
     
     text_layout(layout, FALSE);
     
-    //head_unit = cee_text_layout_head_unit_get(layout);
-    //if (!head_unit)
-    //    return;
-    //
-    //tail_unit = cee_text_layout_tail_unit_get(layout);
-    //if (!tail_unit)
-    //    return;
-    //
-    //offset = cee_text_unit_buffer_offset_get(head_unit);
-    //length = cee_text_unit_buffer_offset_get(tail_unit) +
-    //    cee_text_unit_buffer_length_get(tail_unit) -
-    //    cee_text_unit_buffer_offset_get(head_unit);
-    //range = cee_range_make(offset, length);
-    //
-    //if (layout->attribute_generate) {
-    //    if (layout->tags)
-    //        cee_list_free_full(layout->tags, cee_tag_free);
-    //    layout->tags =
-    //        layout->attribute_generate(layout->attribute_generator_ref,
-    //                                   range);
-    //    if (layout->tags_bst)
-    //        cee_bst_free(layout->tags_bst);
-    //
-    //    layout->tags_bst = cee_bst_create(layout->tags);
-    //
-    //    text_layout(layout, TRUE);
-    //}
+    head_unit = cee_text_layout_head_unit_get(layout);
+    if (!head_unit)
+        return;
+    
+    tail_unit = cee_text_layout_tail_unit_get(layout);
+    if (!tail_unit)
+        return;
+    
+    offset = cee_text_unit_buffer_offset_get(head_unit);
+    length = cee_text_unit_buffer_offset_get(tail_unit) +
+        cee_text_unit_buffer_length_get(tail_unit) -
+        cee_text_unit_buffer_offset_get(head_unit);
+    range = cee_range_make(offset, length);
+    
+    if (layout->attribute_generate) {
+        if (layout->tags)
+            cee_list_free_full(layout->tags, cee_tag_free);
+        layout->tags =
+            layout->attribute_generate(layout->attribute_generator_ref,
+                                       range);
+        if (layout->tags_bst)
+            cee_bst_free(layout->tags_bst);
+    
+        layout->tags_bst = cee_bst_create(layout->tags);
+        
+        text_layout(layout, TRUE);
+    }
 }
 
 cee_boolean cee_text_layout_paragraph_index_is_invalid(CEETextLayoutRef layout)
@@ -712,7 +714,6 @@ void cee_text_layout_paragraph_index_set(CEETextLayoutRef layout,
     cee_ulong nb_paragraph = cee_text_storage_paragraph_count_get(storage);
     if (index >= nb_paragraph)
         index = nb_paragraph - 1;
-    
     layout->paragraph_index = index;
 }
 

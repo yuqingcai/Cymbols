@@ -51,18 +51,21 @@ cee_boolean cee_codec_encoding_utf8(const cee_uchar* subject,
  * when return value equals -1, that means "offset" is the tail of storage buffer,
  * the "codepoint" is CEE_UNICODE_POINT_NUL
  */
-cee_long cee_codec_utf8_decode_next(const cee_uchar* subject,
-                                    cee_long offset,
-                                    CEEUnicodePoint* codepoint,
-                                    cee_size* length)
+void cee_codec_utf8_decode(const cee_uchar* subject,
+                           cee_long offset,
+                           CEEUnicodePoint* codepoint,
+                           cee_size* length,
+                           cee_long* next)
 {
     const cee_uchar* ptr = &subject[offset];
     cee_size _length = 0;
     CEEUnicodePoint _codepoint = CEE_UNICODE_POINT_INVALID;
-    cee_long next = 0;
+    cee_long _next = 0;
     
-    if (offset < 0)
-        return -1;
+    if (offset < 0) {
+        _next = -1;
+        goto exit;
+    }
     
     assert(!(ptr[0] & 0x80) || 
            (ptr[0] >> 5) == 0x6 || 
@@ -101,9 +104,14 @@ cee_long cee_codec_utf8_decode_next(const cee_uchar* subject,
     }
     
     if (_codepoint == CEE_UNICODE_POINT_NUL)
-        next = -1;
+        _next = -1;
     else
-        next = offset + _length;
+        _next = offset + _length;
+
+exit:
+    
+    if (next)
+        *next = _next;
     
     if (codepoint)
         *codepoint = _codepoint;
@@ -111,39 +119,42 @@ cee_long cee_codec_utf8_decode_next(const cee_uchar* subject,
     if (length)
         *length = _length;
     
-    return next;
+    return;
 }
 /**
  * when return value equals -1, that means "offset" is the head of storage buffer,
  * the "codepoint" is CEE_UNICODE_POINT_INVALID
  */
-cee_long cee_codec_utf8_decode_prev(const cee_uchar* subject,
+void cee_codec_utf8_decode_reversed(const cee_uchar* subject,
                                     cee_long offset,
                                     CEEUnicodePoint* codepoint,
-                                    cee_size* length)
+                                    cee_ulong* length,
+                                    cee_long* prev)
 {
-    if (offset < 0)
-        return -1;
-    
-    if (offset == 0) {
-
+    if (offset <= 0) {
+        if (prev)
+            *prev = -1;
+        
         if (codepoint)
             *codepoint = CEE_UNICODE_POINT_INVALID;
         
         if (length)
             *length = 0;
         
-        return -1;
+        return;
     }
     
     offset --;
     offset = cee_codec_utf8_encoded_byte0_get(subject, offset);
-    cee_codec_utf8_decode_next(subject,
-                               offset,
-                               codepoint,
-                               length);
+    cee_codec_utf8_decode(subject,
+                          offset,
+                          codepoint,
+                          length,
+                          NULL);
+    if (prev)
+        *prev = offset;
     
-    return offset;
+    return;
 }
 
 cee_ulong cee_codec_utf8_decode_length(const cee_uchar* subject,
@@ -203,16 +214,18 @@ cee_ulong cee_codec_utf8_nb_codepoint(const cee_uchar* subject,
                                       cee_ulong length)
 {
     cee_ulong nb_decoded = 0;
-    cee_ulong offset = 0;
+    cee_long current = 0;
+    cee_long next = 0;
     cee_ulong total_decode_length = 0;
     
     while (TRUE) {
         CEEUnicodePoint codepoint;
         cee_ulong decode_length;
-        offset = cee_codec_utf8_decode_next(subject,
-                                            offset,
-                                            &codepoint,
-                                            &decode_length);
+        cee_codec_utf8_decode(subject,
+                              current,
+                              &codepoint,
+                              &decode_length,
+                              &next);
         total_decode_length += decode_length;
         
         if (codepoint == CEE_UNICODE_POINT_NUL)
@@ -223,6 +236,7 @@ cee_ulong cee_codec_utf8_nb_codepoint(const cee_uchar* subject,
         if (length && total_decode_length >= length)
             break;
         
+        current = next;
     }
     return nb_decoded;
 }
