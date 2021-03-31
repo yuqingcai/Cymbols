@@ -19,8 +19,9 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* proto_descriptor,
                                           const cee_char* language,
                                           const cee_char* file_path,
-                                          const cee_char* locations,
-                                          const cee_char* fregment_range)
+                                          cee_int line_no,
+                                          CEEList* ranges,
+                                          CEERange fregment_range)
 {
     CEESourceSymbol* symbol = cee_malloc0(sizeof(CEESourceSymbol));
     
@@ -47,12 +48,10 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
     if (file_path)
         symbol->file_path = cee_strdup(file_path);
     
-    if (locations)
-        symbol->locations = cee_strdup(locations);
-    
-    if (fregment_range)
-        symbol->fregment_range = cee_strdup(fregment_range);
-    
+    symbol->line_no = line_no;
+    symbol->ranges = ranges;
+    symbol->fregment_range = fregment_range;
+        
     cee_source_symbol_count ++;
     
     return symbol;
@@ -63,7 +62,7 @@ void cee_source_symbol_free(cee_pointer data)
     if (!data)
         return;
     
-    CEESourceSymbol* symbol = (CEESourceSymbol*)data;
+    CEESourceSymbol* symbol = (CEESourceSymbol*)data;    
     
     if (symbol->name)
         cee_free(symbol->name);
@@ -86,12 +85,9 @@ void cee_source_symbol_free(cee_pointer data)
     if (symbol->proto_descriptor)
         cee_free(symbol->proto_descriptor);
     
-    if (symbol->locations)
-        cee_free(symbol->locations);
-    
-    if (symbol->fregment_range)
-        cee_free(symbol->fregment_range);
-    
+    if (symbol->ranges)
+        cee_list_free_full(symbol->ranges, cee_range_free);
+        
     cee_free(symbol);
     
     cee_source_symbol_count --;
@@ -106,17 +102,30 @@ CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol)
 {
     if (!symbol)
         return NULL;
-    CEESourceSymbol* copy = cee_source_symbol_create(symbol->type,
-                                                     symbol->name,
-                                                     symbol->alias,
-                                                     symbol->parent,
-                                                     symbol->derives,
-                                                     symbol->proto_descriptor,
-                                                     symbol->language,
-                                                     symbol->file_path,
-                                                     symbol->locations,
-                                                     symbol->fregment_range);
+    
+    CEESourceSymbol* copy = cee_malloc0(sizeof(CEESourceSymbol));
+    copy->type = symbol->type;
+    copy->name = cee_strdup(symbol->name);
+    copy->alias = cee_strdup(symbol->alias);
+    copy->language = cee_strdup(symbol->language);
+    copy->file_path = cee_strdup(symbol->file_path);
+    copy->parent = cee_strdup(symbol->parent);
+    copy->derives = cee_strdup(symbol->derives);
+    copy->line_no = symbol->line_no;
+    
+    if (symbol->ranges)
+        copy->ranges = cee_list_copy_deep(symbol->ranges, cee_range_list_copy, NULL);
+    
+    copy->fregment_range = symbol->fregment_range;
+    copy->proto_descriptor = cee_strdup(symbol->proto_descriptor);
+    
     return copy;
+}
+
+cee_pointer cee_source_symbol_copy_func(const cee_pointer src,
+                                        cee_pointer data)
+{
+    return cee_source_symbol_copy((CEESourceSymbol*)src);
 }
 
 CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* file_path,
@@ -127,7 +136,8 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* file_
                                                            const cee_char* language,
                                                            CEETokenStringOption option)
 {
-    CEESourceSymbol* symbol = cee_source_symbol_create(kCEESourceSymbolTypeUnknow,
+    CEEToken* token = begin->data;
+    CEESourceSymbol* symbol = cee_source_symbol_create(type,
                                                        NULL,
                                                        NULL,
                                                        NULL,
@@ -135,19 +145,20 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* file_
                                                        NULL,
                                                        NULL,
                                                        NULL,
+                                                       0,
                                                        NULL,
-                                                       NULL);
+                                                       cee_range_make(0, 0));
     symbol->file_path = cee_strdup(file_path);
-    symbol->type = type;
     symbol->language = cee_strdup(language);
     symbol->name = cee_string_from_token_slice(subject,
                                                begin,
                                                end,
                                                option);
-    symbol->locations = cee_ranges_string_from_token_slice(begin,
-                                                           end,
-                                                           kCEERangeListTypeContinue);
-    symbol->fregment_range = cee_strdup(symbol->locations);
+    symbol->line_no = token->line_no;
+    symbol->ranges = cee_ranges_from_token_slice(begin,
+                                                 end,
+                                                 kCEERangeListTypeContinue);
+    symbol->fregment_range = cee_range_consistent_from_discrete(symbol->ranges);
     return symbol;
 }
 
@@ -158,7 +169,8 @@ CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* file_path,
                                                       const cee_char* language,
                                                       CEETokenStringOption option)
 {
-    CEESourceSymbol* symbol = cee_source_symbol_create(kCEESourceSymbolTypeUnknow,
+    CEEToken* token = tokens->data;
+    CEESourceSymbol* symbol = cee_source_symbol_create(type,
                                                        NULL,
                                                        NULL,
                                                        NULL,
@@ -166,20 +178,18 @@ CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* file_path,
                                                        NULL,
                                                        NULL,
                                                        NULL,
+                                                       0,
                                                        NULL,
-                                                       NULL);
+                                                       cee_range_make(0, 0));
     symbol->file_path = cee_strdup(file_path);
-    symbol->type = type;
     symbol->language = cee_strdup(language);
     symbol->name = cee_string_from_tokens(subject,
                                           TOKEN_FIRST(tokens),
                                           option);
-    symbol->locations = cee_ranges_string_from_tokens(TOKEN_FIRST(tokens),
-                                                      kCEERangeListTypeSeparate);
-    symbol->fregment_range = cee_ranges_string_from_tokens(TOKEN_FIRST(tokens), 
-                                                           kCEERangeListTypeContinue);
+    symbol->line_no = token->line_no;
+    symbol->ranges = cee_ranges_from_tokens(TOKEN_FIRST(tokens), kCEERangeListTypeSeparate);
+    symbol->fregment_range = cee_range_consistent_from_discrete(symbol->ranges);
     return symbol;
-    
 }
 
 void cee_source_symbol_name_format(cee_char* name)
@@ -211,10 +221,12 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     const cee_char* protos = "?";
     const cee_char* derives = "?";
     const cee_char* filepath = "?";
-    const cee_char* locations = "?";
-    const cee_char* fregment_range = "?";
     const cee_char* parent = "?";
     const cee_char* alias = "?";
+    cee_char* ranges = NULL;
+    cee_char* fregment_range = NULL;
+    cee_int line_no = symbol->line_no;
+    
     CEESourceSymbolType type = symbol->type;
     
     if (symbol->name)
@@ -229,22 +241,37 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     if (symbol->derives)
         derives = symbol->derives;
     
-    if (symbol->locations)
-        locations = symbol->locations;
-    
     if (symbol->file_path)
         filepath = symbol->file_path;
     
-    if (symbol->fregment_range)
-        fregment_range = symbol->fregment_range;
+    if (symbol->ranges)
+        ranges = cee_string_from_ranges(symbol->ranges);
+    else
+        ranges = cee_strdup("?");
+    
+    fregment_range = cee_string_from_range(&symbol->fregment_range);
     
     if (symbol->parent)
         parent = symbol->parent;
     
-    fprintf(stdout, "%s %s %d %s %s %s %s %s %s\n",
-            name, alias, type, protos,
-            locations, derives, filepath,
-            fregment_range, parent);
+    fprintf(stdout,
+            "%s %s %d %s %d %s %s %s %s %s\n",
+            name,
+            alias,
+            type,
+            protos,
+            line_no,
+            ranges,
+            derives,
+            filepath,
+            fregment_range,
+            parent);
+    
+    if (ranges)
+        cee_free(ranges);
+    
+    if (fregment_range)
+        cee_free(fregment_range);
 }
 
 void cee_source_symbols_print(CEEList* symbols)
@@ -281,38 +308,26 @@ cee_int cee_source_symbol_location_compare(const cee_pointer a,
     cee_int ret = 0;
     CEESourceSymbol* symbol0 = (CEESourceSymbol*)a;
     CEESourceSymbol* symbol1 = (CEESourceSymbol*)b;
-    CEEList* ranges0 = NULL;
-    CEEList* ranges1 = NULL;
     CEERange* range0 = NULL;
     CEERange* range1 = NULL;
     
-    if (!symbol0->locations || !symbol1->locations)
+    if (!symbol0->ranges || !symbol1->ranges)
         goto exit;
+        
+    range0 = cee_list_first(symbol0->ranges)->data;
+    range1 = cee_list_first(symbol1->ranges)->data;
     
-    ranges0 = cee_ranges_from_string(symbol0->locations);
-    ranges1 = cee_ranges_from_string(symbol1->locations);
-    
-    if (!ranges0 || !ranges1)
+    if (!range0 || !range1)
         goto exit;
-    
-    range0 = ranges0->data;
-    range1 = ranges1->data;
     
     ret = cee_range_compare(range0, range1);
-    
+
 exit:
-    
-    if (ranges0)
-        cee_list_free_full(ranges0, cee_range_free);
-    
-    if (ranges1)
-        cee_list_free_full(ranges1, cee_range_free);
-    
     return ret;
 }
 
 CEESourceSymbol* cee_source_symbol_tree_search(CEETree* tree,
-                                               CEESymbolMatcher matcher,
+                                               CEECompareFunc matcher,
                                                cee_pointer user_data)
 {
     if (!tree)
@@ -321,7 +336,7 @@ CEESourceSymbol* cee_source_symbol_tree_search(CEETree* tree,
     CEEList* p = NULL; 
     CEESourceSymbol* symbol = tree->data;
     if (symbol) {
-        if (matcher(symbol, user_data))
+        if (!matcher(symbol, user_data))
             return symbol;
     }
     
@@ -341,45 +356,49 @@ CEESourceSymbol* cee_source_symbol_tree_search(CEETree* tree,
     return NULL;
 }
 
-cee_boolean cee_source_symbol_matcher_by_buffer_offset(cee_pointer data,
-                                                       cee_pointer user_data)
+cee_int cee_source_symbol_matcher_by_buffer_offset(cee_pointer data,
+                                                   cee_pointer user_data)
 {
     if (!data || !user_data)
-        return FALSE;
+        return -1;
     
     CEESourceSymbol* symbol = (CEESourceSymbol*)data;
     cee_long offset = CEE_POINTER_TO_INT(user_data);
-    CEEList* ranges = cee_ranges_from_string(symbol->locations);
     CEERange range;
-    if (ranges) {
-        range = cee_range_consistent_from_discrete(ranges);
-        cee_list_free_full(ranges, cee_range_free);
-        if (cee_location_in_range(offset, range))
-            return TRUE;
+    if (symbol->ranges) {
+        range = cee_range_consistent_from_discrete(symbol->ranges);
+        if (cee_location_in_range(offset, range) ||
+            cee_location_followed_range(offset, range))
+            return 0;
     }
-    return FALSE;
+    return -1;
 }
 
-cee_boolean cee_source_symbol_matcher_by_name(cee_pointer data,
-                                              cee_pointer user_data)
+cee_int cee_source_symbol_matcher_by_name(cee_pointer data,
+                                          cee_pointer user_data)
 {
     if (!data || !user_data)
-        return FALSE;
+        return -1;
     
     CEESourceSymbol* symbol = (CEESourceSymbol*)data;
     cee_char* name = (cee_char*)user_data;
-    if (symbol->name && !strcmp(symbol->name, name))
-        return TRUE;
+    if ((symbol->name && !strcmp(symbol->name, name)) ||
+        (symbol->alias && !strcmp(symbol->alias, name)))
+        return 0;
     
-    return FALSE;
+    return -1;
 }
 
 cee_boolean cee_source_symbols_are_equal(CEESourceSymbol* symbol0,
                                          CEESourceSymbol* symbol1)
 {
+    CEERange range0 = cee_range_consistent_from_discrete(symbol0->ranges);
+    CEERange range1 = cee_range_consistent_from_discrete(symbol1->ranges);
+    
     if (!strcmp(symbol0->file_path, symbol1->file_path) &&
-        !strcmp(symbol0->locations, symbol1->locations)) 
+        (range0.location == range1.location && range0.length == range1.length))
         return TRUE;
+    
     return FALSE;
 }
 
@@ -507,4 +526,88 @@ CEEList* cee_source_symbol_wrappers_copy_with_condition(CEEList* wrappers,
         filtered = cee_list_reverse(filtered);
     }
     return filtered;
+}
+
+CEESourceSymbolCache* cee_source_symbol_cache_create(CEESourceSymbol* symbol,
+                                                     cee_long referenced_location)
+{
+    CEESourceSymbolCache* cache = (CEESourceSymbolCache*)cee_malloc0(sizeof(CEESourceSymbolCache));
+    cache->symbol = symbol;
+    if (referenced_location != -1)
+        cache->referened_locations =
+            cee_list_prepend(cache->referened_locations, CEE_LONG_TO_POINTER(referenced_location));
+    return cache;
+}
+
+void cee_source_symbol_cache_free(cee_pointer data)
+{
+    CEESourceSymbolCache* cache = (CEESourceSymbolCache*)data;
+    if (cache->symbol)
+        cee_source_symbol_free(cache->symbol);
+    if (cache->referened_locations)
+        cee_list_free(cache->referened_locations);
+    
+    cee_free(cache);
+}
+
+CEESourceSymbolCache* cee_source_symbol_cached(CEEList* caches,
+                                               CEESourceSymbol* symbol)
+{
+    CEEList* p = caches;
+    while (p) {
+        CEESourceSymbolCache* cache = p->data;
+        CEESourceSymbol* cached_symbol = cache->symbol;
+        
+        if (cached_symbol->name && symbol->name && !strcmp(cached_symbol->name, symbol->name) &&
+            cached_symbol->file_path && symbol->file_path && !strcmp(cached_symbol->file_path, symbol->file_path)) {
+            CEERange range0 = cee_range_consistent_from_discrete(cached_symbol->ranges);
+            CEERange range1 = cee_range_consistent_from_discrete(symbol->ranges);
+            if (range0.location == range1.location)
+                return cache;
+        }
+        
+        p = p->next;
+    }
+    return NULL;
+}
+
+void cee_source_symbol_cache_location(CEESourceSymbolCache* cache,
+                                      cee_long referenced_location)
+{
+    if (!cache)
+        return ;
+    cache->referened_locations = cee_list_prepend(cache->referened_locations,
+                                                  CEE_LONG_TO_POINTER(referenced_location));
+}
+
+
+cee_boolean cee_source_symbol_cache_name_hit(CEESourceSymbolCache* cache,
+                                             const cee_char* name)
+{
+    if (!cache)
+        return FALSE;
+    
+    CEESourceSymbol* symbol = cache->symbol;
+    
+    if (symbol->name && name && !strcmp(symbol->name, name))
+        return TRUE;
+    
+    return FALSE;
+}
+
+
+cee_boolean cee_source_symbol_cache_location_hit(CEESourceSymbolCache* cache,
+                                                 cee_long location)
+{
+    if (!cache)
+        return FALSE;
+    
+    CEEList* p = cache->referened_locations;
+    while (p) {
+        if (CEE_POINTER_TO_LONG(p->data) == location)
+            return TRUE;
+        p = p->next;
+    }
+    
+    return FALSE;
 }

@@ -23,7 +23,8 @@ WB  [^a-zA-Z0-9_"'<]
 #include "cee_lib.h"
 #include "cee_token.h"
 
-static cee_ulong g_scan_offset = 0;
+static cee_ulong scan_offset = 0;
+static cee_int line_no = 0;
 static YY_BUFFER_STATE buffer = NULL;
 
 #define RETURN_TOKEN_ID(token_id) {\
@@ -49,20 +50,222 @@ static YY_BUFFER_STATE buffer = NULL;
 %%
 
 
-cee_int cee_lexer_arm_asm_token_get(CEETokenID* token_id,
-                              		cee_long* offset,
-                              		cee_ulong* length)
+static int lines_comment(cee_long offset,
+                        cee_boolean* eof)
 {
-    cee_boolean terminate = FALSE;
+    int c0, c1;
+    int length = 0;
+    
+    do {
+        c0 = input();
+        
+        if (!c0) {
+            *eof = TRUE;
+            break;
+        }
+        
+        length ++;
+        
+        if (c0 == '\n') {
+            line_no ++;
+        }
+        else if (c0 == '\r') {
+            c1 = input();
+            if (!c1) {
+                *eof = TRUE;
+                break;
+            }
+            else if (c1 != '\n') {
+                line_no ++;
+            }
+            unput(c1);
+        }
+        
+        if (c0 == '*') {
+            c1 = input();
+            
+            if (!c1) {
+                *eof = TRUE;
+                break;
+            }
+            
+            if (c1 == '/') {
+                length ++;
+                break;
+            }
+            
+            unput(c1);
+        }
+        
+    } while (1);
+    
+    return length;
+}
+
+static int line_comment(cee_long offset,
+                       cee_boolean* eof)
+{
+    int c0;
+    int length = 0;
+    
+    do {
+        c0 = input();
+        
+        if (!c0) {
+            *eof = TRUE;
+            break;
+        }
+        
+        if (c0 == '\n' || c0 == '\r') {
+            unput(c0);
+            break;
+        }
+        
+        length ++;
+        
+    } while (1);
+    
+    return length;
+}
+
+static int literal(cee_long offset,
+                   cee_boolean* eof)
+{
+    int length = 0;
+    int escape = 0;
+    int c0, c1;
+    
+    do {
+        c0 = input();
+        if (!c0) {
+            *eof = TRUE;
+            break;
+        }
+        
+        length ++;
+        
+        if (c0 == '\n') {
+            line_no ++;
+        }
+        else if (c0 == '\r') {
+            c1 = input();
+            if (!c1) {
+                *eof = TRUE;
+                break;
+            }
+            else if (c1 != '\n') {
+                line_no ++;
+            }
+            unput(c1);
+        }
+        
+        if (c0 == '\\' && !escape)
+            escape ++;
+        else if (escape && c0 != '"')
+            escape --;
+        
+        if (c0 == '"') {
+            if (escape)
+                escape --;
+            else
+                break;
+        }
+        
+    } while (1);
+    
+    return length;
+}
+
+static int character(cee_long offset,
+                     cee_boolean* eof)
+{
+    int length = 0;
+    int escape = 0;
+    int c0, c1;
+    
+    do {
+        c0 = input();
+        if (!c0) {
+            *eof = TRUE;
+            break;
+        }
+        
+        length ++;
+        
+        if (c0 == '\n') {
+            line_no ++;
+        }
+        else if (c0 == '\r') {
+            c1 = input();
+            if (!c1) {
+                *eof = TRUE;
+                break;
+            }
+            else if (c1 != '\n') {
+                line_no ++;
+            }
+            unput(c1);
+        }
+        
+        if (c0 == '\\' && !escape)
+            escape ++;
+        else if (escape && c0 != '\'')
+            escape --;
+        
+        if (c0 == '\'') {
+            if (escape)
+                escape --;
+            else
+                break;
+        }
+        
+    } while (1);
+    
+    return length;
+}
+
+cee_int cee_lexer_arm_asm_token_get(CEEToken** token)
+{
+
+    cee_boolean eof = FALSE;
     cee_ulong tail_length = 0;
     
-    *token_id = arm_asm_scan_lex();
-    *offset = g_scan_offset;
-    *length = arm_asm_scan_get_leng();
+    CEETokenID identifier = arm_asm_scan_lex();
+    cee_long offset = scan_offset;
+    cee_ulong length = arm_asm_scan_get_leng();
     
-    g_scan_offset += arm_asm_scan_get_leng();
+    scan_offset += length;
     
-    if (!*token_id) /* EOF */
+    *token = cee_token_create(identifier, offset, length, line_no);
+    
+    if (identifier == kCEETokenID_NEW_LINE)
+        line_no ++;
+    
+    if (!identifier) /* EOF */
+        return 0;
+    
+    if (identifier == kCEETokenID_LINES_COMMENT) {
+        tail_length = lines_comment(offset, &eof);
+        (*token)->length += tail_length;
+        scan_offset += tail_length;
+    }
+    else if (identifier == kCEETokenID_LINE_COMMENT) {
+        tail_length = line_comment(offset, &eof);
+        (*token)->length += tail_length;
+        scan_offset += tail_length;
+    }
+    else if (identifier == kCEETokenID_LITERAL) {
+        tail_length = literal(offset, &eof);
+        (*token)->length += tail_length;
+        scan_offset += tail_length;
+    }
+    else if (identifier == kCEETokenID_CHARACTER) {
+        tail_length = character(offset, &eof);
+        (*token)->length += tail_length;
+        scan_offset += tail_length;
+    }
+    
+    if (eof)
         return 0;
     
     return 1;
@@ -71,7 +274,8 @@ cee_int cee_lexer_arm_asm_token_get(CEETokenID* token_id,
 void cee_lexer_arm_asm_subject_init(const cee_uchar* subject)
 {
     buffer = arm_asm_scan__scan_bytes(subject, strlen(subject));
-    g_scan_offset = 0;
+    scan_offset = 0;
+    line_no = 0;
 }
 
 void cee_lexer_amr_asm_buffer_free()

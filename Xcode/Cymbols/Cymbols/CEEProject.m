@@ -32,9 +32,8 @@ NSNotificationName CEENotificationSessionPresent = @"CEENotificationSessionPrese
 NSNotificationName CEENotificationSessionCreatePort = @"CEENotificationSessionCreatePort";
 NSNotificationName CEENotificationSessionActivePort = @"CEENotificationSessionActivePort";
 NSNotificationName CEENotificationSessionDeletePort = @"CEENotificationSessionDeletePort";
-NSNotificationName CEENotificationSessionPortCreateContext = @"CEENotificationSessionPortCreateContext";
-NSNotificationName CEENotificationSessionPortRequestJumpSourcePointSelection = @"CEENotificationSessionPortRequestJumpSourcePointSelection";
-NSNotificationName CEENotificationSessionPortSetSelectedSymbol = @"CEENotificationSessionPortSetSelectedSymbol";
+NSNotificationName CEENotificationSessionPortCreateSourceContext = @"CEENotificationSessionPortCreateSourceContext";
+NSNotificationName CEENotificationSessionPortJumpToSymbolRequest = @"CEENotificationSessionPortJumpToSymbolRequest";
 NSNotificationName CEENotificationSessionPortJumpToSourcePoint = @"CEENotificationSessionPortJumpToSourcePoint";
 NSNotificationName CEENotificationSessionPortPresentHistory = @"CEENotificationSessionPortPresentHistory";
 NSNotificationName CEENotificationSessionPortSaveSourceBuffer = @"CEENotificationSessionPortSaveSourceBuffer";
@@ -105,8 +104,12 @@ BOOL ContextContainSymbol(CEEList* context,
     CEEList* p = context;
     while (p) {
         CEESourceSymbol* test = p->data;
+        
+        CEERange range0 = cee_range_consistent_from_discrete(test->ranges);
+        CEERange range1 = cee_range_consistent_from_discrete(symbol->ranges);
+        
         if (!strcmp(test->file_path, symbol->file_path) &&
-            !strcmp(test->locations, symbol->locations))
+            (range0.location == range1.location && range0.length == range1.length))
             return YES;
         p = p->next;
     }
@@ -183,14 +186,6 @@ BOOL ContextContainSymbol(CEEList* context,
     return self;
 }
 
-- (CEESourceBuffer*)bufferInContext:(CEESourceBufferReferenceContext*)context {
-    for (CEESourceBuffer* buffer in _openedSourceBuffers) {
-        if ([buffer.filePath isEqualToString:context.filePath])
-            return buffer;
-    }
-    return [self openSourceBufferWithFilePath:context.filePath];
-}
-
 - (void)appendBufferReference:(CEESourceBuffer*)buffer {
     CEESourceBufferReferenceContext* current = [self currentSourceBufferReference];
     if (current) {
@@ -257,7 +252,6 @@ BOOL ContextContainSymbol(CEEList* context,
     }
 
     if (target) {
-        cee_source_buffer_parse(target, kCEESourceBufferParserOptionCreateSymbolWrapper);
         [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortPresentHistory object:self];
     }
 }
@@ -297,9 +291,6 @@ BOOL ContextContainSymbol(CEEList* context,
     }
     
     if (target) {
-        if (!target.symbol_wrappers)
-            cee_source_buffer_parse(target, kCEESourceBufferParserOptionCreateSymbolWrapper);
-        
         bufferOffsets = [self lastPresentedBufferOffsetInHistory:target.filePath];
         if (bufferOffsets) {
             lineBufferOffset = [bufferOffsets[@"lineBufferOffset"] integerValue];
@@ -311,7 +302,8 @@ BOOL ContextContainSymbol(CEEList* context,
         [self.currentSourceBufferReference setCaretBufferOffset:caretBufferOffset];
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortOpenSourceBuffer object:self];
+    if (target)
+        [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortOpenSourceBuffer object:self];
     
     return target;
 }
@@ -428,7 +420,6 @@ BOOL ContextContainSymbol(CEEList* context,
         }
     }
     
-    //buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionShare];
     buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
 
 exit:
@@ -436,9 +427,6 @@ exit:
 }
 
 - (void)setActivedSourceBuffer:(CEESourceBuffer*)buffer {
-    if (!buffer.symbol_wrappers)
-        cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
-    
     NSInteger lineBufferOffset = 0;
     NSInteger caretBufferOffset = 0;
     NSDictionary* bufferOffsets = [self lastPresentedBufferOffsetInHistory:buffer.filePath];
@@ -640,25 +628,24 @@ exit:
     }
     
     if (target) {
-        cee_source_buffer_parse(target, kCEESourceBufferParserOptionCreateSymbolWrapper);
         const cee_uchar* subject = cee_text_storage_buffer_get(target.storage);
         CEERange range = cee_range_make(0, cee_text_storage_size_get(target.storage));
         CEEList* symbolReferences = NULL;
-        cee_source_reference_parse(target.parser_ref, 
+        cee_source_reference_parse(target.parser_ref,
                                    [target.filePath UTF8String],
                                    (const cee_char*)subject,
-                                   target.source_token_map, 
-                                   target.prep_directive, 
-                                   target.statement, 
-                                   range, 
+                                   target.source_token_map,
+                                   target.prep_directive_fregment,
+                                   target.statement_fregment,
+                                   range,
                                    &symbolReferences);
-        cee_long offset = reference.caretBufferOffset;
-        CEETokenCluster* cluster = cee_token_cluster_search_by_buffer_offset(symbolReferences, 
-                                                                             target.prep_directive, 
-                                                                             target.statement, 
-                                                                             offset);
+        CEETokenCluster* cluster =
+            cee_token_cluster_search_by_buffer_offset(symbolReferences,
+                                                      target.prep_directive_fregment,
+                                                      target.statement_fregment,
+                                                      reference.caretBufferOffset);
         if (cluster) {
-            _context = [self _createContextByCluster:cluster];
+            _source_context = [self createSourceContext:cluster];
             cee_token_cluster_free(cluster);
         }
         cee_list_free_full(symbolReferences, cee_source_symbol_reference_free);
@@ -673,91 +660,62 @@ exit:
 }
 
 - (void)dealloc {
-    if (_context)
-        cee_list_free_full(_context, cee_source_symbol_free);
-    _context = NULL;
-        
-    if (_selected_symbol)
-        cee_source_symbol_free(_selected_symbol);
-    _selected_symbol = NULL;
+    if (_source_context)
+        cee_source_context_free(_source_context);
+    _source_context = NULL;
 }
 
-- (CEEList*)_createContextByCluster:(CEETokenCluster*)cluster {
+- (CEESourceContext*)createSourceContext:(CEETokenCluster*)cluster {
     if (!cluster)
         return NULL;
     
-    CEESourceSymbolReference* symbolReference = NULL;
-    CEESourceSymbol* symbol = NULL;
-    CEEList* context = NULL;
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourceBufferManager* sourceBufferManager = delegate.sourceBufferManager;
     CEESourceBufferReferenceContext* bufferReference = [self currentSourceBufferReference];
-    CEESourceBuffer* buffer = [self bufferInContext:bufferReference];
+    CEESourceBuffer* buffer = [sourceBufferManager openSourceBufferWithFilePath:bufferReference.filePath];
+    CEESourceContext* context = NULL;
+        
+    if (cluster->type == kCEETokenClusterTypeReference)
+        context = cee_source_reference_context_create([bufferReference.filePath UTF8String],
+                                                      (CEESourceSymbolReference*)cluster->content_ref,
+                                                      buffer.prep_directive_fregment,
+                                                      buffer.statement_fregment,
+                                                      self.session.project.database);
+    else if (cluster->type == kCEETokenClusterTypeSymbol)
+        context = cee_source_symbol_context_create([bufferReference.filePath UTF8String],
+                                                   (CEESourceSymbol*)cluster->content_ref,
+                                                   buffer.prep_directive_fregment,
+                                                   buffer.statement_fregment,
+                                                   self.session.project.database);
     
-    if (cluster->type == kCEETokenClusterTypeReference) {
-        symbolReference = (CEESourceSymbolReference*)cluster->content_ref;
-        context = cee_symbols_search_by_reference(symbolReference,
-                                                  buffer.prep_directive,
-                                                  buffer.statement,
-                                                  self.session.project.database,
-                                                  kCEESourceReferenceSearchOptionLocal);
-        if (!context) {
-            context = cee_symbols_search_by_reference(symbolReference,
-                                                      buffer.prep_directive,
-                                                      buffer.statement,
-                                                      self.session.project.database,
-                                                      kCEESourceReferenceSearchOptionGlobal);
-        }
-    }
-    else if (cluster->type == kCEETokenClusterTypeSymbol) {
-        symbol = (CEESourceSymbol*)cluster->content_ref;
-        context = cee_list_prepend(context, cee_source_symbol_copy(symbol));
-    }
+    [sourceBufferManager closeSourceBuffer:buffer];
+    
     return context;
 }
 
 - (void)createContextByCluster:(CEETokenCluster*)cluster {
-    if (!cluster)
-        return;
-    
-    CEEList* context = [self _createContextByCluster:cluster];
-    if (!context)
-        return;
-
-    if (_context)
-        cee_list_free_full(_context, cee_source_symbol_free);
-    
-    _context = context;
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCreateContext object:self];
-    
-    //[self testSymblsSearchByParent:_context];
+    if (_source_context)
+        cee_source_context_free(_source_context);
+    _source_context = [self createSourceContext:cluster];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCreateSourceContext object:self];
 }
 
-- (void)testSymblsSearchByParent:(CEEList*)context {
-    
-    // Test symbols search by parent
-    if (context) {
-        CEESourceSymbol* symbol = cee_list_nth(context, 0)->data;
-        if (symbol->parent) {
-            CEEList* symbols = 
-                cee_database_symbols_search_by_parent(self.session.project.database, 
-                                                      symbol->parent);
-
-            fprintf(stdout, "%s:\n", symbol->parent);
-            if (symbols) {
-                CEEList* p = symbols;
-                while (p) {
-                    symbol = p->data;
-                    fprintf(stdout, "\t%s\n", symbol->name);
-                    p = p->next;
-                }
-                cee_list_free_full(symbols, cee_source_symbol_free);
-            }
-        }
-    } // Test symbols search by parent end
+- (void)jumpToSymbolByCluster:(CEETokenCluster*)cluster {
+    if (_source_context)
+        cee_source_context_free(_source_context);
+    _source_context = [self createSourceContext:cluster];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCreateSourceContext object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortJumpToSymbolRequest object:self];
 }
 
-- (void)setSelectedSourceSymbol:(CEESourceSymbol*)symbol {
-    _selected_symbol = cee_source_symbol_copy(symbol);
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSetSelectedSymbol object:self];
+- (void)jumpToSymbol:(CEESourceSymbol*)symbol {
+    _jumpPoint = [[CEESourcePoint alloc] initWithSourceSymbol:symbol];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortJumpToSourcePoint object:self];
+}
+
+- (void)jumpToReference:(CEESourceSymbolReference*)reference {
+    _jumpPoint = [[CEESourcePoint alloc] initWithSourceSymbolReference:reference];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortJumpToSourcePoint object:self];
 }
 
 - (void)searchReferencesByCluster:(CEETokenCluster*)cluster {
@@ -781,30 +739,6 @@ exit:
     
     if (![referenceString isEqualToString:@""])
         [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSearchReference object:self];
-}
-
-- (void)jumpToSourceSymbolByCluster:(CEETokenCluster*)cluster {
-    CEEList* context = [self _createContextByCluster:cluster];
-    if (!context)
-        return;
-        
-    if (_context)
-        cee_list_free_full(_context, cee_source_symbol_free);
-    _context = context;
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCreateContext object:self];
-    
-    if (cee_list_length(_context) == 1) {
-        CEESourceSymbol* symbol = cee_list_nth_data(_context, 0);
-        CEESourcePoint* sourcePoint = [[CEESourcePoint alloc] initWithFilePath:[NSString stringWithUTF8String:symbol->file_path] andLocations:[NSString stringWithUTF8String:symbol->locations]];
-        [self jumpToSourcePoint:sourcePoint];
-    }
-    else
-        [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortRequestJumpSourcePointSelection object:self];
-}
-
-- (void)jumpToSourcePoint:(CEESourcePoint*)sourcePoint {
-    _jumpPoint = sourcePoint;
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortJumpToSourcePoint object:self];
 }
 
 - (NSString*)descriptor {

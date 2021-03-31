@@ -26,6 +26,7 @@ WB  [^a-zA-Z0-9_"'<]
 #include "cee_token.h"
 
 static cee_ulong scan_offset = 0;
+static cee_int line_no = 0;
 static YY_BUFFER_STATE buffer = NULL;
 
 #define RETURN_TOKEN_ID(token_id) {\
@@ -180,6 +181,21 @@ static int lines_comment(cee_long offset,
         
         length ++;
         
+        if (c0 == '\n') {
+            line_no ++;
+        }
+        else if (c0 == '\r') {
+            c1 = input();
+            if (!c1) {
+                *eof = TRUE;
+                break;
+            }
+            else if (c1 != '\n') {
+                line_no ++;
+            }
+            unput(c1);
+        }
+                
         if (c0 == '*') {
             c1 = input();
             
@@ -232,7 +248,7 @@ static int literal(cee_long offset,
 {
     int length = 0;
     int escape = 0;
-    int c0;
+    int c0, c1;
     
     do {
         c0 = input();
@@ -242,6 +258,21 @@ static int literal(cee_long offset,
         }
         
         length ++;
+        
+        if (c0 == '\n') {
+            line_no ++;
+        }
+        else if (c0 == '\r') {
+            c1 = input();
+            if (!c1) {
+                *eof = TRUE;
+                break;
+            }
+            else if (c1 != '\n') {
+                line_no ++;
+            }
+            unput(c1);
+        }
         
         if (c0 == '\\' && !escape)
             escape ++;
@@ -265,7 +296,7 @@ static int character(cee_long offset,
 {
     int length = 0;
     int escape = 0;
-    int c0;
+    int c0, c1;
     
     do {
         c0 = input();
@@ -275,6 +306,21 @@ static int character(cee_long offset,
         }
         
         length ++;
+        
+        if (c0 == '\n') {
+            line_no ++;
+        }
+        else if (c0 == '\r') {
+            c1 = input();
+            if (!c1) {
+                *eof = TRUE;
+                break;
+            }
+            else if (c1 != '\n') {
+                line_no ++;
+            }
+            unput(c1);
+        }
         
         if (c0 == '\\' && !escape)
             escape ++;
@@ -304,7 +350,10 @@ cee_int cee_lexer_java_token_get(CEEToken** token)
     
     scan_offset += length;
     
-    *token = cee_token_create(identifier, offset, length);
+    *token = cee_token_create(identifier, offset, length, line_no);
+    
+    if (identifier == kCEETokenID_NEW_LINE)
+        line_no ++;
     
     if (!identifier) /* EOF */
         return 0;
@@ -339,6 +388,7 @@ void cee_lexer_java_buffer_create(const cee_char* subject)
 {
     buffer = java_scan__scan_bytes(subject, strlen(subject));
     scan_offset = 0;
+    line_no = 0;
 }
 
 void cee_lexer_java_buffer_free()

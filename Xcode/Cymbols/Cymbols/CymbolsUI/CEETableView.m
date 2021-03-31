@@ -839,8 +839,10 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     
     [self reloadHeader];
     
-    if (_firstRowIndex >= [self numberOfRows])
+    if (_firstRowIndex >= [self numberOfRows]) {
         _firstRowIndex = 0;
+        _selectedRowIndexes = nil;
+    }
     
     if (!self.grid.rowViews.count)
         [self createGridRowViews];

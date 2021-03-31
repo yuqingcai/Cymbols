@@ -98,16 +98,15 @@ CEETextLineRef cee_text_layout_line_next(CEETextLayoutRef layout,
                                          CEETextLineRef line);
 CEETextLineRef ee_text_layout_line_prev(CEETextLayoutRef layout,
                                         CEETextLineRef line);
-void cee_text_layout_attribute_generator_set(CEETextLayoutRef layout,
-                                             cee_pointer generator);
-void cee_text_layout_attribute_generate_set(CEETextLayoutRef layout,
-                                            CEEList* (*generate)(cee_pointer,
-                                                                 CEERange));
 CEETag* cee_text_layout_tag_get(CEETextLayoutRef layout,
                                 cee_long buffer_offset);
 void cee_text_layout_reset(CEETextLayoutRef layout);
 void cee_text_layout_wrap_indent_set(CEETextLayoutRef layout,
                                      cee_boolean wrap_with_indent);
+CEERange cee_text_layout_range_get(CEETextLayoutRef layout);
+void cee_text_layout_styled(CEETextLayoutRef layout,
+                            CEERange range,
+                            CEEList* tags);
 
 #ifdef __cplusplus
 }

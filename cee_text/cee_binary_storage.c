@@ -8,13 +8,8 @@
 typedef struct _CEEBinaryStorage {
 } CEEBinaryStorage;
 
-CEEBinaryStorageRef cee_binary_storage_create(cee_pointer host_ref,
-                                              const cee_uchar* content,
-                                              cee_ulong length,
-                                              void (*buffer_update)(cee_pointer, 
-                                                                    CEEBinaryStorageRef,
-                                                                    CEERange,
-                                                                    CEERange))
+CEEBinaryStorageRef cee_binary_storage_create(const cee_uchar* content,
+                                              cee_ulong length)
 {
     CEEBinaryStorage* storage = (CEEBinaryStorage*)cee_malloc0(sizeof(CEEBinaryStorage));
     return storage;
@@ -34,4 +29,14 @@ void cee_binary_storage_buffer_set(CEEBinaryStorageRef storage,
                                    const cee_uchar* content,
                                    cee_ulong length)
 {
+}
+
+const cee_uchar* cee_binary_storage_buffer_get(CEEBinaryStorageRef storage)
+{
+    return NULL;
+}
+
+cee_ulong cee_binary_storage_size_get(CEEBinaryStorageRef storage)
+{
+    return 0;
 }

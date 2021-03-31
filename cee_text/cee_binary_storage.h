@@ -9,13 +9,11 @@ extern "C" {
 
 typedef struct _CEEBinaryStorage* CEEBinaryStorageRef;
 
-CEEBinaryStorageRef cee_binary_storage_create(cee_pointer host_ref,
-                                              const cee_uchar* content,
-                                              cee_ulong length,
-                                              void (*buffer_update)(cee_pointer, 
-                                                                    CEEBinaryStorageRef,
-                                                                    CEERange,
-                                                                    CEERange));
+CEEBinaryStorageRef cee_binary_storage_create(const cee_uchar* content,
+                                              cee_ulong length);
+
+const cee_uchar* cee_binary_storage_buffer_get(CEEBinaryStorageRef storage);
+cee_ulong cee_binary_storage_size_get(CEEBinaryStorageRef storage);
 void cee_binary_storage_free(CEEBinaryStorageRef data);
 
 void cee_binary_storage_buffer_set(CEEBinaryStorageRef storage,

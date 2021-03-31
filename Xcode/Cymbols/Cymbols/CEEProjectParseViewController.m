@@ -133,22 +133,20 @@
                     __block CEESourceBuffer* buffer = nil;
                     // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                     dispatch_sync(dispatch_get_main_queue(), ^{
-                        //buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
                         buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
                     });
                     
                     if (self->_sync && info->symbol_count)
                         cee_database_symbols_delete_by_file_path(self->_project.database,
                                                                  [buffer.filePath UTF8String]);
-                    
-                    cee_source_buffer_parse(buffer, 0);
+                    [buffer parse];
                     
                     cee_source_fregment_symbol_tree_dump_to_list(buffer.prep_directive_symbol_tree, &list);
                     cee_source_fregment_symbol_tree_dump_to_list(buffer.statement_symbol_tree, &list);
                     list = cee_source_fregment_symbol_list_type_filter(list, filter_types);
                     
                     if (list) {
-                        //NSLog(@"%@ parsed", [buffer.filePath lastPathComponent]);
+                       //NSLog(@"%@ parsed", [buffer.filePath lastPathComponent]);
                         // update last parsed time to buffer
                         cee_char* time_str = cee_time_to_iso8601(cee_time_current());
                         if (time_str) {
@@ -229,7 +227,7 @@
     for (CEESession* session in self->_project.sessions) {
         for (CEESessionPort* port in session.ports) {
             for (CEESourceBuffer* buffer in port.openedSourceBuffers) {
-                if ([buffer stateSet:kCEESourceBufferStateModified] &&
+                if ([buffer stateSet:kCEESourceBufferStateShouldSyncToFile] &&
                     ![buffer stateSet:kCEESourceBufferStateFileTemporary] &&
                     ![buffer stateSet:kCEESourceBufferStateFileDeleted]) {
                     

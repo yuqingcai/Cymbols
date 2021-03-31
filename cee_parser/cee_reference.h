@@ -11,6 +11,7 @@ extern "C" {
 
 typedef enum _CEESourceReferenceType {
     kCEESourceReferenceTypeUnknow = 0,
+    kCEESourceReferenceTypeIgnore ,
     kCEESourceReferenceTypeReplacement,
     kCEESourceReferenceTypeFunction,
     kCEESourceReferenceTypeCustomTypeDeclaration,
@@ -23,26 +24,25 @@ typedef enum _CEESourceReferenceType {
     kCEESourceReferenceTypeMax,
 } CEESourceReferenceType;
 
-typedef enum _CEESourceReferenceSearchOption {
-    kCEESourceReferenceSearchOptionLocal = 0x1 << 0,
-    kCEESourceReferenceSearchOptionGlobal = 0x1 << 1
-} CEESourceReferenceSearchOption;
-
 typedef struct _CEESourceSymbolReference {
     CEESourceReferenceType type;
-    cee_char* filepath;
+    cee_char* file_path;
     CEEList* tokens_ref;
     cee_char* name;
-    cee_char* locations;
+    CEEList* ranges;
+    cee_pointer parser_ref;
 } CEESourceSymbolReference;
 
-CEESourceSymbolReference* cee_source_symbol_reference_create(const cee_char* filepath,
+CEESourceSymbolReference* cee_source_symbol_reference_create(cee_pointer parser_ref,
+                                                             const cee_char* file_path,
                                                              const cee_char* subject,
                                                              CEEList* tokens,
                                                              CEESourceReferenceType type);
 void cee_source_symbol_reference_free(cee_pointer data);
 void cee_source_symbol_reference_print(CEESourceSymbolReference* reference);
 void cee_source_symbol_references_print(CEEList* references);
+cee_int cee_source_symbol_reference_location_compare(const cee_pointer a,
+                                                     const cee_pointer b);
 
 #ifdef __cplusplus
 }

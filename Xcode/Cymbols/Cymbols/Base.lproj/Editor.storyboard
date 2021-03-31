@@ -251,7 +251,7 @@
                         <outlet property="buttonRegex" destination="tmX-ko-mzp" id="rQl-4K-tnH"/>
                         <outlet property="horizontalScroller" destination="qpQ-df-c8I" id="QQc-NW-qn2"/>
                         <outlet property="horizontalScrollerHeight" destination="CZD-uU-Ysp" id="plX-sY-HOH"/>
-                        <outlet property="lineNmberView" destination="f9i-e6-6yN" id="uYx-T5-Ozg"/>
+                        <outlet property="lineNumberView" destination="f9i-e6-6yN" id="wCx-sN-sgT"/>
                         <outlet property="lineNumberViewWidth" destination="VgX-tm-6mI" id="TqU-SJ-7i3"/>
                         <outlet property="replaceInput" destination="78V-Ns-7U2" id="Y6T-7l-EkC"/>
                         <outlet property="searchInput" destination="zwB-Mp-2LG" id="ynt-Mn-SPi"/>
@@ -268,7 +268,7 @@
                         <menuItem title="Jump To Definition" image="icon_jump_to_target_16x16" id="gX9-0S-O6U">
                             <modifierMask key="keyEquivalentModifierMask"/>
                             <connections>
-                                <action selector="jumpToTargetSymbol:" target="76x-dZ-nfA" id="ASi-ri-PPx"/>
+                                <action selector="jumpToSymbol:" target="76x-dZ-nfA" id="3hg-T0-SKX"/>
                             </connections>
                         </menuItem>
                         <menuItem title="Search References..." image="icon_search_16x16" id="dd5-xN-wjd">
@@ -421,6 +421,6 @@
         <image name="icon_search_prev_16x16" width="16" height="16"/>
         <image name="icon_select_16x16" width="16" height="16"/>
         <image name="icon_undo_16x16" width="16" height="16"/>
-        <image name="icon_whole_word_16x16" width="16.5" height="16"/>
+        <image name="icon_whole_word_16x16" width="16" height="16"/>
     </resources>
 </document>

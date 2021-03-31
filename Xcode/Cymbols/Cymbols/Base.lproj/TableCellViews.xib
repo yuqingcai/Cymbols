@@ -15,10 +15,10 @@
                 <imageView autoresizesSubviews="NO" horizontalHuggingPriority="251" verticalHuggingPriority="251" id="y5a-5g-jck" customClass="CEEImageView">
                     <rect key="frame" x="3" y="3" width="16" height="16"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="cymbols_logo" id="XaZ-wq-cst"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_butterfly_16x16" id="XaZ-wq-cst"/>
                 </imageView>
                 <customView autoresizesSubviews="NO" id="uM5-2f-o0s" customClass="CEETableCellViewTextLabel">
-                    <rect key="frame" x="28" y="4" width="362" height="18"/>
+                    <rect key="frame" x="28" y="3" width="362" height="20"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="TextLabel"/>
@@ -56,7 +56,7 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <customView id="uFF-Nx-0gN" customClass="CEETableCellViewTextLabel">
-                    <rect key="frame" x="4" y="4" width="390" height="18"/>
+                    <rect key="frame" x="4" y="3" width="390" height="20"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="file path"/>
@@ -70,6 +70,6 @@
         </customView>
     </objects>
     <resources>
-        <image name="cymbols_logo" width="128" height="128"/>
+        <image name="icon_butterfly_16x16" width="16" height="16"/>
     </resources>
 </document>

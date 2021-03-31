@@ -62,9 +62,6 @@ typedef struct _CEETextLayout {
     cee_boolean line_feed;
     cee_boolean line_wrapped;
     
-    cee_pointer attribute_generator_ref;
-    CEEList* (*attribute_generate)(cee_pointer, 
-                                   CEERange);
     CEEList* tags;
     CEEBST* tags_bst;
 } CEETextLayout;
@@ -473,8 +470,7 @@ void cee_text_layout_free(CEETextLayoutRef layout)
     
     if (layout->tags)
         cee_list_free_full(layout->tags, cee_tag_free);
-    
-    
+        
     cee_free(layout);
 }
 
@@ -635,41 +631,7 @@ static void text_layout(CEETextLayoutRef layout,
 
 void cee_text_layout_run(CEETextLayoutRef layout)
 {
-    CEETextUnitRef head_unit = 0;
-    CEETextUnitRef tail_unit = 0;
-    cee_long offset = 0;
-    cee_ulong length = 0;
-    CEERange range;
-    
     text_layout(layout, FALSE);
-    
-    head_unit = cee_text_layout_head_unit_get(layout);
-    if (!head_unit)
-        return;
-    
-    tail_unit = cee_text_layout_tail_unit_get(layout);
-    if (!tail_unit)
-        return;
-    
-    offset = cee_text_unit_buffer_offset_get(head_unit);
-    length = cee_text_unit_buffer_offset_get(tail_unit) +
-        cee_text_unit_buffer_length_get(tail_unit) -
-        cee_text_unit_buffer_offset_get(head_unit);
-    range = cee_range_make(offset, length);
-    
-    if (layout->attribute_generate) {
-        if (layout->tags)
-            cee_list_free_full(layout->tags, cee_tag_free);
-        layout->tags =
-            layout->attribute_generate(layout->attribute_generator_ref,
-                                       range);
-        if (layout->tags_bst)
-            cee_bst_free(layout->tags_bst);
-    
-        layout->tags_bst = cee_bst_create(layout->tags);
-        
-        text_layout(layout, TRUE);
-    }
 }
 
 cee_boolean cee_text_layout_paragraph_index_is_invalid(CEETextLayoutRef layout)
@@ -1218,19 +1180,6 @@ CEETextLineRef ee_text_layout_line_prev(CEETextLayoutRef layout,
     return NULL;
 }
 
-void cee_text_layout_attribute_generator_set(CEETextLayoutRef layout,
-                                             cee_pointer generator)
-{
-    layout->attribute_generator_ref = generator;
-}
-
-void cee_text_layout_attribute_generate_set(CEETextLayoutRef layout,
-                                            CEEList* (*generate)(cee_pointer,
-                                                                 CEERange))
-{
-    layout->attribute_generate = generate;
-}
-
 CEETag* cee_text_layout_tag_get(CEETextLayoutRef layout,
                                 cee_long buffer_offset)
 {
@@ -1256,4 +1205,45 @@ void cee_text_layout_wrap_indent_set(CEETextLayoutRef layout,
                                      cee_boolean wrap_with_indent)
 {
     layout->wrap_with_indent = wrap_with_indent;
+}
+
+CEERange cee_text_layout_range_get(CEETextLayoutRef layout)
+{
+    CEETextUnitRef head_unit = 0;
+    CEETextUnitRef tail_unit = 0;
+    cee_long offset = 0;
+    cee_ulong length = 0;
+    CEERange range = { 0, 0 };
+    
+    head_unit = cee_text_layout_head_unit_get(layout);
+    if (!head_unit)
+        goto exit;
+    
+    tail_unit = cee_text_layout_tail_unit_get(layout);
+    if (!tail_unit)
+        goto exit;
+    
+    offset = cee_text_unit_buffer_offset_get(head_unit);
+    length = cee_text_unit_buffer_offset_get(tail_unit) +
+        cee_text_unit_buffer_length_get(tail_unit) -
+        cee_text_unit_buffer_offset_get(head_unit);
+    range = cee_range_make(offset, length);
+
+exit:
+    return range;
+}
+
+void cee_text_layout_styled(CEETextLayoutRef layout,
+                            CEERange range,
+                            CEEList* tags)
+{
+    if (layout->tags)
+        cee_list_free_full(layout->tags, cee_tag_free);
+    layout->tags = tags;
+    
+    if (layout->tags_bst)
+        cee_bst_free(layout->tags_bst);
+    layout->tags_bst = cee_bst_create(layout->tags);
+    
+    text_layout(layout, TRUE);
 }

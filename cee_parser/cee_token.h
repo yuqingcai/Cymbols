@@ -473,6 +473,7 @@ typedef enum _CEETokenID {
     kCEETokenID_YIELD,
     
     kCEETokenID_XML_COMMENT,
+    kCEETokenID_XML_END_TAG,
     
     kCEETokenID_END
 } CEETokenID;
@@ -524,6 +525,7 @@ typedef struct _CEEToken {
     CEETokenID identifier;
     cee_long offset;
     cee_ulong length;
+    cee_int line_no;
     CEETokenState state;
     cee_pointer fregment_ref;
 } CEEToken;
@@ -546,7 +548,8 @@ typedef struct _CEETokenCluster {
 void cee_token_free(cee_pointer data);
 CEEToken* cee_token_create(CEETokenID token_id,
                            cee_long offset,
-                           cee_ulong length);
+                           cee_ulong length,
+                           cee_ulong line_no);
 cee_int cee_token_count_get(void);
 cee_char* cee_string_from_token(const cee_char* subject,
                                 CEEToken* token);

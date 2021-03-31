@@ -24,8 +24,8 @@
 @property (strong) NSView *detailView;
 @property (strong) CEETitleView* detailTitlebar;
 @property (strong) CEEEditViewController *monitor;
-@property CEEList* symbols;
 @property BOOL adjustSplitView;
+@property (strong) CEESourceBuffer* contextSourceBuffer;
 @end
 
 @implementation CEESessionContextViewController
@@ -41,31 +41,40 @@
     [_titlebar setTitle:@"Context"];
     [_titlebar setIcon:[styleManager iconFromName:@"icon_relation_16x16"]];
     _adjustSplitView = NO;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortCreateContextResponse:) name:CEENotificationSessionPortCreateContext object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortCreateSourceContextResponse:) name:CEENotificationSessionPortCreateSourceContext object:nil];
 }
 
 - (void)dealloc {
+    AppDelegate* delegate = [NSApp delegate];
+    if (_contextSourceBuffer)
+        [delegate.sourceBufferManager closeSourceBuffer:_contextSourceBuffer];
+    _contextSourceBuffer = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    if (_symbols)
-        cee_list_free(_symbols);
-    _symbols = NULL;
 }
 
 - (void)viewWillAppear {
     [super viewWillAppear];
-
+    
     if (!_splitView)
         [self createSplitView];
-
-    [self createContextSymbols];
-
-    if (!_symbols)
+    
+    if (!_session.activedPort.source_context ||
+        !_session.activedPort.source_context->symbols)
         return;
-
+    
     [_symbolTable reloadData];
+    [self selectSymbolAtIndex:0];
+}
 
-    CEESourceSymbol* symbol = cee_list_nth_data(_symbols, 0);
-    [self presentContextBufferWithSymbol:symbol];
+- (void)viewDidAppear {
+    [super viewDidAppear];
+    
+    if (!_adjustSplitView) {
+        [self setHoldingPrioritiesInSplitView:_splitView];
+        [self setDividersPositionInSplitView:_splitView];
+        [_splitView adjustSubviews];
+        _adjustSplitView = YES;
+    }
 }
 
 - (void)createSplitView {
@@ -87,7 +96,7 @@
     
     [self.view addSubview:_splitView];
     constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[splitView]-0-|" options:0 metrics:nil views:views];
-    constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[splitView]-0-|" options:0 metrics:nil views:views];
+    constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[splitView(>=300)]-0-|" options:0 metrics:nil views:views];
     [self.view addConstraints:constraintsH];
     [self.view addConstraints:constraintsV];
     
@@ -117,6 +126,7 @@
     [_monitor setWrap:YES];
     
     views = @{
+        @"symbolTable" : _symbolTable,
         @"detailTitlebar" : _detailTitlebar,
         @"monitorView" : _monitor.view,
     };
@@ -127,22 +137,15 @@
     [_detailView addConstraints:constraintsH];
     constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[monitorView]-0-|" options:0 metrics:nil views:views];
     [_detailView addConstraints:constraintsH];
-    constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[detailTitlebar(==25.0)]-0-[monitorView]-0-|" options:0 metrics:nil views:views];
+    constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[detailTitlebar(==25.0)]-0-[monitorView(>=200.0)]-0-|" options:0 metrics:nil views:views];
     [_detailView addConstraints:constraintsV];
     
     [_splitView addSubview:_symbolTable];
     [_splitView addSubview:_detailView];
-}
-
-- (void)viewDidAppear {
-    [super viewDidAppear];
     
-    if (!_adjustSplitView) {
-        [self setHoldingPrioritiesInSplitView:_splitView];
-        [self setDividersPositionInSplitView:_splitView];
-        [_splitView adjustSubviews];
-        _adjustSplitView = YES;
-    }
+    constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[symbolTable(>=100.0)]" options:0 metrics:nil views:views];
+    [_symbolTable addConstraints:constraintsV];
+    
 }
 
 - (void)setDividersPositionInSplitView:(NSSplitView*)splitView {
@@ -169,23 +172,27 @@
 }
 
 - (void)presentContextBufferWithSymbol:(CEESourceSymbol*)symbol {
+    if (!symbol) {
+        [_monitor setBuffer:nil];
+        [_titlebar setTitle:[NSString stringWithFormat:@"Context", nil]];
+        [_detailTitlebar setTitle:@""];
+        [_detailTitlebar setIcon:nil];
+        return;
+    }
+    
     NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
     AppDelegate* delegate = [NSApp delegate];
-    CEESourceBufferManager* sourceBufferManager = [delegate sourceBufferManager];
-    //CEESourceBuffer* buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath andOption:kCEESourceBufferOpenOptionIndependent];
-    CEESourceBuffer* buffer = [sourceBufferManager openSourceBufferWithFilePath:filePath];
-    if (!buffer)
+        
+    if (_contextSourceBuffer)
+        [delegate.sourceBufferManager closeSourceBuffer:_contextSourceBuffer];
+    _contextSourceBuffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
+    if (!_contextSourceBuffer)
         return;
     
-    //cee_source_buffer_parse(buffer, kCEESourceBufferParserOptionCreateSymbolWrapper);
-    [_monitor setBuffer:buffer];
-    CEEList* ranges = cee_ranges_from_string(symbol->locations);
-    if (ranges) {
-        [_monitor highlightRanges:ranges];
-        cee_list_free_full(ranges, cee_range_free);
-    }
-    [sourceBufferManager closeSourceBuffer:buffer];
-
+    [_monitor setBuffer:_contextSourceBuffer];
+    if (symbol->ranges)
+        [_monitor highlightRanges:symbol->ranges];
+    
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [_titlebar setTitle:[NSString stringWithFormat:@"Context of \"%s\"", symbol->name, nil]];
     if (_session.project)
@@ -195,53 +202,24 @@
     [_detailTitlebar setIcon:[styleManager filetypeIconFromFilePath:filePath]];
 }
 
-- (void)sessionPortCreateContextResponse:(NSNotification*)notification {
+- (void)sessionPortCreateSourceContextResponse:(NSNotification*)notification {
     CEESessionPort* port = notification.object;
     if (port.session != _session)
         return;
-
-    [self createContextSymbols];
-
-    if (!_symbols)
+    
+    if (!_session.activedPort.source_context ||
+        !_session.activedPort.source_context->symbols)
         return;
     
     [_symbolTable reloadData];
-        
-    CEESourceSymbol* symbol = cee_list_nth_data(_symbols, 0);
-    [self presentContextBufferWithSymbol:symbol];
-    
-}
-
-- (void)createContextSymbols {
-    if (_symbols)
-        cee_list_free(_symbols);
-    _symbols = NULL;
-    
-    if (!_session.activedPort.context)
-        return;
-    
-    CEEList* p = NULL;
-    
-    p = _session.activedPort.context;
-    while (p) {
-        if (cee_source_symbol_is_definition(p->data))
-            _symbols = cee_list_prepend(_symbols, p->data);
-        p = p->next;
-    }
-    
-    if (!_symbols) {
-        p = _session.activedPort.context;
-        while (p) {
-            _symbols = cee_list_prepend(_symbols, p->data);
-            p = p->next;
-        }
-    }
+    [self selectSymbolAtIndex:0];
 }
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
-    if (!_symbols)
+    if (!_session.activedPort.source_context ||
+        !_session.activedPort.source_context->symbols)
         return 0;
-    return cee_list_length(_symbols);
+    return cee_list_length(_session.activedPort.source_context->symbols);
 }
 
 - (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column {
@@ -254,10 +232,11 @@
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    CEEList* symbols = _session.activedPort.source_context->symbols;
     
     if (column == 0) {
         CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
-        CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)row);
+        CEESourceSymbol* symbol = cee_list_nth_data(symbols, (cee_int)row);
         NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
         cellView.text.stringValue = [NSString stringWithFormat:@"%@", [filePath lastPathComponent]];
         [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
@@ -265,7 +244,7 @@
     }
     else if (column == 1) {
         CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
-        CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)row);
+        CEESourceSymbol* symbol = cee_list_nth_data(symbols, (cee_int)row);
         NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
         if (_session.project)
             cellView.text.stringValue = [_session.project shortFilePath:filePath];
@@ -278,11 +257,25 @@
 }
 
 - (IBAction)selectRow:(id)sender {
-    if (!_symbolTable.selectedRowIndexes || _symbolTable.selectedRow == -1)
+    if (!_session.activedPort.source_context ||
+        !_session.activedPort.source_context->symbols ||
+        !_symbolTable.selectedRowIndexes || _symbolTable.selectedRow == -1)
         return;
     
-    CEESourceSymbol* symbol = cee_list_nth_data(_symbols, (cee_int)_symbolTable.selectedRow);
+    CEEList* symbols = _session.activedPort.source_context->symbols;
+    CEESourceSymbol* symbol = cee_list_nth_data(symbols, (cee_int)_symbolTable.selectedRow);
     [self presentContextBufferWithSymbol:symbol];
+}
+
+- (void)selectSymbolAtIndex:(NSInteger)index {
+    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:index];
+    [_symbolTable selectRowIndexes:indexSet byExtendingSelection:NO];
+    [_symbolTable scrollRowToVisible:[indexSet firstIndex]];
+    
+    CEEList* symbols = _session.activedPort.source_context->symbols;
+    CEESourceSymbol* symbol = cee_list_nth_data(symbols, (cee_int)_symbolTable.selectedRow);
+    [self presentContextBufferWithSymbol:symbol];
+    
 }
 
 @end

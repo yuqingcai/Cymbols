@@ -120,9 +120,8 @@ typedef struct _CEESourceFregment {
 #define SOURCE_FREGMENT_CHILDREN_LAST(fregment) cee_list_first(((CEESourceFregment*)fregment)->children)
 #define SOURCE_FREGMENT_NEXT(p) (p)->prev
 #define SOURCE_FREGMENT_PREV(p) (p)->next
+#define SOURCE_FREGMENT_HAS_NEXT(p) ((p)->prev != NULL)
 
-#define SOURCE_FREGMENT_NODE_HAS_NEXT(node) ((node)->prev != NULL)
-#define SOURCE_FREGMENT_NODE_NEXT(node) ((node)->prev)
 
 typedef struct _CEESourceParser* CEESourceParserRef;
 
@@ -148,6 +147,12 @@ typedef struct _CEESourceParser {
                                    CEESourceFregment*,
                                    CEERange,
                                    CEEList**);
+    
+    cee_boolean (*symbol_search_in_scope)(CEESourceParserRef,
+                                          CEESourceSymbolReference*,
+                                          CEESourceFregment*,
+                                          CEESourceFregment*,
+                                          CEESourceSymbol**);
 } CEESourceParser;
 
 void cee_parsers_init(void);
@@ -240,7 +245,15 @@ CEEList* cee_source_fregment_tokens_break(CEESourceFregment* fregment,
                                           CEEList** sub);
 cee_boolean cee_source_fregment_over_range(CEESourceFregment* fregment,
                                            CEERange range);
-CEESourceFregment* cee_source_fregment_sublevel_backtrack(CEESourceFregment* fregment);
+CEEList* cee_source_symbols_search_by_symbol(CEESourceSymbol* symbol,
+                                             CEESourceFregment* prep_directive,
+                                             CEESourceFregment* statement,
+                                             cee_pointer database);
+CEEList* cee_source_symbols_search_by_reference(CEESourceSymbolReference* reference,
+                                                CEESourceFregment* prep_directive,
+                                                CEESourceFregment* statement,
+                                                cee_pointer database);
+CEESourceFregment* cee_source_fregment_level_backtrack(CEESourceFregment* fregment);
 void cee_source_fregment_indexes_in_range(CEESourceTokenMap* token_map,
                                           CEERange range,
                                           CEESourceFregment** indexes);
@@ -251,26 +264,22 @@ CEEList* cee_source_fregment_symbols_search_by_name(CEESourceFregment* fregment,
 CEEList* cee_source_fregment_symbols_in_children_search_by_name(CEESourceFregment* fregment,
                                                                 const cee_char* name);
 CEEList* cee_source_fregment_tree_symbols_search(CEESourceFregment* fregment,
-                                                 CEESymbolMatcher matcher,
+                                                 CEECompareFunc matcher,
                                                  cee_pointer user_data);
 CEETokenCluster* cee_token_cluster_search_by_buffer_offset(CEEList* references,
                                                            CEESourceFregment* prep_directive,
                                                            CEESourceFregment* statement,
                                                            cee_long offset);
-CEEList* cee_symbols_search_by_reference(CEESourceSymbolReference* reference,
-                                         CEESourceFregment* prep_directive,
-                                         CEESourceFregment* statement,
-                                         cee_pointer database,
-                                         CEESourceReferenceSearchOption options);
 CEEList* cee_source_tags_create(CEESourceParserRef parser_ref,
                                 CEESourceTokenMap* token_map,
                                 CEESourceFregment* prep_directive,
                                 CEESourceFregment* statement,
                                 cee_pointer database,
                                 CEERange range,
-                                CEEList* references);
+                                CEEList* references,
+                                CEEList** cache);
 void cee_source_fregment_tree_symbols_parent_parse(CEESourceFregment* fregment);
-
+CEESourceFregment* cee_source_fregment_from_reference_get(CEESourceSymbolReference* reference);
 
 #ifdef __cplusplus
 }

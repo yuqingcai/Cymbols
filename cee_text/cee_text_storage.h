@@ -22,22 +22,15 @@ typedef enum _CEETextStorageEncodeType {
 } CEETextStorageEncodeType;
 
 typedef struct _CEETextStorage* CEETextStorageRef;
-CEETextStorageRef cee_text_storage_create(cee_pointer observer,
-                                          const cee_uchar* string,
-                                          void (*update_notify)(cee_pointer,
-                                                                CEETextStorageRef,
-                                                                CEERange,
-                                                                CEERange)
-                                          );
+CEETextStorageRef cee_text_storage_create(const cee_uchar* string);
 void cee_text_storage_free(CEETextStorageRef data);
+void cee_text_storage_buffer_set(CEETextStorageRef storage,
+                                 const cee_uchar* string);
 void cee_text_storage_buffer_replace(CEETextStorageRef storage,
                                      CEERange range,
                                      const cee_uchar* in,
                                      cee_uchar** out,
-                                     cee_ulong* length,
-                                     cee_boolean enable_update_notify);
-void cee_text_storage_buffer_set(CEETextStorageRef storage,
-                                 const cee_uchar* string);
+                                     cee_ulong* length);
 const cee_uchar* cee_text_storage_buffer_get(CEETextStorageRef storage);
 cee_ulong cee_text_storage_size_get(CEETextStorageRef storage);
 cee_ulong cee_text_storage_character_count_get(CEETextStorageRef storage);
@@ -92,6 +85,12 @@ CEERange cee_text_storage_word_get(CEETextStorageRef storage,
                                    cee_long buffer_offset);
 void cee_text_storage_attribute_generate(CEETextStorageRef storage,
                                          CEERange range);
+void cee_text_storage_bom_set(CEETextStorageRef storage,
+                              const cee_uchar* bom,
+                              cee_ulong size);
+void cee_text_storage_bom_get(CEETextStorageRef storage,
+                              const cee_uchar** bom,
+                              cee_ulong* size);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -12,13 +12,10 @@ typedef struct _CEETextStorage {
     cee_ulong nb_paragraph;
     cee_ulong max_paragraph_length;
     CEETextStorageLineBreakType line_break_type;
-    cee_pointer observer;
-    void (*update_notify)(cee_pointer,
-                          CEETextStorageRef,
-                          CEERange,
-                          CEERange);
     CEETextModifyLoggerRef modify_logger;
     CEEList* paragraph_indexes;
+    cee_uchar* bom;
+    cee_ulong bom_size;
 } CEETextStorage;
 
 static cee_uchar line_break_codepoint_get(CEETextStorage* storage);
@@ -217,6 +214,9 @@ static CEETextStorageLineBreakType line_break_type_default(void)
 
 static CEETextStorageLineBreakType line_break_type_check(const cee_uchar* buffer)
 {
+    if (!buffer)
+        return kCEETextStorageLineBreakTypeUnknow;
+    
     const cee_uchar* ptr = buffer;
     cee_ulong i = 0;
     while (ptr[i]) {
@@ -328,42 +328,16 @@ static cee_ulong max_paragraph_length(const cee_uchar* buffer,
 }
 
 static cee_ulong buffer_size(const cee_uchar* buffer)
-{    
+{
+    if (!buffer)
+        return 0;
+    
     return strlen((cee_char*)buffer);
 }
 
-void cee_text_storage_buffer_set(CEETextStorageRef storage,
-                                 const cee_uchar* string)
-{
-    if (storage->buffer)
-        cee_free(storage->buffer);
-    
-    if (storage->paragraph_indexes)
-        cee_list_free(storage->paragraph_indexes);
-    
-    cee_text_storage_modify_clear(storage);
-    
-    CEERange range;
-    storage->buffer = (cee_uchar*)cee_strdup((cee_char*)string);
-    storage->line_break_type = line_break_type_check(storage->buffer);
-    storage->size = buffer_size(storage->buffer);
-    range = cee_range_make(0, storage->size);
-    storage->nb_paragraph = paragraph_count(storage->buffer, range) + 1;
-    storage->max_paragraph_length = max_paragraph_length(storage->buffer, range);
-    storage->paragraph_indexes = paragraph_indexes_create(storage->buffer);
-}
-
-CEETextStorageRef cee_text_storage_create(cee_pointer observer,
-                                          const cee_uchar* string,
-                                          void (*update_notify)(cee_pointer,
-                                                                CEETextStorageRef,
-                                                                CEERange,
-                                                                CEERange)
-                                          )
+CEETextStorageRef cee_text_storage_create(const cee_uchar* string)
 {
     CEETextStorage* storage = (CEETextStorage*)cee_malloc0(sizeof(CEETextStorage));
-    storage->observer = observer;
-    storage->update_notify = update_notify;
     cee_text_storage_buffer_set(storage, string);
     return storage;
 }
@@ -384,15 +358,49 @@ void cee_text_storage_free(CEETextStorageRef data)
     if (storage->paragraph_indexes)
         cee_list_free(storage->paragraph_indexes);
     
+    if (storage->bom)
+        cee_free(storage->bom);
+    
     cee_free(storage);
+}
+
+void cee_text_storage_buffer_set(CEETextStorageRef storage,
+                                 const cee_uchar* string)
+{
+    if (storage->buffer)
+        cee_free(storage->buffer);
+    storage->buffer = NULL;
+    
+    if (storage->paragraph_indexes)
+        cee_list_free(storage->paragraph_indexes);
+    storage->paragraph_indexes = NULL;
+    
+    if (storage->bom)
+        cee_free(storage->bom);
+    storage->bom = NULL;
+    storage->bom_size = 0;
+    
+    cee_text_storage_modify_clear(storage);
+    
+    CEERange range;
+    storage->buffer = (cee_uchar*)cee_strdup((cee_char*)string);
+    storage->line_break_type = line_break_type_check(storage->buffer);
+    storage->size = buffer_size(storage->buffer);
+    range = cee_range_make(0, storage->size);
+    if (!string)
+        storage->nb_paragraph = 0;
+    else
+        storage->nb_paragraph = paragraph_count(storage->buffer, range) + 1;
+    
+    storage->max_paragraph_length = max_paragraph_length(storage->buffer, range);
+    storage->paragraph_indexes = paragraph_indexes_create(storage->buffer);
 }
 
 void cee_text_storage_buffer_replace(CEETextStorageRef storage,
                                      CEERange range,
                                      const cee_uchar* in,
                                      cee_uchar** out,
-                                     cee_ulong* length,
-                                     cee_boolean enable_update_notify)
+                                     cee_ulong* length)
 {
     if (!storage || (!storage->buffer && !in))
         goto exit;
@@ -403,7 +411,6 @@ void cee_text_storage_buffer_replace(CEETextStorageRef storage,
     cee_uchar* replacement = NULL;
     cee_ulong replacement_length = 0;
     CEERange replacement_range = cee_range_make(range.location, 0);
-    cee_ulong nb_paragraph = storage->nb_paragraph;
     
     /** make the replacement buffer has the same line break character with the storage buffer */
     replacement = replace_line_break(in, storage->line_break_type);
@@ -448,10 +455,6 @@ void cee_text_storage_buffer_replace(CEETextStorageRef storage,
     if (max_length > storage->max_paragraph_length)
         storage->max_paragraph_length = max_length;
     
-    if (storage->update_notify && enable_update_notify) {
-        storage->update_notify(storage->observer, storage, range, replacement_range);
-    }
-        
     if (!out)
         cee_free(replacement);
     else
@@ -461,12 +464,10 @@ void cee_text_storage_buffer_replace(CEETextStorageRef storage,
         *length = replacement_length;
     
     /** recreate pagraph indexes */
-    if (nb_paragraph != storage->nb_paragraph) {
-        if (storage->paragraph_indexes)
-            cee_list_free(storage->paragraph_indexes);
-        storage->paragraph_indexes = paragraph_indexes_create(storage->buffer);
-    }
-        
+    if (storage->paragraph_indexes)
+        cee_list_free(storage->paragraph_indexes);
+    storage->paragraph_indexes = paragraph_indexes_create(storage->buffer);
+            
 exit:
     return;
 }
@@ -689,7 +690,7 @@ cee_long cee_text_storage_paragraph_index_get(CEETextStorageRef storage,
 cee_long cee_text_storage_buffer_offset_by_paragraph_index(CEETextStorageRef storage,
                                                            cee_long index)
 {
-    if (!storage->paragraph_indexes)
+    if (!storage || !storage->paragraph_indexes)
         return 0;
     return CEE_POINTER_TO_LONG(cee_list_nth_data(storage->paragraph_indexes, (cee_int)index));
 }
@@ -839,21 +840,32 @@ void cee_text_storage_modify_logger_create(CEETextStorageRef storage,
 void cee_text_storage_modify_prepend(CEETextStorageRef storage,
                                      CEETextModifyRef modify)
 {
+    if (!storage)
+        return;
+    
     if (storage->modify_logger)
         cee_text_modify_prepend(storage->modify_logger, modify);
 }
 
 CEETextModifyRef cee_text_storage_modify_backward(CEETextStorageRef storage)
 {
+    if (!storage)
+        return NULL;
+    
     if (storage->modify_logger)
         return cee_text_modify_backward(storage->modify_logger);
+    
     return NULL;
 }
 
 CEETextModifyRef cee_text_storage_modify_forward(CEETextStorageRef storage)
 {
+    if (!storage)
+        return NULL;
+    
     if (storage->modify_logger)
         return cee_text_modify_forward(storage->modify_logger);
+    
     return NULL;
 }
 
@@ -949,6 +961,9 @@ CEERange cee_text_storage_word_get(CEETextStorageRef storage,
 
 static CEEList* paragraph_indexes_create(const cee_uchar* buffer)
 {
+    if (!buffer)
+        return NULL;
+    
     cee_long current = 0;
     cee_long next = 0;
     cee_long paragraph_buffer_offset = -1;
@@ -975,4 +990,31 @@ static CEEList* paragraph_indexes_create(const cee_uchar* buffer)
     
     index_set = cee_list_reverse(index_set);
     return index_set;
+}
+
+void cee_text_storage_bom_set(CEETextStorageRef storage,
+                              const cee_uchar* bom,
+                              cee_ulong size)
+{
+    if (!storage)
+        return;
+    
+    storage->bom = cee_malloc0(sizeof(cee_uchar) * size);
+    for (cee_int i = 0; i < size; i ++)
+        storage->bom[i] = bom[i];
+    storage->bom_size = size;
+}
+
+void cee_text_storage_bom_get(CEETextStorageRef storage,
+                              const cee_uchar** bom,
+                              cee_ulong* size)
+{
+    if (!storage)
+        return;
+    
+    if (bom)
+        *bom = storage->bom;
+    
+    if (size)
+        *size = storage->bom_size;
 }

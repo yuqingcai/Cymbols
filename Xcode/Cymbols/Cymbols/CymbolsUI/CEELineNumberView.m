@@ -37,8 +37,8 @@
                                  NSForegroundColorAttributeName : self.textColor,
                                  };
     if (!_lineNumberTags)
-        return ;
-    
+        return;
+        
     for (NSDictionary* tag in _lineNumberTags) {
         NSString* label = tag[@"number"];
         NSRect bounds = NSRectFromString(tag[@"bounds"]);

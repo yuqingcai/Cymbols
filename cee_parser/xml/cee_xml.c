@@ -20,6 +20,7 @@ typedef enum _XMLTagType {
     kXMLTagTypeUnknow,
     kXMLTagTypeBegin,
     kXMLTagTypeClose,
+    kXMLTagTypeEmpty,
 } XMLTagType;
 
 static XMLParser* parser_create(void);
@@ -141,7 +142,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
             SOURCE_FREGMENT_TOKEN_PUSH(fregment, token, TRUE);
             
             if (parsing) {
-            
+                
                 XMLTagType type = tag_parse(fregment);
                 
                 if (type == kXMLTagTypeBegin) {
@@ -162,6 +163,18 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                         break;
                     
                     fregment = NULL;
+                }
+                else if (type == kXMLTagTypeEmpty) {
+                    if (!statement_push(parser, fregment))
+                        break;
+                        
+                    if (!statement_pop(parser))
+                        break;
+                        
+                    fregment = NULL;
+                }
+                else {
+                    break;;
                 }
                 
                 parsing = FALSE;
@@ -248,6 +261,7 @@ static XMLTagType tag_parse(CEESourceFregment* fregment)
     CEEList* q = NULL;
     
     cee_boolean tag_close = FALSE;
+    cee_boolean empty_element = FALSE;
         
     if (!fregment || !fregment->tokens_ref)
         return kXMLTagTypeUnknow;
@@ -262,9 +276,19 @@ static XMLTagType tag_parse(CEESourceFregment* fregment)
                 break;
                 
             token = q->data;
-            if (token->identifier == '/')
+            
+            if (token->identifier == '/') {
                 tag_close = TRUE;
-                        
+            }
+            else {
+                q = cee_token_until_identifier(p, '>', FALSE);
+                q = cee_token_not_whitespace_newline_before(q);
+                if (q) {
+                    token = q->data;
+                    if (token->identifier == '/')
+                        empty_element = TRUE;
+                }
+            }
             break;
         }
         
@@ -275,6 +299,9 @@ static XMLTagType tag_parse(CEESourceFregment* fregment)
     
     if (tag_close)
         return kXMLTagTypeClose;
+    
+    if (empty_element)
+        return kXMLTagTypeEmpty;
     
     return kXMLTagTypeBegin;
 }

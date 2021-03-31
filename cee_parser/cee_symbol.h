@@ -63,8 +63,9 @@ typedef struct _CEESourceSymbol {
     cee_char* file_path;
     cee_char* parent;
     cee_char* derives;
-    cee_char* locations;
-    cee_char* fregment_range;
+    CEEList* ranges;
+    cee_int line_no;
+    CEERange fregment_range;
     cee_char* proto_descriptor;
 } CEESourceSymbol;
 
@@ -76,11 +77,14 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* proto_descriptor,
                                           const cee_char* language,
                                           const cee_char* file_path,
-                                          const cee_char* locations,
-                                          const cee_char* block_range);
+                                          cee_int line_no,
+                                          CEEList* ranges,
+                                          CEERange fregment_range);
 void cee_source_symbol_free(cee_pointer data);
 cee_int cee_source_symbol_count_get(void);
 CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol);
+cee_pointer cee_source_symbol_copy_func(const cee_pointer src,
+                                        cee_pointer data);
 CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* file_path,
                                                            const cee_char* subject,
                                                            CEEList* begin,
@@ -102,15 +106,13 @@ cee_int cee_source_symbol_location_compare(const cee_pointer a,
                                            const cee_pointer b);
 cee_boolean cee_source_symbols_are_equal(CEESourceSymbol* symbol0,
                                          CEESourceSymbol* symbol1);
-typedef cee_boolean (*CEESymbolMatcher)(cee_pointer data,
-                                        cee_pointer user_data);
 CEESourceSymbol* cee_source_symbol_tree_search(CEETree* tree,
-                                               CEESymbolMatcher searcher,
+                                               CEECompareFunc searcher,
                                                cee_pointer user_data);
-cee_boolean cee_source_symbol_matcher_by_buffer_offset(cee_pointer data,
-                                                       cee_pointer user_data);
-cee_boolean cee_source_symbol_matcher_by_name(cee_pointer data,
-                                              cee_pointer user_data);
+cee_int cee_source_symbol_matcher_by_buffer_offset(cee_pointer data,
+                                                   cee_pointer user_data);
+cee_int cee_source_symbol_matcher_by_name(cee_pointer data,
+                                          cee_pointer user_data);
 cee_boolean cee_source_symbol_is_definition(CEESourceSymbol* symbol);
 
 typedef struct _CEESourceSymbolWrapper {
@@ -128,6 +130,23 @@ cee_int cee_source_symbol_wrapper_location_compare(const cee_pointer a,
 CEEList* cee_source_symbol_wrappers_copy_with_condition(CEEList* wrappers,
                                                         const cee_char* conditoin);
 
+typedef struct _CEESourceSymbolCache {
+    CEESourceSymbol* symbol;
+    CEEList* referened_locations;
+} CEESourceSymbolCache;
+
+CEESourceSymbolCache* cee_source_symbol_cache_create(CEESourceSymbol* symbol,
+                                                     cee_long referenced_location);
+void cee_source_symbol_cache_free(cee_pointer);
+CEESourceSymbolCache* cee_source_symbol_cached(CEEList* caches,
+                                               CEESourceSymbol* symbol);
+void cee_source_symbol_cache_location(CEESourceSymbolCache* cache,
+                                      cee_long referenced_location);
+
+cee_boolean cee_source_symbol_cache_name_hit(CEESourceSymbolCache* cache,
+                                             const cee_char* name);
+cee_boolean cee_source_symbol_cache_location_hit(CEESourceSymbolCache* cache,
+                                                 cee_long location);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -872,7 +872,7 @@
         },
     },
      
-     "IDSessionFilePathTreeView [deactived]" : {
+    "IDSessionFilePathTreeView [deactived]" : {
         "background_color" : "#F5F5F5",
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
         "text_color" : "#757575",

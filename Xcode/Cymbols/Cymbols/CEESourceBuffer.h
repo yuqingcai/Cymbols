@@ -23,29 +23,30 @@ extern NSNotificationName CEENotificationSourceBufferSaved;
 
 typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
     kCEESourceBufferStateNormal = 0,
-    kCEESourceBufferStateModified = 1 << 1,
+    kCEESourceBufferStateShouldSyncToFile = 1 << 1,
     kCEESourceBufferStateFileTemporary = 1 << 2,
     kCEESourceBufferStateFileDeleted = 1 << 3,
-    kCEESourceBufferStateShouldSyncWhenClose = 1 << 4,
 };
 
-@class CEEProject;
+typedef NS_ENUM(NSUInteger, CEESourceBufferType) {
+    kCEESourceBufferTypeText,
+    kCEESourceBufferTypeBinary,
+};
 
 @interface CEESourceBuffer : NSObject
 @property (strong) NSString* filePath;
-@property CEECodecEncodedType encodedType;
-@property cee_pointer storage;
-@property CEESourceBufferState state;
-@property CEESourceFregment* comment;
-@property CEESourceFregment* prep_directive;
-@property CEESourceFregment* statement;
-@property CEESourceTokenMap* source_token_map;
-@property CEETree* prep_directive_symbol_tree;
-@property CEETree* statement_symbol_tree;
-@property (readonly)NSInteger referenceCount;
-@property CEEList* tokens;
-@property CEESourceParserRef parser_ref;
-@property CEEList* symbol_wrappers;
+@property (readonly) CEESourceBufferType type;
+@property (readonly) cee_pointer storage;
+@property (readonly) CEESourceBufferState state;
+
+@property (readonly) CEESourceFregment* comment_fregment;
+@property (readonly) CEESourceFregment* prep_directive_fregment;
+@property (readonly) CEESourceFregment* statement_fregment;
+@property (readonly) CEESourceTokenMap* source_token_map;
+@property (readonly) CEETree* prep_directive_symbol_tree;
+@property (readonly) CEETree* statement_symbol_tree;
+@property (readonly) CEEList* tokens;
+@property (readonly) CEESourceParserRef parser_ref;
 
 - (void)setState:(CEESourceBufferState)state;
 - (void)clearState:(CEESourceBufferState)state;
@@ -55,27 +56,16 @@ typedef NS_OPTIONS(NSUInteger, CEESourceBufferState) {
 - (void)updateFileModifiedDate;
 - (void)increaseReferenceCount;
 - (void)decreaseReferenceCount;
-- (BOOL)withBOM;
-
+- (void)parse;
+- (CEEList*)symbols;
+- (CEEList*)referencesInRange:(CEERange)range;
+- (CEEList*)tagsInRange:(CEERange)range withDataBase:(cee_pointer)database;
 @end
-
-typedef enum _CEESourceBufferParserOption {
-    kCEESourceBufferParserOptionCreateSymbolWrapper = 1 << 0,
-} CEESourceBufferParserOption;
-
-//typedef enum _CEESourceBufferOpenOption {
-//    kCEESourceBufferOpenOptionShare = 1 << 0,
-//    kCEESourceBufferOpenOptionIndependent = 1 << 1,
-//} CEESourceBufferOpenOption;
-
-void cee_source_buffer_parse(CEESourceBuffer* buffer,
-                             CEESourceBufferParserOption options);
 
 @interface CEESourceBufferManager : NSObject
 @property (readonly, strong) NSMutableArray* buffers;
 @property (strong, readonly) NSString* temporaryDirectory;
 
-//- (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath andOption:(CEESourceBufferOpenOption)option;
 - (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath;
 - (CEESourceBuffer*)openUntitledSourceBuffer;
 - (void)closeSourceBuffer:(CEESourceBuffer*)buffer;
@@ -84,6 +74,7 @@ void cee_source_buffer_parse(CEESourceBuffer* buffer,
 - (void)syncSourceBuffersFromFiles;
 - (BOOL)isTemporaryFilePath:(NSString*)filePath;
 - (NSString*)sourceType:(CEESourceBuffer*)buffer;
+
 @end
 
 NS_ASSUME_NONNULL_END

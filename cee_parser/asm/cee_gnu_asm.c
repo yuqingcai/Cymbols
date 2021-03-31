@@ -73,7 +73,8 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    CEESourceFregment* statement,
                                    CEERange range,
                                    CEEList** references);
-static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
+static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser_ref,
+                                                       const cee_char* filepath,
                                                        CEESourceFregment* fregment,
                                                        const cee_char* subject,
                                                        CEESourceFregment* prep_directive,
@@ -82,7 +83,8 @@ static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
                                                        CEEList** references);
 static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment* fregment,
                                                               const cee_char* subject);
-static void gnu_asm_reference_fregment_parse(const cee_char* filepath,
+static void gnu_asm_reference_fregment_parse(CEESourceParserRef parser_ref,
+                                             const cee_char* filepath,
                                              CEESourceFregment* fregment,
                                              const cee_char* subject,
                                              CEESourceFregment* prep_directive,
@@ -641,7 +643,8 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
         while (p) {
             fregment = p->data;
             
-            if (!references_in_source_fregment_parse(filepath,
+            if (!references_in_source_fregment_parse(parser_ref,
+                                                     filepath,
                                                      fregment,
                                                      subject,
                                                      prep_directive,
@@ -657,7 +660,8 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
     return TRUE;
 }
 
-static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
+static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser_ref,
+                                                       const cee_char* filepath,
                                                        CEESourceFregment* fregment,
                                                        const cee_char* subject,
                                                        CEESourceFregment* prep_directive,
@@ -672,7 +676,8 @@ static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
         return FALSE;
     
     reference_fregment = gnu_asm_referernce_fregment_convert(fregment, subject);
-    gnu_asm_reference_fregment_parse(filepath,
+    gnu_asm_reference_fregment_parse(parser_ref,
+                                     filepath,
                                      reference_fregment,
                                      subject,
                                      prep_directive,
@@ -682,7 +687,8 @@ static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
     
     p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
     while (p) {
-        if (!references_in_source_fregment_parse(filepath,
+        if (!references_in_source_fregment_parse(parser_ref,
+                                                 filepath,
                                                  p->data,
                                                  subject,
                                                  prep_directive,
@@ -788,7 +794,8 @@ static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment*
     return current;
 }
 
-static void gnu_asm_reference_fregment_parse(const cee_char* filepath,
+static void gnu_asm_reference_fregment_parse(CEESourceParserRef parser_ref,
+                                             const cee_char* filepath,
                                              CEESourceFregment* fregment,
                                              const cee_char* subject,
                                              CEESourceFregment* prep_directive,
@@ -820,7 +827,8 @@ static void gnu_asm_reference_fregment_parse(const cee_char* filepath,
         }
         
         if (sub) {
-            reference = cee_source_symbol_reference_create((const cee_char*)filepath,
+            reference = cee_source_symbol_reference_create(parser_ref,
+                                                           (const cee_char*)filepath,
                                                            subject,
                                                            sub,
                                                            type);
@@ -834,7 +842,8 @@ static void gnu_asm_reference_fregment_parse(const cee_char* filepath,
     
     p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
     while (p) {
-        gnu_asm_reference_fregment_parse(filepath,
+        gnu_asm_reference_fregment_parse(parser_ref,
+                                         filepath,
                                          p->data,
                                          subject,
                                          prep_directive,

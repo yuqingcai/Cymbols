@@ -207,7 +207,8 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    CEESourceFregment* statement,
                                    CEERange range,
                                    CEEList** references);
-static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
+static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser_ref,
+                                                       const cee_char* filepath,
                                                        CEESourceFregment* fregment,
                                                        const cee_char* subject,
                                                        CEESourceFregment* prep_directive,
@@ -216,7 +217,8 @@ static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
                                                        CEEList** references);
 static CEESourceFregment* java_referernce_fregment_convert(CEESourceFregment* fregment,
                                                            const cee_char* subject);
-static void java_reference_fregment_parse(const cee_char* filepath,
+static void java_reference_fregment_parse(CEESourceParserRef parser_ref,
+                                          const cee_char* filepath,
                                           CEESourceFregment* fregment,
                                           const cee_char* subject,
                                           CEESourceFregment* prep_directive,
@@ -316,6 +318,13 @@ static cee_boolean should_proto_descriptor_append_whitespace(CEEToken* token,
 static const cee_char* java_access_level_search(CEESourceFregment* fregment,
                                                 CEEList* begin,
                                                 CEEList* end);
+static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
+                                          CEESourceSymbolReference* reference,
+                                          CEESourceFregment* prep_directive,
+                                          CEESourceFregment* statement,
+                                          CEESourceSymbol** symbol);
+static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* searching,
+                                                         const cee_char* name);
 /**
  * parser
  */
@@ -325,6 +334,7 @@ CEESourceParserRef cee_java_parser_create(const cee_char* identifier)
     parser->symbol_parse = symbol_parse;
     parser->reference_parse = reference_parse;
     parser->token_type_matcher = token_type_matcher;
+    parser->symbol_search_in_scope = symbol_search_in_scope;
     
     JavaParser* java = parser_create();
     java->super = parser;
@@ -682,7 +692,8 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
         while (p) {
             fregment = p->data;
             
-            if (!references_in_source_fregment_parse(filepath,
+            if (!references_in_source_fregment_parse(parser_ref,
+                                                     filepath,
                                                      fregment,
                                                      subject,
                                                      prep_directive,
@@ -698,7 +709,8 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
     return TRUE;
 }
 
-static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
+static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser_ref,
+                                                       const cee_char* filepath,
                                                        CEESourceFregment* fregment,
                                                        const cee_char* subject,
                                                        CEESourceFregment* prep_directive,
@@ -713,7 +725,8 @@ static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
         return FALSE;
     
     reference_fregment = java_referernce_fregment_convert(fregment, subject);
-    java_reference_fregment_parse(filepath,
+    java_reference_fregment_parse(parser_ref,
+                                  filepath,
                                   reference_fregment,
                                   subject,
                                   prep_directive,
@@ -723,7 +736,8 @@ static cee_boolean references_in_source_fregment_parse(const cee_char* filepath,
     
     p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
     while (p) {
-        if (!references_in_source_fregment_parse(filepath,
+        if (!references_in_source_fregment_parse(parser_ref,
+                                                 filepath,
                                                  p->data,
                                                  subject,
                                                  prep_directive,
@@ -829,7 +843,8 @@ static CEESourceFregment* java_referernce_fregment_convert(CEESourceFregment* fr
     return current;
 }
 
-static void java_reference_fregment_parse(const cee_char* filepath,
+static void java_reference_fregment_parse(CEESourceParserRef parser_ref,
+                                          const cee_char* filepath,
                                           CEESourceFregment* fregment,
                                           const cee_char* subject,
                                           CEESourceFregment* prep_directive,
@@ -839,7 +854,6 @@ static void java_reference_fregment_parse(const cee_char* filepath,
     CEEList* p = NULL;
     CEESourceSymbolReference* reference = NULL;
     CEEList* sub = NULL;
-    CEESourceReferenceType type = kCEESourceReferenceTypeUnknow;
     
     if (!fregment)
         return;
@@ -849,24 +863,22 @@ static void java_reference_fregment_parse(const cee_char* filepath,
         if (cee_source_fregment_tokens_pattern_match(fregment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
             p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
-            type = kCEESourceReferenceTypeUnknow;
         }
         else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_IDENTIFIER, NULL)) {
             /** catch any other identifier */
             p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(0, 1), &sub);
-            type = kCEESourceReferenceTypeUnknow;
         }
         else {
             p = TOKEN_NEXT(p);
         }
         
         if (sub) {
-            reference = cee_source_symbol_reference_create((const cee_char*)filepath,
+            reference = cee_source_symbol_reference_create(parser_ref,
+                                                           (const cee_char*)filepath,
                                                            subject,
                                                            sub,
-                                                           type);
+                                                           kCEESourceReferenceTypeUnknow);
             *references = cee_list_prepend(*references, reference);
-            type = kCEESourceReferenceTypeUnknow;
             reference = NULL;
             sub = NULL;
         }
@@ -875,7 +887,8 @@ static void java_reference_fregment_parse(const cee_char* filepath,
     
     p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
     while (p) {
-        java_reference_fregment_parse(filepath,
+        java_reference_fregment_parse(parser_ref,
+                                      filepath,
                                       p->data,
                                       subject,
                                       prep_directive,
@@ -3327,4 +3340,141 @@ static const cee_char* java_access_level_search(CEESourceFregment* fregment,
     }
     
     return NULL;
+}
+
+static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
+                                          CEESourceSymbolReference* reference,
+                                          CEESourceFregment* prep_directive,
+                                          CEESourceFregment* statement,
+                                          CEESourceSymbol** symbol)
+{
+
+    cee_boolean ret = FALSE;
+    CEESourceSymbol* statement_symbol = NULL;
+    CEESourceSymbol* prep_directive_symbol = NULL;
+    CEEList* searched_symbols = NULL;
+    CEESourceFregment* current = cee_source_fregment_from_reference_get(reference);
+    
+    if (!symbol)
+        goto exit;
+    
+    *symbol = NULL;
+    
+    statement_symbol = symbol_search_in_scope_recursive(current, reference->name);
+    if (statement_symbol)
+        statement_symbol = cee_source_symbol_copy(statement_symbol);
+    
+    searched_symbols =
+        cee_source_fregment_tree_symbols_search(prep_directive,
+                                                cee_source_symbol_matcher_by_name,
+                                                (cee_pointer)reference->name);
+    if (searched_symbols) {
+        prep_directive_symbol = cee_source_symbol_copy(cee_list_nth_data(searched_symbols, 0));
+        cee_list_free(searched_symbols);
+    }
+    
+    if (statement_symbol && prep_directive_symbol) {
+        CEERange range0 = cee_range_consistent_from_discrete(statement_symbol->ranges);
+        CEERange range1 = cee_range_consistent_from_discrete(prep_directive_symbol->ranges);
+        CEERange range3 = cee_range_consistent_from_discrete(reference->ranges);
+        
+        if (range1.location > range3.location || range0.location > range1.location) {
+            *symbol = statement_symbol;
+            cee_source_symbol_free(prep_directive_symbol);
+        }
+        else if (range1.location > range0.location){
+            *symbol = prep_directive_symbol;
+            cee_source_symbol_free(statement_symbol);
+        }
+    }
+    else if (statement_symbol) {
+        *symbol = statement_symbol;
+    }
+    else if (prep_directive_symbol) {
+        *symbol = prep_directive_symbol;
+    }
+    
+exit:
+    if (symbol && *symbol)
+        ret = TRUE;
+    
+    return ret;
+}
+
+static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* current,
+                                                         const cee_char* name)
+{
+    CEEList* symbols = NULL;
+    CEESourceSymbol* referenced = NULL;
+    CEESourceFregment* searching = current;
+    CEEList* p = NULL;
+    
+    /** search current fregment */
+    symbols = cee_source_fregment_symbols_search_by_name(searching, name);
+    if (symbols) {
+        referenced = cee_list_nth_data(symbols, 0);
+        goto exit;
+    }
+    
+    /**
+     * Search current round bracket list child fregment,
+     * function parameters , "for" / "while" / "if" statments
+     */
+    p = SOURCE_FREGMENT_CHILDREN_FIRST(searching);
+    while (p) {
+        searching = p->data;
+        if (searching->type[kCEESourceFregmentTypeRoundBracketList]) {
+            symbols = cee_source_fregment_symbols_in_children_search_by_name(searching,
+                                                                             name);
+            if (symbols) {
+                referenced = cee_list_nth_data(symbols, 0);
+                goto exit;
+            }
+        }
+        p = SOURCE_FREGMENT_NEXT(p);
+    }
+    
+    
+    searching = current;
+    
+    /** search current siblings */
+    if (searching->node_ref) {
+        p = SOURCE_FREGMENT_PREV(searching->node_ref);
+        while (p) {
+            searching = p->data;
+            symbols = cee_source_fregment_symbols_search_by_name(searching, name);
+            if (symbols) {
+                referenced = cee_list_nth_data(symbols, 0);
+                goto exit;
+            }
+            
+            /** enumerator search */
+            if (searching->type[kCEESourceFregmentTypeEnumDefinition]) {
+                CEEList* q = SOURCE_FREGMENT_CHILDREN_FIRST(searching);
+                while (q) {
+                    searching = q->data;
+                    symbols = cee_source_fregment_symbols_in_children_search_by_name(searching,
+                                                                                     name);
+                    if (symbols) {
+                        referenced = cee_list_nth_data(symbols, 0);
+                        goto exit;
+                    }
+                    q = SOURCE_FREGMENT_NEXT(q);
+                }
+            }
+            
+            p = SOURCE_FREGMENT_PREV(p);
+        }
+    }
+    
+    searching = current;
+    if (cee_source_fregment_parent_type_is(searching, kCEESourceFregmentTypeRoundBracketList) ||
+        cee_source_fregment_parent_type_is(searching, kCEESourceFregmentTypeCurlyBracketList) ||
+        cee_source_fregment_parent_type_is(searching, kCEESourceFregmentTypeSquareBracketList)) {
+        searching = cee_source_fregment_grandfather_get(searching);
+        referenced = symbol_search_in_scope_recursive(searching, name);
+    }
+    
+exit:
+    return referenced;
 }

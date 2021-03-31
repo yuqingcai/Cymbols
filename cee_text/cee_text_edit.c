@@ -197,8 +197,7 @@ static void selection_content_delete(CEETextEdit* edit)
                                     range0, 
                                     (const cee_uchar*)"",
                                     NULL,
-                                    NULL,
-                                    TRUE);
+                                    NULL);
     
     edit->caret.buffer_offset = range0.location;
     selection_discard(edit);
@@ -287,8 +286,7 @@ static void marked_text_replace(CEETextEdit* edit,
                                     edit->marked.range, 
                                     str,
                                     NULL,
-                                    &length,
-                                    TRUE);
+                                    &length);
     
     range1 = cee_range_make(edit->marked.range.location, length);
     fregment1 = text_fregment_create(storage, range1);
@@ -1475,8 +1473,7 @@ void cee_text_edit_delete_forward(CEETextEditRef edit)
                                         range0,
                                         (const cee_uchar*)"",
                                         NULL,
-                                        NULL,
-                                        TRUE);
+                                        NULL);
         
         state1 = text_edit_state_create(edit);
         range1 = cee_range_make(edit->caret.buffer_offset, 0);
@@ -1533,8 +1530,7 @@ void cee_text_edit_delete_backward(CEETextEditRef edit)
                                         range0,
                                         (const cee_uchar*)"",
                                         NULL,
-                                        NULL,
-                                        TRUE);
+                                        NULL);
         
         edit->caret.buffer_offset = prev;
         paragraph = cee_text_storage_paragraph_beginning_get(storage, prev);
@@ -1605,8 +1601,7 @@ void cee_text_edit_delete_word_forward(CEETextEditRef edit)
                                         range0,
                                         (const cee_uchar*)"",
                                         NULL,
-                                        NULL,
-                                        TRUE);
+                                        NULL);
         
         state1 = text_edit_state_create(edit);
         range1 = cee_range_make(edit->caret.buffer_offset, 0);
@@ -1665,8 +1660,7 @@ void cee_text_edit_delete_word_backward(CEETextEditRef edit)
                                         range0,
                                         (const cee_uchar*)"",
                                         NULL,
-                                        NULL,
-                                        TRUE);
+                                        NULL);
         
         edit->caret.buffer_offset = prev;
         paragraph = cee_text_storage_paragraph_beginning_get(storage, prev);
@@ -1745,8 +1739,7 @@ void cee_text_edit_delete_to_paragraph_beginning(CEETextEditRef edit)
                                         range0,
                                         (const cee_uchar*)"",
                                         NULL,
-                                        NULL,
-                                        TRUE);
+                                        NULL);
         
         edit->caret.buffer_offset = prev;
         paragraph = cee_text_storage_paragraph_beginning_get(storage, prev);
@@ -1823,8 +1816,7 @@ void cee_text_edit_delete_to_paragraph_end(CEETextEditRef edit)
                                         range0,
                                         (const cee_uchar*)"",
                                         NULL,
-                                        NULL,
-                                        TRUE);
+                                        NULL);
         
         state1 = text_edit_state_create(edit);
         range1 = cee_range_make(edit->caret.buffer_offset, 0);
@@ -1908,8 +1900,7 @@ void cee_text_edit_paste(CEETextEditRef edit)
                                     range0,
                                     str,
                                     &pasted_str,
-                                    &length,
-                                    TRUE);
+                                    &length);
     
     range1 = cee_range_make(range0.location, length);
     fregment1 = text_fregment_create(storage, range1);
@@ -1975,8 +1966,7 @@ void cee_text_edit_undo(CEETextEditRef edit)
                                         fregment1->range,
                                         fregment0->subject,
                                         NULL,
-                                        NULL,
-                                        update_host);
+                                        NULL);
         
         p = p->prev;
     }
@@ -2029,8 +2019,7 @@ void cee_text_edit_redo(CEETextEditRef edit)
                                         fregment0->range,
                                         fregment1->subject,
                                         NULL,
-                                        NULL,
-                                        update_host);
+                                        NULL);
         p = p->next;
     }
     
@@ -2093,8 +2082,7 @@ void cee_text_edit_insert(CEETextEditRef edit,
                                     range0,
                                     str,
                                     NULL,
-                                    &length,
-                                    TRUE);
+                                    &length);
     
     range1 = cee_range_make(range0.location, length);
     fregment1 = text_fregment_create(storage, range1);
@@ -2169,8 +2157,7 @@ void cee_text_edit_replace_ranges(CEETextEditRef edit,
                                         range0,
                                         str,
                                         NULL,
-                                        &length,
-                                        update_host);
+                                        &length);
 
         range1 = cee_range_make(range0.location, length);
         fregment1 = text_fregment_create(storage, range1);
@@ -2220,7 +2207,7 @@ void cee_text_edit_caret_buffer_offset_set(CEETextEditRef edit,
     cee_long paragraph = -1;
     CEETextStorageRef storage = edit->storage_ref;
     cee_size length = cee_text_storage_size_get(edit->storage_ref);
-    if (buffer_offset >= length)
+    if (buffer_offset > length)
         buffer_offset = 0;
     
     edit->caret.buffer_offset = buffer_offset;
@@ -2525,8 +2512,7 @@ void cee_text_edit_mark_text(CEETextEditRef edit,
                                     range, 
                                     str, 
                                     NULL, 
-                                    &length,
-                                    TRUE);
+                                    &length);
     edit->marked.range = cee_range_make(range.location, length);
     
     edit->caret.buffer_offset = edit->marked.range.location + edit->marked.range.length;

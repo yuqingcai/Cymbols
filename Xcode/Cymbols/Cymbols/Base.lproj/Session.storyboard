@@ -105,10 +105,10 @@
                 <splitViewController storyboardIdentifier="IDSessionSpliter1" id="nDf-2j-ioP" customClass="CEESessionSpliter1" sceneMemberID="viewController">
                     <splitViewItems>
                         <splitViewItem id="kkH-Zz-T8n"/>
-                        <splitViewItem canCollapse="YES" id="Szh-bn-ZE5"/>
+                        <splitViewItem canCollapse="YES" holdingPriority="260" behavior="sidebar" id="Szh-bn-ZE5"/>
                     </splitViewItems>
-                    <splitView key="splitView" dividerStyle="thin" id="sM4-J5-O4K" customClass="CEESplitView">
-                        <rect key="frame" x="1" y="0.0" width="449" height="300"/>
+                    <splitView key="splitView" arrangesAllSubviews="NO" dividerStyle="thin" id="sM4-J5-O4K" customClass="CEESplitView">
+                        <rect key="frame" x="0.0" y="0.0" width="449" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <connections>
                             <outlet property="delegate" destination="nDf-2j-ioP" id="usq-G8-9m1"/>
@@ -532,13 +532,13 @@
             <objects>
                 <splitViewController storyboardIdentifier="IDSessionSpliter0" id="Hrq-WH-Ws8" customClass="CEESessionSpliter0" sceneMemberID="viewController">
                     <splitViewItems>
-                        <splitViewItem canCollapse="YES" holdingPriority="260" id="1Uv-Zk-Ayz"/>
-                        <splitViewItem holdingPriority="240" id="hRD-vi-XhZ"/>
-                        <splitViewItem canCollapse="YES" holdingPriority="260" id="H0X-j8-8Hw"/>
-                        <splitViewItem canCollapse="YES" holdingPriority="260" id="T1c-cd-fU5"/>
+                        <splitViewItem canCollapse="YES" holdingPriority="260" behavior="sidebar" id="1Uv-Zk-Ayz"/>
+                        <splitViewItem holdingPriority="255" behavior="contentList" id="hRD-vi-XhZ"/>
+                        <splitViewItem canCollapse="YES" holdingPriority="260" behavior="sidebar" id="H0X-j8-8Hw"/>
+                        <splitViewItem canCollapse="YES" holdingPriority="260" behavior="sidebar" id="T1c-cd-fU5"/>
                     </splitViewItems>
                     <splitView key="splitView" arrangesAllSubviews="NO" dividerStyle="thin" vertical="YES" id="uey-HS-9EO" customClass="CEESplitView">
-                        <rect key="frame" x="0.0" y="-84" width="450" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <connections>
                             <outlet property="delegate" destination="Hrq-WH-Ws8" id="hhF-vI-mjD"/>
@@ -560,9 +560,8 @@
         <scene sceneID="vl7-l8-C2j">
             <objects>
                 <viewController identifier="IDSessionSymbolViewController" storyboardIdentifier="IDSessionSymbolViewController" id="aNZ-Ge-4S3" customClass="CEESessionSymbolViewController" sceneMemberID="viewController">
-                    <view key="view" identifier="IDSessionSymbolView" id="sIe-SJ-XFJ" customClass="CEEView">
+                    <view key="view" identifier="IDSessionSymbolView" translatesAutoresizingMaskIntoConstraints="NO" id="sIe-SJ-XFJ" customClass="CEEView">
                         <rect key="frame" x="0.0" y="0.0" width="250" height="300"/>
-                        <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView identifier="IDSessionSymbolsTitleView" translatesAutoresizingMaskIntoConstraints="NO" id="f0H-B1-fa4" customClass="CEETitleView">
                                 <rect key="frame" x="0.0" y="275" width="250" height="25"/>
@@ -608,14 +607,13 @@
         <scene sceneID="OKB-F7-0R6">
             <objects>
                 <viewController identifier="IDSessionSourceViewController" storyboardIdentifier="IDSessionSourceViewController" id="qXA-Id-ORe" customClass="CEESessionSourceViewController" sceneMemberID="viewController">
-                    <view key="view" identifier="IDSessionSourceView" id="bqH-NY-5WP" customClass="CEEView">
+                    <view key="view" identifier="IDSessionSourceView" translatesAutoresizingMaskIntoConstraints="NO" id="bqH-NY-5WP" customClass="CEEView">
                         <rect key="frame" x="0.0" y="0.0" width="220" height="300"/>
-                        <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <containerView identifier="IDSessionSourceContainerView" translatesAutoresizingMaskIntoConstraints="NO" id="93O-nd-26b" customClass="CEEView">
                                 <rect key="frame" x="0.0" y="0.0" width="220" height="300"/>
                                 <connections>
-                                    <segue destination="nDf-2j-ioP" kind="embed" identifier="IDSessionSourceEmbedSegue" id="Pss-wA-UaA"/>
+                                    <segue destination="nDf-2j-ioP" kind="embed" identifier="IDSessionSourceEmbedSegue" id="A0y-mo-ud1"/>
                                 </connections>
                             </containerView>
                         </subviews>
@@ -635,9 +633,8 @@
         <scene sceneID="U6g-gR-SMX">
             <objects>
                 <viewController identifier="IDSessionFileReferenceViewController" storyboardIdentifier="IDSessionFileReferenceViewController" id="ZM5-zG-qt6" customClass="CEESessionFileReferenceViewController" sceneMemberID="viewController">
-                    <view key="view" identifier="IDSessionFilePathView" id="y23-1r-lvL" customClass="CEEView">
+                    <view key="view" identifier="IDSessionFilePathView" translatesAutoresizingMaskIntoConstraints="NO" id="y23-1r-lvL" customClass="CEEView">
                         <rect key="frame" x="0.0" y="0.0" width="250" height="300"/>
-                        <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView identifier="IDSessionFilePathsTitleView" translatesAutoresizingMaskIntoConstraints="NO" id="JV5-ZL-u9t" customClass="CEETitleView">
                                 <rect key="frame" x="0.0" y="275" width="250" height="25"/>
@@ -801,9 +798,8 @@
         <scene sceneID="PUE-oB-dOr">
             <objects>
                 <viewController identifier="IDSessionSourceBufferViewController" storyboardIdentifier="IDSessionSourceBufferViewController" id="X4L-US-s8H" customClass="CEESessionSourceBufferViewController" sceneMemberID="viewController">
-                    <view key="view" identifier="IDSessionReferenceView" id="pMG-Oh-haO" customClass="CEEView">
+                    <view key="view" identifier="IDSessionReferenceView" translatesAutoresizingMaskIntoConstraints="NO" id="pMG-Oh-haO" customClass="CEEView">
                         <rect key="frame" x="0.0" y="0.0" width="250" height="300"/>
-                        <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView identifier="IDSessionReferencesTitleView" translatesAutoresizingMaskIntoConstraints="NO" id="v02-7E-ZnH" customClass="CEETitleView">
                                 <rect key="frame" x="0.0" y="275" width="250" height="25"/>
@@ -813,7 +809,7 @@
                                 </constraints>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="clS-1W-cMR" customClass="CEESessionSourceBufferTableView">
-                                <rect key="frame" x="0.0" y="0.0" width="251" height="275"/>
+                                <rect key="frame" x="0.0" y="0.0" width="250" height="275"/>
                                 <connections>
                                     <outlet property="menu" destination="lId-bh-AJB" id="nqT-Ua-Jg4"/>
                                 </connections>
@@ -825,7 +821,7 @@
                             <constraint firstItem="v02-7E-ZnH" firstAttribute="leading" secondItem="pMG-Oh-haO" secondAttribute="leading" id="ZTd-f4-z7z"/>
                             <constraint firstItem="v02-7E-ZnH" firstAttribute="top" secondItem="pMG-Oh-haO" secondAttribute="top" id="gHg-pV-9Zn"/>
                             <constraint firstAttribute="trailing" secondItem="v02-7E-ZnH" secondAttribute="trailing" id="ocz-Wz-aXP"/>
-                            <constraint firstAttribute="trailing" secondItem="clS-1W-cMR" secondAttribute="trailing" constant="-1" id="pNo-I3-fVF"/>
+                            <constraint firstAttribute="trailing" secondItem="clS-1W-cMR" secondAttribute="trailing" id="pNo-I3-fVF"/>
                             <constraint firstAttribute="bottom" secondItem="clS-1W-cMR" secondAttribute="bottom" id="vhF-PX-BdC"/>
                         </constraints>
                     </view>
@@ -880,12 +876,12 @@
         <scene sceneID="Y5y-z2-X76">
             <objects>
                 <viewController identifier="IDSessionContextViewController" storyboardIdentifier="IDSessionContextViewController" id="VVq-q7-n9X" customClass="CEESessionContextViewController" sceneMemberID="viewController">
-                    <view key="view" identifier="IDSessionContextView" id="SwO-ga-fPk" customClass="CEEView">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                    <view key="view" identifier="IDSessionContextView" verticalCompressionResistancePriority="745" id="SwO-ga-fPk" customClass="CEEView">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="311"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView identifier="IDContextTitleView" translatesAutoresizingMaskIntoConstraints="NO" id="o19-d8-QC3" customClass="CEETitleView">
-                                <rect key="frame" x="0.0" y="275" width="450" height="25"/>
+                                <rect key="frame" x="0.0" y="286" width="450" height="25"/>
                                 <subviews>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="3kl-lD-10O" customClass="CEETitlebarButton">
                                         <rect key="frame" x="426" y="1" width="24" height="24"/>
@@ -921,7 +917,7 @@
                 </viewController>
                 <customObject id="q0K-Tn-m8G" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="328" y="2470"/>
+            <point key="canvasLocation" x="328" y="2464.5"/>
         </scene>
         <!--Session Frame Manager-->
         <scene sceneID="9jf-2Z-bof">
@@ -942,11 +938,11 @@
                 <customObject id="ylF-2D-XNe" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <viewController storyboardIdentifier="IDSessionFrameViewController" id="FWh-fC-5af" customClass="CEESessionFrameViewController" sceneMemberID="viewController">
                     <view key="view" id="i1x-yY-L99" customClass="CEESessionFrameView">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="314"/>
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="rrf-r7-pxV" customClass="CEESessionFrameTitleView">
-                                <rect key="frame" x="0.0" y="289" width="450" height="25"/>
+                                <rect key="frame" x="0.0" y="275" width="450" height="25"/>
                                 <subviews>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="Nul-Mx-cFN" customClass="CEETitlebarButton">
                                         <rect key="frame" x="420" y="1" width="24" height="24"/>
@@ -1044,39 +1040,39 @@
         <image name="icon_close_tinted_16x16" width="16" height="16"/>
         <image name="icon_copy_16x16" width="16" height="16"/>
         <image name="icon_cut_16x16" width="16" height="16"/>
-        <image name="icon_database_build_16x16" width="16" height="16"/>
-        <image name="icon_database_clean_16x16" width="16" height="16"/>
-        <image name="icon_database_new_16x16" width="16" height="16"/>
-        <image name="icon_database_search_16x16" width="16" height="16"/>
-        <image name="icon_database_sync_16x16" width="16" height="16"/>
+        <image name="icon_database_build_16x16" width="16" height="16.5"/>
+        <image name="icon_database_clean_16x16" width="16" height="16.5"/>
+        <image name="icon_database_new_16x16" width="16" height="16.5"/>
+        <image name="icon_database_search_16x16" width="16" height="16.5"/>
+        <image name="icon_database_sync_16x16" width="16" height="16.5"/>
         <image name="icon_edit_16x16" width="16" height="16"/>
         <image name="icon_edit_in_new_window_16x16" width="16" height="16"/>
         <image name="icon_finder_16x16" width="16" height="16"/>
         <image name="icon_list_window_16x16" width="16" height="16"/>
         <image name="icon_mail_16x16" width="16" height="16"/>
-        <image name="icon_navigate_backward_16x16" width="16" height="16"/>
+        <image name="icon_navigate_backward_16x16" width="16.5" height="16"/>
         <image name="icon_navigate_forward_16x16" width="16" height="16"/>
         <image name="icon_new_directory_16x16" width="16" height="16"/>
         <image name="icon_new_file_16x16" width="16" height="16"/>
         <image name="icon_new_window_16x16" width="16" height="16"/>
-        <image name="icon_open_file_16x16" width="16" height="16"/>
+        <image name="icon_open_file_16x16" width="16.5" height="16"/>
         <image name="icon_paste_16x16" width="16" height="16"/>
         <image name="icon_redo_16x16" width="16" height="16"/>
         <image name="icon_reload_16x16" width="16" height="16"/>
         <image name="icon_remove_16x16" width="16" height="16"/>
         <image name="icon_remove_file_16x16" width="16" height="16"/>
-        <image name="icon_sand_clock_16x16" width="16" height="16"/>
-        <image name="icon_save_16x16" width="16" height="16"/>
+        <image name="icon_sand_clock_16x16" width="16.5" height="16"/>
+        <image name="icon_save_16x16" width="16.5" height="16"/>
         <image name="icon_save_all_16x16" width="16" height="16"/>
         <image name="icon_search_16x16" width="16" height="16"/>
-        <image name="icon_split0_16x16" width="16" height="16"/>
-        <image name="icon_split1_16x16" width="16" height="16"/>
-        <image name="icon_split2_16x16" width="16" height="16"/>
+        <image name="icon_split0_16x16" width="16" height="16.5"/>
+        <image name="icon_split1_16x16" width="16.5" height="16.5"/>
+        <image name="icon_split2_16x16" width="16" height="16.5"/>
         <image name="icon_split3_16x16" width="16" height="16"/>
         <image name="icon_split4_16x16" width="16" height="16"/>
         <image name="icon_split_horizontal_16x16" width="16" height="16"/>
         <image name="icon_split_vertical_16x16" width="16" height="16"/>
-        <image name="icon_toolbar_toggle_16x16" width="16" height="16"/>
+        <image name="icon_toolbar_toggle_16x16" width="16.5" height="16"/>
         <image name="icon_trash_16x16" width="16" height="16"/>
         <image name="icon_undo_16x16" width="16" height="16"/>
     </resources>

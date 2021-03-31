@@ -21,12 +21,14 @@ void cee_token_free(cee_pointer data)
 
 CEEToken* cee_token_create(CEETokenID identifier,
                            cee_long offset,
-                           cee_ulong length)
+                           cee_ulong length,
+                           cee_ulong line_no)
 {
     CEEToken* token = cee_malloc0(sizeof (CEEToken));
     token->identifier = identifier;
     token->offset = offset;
     token->length = length;
+    token->line_no = line_no;
     
     cee_token_count ++;
     

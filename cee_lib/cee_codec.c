@@ -137,6 +137,7 @@ exit:
     
     return;
 }
+
 /**
  * when return value equals -1, that means "offset" is the head of storage buffer,
  * the "codepoint" is CEE_UNICODE_POINT_INVALID
@@ -156,45 +157,112 @@ void cee_codec_utf8_decode_reversed(const cee_uchar* subject,
         _prev = -1;
         goto exit;
     }
-        
-    if ((subject[offset-4] >> 3) == 0x1e) {
-        _length = 4;
-        _prev = offset - _length;
-        ptr = &subject[_prev];
-        _codepoint = ((ptr[0] & 0x07) << 18) |
-                    ((ptr[1] & 0x3F) << 12) |
-                    ((ptr[2] & 0x3F) << 6) |
-                    (ptr[3] & 0x3F);
+    
+    if (offset >= 4) {
+        if ((subject[offset-4] >> 3) == 0x1e) {
+            _length = 4;
+            _prev = offset - _length;
+            ptr = &subject[_prev];
+            _codepoint = ((ptr[0] & 0x07) << 18) |
+                        ((ptr[1] & 0x3F) << 12) |
+                        ((ptr[2] & 0x3F) << 6) |
+                        (ptr[3] & 0x3F);
+        }
+        else if ((subject[offset-3] >> 4) == 0xe) {
+            _length = 3;
+            _prev = offset - _length;
+            ptr = &subject[_prev];
+            _codepoint = ((ptr[0] & 0x0F) << 12) |
+                            ((ptr[1] & 0x3F) << 6) |
+                            (ptr[2] & 0x3F);
+        }
+        else if ((subject[offset-2] >> 5) == 0x6) {
+            _length = 2;
+            _prev = offset - _length;
+            ptr = &subject[_prev];
+            _codepoint = ((ptr[0] & 0x1F) << 6) |
+                            (ptr[1] & 0x3F);
+            
+        }
+        else if (!(subject[offset-1] & 0x80)) {
+            _length = 1;
+            _prev = offset - _length;
+            ptr = &subject[_prev];
+            _codepoint = ptr[0] & 0x7F;
+        }
+        else {
+            _length = 1;
+            _prev = offset - _length;
+            ptr = &subject[offset];
+            _codepoint = ptr[0];
+        }
     }
-    else if ((subject[offset-3] >> 4) == 0xe) {
-        _length = 3;
-        _prev = offset - _length;
-        ptr = &subject[_prev];
-        _codepoint = ((ptr[0] & 0x0F) << 12) |
-                        ((ptr[1] & 0x3F) << 6) |
-                        (ptr[2] & 0x3F);
+    else if (offset == 3) {
+        if ((subject[offset-3] >> 4) == 0xe) {
+            _length = 3;
+            _prev = offset - _length;
+            ptr = &subject[_prev];
+            _codepoint = ((ptr[0] & 0x0F) << 12) |
+                            ((ptr[1] & 0x3F) << 6) |
+                            (ptr[2] & 0x3F);
+        }
+        else if ((subject[offset-2] >> 5) == 0x6) {
+            _length = 2;
+            _prev = offset - _length;
+            ptr = &subject[_prev];
+            _codepoint = ((ptr[0] & 0x1F) << 6) |
+                            (ptr[1] & 0x3F);
+            
+        }
+        else if (!(subject[offset-1] & 0x80)) {
+            _length = 1;
+            _prev = offset - _length;
+            ptr = &subject[_prev];
+            _codepoint = ptr[0] & 0x7F;
+        }
+        else {
+            _length = 1;
+            _prev = offset - _length;
+            ptr = &subject[offset];
+            _codepoint = ptr[0];
+        }
     }
-    else if ((subject[offset-2] >> 5) == 0x6) {
-        _length = 2;
-        _prev = offset - _length;
-        ptr = &subject[_prev];
-        _codepoint = ((ptr[0] & 0x1F) << 6) |
-                        (ptr[1] & 0x3F);
-        
+    else if (offset == 2) {
+        if ((subject[offset-2] >> 5) == 0x6) {
+            _length = 2;
+            _prev = offset - _length;
+            ptr = &subject[_prev];
+            _codepoint = ((ptr[0] & 0x1F) << 6) |
+                            (ptr[1] & 0x3F);
+            
+        }
+        else if (!(subject[offset-1] & 0x80)) {
+            _length = 1;
+            _prev = offset - _length;
+            ptr = &subject[_prev];
+            _codepoint = ptr[0] & 0x7F;
+        }
+        else {
+            _length = 1;
+            _prev = offset - _length;
+            ptr = &subject[offset];
+            _codepoint = ptr[0];
+        }
     }
-    else if (!(subject[offset-1] & 0x80)) {
-        _length = 1;
-        _prev = offset - _length;
-        ptr = &subject[_prev];
-        _codepoint = ptr[0] & 0x7F;
+    else if (offset == 1) {
+        if (!(subject[offset-1] & 0x80)) {
+            _length = 1;
+            _prev = offset - _length;
+            ptr = &subject[_prev];
+            _codepoint = ptr[0] & 0x7F;
+        }
+        else {
+            _length = 1;
+            _prev = offset - _length;
+            ptr = &subject[offset];
+            _codepoint = ptr[0];
+        }
     }
-    else {
-        _length = 1;
-        _prev = offset - _length;
-        ptr = &subject[offset];
-        _codepoint = ptr[0];
-    }
-
     
 exit:
     if (codepoint)
@@ -313,117 +381,126 @@ cee_boolean cee_codec_has_bom(const cee_uchar* buffer)
     return FALSE;
 }
 
-void cee_codec_export_bom(const cee_uchar* buffer,
-                          cee_uchar* bom)
+void cee_codec_bom_export(const cee_uchar* buffer,
+                          cee_uchar** bom,
+                          cee_ulong* size)
 {
-    bom[0] = 0x00;
-    bom[1] = 0x00;
-    bom[2] = 0x00;
-    bom[3] = 0x00;
+    cee_uchar* _bom = NULL;
+    cee_ulong _size = 0;
     
     if (buffer[0] == 0xEF &&
         buffer[1] == 0xBB &&
         buffer[2] == 0xBF) {
+        _size = 3;
+        _bom = cee_malloc0(sizeof(cee_uchar)*_size);
         /** UTF-8 */
-        bom[0] = buffer[0];
-        bom[1] = buffer[1];
-        bom[2] = buffer[2];
+        _bom[0] = buffer[0];
+        _bom[1] = buffer[1];
+        _bom[2] = buffer[2];
     }
     else if (buffer[0] == 0xFE &&
              buffer[1] == 0xFF) {
+        _size = 2;
+        _bom = cee_malloc0(sizeof(cee_uchar)*_size);
         /** UTF-16 (big-endian) */
-        bom[0] = buffer[0];
-        bom[1] = buffer[1];
+        _bom[0] = buffer[0];
+        _bom[1] = buffer[1];
     }
     else if (buffer[0] == 0xFF &&
              buffer[1] == 0xFE) {
+        _size = 2;
+        _bom = cee_malloc0(sizeof(cee_uchar)*_size);
         /** UTF-16 (little-endian) */
-        bom[0] = buffer[0];
-        bom[1] = buffer[1];
+        _bom[0] = buffer[0];
+        _bom[1] = buffer[1];
     }
     else if (buffer[0] == 0x00 &&
              buffer[1] == 0x00 &&
              buffer[2] == 0xFE &&
              buffer[3] == 0xFF) {
+        _size = 4;
+        _bom = cee_malloc0(sizeof(cee_uchar)*_size);
         /** UTF-32 (big-endian) */
-        bom[0] = buffer[0];
-        bom[1] = buffer[1];
-        bom[2] = buffer[2];
-        bom[3] = buffer[3];
+        _bom[0] = buffer[0];
+        _bom[1] = buffer[1];
+        _bom[2] = buffer[2];
+        _bom[3] = buffer[3];
     }
     else if (buffer[0] == 0xFF &&
              buffer[1] == 0xFE &&
              buffer[2] == 0x00 &&
              buffer[3] == 0x00) {
+        _size = 4;
+        _bom = cee_malloc0(sizeof(cee_uchar)*_size);
         /** UTF-32 (little-endian) */
-        bom[0] = buffer[0];
-        bom[1] = buffer[1];
-        bom[2] = buffer[2];
-        bom[3] = buffer[3];
+        _bom[0] = buffer[0];
+        _bom[1] = buffer[1];
+        _bom[2] = buffer[2];
+        _bom[3] = buffer[3];
     }
+    
+    if (bom)
+        *bom = _bom;
+    else
+        cee_free(_bom);
+    
+    if (size)
+        *size = _size;
 }
 
-CEECodecEncodedType cee_codec_type_from_bom(const cee_uchar* bom)
+const cee_char* cee_codec_encoded_type_from_bom(const cee_uchar* bom,
+                                                cee_ulong bom_size)
 {
-    if (bom[0] == 0xEF &&
-        bom[1] == 0xBB &&
-        bom[2] == 0xBF) {
-        /** UTF-8 */
-        return kCEECodecEncodedTypeUTF8;
+    if (bom_size == 3) {
+        if (bom[0] == 0xEF &&
+            bom[1] == 0xBB &&
+            bom[2] == 0xBF) {
+            /** UTF-8 */
+            return "UTF-8";
+        }
     }
-    else if (bom[0] == 0xFE &&
-             bom[1] == 0xFF) {
-        /** UTF-16 (big-endian) */
-        return kCEECodecEncodedTypeUTF16BE;
+    else if (bom_size == 2) {
+        if (bom[0] == 0xFE &&
+            bom[1] == 0xFF) {
+            /** UTF-16 (big-endian) */
+            return "UTF-16BE";
+        }
+        else if (bom[0] == 0xFF &&
+                 bom[1] == 0xFE) {
+            /** UTF-16 (little-endian) */
+            return "UTF-16LE";
+        }
     }
-    else if (bom[0] == 0xFF &&
-             bom[1] == 0xFE) {
-        /** UTF-16 (little-endian) */
-        return kCEECodecEncodedTypeUTF16LE;
+    else if (bom_size == 4) {
+        if (bom[0] == 0x00 &&
+            bom[1] == 0x00 &&
+            bom[2] == 0xFE &&
+            bom[3] == 0xFF) {
+            /** UTF-32 (big-endian) */
+            return "UTF-32BE";
+        }
+        else if (bom[0] == 0xFF &&
+                 bom[1] == 0xFE &&
+                 bom[2] == 0x00 &&
+                 bom[3] == 0x00) {
+            /** UTF-32 (little-endian) */
+            return "UTF-32LE";
+        }
     }
-    else if (bom[0] == 0x00 &&
-             bom[1] == 0x00 &&
-             bom[2] == 0xFE &&
-             bom[3] == 0xFF) {
-        /** UTF-32 (big-endian) */
-        return kCEECodecEncodedTypeUTF32BE;
-    }
-    else if (bom[0] == 0xFF &&
-             bom[1] == 0xFE &&
-             bom[2] == 0x00 &&
-             bom[3] == 0x00) {
-        /** UTF-32 (little-endian) */
-        return kCEECodecEncodedTypeUTF32LE;
-    }
-    return kCEECodecEncodedTypeBinary;
-}
-
-const cee_char* cee_codec_encoded_type_string(CEECodecEncodedType type)
-{
-    if (type == kCEECodecEncodedTypeUTF8)
-        return "UTF-8";
-    else if (type == kCEECodecEncodedTypeUTF16BE)
-        return "UTF-16BE";
-    else if (type == kCEECodecEncodedTypeUTF16LE)
-        return "UTF-16LE";
-    else if (type == kCEECodecEncodedTypeUTF32BE)
-        return "UTF-32BE";
-    else if (type == kCEECodecEncodedTypeUTF32LE)
-        return "UTF-32LE";
     
     return NULL;
 }
 
 cee_uchar* cee_codec_convert_to_utf8_with_bom(const cee_uchar* subject,
                                               cee_size length,
-                                              const cee_uchar* bom)
+                                              const cee_uchar* bom,
+                                              cee_ulong bom_size)
 {
     /**
      * subject should begin with BOM
      */
     const cee_char* to = "UTF-8";
-    CEECodecEncodedType type = cee_codec_type_from_bom(bom);
-    const cee_char* from = cee_codec_encoded_type_string(type);
+    const cee_char* from = cee_codec_encoded_type_from_bom(bom, bom_size);
     if (!from)
         return NULL;
     

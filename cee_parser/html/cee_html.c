@@ -16,12 +16,12 @@ typedef struct _HTMLParser {
     CEESourceFregment* comment_current;
 } HTMLParser;
 
-typedef enum _XMLTagType {
-    kXMLTagTypeUnknow,
-    kXMLTagTypeBegin,
-    kXMLTagTypeClose,
-    kXMLTagTypeEmpty,
-} XMLTagType;
+typedef enum _HTMLTagType {
+    kHTMLTagTypeUnknow,
+    kHTMLTagTypeBegin,
+    kHTMLTagTypeClose,
+    kHTMLTagTypeEmpty,
+} HTMLTagType;
 
 static HTMLParser* parser_create(void);
 static void parser_free(cee_pointer data);
@@ -42,7 +42,7 @@ static cee_boolean comment_token_push(HTMLParser* parser,
                                       CEEToken* push);
 static cee_boolean comment_fregment_reduce(HTMLParser* parser);
 static cee_boolean comment_attach(HTMLParser* parser);
-static XMLTagType tag_parse(CEESourceFregment* fregment);
+static HTMLTagType tag_parse(CEESourceFregment* fregment);
 static cee_boolean token_is_empty_tag(CEEToken* token);
 static void html_tag_symbols_create(CEESourceFregment* fregment);
 static cee_char* attribute_name_get(CEESourceFregment* fregment,
@@ -147,14 +147,14 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
             
             if (parsing) {
             
-                XMLTagType type = tag_parse(fregment);
+                HTMLTagType type = tag_parse(fregment);
                 
-                if (type == kXMLTagTypeBegin) {
+                if (type == kHTMLTagTypeBegin) {
                     if (!statement_push(parser, fregment))
                         break;
                     fregment = NULL;
                 }
-                else if (type == kXMLTagTypeClose) {
+                else if (type == kHTMLTagTypeClose) {
                     cee_source_fregment_type_set_exclusive(fregment,
                                                            kCEESourceFregmentTypeXMLTagEnd);
                     if (!statement_pop(parser))
@@ -169,7 +169,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                     fregment = NULL;
                     
                 }
-                else if (type == kXMLTagTypeEmpty) {
+                else if (type == kHTMLTagTypeEmpty) {
                     if (!statement_push(parser, fregment))
                         break;
                     
@@ -262,7 +262,7 @@ static void symbol_parse_clear(HTMLParser* parser)
 }
 
 
-static XMLTagType tag_parse(CEESourceFregment* fregment)
+static HTMLTagType tag_parse(CEESourceFregment* fregment)
 {
     CEEToken* token = NULL;
     CEEList* p = NULL;
@@ -272,7 +272,7 @@ static XMLTagType tag_parse(CEESourceFregment* fregment)
     cee_boolean empty_element = FALSE;
         
     if (!fregment || !fregment->tokens_ref)
-        return kXMLTagTypeUnknow;
+        return kHTMLTagTypeUnknow;
     
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
@@ -302,12 +302,12 @@ static XMLTagType tag_parse(CEESourceFregment* fregment)
     html_tag_symbols_create(fregment);
     
     if (tag_close)
-        return kXMLTagTypeClose;
+        return kHTMLTagTypeClose;
     
     if (empty_element)
-        return kXMLTagTypeEmpty;
+        return kHTMLTagTypeEmpty;
     
-    return kXMLTagTypeBegin;
+    return kHTMLTagTypeBegin;
 }
 
 static cee_boolean token_is_empty_tag(CEEToken* token)

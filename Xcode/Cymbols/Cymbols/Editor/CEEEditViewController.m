@@ -79,4 +79,11 @@
     
 }
 
+- (void)setLineBufferOffset:(NSInteger)offset {
+    
+}
+
+- (void)setCaretBufferOffset:(NSInteger)offset {
+    
+}
 @end

@@ -13,7 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CEEProjectContextViewController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource>
-@property CEESourceSymbol* selectedSymbol;
+@property cee_long symbolIndex;
 @end
 
 NS_ASSUME_NONNULL_END

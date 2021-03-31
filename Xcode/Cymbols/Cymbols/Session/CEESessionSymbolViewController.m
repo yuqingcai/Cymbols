@@ -16,7 +16,7 @@
 @property (strong) CEESessionPort* port;
 @property (strong) CEESourceBuffer* buffer;
 @property (strong) NSString* filterCondition;
-@property CEEList* symbol_wrappers;
+@property CEEList* symbolWrappers;
 @property (strong) NSTimer* updateSymbolsTimer;
 @property BOOL shouldUpdate;
 @end
@@ -55,14 +55,15 @@
 - (void)updateSymbols:(NSTimer *)timer {
     if (_shouldUpdate)
         [self presentSymbols];
+    
     _shouldUpdate = NO;
 }
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    if (_symbol_wrappers)
-        cee_list_free_full(_symbol_wrappers, cee_source_symbol_wrapper_free);
-    _symbol_wrappers = NULL;
+    if (_symbolWrappers)
+        cee_list_free_full(_symbolWrappers, cee_source_symbol_wrapper_free);
+    _symbolWrappers = NULL;
     
     if (_updateSymbolsTimer) {
         [_updateSymbolsTimer invalidate];
@@ -71,9 +72,9 @@
 }
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
-    if (!_symbol_wrappers)
+    if (!_symbolWrappers)
         return 0;
-    return cee_list_length(_symbol_wrappers);
+    return cee_list_length(_symbolWrappers);
 }
 
 - (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column {
@@ -83,40 +84,27 @@
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
-    CEESourceSymbolWrapper* wrapper = cee_list_nth_data(_symbol_wrappers, (cee_uint)row);
+    CEESourceSymbolWrapper* wrapper = cee_list_nth_data(_symbolWrappers, (cee_uint)row);
     CEESourceSymbol* symbol = wrapper->symbol_ref;
     NSString* string = [NSString stringWithUTF8String:symbol->name];
     
-    //switch (symbol->type) {
-    //    case kCEESourceSymbolTypeFunctionDefinition:
-    //        string = [string stringByAppendingString:@"()"];
-    //        break;
-    //    case kCEESourceSymbolTypeFunctionDeclaration:
-    //        string = [string stringByAppendingString:@"()"];
-    //        break;
-    //    case kCEESourceSymbolTypeTemplateDeclaration:
-    //        string = [string stringByAppendingString:@"<>"];
-    //        break;
-    //    default:
-    //        break;
-    //}
     cellView.text.stringValue = string;
     [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
     return cellView;
 }
 
 - (CGFloat)tableView:(CEETableView *)tableView indentForRow:(NSInteger)row {
-    CEESourceSymbolWrapper* wrapper = cee_list_nth_data(_symbol_wrappers, (cee_uint)row);
+    CEESourceSymbolWrapper* wrapper = cee_list_nth_data(_symbolWrappers, (cee_uint)row);
     return wrapper->level - 1;
 }
 
 - (IBAction)selectRow:sender {
-    if (!_symbolTable.selectedRowIndexes || !_symbol_wrappers)
+    if (!_symbolTable.selectedRowIndexes || !_symbolWrappers)
         return;
     
-    CEESourceSymbolWrapper* wrapper = cee_list_nth_data(_symbol_wrappers, 
+    CEESourceSymbolWrapper* wrapper = cee_list_nth_data(_symbolWrappers,
                                                         (cee_uint)_symbolTable.selectedRow);
-    [_session.activedPort setSelectedSourceSymbol:wrapper->symbol_ref];
+    [_session.activedPort jumpToSymbol:wrapper->symbol_ref];
 }
 
 - (void)deserialize:(NSDictionary *)dict {
@@ -128,7 +116,7 @@
 - (void)sourceBufferChangeStateResponse:(NSNotification*)notification {
     if (notification.object != _buffer)
         return;
-    if ([_buffer stateSet:kCEESourceBufferStateModified])
+    if ([_buffer stateSet:kCEESourceBufferStateShouldSyncToFile])
         _shouldUpdate = YES;
 }
 
@@ -209,13 +197,13 @@
 }
 
 - (void)presentSymbols {
-    if (_symbol_wrappers)
-        cee_list_free_full(_symbol_wrappers, cee_source_symbol_wrapper_free);
-    _symbol_wrappers = NULL;
+    if (_symbolWrappers)
+        cee_list_free_full(_symbolWrappers, cee_source_symbol_wrapper_free);
+    _symbolWrappers = NULL;
     
     if (_buffer)
-        _symbol_wrappers = cee_source_symbol_wrappers_copy_with_condition(_buffer.symbol_wrappers, 
-                                                                          [_filterCondition UTF8String]);
+        _symbolWrappers = cee_source_symbol_wrappers_copy_with_condition(_buffer.symbols,
+                                                                         [_filterCondition UTF8String]);
     [_symbolTable reloadData];
 }
 

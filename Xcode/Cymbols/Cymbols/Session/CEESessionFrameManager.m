@@ -331,16 +331,15 @@
 
 - (void)closeFrame:(CEESessionFrameViewController*)frame {
     __block BOOL shouldClose = YES;
-    NSMutableArray* syncBuffers = nil;
+    NSMutableArray* syncBuffers = [[NSMutableArray alloc] init];
     for (CEESourceBuffer* buffer in frame.port.openedSourceBuffers) {
-        if ([buffer stateSet:kCEESourceBufferStateShouldSyncWhenClose]) {
-            if (!syncBuffers)
-                syncBuffers = [[NSMutableArray alloc] init];
-            [syncBuffers addObject:buffer];
+        if ([buffer stateSet:kCEESourceBufferStateShouldSyncToFile]) {
+            if (![syncBuffers containsObject:buffer])
+                [syncBuffers addObject:buffer];
         }
     }
     
-    if (syncBuffers) {
+    if (syncBuffers.count) {
         if (!_sourceBufferManagerWindowController)
             _sourceBufferManagerWindowController = [[NSStoryboard storyboardWithName:@"SourceBufferManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceBufferManagerWindowController"];
         CEESourceBufferManagerViewController* controller = (CEESourceBufferManagerViewController*)_sourceBufferManagerWindowController.contentViewController;

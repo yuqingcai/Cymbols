@@ -39,20 +39,21 @@
 
 - (BOOL)windowShouldClose:(NSWindow *)sender {
     __block BOOL shouldClose = YES;
-    NSMutableArray* syncBuffers = nil;
+    NSMutableArray* syncBuffers = [[NSMutableArray alloc] init];
+    
     for (CEESessionPort* port in _session.ports) {
         for (CEESourceBuffer* buffer in [port openedSourceBuffers]) {
-            if ([buffer stateSet:kCEESourceBufferStateShouldSyncWhenClose]) {
-                if (!syncBuffers)
-                    syncBuffers = [[NSMutableArray alloc] init];
-                [syncBuffers addObject:buffer];
+            if ([buffer stateSet:kCEESourceBufferStateShouldSyncToFile]) {
+                if (![syncBuffers containsObject:buffer])
+                    [syncBuffers addObject:buffer];
             }
         }
     }
     
-    if (syncBuffers) {
+    if (syncBuffers.count) {
         if (!_sourceBufferManagerWindowController)
             _sourceBufferManagerWindowController = [[NSStoryboard storyboardWithName:@"SourceBufferManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceBufferManagerWindowController"];
+        
         CEESourceBufferManagerViewController* controller = (CEESourceBufferManagerViewController*)_sourceBufferManagerWindowController.contentViewController;
         [controller setModifiedSourceBuffers:syncBuffers];
         [self.window beginSheet:_sourceBufferManagerWindowController.window completionHandler:(^(NSInteger result) {

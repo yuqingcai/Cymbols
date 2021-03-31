@@ -68,6 +68,7 @@ CEEPoint CEEPointFromNSPoint(NSPoint point)
 @implementation CEETextView
 @synthesize wrap = _wrap;
 @synthesize caretBlinkTimeInterval = _caretBlinkTimeInterval;
+@synthesize storage = _storage;
 
 static void pasteboard_string_set(cee_pointer platform_ref, const cee_uchar* str)
 {
@@ -83,6 +84,9 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (BOOL)becomeFirstResponder {
+    if (!_editable)
+        return NO;
+    
     [super setStyleState:kCEEViewStyleStateActived];
     [self startCaretBlink];
     return YES;
@@ -117,9 +121,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     _retain_storage = YES;
     _caretBlinkTimeInterval = 0.5;
     
-    _storage = cee_text_storage_create(NULL,
-                                       (const cee_uchar*)"",
-                                       NULL);
+    _storage = cee_text_storage_create((const cee_uchar*)"");
     _edit = cee_text_edit_create((__bridge cee_pointer)self,
                                  _storage,
                                  _aligment,
@@ -206,27 +208,33 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 - (void)setStorage:(CEETextStorageRef)storage {
     if (_storage && _retain_storage)
         cee_text_storage_free(_storage);
-    
+
     if (storage) {
         _storage = storage;
         _retain_storage = NO;
     }
     else {
-        _storage = cee_text_storage_create(NULL,
-                                           (const cee_uchar*)"",
-                                           NULL);
+        _storage = cee_text_storage_create((const cee_uchar*)"");
         _retain_storage = YES;
     }
     
     cee_text_edit_storage_set(_edit, _storage);
 }
 
+- (CEETextStorageRef)storage {
+    return _storage;
+}
+
 - (void)dealloc {
-    if (_edit)
+    if (_edit) {
         cee_text_edit_free(_edit);
+        _edit = NULL;
+    }
     
-    if (_storage && _retain_storage)
+    if (_storage && _retain_storage) {
         cee_text_storage_free(_storage);
+        _storage = NULL;
+    }
     
     if (_caretBlinkTimer) {
         [_caretBlinkTimer invalidate];
@@ -256,14 +264,12 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 - (void)setFrameSize:(NSSize)newSize {
     [super setFrameSize:newSize];
     [self resetMouseTraceArea];
-    CEESize size = cee_size_make(self.frame.size.width,
-                                 self.frame.size.height);
+    CEESize size = cee_size_make(self.frame.size.width, self.frame.size.height);
     cee_text_edit_container_size_set(_edit, size);
+    [self setNeedsDisplay:YES];
     
     if (_delegate && [_delegate respondsToSelector:@selector(textViewFrameChanged:)])
         [_delegate textViewFrameChanged:self];
-    
-    [self setNeedsDisplay:YES];
 }
 
 - (NSArray<NSAttributedStringKey> *)validAttributesForMarkedText {
@@ -465,11 +471,15 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (void)mouseDown:(NSEvent *)event {
+    if (!_editable)
+        return;
     
     [super mouseDown:event];
     
     if ([self.window firstResponder] != self)
         [self.window makeFirstResponder:self];
+    
+    cee_text_edit_highlight_clear(_edit);
     
     NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
     point = [self layoutPointFromViewPoint:point];
@@ -510,12 +520,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
-    
-    if (!(event.modifierFlags & NSEventModifierFlagCommand)) {
-        if (_delegate && [_delegate respondsToSelector:@selector(textViewCreateContext:)])
-            [_delegate textViewCreateContext:self];
-    }
-    
+        
     if (event.modifierFlags & NSEventModifierFlagShift) {
         cee_text_edit_selection_complete_position_set(_edit, p);
         if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChanged:)])
@@ -583,7 +588,6 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                 break;
         }
     }
-    
     [self setNeedsDisplay:YES];
 }
 
@@ -1533,6 +1537,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         point = [self layoutPointFromViewPoint:point];
         CEEPoint p = CEEPointFromNSPoint(point);
         cee_text_edit_cursor_position_set(_edit, p);
+        
         if (_delegate && [_delegate respondsToSelector:@selector(textViewHighlightTokenCluster:)])
             [_delegate textViewHighlightTokenCluster:self];
     }
@@ -1543,6 +1548,9 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (NSMenu*)menuForEvent:(NSEvent *)event {
+    if (!_editable)
+        return nil;
+    
     NSMenu* menu = [super menuForEvent:event];
     if (_delegate && [_delegate respondsToSelector:@selector(textView:modifyMenu:)])
         [_delegate textView:self modifyMenu:&menu];

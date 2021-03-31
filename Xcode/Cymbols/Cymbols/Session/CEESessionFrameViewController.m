@@ -51,8 +51,9 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setSelectedSymbolResponse:) name:CEENotificationSessionPortSetSelectedSymbol object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferReloadResponse:) name:CEENotificationSourceBufferReload object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToSourcePointResponse:) name:CEENotificationSessionPortJumpToSourcePoint object:nil];
+    
 }
 
 - (BOOL)becomeFirstResponder {
@@ -117,32 +118,27 @@
     
     CEEEditViewController* viewController = nil;
     
-    if (_sourceBuffer.encodedType == kCEECodecEncodedTypeUTF8 ||
-        _sourceBuffer.encodedType == kCEECodecEncodedTypeUTF16BE ||
-        _sourceBuffer.encodedType == kCEECodecEncodedTypeUTF16LE ||
-        _sourceBuffer.encodedType == kCEECodecEncodedTypeUTF32BE ||
-        _sourceBuffer.encodedType == kCEECodecEncodedTypeUTF32LE)
+    if (_sourceBuffer.type == kCEESourceBufferTypeText)
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
-    else if (_sourceBuffer.encodedType == kCEECodecEncodedTypeBinary)
+    else if (_sourceBuffer.type == kCEESourceBufferTypeBinary)
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDBinaryEditViewController"];
     else
         viewController = [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDNotSupportedEditViewController"];
     
-    if (_editViewController) {
+    if ([_editViewController.view superview])
         [_editViewController.view removeFromSuperview];
-        [_editViewController removeFromParentViewController];
-    }
     
+    // The old _editViewController should release immediately
+    // after a new _editViewController is created.
     _editViewController = viewController;
     [_editViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
-        
+    
     [self.view addSubview:_editViewController.view];
-    [self addChildViewController:_editViewController];
     
     NSDictionary *views = @{
-                            @"titlebar" : _titlebar,
-                            @"editView" : _editViewController.view,
-                            };
+        @"titlebar" : _titlebar,
+        @"editView" : _editViewController.view,
+    };
     NSArray *constraintsH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[editView]-0-|" options:0 metrics:nil views:views];
     NSArray *constraintsV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[titlebar]-0-[editView]-0-|" options:0 metrics:nil views:views];
     [self.view addConstraints:constraintsH];
@@ -181,11 +177,9 @@
 }
 
 - (void)sourceBufferChangeStateResponse:(NSNotification*)notification {
-    CEESourceBuffer* notify_buffer = notification.object;
-    //if (![notify_buffer.filePath isEqualToString:buffer.filePath])
-    //    return;
+    CEESourceBuffer* buffer = notification.object;
     
-    if (notify_buffer != _sourceBuffer)
+    if (buffer != _sourceBuffer)
         return;
     
     if ([_sourceBuffer stateSet:kCEESourceBufferStateFileTemporary])
@@ -193,7 +187,7 @@
     else
         self.title = _sourceBuffer.filePath;
     
-    if ([_sourceBuffer stateSet:kCEESourceBufferStateModified])
+    if ([_sourceBuffer stateSet:kCEESourceBufferStateShouldSyncToFile])
         self.title = [self.title stringByAppendingFormat:@" *"];
     
     if ([_sourceBuffer stateSet:kCEESourceBufferStateFileDeleted])
@@ -209,33 +203,29 @@
     else
         self.title = _sourceBuffer.filePath;
     
-    if ([_sourceBuffer stateSet:kCEESourceBufferStateModified])
+    if ([_sourceBuffer stateSet:kCEESourceBufferStateShouldSyncToFile])
         self.title = [self.title stringByAppendingFormat:@" *"];
     
     if ([_sourceBuffer stateSet:kCEESourceBufferStateFileDeleted])
         self.title = [self.title stringByAppendingFormat:@" (delete)"];
 }
 
-- (void)jumpToSourcePointResponse:(NSNotification*)notification {
-    if (notification.object != _port || !_port.jumpPoint)
+- (void)sourceBufferReloadResponse:(NSNotification*)notification {
+    if (notification.object != _port.activedSourceBuffer)
         return;
-    
-    NSString* filePath = _port.jumpPoint.filePath;
-    CEEList* ranges = cee_ranges_from_string([_port.jumpPoint.locations UTF8String]);
-    if (ranges) {
-        [_port openSourceBufferWithFilePath:filePath];
-        [self.editViewController highlightRanges:ranges];
-        cee_list_free_full(ranges, cee_range_free);
-    }
+    [self presentSourceBuffer];
 }
 
-- (void)setSelectedSymbolResponse:(NSNotification*)notification {
-    if (notification.object != _port || !_port.selected_symbol)
+- (void)jumpToSourcePointResponse:(NSNotification*)notification {
+    if (notification.object != _port)
         return;
+    CEESourcePoint* jumpPoint = _port.jumpPoint;
     
-    CEEList* ranges = cee_ranges_from_string(_port.selected_symbol->locations);
+    if(![jumpPoint.filePath isEqualToString:_port.activedSourceBuffer.filePath])
+            [_port openSourceBufferWithFilePath:jumpPoint.filePath];
+    CEEList* ranges = cee_ranges_from_string([jumpPoint.locations UTF8String]);
     if (ranges) {
-        [self.editViewController highlightRanges:ranges];
+        [_editViewController highlightRanges: ranges];
         cee_list_free_full(ranges, cee_range_free);
     }
 }

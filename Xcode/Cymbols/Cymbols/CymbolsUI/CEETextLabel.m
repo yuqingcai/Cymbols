@@ -19,7 +19,6 @@
     cee_text_edit_attributes_configure(_edit, (const cee_uchar*)[[self textAttributesDescriptor] UTF8String]);
     cee_text_edit_wrap_set(self.edit, TRUE);
     cee_text_edit_wrap_with_indent_set(self.edit, FALSE);
-    
 }
 
 - (void)setStringValue:(NSString *)string {

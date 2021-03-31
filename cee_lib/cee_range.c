@@ -76,8 +76,49 @@ CEEList* cee_ranges_from_string(const cee_char* str)
     ranges = cee_list_reverse(ranges);
     
 exit:
-    cee_list_free_full(matches, cee_range_free);
+    if (matches)
+        cee_list_free_full(matches, cee_range_free);
+    
     return ranges;
+}
+
+CEERange cee_range_from_string(const cee_char* str)
+{
+    const cee_char* pattern = "range\\s*\\(\\s*([0-9]+)\\s*,\\s*([0-9]+)\\s*\\)";
+    CEEList* matches = NULL;
+    CEERange* match = NULL;
+    cee_int nb_match = 0;
+    cee_char* str_location = NULL;
+    cee_char* str_length = NULL;
+    CEERange range = cee_range_make(-1, 0);
+    
+    if (!str)
+        goto exit;
+    
+    matches = cee_regex_search(str, pattern, FALSE, 0, NULL);
+    nb_match = cee_list_length(matches);
+    if (!nb_match || nb_match % 3)
+        goto exit;
+    
+    match = cee_list_nth_data(matches, 1);
+    str_location = cee_strndup(&str[match->location], match->length);
+    match = cee_list_nth_data(matches, 2);
+    str_length = cee_strndup(&str[match->location], match->length);
+    
+    if (str_location && str_length)
+        range = cee_range_make(atol(str_location), atoll(str_length));
+    
+    if (str_location)
+        cee_free(str_location);
+    
+    if (str_length)
+        cee_free(str_length);
+    
+exit:
+    if (matches)
+        cee_list_free_full(matches, cee_range_free);
+    
+    return range;
 }
 
 cee_char* cee_string_from_range(CEERange* range)
@@ -147,8 +188,14 @@ cee_char* cee_string_from_ranges(CEEList* ranges)
 cee_boolean cee_location_in_range(cee_long location,
                                   CEERange range)
 {
-    return (location >= range.location) && 
+    return (location >= range.location) &&
             (location < range.location + range.length);
+}
+
+cee_boolean cee_location_followed_range(cee_long location,
+                                        CEERange range)
+{
+    return location == range.location + range.length;
 }
 
 cee_boolean cee_location_in_ranges(cee_long location,
@@ -167,6 +214,24 @@ cee_boolean cee_location_in_ranges(cee_long location,
     }
     return FALSE;
 }
+
+cee_boolean cee_location_followed_ranges(cee_long location,
+                                         CEEList* ranges)
+{
+    if (!ranges)
+        return FALSE;
+    
+    CEEList* p = ranges;
+    CEERange* range = NULL;
+    while (p) {
+        range = p->data;
+        if (cee_location_followed_range(location, *range))
+            return TRUE;
+        p = p->next;
+    }
+    return FALSE;
+}
+
 
 cee_boolean cee_location_overflow_range(cee_long location,
                                         CEERange range)
@@ -189,9 +254,12 @@ cee_boolean cee_ranges_intersect(CEERange range0,
 
 CEERange cee_range_consistent_from_discrete(CEEList* ranges)
 {
+    CEERange range = cee_range_make(-1, 0);
+    if (!ranges)
+        return range;
+    
     CEERange* range0 = cee_list_first(ranges)->data;
     CEERange* rangeN = cee_list_last(ranges)->data;
-    CEERange range = cee_range_make(-1, 0);
     if (range0 && rangeN)    
         range = cee_range_make(range0->location, 
                                rangeN->location + rangeN->length - range0->location);
@@ -238,4 +306,11 @@ exit:
         cee_list_free_full(ranges1, cee_range_free);
     
     return ret;
+}
+
+cee_pointer cee_range_list_copy(const cee_pointer src,
+                                cee_pointer data)
+{
+    CEERange* range = (CEERange*)src;
+    return cee_range_create(range->location, range->length);
 }

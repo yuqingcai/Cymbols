@@ -32,7 +32,6 @@ IB_DESIGNABLE
 - (void)textViewSelectWithCommand:(CEETextView*)textView;
 - (void)textViewHighlightTokenCluster:(CEETextView*)textView;
 - (void)textViewIgnoreTokenCluster:(CEETextView*)textView;
-- (void)textViewCreateContext:(CEETextView*)textView;
 - (void)textView:(CEETextView*)textView modifyMenu:(NSMenu**)menu;
 @end
 
@@ -51,7 +50,7 @@ IB_DESIGNABLE
 @property (strong) NSColor* textBackgroundColorHighlightOutline;
 @property CEETextLayoutAlignment aligment;
 @property (readonly) CEETextEditRef edit;
-@property (readonly) CEETextStorageRef storage;
+@property CEETextStorageRef _Nullable storage;
 @property BOOL wrap;
 @property BOOL editable;
 @property BOOL intelligence;
@@ -61,7 +60,6 @@ IB_DESIGNABLE
 @property (weak) id<CEETextViewDelegate> delegate;
 - (NSString*)textAttributesDescriptor;
 - (void)setTextAttributesDescriptor:(NSString*)descriptor;
-- (void)setStorage:(CEETextStorageRef __nullable)storage;
 - (NSPoint)viewPointFromLayoutPoint:(NSPoint)point;
 
 @end

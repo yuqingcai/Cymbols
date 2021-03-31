@@ -140,7 +140,7 @@
                                     <userDefinedRuntimeAttribute type="string" keyPath="title" value="Select"/>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
-                                    <action selector="select:" target="vZd-gK-2ZD" id="MJ1-vI-b36"/>
+                                    <action selector="jumpToSymbol:" target="vZd-gK-2ZD" id="zEd-dH-zlh"/>
                                 </connections>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="xS7-HQ-vc8" customClass="CEEButton">
@@ -536,6 +536,6 @@
     </scenes>
     <resources>
         <image name="icon_alert_32x32" width="32" height="32"/>
-        <image name="icon_database_build_16x16" width="16" height="16"/>
+        <image name="icon_database_build_16x16" width="16" height="16.5"/>
     </resources>
 </document>
