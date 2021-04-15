@@ -100,6 +100,11 @@
             kCEESourceSymbolTypeImport,
             kCEESourceSymbolTypeUsingDeclaration,
             kCEESourceSymbolTypePackage,
+            kCEESourceSymbolTypeXMLTagStart,
+            kCEESourceSymbolTypeXMLTagEnd,
+            kCEESourceSymbolTypeXMLTagName,
+            kCEESourceSymbolTypeXMLTagAttribute,
+            kCEESourceSymbolTypeCSSSelector,
             0,
         };
         

@@ -8,6 +8,7 @@
 #import "AppDelegate.h"
 #import "CEESessionSymbolViewController.h"
 #import "CEEImageTextTableCellView.h"
+#import "CEEStyleManager.h"
 
 @interface CEESessionSymbolViewController ()
 @property (strong) IBOutlet CEETitleView *titlebar;
@@ -15,7 +16,7 @@
 @property (weak) IBOutlet CEETextField *filterInput;
 @property (strong) CEESessionPort* port;
 @property (strong) CEESourceBuffer* buffer;
-@property (strong) NSString* filterCondition;
+@property (strong) NSString* filter;
 @property CEEList* symbolWrappers;
 @property (strong) NSTimer* updateSymbolsTimer;
 @property BOOL shouldUpdate;
@@ -89,7 +90,7 @@
     NSString* string = [NSString stringWithUTF8String:symbol->name];
     
     cellView.text.stringValue = string;
-    [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
+    [cellView.icon setImage:[styleManager iconFromSymbol:symbol]];
     return cellView;
 }
 
@@ -107,10 +108,11 @@
     [_session.activedPort jumpToSymbol:wrapper->symbol_ref];
 }
 
-- (void)deserialize:(NSDictionary *)dict {
+- (BOOL)deserialize:(NSDictionary *)dict {
     _port = [_session activedPort];
     _buffer = [_port activedSourceBuffer];
     [self presentSymbols];
+    return YES;
 }
 
 - (void)sourceBufferChangeStateResponse:(NSNotification*)notification {
@@ -203,13 +205,13 @@
     
     if (_buffer)
         _symbolWrappers = cee_source_symbol_wrappers_copy_with_condition(_buffer.symbols,
-                                                                         [_filterCondition UTF8String]);
+                                                                         [_filter UTF8String]);
     [_symbolTable reloadData];
 }
 
 - (void)textViewTextChanged:(CEETextView *)textView {
     if (textView == _filterInput) {
-        _filterCondition = [_filterInput.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        _filter = [_filterInput.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         [self presentSymbols];
     }
 }

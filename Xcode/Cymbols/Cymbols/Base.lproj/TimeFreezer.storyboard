@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -28,23 +29,23 @@
                 </windowController>
                 <customObject id="n9b-sI-fxO" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="24" y="-11"/>
+            <point key="canvasLocation" x="22" y="20"/>
         </scene>
         <!--Time Freezer View Controller-->
         <scene sceneID="h8L-N6-H49">
             <objects>
                 <viewController id="l5T-5P-FX3" customClass="CEETimeFreezerViewController" sceneMemberID="viewController">
                     <view key="view" id="SUn-mg-XDn" customClass="CEEWindowContentView">
-                        <rect key="frame" x="0.0" y="0.0" width="480" height="209"/>
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="289"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iwl-4A-8LX" customClass="CEEImageView">
-                                <rect key="frame" x="207" y="125" width="64" height="64"/>
+                                <rect key="frame" x="208" y="198" width="64" height="64"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_butterfly_128x128" id="Koa-zH-xfc"/>
                             </imageView>
                             <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I1J-5D-Vpd" customClass="CEEButton">
-                                <rect key="frame" x="161" y="29" width="157" height="24"/>
+                                <rect key="frame" x="161" y="96" width="157" height="24"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="title" value="Purchase Offical Version"/>
@@ -54,17 +55,31 @@
                                 </connections>
                             </customView>
                             <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BwN-gF-edQ" customClass="CEETextTitle">
-                                <rect key="frame" x="207" y="102" width="64" height="24"/>
+                                <rect key="frame" x="208" y="175" width="64" height="24"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Cymbols"/>
                                 </userDefinedRuntimeAttributes>
                             </customView>
                             <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6eo-dD-jnO" customClass="CEETextLabel">
-                                <rect key="frame" x="152" y="64" width="174" height="30"/>
+                                <rect key="frame" x="153" y="131" width="174" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Trail Version Time Freeze 5s"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                            <customView identifier="IDWelcomeViewCopyrightTextLabel" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="617-9g-WEd" customClass="CEETextLabel">
+                                <rect key="frame" x="123" y="52" width="235" height="24"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Copyright © 2021 Yu Qing Cai. All rights reserved."/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                            <customView identifier="IDWelcomeViewLinkTextLabel" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RWQ-ZI-qiv" customClass="CEETextLabel">
+                                <rect key="frame" x="183" y="29" width="115" height="24"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="https://www.cymbols.io"/>
                                 </userDefinedRuntimeAttributes>
                             </customView>
                         </subviews>
@@ -75,7 +90,7 @@
                 </viewController>
                 <customObject id="caK-5Y-LT7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="606" y="-24.5"/>
+            <point key="canvasLocation" x="633" y="10.5"/>
         </scene>
     </scenes>
     <resources>

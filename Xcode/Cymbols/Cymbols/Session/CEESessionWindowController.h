@@ -13,8 +13,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEESessionWindowController : CEEWindowController
 @property (weak) CEESession* session;
-- (NSString*)serialize;
-- (void)deserialize:(NSDictionary*)dict;
 @end
 
 NS_ASSUME_NONNULL_END

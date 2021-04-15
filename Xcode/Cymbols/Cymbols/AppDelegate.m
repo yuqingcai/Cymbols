@@ -14,15 +14,32 @@
 #import "CEETimerFreezer.h"
 
 NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
+NSNotificationName CEENotificationApplicationConfigurationChanged = @"CEENotificationApplicationConfigurationChanged";
+
+NSString* CEEWindowSettingFilePathIndexer = @"CEEWindowSettingFilePathIndexer";
+NSString* CEEProjectSettingFilePathIndexer = @"CEEProjectSettingFilePathIndexer";
+NSString* CEEConfigurationTemplateFilePathIndexer = @"CEEConfigurationTemplateFilePathIndexer";
+NSString* CEEConfigurationFilePathIndexer = @"CEEConfigurationFilePathIndexer";
+NSString* CEEWelcomeGuideFilePathIndexer = @"CEEWelcomeGuideFilePathIndexer";
+NSString* CEETemporaryDirectoryIndexer = @"CEETemporaryDirectoryIndexer";
+NSString* CEEUpdateInfoFilePathIndexer = @"CEEUpdateInfoFilePathIndexer";
+NSString* CEEApplicationInfoStringIndexer = @"CEEApplicationInfoStringIndexer";
+NSString* CEEApplicationVersionIndexer = @"CEEApplicationVersionIndexer";
+NSString* CEEBundleVersionIndexer = @"CEEBundleVersionIndexer";
+NSString* CEESerializerVersionIndexer = @"CEESerializerVersionIndexer";
+NSString* CEEStylesDirectoryIndexer = @"CEEStylesDirectoryIndexer";
+NSString* CEEApplicationVersionTagFilePathIndexer = @"CEEApplicationVersionTagFilePathIndexer";
+NSString* CEEApplicationConfigurationNameLineWrap = @"line_wrap";
+NSString* CEEApplicationConfigurationNameCaretBlinkTimeInterval = @"caret_blink_time_interval";
+NSString* CEEApplicationConfigurationNameShowLineNumber = @"show_line_number";
+NSString* CEEApplicationConfigurationNameUIStyle = @"ui_style";
+NSString* CEEApplicationConfigurationNameTextHighlightStyle = @"text_highlight_style";
 
 @interface AppDelegate()
 @property (strong) NSTimer* heartBeatTimer;
-@property (strong) NSMutableDictionary* activedConfigurations;
 @property (strong) NSMutableArray* securityBookmarks;
-#ifdef TRIAL_VERSION
 @property (strong) CEETimerFreezer* timeFreezer;
-@property (strong) CEEWindowController* welcomeWindowController;
-#endif
+@property (strong) NSString* supportDirectory;
 @end
 
 @implementation AppDelegate
@@ -37,22 +54,41 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     cee_parsers_create();
     
     [self setupSupportDirectory];
-    [self configure];
+    [self setupConfiguration];
     [self createHeartBeatTimer];
     [self createNetwork];
+    [self createStyleManager];
+    [self createSourceBufferManager];
+    [self createProjectController];
     
 #ifdef TRIAL_VERSION
     [self createTimeFreezer];
 #endif
     
-    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    [styleManager setDirectory:[_supportDirectory stringByAppendingPathComponent:@"Styles"]];
-    styleManager.userInterfaceStyleName = _activedConfigurations[@"ui_style"];
-    styleManager.textHighlightStyleName = _activedConfigurations[@"syntax_style"];
-    _sourceBufferManager = [[CEESourceBufferManager alloc] init];
-    _projectController = [[CEEProjectController alloc] init];
-    
     return self;
+}
+
+- (void)dealloc {
+    
+    cee_parsers_free();
+    
+    [self deleteHeartBeatTimer];
+}
+
+- (void)createStyleManager {
+    CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+    [styleManager setDirectory:[self propertyIndex:CEEStylesDirectoryIndexer]];
+    [styleManager setUserInterfaceStyleName:_configuration[CEEApplicationConfigurationNameUIStyle]];
+    [styleManager setTextHighlightStyleName:_configuration[CEEApplicationConfigurationNameTextHighlightStyle]];
+}
+
+- (void)createSourceBufferManager {
+    _sourceBufferManager = [[CEESourceBufferManager alloc] init];
+    [_sourceBufferManager setTemporaryDirectory:[self propertyIndex:CEETemporaryDirectoryIndexer]];
+}
+
+- (void)createProjectController {
+    _projectController = [[CEEProjectController alloc] init];
 }
 
 - (void)createHeartBeatTimer {
@@ -60,69 +96,94 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     [[NSRunLoop currentRunLoop] addTimer:_heartBeatTimer forMode:NSRunLoopCommonModes];
 }
 
-- (void)heartBeat:(NSTimer *)timer {
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationHeartBeat object:self];
-}
-
-- (void)setupSupportDirectory {
-    NSArray* searchPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    _supportDirectory = [searchPaths firstObject];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:_supportDirectory isDirectory:nil])
-        [[NSFileManager defaultManager] createDirectoryAtPath:_supportDirectory withIntermediateDirectories:YES attributes:nil error:nil];
-    
-    // copy configure file
-    NSString* fileInBundle = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Cymbols.cfg"];
-    NSString* copyFilePath = [_supportDirectory stringByAppendingPathComponent:@"Cymbols.cfg"];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:copyFilePath])
-        [[NSFileManager defaultManager] copyItemAtPath:fileInBundle toPath:copyFilePath error:nil];
-    
-    // copy welcomeGuide
-    fileInBundle = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"WelcomeGuide"];
-    copyFilePath = [_supportDirectory stringByAppendingPathComponent:@"WelcomeGuide"];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:copyFilePath isDirectory:nil])
-        [[NSFileManager defaultManager] removeItemAtPath:copyFilePath error:nil];
-    [[NSFileManager defaultManager] copyItemAtPath:fileInBundle toPath:copyFilePath error:nil];
-}
-
-- (void)createNetwork {
-    _network = [[CEENetwork alloc] init];
-}
-
-#ifdef TRIAL_VERSION
-- (void)createTimeFreezer {
-    _timeFreezer = [[CEETimerFreezer alloc] init];
-}
-#endif
-
-- (NSString*)welcomeGuidePath {
-    return [[_supportDirectory stringByAppendingPathComponent:@"WelcomeGuide"] stringByAppendingPathComponent:@"WelcomeGuide"];
-}
-
-- (void)configure {
-    NSString* filePath = [_supportDirectory stringByAppendingPathComponent:@"Cymbols.cfg"];
-    _activedConfigurations = [CEEJSONReader objectFromFile:filePath];
-    _configurations = _activedConfigurations;
-}
-
-- (NSString*)configurationFilePath {
-    return [_supportDirectory stringByAppendingPathComponent:@"Cymbols.cfg"];
-}
-
-- (void)dealloc {
-    
-    cee_parsers_free();
-    
+- (void)deleteHeartBeatTimer {
     if (_heartBeatTimer) {
         [_heartBeatTimer invalidate];
         _heartBeatTimer = nil;
     }
 }
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-#ifdef TRIAL_VERSION
-    [self trialVersionSmilingFace];
-#endif
+- (void)heartBeat:(NSTimer *)timer {
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationHeartBeat object:self];
+}
+
+- (void)setupSupportDirectory {
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSArray* searchPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+    _supportDirectory = [searchPaths firstObject];
     
+    if (![fileManager fileExistsAtPath:_supportDirectory isDirectory:nil]) {
+        [fileManager createDirectoryAtPath:_supportDirectory withIntermediateDirectories:YES attributes:nil error:nil];
+        [self createApplicationVersionTagFile];
+    }
+    else {
+        NSString* versionTagFilePath = [self propertyIndex:CEEApplicationVersionTagFilePathIndexer];
+        if (![fileManager fileExistsAtPath:versionTagFilePath]) {
+            [self emptySupportDirectory];
+            [self createApplicationVersionTagFile];
+        }
+        else {
+            NSString* tagInFile = [NSString stringWithContentsOfFile:versionTagFilePath encoding:NSUTF8StringEncoding error:nil];
+            NSString* versionString = [self propertyIndex:CEEApplicationVersionIndexer];
+            if ([tagInFile compare:versionString options:NSCaseInsensitiveSearch] != NSOrderedSame) {
+                [self emptySupportDirectory];
+                [self createApplicationVersionTagFile];
+            }
+        }
+    }
+    
+    NSArray* descriptors = @[
+        @{@"filePath":  @"Configuration.tpl",   @"override": @(YES)},   // configure template
+        @{@"filePath":  @"Cymbols.cfg",         @"override": @(NO)},    // configure file
+        //@{@"filePath":  @"WelcomeGuide",        @"override": @(YES)},   // welcome guide
+    ];
+    
+    for (NSDictionary* descriptor in descriptors) {
+        NSString* fileInBundle = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:descriptor[@"filePath"]];
+        NSString* copyFilePath = [_supportDirectory stringByAppendingPathComponent:descriptor[@"filePath"]];
+        BOOL override = [descriptor[@"override"] boolValue];
+        if (override && [[NSFileManager defaultManager] fileExistsAtPath:copyFilePath isDirectory:nil])
+            [[NSFileManager defaultManager] removeItemAtPath:copyFilePath error:nil];
+    
+        if (![[NSFileManager defaultManager] fileExistsAtPath:copyFilePath])
+            [[NSFileManager defaultManager] copyItemAtPath:fileInBundle toPath:copyFilePath error:nil];
+    }
+}
+
+- (void)emptySupportDirectory {
+    if (!_supportDirectory)
+        return;
+    
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSError* error = nil;
+    NSArray* files = [fileManager contentsOfDirectoryAtPath:_supportDirectory error:&error];
+    if(error)
+        return;
+
+    for(NSString* file in files)
+        [fileManager removeItemAtPath:[_supportDirectory stringByAppendingPathComponent:file] error:&error];
+}
+
+- (void) createApplicationVersionTagFile {
+    NSString* versionTagFilePath = [self propertyIndex:CEEApplicationVersionTagFilePathIndexer];
+    NSString* versionTag = [self propertyIndex:CEEApplicationVersionIndexer];
+    [versionTag writeToFile:versionTagFilePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+}
+
+- (void)createNetwork {
+    _network = [[CEENetwork alloc] init];
+}
+
+- (void)createTimeFreezer {
+    _timeFreezer = [[CEETimerFreezer alloc] init];
+}
+
+- (void)setupConfiguration {
+    NSString* filePath = [self propertyIndex:CEEConfigurationFilePathIndexer];
+    _configuration = [CEEJSONReader objectFromFile:filePath];
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"NSConstraintBasedLayoutVisualizeMutuallyExclusiveConstraints"];
 }
 
@@ -136,7 +197,7 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
         [project serialize];
         [project deleteAllSessions];
     }
-    [_sourceBufferManager discardUntitleSourceBuffers];
+    [_sourceBufferManager discardTemporaryFiles];
     [self stopAccessingSecurityScopedResourceWithLoggedBookmarks];
 }
 
@@ -220,30 +281,11 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     return NSTerminateNow;
 }
 
-- (NSString*)serializerVersionString {
-    return @"Serializer_1_0_0";
-}
-
-- (NSString*)infoString {
-    NSString* version = [self versionString];
-    version = [version stringByReplacingOccurrencesOfString:@"." withString:@"_"];
-    NSString* infoString = [NSString stringWithFormat:@"Application_%@", version, nil];
-    return infoString;
-}
-
-- (NSString*)versionString {
-    return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-}
-
-- (NSString*)bundleVersionString {
-    return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
-}
-
-- (void)setConfiguration:(NSString*)configuration value:(NSString*)value {
-    [_activedConfigurations setValue:value forKey:configuration];
-    _configurations = _activedConfigurations;
-    NSString* filePath = [_supportDirectory stringByAppendingPathComponent:@"Cymbols.cfg"];
-    [CEEJSONReader object:_activedConfigurations toFile:filePath];
+- (void)setConfigurationForKey:(NSString*)key value:(NSString*)value {
+    [_configuration setValue:value forKey:key];
+    NSString* filePath = [self propertyIndex:CEEConfigurationFilePathIndexer];
+    [CEEJSONReader object:_configuration toFile:filePath];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationApplicationConfigurationChanged object:self];
 }
 
 - (void)saveWindowSettingAsDefault:(CEEWindowController*)controller {
@@ -259,16 +301,8 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
     [dict setValue:@(frameSize.width) forKey:@"width"];
     [dict setValue:@(frameSize.height) forKey:@"height"];
     
-    NSString* defaultWindowSettingPath = [_supportDirectory stringByAppendingPathComponent:@"DefaultWindowSetting.cfg"];
-    [CEEJSONReader object:dict toFile:defaultWindowSettingPath];
-}
-
-- (NSString*)defaultWindowSettingPath {
-    return [_supportDirectory stringByAppendingPathComponent:@"DefaultWindowSetting.cfg"];
-}
-
-- (NSString*)defaultProjectSettingPath {
-    return [_supportDirectory stringByAppendingPathComponent:@"DefaultProjectSetting.cfg"];
+    NSString* filePath = [self propertyIndex:CEEWindowSettingFilePathIndexer];
+    [CEEJSONReader object:dict toFile:filePath];
 }
 
 - (void)startAccessingSecurityScopedResourceWithBookmark:(CEESecurityBookmark*)bookmark {
@@ -302,12 +336,50 @@ NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
         _securityBookmarks = [[NSMutableArray alloc] init];
     [_securityBookmarks addObject:bookmark];
 }
-#ifdef TRIAL_VERSION
-- (void)trialVersionSmilingFace {
-    if (!_welcomeWindowController)
-        _welcomeWindowController = [[NSStoryboard storyboardWithName:@"Welcome" bundle:nil] instantiateControllerWithIdentifier:@"IDTrialVersionWelcomeWindowController"];
-    [_welcomeWindowController showWindow:self];
-    [_welcomeWindowController.window setLevel:NSModalPanelWindowLevel];
+
+- (NSString*)propertyIndex:(NSString*)indexer {
+    if ([indexer isEqualToString:CEEApplicationInfoStringIndexer]) {
+        NSString* version = [self propertyIndex:CEEApplicationVersionIndexer];
+        return [NSString stringWithFormat:@"Cymbols-%@", version, nil];
+    }
+    else if ([indexer isEqualToString:CEEApplicationVersionIndexer]) {
+        return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+    }
+    else if ([indexer isEqualToString:CEEBundleVersionIndexer]) {
+        return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+    }
+    else if ([indexer isEqualToString:CEESerializerVersionIndexer]) {
+        return @"Serializer-1.0.0";
+    }
+    else if ([indexer isEqualToString:CEEWindowSettingFilePathIndexer]) {
+        return [_supportDirectory stringByAppendingPathComponent:@"DefaultWindowSetting.cfg"];
+    }
+    else if ([indexer isEqualToString:CEEProjectSettingFilePathIndexer]) {
+        return [_supportDirectory stringByAppendingPathComponent:@"DefaultProjectSetting.cfg"];
+    }
+    else if ([indexer isEqualToString:CEEConfigurationTemplateFilePathIndexer]) {
+        return [_supportDirectory stringByAppendingPathComponent:@"Configuration.tpl"];
+    }
+    else if ([indexer isEqualToString:CEEConfigurationFilePathIndexer]) {
+        return [_supportDirectory stringByAppendingPathComponent:@"Cymbols.cfg"];
+    }
+    else if ([indexer isEqualToString:CEEWelcomeGuideFilePathIndexer]) {
+        return [_supportDirectory stringByAppendingPathComponent:@"WelcomeGuide/WelcomeGuide.md"];
+    }
+    else if ([indexer isEqualToString:CEETemporaryDirectoryIndexer]) {
+        return [_supportDirectory stringByAppendingPathComponent:@"Backups/Untitled"];
+    }
+    else if ([indexer isEqualToString:CEEUpdateInfoFilePathIndexer]) {
+        return [_supportDirectory stringByAppendingPathComponent:@"UpdateInfo.cfg"];
+    }
+    else if ([indexer isEqualToString:CEEStylesDirectoryIndexer]) {
+        return [_supportDirectory stringByAppendingPathComponent:@"Styles"];
+    }
+    else if ([indexer isEqualToString:CEEApplicationVersionTagFilePathIndexer]) {
+        return [_supportDirectory stringByAppendingPathComponent:@"Version.tag"];
+    }
+        
+    return nil;
 }
-#endif
+
 @end

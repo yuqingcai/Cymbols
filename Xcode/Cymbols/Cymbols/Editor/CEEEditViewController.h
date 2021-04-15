@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CEEEditViewController : CEEViewController <CEETextViewDelegate>
 @property (strong) CEESessionPort* _Nullable port;
 @property (strong) CEESourceBuffer* _Nullable buffer;
+@property BOOL intelligentPickup;
 - (void)highlightRanges:(CEEList*)ranges;
 - (void)setEditable:(BOOL)flag;
 - (void)setIntelligence:(BOOL)flag;

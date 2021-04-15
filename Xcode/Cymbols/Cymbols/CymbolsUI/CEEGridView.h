@@ -30,6 +30,7 @@ typedef NS_ENUM(NSInteger, CEEGridRowViewStyle) {
 - (NSUInteger)numberOfCellViews;
 - (void)setCellViews:(NSArray*)cellViews;
 - (NSArray*)removeAllCellViews;
+- (__kindof NSView*)replaceCellViewAtClumn:(NSInteger)column withView:(NSView*)view;
 @end
 
 @interface CEEGridView : CEEView
@@ -49,7 +50,9 @@ typedef NS_ENUM(NSInteger, CEEGridRowViewStyle) {
 - (NSArray*)removeRowViewsFromTail:(NSInteger)n;
 - (NSArray*)removeAllRowViews;
 - (__kindof NSView*)cellViewInRow:(NSUInteger)row column:(NSUInteger)column;
-
+- (__kindof NSView*)replaceCellViewInRow:(NSUInteger)row column:(NSUInteger)column withView:(NSView*)view;
+- (BOOL)containCellView:(NSView*)view;
+- (void)replaceEmptyViewToCellView:(NSView*)cellView;
 @end
 
 NS_ASSUME_NONNULL_END

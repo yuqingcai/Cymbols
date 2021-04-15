@@ -64,7 +64,8 @@
     return serializing;
 }
 
-- (void)deserialize:(NSDictionary*)dict {
+- (BOOL)deserialize:(NSDictionary*)dict {
     [self.view setFrameSize:NSSizeFromString(dict[@"size"])];
+    return YES;
 }
 @end

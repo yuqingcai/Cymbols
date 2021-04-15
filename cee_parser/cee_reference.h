@@ -31,6 +31,7 @@ typedef struct _CEESourceSymbolReference {
     cee_char* name;
     CEEList* ranges;
     cee_pointer parser_ref;
+    cee_int line_no;
 } CEESourceSymbolReference;
 
 CEESourceSymbolReference* cee_source_symbol_reference_create(cee_pointer parser_ref,

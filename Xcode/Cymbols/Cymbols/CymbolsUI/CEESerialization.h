@@ -10,8 +10,9 @@
 #define CEESerialization_h
 
 @protocol CEESerialization <NSObject>
+@required
 - (NSString*)serialize;
-- (void)deserialize:(NSDictionary*)dict;
+- (BOOL)deserialize:(NSDictionary*)dict;
 @end
 
 #endif /* CEESerialization_h */

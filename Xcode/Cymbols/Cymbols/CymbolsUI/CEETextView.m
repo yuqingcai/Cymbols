@@ -14,7 +14,7 @@
 @property BOOL autoScrolling;
 @property NSTimer* autoScrollTimer;
 @property NSTimer* caretBlinkTimer;
-@property NSInteger caretBlinkFlag;
+@property BOOL caretShow;
 @end
 
 typedef enum _CEETextViewScrollDirection {
@@ -69,6 +69,7 @@ CEEPoint CEEPointFromNSPoint(NSPoint point)
 @synthesize wrap = _wrap;
 @synthesize caretBlinkTimeInterval = _caretBlinkTimeInterval;
 @synthesize storage = _storage;
+@synthesize stringValue = _stringValue;
 
 static void pasteboard_string_set(cee_pointer platform_ref, const cee_uchar* str)
 {
@@ -134,6 +135,18 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     cee_text_edit_wrap_set(self.edit, _wrap);
 }
 
+- (void)setStringValue:(NSString *)string {
+    _stringValue = string;
+    cee_text_edit_select_all(_edit);
+    cee_text_edit_delete_backward(_edit);
+    cee_text_edit_insert(_edit, (const cee_uchar*)[_stringValue UTF8String]);
+    [self setNeedsDisplay:YES];
+}
+
+- (NSString*)stringValue {
+    return [NSString stringWithUTF8String:(cee_char*)cee_text_storage_buffer_get(_storage)];
+}
+
 - (void)setWrap:(BOOL)wrap {
     _wrap = wrap;
     cee_text_edit_wrap_set(self.edit, _wrap);
@@ -144,10 +157,10 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (void)startCaretBlink {
-    _caretBlinkFlag = 0;
+    _caretShow = YES;
     if (_caretBlinkTimer)
         return;
-        
+    
     _caretBlinkTimer = [NSTimer timerWithTimeInterval:_caretBlinkTimeInterval target:self selector:@selector(blinkCaret:) userInfo:nil repeats:YES];
     [[NSRunLoop mainRunLoop] addTimer:_caretBlinkTimer forMode:NSRunLoopCommonModes];
 }
@@ -157,15 +170,32 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         return;
     [_caretBlinkTimer invalidate];
     _caretBlinkTimer = nil;
+    _caretShow = YES;
+    [self setNeedsDisplay:YES];
+}
+
+- (BOOL)caretBlinkStop {
+    return !_caretBlinkTimer;
 }
 
 - (void)setCaretBlinkTimeInterval:(CGFloat)interval {
+    [self stopCaretBlink];
     _caretBlinkTimeInterval = interval;
     [self startCaretBlink];
 }
 
 - (CGFloat )caretBlinkTimeInterval {
     return _caretBlinkTimeInterval;
+}
+
+- (void)blinkCaret:(NSTimer*)timer {
+    _caretShow = !_caretShow;
+    [self setNeedsDisplay:YES];
+}
+
+- (void)resumeBlinkCaret {
+    if ([self caretBlinkStop])
+        [self startCaretBlink];
 }
 
 - (void)setTextAttributesDescriptor:(NSString*)descriptor {
@@ -198,11 +228,6 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                                     (NSInteger)(foreColor.alphaComponent * 100)];
     NSString* descriptor = [NSString stringWithFormat:@"{ \"font\" : \"%@\", \"forecolor\" : \"%@\" }", fontAttribute, foreColorAttribute];
     return descriptor;
-}
-
-- (void)blinkCaret:(NSTimer*)timer {
-    _caretBlinkFlag ++;
-    [self setNeedsDisplay:YES];
 }
 
 - (void)setStorage:(CEETextStorageRef)storage {
@@ -319,16 +344,16 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [[self inputContext] handleEvent:event];
 }
 
+- (void)keyUp:(NSEvent*)event {
+    [self startCaretBlink];
+}
+
 - (void)insertText:(id)string replacementRange:(NSRange)replacementRange {
     cee_text_edit_insert(_edit, (const cee_uchar*)[string UTF8String]);
     [self setNeedsDisplay:YES];
     
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
-}
-
-- (void)keyUp:(NSEvent *)event {
-    [self startCaretBlink];
 }
 
 - (void)setMarkedText:(id)markedText selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange {
@@ -476,6 +501,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     
     [super mouseDown:event];
     
+    [self stopCaretBlink];
+    
     if ([self.window firstResponder] != self)
         [self.window makeFirstResponder:self];
     
@@ -581,6 +608,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                 if ((event.modifierFlags & NSEventModifierFlagCommand) &&  
                     _delegate && [_delegate respondsToSelector:@selector(textViewSelectWithCommand:)])
                     [_delegate textViewSelectWithCommand:self];
+                
+                [self startCaretBlink];
                 
                 break;
                 
@@ -791,21 +820,12 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 
 - (void)drawCaretAtUnit:(CEETextUnitRef)unit inLine:(CEETextLineRef)line {
     CEERect line_bounds;
-    BOOL draw = NO;
     CEERect caret_bounds;
     CEETextLayoutRef layout = NULL;
     cee_float line_space = 0;
     NSRect rect;
     cee_pointer platform = NULL;
-    
-    if (!(_caretBlinkFlag % 2))
-        draw = YES;
-    else
-        draw = NO;
-    
-    if (!draw)
-        return;
-    
+       
     layout = cee_text_edit_layout(_edit);
     if (!layout)
         return;
@@ -893,6 +913,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     CEETextLayoutRef layout = NULL;
     CGRect rect;
     cee_pointer platform = NULL;
+    BOOL drawString = NO;
     
     layout = cee_text_edit_layout(_edit);
     if (!layout)
@@ -903,9 +924,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     CGContextSetTextPosition(context, 0.0, 0.0);
     
     platform = cee_text_layout_platform_get(layout);
-    background_color = (CGColorRef)cee_text_platform_background_color_get(platform,
-                                                                          -1, 
-                                                                          0);
+    background_color = (CGColorRef)cee_text_platform_background_color_get(platform, -1, 0);
     if (background_color) {
         CGContextSetFillColorWithColor(context, background_color);
         rect = CGRectMake(0.0,
@@ -932,9 +951,9 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     while (p) {
         line = p->data;
         base = cee_text_line_base_get(line);
-        q = cee_text_line_units_get(line);
         line_bounds = cee_text_line_bounds_get(line);
         
+        q = cee_text_line_units_get(line);
         while (q) {
             unit = q->data;
             glyph = (CGGlyph)cee_text_unit_glyph_get(unit);
@@ -954,7 +973,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
             if ([self.window isKeyWindow] &&
                 self.window.firstResponder == self && _editable &&
                 self.styleState == kCEEViewStyleStateActived &&
-                buffer_offset == caret_offset)
+                buffer_offset == caret_offset && _caretShow)
                 [self drawCaretAtUnit:unit inLine:line];
             
             rect = CGRectMake(position.x,
@@ -968,13 +987,16 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
             }
             
             //[self drawUnitRect:rect];
-                        
+            
             if (glyph) {
                 CGContextSetFillColorWithColor(context, fore_color);
                 CGContextSetStrokeColorWithColor(context, fore_color);
                 CTFontDrawGlyphs(font, &glyph, &position, 1, context);
                 if (under_line)
                     [self drawUnderlineAtUnit:unit inLine:line];
+                
+                if (!drawString)
+                    drawString = TRUE;
             }
             q = q->next;
         }
@@ -1027,6 +1049,9 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     if (current.textBackgroundColorHighlightOutline)
         self.textBackgroundColorHighlightOutline = current.textBackgroundColorHighlightOutline;
     
+    if (current.alternativeTextColor)
+        self.alternativeTextColor = current.alternativeTextColor;
+        
     if (current.aligment) {
         if ([current.aligment caseInsensitiveCompare:@"left"] == NSOrderedSame)
             self.aligment = kCEETextLayoutAlignmentLeft;
@@ -1043,6 +1068,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveLeft:(id)sender {
@@ -1050,6 +1077,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveUp:(id)sender {
@@ -1057,6 +1086,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveDown:(id)sender {
@@ -1064,6 +1095,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveWordRight:(id)sender {
@@ -1071,6 +1104,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveWordLeft:(id)sender {
@@ -1078,6 +1113,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveForward:(id)sender {
@@ -1085,6 +1122,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveBackward:(id)sender {
@@ -1092,6 +1131,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveWordForward:(id)sender {
@@ -1099,6 +1140,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveWordBackward:(id)sender {
@@ -1106,6 +1149,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToLeftEndOfLine:(id)sender {
@@ -1113,6 +1158,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToRightEndOfLine:(id)sender {
@@ -1120,6 +1167,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToBeginningOfLine:(id)sender {
@@ -1127,6 +1176,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToEndOfLine:(id)sender {
@@ -1134,6 +1185,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToBeginningOfParagraph:(id)sender {
@@ -1141,6 +1194,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToEndOfParagraph:(id)sender {
@@ -1148,6 +1203,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToBeginningOfDocument:(id)sender {
@@ -1155,6 +1212,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToEndOfDocument:(id)sender {
@@ -1162,6 +1221,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)pageDown:(id)sender {
@@ -1169,6 +1230,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)pageUp:(id)sender {
@@ -1176,6 +1239,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewCaretSet:)])
         [_delegate textViewCaretSet:self];
+    
+    [self resumeBlinkCaret];
 }
 
 // move caret and modify selection
@@ -1184,6 +1249,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveLeftAndModifySelection:(id)sender {
@@ -1191,6 +1258,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveUpAndModifySelection:(id)sender {
@@ -1198,6 +1267,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveDownAndModifySelection:(id)sender {
@@ -1205,6 +1276,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveWordRightAndModifySelection:(id)sender {
@@ -1212,6 +1285,9 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    if ([self caretBlinkStop])
+        [self startCaretBlink];
 }
 
 - (void)moveWordLeftAndModifySelection:(id)sender {
@@ -1219,6 +1295,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToLeftEndOfLineAndModifySelection:(id)sender {
@@ -1226,6 +1304,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToRightEndOfLineAndModifySelection:(id)sender {
@@ -1233,6 +1313,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveForwardAndModifySelection:(id)sender {
@@ -1240,6 +1322,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveBackwardAndModifySelection:(id)sender {
@@ -1247,6 +1331,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveWordForwardAndModifySelection:(id)sender {
@@ -1254,6 +1340,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveWordBackwardAndModifySelection:(id)sender {
@@ -1261,6 +1349,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToBeginningOfLineAndModifySelection:(id)sender {
@@ -1268,6 +1358,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToEndOfLineAndModifySelection:(id)sender {
@@ -1275,6 +1367,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToBeginningOfParagraphAndModifySelection:(id)sender {
@@ -1282,6 +1376,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToEndOfParagraphAndModifySelection:(id)sender {
@@ -1289,6 +1385,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToBeginningOfDocumentAndModifySelection:(id)sender {
@@ -1296,6 +1394,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveToEndOfDocumentAndModifySelection:(id)sender {
@@ -1303,6 +1403,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveParagraphForwardAndModifySelection:(id)sender {
@@ -1310,6 +1412,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)moveParagraphBackwardAndModifySelection:(id)sender {
@@ -1317,6 +1421,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)pageDownAndModifySelection:(id)sender {
@@ -1324,6 +1430,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)pageUpAndModifySelection:(id)sender {
@@ -1331,6 +1439,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChangedWhenCaretMove:)])
         [_delegate textViewSelectionChangedWhenCaretMove:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)scrollLineUp:(id)sender {
@@ -1338,6 +1448,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewScrolled:)])
         [_delegate textViewScrolled:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)scrollLineDown:(id)sender {
@@ -1345,6 +1457,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewScrolled:)])
         [_delegate textViewScrolled:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)scrollToBeginningOfDocument:(id)sender {
@@ -1352,6 +1466,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewScrolled:)])
         [_delegate textViewScrolled:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)scrollToEndOfDocument:(id)sender {
@@ -1359,6 +1475,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewScrolled:)])
         [_delegate textViewScrolled:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)selectAll:(id)sender {
@@ -1366,6 +1484,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChanged:)])
         [_delegate textViewSelectionChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)selectParagraph:(id)sender {
@@ -1373,6 +1493,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChanged:)])
         [_delegate textViewSelectionChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)selectLine:(id)sender {
@@ -1380,6 +1502,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChanged:)])
         [_delegate textViewSelectionChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)selectWord:(id)sender {
@@ -1387,6 +1511,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewSelectionChanged:)])
         [_delegate textViewSelectionChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)insertTab:(id)sender {
@@ -1394,6 +1520,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)insertNewline:(id)sender {
@@ -1401,6 +1529,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)deleteForward:(id)sender {
@@ -1408,6 +1538,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)deleteBackward:(id)sender {
@@ -1415,6 +1547,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)deleteWordForward:(id)sender {
@@ -1422,6 +1556,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)deleteWordBackward:(id)sender {
@@ -1429,6 +1565,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)deleteToBeginningOfLine:(id)sender {
@@ -1436,6 +1574,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)deleteToEndOfLine:(id)sender {
@@ -1443,6 +1583,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)deleteToBeginningOfParagraph:(id)sender {
@@ -1450,6 +1592,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)deleteToEndOfParagraph:(id)sender {
@@ -1457,11 +1601,15 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)copy:(id)sender {
     cee_text_edit_copy(_edit);
     [self setNeedsDisplay:YES];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)cut:(id)sender {
@@ -1469,6 +1617,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)paste:(id)sender {
@@ -1476,6 +1626,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)undo:(id)sender {
@@ -1483,6 +1635,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)redo:(id)sender {
@@ -1490,6 +1644,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
+    
+    [self resumeBlinkCaret];
 }
 
 - (void)scrollWheel:(NSEvent *)event {
@@ -1532,6 +1688,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 
 - (void)flagsChanged:(NSEvent *)event {
     [super flagsChanged:event];
+    
     if ((event.modifierFlags & NSEventModifierFlagCommand)) {
         NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
         point = [self layoutPointFromViewPoint:point];
@@ -1543,8 +1700,9 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     }
     else {
         if (_delegate && [_delegate respondsToSelector:@selector(textViewIgnoreTokenCluster:)])
-            [_delegate textViewIgnoreTokenCluster:self];     
-    }        
+            [_delegate textViewIgnoreTokenCluster:self];
+    }
+    
 }
 
 - (NSMenu*)menuForEvent:(NSEvent *)event {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -74,11 +75,14 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="zwB-Mp-2LG" customClass="CEETextField">
-                                        <rect key="frame" x="128" y="36" width="261" height="24"/>
+                                        <rect key="frame" x="96" y="36" width="293" height="24"/>
                                         <constraints>
                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="32" id="1OT-uf-f6b"/>
                                             <constraint firstAttribute="height" constant="24" id="jgS-sa-Smt"/>
                                         </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="placeholderString" value="Find"/>
+                                        </userDefinedRuntimeAttributes>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="JwB-GE-K7G" customClass="CEETextLabel">
                                         <rect key="frame" x="395" y="36" width="174" height="24"/>
@@ -130,11 +134,14 @@
                                         </connections>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="78V-Ns-7U2" customClass="CEETextField">
-                                        <rect key="frame" x="128" y="6" width="261" height="24"/>
+                                        <rect key="frame" x="96" y="6" width="293" height="24"/>
                                         <constraints>
                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="32" id="Op5-4p-pYA"/>
                                             <constraint firstAttribute="height" constant="24" id="xaK-vF-TcH"/>
                                         </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="placeholderString" value="Replace"/>
+                                        </userDefinedRuntimeAttributes>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="doo-bE-zBW" customClass="CEEButton">
                                         <rect key="frame" x="395" y="6" width="84" height="24"/>
@@ -162,47 +169,23 @@
                                             <action selector="replaceAllSearched:" target="Ago-IL-Isb" id="LGO-Tv-FZt"/>
                                         </connections>
                                     </customView>
-                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="xMz-fk-g7n" customClass="CEETextLabel">
-                                        <rect key="frame" x="90" y="36" width="38" height="24"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="Kvn-B5-HlT"/>
-                                            <constraint firstAttribute="width" constant="38" id="a2K-WA-a6J"/>
-                                        </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Find:"/>
-                                        </userDefinedRuntimeAttributes>
-                                    </customView>
-                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="dt9-gC-ZJF" customClass="CEETextLabel">
-                                        <rect key="frame" x="70" y="6" width="58" height="24"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="6ZK-FH-mky"/>
-                                            <constraint firstAttribute="width" constant="58" id="Oec-hh-40Q"/>
-                                        </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Replace:"/>
-                                        </userDefinedRuntimeAttributes>
-                                    </customView>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstItem="78V-Ns-7U2" firstAttribute="leading" secondItem="kKt-JL-Aih" secondAttribute="leading" constant="96" id="1jn-rJ-KUG"/>
                                     <constraint firstItem="rNb-xI-fDo" firstAttribute="leading" secondItem="doo-bE-zBW" secondAttribute="trailing" constant="6" id="2SR-QD-FT2"/>
                                     <constraint firstAttribute="bottom" secondItem="doo-bE-zBW" secondAttribute="bottom" constant="6" id="69e-H8-Ay3"/>
                                     <constraint firstItem="tmX-ko-mzp" firstAttribute="leading" secondItem="kKt-JL-Aih" secondAttribute="leading" constant="6" id="CEj-56-tsm"/>
                                     <constraint firstItem="JwB-GE-K7G" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="Ews-Tj-wvc"/>
                                     <constraint firstAttribute="trailing" secondItem="JwB-GE-K7G" secondAttribute="trailing" constant="6" id="FZs-r5-in4"/>
                                     <constraint firstAttribute="bottom" secondItem="rNb-xI-fDo" secondAttribute="bottom" constant="6" id="Lr1-sO-RPo"/>
-                                    <constraint firstItem="78V-Ns-7U2" firstAttribute="leading" secondItem="dt9-gC-ZJF" secondAttribute="trailing" id="Nez-07-nFd"/>
-                                    <constraint firstItem="xMz-fk-g7n" firstAttribute="leading" secondItem="p8z-hB-UZ2" secondAttribute="trailing" id="PaS-EV-UME"/>
-                                    <constraint firstItem="zwB-Mp-2LG" firstAttribute="leading" secondItem="xMz-fk-g7n" secondAttribute="trailing" id="PfY-o0-V51"/>
+                                    <constraint firstItem="zwB-Mp-2LG" firstAttribute="leading" secondItem="p8z-hB-UZ2" secondAttribute="trailing" constant="6" id="PUu-5u-6yO"/>
                                     <constraint firstItem="p8z-hB-UZ2" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="Q44-ZH-3vb"/>
-                                    <constraint firstAttribute="bottom" secondItem="dt9-gC-ZJF" secondAttribute="bottom" constant="6" id="Q8P-jX-9uB"/>
                                     <constraint firstItem="mMC-Hd-AXe" firstAttribute="leading" secondItem="7TO-lK-xhN" secondAttribute="trailing" constant="6" id="TWC-WR-Wfi"/>
-                                    <constraint firstItem="dt9-gC-ZJF" firstAttribute="leading" secondItem="kKt-JL-Aih" secondAttribute="leading" constant="70" id="Vc3-Tt-Umd"/>
                                     <constraint firstItem="83W-b2-4kh" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="b91-Aw-soQ"/>
                                     <constraint firstItem="IBL-aU-c8f" firstAttribute="leading" secondItem="mMC-Hd-AXe" secondAttribute="trailing" constant="6" id="blo-Ya-gdD"/>
                                     <constraint firstItem="7TO-lK-xhN" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="cqs-bH-EsJ"/>
                                     <constraint firstItem="mMC-Hd-AXe" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="fK1-Xj-F9Y"/>
                                     <constraint firstItem="p8z-hB-UZ2" firstAttribute="leading" secondItem="83W-b2-4kh" secondAttribute="trailing" constant="6" id="hTP-FP-pdp"/>
-                                    <constraint firstItem="xMz-fk-g7n" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="ky3-2s-3Fq"/>
                                     <constraint firstItem="IBL-aU-c8f" firstAttribute="top" secondItem="kKt-JL-Aih" secondAttribute="top" constant="6" id="mIv-u5-cJO"/>
                                     <constraint firstItem="doo-bE-zBW" firstAttribute="leading" secondItem="78V-Ns-7U2" secondAttribute="trailing" constant="6" id="mgO-9E-v7g"/>
                                     <constraint firstAttribute="trailing" secondItem="IBL-aU-c8f" secondAttribute="trailing" constant="6" id="mho-C1-7Rh"/>

@@ -17,4 +17,8 @@
 - (void)setViewStyleConfiguration:(CEEUserInterfaceStyleConfiguration*)configuration {
     [self.view setStyleConfiguration:configuration];
 }
+
+- (void)setViewStyleConfigurationComplete {
+    [self.view setStyleConfigurationComplete];
+}
 @end

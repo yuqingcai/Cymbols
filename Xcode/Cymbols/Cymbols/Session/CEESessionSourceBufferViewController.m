@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "CEEStyleManager.h"
 #import "CEETitleView.h"
 #import "CEESessionSourceBufferViewController.h"
 #import "CEEImageTextTableCellView.h"
@@ -68,9 +69,7 @@
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEESourceBuffer* buffer = _buffers[row];
     CEEImageTextTableCellView* cellView = [_sourceBufferTable makeViewWithIdentifier:@"IDImageTextTableCellView"];
-    NSString* string = nil;
-    
-    string = [buffer.filePath lastPathComponent];
+    NSString* string = [buffer.filePath lastPathComponent];
         
     if (column == 0) {
         if ([buffer stateSet:kCEESourceBufferStateShouldSyncToFile])
@@ -79,7 +78,7 @@
             string = [string stringByAppendingString:@" (delete)"];
     }
     cellView.text.stringValue = string;
-    [cellView.icon setImage:[styleManager filetypeIconFromFileName:[buffer.filePath lastPathComponent]]];
+    [cellView.icon setImage:[styleManager iconFromFileName:[buffer.filePath lastPathComponent]]];
     return cellView;
 }
 
@@ -101,9 +100,10 @@
     [_sourceBufferTable scrollRowToVisible:[indexSet firstIndex]];
 }
 
-- (void)deserialize:(NSDictionary *)dict {
+- (BOOL)deserialize:(NSDictionary *)dict {
     [_sourceBufferTable reloadData];
     [self highlightSelectionInSourceBufferTable];
+    return YES;
 }
 
 - (IBAction)selectRow:sender {

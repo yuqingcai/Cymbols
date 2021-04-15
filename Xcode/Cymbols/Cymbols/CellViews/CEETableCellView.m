@@ -9,15 +9,12 @@
 #import "CEETableCellView.h"
 
 
-NSComparisonResult viewHorizontalPositionCompare(NSView* view0, NSView* view1, void* context) {
-    CGFloat x0 = view0.frame.origin.x;
-    CGFloat x1 = view1.frame.origin.x;
-    if (x0 < x1)
-        return NSOrderedAscending;
-    return NSOrderedDescending;
-}
-
 @implementation CEETableCellView
+
+- (void)initProperties {
+    [super initProperties];
+    _createdInTableView = NO;
+}
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [super initWithCoder:coder];
@@ -26,7 +23,6 @@ NSComparisonResult viewHorizontalPositionCompare(NSView* view0, NSView* view1, v
     
     [self setAutoresizesSubviews:YES];
     [self setTranslatesAutoresizingMaskIntoConstraints:YES];
-    
     return self;
 }
 

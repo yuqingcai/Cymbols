@@ -20,6 +20,11 @@ CEESourceSymbolReference* cee_source_symbol_reference_create(cee_pointer parser_
                                              kCEETokenStringOptionCompact);
     reference->ranges = cee_ranges_from_tokens(TOKEN_FIRST(tokens), kCEERangeListTypeSeparate);
     reference->parser_ref = parser_ref;
+    
+    if (tokens) {
+        CEEToken* first_token = TOKEN_FIRST(tokens)->data;
+        reference->line_no = first_token->line_no;
+    }
     return reference;
 }
 

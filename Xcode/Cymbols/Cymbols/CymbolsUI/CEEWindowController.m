@@ -6,6 +6,7 @@
 //  Copyright © 2018 Lazycatdesign. All rights reserved.
 //
 
+#import "CEEStyleManager.h"
 #import "CEEWindowController.h"
 #import "CEEViewController.h"
 #import "CEEView.h"
@@ -14,13 +15,19 @@
 @implementation CEEWindowController
 
 - (void)initProperties {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateContentViewStyle:) name:CEENotificationUserInterfaceStyleUpdate object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUserInterfaceStyle:) name:CEENotificationUserInterfaceStyleUpdate object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUserInterfaceStyleComplete:) name:CEENotificationUserInterfaceStyleUpdateComplete object:nil];
 }
 
-- (void)updateContentViewStyle:(NSNotification*)notification {
+- (void)updateUserInterfaceStyle:(NSNotification*)notification {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [self.contentViewController setViewStyleConfiguration:[styleManager userInterfaceConfiguration]];
 }
+
+- (void)updateUserInterfaceStyleComplete:(NSNotification*)notification {
+    [self.contentViewController setViewStyleConfigurationComplete];
+}
+
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [super initWithCoder:coder];
@@ -72,6 +79,10 @@
     return self;
 }
 
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (void)windowDidBecomeMain:(NSNotification *)notification {
     [self.contentViewController setViewStyleState:kCEEViewStyleStateActived];
 }
@@ -87,8 +98,8 @@
     return serializing;
 }
 
-- (void)deserialize:(NSDictionary*)dict {
-    
+- (BOOL)deserialize:(NSDictionary*)dict {
+    return YES;
 }
 
 @end

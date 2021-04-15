@@ -24,6 +24,14 @@
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
+    AppDelegate* delegate = [NSApp delegate];
+    CEEProject* project = _session.project;
+    if (project.sessions.count == 1) {
+        if ([project isUntitled])
+            [delegate saveWindowSettingAsDefault:[project.windowControllers lastObject]];
+        [project serialize];
+    }
+    
     [_session deleteAllPorts];
     [_session.project.sessions removeObject:_session];
 }
@@ -107,13 +115,15 @@
     return serializing;
 }
 
-- (void)deserialize:(NSDictionary*)dict {
+- (BOOL)deserialize:(NSDictionary*)dict {
     NSRect rect = NSRectFromString(dict[@"frame"]);
     [self.window setFrame:rect display:YES];
     
     if (dict[@"IDSessionView"] && 
         [[self.contentViewController class] conformsToProtocol:@protocol(CEESerialization)])
         [(id<CEESerialization>)self.contentViewController deserialize:dict[@"IDSessionView"]];
+    
+    return YES;
 }
 
 @end

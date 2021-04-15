@@ -6,6 +6,7 @@
 //  Copyright © 2020 Lazycatdesign. All rights reserved.
 //
 #import "AppDelegate.h"
+#import "CEEStyleManager.h"
 #import "CEEProjectContextViewController.h"
 #import "CEEImageTextTableCellView.h"
 #import "CEEEditViewController.h"
@@ -74,7 +75,7 @@
     AppDelegate* delegate = [NSApp delegate];
     CEESessionPort* activedPort = [[[delegate currentProject] currentSession] activedPort];
     _project = [delegate currentProject];
-    _symbolIndex = -1;
+    _selectedSymbolRef = NULL;
     [_symbolTable reloadData];
     
     if (activedPort &&
@@ -118,7 +119,7 @@
     CEESourceSymbol* symbol = cee_list_nth_data(activedPort.source_context->symbols, (cee_int)row);
     NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
     cellView.text.stringValue = [NSString stringWithFormat:@"%ld %@ - line %d", row, [filePath lastPathComponent], symbol->line_no + 1];
-    [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
+    [cellView.icon setImage:[styleManager iconFromSymbol:symbol]];
     return cellView;
 }
 
@@ -173,7 +174,8 @@
     CEESessionPort* activedPort = [[[delegate currentProject] currentSession] activedPort];
     if (!activedPort || !activedPort.source_context || !activedPort.source_context->symbols)
         return;
-    _symbolIndex = _symbolTable.selectedRow;
+    _selectedSymbolRef = cee_list_nth_data(activedPort.source_context->symbols,
+                                        (cee_int)_symbolTable.selectedRow);
     [NSApp stopModalWithCode:NSModalResponseOK];
 }
 

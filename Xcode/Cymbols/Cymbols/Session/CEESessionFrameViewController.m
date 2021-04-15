@@ -6,13 +6,14 @@
 //  Copyright © 2018年 Lazycatdesign. All rights reserved.
 //
 #import "AppDelegate.h"
+#import "CEEStyleManager.h"
 #import "CEEEditViewController.h"
 #import "CEESessionFrameViewController.h"
 #import "CEESessionFrameManager.h"
 #import "CEESourceBuffer.h"
 #import "CEETitlebarButton.h"
 #import "CEESourceHistoryViewController.h"
-#import "CEEPopupPanel.h"
+#import "CEESourceHistoryPopupPanel.h"
 #import "CEEIdentifier.h"
 
 @interface CEESessionFrameViewController()
@@ -22,24 +23,21 @@
 @property (weak) IBOutlet CEETitlebarButton *nextButton;
 @property (weak) IBOutlet CEETitlebarButton *bufferListButton;
 @property (strong) CEEEditViewController* editViewController;
-@property (strong) NSPanel* titleDetail;
-@property (strong) CEEPopupPanel* sourceHistoryPanel;
+//@property (strong) NSPanel* titleDetail;
+@property (strong) CEESourceHistoryPopupPanel* sourceHistoryPanel;
 @property (strong) CEESourceBuffer* sourceBuffer;
 @end
 
 @implementation CEESessionFrameViewController
 
+@synthesize port = _port;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self.view setTranslatesAutoresizingMaskIntoConstraints:NO];
     
-    _sourceHistoryPanel = [CEEPopupPanel windowWithContentViewController:[[NSStoryboard storyboardWithName:@"SourceHistory" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceHistoryViewController"]];
-    [_sourceHistoryPanel setStyleMask:NSWindowStyleMaskBorderless];
-    [_sourceHistoryPanel setHasShadow:YES];
-    [_sourceHistoryPanel setBackgroundColor:[NSColor clearColor]];
+    _sourceHistoryPanel = [CEESourceHistoryPopupPanel windowWithContentViewController:[[NSStoryboard storyboardWithName:@"Session" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceHistoryViewController"]];
     [_sourceHistoryPanel setDelegate:self];
-    [_sourceHistoryPanel setFloatingPanel:YES];
-    [_sourceHistoryPanel setExclusived:YES];
     
     [_titlebar setDelegate:self];
     [_titlebar setDraggingSource:(CEESessionFrameView*)self.view];
@@ -53,7 +51,12 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferReloadResponse:) name:CEENotificationSourceBufferReload object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToSourcePointResponse:) name:CEENotificationSessionPortJumpToSourcePoint object:nil];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateContentViewStyle:) name:CEENotificationUserInterfaceStyleUpdate object:nil];
+}
+
+- (void)updateContentViewStyle:(NSNotification*)notification {
+   CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
+   [_sourceHistoryPanel.contentViewController setViewStyleConfiguration:[styleManager userInterfaceConfiguration]];
 }
 
 - (BOOL)becomeFirstResponder {
@@ -86,6 +89,16 @@
         [_port moveSourceBufferReferenceNext];
 }
 
+- (void)setPort:(CEESessionPort *)port {
+    _port = port;
+    if (_sourceHistoryPanel)
+        [_sourceHistoryPanel setPort:port];
+}
+
+- (CEESessionPort*)port {
+    return _port;
+}
+
 - (void)expandTitleViewDetail:(CEETitleView *)titleView {
     //NSPoint pointInWindow = [self.view convertPoint:_titlebar.frame.origin toView:nil];
     //NSRect rect = [self.view.window convertRectToScreen:NSMakeRect(pointInWindow.x, pointInWindow.y-30, 100, 30)];
@@ -99,14 +112,23 @@
     //[_titleDetail orderOut:self];
 }
 
-- (IBAction)presentHistoryList:(id)sender {
-    NSPoint point0 = [self.titlebar convertPoint:_bufferListButton.frame.origin toView:nil];    
+- (IBAction)presentHistoryView:(id)sender {
+    NSPoint point0 = [self.titlebar convertPoint:_bufferListButton.frame.origin toView:nil];
     NSPoint point1 = [self.view convertPoint:_titlebar.frame.origin toView:nil];
+    point0 = [self.view.window convertPointToScreen:point0];
     point1 = [self.view.window convertPointToScreen:point1];
-    NSRect rect = NSMakeRect(point1.x, point1.y, 400 , 400);
-    rect.origin.y -= 400;    
-    [(CEEView*)_sourceHistoryPanel.contentView setStyleState:kCEEViewStyleStateActived];
-    [(CEESourceHistoryViewController*)_sourceHistoryPanel.contentViewController setPort:self.port];
+    
+    CGFloat width = [_sourceHistoryPanel expactedWidth];
+    CGFloat height = [_sourceHistoryPanel expactedHeight];
+    
+    if (height > point1.y) {
+        if (point1.y < [_sourceHistoryPanel minimumHeight])
+            height = [_sourceHistoryPanel minimumHeight];
+        else
+            height = point1.y;
+    }
+    NSRect rect = NSMakeRect(point0.x, point1.y, width , height);
+    rect.origin.y -= height;
     [_sourceHistoryPanel setFrame:rect display:YES];
     [_sourceHistoryPanel orderFront:nil];
 }
@@ -226,6 +248,7 @@
     CEEList* ranges = cee_ranges_from_string([jumpPoint.locations UTF8String]);
     if (ranges) {
         [_editViewController highlightRanges: ranges];
+        [_editViewController setIntelligentPickup:NO];
         cee_list_free_full(ranges, cee_range_free);
     }
 }
@@ -268,7 +291,8 @@
     return @"";
 }
 
-- (void)deserialize:(NSDictionary*)dict {
+- (BOOL)deserialize:(NSDictionary*)dict {
+    return YES;
 }
 
 - (void)mouseDown:(NSEvent *)event {

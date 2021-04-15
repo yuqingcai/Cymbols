@@ -361,6 +361,8 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
 
 @implementation CEESourceBufferManager
 
+@synthesize temporaryDirectory = _temporaryDirectory;
+
 - (instancetype)init {
     self = [super init];
     if (!self)
@@ -368,16 +370,17 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
     
     _temporaryIndex = 0;
     _buffers = [[NSMutableArray alloc] init];
-    [self createTemporyDirectory];
     return self;
 }
 
-- (void)createTemporyDirectory {
-    NSArray* searchPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    NSString* supportDirectory = [searchPaths firstObject];
-    _temporaryDirectory = [supportDirectory stringByAppendingPathComponent:@"Backups/Untitled"];
+- (void)setTemporaryDirectory:(NSString *)temporaryDirectory {
+    _temporaryDirectory = temporaryDirectory;
     if (![[NSFileManager defaultManager] fileExistsAtPath:_temporaryDirectory isDirectory:nil])
         [[NSFileManager defaultManager] createDirectoryAtPath:_temporaryDirectory withIntermediateDirectories:YES attributes:nil error:nil];
+}
+
+- (NSString*)temporaryDirectory {
+    return _temporaryDirectory;
 }
 
 - (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString*)filePath  {
@@ -408,6 +411,11 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
 }
 
 - (CEESourceBuffer*)openUntitledSourceBuffer {
+    if (!_temporaryDirectory) {
+        NSLog(@"Error: Temporary Dircetory Not Found!");
+        return nil;
+    }
+        
     NSString* fileName = [NSString stringWithFormat:@"Untitled%ld", (long)_temporaryIndex];
     NSString* filePath = [_temporaryDirectory stringByAppendingPathComponent:fileName];
     CEESourceBuffer* buffer = [[CEESourceBuffer alloc] initWithFilePath:nil];
@@ -429,6 +437,10 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
     if (!buffer.referenceCount) {
         if ([_buffers containsObject:buffer])
             [_buffers removeObject:buffer];
+        
+        // remove temporary file
+        if ([buffer stateSet:kCEESourceBufferStateFileTemporary])
+            [[NSFileManager defaultManager] removeItemAtPath:buffer.filePath error:nil];
     }
 }
 
@@ -450,7 +462,7 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
     return YES;
 }
 
-- (void)discardUntitleSourceBuffers {
+- (void)discardTemporaryFiles {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:_temporaryDirectory];
     NSString *fileName;

@@ -45,6 +45,7 @@ typedef NS_ENUM(NSInteger, CEETableViewColumnAutoresizingStyle) {
 @property NSInteger numberOfColumns;
 @property (strong) NSString* nibNameOfCellView;
 @property NSInteger firstRowIndex;
+@property BOOL selectable;
 
 - (CGFloat)rowHeight;
 - (void)scrollRowToVisible:(NSInteger)row;
@@ -61,8 +62,9 @@ typedef NS_ENUM(NSInteger, CEETableViewColumnAutoresizingStyle) {
 
 @protocol CEETableViewDelegate <NSObject>
 @required
-- (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column;
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row;
+@optional
+- (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column;
 - (CGFloat)tableView:(CEETableView *)tableView indentForRow:(NSInteger)row;
 @end
 

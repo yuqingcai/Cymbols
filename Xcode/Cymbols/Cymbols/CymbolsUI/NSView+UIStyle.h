@@ -7,10 +7,8 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "CEEStyleManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
 
 typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
     kCEEViewStyleStateActived       = 0 ,
@@ -26,10 +24,10 @@ typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
 @property (strong) NSDictionary* descriptor;
 @end
 
-
 @interface CEEUserInterfaceStyle : NSObject
 @property (strong) NSFont* font;
 @property (strong) NSColor* textColor;
+@property (strong) NSColor* alternativeTextColor;
 @property (strong) NSColor* backgroundColor;
 @property (strong) NSColor* borderColor;
 @property (strong) NSShadow* textShadow;
@@ -63,11 +61,21 @@ typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
 - (instancetype)initWithScheme:(CEEUserInterfaceStyleScheme*)scheme;
 @end
 
+@interface CEEUserInterfaceStyleConfiguration : NSObject
+@property (strong) NSDictionary* descriptor;
++ (NSColor*)createColorFromString:(NSString*)string;
++ (NSFont*)createFontFromString:(NSString*)string;
++ (NSGradient*)createGradientFromString:(NSString*)string;
++ (NSShadow*)createShadowFromString:(NSString*)string;
+- (void)configureView:(__kindof NSView*)view;
+@end
 
 @interface NSView(UIStyle)
++ (NSString*)createComponentIdentifier:(NSString*)identifier withPrefix:(NSString*)prefix;
 - (void)setStyleState:(CEEViewStyleState)state;
 - (CEEViewStyleState)styleState;
 - (void)setStyleConfiguration:(CEEUserInterfaceStyleConfiguration*)configuration;
+- (void)setStyleConfigurationComplete;
 - (CEEUserInterfaceStyleConfiguration*)styleConfiguration;
 - (NSString*)getSchemeObjectIdentifier;
 - (NSString*)getSchemeClassIdentifier;
@@ -76,5 +84,6 @@ typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
 - (void)setSytleSchemes:(NSArray*)schemes;
 
 @end
+
 
 NS_ASSUME_NONNULL_END

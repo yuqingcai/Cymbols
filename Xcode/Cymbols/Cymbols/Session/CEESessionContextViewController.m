@@ -58,10 +58,6 @@
     if (!_splitView)
         [self createSplitView];
     
-    if (!_session.activedPort.source_context ||
-        !_session.activedPort.source_context->symbols)
-        return;
-    
     [_symbolTable reloadData];
     [self selectSymbolAtIndex:0];
 }
@@ -199,16 +195,12 @@
         [_detailTitlebar setTitle:[_session.project shortFilePath:filePath]];
     else
         [_detailTitlebar setTitle:filePath];
-    [_detailTitlebar setIcon:[styleManager filetypeIconFromFilePath:filePath]];
+    [_detailTitlebar setIcon:[styleManager iconFromFilePath:filePath]];
 }
 
 - (void)sessionPortCreateSourceContextResponse:(NSNotification*)notification {
     CEESessionPort* port = notification.object;
     if (port.session != _session)
-        return;
-    
-    if (!_session.activedPort.source_context ||
-        !_session.activedPort.source_context->symbols)
         return;
     
     [_symbolTable reloadData];
@@ -239,7 +231,7 @@
         CEESourceSymbol* symbol = cee_list_nth_data(symbols, (cee_int)row);
         NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
         cellView.text.stringValue = [NSString stringWithFormat:@"%@", [filePath lastPathComponent]];
-        [cellView.icon setImage:[styleManager symbolIconFromSymbolType:symbol->type]];
+        [cellView.icon setImage:[styleManager iconFromSymbol:symbol]];
         return cellView;
     }
     else if (column == 1) {
@@ -250,7 +242,7 @@
             cellView.text.stringValue = [_session.project shortFilePath:filePath];
         else
             cellView.text.stringValue = filePath;
-        [cellView.icon setImage:[styleManager filetypeIconFromFilePath:filePath]];
+        [cellView.icon setImage:[styleManager iconFromFilePath:filePath]];
         return cellView;
     }
     return nil;
@@ -268,12 +260,15 @@
 }
 
 - (void)selectSymbolAtIndex:(NSInteger)index {
-    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:index];
-    [_symbolTable selectRowIndexes:indexSet byExtendingSelection:NO];
-    [_symbolTable scrollRowToVisible:[indexSet firstIndex]];
+    CEESourceSymbol* symbol = NULL;
     
-    CEEList* symbols = _session.activedPort.source_context->symbols;
-    CEESourceSymbol* symbol = cee_list_nth_data(symbols, (cee_int)_symbolTable.selectedRow);
+    if (_session.activedPort.source_context && _session.activedPort.source_context->symbols) {
+        NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:index];
+        [_symbolTable selectRowIndexes:indexSet byExtendingSelection:NO];
+        [_symbolTable scrollRowToVisible:[indexSet firstIndex]];
+        symbol = cee_list_nth_data(_session.activedPort.source_context->symbols, (cee_int)_symbolTable.selectedRow);
+    }
+    
     [self presentContextBufferWithSymbol:symbol];
     
 }

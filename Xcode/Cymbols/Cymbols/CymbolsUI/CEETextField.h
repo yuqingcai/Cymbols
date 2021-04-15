@@ -13,9 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 IB_DESIGNABLE
 
 @interface CEETextField : CEETextView
-
-@property (strong) IBInspectable NSString* stringValue;
-
+@property (strong) IBInspectable NSString* placeholderString;
+@property (strong) IBInspectable NSImage* placeholderIcon;
 @end
 
 NS_ASSUME_NONNULL_END

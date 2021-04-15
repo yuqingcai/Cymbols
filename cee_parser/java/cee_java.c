@@ -854,15 +854,20 @@ static void java_reference_fregment_parse(CEESourceParserRef parser_ref,
     CEEList* p = NULL;
     CEESourceSymbolReference* reference = NULL;
     CEEList* sub = NULL;
+    CEESourceReferenceType type = kCEESourceReferenceTypeUnknow;
     
     if (!fregment)
         return;
     
     p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
     while (p) {
+        
+        type = kCEESourceReferenceTypeUnknow;
+        
         if (cee_source_fregment_tokens_pattern_match(fregment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
             p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
+            type = kCEESourceReferenceTypeMember;
         }
         else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_IDENTIFIER, NULL)) {
             /** catch any other identifier */
@@ -877,7 +882,7 @@ static void java_reference_fregment_parse(CEESourceParserRef parser_ref,
                                                            (const cee_char*)filepath,
                                                            subject,
                                                            sub,
-                                                           kCEESourceReferenceTypeUnknow);
+                                                           type);
             *references = cee_list_prepend(*references, reference);
             reference = NULL;
             sub = NULL;
@@ -3355,7 +3360,7 @@ static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
     CEEList* searched_symbols = NULL;
     CEESourceFregment* current = cee_source_fregment_from_reference_get(reference);
     
-    if (!symbol)
+    if (!current || !symbol || reference->type == kCEESourceReferenceTypeMember)
         goto exit;
     
     *symbol = NULL;
@@ -3408,6 +3413,9 @@ static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* curr
     CEESourceSymbol* referenced = NULL;
     CEESourceFregment* searching = current;
     CEEList* p = NULL;
+    
+    if (!searching)
+        goto exit;
     
     /** search current fregment */
     symbols = cee_source_fregment_symbols_search_by_name(searching, name);

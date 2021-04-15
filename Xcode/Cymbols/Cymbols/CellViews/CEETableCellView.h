@@ -11,6 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CEETableCellView : CEEView
+@property BOOL createdInTableView;
 @end
 
 NS_ASSUME_NONNULL_END

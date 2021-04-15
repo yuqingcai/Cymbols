@@ -181,7 +181,7 @@
     return nil;
 }
 
-- (void)deserialize:(NSDictionary*)dict {
+- (BOOL)deserialize:(NSDictionary*)dict {
     NSArray* descroptors = dict[@"subviews"];
     NSDictionary* descriptor = nil;
     CGFloat offset = 0.0;
@@ -220,7 +220,7 @@
             [self.splitView setPosition:offset ofDividerAtIndex:i];
         }
     }
-    
+    return YES;
 }
 @end
 

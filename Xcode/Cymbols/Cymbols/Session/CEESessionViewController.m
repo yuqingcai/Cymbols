@@ -20,6 +20,7 @@
 #import "CEEProjectSearchViewController.h"
 #import "CEEUpdateInfoViewController.h"
 #import "CEETitlebarButton.h"
+#import "CEETextTitle.h"
 
 @interface CEESessionViewController ()
 
@@ -33,14 +34,15 @@
 @property (strong) NSWindowController* projectParseWindowController;
 @property (strong) NSWindowController* projectCleanWindowController;
 @property (strong) NSWindowController* projectSearchWindowController;
+@property (strong) NSWindowController* timeFreezerWindowController;
 @property (strong) NSWindowController* contextWindowController;
-@property (strong) NSWindowController* userInterfaceStyleSelectionWindowController;
-@property (strong) NSWindowController* textHighlightStyleSelectionWindowController;
 @property (strong) NSWindowController* addReferenceWindowController;
 @property (strong) NSWindowController* removeReferenceWindowController;
 @property (strong) NSWindowController* referenceRootScannerWindowController;
 @property (strong) NSWindowController* updateInfoWindowController;
+@property (strong) CEEWindowController* preferenceWindowController;
 @property (weak) IBOutlet CEEToolbarButton *messageButton;
+@property (weak) IBOutlet CEETextTitle *trialVersionTitle;
 
 @end
 
@@ -55,6 +57,10 @@
     _titleHeight = 26;
     [self checkUpdate];
     
+    [_trialVersionTitle setHidden:YES];
+#ifdef TRIAL_VERSION
+    [_trialVersionTitle setHidden:NO];
+#endif
     
     _toolbar = [[NSStoryboard storyboardWithName:@"Session" bundle:nil] instantiateControllerWithIdentifier:@"IDSessionToolbar"];
     [self addChildViewController:_toolbar];
@@ -68,10 +74,11 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPresentResponse:) name:CEENotificationSessionPresent object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferCloseResponse:) name:CEENotificationSessionPortCloseSourceBuffer object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(searchReferenceResponse:) name:CEENotificationSessionPortSearchReference object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(searchReferenceRequestResponse:) name:CEENotificationSessionPortSearchReferenceRequest object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cymbolsUpdateNotifyResponse:) name:CEENotificationCymbolsUpdateNotify object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cymbolsUpdateConfirmResponse:) name:CEENotificationCymbolsUpdateConfirm object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToSymbolRequestResponse:) name:CEENotificationSessionPortJumpToSymbolRequest object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(timeFreezeResponse:) name:CEENotificationTimeFreeze object:nil];
 }
 
 - (CGFloat)sheetOffset {
@@ -169,20 +176,6 @@
 - (IBAction)splitVertically:(id)sender {
     CEESessionSourceViewController* controller = (CEESessionSourceViewController*)[_spliter viewControllerByIdentifier:@"IDSessionSourceViewController"];
     [controller splitViewVertically];
-}
-
-- (IBAction)toggleUserInterfaceStyleSelection:(id)sender {
-    if (!_userInterfaceStyleSelectionWindowController)
-        _userInterfaceStyleSelectionWindowController = [[NSStoryboard storyboardWithName:@"Theme" bundle:nil] instantiateControllerWithIdentifier:@"IDUserInterfaceStyleSelectionWindowController"];
-    NSModalResponse responese = [NSApp runModalForWindow:_userInterfaceStyleSelectionWindowController.window];
-    [_userInterfaceStyleSelectionWindowController close];
-}
-
-- (IBAction)toggleTextHighlightStyleSelection:(id)sender {
-    if (!_textHighlightStyleSelectionWindowController)
-        _textHighlightStyleSelectionWindowController = [[NSStoryboard storyboardWithName:@"Theme" bundle:nil] instantiateControllerWithIdentifier:@"IDTextHighlightStyleSelectionWindowController"];
-    NSModalResponse responese = [NSApp runModalForWindow:_textHighlightStyleSelectionWindowController.window];
-    [_textHighlightStyleSelectionWindowController close];
 }
 
 - (IBAction)newWindow:(id)sender {
@@ -429,10 +422,10 @@
         return;
         
     AppDelegate* delegate = [NSApp delegate];
-    NSDictionary* configurations = delegate.configurations;
-    if (configurations[@"show_opened_files_list"]) {
-        NSString* configuration = configurations[@"show_opened_files_list"];
-        if ([configuration compare:@"auto" options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+    NSDictionary* configuration = delegate.configuration;
+    if (configuration[@"show_opened_files_list"]) {
+        NSString* value = configuration[@"show_opened_files_list"];
+        if ([value compare:@"auto" options:NSCaseInsensitiveSearch] == NSOrderedSame) {
             [_spliter showSourceBufferView:YES];
         }
     }
@@ -480,18 +473,69 @@
         !port.source_context || !port.source_context->symbols)
         return;
     
-    if (cee_list_length(port.source_context->symbols) == 1)
+    if (cee_list_length(port.source_context->symbols) == 1) {
         [port jumpToSymbol:cee_list_nth_data(port.source_context->symbols, 0)];
+        return;
+    }
     
     if (!_contextWindowController)
         _contextWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectContextWindowController"];
     NSModalResponse responese = [NSApp runModalForWindow:_contextWindowController.window];
     if (responese == NSModalResponseOK) {
         CEEProjectContextViewController* contextViewController = (CEEProjectContextViewController*)_contextWindowController.contentViewController;
-        if (contextViewController.symbolIndex != -1)
-            [port jumpToSymbol:cee_list_nth_data(port.source_context->symbols, (cee_uint)contextViewController.symbolIndex)];
+        if (contextViewController.selectedSymbolRef)
+            [port jumpToSymbol:contextViewController.selectedSymbolRef];
     }
     [_contextWindowController close];
+}
+
+- (void)searchReferenceRequestResponse:(NSNotification*)notification {
+    CEESessionPort* port = notification.object;
+    if (port.session != _session)
+        return;
+    
+    if (!_projectSearchWindowController)
+        _projectSearchWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSearchWindowController"];
+    
+    CEEProjectSearchViewController* projectSearchViewController = (CEEProjectSearchViewController*)_projectSearchWindowController.contentViewController;
+    
+    [projectSearchViewController setAutoStart:YES];
+    NSModalResponse responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
+    if (responese == NSModalResponseOK) {
+        if (projectSearchViewController.selectedResult)
+            [port jumpToSourcePoint:projectSearchViewController.selectedResult];
+    }
+    [projectSearchViewController setAutoStart:NO];
+    [_projectSearchWindowController close];
+}
+
+- (void)timeFreezeResponse:(NSNotification*)notification {
+    if (!_timeFreezerWindowController)
+        _timeFreezerWindowController = [[NSStoryboard storyboardWithName:@"TimeFreezer" bundle:nil] instantiateControllerWithIdentifier:@"IDTimeFreezerWindowController"];
+    if ([self.view.window isKeyWindow]) {
+        [self.view.window beginSheet:_timeFreezerWindowController.window completionHandler:(^(NSInteger result) {
+            [NSApp stopModalWithCode:result];
+        })];
+        [NSApp runModalForWindow:self.view.window];
+    }
+}
+
+- (IBAction)searchInProject:(id)sender {
+    CEESessionPort* port = _session.activedPort;
+    if (!port)
+        return;
+    
+    if (!_projectSearchWindowController)
+        _projectSearchWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSearchWindowController"];
+    
+    CEEProjectSearchViewController* projectSearchViewController = (CEEProjectSearchViewController*)_projectSearchWindowController.contentViewController;
+    
+    NSModalResponse responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
+    if (responese == NSModalResponseOK) {
+        if (projectSearchViewController.selectedResult)
+            [port jumpToSourcePoint:projectSearchViewController.selectedResult];
+    }
+    [_projectSearchWindowController close];
 }
 
 - (IBAction)buildProject:(id)sender {
@@ -526,58 +570,8 @@
     [NSApp runModalForWindow:self.view.window];
 }
 
-- (void)searchReferenceResponse:(NSNotification*)notification {
-    //CEESessionPort* port = notification.object;
-    //if (port.session != _session)
-    //    return;
-    //
-    //if (!_projectSearchWindowController)
-    //    _projectSearchWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSearchWindowController"];
-    //
-    //CEEProjectSearchViewController* projectSearchViewController = (CEEProjectSearchViewController*)_projectSearchWindowController.contentViewController;
-    //
-    //[projectSearchViewController setAutoStart:YES];
-    //NSModalResponse responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
-    //if (responese == NSModalResponseOK) {
-    //    if (projectSearchViewController.selectedResult) {
-    //        CEESearchResult* result = projectSearchViewController.selectedResult;
-    //        CEESourcePoint* sourcePoint = [[CEESourcePoint alloc] initWithFilePath:result.filePath andLocations:result.locations];
-    //        [port jumpToSourcePoint:sourcePoint];
-    //    }
-    //}
-    //[projectSearchViewController setAutoStart:NO];
-    //[_projectSearchWindowController close];
-}
-
-- (IBAction)searchInProject:(id)sender {
-    //CEESessionPort* port = _session.activedPort;
-    //if (!port)
-    //    return;
-    //
-    //if (!_projectSearchWindowController)
-    //    _projectSearchWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSearchWindowController"];
-    //
-    //CEEProjectSearchViewController* projectSearchViewController = (CEEProjectSearchViewController*)_projectSearchWindowController.contentViewController;
-    //
-    //NSModalResponse responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
-    //if (responese == NSModalResponseOK) {
-    //    if (projectSearchViewController.selectedResult) {
-    //        CEESearchResult* result = projectSearchViewController.selectedResult;
-    //        CEESourcePoint* sourcePoint = [[CEESourcePoint alloc] initWithFilePath:result.filePath andLocations:result.locations];
-    //        [port jumpToSourcePoint:sourcePoint];
-    //    }
-    //}
-    //[_projectSearchWindowController close];
-}
-
 - (IBAction)showHelp:(id)sender {
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://cymbols.io/manual.html"]];
-}
-
-- (IBAction)setPreferences:(id)sender {
-    AppDelegate* delegate = [NSApp delegate];
-    CEESessionPort* port = self.session.activedPort;
-    [port openSourceBufferWithFilePath:[delegate configurationFilePath]];
 }
 
 - (void)cymbolsUpdateNotifyResponse:(id)sender {
@@ -614,8 +608,13 @@
     })];
     [NSApp runModalForWindow:self.view.window];
     [delegate.network cleanUpdateFlag];
-
 }
 
+- (IBAction)setPreferences:(id)sender {
+    if (!_preferenceWindowController)
+        _preferenceWindowController = [[NSStoryboard storyboardWithName:@"Preferences" bundle:nil] instantiateControllerWithIdentifier:@"IDPreferencesWindowController"];
+    NSModalResponse responese = [NSApp runModalForWindow:_preferenceWindowController.window];
+    [_preferenceWindowController close];
+}
 
 @end

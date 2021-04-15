@@ -13,12 +13,14 @@
 @end
 
 @implementation CEEView
+@synthesize tag = _tag;
 
 - (void)initProperties {
     _font = [NSFont systemFontOfSize:12.0];
     _backgroundColor = [NSColor clearColor];
     _borderColor = [NSColor clearColor];
     _textColor = [NSColor textColor];
+    _alternativeTextColor = [NSColor textColor];
     _dividerColor = [NSColor clearColor];
     _textShadow = nil;
     _gradient = nil;
@@ -59,6 +61,14 @@
     return self;
 }
 
+- (NSInteger)tag {
+    return _tag;
+}
+
+- (void)setTag:(NSInteger)tag {
+    _tag = tag;
+}
+
 - (void)addMouseTraceArea {
     NSTrackingAreaOptions opt = NSTrackingActiveInActiveApp |
         NSTrackingMouseEnteredAndExited |
@@ -80,7 +90,7 @@
     return tintedImage;
 }
 
-- (void)drawRect:(NSRect)dirtyRect {    
+- (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
     
     if (self.cornerRadius > FLT_EPSILON) {

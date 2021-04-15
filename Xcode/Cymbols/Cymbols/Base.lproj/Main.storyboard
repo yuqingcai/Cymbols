@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
     </dependencies>
     <scenes>
         <!--Application-->
@@ -22,28 +22,10 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
-                                        <menuItem title="Preferences" id="y2E-OR-19J">
-                                            <menu key="submenu" title="Preferences" id="gnb-fJ-yMj">
-                                                <items>
-                                                    <menuItem title="Setting" keyEquivalent="," id="Sp1-Fe-a6Y">
-                                                        <connections>
-                                                            <action selector="setPreferences:" target="Ady-hI-5gd" id="783-vJ-nO4"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="User Interface Styles..." id="H8D-5c-Z7G">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="toggleUserInterfaceStyleSelection:" target="Ady-hI-5gd" id="fdO-ne-c9A"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Syntax Styles..." id="LWl-Lf-YVq">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="toggleTextHighlightStyleSelection:" target="Ady-hI-5gd" id="OaY-eU-L9C"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                </items>
-                                            </menu>
+                                        <menuItem title="Preferences..." keyEquivalent="," id="Sp1-Fe-a6Y">
+                                            <connections>
+                                                <action selector="setPreferences:" target="Ady-hI-5gd" id="783-vJ-nO4"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="wFC-TO-SCJ"/>
                                         <menuItem title="Services" id="NMo-om-nkz">
@@ -358,7 +340,6 @@
                     </connections>
                 </application>
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate"/>
-                <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="166" y="-82"/>

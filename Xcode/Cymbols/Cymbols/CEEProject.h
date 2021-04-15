@@ -32,7 +32,7 @@ extern NSNotificationName CEENotificationSessionPortJumpToSourcePoint;
 extern NSNotificationName CEENotificationSessionPortPresentHistory;
 extern NSNotificationName CEENotificationSessionPortSaveSourceBuffer;
 extern NSNotificationName CEENotificationSessionPortSetDescriptor;
-extern NSNotificationName CEENotificationSessionPortSearchReference;
+extern NSNotificationName CEENotificationSessionPortSearchReferenceRequest;
 
 @class CEEProject;
 @class CEESession;
@@ -85,7 +85,7 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 - (void)jumpToSymbolByCluster:(CEETokenCluster*)cluster;
 - (void)searchReferencesByCluster:(CEETokenCluster*)cluster;
 - (void)jumpToSymbol:(CEESourceSymbol*)symbol;
-- (void)jumpToReference:(CEESourceSymbolReference*)reference;
+- (void)jumpToSourcePoint:(CEESourcePoint*)sourcePoint;
 
 @end
 
@@ -113,7 +113,7 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 @property (strong, readonly) CEEProjectSearcher* searcher;
 - (void)setProperties:(CEEProjectSetting*)properties;
 - (void)serialize;
-- (void)deserialize:(NSString*)filePath;
+- (BOOL)deserialize:(NSString*)filePath;
 - (void)createSessionWithFilePaths:(NSArray*)filePaths;
 - (void)deleteAllSessions;
 - (NSArray*)getReferenceRoots;

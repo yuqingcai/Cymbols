@@ -30,6 +30,7 @@ typedef NS_ENUM(NSInteger, CEEViewRegion) {
 @property (strong) NSPointerArray* userInterfaceStyles;
 @property (strong) NSFont* font;
 @property (strong) NSColor* textColor;
+@property (strong) NSColor* alternativeTextColor;
 @property (strong) NSColor* backgroundColor;
 @property (strong) NSColor* borderColor;
 @property (strong) NSColor* dividerColor;
@@ -39,6 +40,7 @@ typedef NS_ENUM(NSInteger, CEEViewRegion) {
 @property (strong) NSString* borders;
 @property CGFloat borderWidth;
 @property CGFloat cornerRadius;
+@property IBInspectable NSInteger tag;
 
 - (void)initProperties;
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint;

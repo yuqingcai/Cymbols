@@ -34,8 +34,7 @@ CEEList* cee_regex_macos_search(const cee_char* string,
         
         for (int i = 0; i < result.numberOfRanges; i ++) {
             NSRange matchRange = [result rangeAtIndex:i];
-            CEERange* range = cee_range_create(matchRange.location,
-                                               matchRange.length);
+            CEERange* range = cee_range_create(matchRange.location, matchRange.length);
             ranges = cee_list_prepend(ranges, range);
         }
         

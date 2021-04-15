@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -67,6 +68,50 @@
                 <outlet property="text" destination="uFF-Nx-0gN" id="iHP-J8-Wu9"/>
             </connections>
             <point key="canvasLocation" x="139" y="177"/>
+        </customView>
+        <customView identifier="IDComboBoxTableCellView" id="nn9-Nr-RGG" customClass="CEEComboBoxTableCellView">
+            <rect key="frame" x="0.0" y="0.0" width="394" height="22"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView id="a2B-Wy-zJZ" customClass="CEETableCellViewTextLabel">
+                    <rect key="frame" x="3" y="1" width="202" height="20"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="text"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nWy-14-wpN" customClass="CEEComboBox">
+                    <rect key="frame" x="244" y="0.0" width="130" height="20"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                </customView>
+            </subviews>
+            <connections>
+                <outlet property="comboBox" destination="nWy-14-wpN" id="zdO-wy-gZC"/>
+                <outlet property="text" destination="a2B-Wy-zJZ" id="dSQ-j8-mQR"/>
+            </connections>
+            <point key="canvasLocation" x="139" y="275"/>
+        </customView>
+        <customView identifier="IDTextFieldTableCellView" id="dpZ-y6-jG4" customClass="CEETextFieldTableCellView">
+            <rect key="frame" x="0.0" y="0.0" width="394" height="22"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <customView id="BH8-aU-kBP" customClass="CEETableCellViewTextLabel">
+                    <rect key="frame" x="3" y="1" width="202" height="20"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="text"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
+                <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Cug-Sx-D6s" customClass="CEETextFieldSimple">
+                    <rect key="frame" x="244" y="0.0" width="130" height="21"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                </customView>
+            </subviews>
+            <connections>
+                <outlet property="input" destination="Cug-Sx-D6s" id="I6N-30-RSj"/>
+                <outlet property="text" destination="BH8-aU-kBP" id="9H7-Hc-Bcd"/>
+            </connections>
+            <point key="canvasLocation" x="139" y="372"/>
         </customView>
     </objects>
     <resources>

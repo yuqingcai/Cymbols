@@ -6,11 +6,10 @@
 //  Copyright © 2021 Lazycatdesign. All rights reserved.
 //
 
+#import "AppDelegate.h"
 #import "CEETimeFreezerViewController.h"
 #import "CEETextLabel.h"
 #import "CEETextTitle.h"
-
-#define FREEZE_SECOND 10
 
 @interface CEETimeFreezerViewController ()
 @property (strong) NSTimer* freezeTimer;
@@ -22,7 +21,7 @@
 - (void)viewDidAppear {
     [super viewDidAppear];
     
-    _freezeCounter = FREEZE_SECOND;
+    _freezeCounter = TIMER_FREEZER_FREEZE_INTERVAL;
     _freezeTimer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(freeze:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:_freezeTimer forMode:NSRunLoopCommonModes];
     
@@ -35,7 +34,7 @@
     _freezeTitle.stringValue = [NSString stringWithFormat:@"Trial Version Time Freeze %lds", _freezeCounter, nil];
     
     if (_freezeCounter == 0) {
-        _freezeCounter = FREEZE_SECOND;
+        _freezeCounter = TIMER_FREEZER_FREEZE_INTERVAL;
         
         if (_freezeTimer) {
             [_freezeTimer invalidate];

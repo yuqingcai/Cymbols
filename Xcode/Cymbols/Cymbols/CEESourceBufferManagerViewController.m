@@ -34,6 +34,7 @@
     [_sourceBufferTable setAction:@selector(selectRow:)];
     [_sourceBufferTable setAllowsMultipleSelection:YES];
     [_sourceBufferTable setEnableDrawHeader:NO];
+    [_sourceBufferTable setSelectable:NO];
     
     _editViewController =  [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
     [_editViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];

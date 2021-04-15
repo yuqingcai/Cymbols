@@ -14,6 +14,15 @@
             "forecolor" : "#E9E2DE",
             "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
+            
+        {
+            "name" : "line_number",
+            "font" : "font(\"Menlo\", 10.0, \"regular\", 5.0)",
+            "underline" : "false",
+            "strikethrough" : "false",
+            "forecolor" : "#E9E2DE",
+            "backgroundcolor" : "hsba(0, 0, 0, 0)"
+        },
         
         {
             "name" : "keyword",

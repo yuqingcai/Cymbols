@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CEESourcePoint : NSObject
 @property (strong) NSString* filePath;
 @property (strong) NSString* locations;
-- (instancetype)initWithFilePath:(NSString*)filePath andLocations:(NSString*)locations;
+@property NSInteger lineNumber;
 - (instancetype)initWithSourceSymbol:(CEESourceSymbol*)symbol;
 - (instancetype)initWithSourceSymbolReference:(CEESourceSymbolReference*)reference;
 @end

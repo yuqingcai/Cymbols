@@ -10,12 +10,12 @@
 #import "AppDelegate.h"
 #include <CoreFoundation/CoreFoundation.h>
 
-#define TRIGGER_SECOND 600
+
+NSNotificationName CEENotificationTimeFreeze = @"CEENotificationTimeFreeze";
 
 @interface CEETimerFreezer()
 @property NSInteger beatCount;
 @property NSInteger notifyInterval;
-@property (strong) NSWindowController* timeFreezerWindowController;
 @end
 
 @implementation CEETimerFreezer
@@ -24,10 +24,7 @@
     self = [super init];
     if (!self)
         return nil;
-    
-    _timeFreezerWindowController = [[NSStoryboard storyboardWithName:@"TimeFreezer" bundle:nil] instantiateControllerWithIdentifier:@"IDTimeFreezerWindowController"];
-    
-    _notifyInterval = (NSInteger)(TRIGGER_SECOND / CEE_APP_HEART_BEAT_INTERVAL);
+    _notifyInterval = (NSInteger)(TIMER_FREEZER_TRIGGER_INTERVAL / CEE_APP_HEART_BEAT_INTERVAL);
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(heartBeatResponse:) name:CEENotificationHeartBeat object:nil];
     return self;
 }
@@ -41,18 +38,7 @@
 }
 
 - (void)freeze {
-    AppDelegate* delegate = [NSApp delegate];
-    NSArray* windowControllers = [[delegate currentProject] windowControllers];
-    
-    for (NSWindowController* windowController in windowControllers) {
-        if ([windowController.window isKeyWindow]) {
-            [windowController.window beginSheet:_timeFreezerWindowController.window completionHandler:(^(NSInteger result) {
-                [NSApp stopModalWithCode:result];
-            })];
-            [NSApp runModalForWindow:windowController.window];
-            break;
-        }
-    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationTimeFreeze object:self];
 }
 
 @end

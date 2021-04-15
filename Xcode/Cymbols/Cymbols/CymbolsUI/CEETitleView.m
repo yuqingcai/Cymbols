@@ -41,7 +41,7 @@
             _iconHeight = 16.0;
         
         CGRect r0 = CGRectMake(0.0, 0.0, _iconWidth, _iconHeight);
-        CGPoint p0 = CGPointMake(_iconLeading, (dirtyRect.size.height - _iconHeight) / 2.0);
+        CGPoint p0 = CGPointMake(_iconLeading, (dirtyRect.size.height - _iconHeight) / 2.0 + 0.5);
         [_icon drawAtPoint:p0 fromRect:r0 operation:NSCompositingOperationSourceOver fraction:1.0];
     }
     
@@ -62,7 +62,7 @@
         CGFloat titleWidth = 0.0;
         
         titleWidth = dirtyRect.size.width - (_iconLeading + _iconWidth + _titleLeading + _titleTailing);
-        titleRect = NSMakeRect(_iconLeading + _iconWidth + _titleLeading, (dirtyRect.size.height / 2.0) - diff, titleWidth, dirtyRect.size.height);
+        titleRect = NSMakeRect(_iconLeading + _iconWidth + _titleLeading, (dirtyRect.size.height / 2.0) + 0.5 - diff, titleWidth, dirtyRect.size.height);
         
         if (minimalStringSize.width < titleWidth) {
             if (drawingSize.width < titleWidth) {

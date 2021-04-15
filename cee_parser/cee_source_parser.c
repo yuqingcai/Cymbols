@@ -1586,28 +1586,26 @@ static CEEList* reference_tags_create(CEESourceSymbolReference* reference,
     
     symbol = symbol_referenced_search_in_cached(reference, *caches);
     if (!symbol) {
-        if (reference->type == kCEESourceReferenceTypeUnknow) {
-            symbols = cee_source_symbols_search_by_reference(reference,
-                                                             prep_directive,
-                                                             statement,
-                                                             database);
-            if (!symbols)
-                goto exit;
-            
-            symbol = cee_source_symbol_copy(cee_list_nth_data(symbols, 0));
-            cee_list_free_full(symbols, cee_source_symbol_free);
-            
-            cache = cee_source_symbol_cached(*caches, symbol);
-            if (cache) {
-                cee_source_symbol_cache_location(cache, reference_range.location);
-                cee_source_symbol_free(symbol);
-            }
-            else {
-                cache = cee_source_symbol_cache_create(symbol, reference_range.location);
-                *caches = cee_list_prepend(*caches, cache);
-            }
-            symbol = cache->symbol;
+        symbols = cee_source_symbols_search_by_reference(reference,
+                                                         prep_directive,
+                                                         statement,
+                                                         database);
+        if (!symbols)
+            goto exit;
+        
+        symbol = cee_source_symbol_copy(cee_list_nth_data(symbols, 0));
+        cee_list_free_full(symbols, cee_source_symbol_free);
+        
+        cache = cee_source_symbol_cached(*caches, symbol);
+        if (cache) {
+            cee_source_symbol_cache_location(cache, reference_range.location);
+            cee_source_symbol_free(symbol);
         }
+        else {
+            cache = cee_source_symbol_cache_create(symbol, reference_range.location);
+            *caches = cee_list_prepend(*caches, cache);
+        }
+        symbol = cache->symbol;
     }
     
     if (symbol) {
@@ -1709,7 +1707,7 @@ CEEList* cee_source_symbols_search_by_reference(CEESourceSymbolReference* refere
     global = cee_database_symbols_search_by_name(database, reference->name);
     if (!global)
         global = cee_database_symbols_search_by_alias(database, reference->name);
-    
+        
     return source_symbols_concat(local, global);
 }
 

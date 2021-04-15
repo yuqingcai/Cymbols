@@ -23,7 +23,11 @@ typedef enum _HTMLTagType {
     kHTMLTagTypeEmpty,
 } HTMLTagType;
 
+static CEETokenType html_token_type_map[CEETokenID_MAX];
 static HTMLParser* parser_create(void);
+static void html_token_type_map_init(void);
+static cee_boolean token_type_matcher(CEEToken* token,
+                                      CEETokenType type);
 static void parser_free(cee_pointer data);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
@@ -59,11 +63,29 @@ CEESourceParserRef cee_html_parser_create(const cee_char* identifier)
 {
     CEESourceParserRef parser = cee_parser_create(identifier);
     parser->symbol_parse = symbol_parse;
+    parser->token_type_matcher = token_type_matcher;
     
     HTMLParser* html = parser_create();
     html->super = parser;
     parser->imp = html;
+    
+    html_token_type_map_init();
     return parser;
+}
+
+static void html_token_type_map_init(void)
+{
+    for (cee_int i = 0; i < CEETokenID_MAX; i ++)
+        html_token_type_map[i] = 0;
+    html_token_type_map['<'] = kCEETokenTypePunctuation;
+    html_token_type_map['>'] = kCEETokenTypePunctuation;
+    html_token_type_map['/'] = kCEETokenTypePunctuation;
+}
+
+static cee_boolean token_type_matcher(CEEToken* token,
+                                      CEETokenType type)
+{
+    return (html_token_type_map[token->identifier] & type) != 0;
 }
 
 void cee_html_parser_free(cee_pointer data)
@@ -293,6 +315,15 @@ static HTMLTagType tag_parse(CEESourceFregment* fregment)
                 if (token_is_empty_tag(token))
                     empty_element = TRUE;
             }
+            else {
+                q = cee_token_until_identifier(p, '>', FALSE);
+                q = cee_token_not_whitespace_newline_before(q);
+                if (q) {
+                    token = q->data;
+                    if (token->identifier == '/')
+                        empty_element = TRUE;
+                }
+            }
             break;
         }
         
@@ -363,13 +394,7 @@ static void html_tag_symbols_create(CEESourceFregment* fregment)
         
         token = p->data;
         
-        if (token->identifier == '<') {
-            type = kCEESourceSymbolTypeXMLTagStart;
-        }
-        else if (token->identifier == '>' || token->identifier == '/') {
-            type = kCEESourceSymbolTypeXMLTagEnd;
-        }
-        else if (token->identifier == kCEETokenID_IDENTIFIER) {
+        if (token->identifier == kCEETokenID_IDENTIFIER) {
             if (i == 0)  {
                 type = kCEESourceSymbolTypeXMLTagName;
             }
@@ -474,7 +499,6 @@ static cee_boolean token_is_comment(CEEToken* token)
 {
     return token->identifier == kCEETokenID_HTML_COMMENT;
 }
-
 
 static cee_boolean comment_token_push(HTMLParser* parser,
                                       CEEToken* push)

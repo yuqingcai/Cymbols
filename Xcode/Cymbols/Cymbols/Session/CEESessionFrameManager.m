@@ -445,8 +445,6 @@
     CEESourceBuffer* activedSourceBuffer = nil;
     
     activedSourceBuffer = [_session.activedPort activedSourceBuffer];
-    if (!activedSourceBuffer)
-        return;
     
     frame = [self createFrame];
     if (!frame)
@@ -475,10 +473,11 @@
         }
         
         if (duplicatedBuffers) {
-            if ([duplicatedBuffers containsObject:activedSourceBuffer])
+            if (activedSourceBuffer && [duplicatedBuffers containsObject:activedSourceBuffer])
                 [frame.port setActivedSourceBuffer:activedSourceBuffer];
             else
                 [frame.port setActivedSourceBuffer:duplicatedBuffers[0]];
+            
             [self selectFrame:frame];
         }
     }
@@ -624,7 +623,7 @@
     return serializing;
 }
 
-- (void)deserialize:(NSDictionary*)dict {
+- (BOOL)deserialize:(NSDictionary*)dict {
     NSArray* descriptors = dict[@"subviews"];
     NSSize size = NSSizeFromString(dict[@"size"]);
     NSView* subview = [self deserializeSubview:descriptors[0]];
@@ -633,6 +632,7 @@
     
     [self.view setFrameSize:size];
     [self connectFramesToPorts];
+    return YES;
 }
 
 - (void)connectFramesToPorts {

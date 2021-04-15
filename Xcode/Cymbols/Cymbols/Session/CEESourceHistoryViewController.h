@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CEESourceHistoryViewController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource>
 @property (weak) CEESessionPort* port;
+- (CEETableView*)tableView;
 @end
 
 NS_ASSUME_NONNULL_END

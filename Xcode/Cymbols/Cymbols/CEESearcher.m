@@ -8,11 +8,6 @@
 
 #import "CEESearcher.h"
 
-
-@implementation CEESearchResult
-
-@end
-
 @implementation CEEProjectSearcher
 @synthesize options = _options;
 
@@ -22,8 +17,10 @@
         return nil;
     
     [self setMode:kCEESearchModeReference];
+
     _target = @"";
     _filePattern = @"*";
+
     return self;
 }
 

@@ -38,7 +38,7 @@ NSNotificationName CEENotificationSessionPortJumpToSourcePoint = @"CEENotificati
 NSNotificationName CEENotificationSessionPortPresentHistory = @"CEENotificationSessionPortPresentHistory";
 NSNotificationName CEENotificationSessionPortSaveSourceBuffer = @"CEENotificationSessionPortSaveSourceBuffer";
 NSNotificationName CEENotificationSessionPortSetDescriptor = @"CEENotificationSessionPortSetDescriptor";
-NSNotificationName CEENotificationSessionPortSearchReference = @"CEENotificationSessionPortSearchReference";
+NSNotificationName CEENotificationSessionPortSearchReferenceRequest = @"CEENotificationSessionPortSearchReferenceRequest";
 
 NSArray* ExpandFilePaths(NSArray* filePaths)
 {
@@ -140,7 +140,7 @@ BOOL ContextContainSymbol(CEEList* context,
         return nil;
     
     AppDelegate* delegate = [NSApp delegate];
-    NSString* filePath = [delegate defaultProjectSettingPath];
+    NSString* filePath = [delegate propertyIndex:CEEProjectSettingFilePathIndexer];
     if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
         NSMutableDictionary* descriptor = [CEEJSONReader objectFromFile:filePath];
         CEESecurityBookmark* bookmark = [[CEESecurityBookmark alloc] init];
@@ -161,7 +161,7 @@ BOOL ContextContainSymbol(CEEList* context,
         [dict setValue:bookmark.filePath forKey:@"filePath"];
         [dict setValue:bookmark.content forKey:@"bookmarkContent"];
     }
-    NSString* filePath = [delegate defaultProjectSettingPath];
+    NSString* filePath =  [delegate propertyIndex:CEEProjectSettingFilePathIndexer];
     [CEEJSONReader object:dict toFile:filePath];
 }
 
@@ -231,6 +231,10 @@ BOOL ContextContainSymbol(CEEList* context,
 
 - (void)presentHistory:(CEESourceBufferReferenceContext*)reference {
     CEESourceBuffer* target = nil;
+    BOOL isDirectory = FALSE;
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:reference.filePath isDirectory:&isDirectory] || isDirectory)
+        return;
     
     for (NSInteger i = 0; i < _sourceBufferReferences.count; i ++) {
         if (reference == _sourceBufferReferences[i])
@@ -558,7 +562,7 @@ exit:
     return serializing;
 }
 
-- (void)deserialize:(NSDictionary*)dict {
+- (BOOL)deserialize:(NSDictionary*)dict {
     NSString* identifier = [dict allKeys][0];
     NSDictionary* descriptor = dict[identifier];
     CEESourceBufferReferenceContext* reference = nil;
@@ -595,8 +599,8 @@ exit:
             NSString* filePath = referenceDescriptor[@"filePath"];
             NSString* lineBufferOffset = referenceDescriptor[@"lineBufferOffset"];
             NSString* caretBufferOffset = referenceDescriptor[@"caretBufferOffset"];
-            
-            if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
+            BOOL isDirectory = NO;
+            if (![[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&isDirectory] || isDirectory)
                 continue;
             
             reference = [[CEESourceBufferReferenceContext alloc] initWithFilePath:filePath];
@@ -652,6 +656,7 @@ exit:
     }
     
     _identifier = identifier;
+    return YES;
 }
 
 - (void)discardReferences {    
@@ -713,8 +718,8 @@ exit:
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortJumpToSourcePoint object:self];
 }
 
-- (void)jumpToReference:(CEESourceSymbolReference*)reference {
-    _jumpPoint = [[CEESourcePoint alloc] initWithSourceSymbolReference:reference];
+- (void)jumpToSourcePoint:(CEESourcePoint*)sourcePoint {
+    _jumpPoint = sourcePoint;
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortJumpToSourcePoint object:self];
 }
 
@@ -723,14 +728,13 @@ exit:
         return;
 
     NSString* referenceString;
-    CEESourceSymbolReference* reference = NULL;
-    CEESourceSymbol* symbol = NULL;
+    
     if (cluster->type == kCEETokenClusterTypeReference) {
-        reference = (CEESourceSymbolReference*)cluster->content_ref;
+        CEESourceSymbolReference* reference = (CEESourceSymbolReference*)cluster->content_ref;
         referenceString = [NSString stringWithUTF8String:reference->name];
     }
     else if (cluster->type == kCEETokenClusterTypeSymbol) {
-        symbol = (CEESourceSymbol*)cluster->content_ref;
+        CEESourceSymbol* symbol = (CEESourceSymbol*)cluster->content_ref;
         referenceString = [NSString stringWithUTF8String:symbol->name];
     }
     referenceString = [referenceString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -738,7 +742,7 @@ exit:
     self.session.project.searcher.target = referenceString;
     
     if (![referenceString isEqualToString:@""])
-        [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSearchReference object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortSearchReferenceRequest object:self];
 }
 
 - (NSString*)descriptor {
@@ -820,7 +824,7 @@ exit:
     NSString* serializing = @"{";
     
     // version begin
-    serializing = [serializing stringByAppendingFormat:@"\"serializer\":\"%@\"", [delegate serializerVersionString]];
+    serializing = [serializing stringByAppendingFormat:@"\"serializer\":\"%@\"", [delegate propertyIndex:CEESerializerVersionIndexer]];
     // version end
     serializing = [serializing stringByAppendingFormat:@","];
     
@@ -959,11 +963,19 @@ exit:
     return session;
 }
 
-- (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError * _Nullable *)outError { 
+- (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError * _Nullable *)outError {
+    AppDelegate* delegate = [NSApp delegate];
     if ([typeName caseInsensitiveCompare:@"com.lazycatdesign.cymbols.cymd"] == NSOrderedSame) {
-        [self deserialize:[url path]];
-        if (!self.database)
+        if (![self deserialize:[url path]]) {
+            NSString* failureReasonString = [NSString stringWithFormat:@"This database can't be supported by the current version(%@) of Cymbols", [delegate propertyIndex:CEEApplicationVersionIndexer]];
+            NSDictionary* userInfo = @{
+                NSLocalizedFailureReasonErrorKey : failureReasonString,
+            };
+            NSError* error = [NSError errorWithDomain:NSCocoaErrorDomain code:EPERM userInfo:userInfo];
+            if (error)
+                *outError = error;
             return NO;
+        }
     }
     return YES;
 }
@@ -988,7 +1000,7 @@ exit:
 
 - (void)loadDefaultWindowSetting:(CEEWindowController*)windowController {
     AppDelegate* delegate = [NSApp delegate];
-    NSString* filePath = [delegate defaultWindowSettingPath];
+    NSString* filePath = [delegate propertyIndex:CEEWindowSettingFilePathIndexer];
     NSMutableDictionary* descriptor = [CEEJSONReader objectFromFile:filePath];
     if (descriptor &&
         descriptor[@"x"] && descriptor[@"y"] &&
@@ -1026,7 +1038,7 @@ exit:
         return ;
     
     // set application info in database
-    cee_database_application_info_set(_database, [[delegate infoString] UTF8String]);
+    cee_database_application_info_set(_database, [[delegate propertyIndex:CEEApplicationInfoStringIndexer] UTF8String]);
     
     // turn off journal mode, apple's sandbox forbid the journal file created
     sqlite3_exec(_database, "PRAGMA journal_mode=MEMORY;", NULL, 0, 0);
@@ -1084,7 +1096,7 @@ exit:
     }
 }
 
-- (void)deserialize:(NSString*)filePath {
+- (BOOL)deserialize:(NSString*)filePath {
     CEEList* descriptors = NULL;
     CEEList* p = NULL;
     cee_char* descriptor_string = NULL;
@@ -1093,12 +1105,15 @@ exit:
     
     _database = cee_database_open([filePath UTF8String]);
     if (!_database)
-        return;
+        return NO;
     
     // turn off journal mode, apple's sandbox forbid the journal file created
     sqlite3_exec(_database, "PRAGMA journal_mode=MEMORY;", NULL, 0, 0);
     
-    [self validateDatabase];
+    if (![self validateDatabase]) {
+        [self close];
+        return NO;
+    }
     
     // clean the init sessions
     [self deleteAllSessions];
@@ -1126,25 +1141,34 @@ exit:
         session = [self createSession];
         [session.project setCurrentSession:session];
     }
+    return YES;
 }
 
-- (void)validateDatabase {
+- (BOOL)validateDatabase {
     AppDelegate* delegate = [NSApp delegate];
+    BOOL ret = YES;
+    NSString* infoStringLogged = nil;
+    NSString* infoStringCurrent = nil;
+    
     // get application info in database
     cee_char* info_string = cee_database_application_info_get(_database);
-    if (!info_string)
-        [self createCurrentVersionDatabaseContent];
+    if (!info_string) {
+        ret = NO;
+        goto exit;
+    }
     
-    NSString* infoStringLogged = [NSString stringWithUTF8String:info_string];
-    NSString* infoStringCurrent = [delegate infoString];
-    
+    infoStringLogged = [NSString stringWithUTF8String:info_string];
+    infoStringCurrent = [delegate propertyIndex:CEEApplicationInfoStringIndexer];
     infoStringLogged = [infoStringLogged stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     infoStringCurrent = [infoStringCurrent stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    
-    if ([infoStringLogged compare:infoStringCurrent options:NSCaseInsensitiveSearch] != NSOrderedSame)
-        [self createCurrentVersionDatabaseContent];
-    
+    if ([infoStringLogged compare:infoStringCurrent options:NSCaseInsensitiveSearch] != NSOrderedSame) {
+        ret = NO;
+        goto exit;
+    }
+
+exit:
     cee_free(info_string);
+    return ret;
 }
 
 - (void)createSessionWithFilePaths:(NSArray*)filePaths {
@@ -1311,10 +1335,6 @@ exit:
 
 - (BOOL)filePathIsReferenceRoot:(NSString*)filePath {
     return cee_database_file_reference_root_is_existed(_database, [filePath UTF8String]);
-}
-
-- (void)createCurrentVersionDatabaseContent {
-    // TODO: create current version database content
 }
 
 - (void)startAccessFilePathsReferenced {
@@ -1571,5 +1591,6 @@ next:
         }
     }
 }
+
 
 @end

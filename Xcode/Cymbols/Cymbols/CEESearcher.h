@@ -22,11 +22,6 @@ typedef NS_ENUM(NSUInteger, CEESearchMode) {
     kCEESearchModeRegex = 1 << 2,
 };
 
-@interface CEESearchResult : NSObject
-@property (strong) NSString* filePath;
-@property (strong) NSString* locations;
-@end
-
 @interface CEEProjectSearcher : NSObject
 @property NSString* target;
 @property NSString* filePattern;

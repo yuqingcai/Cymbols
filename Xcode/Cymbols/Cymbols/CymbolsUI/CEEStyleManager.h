@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 extern NSNotificationName CEENotificationUserInterfaceStyleUpdate;
 extern NSNotificationName CEENotificationTextHighlightStyleUpdate;
+extern NSNotificationName CEENotificationUserInterfaceStyleUpdateComplete;
+extern NSNotificationName CEENotificationTextHighlightStyleUpdateComplete;
 
 @class CEEUserInterfaceStyleConfiguration;
 
@@ -20,29 +22,17 @@ extern NSNotificationName CEENotificationTextHighlightStyleUpdate;
 @property (strong) CEEUserInterfaceStyleConfiguration* userInterfaceConfiguration;
 @property (strong) NSString* userInterfaceStyleName;
 @property (strong) NSString* textHighlightStyleName;
-@property (strong) NSString* textHighlighDescriptor;
+@property (strong, readonly) NSString* textHighlightDescriptor;
 + (CEEStyleManager*)defaultStyleManager;
 - (void)setDirectory:(NSString*)directory;
-- (NSArray*)userInterfaceStylePaths;
-- (NSArray*)textHighlightStylePaths;
 - (NSArray*)userInterfaceStyleNames;
 - (NSArray*)textHighlightStyleNames;
-- (void)setUserInterfaceStyle:(NSDictionary*)descriptor;
-- (void)setTextHighlightDescriptor:(NSString*)descriptor;
-- (NSImage*)filetypeIconFromFileName:(NSString*)fileName;
-- (NSImage*)filetypeIconFromFilePath:(NSString*)filePath;
-- (NSImage*)symbolIconFromSymbolType:(CEESourceSymbolType)type;
+- (NSImage*)iconFromFileName:(NSString*)fileName;
+- (NSImage*)iconFromFilePath:(NSString*)filePath;
+- (NSImage*)iconFromSymbol:(CEESourceSymbol*)symbol;
 - (NSImage*)iconFromName:(NSString*)name;
+
 @end
 
-
-@interface CEEUserInterfaceStyleConfiguration : NSObject
-@property (strong) NSDictionary* descriptor;
-+ (NSColor*)createColorFromString:(NSString*)string;
-+ (NSFont*)createFontFromString:(NSString*)string;
-+ (NSGradient*)createGradientFromString:(NSString*)string;
-+ (NSShadow*)createShadowFromString:(NSString*)string;
-- (void)configureView:(__kindof NSView*)view;
-@end
 
 NS_ASSUME_NONNULL_END

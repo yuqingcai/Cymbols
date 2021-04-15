@@ -23,7 +23,11 @@ typedef enum _XMLTagType {
     kXMLTagTypeEmpty,
 } XMLTagType;
 
+static CEETokenType xml_token_type_map[CEETokenID_MAX];
 static XMLParser* parser_create(void);
+static void xml_token_type_map_init(void);
+static cee_boolean token_type_matcher(CEEToken* token,
+                                      CEETokenType type);
 static void parser_free(cee_pointer data);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
@@ -55,11 +59,29 @@ CEESourceParserRef cee_xml_parser_create(const cee_char* identifier)
 {
     CEESourceParserRef parser = cee_parser_create(identifier);
     parser->symbol_parse = symbol_parse;
+    parser->token_type_matcher = token_type_matcher;
     
     XMLParser* xml = parser_create();
     xml->super = parser;
     parser->imp = xml;
+    
+    xml_token_type_map_init();
     return parser;
+}
+
+static void xml_token_type_map_init(void)
+{
+    for (cee_int i = 0; i < CEETokenID_MAX; i ++)
+        xml_token_type_map[i] = 0;
+    xml_token_type_map['<'] = kCEETokenTypePunctuation;
+    xml_token_type_map['>'] = kCEETokenTypePunctuation;
+    xml_token_type_map['/'] = kCEETokenTypePunctuation;
+}
+
+static cee_boolean token_type_matcher(CEEToken* token,
+                                      CEETokenType type)
+{
+    return (xml_token_type_map[token->identifier] & type) != 0;
 }
 
 void cee_xml_parser_free(cee_pointer data)
@@ -323,13 +345,7 @@ static void xml_tag_symbols_create(CEESourceFregment* fregment)
         
         token = p->data;
         
-        if (token->identifier == '<') {
-            type = kCEESourceSymbolTypeXMLTagStart;
-        }
-        else if (token->identifier == '>' || token->identifier == '/') {
-            type = kCEESourceSymbolTypeXMLTagEnd;
-        }
-        else if (token->identifier == kCEETokenID_IDENTIFIER) {
+        if (token->identifier == kCEETokenID_IDENTIFIER) {
             if (i == 0)
                 type = kCEESourceSymbolTypeXMLTagName;
             else

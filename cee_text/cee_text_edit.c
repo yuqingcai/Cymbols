@@ -1078,6 +1078,8 @@ void cee_text_edit_caret_move_left_selection(CEETextEditRef edit)
                                            &buffer_offset,
                                            NULL,
                                            NULL);
+    if (buffer_offset == -1)
+        return;
 
     caret_buffer_offset_set(edit, buffer_offset, TRUE);
     selection_complete(edit, buffer_offset);
@@ -1720,16 +1722,17 @@ void cee_text_edit_delete_to_paragraph_beginning(CEETextEditRef edit)
         if (prev == -1)
             return;
         
-        if (prev == edit->caret.buffer_offset) {
+        if (prev == edit->caret.buffer_offset)
             cee_text_storage_buffer_character_prev(storage,
                                                    edit->caret.buffer_offset,
                                                    &prev,
                                                    NULL,
                                                    &length);
-        }
-        else {
+        else
             length = edit->caret.buffer_offset - prev;
-        }
+            
+        if (prev == -1)
+            prev = 0;
         
         state0 = text_edit_state_create(edit);
         range0 = cee_range_make(prev, length);

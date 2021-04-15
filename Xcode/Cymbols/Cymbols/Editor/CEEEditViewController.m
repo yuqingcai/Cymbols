@@ -86,4 +86,5 @@
 - (void)setCaretBufferOffset:(NSInteger)offset {
     
 }
+
 @end

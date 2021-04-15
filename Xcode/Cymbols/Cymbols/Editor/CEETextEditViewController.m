@@ -47,12 +47,15 @@
 
 @implementation CEETextEditViewController
 
+@synthesize showLineNumber = _showLineNumber;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     CEEStyleManager* manager = [CEEStyleManager defaultStyleManager];
-    NSString* textHighightDescriptor = [manager textHighlighDescriptor];
+    NSString* textHighightDescriptor = [manager textHighlightDescriptor];
     
+    self.intelligentPickup = YES;
     _searchingText = NO;
     _searchCaseSensitive = NO;
     _searchRegex = NO;
@@ -62,6 +65,8 @@
     
     [_textView setDelegate:self];
     [_textView setTextAttributesDescriptor:textHighightDescriptor];
+    
+    [_lineNumberView setTextAttributesDescriptor:textHighightDescriptor];
     
     [_searchInput setDelegate:self];
     [_replaceInput setDelegate:self];
@@ -80,34 +85,47 @@
     [_horizontalScroller setTarget:self];
     [_horizontalScroller setAction:@selector(horizontalScroll:)];
     
-    [self configure];
+    [self setupConfiguration];
     
     [self showTextSearch:NO];
-    [self showLineNumber:_showLineNumber];
+    [self setShowLineNumber:_showLineNumber];
+        
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textHighlightStyleResponse:) name:CEENotificationTextHighlightStyleUpdate object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textHighlightStyleResponse:) name:CEENotificationTextHighlightStyleUpdate object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationConfigurationChanged:) name:CEENotificationApplicationConfigurationChanged object:nil];
 }
 
-- (void)configure {
+- (void)applicationConfigurationChanged:(NSNotification*)notification {
+    [self setupConfiguration];
+}
+
+- (void)setupConfiguration {
     AppDelegate* delegate = [NSApp delegate];
-    NSDictionary* configurations = [delegate configurations];
+    NSDictionary* configuration = [delegate configuration];
     
-    if (configurations[@"line_wrap"])
-        [self setWrap:[configurations[@"line_wrap"] boolValue]];
+    if (configuration[CEEApplicationConfigurationNameLineWrap])
+        [self setWrap:[configuration[CEEApplicationConfigurationNameLineWrap] boolValue]];
     else
         [self setWrap:NO];
     
-    if (configurations[@"caret_blink_time_interval"])
-        _textView.caretBlinkTimeInterval = [configurations[@"caret_blink_time_interval"] floatValue];
-    else
+    if (configuration[CEEApplicationConfigurationNameCaretBlinkTimeInterval]) {
+        float value = [configuration[CEEApplicationConfigurationNameCaretBlinkTimeInterval] floatValue];
+        if (value < 0.1 || value > 100)
+            _textView.caretBlinkTimeInterval = 0.5;
+        else
+            _textView.caretBlinkTimeInterval = value;
+        
+    }
+    else {
         _textView.caretBlinkTimeInterval = 0.5;
+    }
     
-    if (configurations[@"show_line_number"])
-        _showLineNumber = [configurations[@"show_line_number"] boolValue];
+    if (configuration[CEEApplicationConfigurationNameShowLineNumber])
+        self.showLineNumber = [configuration[CEEApplicationConfigurationNameShowLineNumber] boolValue];
     else
-        _showLineNumber = YES;
+        self.showLineNumber = YES;
 }
 
 - (void)setEditable:(BOOL)flag {
@@ -124,6 +142,9 @@
         [self showHorizontalScroller:NO];
     else
         [self showHorizontalScroller:YES];
+    
+    [self updateReferences];
+    [self styledText];
 }
 
 - (void)viewDidAppear {
@@ -164,12 +185,17 @@
     [self.view updateConstraints];
 }
 
-- (void)showLineNumber:(BOOL)shown {
+- (void)setShowLineNumber:(BOOL)shown {
+    _showLineNumber = shown;
     if (shown)
         _lineNumberViewWidth.constant = 60.0;
     else
         _lineNumberViewWidth.constant = 0.0;  
     [self.view updateConstraints];
+}
+
+- (BOOL)showLineNumber {
+    return _showLineNumber;
 }
 
 - (void)showHorizontalScroller:(BOOL)shown {
@@ -443,8 +469,9 @@
 
 - (void)textHighlightStyleResponse:(NSNotification*)notification {
     CEEStyleManager* manager = [CEEStyleManager defaultStyleManager];
-    NSString* descriptor = [manager textHighlighDescriptor];
+    NSString* descriptor = [manager textHighlightDescriptor];
     [_textView setTextAttributesDescriptor:descriptor];
+    [_lineNumberView setTextAttributesDescriptor:descriptor];
 }
 
 - (BOOL)filePathIsSource:(NSString*)filePath {
@@ -770,6 +797,9 @@
     if (!textView.intelligence || textView != _textView)
         return;
     
+    if (!self.intelligentPickup)
+        return;
+    
     CEEList* ranges_ref = NULL;
     cee_long offset = cee_text_edit_cursor_buffer_offset_get(_textView.edit);
     CEETokenCluster* cluster =
@@ -802,10 +832,13 @@
 - (void)textViewIgnoreTokenCluster:(CEETextView*)textView {
     if (!textView.intelligence || textView != _textView)
         return;
+    
+    if (!self.intelligentPickup)
+        return;
+    
     cee_text_edit_highlight_set(_textView.edit, NULL);
     [_textView setNeedsDisplay:YES];
 }
-
 
 - (void)textView:(CEETextView*)textView modifyMenu:(NSMenu**)menu {
     NSMenu* modify = *menu;
@@ -851,6 +884,12 @@
     [self updateReferences];
     [self adjustScrollers];
     [self styledText];
+}
+
+- (void)mouseDown:(NSEvent *)event {
+    [super mouseDown:event];
+    if (!self.intelligentPickup)
+        self.intelligentPickup = YES;
 }
 
 @end

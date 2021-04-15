@@ -17,9 +17,9 @@
 
 @interface CEESessionFileReferenceViewController ()
 @property (strong) IBOutlet CEETitleView *titlebar;
-@property (strong) CEETableView *filePathTable;
-@property (strong) CEETreeView *filePathTree;
-@property (strong) NSString* filterCondition;
+@property (strong) CEETableView* filePathTable;
+@property (strong) CEETreeView* filePathTree;
+@property (strong) NSString* filter;
 @property (strong) NSArray* filePaths;
 @property (weak) IBOutlet CEETextField *filterInput;
 @property (strong) NSWindowController* createFileAtPathWindowController;
@@ -226,17 +226,24 @@
 
 - (void)textViewTextChanged:(CEETextView *)textView {
     if (textView == _filterInput) {
-        _filterCondition = _filterInput.stringValue;
-        if (!_filterCondition || [_filterCondition isEqual:@""]) {
+        _filter = _filterInput.stringValue;
+        
+        if (!_filter) {
             _filePaths = [_session filePathsFilter:nil];
             [self showfilePathTree];
             [_filePathTree reloadData];
         }
         else {
-            [self showfilePathTable];
-            _filterCondition = [_filterCondition stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            _filePaths = [_session filePathsFilter:_filterCondition];
-            [_filePathTable reloadData];
+            _filter = [_filter stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            if ([_filter isEqual:@""]) {
+                [self showfilePathTree];
+                [_filePathTree reloadData];
+            }
+            else {
+                [self showfilePathTable];
+                _filePaths = [_session filePathsFilter:_filter];
+                [_filePathTable reloadData];
+            }
         }
     }
 }
@@ -467,7 +474,7 @@
     }
     else {
         cellView.text.stringValue = string;
-        [cellView.icon setImage:[styleManager filetypeIconFromFileName:[filePath lastPathComponent]]];
+        [cellView.icon setImage:[styleManager iconFromFileName:[filePath lastPathComponent]]];
     }
     
     return cellView;
@@ -609,7 +616,7 @@
             if (!isReferenced)
                 string = [string stringByAppendingString:@" (UnReferenced)"];
             cellView.text.stringValue = string;
-            [cellView.icon setImage:[styleManager filetypeIconFromFileName:[filePath lastPathComponent]]];
+            [cellView.icon setImage:[styleManager iconFromFileName:[filePath lastPathComponent]]];
         }
     }
     return cellView;
@@ -640,7 +647,7 @@
 }
 
 
-- (void)deserialize:(NSDictionary *)dict {
+- (BOOL)deserialize:(NSDictionary *)dict {
     NSArray* subviews = dict[@"subviews"];
     NSDictionary* filePathTreeDescriptor = nil;
     
@@ -657,12 +664,13 @@
         [_filePathTree setFirstRowIndex:firstRowIndex];
     }
     else {
-        _filePaths = [_session filePathsFilter:_filterCondition];
+        _filePaths = [_session filePathsFilter:_filter];
         if (_filePathTable.superview)
             [_filePathTable reloadData];
         else if (_filePathTree.superview)
             [_filePathTree reloadData];
     }
+    return YES;
 }
 
 - (void)addReferenceResponse:(NSNotification*)notification {
@@ -723,7 +731,7 @@
 }
 
 - (void)presentPaths {
-    _filePaths = [_session filePathsFilter:_filterCondition];
+    _filePaths = [_session filePathsFilter:_filter];
     [_filePathTable reloadData];
     [_filePathTree reloadData];
 }

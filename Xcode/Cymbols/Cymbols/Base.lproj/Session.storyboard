@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -73,6 +74,16 @@
                                     <action selector="update:" target="5gI-5U-AMq" id="CNJ-80-aBW"/>
                                 </connections>
                             </customView>
+                            <customView identifier="IDTextTitleTrial" translatesAutoresizingMaskIntoConstraints="NO" id="scA-Gn-Y7x" customClass="CEETextTitle">
+                                <rect key="frame" x="65" y="279" width="88" height="18"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="88" id="eQQ-dO-cHR"/>
+                                    <constraint firstAttribute="height" constant="18" id="gKz-BJ-ejt"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Trial Version"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="W1l-Ce-q5b" secondAttribute="bottom" id="0NP-PX-IGD"/>
@@ -81,11 +92,13 @@
                             <constraint firstItem="ObT-tL-nor" firstAttribute="leading" secondItem="1V1-8a-C38" secondAttribute="trailing" constant="4" id="Ch7-yV-hpi"/>
                             <constraint firstAttribute="trailing" secondItem="ObT-tL-nor" secondAttribute="trailing" constant="6" id="Cid-ym-emH"/>
                             <constraint firstAttribute="trailing" secondItem="0Ah-4l-1PM" secondAttribute="trailing" id="Cyq-Gn-u0b"/>
+                            <constraint firstItem="scA-Gn-Y7x" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" constant="3" id="TSH-ad-cSc"/>
                             <constraint firstItem="1V1-8a-C38" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" id="fqT-47-Teb"/>
                             <constraint firstItem="W1l-Ce-q5b" firstAttribute="top" secondItem="0Ah-4l-1PM" secondAttribute="bottom" id="p0Z-C0-8qr"/>
                             <constraint firstItem="0Ah-4l-1PM" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" id="qvW-mx-INQ"/>
                             <constraint firstAttribute="trailing" secondItem="W1l-Ce-q5b" secondAttribute="trailing" id="t3K-ne-xdw"/>
                             <constraint firstItem="ObT-tL-nor" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" id="yOF-8b-uQh"/>
+                            <constraint firstItem="scA-Gn-Y7x" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" constant="65" id="yxP-E6-JFg"/>
                         </constraints>
                     </view>
                     <connections>
@@ -93,6 +106,7 @@
                         <outlet property="messageButton" destination="1V1-8a-C38" id="LJJ-Ev-eYM"/>
                         <outlet property="sessionView" destination="ERx-hH-rdd" id="V96-BY-J64"/>
                         <outlet property="statusBar" destination="W1l-Ce-q5b" id="GoT-TU-iwd"/>
+                        <outlet property="trialVersionTitle" destination="scA-Gn-Y7x" id="FfH-M5-soG"/>
                     </connections>
                 </viewController>
                 <customObject id="2Tp-Fl-jBw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -574,10 +588,13 @@
                                 <rect key="frame" x="0.0" y="29" width="250" height="246"/>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="4Zw-sT-2k4" customClass="CEETextField">
-                                <rect key="frame" x="3" y="3" width="244" height="23"/>
+                                <rect key="frame" x="3" y="3" width="244" height="24"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="23" id="NER-mE-eA8"/>
+                                    <constraint firstAttribute="height" constant="24" id="NER-mE-eA8"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="placeholderString" value="Filter"/>
+                                </userDefinedRuntimeAttributes>
                             </customView>
                         </subviews>
                         <constraints>
@@ -588,7 +605,7 @@
                             <constraint firstItem="f0H-B1-fa4" firstAttribute="top" secondItem="sIe-SJ-XFJ" secondAttribute="top" id="Ghg-2H-D6l"/>
                             <constraint firstItem="4Zw-sT-2k4" firstAttribute="leading" secondItem="sIe-SJ-XFJ" secondAttribute="leading" constant="3" id="RQs-AO-g3A"/>
                             <constraint firstItem="f0H-B1-fa4" firstAttribute="leading" secondItem="sIe-SJ-XFJ" secondAttribute="leading" id="Szn-og-uA9"/>
-                            <constraint firstItem="4Zw-sT-2k4" firstAttribute="top" secondItem="CTk-DY-dd2" secondAttribute="bottom" constant="3" id="jke-io-2FD"/>
+                            <constraint firstItem="4Zw-sT-2k4" firstAttribute="top" secondItem="CTk-DY-dd2" secondAttribute="bottom" constant="2" id="jke-io-2FD"/>
                             <constraint firstAttribute="trailing" secondItem="4Zw-sT-2k4" secondAttribute="trailing" constant="3" id="vkN-7j-e5Q"/>
                             <constraint firstAttribute="bottom" secondItem="4Zw-sT-2k4" secondAttribute="bottom" constant="3" id="wme-vX-5un"/>
                         </constraints>
@@ -644,10 +661,13 @@
                                 </constraints>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="jFl-ek-Wio" customClass="CEETextField">
-                                <rect key="frame" x="3" y="3" width="244" height="23"/>
+                                <rect key="frame" x="3" y="3" width="244" height="24"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="23" id="N1d-Uo-xgN"/>
+                                    <constraint firstAttribute="height" constant="24" id="N1d-Uo-xgN"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="placeholderString" value="Filter"/>
+                                </userDefinedRuntimeAttributes>
                             </customView>
                         </subviews>
                         <constraints>
@@ -993,7 +1013,7 @@
                                             <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_sand_clock_16x16"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
-                                            <action selector="presentHistoryList:" target="FWh-fC-5af" id="35M-h9-nta"/>
+                                            <action selector="presentHistoryView:" target="FWh-fC-5af" id="D3X-Fi-vnS"/>
                                         </connections>
                                     </customView>
                                 </subviews>
@@ -1027,6 +1047,33 @@
                 </viewController>
             </objects>
             <point key="canvasLocation" x="-232" y="2877"/>
+        </scene>
+        <!--Source History View Controller-->
+        <scene sceneID="im6-Ib-xOw">
+            <objects>
+                <viewController storyboardIdentifier="IDSourceHistoryViewController" id="Wgn-XG-Ke7" customClass="CEESourceHistoryViewController" sceneMemberID="viewController">
+                    <view key="view" identifier="IDSourceHistoryView" id="J23-FP-mIF" customClass="CEEView">
+                        <rect key="frame" x="0.0" y="0.0" width="285" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Jv8-GB-YQ4" customClass="CEETableView">
+                                <rect key="frame" x="0.0" y="0.0" width="285" height="300"/>
+                            </customView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="Jv8-GB-YQ4" firstAttribute="top" secondItem="J23-FP-mIF" secondAttribute="top" id="7Bt-Ny-l5m"/>
+                            <constraint firstItem="Jv8-GB-YQ4" firstAttribute="leading" secondItem="J23-FP-mIF" secondAttribute="leading" id="B71-Ae-aW7"/>
+                            <constraint firstAttribute="bottom" secondItem="Jv8-GB-YQ4" secondAttribute="bottom" id="ejY-5n-Etn"/>
+                            <constraint firstAttribute="trailing" secondItem="Jv8-GB-YQ4" secondAttribute="trailing" id="o9x-9f-2fp"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="historyTable" destination="Jv8-GB-YQ4" id="WDy-Xz-EnS"/>
+                    </connections>
+                </viewController>
+                <customObject id="btu-Tg-AtS" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-668" y="2877"/>
         </scene>
     </scenes>
     <resources>

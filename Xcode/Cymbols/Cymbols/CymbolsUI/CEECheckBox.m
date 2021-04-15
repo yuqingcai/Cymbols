@@ -81,7 +81,6 @@
     borderWidth = 0.0;
     backgroundColor = [NSColor clearColor];
     
-    
     NSSize frameSize = self.frame.size;
     NSRect rect = NSMakeRect((borderWidth / 2.0),
                              (borderWidth / 2.0),
@@ -110,7 +109,7 @@
     CGFloat interval = 4.0;
     CGFloat boxSize = 13;
     NSRect boxRect = NSMakeRect(rect.origin.x + interval, 
-                                base - boxSize / 2.0, 
+                                base - boxSize / 2.0 + 0.5,
                                 boxSize, 
                                 boxSize);
     CGFloat boxLineWidth = 1.0;
@@ -127,7 +126,6 @@
                                     boxSize - boxLineWidth, 
                                     boxSize - boxLineWidth);
     path = [NSBezierPath bezierPathWithRoundedRect:contentRect xRadius:boxCornerRadius yRadius:boxCornerRadius];
-    
     
     if (self.state == NSControlStateValueOn) {
         if (boxBackgroundColorChecked) {
@@ -188,7 +186,7 @@
         CGFloat width = drawingSize.width;
         CGFloat height = font.ascender + font.descender;
         CGFloat x = titleRect.origin.x;
-        CGFloat y = titleRect.origin.y + ((titleRect.size.height - height) / 2.0);
+        CGFloat y = titleRect.origin.y + ((titleRect.size.height - height) / 2.0) - 0.5;
         NSRect drawRect = NSMakeRect(x, y, width, height);
         [drawingString drawWithRect:drawRect options:0 context:nil];
     }

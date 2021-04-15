@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern NSNotificationName CEENotificationTimeFreeze;
+
 @interface CEETimerFreezer : NSObject
 @end
 

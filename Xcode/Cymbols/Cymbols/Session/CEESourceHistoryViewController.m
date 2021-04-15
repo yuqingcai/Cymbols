@@ -10,6 +10,7 @@
 #import "CEESourceHistoryViewController.h"
 #import "CEEImageTextTableCellView.h"
 #import "CEEProject.h"
+#import "CEEStyleManager.h"
 
 @interface CEESourceHistoryViewController ()
 @property (weak) IBOutlet CEETableView *historyTable;
@@ -64,14 +65,24 @@
     CEESourceBufferReferenceContext* reference = _port.sourceBufferReferences[row];
     CEEImageTextTableCellView *cellView = [_historyTable makeViewWithIdentifier:@"IDImageTextTableCellView"];
     NSString* string = [reference.filePath lastPathComponent];
+    BOOL validated = YES;
+    BOOL isDirectory = NO;
+    if (![[NSFileManager defaultManager] fileExistsAtPath:reference.filePath isDirectory:&isDirectory] || isDirectory)
+        validated = NO;
     
-    cellView.text.stringValue = string;
-    [cellView.icon setImage:[styleManager filetypeIconFromFileName:[reference.filePath lastPathComponent]]];
+    if (validated) {
+        cellView.text.stringValue = string;
+        [cellView.icon setImage:[styleManager iconFromFileName:[reference.filePath lastPathComponent]]];
+    }
+    else {
+        cellView.text.stringValue = [string stringByAppendingString:@" (deleted)"];
+        [cellView.icon setImage:[styleManager iconFromName:@"icon_file_not_existed_16x16"]];
+    }
     return cellView;
 }
 
 - (void)highlightSelectionInHistoryTable {    
-    NSIndexSet *indexSet = nil;
+    NSIndexSet* indexSet = nil;
     CEESourceBufferReferenceContext* reference = [_port currentSourceBufferReference];
     NSArray* references = [_port sourceBufferReferences];
     for (NSInteger i = 0; i < references.count; i ++) {
@@ -88,6 +99,10 @@
     if (!_historyTable.selectedRowIndexes)
         return;
     [_port presentHistory:_port.sourceBufferReferences[_historyTable.selectedRow]];
+}
+
+- (CEETableView*)tableView {
+    return _historyTable;
 }
 
 @end

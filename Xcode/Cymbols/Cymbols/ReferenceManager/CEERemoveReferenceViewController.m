@@ -176,7 +176,7 @@ typedef NS_ENUM(NSInteger, RemoveReferenceScene) {
         if (column == 0) {
             CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
             cellView.text.stringValue = [filePath lastPathComponent];
-            [cellView.icon setImage:[styleManager filetypeIconFromFilePath:filePath]];
+            [cellView.icon setImage:[styleManager iconFromFilePath:filePath]];
             return cellView;
         }
         else if (column == 1) {
@@ -190,7 +190,7 @@ typedef NS_ENUM(NSInteger, RemoveReferenceScene) {
         if (column == 0) {
             CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
             cellView.text.stringValue = [filePath lastPathComponent];
-            [cellView.icon setImage:[styleManager filetypeIconFromFilePath:filePath]];
+            [cellView.icon setImage:[styleManager iconFromFilePath:filePath]];
             return cellView;
         }
         else if (column == 1) {

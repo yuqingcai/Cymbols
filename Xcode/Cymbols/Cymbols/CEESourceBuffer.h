@@ -63,14 +63,14 @@ typedef NS_ENUM(NSUInteger, CEESourceBufferType) {
 @end
 
 @interface CEESourceBufferManager : NSObject
-@property (readonly, strong) NSMutableArray* buffers;
-@property (strong, readonly) NSString* temporaryDirectory;
+@property (strong, readonly) NSMutableArray* buffers;
+@property (strong) NSString* temporaryDirectory;
 
 - (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString *)filePath;
 - (CEESourceBuffer*)openUntitledSourceBuffer;
 - (void)closeSourceBuffer:(CEESourceBuffer*)buffer;
 - (BOOL)saveSourceBuffer:(CEESourceBuffer*)buffer atFilePath:(NSString*)filePath;
-- (void)discardUntitleSourceBuffers;
+- (void)discardTemporaryFiles;
 - (void)syncSourceBuffersFromFiles;
 - (BOOL)isTemporaryFilePath:(NSString*)filePath;
 - (NSString*)sourceType:(CEESourceBuffer*)buffer;

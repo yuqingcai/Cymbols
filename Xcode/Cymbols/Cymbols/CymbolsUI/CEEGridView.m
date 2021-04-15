@@ -151,6 +151,9 @@
 - (void)setIndent:(CGFloat)indent {
     _indent = indent;
     
+    if (!self.cellViews || !self.cellViews.count)
+        return;
+    
     if (_rowStyle == kCEEGridRowViewStyleHierarchical) {
         NSRect buttonFrame = NSMakeRect(0.0, 0.0, 0.0, 0.0);
         if (_expandButton)
@@ -209,8 +212,21 @@
     return _expanded;
 }
 
+- (__kindof NSView*)replaceCellViewAtClumn:(NSInteger)column withView:(NSView*)view {
+    NSView* replaced = _cellViews[column];
+    NSRect frame = replaced.frame;
+    if (replaced.superview)
+        [replaced removeFromSuperview];
+    [_cellViews replaceObjectAtIndex:column withObject:view];
+    [self addSubview:view];
+    [view setFrame:frame];
+    return replaced;
+}
+
 @end
 
+@interface CEEGridView ()
+@end
 
 @implementation CEEGridView
 
@@ -309,7 +325,33 @@
         return nil;
     
     CEEGridRowView* rowView = self.subviews[row];
+    if (!rowView || !rowView.cellViews || !rowView.cellViews.count)
+        return nil;
+    
     return rowView.cellViews[column];
+}
+
+- (__kindof NSView*)replaceCellViewInRow:(NSUInteger)row column:(NSUInteger)column withView:(NSView*)view {
+    CEEGridRowView* rowView = self.subviews[row];
+    NSView* replaced = [rowView replaceCellViewAtClumn:column withView:view];
+    return replaced;
+}
+
+- (BOOL)containCellView:(NSView*)view {
+    for (CEEGridRowView* rowView in self.subviews) {
+        if ([rowView.cellViews containsObject:view])
+            return YES;
+    }
+    return NO;
+}
+
+- (void)replaceEmptyViewToCellView:(NSView*)cellView {
+    for (CEEGridRowView* rowView in self.subviews) {
+        for (NSInteger i = 0; i < rowView.cellViews.count; i++) {
+            if (rowView.cellViews[i] == cellView)
+                [rowView replaceCellViewAtClumn:i withView:[[NSView alloc] init]];
+        }
+    }
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
@@ -418,5 +460,6 @@
     self.enableDrawHorizontalGrid = current.enableDrawHorizontalGrid;
     self.enableDrawVerticalGrid = current.enableDrawVerticalGrid;
 }
+
 
 @end

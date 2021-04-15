@@ -302,7 +302,7 @@ typedef NS_ENUM(NSInteger, ScannerScene) {
             cellView = [_filePathView.filePathTable makeViewWithIdentifier:@"IDImageTextTableCellView"];
             if (cellView) {
                 cellView.text.stringValue = [filePath lastPathComponent];
-                [cellView.icon setImage:[styleManager filetypeIconFromFilePath:filePath]];
+                [cellView.icon setImage:[styleManager iconFromFilePath:filePath]];
             }
             return cellView;
         }

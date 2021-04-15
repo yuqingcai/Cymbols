@@ -84,13 +84,14 @@
     return serializing;
 }
 
-- (void)deserialize:(NSDictionary*)dict {
+- (BOOL)deserialize:(NSDictionary*)dict {
     [self.view setFrameSize:NSSizeFromString(dict[@"size"])];
     NSArray* descriptors = dict[@"subviews"];
     for (NSDictionary* descriptor in descriptors) {
         if (descriptor[@"IDSessionSplit1View"])
             [_spliter deserialize:descriptor[@"IDSessionSplit1View"]];
     }
+    return YES;
 }
 
 @end

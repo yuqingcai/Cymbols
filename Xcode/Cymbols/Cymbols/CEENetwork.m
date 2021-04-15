@@ -275,7 +275,7 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
             
             dispatch_sync(dispatch_get_main_queue(), ^{
                 AppDelegate* delegate = [NSApp delegate];
-                NSString* filePath = [[delegate supportDirectory] stringByAppendingPathComponent:@"UpdateInfo.cfg"];
+                NSString* filePath = [delegate propertyIndex:CEEUpdateInfoFilePathIndexer];
                 
                 if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
                     NSString* origin = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
@@ -331,8 +331,7 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
 
 - (void)setUpdateFlag {
     AppDelegate* delegate = [NSApp delegate];
-    NSString* filePath = [[delegate supportDirectory] stringByAppendingPathComponent:@"UpdateInfo.cfg"];
-    
+    NSString* filePath = [delegate propertyIndex:CEEUpdateInfoFilePathIndexer];
     if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
         return;
     
@@ -345,7 +344,7 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
 
 - (void)cleanUpdateFlag {
     AppDelegate* delegate = [NSApp delegate];
-    NSString* filePath = [[delegate supportDirectory] stringByAppendingPathComponent:@"UpdateInfo.cfg"];
+    NSString* filePath = [delegate propertyIndex:CEEUpdateInfoFilePathIndexer];
     
     if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
         return;
@@ -359,7 +358,7 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
 
 - (BOOL)updateFlagSet {
     AppDelegate* delegate = [NSApp delegate];
-    NSString* filePath = [[delegate supportDirectory] stringByAppendingPathComponent:@"UpdateInfo.cfg"];
+    NSString* filePath = [delegate propertyIndex:CEEUpdateInfoFilePathIndexer];
     
     if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
         return NO;
@@ -370,7 +369,7 @@ static kern_return_t GetMACAddress(io_iterator_t intfIterator, UInt8 *MACAddress
 
 - (NSString*)updateInfoString {
     AppDelegate* delegate = [NSApp delegate];
-    NSString* filePath = [[delegate supportDirectory] stringByAppendingPathComponent:@"UpdateInfo.cfg"];
+    NSString* filePath = [delegate propertyIndex:CEEUpdateInfoFilePathIndexer];
     
     if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
         return nil;

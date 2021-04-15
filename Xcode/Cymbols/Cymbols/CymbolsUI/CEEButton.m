@@ -168,7 +168,7 @@
         CGFloat iconHeight = tintedIcon.size.height;
         CGRect r0 = CGRectMake(0, 0, iconWidth, iconHeight);
         CGFloat offsetX = (self.frame.size.width - iconWidth) / 2.0;
-        CGFloat offsetY = (self.frame.size.height - iconHeight) / 2.0;
+        CGFloat offsetY = (self.frame.size.height - iconHeight) / 2.0 + 0.5;
         CGPoint p0 = CGPointMake(offsetX, offsetY);
         [tintedIcon drawAtPoint:p0 fromRect:r0 operation:NSCompositingOperationSourceOver fraction:1.0];
     }
@@ -277,7 +277,9 @@
     self.gradientAngle = current.gradientAngle;
     self.borderWidth = current.borderWidth;
     
-    self.iconColor = current.iconColor;
+    if (current.iconColor)
+        self.iconColor = current.iconColor;
+    
     self.cornerRadius = current.cornerRadius;
 }
 

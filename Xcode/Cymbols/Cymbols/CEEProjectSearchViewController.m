@@ -6,6 +6,7 @@
 //  Copyright © 2020 Lazycatdesign. All rights reserved.
 //
 #import "AppDelegate.h"
+#import "CEEStyleManager.h"
 #import "CEEProjectSearchViewController.h"
 #import "CEEEditViewController.h"
 #import "CEEImageTextTableCellView.h"
@@ -27,7 +28,10 @@
 @property (weak) IBOutlet CEEButton *buttonCancel;
 @property (weak) IBOutlet CEEButton *buttonSearch;
 @property (weak) IBOutlet CEEButton *buttonClose;
+@property (weak) IBOutlet CEEButton *buttonSelect;
+
 @property BOOL cancel;
+@property BOOL searching;
 @property (strong) CEEProject* project;
 @property (weak) IBOutlet CEETableView *resultTable;
 @property (weak) IBOutlet CEEView *sourceContentView;
@@ -35,8 +39,7 @@
 @property (strong) CEEEditViewController *editViewController;
 @property (weak) IBOutlet CEETextLabel *labelParsing;
 @property (weak) IBOutlet NSProgressIndicator *progressBar;
-@property BOOL isSearching;
-
+@property (strong) CEESourceBuffer* contextSourceBuffer;
 @end
 
 @implementation CEEProjectSearchViewController
@@ -45,7 +48,7 @@
     [super viewDidLoad];
     
     [_resultTable setNibNameOfCellView:@"TableCellViews"];
-    [_resultTable setNumberOfColumns:2];
+    [_resultTable setNumberOfColumns:1];
     [_resultTable setDataSource:self];
     [_resultTable setDelegate:self];
     [_resultTable setTarget:self];
@@ -88,6 +91,14 @@
     [_progressBar setHidden:YES];
 }
 
+- (void)dealloc {
+    AppDelegate* delegate = [NSApp delegate];
+    if (_contextSourceBuffer)
+        [delegate.sourceBufferManager closeSourceBuffer:_contextSourceBuffer];
+    _contextSourceBuffer = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (void)viewDidAppear {
     [super viewDidAppear];
     
@@ -109,7 +120,7 @@
     
     [_buttonCancel setEnabled:NO];
     [_resultTable reloadData];
-    _isSearching = NO;
+    _searching = NO;
     _cancel = NO;
     _selectedResult = nil;
     
@@ -128,10 +139,13 @@
     if (!filePaths)
         return;
     
+    _selectedResult = nil;
+    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
         NSMutableArray* results = [[NSMutableArray alloc] init];
-        self->_isSearching = YES;
+        self->_project.searcher.results = results;
+        self->_searching = YES;
                 
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self UISetupBeforSearch];
@@ -144,45 +158,45 @@
                 CEEList* references = NULL;
                 
                 __block CEESourceBuffer* buffer = nil;
+                
                 // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
                 });
                 
-                //const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
-                //CEERange range = cee_range_make(0, cee_text_storage_size_get(buffer.storage));
-                //cee_source_buffer_parse(buffer, 0);
-                //cee_source_reference_parse(buffer.parser_ref,
-                //                            [buffer.filePath UTF8String],
-                //                            (const cee_char*)subject,
-                //                            buffer.source_token_map,
-                //                            buffer.prep_directive,
-                //                            buffer.statement,
-                //                            range,
-                //                            &references);
-                //
-                //CEEList* p = references;
-                //while (p) {
-                //    CEESourceSymbolReference* reference = p->data;
-                //    if (!strcmp(reference->name, [self->_project.searcher.target UTF8String])) {
-                //        CEESearchResult* result = [[CEESearchResult alloc] init];
-                //        result.filePath = [NSString stringWithUTF8String:reference->filepath];
-                //        result.locations =  [NSString stringWithUTF8String:reference->locations];
-                //        [results addObject:result];
-                //        self->_project.searcher.results = results;
-                //        dispatch_sync(dispatch_get_main_queue(), ^{
-                //            [self->_resultTable reloadData];
-                //        });
-                //    }
-                //    p = p->next;
-                //}
-                            
+                const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
+                CEERange range = cee_range_make(0, cee_text_storage_size_get(buffer.storage));
+                cee_source_reference_parse(buffer.parser_ref,
+                                            [buffer.filePath UTF8String],
+                                            (const cee_char*)subject,
+                                            buffer.source_token_map,
+                                            buffer.prep_directive_fregment,
+                                            buffer.statement_fregment,
+                                            range,
+                                            &references);
+                CEEList* p = references;
+                while (p) {
+                    CEESourceSymbolReference* reference = p->data;
+                    if (!strcmp(reference->name, [self->_project.searcher.target UTF8String])) {
+                        CEESourcePoint* result = [[CEESourcePoint alloc] initWithSourceSymbolReference:reference];
+                        [results addObject:result];
+                        dispatch_sync(dispatch_get_main_queue(), ^{
+                            [self->_resultTable reloadData];
+                            if (!self->_selectedResult) {
+                                [self selectResultAtIndex:0];
+                                [self->_buttonSelect setEnabled:YES];
+                            }
+                        });
+                    }
+                    p = p->next;
+                }
+                cee_list_free_full(references, cee_source_symbol_reference_free);
+                
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     [self->_labelParsing setStringValue:[filePath lastPathComponent]];
                     [self->_progressBar setDoubleValue:(double)(i+1)/filePaths.count];
                 });
                 
-                cee_list_free_full(references, cee_source_symbol_reference_free);
                 
                 // close source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
@@ -197,12 +211,7 @@
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self UISetupAfterSearched];
             [self enableOptionInputs];
-            self->_isSearching = NO;
-            if (results.count) {
-                NSIndexSet* set = [[NSIndexSet alloc] initWithIndex:0];
-                [self->_resultTable selectRowIndexes:set byExtendingSelection:NO];
-                [self selectRow:nil];
-            }
+            self->_searching = NO;
         });
     });
 }
@@ -213,10 +222,13 @@
     if (!filePaths)
         return;
     
+    _selectedResult = nil;
+    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
         NSMutableArray* results = [[NSMutableArray alloc] init];
-        self->_isSearching = YES;
+        self->_project.searcher.results = results;
+        self->_searching = YES;
         
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self UISetupBeforSearch];
@@ -233,38 +245,45 @@
                     buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
                 });
                 
-                //const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
-                //CEEList* ranges = cee_regex_search((const cee_char*)subject,
-                //                                   [self->_project.searcher.target UTF8String],
-                //                                   TRUE,
-                //                                   0,
-                //                                   NULL);
-                //CEEList* p = ranges;
-                //while (p) {
-                //    cee_char* range_string = cee_string_from_range(p->data);
-                //    if (range_string) {
-                //        CEESearchResult* result = [[CEESearchResult alloc] init];
-                //        result.filePath = filePath;
-                //        result.locations = [NSString stringWithUTF8String:range_string];
-                //        [results addObject:result];
-                //        self->_project.searcher.results = results;
-                //        dispatch_sync(dispatch_get_main_queue(), ^{
-                //            [self->_resultTable reloadData];
-                //        });
-                //        cee_free(range_string);
-                //    }
-                //    p = p->next;
-                //}
-                //cee_list_free_full(ranges, cee_range_free);
-                
-                // close source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    [delegate.sourceBufferManager closeSourceBuffer:buffer];
-                });
+                cee_boolean time_out = FALSE;
+                const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
+                CEEList* ranges = cee_regex_search((const cee_char*)subject,
+                                                   [self->_project.searcher.target UTF8String],
+                                                   TRUE,
+                                                   10000,
+                                                   &time_out);
+                CEEList* p = ranges;
+                while (p) {
+                    cee_char* range_string = cee_string_from_range(p->data);
+                    if (range_string) {
+                        CEESourcePoint* result = [[CEESourcePoint alloc] init];
+                        result.filePath = filePath;
+                        result.locations = [NSString stringWithUTF8String:range_string];
+                        result.lineNumber = -1;
+                        [results addObject:result];
+                        
+                        dispatch_sync(dispatch_get_main_queue(), ^{
+                            [self->_resultTable reloadData];
+                            if (!self->_selectedResult) {
+                                [self selectResultAtIndex:0];
+                                [self->_buttonSelect setEnabled:YES];
+                            }
+                        });
+                        
+                        cee_free(range_string);
+                    }
+                    p = p->next;
+                }
+                cee_list_free_full(ranges, cee_range_free);
                 
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     [self->_labelParsing setStringValue:[filePath lastPathComponent]];
                     [self->_progressBar setDoubleValue:(double)(i+1)/filePaths.count];
+                });
+                
+                // close source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    [delegate.sourceBufferManager closeSourceBuffer:buffer];
                 });
                 
                 if (self->_cancel)
@@ -275,12 +294,7 @@
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self UISetupAfterSearched];
             [self enableOptionInputs];
-            self->_isSearching = NO;
-            if (results.count) {
-                NSIndexSet* set = [[NSIndexSet alloc] initWithIndex:0];
-                [self->_resultTable selectRowIndexes:set byExtendingSelection:NO];
-                [self selectRow:nil];
-            }
+            self->_searching = NO;
         });
     });
 }
@@ -290,6 +304,8 @@
     __block NSArray* filePaths = [_project getReferenceFilePathsWithCondition:_project.searcher.filePattern];
     if (!filePaths)
         return;
+    
+    _selectedResult = nil;
     
     cee_boolean sensitive = FALSE;
     cee_boolean mode = kCEEStringSearchModeMatchWord;
@@ -304,7 +320,8 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
         NSMutableArray* results = [[NSMutableArray alloc] init];
-        self->_isSearching = YES;
+        self->_project.searcher.results = results;
+        self->_searching = YES;
         
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self UISetupBeforSearch];
@@ -316,44 +333,51 @@
                 NSString* filePath = filePaths[i];
                 
                 __block CEESourceBuffer* buffer = nil;
+                
                 // open source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
                 });
                 
-                //const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
-                //CEEList* ranges = cee_str_search((const cee_char*)subject,
-                //                                    [self->_project.searcher.target UTF8String],
-                //                                    sensitive,
-                //                                    mode);
-                //CEEList* p = ranges;
-                //while (p) {
-                //    cee_char* range_string = cee_string_from_range(p->data);
-                //    if (range_string) {
-                //        CEESearchResult* result = [[CEESearchResult alloc] init];
-                //        result.filePath = filePath;
-                //        result.locations = [NSString stringWithUTF8String:range_string];
-                //        [results addObject:result];
-                //        self->_project.searcher.results = results;
-                //        dispatch_sync(dispatch_get_main_queue(), ^{
-                //            [self->_resultTable reloadData];
-                //        });
-                //        cee_free(range_string);
-                //    }
-                //    p = p->next;
-                //}
-                //cee_list_free_full(ranges, cee_range_free);
-                
-                // close source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    [delegate.sourceBufferManager closeSourceBuffer:buffer];
-                });
+                const cee_uchar* subject = cee_text_storage_buffer_get(buffer.storage);
+                CEEList* ranges = cee_str_search((const cee_char*)subject,
+                                                    [self->_project.searcher.target UTF8String],
+                                                    sensitive,
+                                                    mode);
+                CEEList* p = ranges;
+                while (p) {
+                    cee_char* range_string = cee_string_from_range(p->data);
+                    if (range_string) {
+                        CEESourcePoint* result = [[CEESourcePoint alloc] init];
+                        result.filePath = filePath;
+                        result.locations = [NSString stringWithUTF8String:range_string];
+                        result.lineNumber = -1;
+                        [results addObject:result];
+                        
+                        dispatch_sync(dispatch_get_main_queue(), ^{
+                            [self->_resultTable reloadData];
+                            if (!self->_selectedResult) {
+                                [self selectResultAtIndex:0];
+                                [self->_buttonSelect setEnabled:YES];
+                            }
+                        });
+                        
+                        cee_free(range_string);
+                    }
+                    p = p->next;
+                }
+                cee_list_free_full(ranges, cee_range_free);
                 
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     [self->_labelParsing setStringValue:[filePath lastPathComponent]];
                     [self->_progressBar setDoubleValue:(double)(i+1)/filePaths.count];
                 });
                 
+                // close source buffer in main queue(cause [NSApp delegate] should be invoked in main queue)
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    [delegate.sourceBufferManager closeSourceBuffer:buffer];
+                });
+                                
                 if (self->_cancel)
                     break;
             }
@@ -362,12 +386,7 @@
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self UISetupAfterSearched];
             [self enableOptionInputs];
-            self->_isSearching = NO;
-            if (results.count) {
-                NSIndexSet* set = [[NSIndexSet alloc] initWithIndex:0];
-                [self->_resultTable selectRowIndexes:set byExtendingSelection:NO];
-                [self selectRow:nil];
-            }
+            self->_searching = NO;
         });
     });
 }
@@ -379,7 +398,7 @@
     _project.searcher.results = nil;
     [_resultTable reloadData];
     _cancel = NO;
-    //[_editViewController setBuffer:nil];
+    [_editViewController setBuffer:nil];
     
     if (_project.searcher.mode == kCEESearchModeReference)
         [self serchReference];
@@ -432,6 +451,7 @@
     [self->_buttonSearch setEnabled:NO];
     [self->_buttonCancel setEnabled:YES];
     [self->_buttonClose setEnabled:NO];
+    [self->_buttonSelect setEnabled:NO];
 }
 
 - (void)UISetupAfterSearched {
@@ -440,6 +460,7 @@
     [self->_buttonSearch setEnabled:YES];
     [self->_buttonCancel setEnabled:NO];
     [self->_buttonClose setEnabled:YES];
+    [self->_buttonSelect setEnabled:YES];
     [self enableOptionInputs];
 }
 
@@ -541,47 +562,69 @@
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    CEESearchResult* result = _project.searcher.results[row];
+    CEESourcePoint* sourcePoint = _project.searcher.results[row];
+    CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
+    NSString* fileName = [sourcePoint.filePath lastPathComponent];
+    
+    if (sourcePoint.lineNumber != -1)
+        cellView.text.stringValue = [NSString stringWithFormat:@"%ld %@ - line %ld", row, fileName, sourcePoint.lineNumber + 1];
+    else
+        cellView.text.stringValue = [NSString stringWithFormat:@"%ld %@", row, fileName];
         
-    if (column == 0) {
-        CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
-        NSString* fileName = [result.filePath lastPathComponent];
-        cellView.text.stringValue = fileName;        
-        [cellView.icon setImage:[styleManager filetypeIconFromFileName:fileName]];
-        return cellView;
-    }
-    else if (column == 1) {
-        CEETextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDTextTableCellView"];
-        cellView.text.stringValue = result.filePath;
-        return cellView;
-    }
-    return nil;
+    [cellView.icon setImage:[styleManager iconFromFileName:fileName]];
+    return cellView;
 }
 
 - (IBAction)selectRow:sender {
-    //if (!_resultTable.selectedRowIndexes || _resultTable.selectedRow == -1 || _isSearching)
-    //    return;
-    //
-    //AppDelegate* delegate = [NSApp delegate];
-    //CEESearchResult* result = _project.searcher.results[_resultTable.selectedRow];
-    //CEESourceBuffer* buffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:result.filePath];
+    if (!_resultTable.selectedRowIndexes || _resultTable.selectedRow == -1)
+        return;
     
-    //cee_source_buffer_parse(buffer, 0);
-    //[_editViewController setBuffer:buffer];
-    //CEEList* ranges = cee_ranges_from_string([result.locations UTF8String]);
-    //if (ranges) {
-    //    [_editViewController highlightRanges:ranges];
-    //    cee_list_free_full(ranges, cee_range_free);
-    //}
-    //[_titlebar setTitle:result.filePath];
-    //[delegate.sourceBufferManager closeSourceBuffer:buffer];
+    AppDelegate* delegate = [NSApp delegate];
+    CEESourcePoint* result = _project.searcher.results[_resultTable.selectedRow];
+    
+    if (_contextSourceBuffer)
+        [delegate.sourceBufferManager closeSourceBuffer:_contextSourceBuffer];
+    _contextSourceBuffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:result.filePath];
+    [_editViewController setBuffer:_contextSourceBuffer];
+    CEEList* ranges = cee_ranges_from_string([result.locations UTF8String]);
+    if (ranges) {
+        [_editViewController highlightRanges:ranges];
+        cee_list_free_full(ranges, cee_range_free);
+    }
+    [_titlebar setTitle:result.filePath];
     
     return;
 }
 
+- (void)selectResultAtIndex:(NSInteger)index {
+    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:index];
+    [_resultTable selectRowIndexes:indexSet byExtendingSelection:NO];
+    [_resultTable scrollRowToVisible:[indexSet firstIndex]];
+    
+    
+    AppDelegate* delegate = [NSApp delegate];
+    _selectedResult = _project.searcher.results[index];
+    
+    if (_contextSourceBuffer)
+        [delegate.sourceBufferManager closeSourceBuffer:_contextSourceBuffer];
+    _contextSourceBuffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:_selectedResult.filePath];
+    [_editViewController setBuffer:_contextSourceBuffer];
+    CEEList* ranges = cee_ranges_from_string([_selectedResult.locations UTF8String]);
+    if (ranges) {
+        [_editViewController highlightRanges:ranges];
+        cee_list_free_full(ranges, cee_range_free);
+    }
+    [_titlebar setTitle:_selectedResult.filePath];
+    return;
+}
+
 - (IBAction)selectItem:(id)sender {
+    if (_searching)
+        [self cancel:self];
+    
     if (_project.searcher.results)
         _selectedResult = _project.searcher.results[(cee_int)_resultTable.selectedRow];
+    
     [NSApp stopModalWithCode:NSModalResponseOK];
 }
 
@@ -591,6 +634,5 @@
     else if (textView == _filePatternInput)
         _project.searcher.filePattern = _filePatternInput.stringValue;
 }
-
 
 @end
