@@ -58,8 +58,8 @@ IB_DESIGNABLE
 @property BOOL highLightSearched;
 @property CGFloat caretBlinkTimeInterval;
 @property (weak) id<CEETextViewDelegate> delegate;
-- (NSString*)textAttributesDescriptor;
 - (void)setTextAttributesDescriptor:(NSString*)descriptor;
+- (NSString*)textAttributesDescriptorFromUIContext;
 - (NSPoint)viewPointFromLayoutPoint:(NSPoint)point;
 
 @end

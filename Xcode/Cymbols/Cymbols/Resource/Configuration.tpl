@@ -34,5 +34,14 @@
 		"values" : [
 		],
 		"value" : "Null"
-	}
+	},
+    
+    "show_opened_files" : {
+        "title" : "Show Opened Files",
+        "values" : [
+            "Auto",
+            "No",
+        ],
+        "value" : "Null"
+    }
 }

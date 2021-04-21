@@ -12,11 +12,7 @@
 
 - (void)initProperties {
     [super initProperties];
-    self.borderColor = [NSColor clearColor];
-    self.borderWidth = 1.0;
     self.editable = NO;
-    
-    cee_text_edit_attributes_configure(_edit, (const cee_uchar*)[[self textAttributesDescriptor] UTF8String]);
     cee_text_edit_wrap_set(self.edit, TRUE);
     cee_text_edit_wrap_with_indent_set(self.edit, FALSE);
 }
@@ -32,16 +28,6 @@
 
 - (void)mouseDown:(NSEvent *)event {
     [[self nextResponder] mouseDown: event];
-}
-
-- (void)setFont:(NSFont *)font {
-    [super setFont:font];
-    [self setTextAttributesDescriptor:[self textAttributesDescriptor]];
-}
-
-- (void)setTextColor:(NSColor *)textColor {
-    [super setTextColor:textColor];
-    [self setTextAttributesDescriptor:[self textAttributesDescriptor]];
 }
 
 - (void)drawRect:(NSRect)dirtyRect {

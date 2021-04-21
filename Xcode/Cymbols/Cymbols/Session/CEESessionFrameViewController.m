@@ -12,6 +12,7 @@
 #import "CEESessionFrameManager.h"
 #import "CEESourceBuffer.h"
 #import "CEETitlebarButton.h"
+#import "CEETitlebarStateButton.h"
 #import "CEESourceHistoryViewController.h"
 #import "CEESourceHistoryPopupPanel.h"
 #import "CEEIdentifier.h"
@@ -19,6 +20,7 @@
 @interface CEESessionFrameViewController()
 @property (weak) IBOutlet CEETitleView *titlebar;
 @property (weak) IBOutlet CEETitlebarButton *closeButton;
+@property (weak) IBOutlet CEETitlebarStateButton *pinButton;
 @property (weak) IBOutlet CEETitlebarButton *previousButton;
 @property (weak) IBOutlet CEETitlebarButton *nextButton;
 @property (weak) IBOutlet CEETitlebarButton *bufferListButton;
@@ -43,15 +45,16 @@
     [_titlebar setDraggingSource:(CEESessionFrameView*)self.view];
     [_titlebar setTitleLeading:_previousButton.frame.origin.x + _previousButton.frame.size.width +
      _nextButton.frame.size.width + _bufferListButton.frame.size.width + 18.0];
-    [_titlebar setTitleTailing:_closeButton.frame.size.width];
+    [_titlebar setTitleTailing:_closeButton.frame.size.width + _pinButton.frame.size.width + 18.0];
     
     [(CEESessionFrameView*)self.view setDelegate:self];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferReloadResponse:) name:CEENotificationSourceBufferReload object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToSourcePointResponse:) name:CEENotificationSessionPortJumpToSourcePoint object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToSourcePointResponse:) name:CEENotificationSessionJumpToSourcePoint object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateContentViewStyle:) name:CEENotificationUserInterfaceStyleUpdate object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pinPortResponse:) name:CEENotificationSessionPinPort object:nil];
 }
 
 - (void)updateContentViewStyle:(NSNotification*)notification {
@@ -93,6 +96,13 @@
     _port = port;
     if (_sourceHistoryPanel)
         [_sourceHistoryPanel setPort:port];
+}
+
+- (IBAction)pin:(id)sender {
+    if (_pinButton.state == NSControlStateValueOn)
+        [_port.session setPinnedPort:_port];
+    else
+        [_port.session setPinnedPort:nil];
 }
 
 - (CEESessionPort*)port {
@@ -241,7 +251,7 @@
 - (void)jumpToSourcePointResponse:(NSNotification*)notification {
     if (notification.object != _port)
         return;
-    CEESourcePoint* jumpPoint = _port.jumpPoint;
+    CEESourcePoint* jumpPoint = _port.session.jumpPoint;
     
     if(![jumpPoint.filePath isEqualToString:_port.activedSourceBuffer.filePath])
             [_port openSourceBufferWithFilePath:jumpPoint.filePath];
@@ -252,6 +262,18 @@
         cee_list_free_full(ranges, cee_range_free);
     }
 }
+
+- (void)pinPortResponse:(NSNotification*)notification {
+    if (notification.object != _port.session)
+        return;
+    
+    if (_port.session.pinnedPort != _port) {
+        if (_pinButton.state == NSControlStateValueOn)
+            _pinButton.state = NSControlStateValueOff;
+    }
+    
+}
+
 
 - (void)windowDidResignKey:(NSNotification *)notification {
     if (notification.object == _sourceHistoryPanel)

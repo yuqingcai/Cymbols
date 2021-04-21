@@ -73,14 +73,14 @@
     [_editViewController setBuffer:nil];
     [_titlebar setTitle:@""];
     AppDelegate* delegate = [NSApp delegate];
-    CEESessionPort* activedPort = [[[delegate currentProject] currentSession] activedPort];
+    CEESession* session = [[delegate currentProject] currentSession];
     _project = [delegate currentProject];
     _selectedSymbolRef = NULL;
     [_symbolTable reloadData];
     
-    if (activedPort &&
-        activedPort.source_context &&
-        cee_list_length(activedPort.source_context->symbols))
+    if (session &&
+        session.sourceContext &&
+        cee_list_length(session.sourceContext->symbols))
         [self selectSymbolAtIndex:0];
 }
 - (void)dealloc {
@@ -93,30 +93,30 @@
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
     AppDelegate* delegate = [NSApp delegate];
-    CEESessionPort* activedPort = [[[delegate currentProject] currentSession] activedPort];
-    if (!activedPort || !activedPort.source_context || !activedPort.source_context->symbols)
+    CEESession* session = [[delegate currentProject] currentSession];
+    if (!session || !session.sourceContext || !session.sourceContext->symbols)
         return 0;
-    return cee_list_length(activedPort.source_context->symbols);
+    return cee_list_length(session.sourceContext->symbols);
 }
 
 - (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column {
     AppDelegate* delegate = [NSApp delegate];
-    CEESessionPort* activedPort = [[[delegate currentProject] currentSession] activedPort];
-    if (!activedPort || !activedPort.source_context || !activedPort.source_context->symbols)
+    CEESession* session = [[delegate currentProject] currentSession];
+    if (!session || !session.sourceContext || !session.sourceContext->symbols)
         return @"Location info";
         
-    CEESourceSymbol* symbol = cee_list_nth_data(activedPort.source_context->symbols, 0);
+    CEESourceSymbol* symbol = cee_list_nth_data(session.sourceContext->symbols, 0);
     NSString* name = [NSString stringWithUTF8String:symbol->name];
-    cee_ulong length = cee_list_length(activedPort.source_context->symbols);
+    cee_ulong length = cee_list_length(session.sourceContext->symbols);
     return [NSString stringWithFormat:@"\"%@\" found at %lu locations", name, length];
 }
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     AppDelegate* delegate = [NSApp delegate];
-    CEESessionPort* activedPort = [[[delegate currentProject] currentSession] activedPort];
+    CEESession* session = [[delegate currentProject] currentSession];
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
-    CEESourceSymbol* symbol = cee_list_nth_data(activedPort.source_context->symbols, (cee_int)row);
+    CEESourceSymbol* symbol = cee_list_nth_data(session.sourceContext->symbols, (cee_int)row);
     NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
     cellView.text.stringValue = [NSString stringWithFormat:@"%ld %@ - line %d", row, [filePath lastPathComponent], symbol->line_no + 1];
     [cellView.icon setImage:[styleManager iconFromSymbol:symbol]];
@@ -130,12 +130,12 @@
 - (IBAction)selectRow:sender {
     @autoreleasepool {
         AppDelegate* delegate = [NSApp delegate];
-        CEESessionPort* activedPort = [[[delegate currentProject] currentSession] activedPort];
+        CEESession* session = [[delegate currentProject] currentSession];
         
         if (!_symbolTable.selectedRowIndexes || _symbolTable.selectedRow == -1)
             return;
         
-        CEESourceSymbol* symbol = cee_list_nth_data(activedPort.source_context->symbols,
+        CEESourceSymbol* symbol = cee_list_nth_data(session.sourceContext->symbols,
                                                     (cee_int)_symbolTable.selectedRow);
         NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
         if (_contextSourceBuffer)
@@ -155,9 +155,9 @@
         [_symbolTable scrollRowToVisible:[indexSet firstIndex]];
                 
         AppDelegate* delegate = [NSApp delegate];
-        CEESessionPort* activedPort = [[[delegate currentProject] currentSession] activedPort];
+        CEESession* session = [[delegate currentProject] currentSession];
         
-        CEESourceSymbol* symbol = cee_list_nth_data(activedPort.source_context->symbols,
+        CEESourceSymbol* symbol = cee_list_nth_data(session.sourceContext->symbols,
                                                     (cee_int)_symbolTable.selectedRow);
         NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
         if (_contextSourceBuffer)
@@ -171,10 +171,10 @@
 
 - (IBAction)jumpToSymbol:(id)sender {
     AppDelegate* delegate = [NSApp delegate];
-    CEESessionPort* activedPort = [[[delegate currentProject] currentSession] activedPort];
-    if (!activedPort || !activedPort.source_context || !activedPort.source_context->symbols)
+    CEESession* session = [[delegate currentProject] currentSession];
+    if (!session || !session.sourceContext || !session.sourceContext->symbols)
         return;
-    _selectedSymbolRef = cee_list_nth_data(activedPort.source_context->symbols,
+    _selectedSymbolRef = cee_list_nth_data(session.sourceContext->symbols,
                                         (cee_int)_symbolTable.selectedRow);
     [NSApp stopModalWithCode:NSModalResponseOK];
 }

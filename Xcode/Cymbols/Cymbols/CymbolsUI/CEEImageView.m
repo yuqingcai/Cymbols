@@ -8,18 +8,44 @@
 
 #import "CEEImageView.h"
 
-@interface CEEImageViewStyleItem : NSObject
-@property (strong) NSColor* tintColor;
-@end
-
-@implementation CEEImageViewStyleItem
-@end
 
 @implementation CEEImageView
+
+
+- (instancetype)initWithCoder:(NSCoder *)decoder {
+    self = [super initWithCoder:decoder];
+    if (!self)
+        return nil;
+    
+    [self initProperties];
+    
+    return self;
+}
+
+- (instancetype)initWithFrame:(NSRect)frameRect {
+    self = [super initWithFrame:frameRect];
+    if (!self)
+        return nil;
+    
+    [self initProperties];
+    
+    return self;
+}
+
+- (instancetype)init {
+    self = [super init];
+    if (!self)
+        return nil;
+    
+    [self initProperties];
+    
+    return self;
+}
 
 - (void)initProperties {
     _tintColor = nil;
     _styleState = kCEEViewStyleStateActived;
+    
 }
 
 - (NSImage*)tintedImage:(NSImage*)image withColor:(NSColor *)tint {

@@ -21,6 +21,7 @@ extern const CGFloat CEEPopupPanelSizeMinimumHeight;
 @interface CEEPopupPanel : NSPanel
 @property BOOL exclusived;
 @property (weak) id<CEEPopupPanelDelegate> popupDelegate;
+- (void)initProperties;
 - (CGFloat)expactedWidth;
 - (CGFloat)expactedHeight;
 - (CGFloat)minimumWidth;

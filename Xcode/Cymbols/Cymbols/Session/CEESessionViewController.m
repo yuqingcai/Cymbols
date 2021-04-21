@@ -7,6 +7,7 @@
 //
 
 #import "CEESessionViewController.h"
+#import "CEEStyleManager.h"
 #import "CEESessionSpliter0.h"
 #import "CEESessionToolbar.h"
 #import "CEEProjectCreatorController.h"
@@ -18,6 +19,7 @@
 #import "CEEProjectContextViewController.h"
 #import "CEEProjectCleanViewController.h"
 #import "CEEProjectSearchViewController.h"
+#import "CEESaveManagerViewController.h"
 #import "CEEUpdateInfoViewController.h"
 #import "CEETitlebarButton.h"
 #import "CEETextTitle.h"
@@ -200,35 +202,48 @@
     [_session.activedPort openUntitledSourceBuffer];
 }
 
+- (IBAction)closeFile:(id)sender {
+    if (!_session.activedPort ||
+        !_session.activedPort.activedSourceBuffer)
+        return;
+    
+    CEESessionPort* port = _session.activedPort;
+    CEESourceBuffer* buffer = [port activedSourceBuffer];
+    NSWindowController* saveManagerWindowController = nil;
+    CEESaveManagerViewController* controller = nil;
+    if ([buffer stateSet:kCEESourceBufferStateShouldSyncToFile]) {
+        saveManagerWindowController = [[NSStoryboard storyboardWithName:@"SaveManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSaveManagerWindowController"];;
+        controller = (CEESaveManagerViewController*)saveManagerWindowController.contentViewController;
+        [controller setModifiedSourceBuffers:@[buffer]];
+        
+        [self.view.window beginSheet:saveManagerWindowController.window completionHandler:(^(NSInteger result) {
+            if (result == NSModalResponseOK)
+                [port closeSourceBuffers:@[buffer]];
+            [controller setModifiedSourceBuffers:nil];
+            [NSApp stopModalWithCode:NSModalResponseOK];
+        })];
+        [NSApp runModalForWindow:self.view.window];
+    }
+    else {
+        [port closeSourceBuffers:@[buffer]];
+    }
+}
+
+- (IBAction)closeWindow:(id)sender {
+    if ([self.view.window.delegate windowShouldClose:self.view.window])
+        [self.view.window close];
+}
+
 - (IBAction)newProject:(id)sender {
     if (!_projectCreatorWindowController)
         _projectCreatorWindowController = [[NSStoryboard storyboardWithName:@"ProjectCreator" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectCreatorWindowController"];
     
     [self.view.window beginSheet:_projectCreatorWindowController.window completionHandler:(^(NSInteger result) {
-        [NSApp stopModalWithCode:result];
     })];
-    [NSApp runModalForWindow:self.view.window];
 }
 
-- (NSArray*)filePathsFromOpenPanel {
-    __block NSMutableArray* filePaths = [[NSMutableArray alloc] init];
-    NSOpenPanel* openPanel = [NSOpenPanel openPanel];
-    NSURL* URL = [[NSURL alloc] initFileURLWithPath:NSHomeDirectory() isDirectory:YES];
-    [openPanel setDirectoryURL:URL];
-    [openPanel setCanChooseDirectories:YES];
-    [openPanel setAllowsMultipleSelection:YES];
-    [openPanel setCanChooseFiles:YES];
-    [openPanel setCanCreateDirectories:NO];
-    [openPanel setDelegate:self];
-    [openPanel beginSheetModalForWindow:self.view.window completionHandler: (^(NSInteger result){
-        [NSApp stopModalWithCode:result];
-        if (result == NSModalResponseOK) {
-            for (NSURL* URL in [openPanel URLs])
-                [filePaths addObject:[URL path]];
-        }
-    })];
-    [NSApp runModalForWindow:[self.view window]];
-    return filePaths;
+- (IBAction)closeProject:(id)sender {
+    [_session.project close];
 }
 
 - (NSString*)filePathFromSavePanelWithFileName:(NSString*)fileName {
@@ -242,7 +257,7 @@
         [savePanel setNameFieldStringValue:fileName];
     else
         [savePanel setNameFieldStringValue:@"Untitled"];
-        
+    
     [savePanel beginSheetModalForWindow:self.view.window completionHandler:(^(NSInteger result) {
         [NSApp stopModalWithCode:result];
         if (result == NSModalResponseOK) {
@@ -254,25 +269,33 @@
 }
 
 - (IBAction)openFiles:(id)sender {
-    CEEProjectController* projectController = [NSDocumentController sharedDocumentController];
-    NSArray* filePaths = [self filePathsFromOpenPanel];
-    CEEProject* project = nil;
-    for (NSString* filePath in filePaths) {
-        NSURL* url = [NSURL fileURLWithPath:filePath];
-        NSString* typeName = [projectController typeForContentsOfURL:url error:nil];
-        if ([typeName isEqualToString:@"com.lazycatdesign.cymbols.cymd"]) {
-            project = [projectController documentForURL:url];
-            if (project) {
-                [project showWindows];
-            }
-            else {
-                [projectController openProjectFromURL:url];
+    __block CEEProjectController* projectController = [NSDocumentController sharedDocumentController];
+    NSURL* URL = [[NSURL alloc] initFileURLWithPath:NSHomeDirectory() isDirectory:YES];
+    NSOpenPanel* openPanel = [NSOpenPanel openPanel];
+    [openPanel setDirectoryURL:URL];
+    [openPanel setCanChooseDirectories:YES];
+    [openPanel setAllowsMultipleSelection:YES];
+    [openPanel setCanChooseFiles:YES];
+    [openPanel setCanCreateDirectories:NO];
+    [openPanel setDelegate:self];
+    [openPanel beginSheetModalForWindow:self.view.window completionHandler: (^(NSInteger result) {
+        if (result == NSModalResponseOK) {
+            for (NSURL* URL in [openPanel URLs]) {
+                NSString* typeName = [projectController typeForContentsOfURL:URL error:nil];
+                
+                if ([typeName isEqualToString:@"com.lazycatdesign.cymbols.cymd"]) {
+                    CEEProject* project = [projectController documentForURL:URL];
+                    if (project)
+                        [project showWindows];
+                    else
+                        [projectController openProjectFromURL:URL];
+                }
+                else {
+                    [self->_session.activedPort openSourceBufferWithFilePath:[URL path]];
+                }
             }
         }
-        else {
-            [_session.activedPort openSourceBufferWithFilePath:filePath];
-        }
-    }
+    })];
 }
 
 - (IBAction)save:(id)sender {
@@ -332,7 +355,7 @@
     if (!_addReferenceWindowController)
         _addReferenceWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDAddReferenceWindowController"];
     [self.view.window beginSheet:_addReferenceWindowController.window completionHandler:(^(NSInteger result) {
-        [NSApp stopModalWithCode:result];
+        [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
 }
@@ -341,7 +364,7 @@
     if (!_removeReferenceWindowController)
         _removeReferenceWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDRemoveReferenceWindowController"];
     [self.view.window beginSheet:_removeReferenceWindowController.window completionHandler:(^(NSInteger result) {
-        [NSApp stopModalWithCode:result];
+        [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
 }
@@ -350,7 +373,7 @@
     if (!_referenceRootScannerWindowController)
         _referenceRootScannerWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDReferenceRootScannerWindowController"];
     [self.view.window beginSheet:_referenceRootScannerWindowController.window completionHandler:(^(NSInteger result) {
-        [NSApp stopModalWithCode:result];
+        [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
 }
@@ -423,8 +446,8 @@
         
     AppDelegate* delegate = [NSApp delegate];
     NSDictionary* configuration = delegate.configuration;
-    if (configuration[@"show_opened_files_list"]) {
-        NSString* value = configuration[@"show_opened_files_list"];
+    if (configuration[@"show_opened_files"]) {
+        NSString* value = configuration[@"show_opened_files"];
         if ([value compare:@"auto" options:NSCaseInsensitiveSearch] == NSOrderedSame) {
             [_spliter showSourceBufferView:YES];
         }
@@ -470,11 +493,11 @@
     CEESessionPort* port = notification.object;
     
     if (port.session != _session ||
-        !port.source_context || !port.source_context->symbols)
+        !_session.sourceContext || !_session.sourceContext->symbols)
         return;
     
-    if (cee_list_length(port.source_context->symbols) == 1) {
-        [port jumpToSymbol:cee_list_nth_data(port.source_context->symbols, 0)];
+    if (cee_list_length(_session.sourceContext->symbols) == 1) {
+        [_session jumpToSymbol:cee_list_nth_data(_session.sourceContext->symbols, 0) inPort:_session.pinnedPort];
         return;
     }
     
@@ -484,7 +507,7 @@
     if (responese == NSModalResponseOK) {
         CEEProjectContextViewController* contextViewController = (CEEProjectContextViewController*)_contextWindowController.contentViewController;
         if (contextViewController.selectedSymbolRef)
-            [port jumpToSymbol:contextViewController.selectedSymbolRef];
+            [port.session jumpToSymbol:contextViewController.selectedSymbolRef inPort:_session.pinnedPort];
     }
     [_contextWindowController close];
 }
@@ -503,21 +526,14 @@
     NSModalResponse responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
     if (responese == NSModalResponseOK) {
         if (projectSearchViewController.selectedResult)
-            [port jumpToSourcePoint:projectSearchViewController.selectedResult];
+            [port.session jumpToSourcePoint:projectSearchViewController.selectedResult inPort:_session.pinnedPort];
     }
     [projectSearchViewController setAutoStart:NO];
     [_projectSearchWindowController close];
 }
 
 - (void)timeFreezeResponse:(NSNotification*)notification {
-    if (!_timeFreezerWindowController)
-        _timeFreezerWindowController = [[NSStoryboard storyboardWithName:@"TimeFreezer" bundle:nil] instantiateControllerWithIdentifier:@"IDTimeFreezerWindowController"];
-    if ([self.view.window isKeyWindow]) {
-        [self.view.window beginSheet:_timeFreezerWindowController.window completionHandler:(^(NSInteger result) {
-            [NSApp stopModalWithCode:result];
-        })];
-        [NSApp runModalForWindow:self.view.window];
-    }
+    [self showTrialWelcome];
 }
 
 - (IBAction)searchInProject:(id)sender {
@@ -533,7 +549,7 @@
     NSModalResponse responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
     if (responese == NSModalResponseOK) {
         if (projectSearchViewController.selectedResult)
-            [port jumpToSourcePoint:projectSearchViewController.selectedResult];
+            [port.session jumpToSourcePoint:projectSearchViewController.selectedResult inPort:_session.pinnedPort];
     }
     [_projectSearchWindowController close];
 }
@@ -544,7 +560,7 @@
     CEEProjectParseViewController* controller = (CEEProjectParseViewController*)_projectParseWindowController.contentViewController;
     controller.sync = NO;
     [self.view.window beginSheet:_projectParseWindowController.window completionHandler:(^(NSInteger result) {
-        [NSApp stopModalWithCode:result];
+        [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
 }
@@ -555,7 +571,7 @@
     CEEProjectParseViewController* controller = (CEEProjectParseViewController*)_projectParseWindowController.contentViewController;
     controller.sync = YES;
     [self.view.window beginSheet:_projectParseWindowController.window completionHandler:(^(NSInteger result) {
-        [NSApp stopModalWithCode:result];
+        [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
 }
@@ -565,14 +581,27 @@
         _projectCleanWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectCleanWindowController"];
     
     [self.view.window beginSheet:_projectCleanWindowController.window completionHandler:(^(NSInteger result) {
-        [NSApp stopModalWithCode:result];
+        [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
 }
 
-- (IBAction)showHelp:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://cymbols.io/manual.html"]];
+- (IBAction)getHelp:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://www.cymbols.io/help"]];
 }
+
+- (IBAction)getManual:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://www.cymbols.io/manual"]];
+}
+
+- (IBAction)reportBug:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://www.cymbols.io/bug"]];
+}
+
+- (IBAction)requestNewFeature:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://www.cymbols.io/feature"]];
+}
+
 
 - (void)cymbolsUpdateNotifyResponse:(id)sender {
     [_messageButton setEnabled:YES];
@@ -604,7 +633,7 @@
     CEEUpdateInfoViewController* viewController = (CEEUpdateInfoViewController*)_updateInfoWindowController.contentViewController;
     viewController.infoString = [delegate.network updateInfoString];
     [self.view.window beginSheet:_updateInfoWindowController.window completionHandler:(^(NSInteger result) {
-        [NSApp stopModalWithCode:result];
+        [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
     [delegate.network cleanUpdateFlag];
@@ -613,8 +642,19 @@
 - (IBAction)setPreferences:(id)sender {
     if (!_preferenceWindowController)
         _preferenceWindowController = [[NSStoryboard storyboardWithName:@"Preferences" bundle:nil] instantiateControllerWithIdentifier:@"IDPreferencesWindowController"];
-    NSModalResponse responese = [NSApp runModalForWindow:_preferenceWindowController.window];
+    [NSApp runModalForWindow:_preferenceWindowController.window];
     [_preferenceWindowController close];
+}
+
+- (void)showTrialWelcome {
+    if (!_timeFreezerWindowController)
+        _timeFreezerWindowController = [[NSStoryboard storyboardWithName:@"TimeFreezer" bundle:nil] instantiateControllerWithIdentifier:@"IDTimeFreezerWindowController"];
+    if ([self.view.window isMainWindow]) {
+        [self.view.window beginSheet:_timeFreezerWindowController.window completionHandler:(^(NSInteger result) {
+            [NSApp stopModalWithCode:NSModalResponseOK];
+        })];
+        [NSApp runModalForWindow:self.view.window];
+    }
 }
 
 @end

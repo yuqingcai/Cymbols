@@ -709,7 +709,7 @@
                                 <action selector="openFiles:" target="ZM5-zG-qt6" id="Ccf-l5-qnn"/>
                             </connections>
                         </menuItem>
-                        <menuItem title="Open in New Window" image="icon_edit_in_new_window_16x16" tag="3" id="opQ-ik-nA3">
+                        <menuItem title="Open in New Window" image="icon_new_window_16x16" tag="3" id="opQ-ik-nA3">
                             <modifierMask key="keyEquivalentModifierMask"/>
                             <connections>
                                 <action selector="openFilesInNewSession:" target="ZM5-zG-qt6" id="R6h-8W-Vjs"/>
@@ -780,7 +780,7 @@
                                 <action selector="openFiles:" target="ZM5-zG-qt6" id="0jP-3g-B19"/>
                             </connections>
                         </menuItem>
-                        <menuItem title="Open in New Window" image="icon_edit_in_new_window_16x16" tag="2" id="YWe-E8-XdD">
+                        <menuItem title="Open in New Window" image="icon_new_window_16x16" tag="2" id="YWe-E8-XdD">
                             <modifierMask key="keyEquivalentModifierMask"/>
                             <connections>
                                 <action selector="openFilesInNewSession:" target="ZM5-zG-qt6" id="m1S-yx-o7A"/>
@@ -812,7 +812,7 @@
                     </connections>
                 </menu>
             </objects>
-            <point key="canvasLocation" x="716" y="1511"/>
+            <point key="canvasLocation" x="828" y="1511"/>
         </scene>
         <!--Session Source Buffer View Controller-->
         <scene sceneID="PUE-oB-dOr">
@@ -856,25 +856,25 @@
                         <menuItem title="Close" image="icon_close_tinted_16x16" id="je7-Ld-z7X">
                             <modifierMask key="keyEquivalentModifierMask"/>
                             <connections>
-                                <action selector="close:" target="mhP-YY-odI" id="UfD-IK-MLT"/>
+                                <action selector="closeCurrentSourceBuffer:" target="X4L-US-s8H" id="9Db-qQ-qwL"/>
                             </connections>
                         </menuItem>
                         <menuItem title="Close Others" image="icon_close_other_16x16" id="xdR-T7-7ou">
                             <modifierMask key="keyEquivalentModifierMask"/>
                             <connections>
-                                <action selector="closeOthers:" target="mhP-YY-odI" id="T69-Oc-ZAQ"/>
+                                <action selector="closeOtherSourceBuffers:" target="X4L-US-s8H" id="iUU-5S-upI"/>
                             </connections>
                         </menuItem>
                         <menuItem title="Close Others Above" image="icon_close_above_16x16" id="Qlv-md-bUX">
                             <modifierMask key="keyEquivalentModifierMask"/>
                             <connections>
-                                <action selector="closeOthersAbove:" target="mhP-YY-odI" id="WJ5-OB-we0"/>
+                                <action selector="closeOtherSourceBuffersAbove:" target="X4L-US-s8H" id="PJh-Lu-YkK"/>
                             </connections>
                         </menuItem>
                         <menuItem title="Close Others Below" image="icon_close_below_16x16" id="oh4-No-zQO">
                             <modifierMask key="keyEquivalentModifierMask"/>
                             <connections>
-                                <action selector="closeOthersBelow:" target="mhP-YY-odI" id="stV-K6-HtM"/>
+                                <action selector="closeOtherSourceBuffersBelow:" target="X4L-US-s8H" id="Iam-7c-6j2"/>
                             </connections>
                         </menuItem>
                         <menuItem isSeparatorItem="YES" id="vf4-Rx-8fi"/>
@@ -1016,6 +1016,19 @@
                                             <action selector="presentHistoryView:" target="FWh-fC-5af" id="D3X-Fi-vnS"/>
                                         </connections>
                                     </customView>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="SgD-T7-l7b" customClass="CEETitlebarStateButton">
+                                        <rect key="frame" x="396" y="1" width="24" height="24"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="24" id="NRI-Gb-Ela"/>
+                                            <constraint firstAttribute="width" constant="24" id="c3h-AF-iNY"/>
+                                        </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="image" keyPath="icon" value="icon_pin_16x16"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="pin:" target="FWh-fC-5af" id="I3J-iS-sBa"/>
+                                        </connections>
+                                    </customView>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="4rd-3j-KKc" firstAttribute="top" secondItem="rrf-r7-pxV" secondAttribute="top" id="0TL-xY-bYF"/>
@@ -1024,10 +1037,12 @@
                                     <constraint firstItem="Qre-Qb-fU9" firstAttribute="leading" secondItem="rrf-r7-pxV" secondAttribute="leading" constant="6" id="LZ4-wP-f2z"/>
                                     <constraint firstItem="Nul-Mx-cFN" firstAttribute="top" secondItem="rrf-r7-pxV" secondAttribute="top" id="ODi-Ot-M3A"/>
                                     <constraint firstItem="kwv-2q-eZc" firstAttribute="top" secondItem="rrf-r7-pxV" secondAttribute="top" id="Wc7-3e-mSf"/>
+                                    <constraint firstItem="SgD-T7-l7b" firstAttribute="top" secondItem="rrf-r7-pxV" secondAttribute="top" id="YUJ-ns-GvQ"/>
                                     <constraint firstItem="4rd-3j-KKc" firstAttribute="leading" secondItem="kwv-2q-eZc" secondAttribute="trailing" constant="6" id="o2R-sU-zXV"/>
                                     <constraint firstItem="Qre-Qb-fU9" firstAttribute="top" secondItem="rrf-r7-pxV" secondAttribute="top" id="tTz-vK-TwH"/>
                                     <constraint firstAttribute="trailing" secondItem="Nul-Mx-cFN" secondAttribute="trailing" constant="6" id="tZx-Su-wBK"/>
                                     <constraint firstAttribute="height" constant="25" id="tzU-h2-Arx"/>
+                                    <constraint firstItem="Nul-Mx-cFN" firstAttribute="leading" secondItem="SgD-T7-l7b" secondAttribute="trailing" id="yky-Rm-m9s"/>
                                 </constraints>
                             </customView>
                         </subviews>
@@ -1041,6 +1056,7 @@
                         <outlet property="bufferListButton" destination="4rd-3j-KKc" id="JwF-OP-Sv8"/>
                         <outlet property="closeButton" destination="Nul-Mx-cFN" id="NTF-IN-OZW"/>
                         <outlet property="nextButton" destination="kwv-2q-eZc" id="dwT-pd-kbu"/>
+                        <outlet property="pinButton" destination="SgD-T7-l7b" id="LJv-1v-b3a"/>
                         <outlet property="previousButton" destination="Qre-Qb-fU9" id="EhH-D1-Tsz"/>
                         <outlet property="titlebar" destination="rrf-r7-pxV" id="dSj-H6-ZDr"/>
                     </connections>
@@ -1093,7 +1109,6 @@
         <image name="icon_database_search_16x16" width="16" height="16.5"/>
         <image name="icon_database_sync_16x16" width="16" height="16.5"/>
         <image name="icon_edit_16x16" width="16" height="16"/>
-        <image name="icon_edit_in_new_window_16x16" width="16" height="16"/>
         <image name="icon_finder_16x16" width="16" height="16"/>
         <image name="icon_list_window_16x16" width="16" height="16"/>
         <image name="icon_mail_16x16" width="16" height="16"/>
@@ -1104,6 +1119,7 @@
         <image name="icon_new_window_16x16" width="16" height="16"/>
         <image name="icon_open_file_16x16" width="16.5" height="16"/>
         <image name="icon_paste_16x16" width="16" height="16"/>
+        <image name="icon_pin_16x16" width="16" height="16"/>
         <image name="icon_redo_16x16" width="16" height="16"/>
         <image name="icon_reload_16x16" width="16" height="16"/>
         <image name="icon_remove_16x16" width="16" height="16"/>

@@ -203,7 +203,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     [self setNeedsDisplay:YES];
 }
 
-- (NSString*)textAttributesDescriptor {
+- (NSString*)textAttributesDescriptorFromUIContext {
     NSString* fontFamilyName = [self.font familyName];
     CGFloat fontSize = [self.font pointSize];
     NSFontTraitMask fontTrait = [[NSFontManager sharedFontManager] traitsOfFont:self.font];
@@ -218,13 +218,13 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         if (fontTrait & NSItalicFontMask)
             traitString = [traitString stringByAppendingString:@"italic "];
     }
-    NSString* fontAttribute = [NSString stringWithFormat:@"font(\\\"%@\\\", %.1f, \\\"%@\\\", %.1f)", 
+    NSString* fontAttribute = [NSString stringWithFormat:@"font(\\\"%@\\\", %.1f, \\\"%@\\\", %.1f)",
                                fontFamilyName, fontSize, traitString, fontWeight];
     NSColor* foreColor = [self.textColor colorUsingColorSpace:[NSColorSpace genericRGBColorSpace]];
-    NSString* foreColorAttribute = [NSString stringWithFormat:@"rgba(%ld, %ld, %ld, %ld)", 
-                                    (NSInteger)(foreColor.redComponent * 255),  
-                                    (NSInteger)(foreColor.greenComponent * 255), 
-                                    (NSInteger)(foreColor.blueComponent * 255), 
+    NSString* foreColorAttribute = [NSString stringWithFormat:@"rgba(%ld, %ld, %ld, %ld)",
+                                    (NSInteger)(foreColor.redComponent * 255),
+                                    (NSInteger)(foreColor.greenComponent * 255),
+                                    (NSInteger)(foreColor.blueComponent * 255),
                                     (NSInteger)(foreColor.alphaComponent * 100)];
     NSString* descriptor = [NSString stringWithFormat:@"{ \"font\" : \"%@\", \"forecolor\" : \"%@\" }", fontAttribute, foreColorAttribute];
     return descriptor;

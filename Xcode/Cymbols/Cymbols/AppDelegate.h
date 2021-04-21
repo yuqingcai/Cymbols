@@ -13,9 +13,9 @@
 #import "CEESecurityBookmark.h"
 #import "CEENetwork.h"
 
-#define CEE_APP_HEART_BEAT_INTERVAL                 0.1     // in second
+//#define TRIAL_VERSION
 
-#define TRIAL_VERSION
+#define CEE_APP_HEART_BEAT_INTERVAL                 0.1     // in second
 #define TIMER_FREEZER_TRIGGER_INTERVAL              360     // in second
 #define TIMER_FREEZER_FREEZE_INTERVAL               15      // in second
 
@@ -34,6 +34,7 @@ extern NSString* CEEApplicationInfoStringIndexer;
 extern NSString* CEEApplicationVersionIndexer;
 extern NSString* CEEBundleVersionIndexer;
 extern NSString* CEESerializerVersionIndexer;
+extern NSString* CEEBackwardCompatibleMaxVersionIndexer;
 
 extern NSString* CEEApplicationConfigurationNameLineWrap;
 extern NSString* CEEApplicationConfigurationNameCaretBlinkTimeInterval;

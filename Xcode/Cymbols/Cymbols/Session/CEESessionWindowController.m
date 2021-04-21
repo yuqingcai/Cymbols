@@ -8,10 +8,10 @@
 #import "AppDelegate.h"
 #import "CEESessionWindowController.h"
 #import "CEESessionViewController.h"
-#import "CEESourceBufferManagerViewController.h"
+#import "CEESaveManagerViewController.h"
 
 @interface CEESessionWindowController()
-@property (strong) NSWindowController* sourceBufferManagerWindowController;
+@property (strong) NSWindowController* saveManagerWindowController;
 @end
 
 @implementation CEESessionWindowController
@@ -40,7 +40,7 @@
     if (![self.window isVisible])
         return;
     
-    AppDelegate* delegate = [NSApp delegate];
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
     if ([_session.project isUntitled])
         [delegate saveWindowSettingAsDefault:self];
 }
@@ -59,12 +59,11 @@
     }
     
     if (syncBuffers.count) {
-        if (!_sourceBufferManagerWindowController)
-            _sourceBufferManagerWindowController = [[NSStoryboard storyboardWithName:@"SourceBufferManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceBufferManagerWindowController"];
-        
-        CEESourceBufferManagerViewController* controller = (CEESourceBufferManagerViewController*)_sourceBufferManagerWindowController.contentViewController;
+        if (!_saveManagerWindowController)
+            _saveManagerWindowController = [[NSStoryboard storyboardWithName:@"SaveManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSaveManagerWindowController"];
+        CEESaveManagerViewController* controller = (CEESaveManagerViewController*)_saveManagerWindowController.contentViewController;
         [controller setModifiedSourceBuffers:syncBuffers];
-        [self.window beginSheet:_sourceBufferManagerWindowController.window completionHandler:(^(NSInteger result) {
+        [self.window beginSheet:_saveManagerWindowController.window completionHandler:(^(NSInteger result) {
             if (result == NSModalResponseCancel)
                 shouldClose = NO;
             else
@@ -95,10 +94,11 @@
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)notification {
-    AppDelegate* delegate = [NSApp delegate];
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
     [super windowDidBecomeMain:notification];
     [_session.project setCurrentSession:_session];
     [delegate setCurrentProject:_session.project];
+    [self mainMenuSetup];
 }
 
 - (void)windowDidResignMain:(NSNotification *)notification {
@@ -124,6 +124,34 @@
         [(id<CEESerialization>)self.contentViewController deserialize:dict[@"IDSessionView"]];
     
     return YES;
+}
+
+- (void)mainMenuSetup {
+    NSMenu* mainMenu = [[NSApplication sharedApplication] mainMenu];
+    CEEProject* project = _session.project;
+    BOOL itemEnable = NO;
+    if (!project.database)
+        itemEnable = NO;
+    else
+        itemEnable = YES;
+    
+    for (NSMenuItem* item in mainMenu.itemArray) {
+        if ([item.title isEqualToString:@"Project"] && [item hasSubmenu]) {
+            [item.submenu setAutoenablesItems:NO];
+            for (NSMenuItem* subItem in [[item submenu] itemArray]) {
+                if ([subItem.title isEqualToString:@"Close Project"] ||
+                    [subItem.title isEqualToString:@"Build"] ||
+                    [subItem.title isEqualToString:@"Sync"] ||
+                    [subItem.title isEqualToString:@"Clean"] ||
+                    [subItem.title isEqualToString:@"Search..."] ||
+                    [subItem.title isEqualToString:@"Add Source Reference..."] ||
+                    [subItem.title isEqualToString:@"Remove Source Reference..."]) {
+                    [subItem setEnabled:itemEnable];
+                }
+            }
+        }
+    }
+    
 }
 
 @end

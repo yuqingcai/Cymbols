@@ -1,5 +1,5 @@
 //
-//  CEESourceBufferManagerViewController.h
+//  CEESaveManagerViewController.h
 //  Cymbols
 //
 //  Created by qing on 2020/7/16.
@@ -12,7 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CEESourceBufferManagerViewController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, NSOpenSavePanelDelegate, CEECheckboxTableCellViewDelegate>
+@interface CEESaveManagerViewController : CEEViewController <CEETableViewDelegate, CEETableViewDataSource, NSOpenSavePanelDelegate, CEECheckboxTableCellViewDelegate>
 @property (strong, nullable) NSArray* modifiedSourceBuffers;
 @end
 

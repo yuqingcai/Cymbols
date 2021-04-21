@@ -29,6 +29,7 @@
     _iconLeading = 0.0;
     _iconWidth = 0.0;
     _iconHeight = 0.0;
+    [self addMouseTraceArea];
 }
 
 - (void)drawRect:(NSRect)dirtyRect {

@@ -9,13 +9,13 @@
 #import "CEEStyleManager.h"
 #import "CEEIdentifier.h"
 #import "CEESessionFrameManager.h"
-#import "CEESourceBufferManagerViewController.h"
+#import "CEESaveManagerViewController.h"
 
 
 @interface CEESessionFrameManager ()
 @property (strong) NSMutableArray<NSView*>* splitViews;
 @property (strong) CEESessionFrameViewController* selectedFrame;
-@property (strong) NSWindowController* sourceBufferManagerWindowController;
+@property (strong) NSWindowController* saveManagerWindowController;
 @end
 
 @implementation CEESessionFrameManager
@@ -340,11 +340,11 @@
     }
     
     if (syncBuffers.count) {
-        if (!_sourceBufferManagerWindowController)
-            _sourceBufferManagerWindowController = [[NSStoryboard storyboardWithName:@"SourceBufferManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceBufferManagerWindowController"];
-        CEESourceBufferManagerViewController* controller = (CEESourceBufferManagerViewController*)_sourceBufferManagerWindowController.contentViewController;
+        if (!_saveManagerWindowController)
+            _saveManagerWindowController = [[NSStoryboard storyboardWithName:@"SaveManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSaveManagerWindowController"];
+        CEESaveManagerViewController* controller = (CEESaveManagerViewController*)_saveManagerWindowController.contentViewController;
         [controller setModifiedSourceBuffers:syncBuffers];
-        [self.view.window beginSheet:_sourceBufferManagerWindowController.window completionHandler:(^(NSInteger result) {
+        [self.view.window beginSheet:_saveManagerWindowController.window completionHandler:(^(NSInteger result) {
             if (result == NSModalResponseCancel)
                 shouldClose = NO;
             else

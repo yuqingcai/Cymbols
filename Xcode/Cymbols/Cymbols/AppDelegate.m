@@ -27,6 +27,7 @@ NSString* CEEApplicationInfoStringIndexer = @"CEEApplicationInfoStringIndexer";
 NSString* CEEApplicationVersionIndexer = @"CEEApplicationVersionIndexer";
 NSString* CEEBundleVersionIndexer = @"CEEBundleVersionIndexer";
 NSString* CEESerializerVersionIndexer = @"CEESerializerVersionIndexer";
+NSString* CEEBackwardCompatibleMaxVersionIndexer = @"CEEBackwardCompatibleMaxVersionIndexer";
 NSString* CEEStylesDirectoryIndexer = @"CEEStylesDirectoryIndexer";
 NSString* CEEApplicationVersionTagFilePathIndexer = @"CEEApplicationVersionTagFilePathIndexer";
 NSString* CEEApplicationConfigurationNameLineWrap = @"line_wrap";
@@ -164,7 +165,7 @@ NSString* CEEApplicationConfigurationNameTextHighlightStyle = @"text_highlight_s
         [fileManager removeItemAtPath:[_supportDirectory stringByAppendingPathComponent:file] error:&error];
 }
 
-- (void) createApplicationVersionTagFile {
+- (void)createApplicationVersionTagFile {
     NSString* versionTagFilePath = [self propertyIndex:CEEApplicationVersionTagFilePathIndexer];
     NSString* versionTag = [self propertyIndex:CEEApplicationVersionIndexer];
     [versionTag writeToFile:versionTagFilePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
@@ -347,6 +348,9 @@ NSString* CEEApplicationConfigurationNameTextHighlightStyle = @"text_highlight_s
     }
     else if ([indexer isEqualToString:CEEBundleVersionIndexer]) {
         return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+    }
+    else if ([indexer isEqualToString:CEEBackwardCompatibleMaxVersionIndexer]) {
+        return @"Cymbols-1.5.0";
     }
     else if ([indexer isEqualToString:CEESerializerVersionIndexer]) {
         return @"Serializer-1.0.0";

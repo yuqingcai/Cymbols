@@ -11,13 +11,13 @@
 #import "CEETitleView.h"
 #import "CEESessionSourceBufferViewController.h"
 #import "CEEImageTextTableCellView.h"
-#import "CEESourceBufferManagerViewController.h"
+#import "CEESaveManagerViewController.h"
 
 @interface CEESessionSourceBufferViewController ()
 @property (strong) IBOutlet CEETitleView *titlebar;
 @property (strong) IBOutlet CEESessionSourceBufferTableView *sourceBufferTable;
 @property (strong) NSArray* buffers;
-@property (strong) NSWindowController* sourceBufferManagerWindowController;
+@property (strong) NSWindowController* saveManagerWindowController;
 @end
 
 @implementation CEESessionSourceBufferViewController
@@ -38,6 +38,8 @@
     [_sourceBufferTable setColumnAutoresizingStyle:kCEETableViewUniformColumnAutoresizingStyle];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(closeSourceBufferResponse:) name:CEENotificationSessionPortCloseSourceBuffer object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activeSourceBufferResponse:) name:CEENotificationSessionPortActiveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSourceBufferResponse:) name:CEENotificationSessionPortSaveSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(openSourceBufferResponse:) name:CEENotificationSessionPortOpenSourceBuffer object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(activePortResponse:) name:CEENotificationSessionActivePort object:nil];
@@ -96,6 +98,9 @@
         }
     }
     
+    if (!indexSet)
+        return;
+    
     [_sourceBufferTable selectRowIndexes:indexSet byExtendingSelection:NO];
     [_sourceBufferTable scrollRowToVisible:[indexSet firstIndex]];
 }
@@ -132,6 +137,16 @@
 }
 
 - (void)sourceBufferChangeStateResponse:(NSNotification*)notification {
+    [_sourceBufferTable reloadData];
+    [self highlightSelectionInSourceBufferTable];
+}
+
+- (void)closeSourceBufferResponse:(NSNotification*)notification {
+    [_sourceBufferTable reloadData];
+    [self highlightSelectionInSourceBufferTable];
+}
+
+- (void)activeSourceBufferResponse:(NSNotification*)notification {
     [_sourceBufferTable reloadData];
     [self highlightSelectionInSourceBufferTable];
 }
@@ -186,18 +201,18 @@
     [self highlightSelectionInSourceBufferTable];
 }
 
-- (IBAction)close:(id)sender {
+- (IBAction)closeCurrentSourceBuffer:(id)sender {
     NSInteger clickedRow = [_sourceBufferTable clickedRow];
     if (clickedRow == -1)
         return ;
     
     CEESourceBuffer* buffer = _buffers[clickedRow];
-    [self closeBuffers:@[buffer]];
+    [self closeSourceBuffers:@[buffer]];
     [_sourceBufferTable reloadData];
     [self highlightSelectionInSourceBufferTable];
 }
 
-- (IBAction)closeOthers:(id)sender {
+- (IBAction)closeOtherSourceBuffers:(id)sender {
     NSInteger clickedRow = [_sourceBufferTable clickedRow];
     if (clickedRow == -1)
         return ;
@@ -208,12 +223,12 @@
         if (buffer != selected)
             [buffers addObject:buffer];
     }
-    [self closeBuffers:buffers];
+    [self closeSourceBuffers:buffers];
     [_sourceBufferTable reloadData];
     [self highlightSelectionInSourceBufferTable];
 }
 
-- (IBAction)closeOthersAbove:(id)sender {
+- (IBAction)closeOtherSourceBuffersAbove:(id)sender {
     NSInteger clickedRow = [_sourceBufferTable clickedRow];
     if (clickedRow == -1 || clickedRow == 0)
         return ;
@@ -222,12 +237,12 @@
     for (NSInteger i = 0; i < clickedRow; i ++)
         [buffers addObject:_buffers[i]];
     
-    [self closeBuffers:buffers];
+    [self closeSourceBuffers:buffers];
     [_sourceBufferTable reloadData];
     [self highlightSelectionInSourceBufferTable];
 }
 
-- (IBAction)closeOthersBelow:(id)sender {
+- (IBAction)closeOtherSourceBuffersBelow:(id)sender {
     NSInteger clickedRow = [_sourceBufferTable clickedRow];
     if (clickedRow == -1 || clickedRow == _buffers.count - 1)
         return ;
@@ -236,12 +251,12 @@
     for (NSInteger i = clickedRow + 1; i < _buffers.count; i ++)
         [buffers addObject:_buffers[i]];
     
-    [self closeBuffers:buffers];
+    [self closeSourceBuffers:buffers];
     [_sourceBufferTable reloadData];
     [self highlightSelectionInSourceBufferTable];
 }
 
-- (void)closeBuffers:(NSArray*)buffers {
+- (void)closeSourceBuffers:(NSArray*)buffers {
     __block BOOL shouldClose = YES;
     NSMutableArray* syncBuffers = [[NSMutableArray alloc] init];
     for (CEESourceBuffer* buffer in buffers) {
@@ -252,11 +267,11 @@
     }
     
     if (syncBuffers.count) {
-        if (!_sourceBufferManagerWindowController)
-            _sourceBufferManagerWindowController = [[NSStoryboard storyboardWithName:@"SourceBufferManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSourceBufferManagerWindowController"];
-        CEESourceBufferManagerViewController* controller = (CEESourceBufferManagerViewController*)_sourceBufferManagerWindowController.contentViewController;
+        if (!_saveManagerWindowController)
+            _saveManagerWindowController = [[NSStoryboard storyboardWithName:@"SaveManager" bundle:nil] instantiateControllerWithIdentifier:@"IDSaveManagerWindowController"];
+        CEESaveManagerViewController* controller = (CEESaveManagerViewController*)_saveManagerWindowController.contentViewController;
         [controller setModifiedSourceBuffers:syncBuffers];
-        [self.view.window beginSheet:_sourceBufferManagerWindowController.window completionHandler:(^(NSInteger result) {
+        [self.view.window beginSheet:_saveManagerWindowController.window completionHandler:(^(NSInteger result) {
             if (result == NSModalResponseCancel)
                 shouldClose = NO;
             else

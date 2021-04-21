@@ -12,11 +12,19 @@
 
 - (void)setFrameSize:(NSSize)newSize {
     [super setFrameSize:newSize];
-        
+    
     NSRect checkboxRect = _checkbox.frame;
+    NSRect textRect = _text.frame;
+    
     checkboxRect.origin.x = 4.0;
-    checkboxRect.size.width = newSize.width - checkboxRect.origin.x;
     [_checkbox setFrame:checkboxRect];
+    
+    textRect.origin.x = checkboxRect.origin.x + checkboxRect.size.width;
+    textRect.size.width = newSize.width - checkboxRect.origin.x - checkboxRect.size.width;
+    if (textRect.size.width <= 0.0)
+        textRect.size.width = 1.0;
+    
+    [_text setFrame:textRect];
 }
 
 - (IBAction)check:(id)sender {

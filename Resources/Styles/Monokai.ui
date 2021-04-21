@@ -246,7 +246,7 @@
         "icon_color" : "#737373",
         "corner_radius" : "2.0",
     },
-        
+    
     "ClassStateButton [actived]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
         "background_color" : "#4B464D",
@@ -278,7 +278,7 @@
         "icon_color" : "#737373",
         "corner_radius" : "2.0",
     },
-    
+        
     "ClassToolbarButton [actived]" : {
     },
     
@@ -434,7 +434,25 @@
         "text_color" : "#EBEBEA",
         "aligment" : "left",
     },
-        
+    
+    "ClassTextLink [actived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "#EBEBEA",
+        "aligment" : "left",
+    },
+    
+    "ClassTextLink [deactived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "#EBEBEA",
+        "aligment" : "left",
+    },
+    
+    "ClassTextLink [highlighted]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "#EBEBEA",
+        "aligment" : "left",
+    },
+    
     "ClassTextTitle [actived]" : {
         "font" : "font(\"Helvetica\", 12.0, \"bold\", 5.0)",
         "text_color" : "#EBEBEA",

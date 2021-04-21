@@ -17,16 +17,6 @@
     [self setEditable:NO];
 }
 
-- (void)setFont:(NSFont *)font {
-    [super setFont:font];
-    [self setTextAttributesDescriptor:[self textAttributesDescriptor]];
-}
-
-- (void)setTextColor:(NSColor *)textColor {
-    [super setTextColor:textColor];
-    [self setTextAttributesDescriptor:[self textAttributesDescriptor]];
-}
-
 - (BOOL)becomeFirstResponder {
     [super becomeFirstResponder];
     return YES;

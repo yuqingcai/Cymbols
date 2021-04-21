@@ -839,13 +839,19 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
     if (!self.dataSource || !self.delegate)
         return;
     
+    NSInteger n = [self numberOfRows];
+    
     [self reloadHeader];
     
-    if (_firstRowIndex >= [self numberOfRows]) {
+    if (_firstRowIndex >= n) {
         _firstRowIndex = 0;
         _selectedRowIndexes = nil;
     }
     
+    if (!_selectedRowIndexes && n && _selectable) {
+        _selectedRowIndexes = [[NSMutableIndexSet alloc] initWithIndex:0];
+    }
+            
     if (!self.grid.rowViews.count)
         [self createGridRowViews];
     else
@@ -1234,8 +1240,7 @@ typedef NS_OPTIONS(NSInteger, ComponentState) {
 - (void)mouseDown:(NSEvent*)event {
         
     [self.window makeFirstResponder:self];
-    
-    
+        
     BOOL keepOn = YES;
     BOOL isDragging = NO;
     BOOL clickDetect = NO;
@@ -1927,6 +1932,7 @@ exit:
     [_verticalScroller setStyleConfiguration:configuration];
     [_horizontalScroller setStyleConfiguration:configuration];
     [_grid setStyleConfiguration:configuration];
+    [_headerPadding setStyleConfiguration:configuration];
     
     for (CEEGridRowView* view in _rowViewBuffer)
         [view setStyleConfiguration:configuration];

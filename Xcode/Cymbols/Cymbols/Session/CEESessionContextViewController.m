@@ -41,7 +41,7 @@
     [_titlebar setTitle:@"Context"];
     [_titlebar setIcon:[styleManager iconFromName:@"icon_relation_16x16"]];
     _adjustSplitView = NO;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionPortCreateSourceContextResponse:) name:CEENotificationSessionPortCreateSourceContext object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionCreateSourceContextResponse:) name:CEENotificationSessionCreateSourceContext object:nil];
 }
 
 - (void)dealloc {
@@ -198,9 +198,9 @@
     [_detailTitlebar setIcon:[styleManager iconFromFilePath:filePath]];
 }
 
-- (void)sessionPortCreateSourceContextResponse:(NSNotification*)notification {
-    CEESessionPort* port = notification.object;
-    if (port.session != _session)
+- (void)sessionCreateSourceContextResponse:(NSNotification*)notification {
+    CEESession* session = notification.object;
+    if (session != _session)
         return;
     
     [_symbolTable reloadData];
@@ -208,10 +208,10 @@
 }
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
-    if (!_session.activedPort.source_context ||
-        !_session.activedPort.source_context->symbols)
+    if (!_session.sourceContext ||
+        !_session.sourceContext->symbols)
         return 0;
-    return cee_list_length(_session.activedPort.source_context->symbols);
+    return cee_list_length(_session.sourceContext->symbols);
 }
 
 - (NSString *)tableView:(CEETableView *)tableView titleForColumn:(NSInteger)column {
@@ -224,7 +224,7 @@
 
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
-    CEEList* symbols = _session.activedPort.source_context->symbols;
+    CEEList* symbols = _session.sourceContext->symbols;
     
     if (column == 0) {
         CEEImageTextTableCellView* cellView = [tableView makeViewWithIdentifier:@"IDImageTextTableCellView"];
@@ -249,12 +249,12 @@
 }
 
 - (IBAction)selectRow:(id)sender {
-    if (!_session.activedPort.source_context ||
-        !_session.activedPort.source_context->symbols ||
+    if (!_session.sourceContext ||
+        !_session.sourceContext->symbols ||
         !_symbolTable.selectedRowIndexes || _symbolTable.selectedRow == -1)
         return;
     
-    CEEList* symbols = _session.activedPort.source_context->symbols;
+    CEEList* symbols = _session.sourceContext->symbols;
     CEESourceSymbol* symbol = cee_list_nth_data(symbols, (cee_int)_symbolTable.selectedRow);
     [self presentContextBufferWithSymbol:symbol];
 }
@@ -262,11 +262,11 @@
 - (void)selectSymbolAtIndex:(NSInteger)index {
     CEESourceSymbol* symbol = NULL;
     
-    if (_session.activedPort.source_context && _session.activedPort.source_context->symbols) {
+    if (_session.sourceContext && _session.sourceContext->symbols) {
         NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:index];
         [_symbolTable selectRowIndexes:indexSet byExtendingSelection:NO];
         [_symbolTable scrollRowToVisible:[indexSet firstIndex]];
-        symbol = cee_list_nth_data(_session.activedPort.source_context->symbols, (cee_int)_symbolTable.selectedRow);
+        symbol = cee_list_nth_data(_session.sourceContext->symbols, (cee_int)_symbolTable.selectedRow);
     }
     
     [self presentContextBufferWithSymbol:symbol];

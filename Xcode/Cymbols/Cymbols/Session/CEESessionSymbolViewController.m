@@ -105,7 +105,7 @@
     
     CEESourceSymbolWrapper* wrapper = cee_list_nth_data(_symbolWrappers,
                                                         (cee_uint)_symbolTable.selectedRow);
-    [_session.activedPort jumpToSymbol:wrapper->symbol_ref];
+    [_session jumpToSymbol:wrapper->symbol_ref inPort:_session.activedPort];
 }
 
 - (BOOL)deserialize:(NSDictionary *)dict {

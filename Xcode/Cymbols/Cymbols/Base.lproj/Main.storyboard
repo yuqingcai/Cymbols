@@ -68,6 +68,12 @@
                                                 <action selector="newFile:" target="Ady-hI-5gd" id="o4j-yc-4ig"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="New Window" keyEquivalent="N" id="B5y-4x-dbm">
+                                            <connections>
+                                                <action selector="newWindow:" target="Ady-hI-5gd" id="kdP-5T-4wN"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
                                         <menuItem title="Open…" keyEquivalent="o" id="IAo-SY-fd9">
                                             <connections>
                                                 <action selector="openFiles:" target="Ady-hI-5gd" id="4rc-7d-pag"/>
@@ -86,19 +92,7 @@
                                                 </items>
                                             </menu>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
-                                        <menuItem title="Close Window" keyEquivalent="w" id="DVo-aG-piG">
-                                            <connections>
-                                                <action selector="closeWindow:" target="Ady-hI-5gd" id="6Ce-fK-6hl"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Close Project" id="x41-ni-MbF">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="closeProject:" target="Ady-hI-5gd" id="Pmg-Hn-uuG"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="1mO-Vc-uHM"/>
+                                        <menuItem isSeparatorItem="YES" id="w9I-hP-rWC"/>
                                         <menuItem title="Save" keyEquivalent="s" id="pxx-59-PXV">
                                             <connections>
                                                 <action selector="save:" target="Ady-hI-5gd" id="Mq6-qj-7Rc"/>
@@ -113,6 +107,18 @@
                                         <menuItem title="Save As…" keyEquivalent="S" id="Bw7-FT-i3A">
                                             <connections>
                                                 <action selector="saveAs:" target="Ady-hI-5gd" id="Duq-6d-haO"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="1mO-Vc-uHM"/>
+                                        <menuItem title="Close File" id="FZT-JV-m5c">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="closeFile:" target="Ady-hI-5gd" id="GGl-YE-wDe"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Close Window" keyEquivalent="w" id="DVo-aG-piG">
+                                            <connections>
+                                                <action selector="closeWindow:" target="Ady-hI-5gd" id="5PI-1c-gsI"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -148,18 +154,6 @@
                                                 <action selector="paste:" target="Ady-hI-5gd" id="UvS-8e-Qdg"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Paste and Match Style" keyEquivalent="V" id="WeT-3V-zwk">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="pasteAsPlainText:" target="Ady-hI-5gd" id="cEh-KX-wJQ"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Delete" id="pa3-QI-u2k">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="delete:" target="Ady-hI-5gd" id="0Mk-Ml-PaM"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem title="Select All" keyEquivalent="a" id="Ruw-6m-B2m">
                                             <connections>
                                                 <action selector="selectAll:" target="Ady-hI-5gd" id="VNm-Mi-diN"/>
@@ -172,9 +166,14 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Project" id="Axi-CX-u9f">
                                     <items>
-                                        <menuItem title="New Project..." keyEquivalent="N" id="5hX-dU-uPn">
+                                        <menuItem title="New Project..." keyEquivalent="P" id="5hX-dU-uPn">
                                             <connections>
                                                 <action selector="newProject:" target="Ady-hI-5gd" id="YI5-TU-R4B"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Close Project" keyEquivalent="C" id="NGQ-KH-69H">
+                                            <connections>
+                                                <action selector="closeProject:" target="Ady-hI-5gd" id="qQC-C2-WtS"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="vTl-78-bt7"/>
@@ -193,36 +192,21 @@
                                                 <action selector="cleanProject:" target="Ady-hI-5gd" id="7ib-hW-BrT"/>
                                             </connections>
                                         </menuItem>
-                                    </items>
-                                </menu>
-                            </menuItem>
-                            <menuItem title="Navigate" id="lRi-B9-aF6">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Navigate" id="AGS-E5-teN">
-                                    <items>
-                                        <menuItem title="Jump To Definition" id="27u-hK-I3T">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        <menuItem isSeparatorItem="YES" id="k9p-Vj-9Fg"/>
+                                        <menuItem title="Search..." keyEquivalent="F" id="Wbz-Bz-6bj">
                                             <connections>
-                                                <action selector="jumpToTargetSymbol:" target="Ady-hI-5gd" id="Pg4-rX-Q1J"/>
+                                                <action selector="searchInProject:" target="Ady-hI-5gd" id="lTN-m6-wrS"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Search Reference..." id="9DY-M0-xoa">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        <menuItem isSeparatorItem="YES" id="dtq-Ws-cnq"/>
+                                        <menuItem title="Add Source Reference..." keyEquivalent="A" id="77U-tm-AlB">
                                             <connections>
-                                                <action selector="searchReferences:" target="Ady-hI-5gd" id="Kbo-H8-r1P"/>
+                                                <action selector="addReferencesToProject:" target="Ady-hI-5gd" id="qPr-SR-SVC"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="xXi-jq-P3H"/>
-                                        <menuItem title="Go Forward" id="ZXY-Hh-NTk">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        <menuItem title="Remove Source Reference..." keyEquivalent="R" id="Dbt-zT-yGU">
                                             <connections>
-                                                <action selector="next:" target="Ady-hI-5gd" id="zro-4t-gda"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Go Back" id="e2O-Pp-TpQ">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="prev:" target="Ady-hI-5gd" id="UGB-Rd-7Ex"/>
+                                                <action selector="removeReferencesFromProject:" target="Ady-hI-5gd" id="sqC-NV-lUd"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -268,25 +252,50 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="View" id="HyV-fh-RgO">
                                     <items>
-                                        <menuItem title="Show Toolbar" keyEquivalent="t" id="snW-S8-Cw5">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                        <menuItem title="Toggle Toolbar" keyEquivalent="t" id="snW-S8-Cw5">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
-                                                <action selector="toggleSessionToolbar:" target="Ady-hI-5gd" id="Tyc-Yl-JmD"/>
+                                                <action selector="toggleToolbar:" target="Ady-hI-5gd" id="WfA-HH-iDa"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Customize Toolbar…" id="1UK-8n-QPP">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        <menuItem title="Toggle Symbol Sidebar" keyEquivalent="s" id="A0M-ab-otm">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
-                                                <action selector="runToolbarCustomizationPalette:" target="Ady-hI-5gd" id="pQI-g3-MTW"/>
+                                                <action selector="toggleSymbolView:" target="Ady-hI-5gd" id="Ku6-Wl-FGF"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Toggle Open Files Sidebar" keyEquivalent="o" id="JQ2-sK-Nz3">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="toggleSourceBufferView:" target="Ady-hI-5gd" id="VRY-9k-88K"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Toggle File Reference Sidebar" keyEquivalent="f" id="HJM-2A-PdW">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="toggleFileReferenceView:" target="Ady-hI-5gd" id="Xbz-tU-yP0"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Toggle Session Context" keyEquivalent="c" id="XSS-p8-0P3">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="toggleContextView:" target="Ady-hI-5gd" id="pCQ-Ku-Ei4"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="hB3-LF-h0Y"/>
-                                        <menuItem title="Show Sidebar" keyEquivalent="s" id="kIP-vf-haE">
+                                        <menuItem title="Split View Horizontally" keyEquivalent="h" id="p8w-dn-pON">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
-                                                <action selector="toggleSidebar:" target="Ady-hI-5gd" id="iwa-gc-5KM"/>
+                                                <action selector="splitHorizontally:" target="Ady-hI-5gd" id="5vI-5F-a6q"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Split View Vertically" keyEquivalent="v" id="wIR-g6-xLX">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="splitVertically:" target="Ady-hI-5gd" id="4RD-E4-wDY"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="pcX-eq-mIw"/>
                                         <menuItem title="Enter Full Screen" keyEquivalent="f" id="4J7-dP-txa">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
@@ -300,9 +309,14 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Window" systemMenu="window" id="Td7-aD-5lo">
                                     <items>
-                                        <menuItem title="Minimize" keyEquivalent="m" id="OY7-WF-poV">
+                                        <menuItem title="New Window" keyEquivalent="W" id="OY7-WF-poV">
                                             <connections>
-                                                <action selector="performMiniaturize:" target="Ady-hI-5gd" id="VwT-WD-YPe"/>
+                                                <action selector="newWindow:" target="Ady-hI-5gd" id="Aj1-qB-jwQ"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Minimize" keyEquivalent="m" id="DTE-ej-CJ9">
+                                            <connections>
+                                                <action selector="performMiniaturize:" target="Ady-hI-5gd" id="qVi-lt-L7B"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Zoom" id="R4o-n2-Eq4">
@@ -325,9 +339,27 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                                     <items>
-                                        <menuItem title="Cymbols Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                                        <menuItem title="Manual" id="FKE-Sm-Kum">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
-                                                <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
+                                                <action selector="getManual:" target="Ady-hI-5gd" id="jyd-ti-imC"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Report Bug" id="ctK-ko-vGK">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reportBug:" target="Ady-hI-5gd" id="FgM-ag-A2R"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Request New Feature" id="k0s-be-U9n">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="requestNewFeature:" target="Ady-hI-5gd" id="dK4-8o-3aN"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Cymbols Help" keyEquivalent="?" id="Acu-Le-b4q">
+                                            <connections>
+                                                <action selector="getHelp:" target="Ady-hI-5gd" id="olJ-oJ-xwF"/>
                                             </connections>
                                         </menuItem>
                                     </items>

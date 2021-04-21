@@ -17,4 +17,3 @@
 - (NSString*)serialize;
 - (void)deserialize:(NSDictionary*)dict;
 @end
-

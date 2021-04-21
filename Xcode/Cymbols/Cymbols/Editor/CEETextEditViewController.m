@@ -364,7 +364,7 @@
     CEERange replace;
     CEERange* range = NULL;
     CEEList* p = NULL;
-        
+    
     ranges = cee_text_edit_searched_ranges_get(_textView.edit);
     if (!ranges)
         return;
@@ -399,6 +399,8 @@
         cee_text_edit_searched_index_set(_textView.edit, index);
     }
     
+    [self.buffer setState:kCEESourceBufferStateShouldSyncToFile];
+    [self styledText];
     [self adjustScrollers];
     [self updateLineNumberView];
     _searchTextWhenModifing = YES;
@@ -420,6 +422,8 @@
     if (_searchingText)
         [self searchText];
     
+    [self.buffer setState:kCEESourceBufferStateShouldSyncToFile];
+    [self styledText];
     [self adjustScrollers];
     [self updateLineNumberView];
     _searchTextWhenModifing = YES;

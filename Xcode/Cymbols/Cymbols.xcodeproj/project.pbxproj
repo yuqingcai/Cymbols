@@ -22,6 +22,7 @@
 		26381F292564A692004CC769 /* cee_csharp.l in Sources */ = {isa = PBXBuildFile; fileRef = 26381F272564A692004CC769 /* cee_csharp.l */; };
 		2647CE3925309A1700970FE4 /* WelcomeGuide in Resources */ = {isa = PBXBuildFile; fileRef = 2647CE3825309A1700970FE4 /* WelcomeGuide */; };
 		26548527254150AC00E1D0DE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 26548526254150AC00E1D0DE /* Credits.rtf */; };
+		265B3A512629D0AC001AD06D /* icon_pin_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 265B3A502629D0AC001AD06D /* icon_pin_16x16@2x.png */; };
 		265C705C2618003300AF9A63 /* CEESourceHistoryPopupPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 265C705B2618003300AF9A63 /* CEESourceHistoryPopupPanel.m */; };
 		2660770F25D80A870087D883 /* CEETimerFreezer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2660770D25D80A860087D883 /* CEETimerFreezer.m */; };
 		2660771225D816930087D883 /* TimeFreezer.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2660771025D816930087D883 /* TimeFreezer.storyboard */; };
@@ -139,7 +140,7 @@
 		269204C5252FF57500D6E2DC /* CEEProject.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204C3252FF57400D6E2DC /* CEEProject.m */; };
 		269204C8252FF58200D6E2DC /* CEESearcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204C7252FF58200D6E2DC /* CEESearcher.m */; };
 		269204CB252FF58F00D6E2DC /* CEESourceBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204C9252FF58F00D6E2DC /* CEESourceBuffer.m */; };
-		269204CE252FF5A000D6E2DC /* CEESourceBufferManagerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204CC252FF5A000D6E2DC /* CEESourceBufferManagerViewController.m */; };
+		269204CE252FF5A000D6E2DC /* CEESaveManagerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204CC252FF5A000D6E2DC /* CEESaveManagerViewController.m */; };
 		269204D9252FF5BC00D6E2DC /* CEEProjectCleanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204D0252FF5BB00D6E2DC /* CEEProjectCleanViewController.m */; };
 		269204DA252FF5BC00D6E2DC /* CEEProjectSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204D5252FF5BC00D6E2DC /* CEEProjectSearchViewController.m */; };
 		269204DC252FF5BC00D6E2DC /* CEEProjectContextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269204D7252FF5BC00D6E2DC /* CEEProjectContextViewController.m */; };
@@ -158,7 +159,7 @@
 		2692050A252FF60300D6E2DC /* Editor.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 269204F8252FF60200D6E2DC /* Editor.storyboard */; };
 		2692050B252FF60300D6E2DC /* FilePathView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204FA252FF60200D6E2DC /* FilePathView.xib */; };
 		2692050C252FF60300D6E2DC /* AddReferenceView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 269204FC252FF60300D6E2DC /* AddReferenceView.xib */; };
-		2692050D252FF60300D6E2DC /* SourceBufferManager.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 269204FE252FF60300D6E2DC /* SourceBufferManager.storyboard */; };
+		2692050D252FF60300D6E2DC /* SaveManager.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 269204FE252FF60300D6E2DC /* SaveManager.storyboard */; };
 		2692050F252FF6AE00D6E2DC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2692050E252FF6AD00D6E2DC /* main.m */; };
 		26920511252FF71400D6E2DC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2667ECFB25037D8000ED5010 /* Assets.xcassets */; };
 		2693B21C2530015200D21FD3 /* Cymbols.cfg in Resources */ = {isa = PBXBuildFile; fileRef = 2693B21B2530015200D21FD3 /* Cymbols.cfg */; };
@@ -196,6 +197,8 @@
 		8A83605D261BEB1A007EBD71 /* CEEComboBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A83605B261BEB1A007EBD71 /* CEEComboBox.m */; };
 		8A836060261BF07D007EBD71 /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8A83605E261BF07D007EBD71 /* Preferences.storyboard */; };
 		8A836063261BF39E007EBD71 /* CEEPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A836062261BF39E007EBD71 /* CEEPreferencesViewController.m */; };
+		8A94A96A262D700B002DB894 /* CEETextLink.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A94A968262D700B002DB894 /* CEETextLink.m */; };
+		8A94A96D262D7852002DB894 /* CEEImageLinkView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A94A96C262D7852002DB894 /* CEEImageLinkView.m */; };
 		8AA63F7A25E8C4D600318902 /* icon_database_clean_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA63F0525E8C4D300318902 /* icon_database_clean_16x16@2x.png */; };
 		8AA63F7B25E8C4D600318902 /* icon_message_declaration_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA63F0625E8C4D300318902 /* icon_message_declaration_16x16@2x.png */; };
 		8AA63F7C25E8C4D600318902 /* icon_file_type_csharp_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA63F0725E8C4D300318902 /* icon_file_type_csharp_16x16@2x.png */; };
@@ -371,6 +374,7 @@
 		26381F272564A692004CC769 /* cee_csharp.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_csharp.l; sourceTree = "<group>"; };
 		2647CE3825309A1700970FE4 /* WelcomeGuide */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WelcomeGuide; path = ../../../../Resources/WelcomeGuide; sourceTree = "<group>"; };
 		26548526254150AC00E1D0DE /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
+		265B3A502629D0AC001AD06D /* icon_pin_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_pin_16x16@2x.png"; sourceTree = "<group>"; };
 		265C705A2618003300AF9A63 /* CEESourceHistoryPopupPanel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEESourceHistoryPopupPanel.h; sourceTree = "<group>"; };
 		265C705B2618003300AF9A63 /* CEESourceHistoryPopupPanel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEESourceHistoryPopupPanel.m; sourceTree = "<group>"; };
 		2660770D25D80A860087D883 /* CEETimerFreezer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETimerFreezer.m; sourceTree = "<group>"; };
@@ -606,8 +610,8 @@
 		269204C7252FF58200D6E2DC /* CEESearcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESearcher.m; sourceTree = "<group>"; };
 		269204C9252FF58F00D6E2DC /* CEESourceBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESourceBuffer.m; sourceTree = "<group>"; };
 		269204CA252FF58F00D6E2DC /* CEESourceBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESourceBuffer.h; sourceTree = "<group>"; };
-		269204CC252FF5A000D6E2DC /* CEESourceBufferManagerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESourceBufferManagerViewController.m; sourceTree = "<group>"; };
-		269204CD252FF5A000D6E2DC /* CEESourceBufferManagerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESourceBufferManagerViewController.h; sourceTree = "<group>"; };
+		269204CC252FF5A000D6E2DC /* CEESaveManagerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEESaveManagerViewController.m; sourceTree = "<group>"; };
+		269204CD252FF5A000D6E2DC /* CEESaveManagerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEESaveManagerViewController.h; sourceTree = "<group>"; };
 		269204CF252FF5BB00D6E2DC /* CEEProjectCleanViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectCleanViewController.h; sourceTree = "<group>"; };
 		269204D0252FF5BB00D6E2DC /* CEEProjectCleanViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEProjectCleanViewController.m; sourceTree = "<group>"; };
 		269204D1252FF5BB00D6E2DC /* CEEProjectSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEProjectSearchViewController.h; sourceTree = "<group>"; };
@@ -632,7 +636,7 @@
 		269204F9252FF60200D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Editor.storyboard; sourceTree = "<group>"; };
 		269204FB252FF60200D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/FilePathView.xib; sourceTree = "<group>"; };
 		269204FD252FF60300D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/AddReferenceView.xib; sourceTree = "<group>"; };
-		269204FF252FF60300D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/SourceBufferManager.storyboard; sourceTree = "<group>"; };
+		269204FF252FF60300D6E2DC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/SaveManager.storyboard; sourceTree = "<group>"; };
 		2692050E252FF6AD00D6E2DC /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2693B21B2530015200D21FD3 /* Cymbols.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cymbols.cfg; path = ../../../../Resources/Cymbols.cfg; sourceTree = "<group>"; };
 		2693B226253001D700D21FD3 /* Styles */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Styles; path = ../../../../Resources/Styles; sourceTree = "<group>"; };
@@ -685,6 +689,10 @@
 		8A83605F261BF07D007EBD71 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Preferences.storyboard; sourceTree = "<group>"; };
 		8A836061261BF39E007EBD71 /* CEEPreferencesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CEEPreferencesViewController.h; path = Cymbols/CEEPreferencesViewController.h; sourceTree = SOURCE_ROOT; };
 		8A836062261BF39E007EBD71 /* CEEPreferencesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = CEEPreferencesViewController.m; path = Cymbols/CEEPreferencesViewController.m; sourceTree = SOURCE_ROOT; };
+		8A94A968262D700B002DB894 /* CEETextLink.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEETextLink.m; sourceTree = "<group>"; };
+		8A94A969262D700B002DB894 /* CEETextLink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETextLink.h; sourceTree = "<group>"; };
+		8A94A96B262D7852002DB894 /* CEEImageLinkView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEImageLinkView.h; sourceTree = "<group>"; };
+		8A94A96C262D7852002DB894 /* CEEImageLinkView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEImageLinkView.m; sourceTree = "<group>"; };
 		8AA63F0525E8C4D300318902 /* icon_database_clean_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_database_clean_16x16@2x.png"; sourceTree = "<group>"; };
 		8AA63F0625E8C4D300318902 /* icon_message_declaration_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_message_declaration_16x16@2x.png"; sourceTree = "<group>"; };
 		8AA63F0725E8C4D300318902 /* icon_file_type_csharp_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_csharp_16x16@2x.png"; sourceTree = "<group>"; };
@@ -871,8 +879,8 @@
 				269F9656253DB22500D8808A /* CEESourcePoint.m */,
 				269204CA252FF58F00D6E2DC /* CEESourceBuffer.h */,
 				269204C9252FF58F00D6E2DC /* CEESourceBuffer.m */,
-				269204CD252FF5A000D6E2DC /* CEESourceBufferManagerViewController.h */,
-				269204CC252FF5A000D6E2DC /* CEESourceBufferManagerViewController.m */,
+				269204CD252FF5A000D6E2DC /* CEESaveManagerViewController.h */,
+				269204CC252FF5A000D6E2DC /* CEESaveManagerViewController.m */,
 				269204D4252FF5BC00D6E2DC /* CEEProjectParseViewController.h */,
 				269204D8252FF5BC00D6E2DC /* CEEProjectParseViewController.m */,
 				269204CF252FF5BB00D6E2DC /* CEEProjectCleanViewController.h */,
@@ -903,7 +911,7 @@
 				269204EE252FF60100D6E2DC /* Theme.storyboard */,
 				269204F6252FF60200D6E2DC /* AutoComplete.storyboard */,
 				261BE13925C79F4C0099158E /* ReferenceManager.storyboard */,
-				269204FE252FF60300D6E2DC /* SourceBufferManager.storyboard */,
+				269204FE252FF60300D6E2DC /* SaveManager.storyboard */,
 				261BE13C25C7AB960099158E /* ProjectCreator.storyboard */,
 				269204F2252FF60200D6E2DC /* ProjectProcess.storyboard */,
 				8A83605E261BF07D007EBD71 /* Preferences.storyboard */,
@@ -1139,6 +1147,7 @@
 		269202E4252FF3E300D6E2DC /* 2x */ = {
 			isa = PBXGroup;
 			children = (
+				265B3A502629D0AC001AD06D /* icon_pin_16x16@2x.png */,
 				8AA63F0925E8C4D300318902 /* icon_add_16x16@2x.png */,
 				8AA63F1A25E8C4D400318902 /* icon_add_file_16x16@2x.png */,
 				8AA63F5D25E8C4D600318902 /* icon_alert_32x32@2x.png */,
@@ -1291,6 +1300,8 @@
 				269203E3252FF4F400D6E2DC /* CEEIdentifier.m */,
 				269203E4252FF4F400D6E2DC /* CEEImageView.h */,
 				269203E5252FF4F400D6E2DC /* CEEImageView.m */,
+				8A94A96B262D7852002DB894 /* CEEImageLinkView.h */,
+				8A94A96C262D7852002DB894 /* CEEImageLinkView.m */,
 				269203E6252FF4F400D6E2DC /* CEEJSONReader.h */,
 				269203E7252FF4F400D6E2DC /* CEEJSONReader.m */,
 				269203EC252FF4F400D6E2DC /* CEEPopupPanel.h */,
@@ -1320,6 +1331,8 @@
 				8A6F3112261D516C00F9523D /* CEETextFieldSimple.m */,
 				26920401252FF4F400D6E2DC /* CEETextLabel.h */,
 				26920402252FF4F400D6E2DC /* CEETextLabel.m */,
+				8A94A969262D700B002DB894 /* CEETextLink.h */,
+				8A94A968262D700B002DB894 /* CEETextLink.m */,
 				26920403252FF4F400D6E2DC /* CEETextTitle.h */,
 				26920404252FF4F400D6E2DC /* CEETextTitle.m */,
 				269203D6252FF4F400D6E2DC /* CEEBinaryView.h */,
@@ -1576,7 +1589,7 @@
 				8AA63FA925E8C4D600318902 /* icon_edit_16x16@2x.png in Resources */,
 				8AA63FCB25E8C4D600318902 /* icon_split2_mono_16x16@2x.png in Resources */,
 				8AA63F9F25E8C4D600318902 /* icon_expandable_16x16@2x.png in Resources */,
-				2692050D252FF60300D6E2DC /* SourceBufferManager.storyboard in Resources */,
+				2692050D252FF60300D6E2DC /* SaveManager.storyboard in Resources */,
 				8AA63F7A25E8C4D600318902 /* icon_database_clean_16x16@2x.png in Resources */,
 				8AA63FB725E8C4D600318902 /* icon_css_selector_16x16@2x.png in Resources */,
 				8AA63FDA25E8C4D600318902 /* icon_file_not_existed_16x16@2x.png in Resources */,
@@ -1634,6 +1647,7 @@
 				8AA63FE025E8C4D600318902 /* icon_toolbar_toggle_16x16@2x.png in Resources */,
 				8AA63F9E25E8C4D600318902 /* icon_variable_declaration_16x16@2x.png in Resources */,
 				26920504252FF60300D6E2DC /* Session.storyboard in Resources */,
+				265B3A512629D0AC001AD06D /* icon_pin_16x16@2x.png in Resources */,
 				2693B21C2530015200D21FD3 /* Cymbols.cfg in Resources */,
 				8AA63FC825E8C4D600318902 /* icon_split2_16x16@2x.png in Resources */,
 				8AA63F8525E8C4D600318902 /* icon_butterfly_128x128@2x.png in Resources */,
@@ -1750,6 +1764,7 @@
 				26920432252FF4F400D6E2DC /* CEEStateButton.m in Sources */,
 				26920435252FF4F400D6E2DC /* CEETabbarStateButton.m in Sources */,
 				269204AF252FF53100D6E2DC /* CEEProjectPropertyView.m in Sources */,
+				8A94A96D262D7852002DB894 /* CEEImageLinkView.m in Sources */,
 				8ACE9D84261C4DBA0006106A /* CEEComboBoxTableCellView.m in Sources */,
 				26C9B0142599A49100A24B60 /* CEEToolbarStateButton.m in Sources */,
 				26B3F0772560F403007D902C /* cee_gnu_asm.l in Sources */,
@@ -1757,7 +1772,7 @@
 				26920495252FF51A00D6E2DC /* CEESessionWindowController.m in Sources */,
 				8A6F3110261D4EB600F9523D /* CEETextFieldTableCellView.m in Sources */,
 				269204A6252FF52700D6E2DC /* CEERemoveReferenceView.m in Sources */,
-				269204CE252FF5A000D6E2DC /* CEESourceBufferManagerViewController.m in Sources */,
+				269204CE252FF5A000D6E2DC /* CEESaveManagerViewController.m in Sources */,
 				2692048B252FF51A00D6E2DC /* CEESessionSourceBufferViewController.m in Sources */,
 				26920297252FF35600D6E2DC /* cee_range.c in Sources */,
 				2692029F252FF37400D6E2DC /* cee_backend.c in Sources */,
@@ -1870,6 +1885,7 @@
 				269204DD252FF5BC00D6E2DC /* CEEProjectParseViewController.m in Sources */,
 				26920292252FF35600D6E2DC /* cee_fileutils.c in Sources */,
 				26920443252FF4F400D6E2DC /* CEEWindowController.m in Sources */,
+				8A94A96A262D700B002DB894 /* CEETextLink.m in Sources */,
 				26920434252FF4F400D6E2DC /* CEETabbarButton.m in Sources */,
 				26920293252FF35600D6E2DC /* cee_geometry.c in Sources */,
 				269202C2252FF38400D6E2DC /* cee_reference.c in Sources */,
@@ -2052,12 +2068,12 @@
 			name = AddReferenceView.xib;
 			sourceTree = "<group>";
 		};
-		269204FE252FF60300D6E2DC /* SourceBufferManager.storyboard */ = {
+		269204FE252FF60300D6E2DC /* SaveManager.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
 				269204FF252FF60300D6E2DC /* Base */,
 			);
-			name = SourceBufferManager.storyboard;
+			name = SaveManager.storyboard;
 			sourceTree = "<group>";
 		};
 		26CBA6CA25C9237200062C23 /* FileSettingView.xib */ = {
@@ -2217,7 +2233,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.5.1;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2252,7 +2268,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.5.1;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";

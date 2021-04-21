@@ -39,10 +39,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="480" height="289"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iwl-4A-8LX" customClass="CEEImageView">
+                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iwl-4A-8LX" customClass="CEEImageLinkView">
                                 <rect key="frame" x="208" y="198" width="64" height="64"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_butterfly_128x128" id="Koa-zH-xfc"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="URLString" value="http://www.cymbols.io"/>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I1J-5D-Vpd" customClass="CEEButton">
                                 <rect key="frame" x="161" y="96" width="157" height="24"/>
@@ -55,7 +58,7 @@
                                 </connections>
                             </customView>
                             <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BwN-gF-edQ" customClass="CEETextTitle">
-                                <rect key="frame" x="208" y="175" width="64" height="24"/>
+                                <rect key="frame" x="208" y="169" width="64" height="24"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Cymbols"/>
@@ -69,23 +72,25 @@
                                 </userDefinedRuntimeAttributes>
                             </customView>
                             <customView identifier="IDWelcomeViewCopyrightTextLabel" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="617-9g-WEd" customClass="CEETextLabel">
-                                <rect key="frame" x="123" y="52" width="235" height="24"/>
+                                <rect key="frame" x="123" y="52" width="235" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Copyright © 2021 Yu Qing Cai. All rights reserved."/>
                                 </userDefinedRuntimeAttributes>
                             </customView>
-                            <customView identifier="IDWelcomeViewLinkTextLabel" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RWQ-ZI-qiv" customClass="CEETextLabel">
-                                <rect key="frame" x="183" y="29" width="115" height="24"/>
+                            <customView identifier="IDWelcomeViewLinkTextLabel" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RWQ-ZI-qiv" customClass="CEETextLink">
+                                <rect key="frame" x="183" y="29" width="115" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="https://www.cymbols.io"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="URLString" value="http://www.cymbols.io"/>
                                 </userDefinedRuntimeAttributes>
                             </customView>
                         </subviews>
                     </view>
                     <connections>
                         <outlet property="freezeTitle" destination="6eo-dD-jnO" id="sx8-ev-39A"/>
+                        <outlet property="productLinkAddress" destination="RWQ-ZI-qiv" id="eMc-5Z-8zw"/>
                     </connections>
                 </viewController>
                 <customObject id="caK-5Y-LT7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

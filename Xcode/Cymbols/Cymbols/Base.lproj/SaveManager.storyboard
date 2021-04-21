@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -8,7 +9,7 @@
         <!--Window Controller-->
         <scene sceneID="ahv-op-OuB">
             <objects>
-                <windowController storyboardIdentifier="IDSourceBufferManagerWindowController" id="Li7-ne-qmn" customClass="CEEWindowController" sceneMemberID="viewController">
+                <windowController storyboardIdentifier="IDSaveManagerWindowController" id="Li7-ne-qmn" customClass="CEEWindowController" sceneMemberID="viewController">
                     <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" titlebarAppearsTransparent="YES" titleVisibility="hidden" id="XUh-gi-HgG" customClass="CEEWindow">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
                         <rect key="contentRect" x="952" y="465" width="600" height="500"/>
@@ -25,10 +26,10 @@
             </objects>
             <point key="canvasLocation" x="219" y="76.5"/>
         </scene>
-        <!--Source Buffer Manager View Controller-->
+        <!--Save Manager View Controller-->
         <scene sceneID="cTi-NY-w2f">
             <objects>
-                <viewController id="HvY-8q-DBX" customClass="CEESourceBufferManagerViewController" sceneMemberID="viewController">
+                <viewController id="HvY-8q-DBX" customClass="CEESaveManagerViewController" sceneMemberID="viewController">
                     <view key="view" id="oH0-m7-mbz" customClass="CEEWindowContentView">
                         <rect key="frame" x="0.0" y="0.0" width="704" height="496"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -118,7 +119,7 @@
                                     <constraint firstAttribute="height" constant="23" id="i17-YC-iVq"/>
                                 </constraints>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="OK"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Save"/>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="save:" target="HvY-8q-DBX" id="rak-22-RhE"/>

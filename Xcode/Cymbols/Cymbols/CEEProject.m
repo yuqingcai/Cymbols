@@ -31,10 +31,11 @@ NSNotificationName CEENotificationSessionPortActiveSourceBuffer = @"CEENotificat
 NSNotificationName CEENotificationSessionPresent = @"CEENotificationSessionPresent";
 NSNotificationName CEENotificationSessionCreatePort = @"CEENotificationSessionCreatePort";
 NSNotificationName CEENotificationSessionActivePort = @"CEENotificationSessionActivePort";
+NSNotificationName CEENotificationSessionPinPort = @"CEENotificationSessionPinPort";
 NSNotificationName CEENotificationSessionDeletePort = @"CEENotificationSessionDeletePort";
-NSNotificationName CEENotificationSessionPortCreateSourceContext = @"CEENotificationSessionPortCreateSourceContext";
+NSNotificationName CEENotificationSessionCreateSourceContext = @"CEENotificationSessionCreateSourceContext";
+NSNotificationName CEENotificationSessionJumpToSourcePoint = @"CEENotificationSessionJumpToSourcePoint";
 NSNotificationName CEENotificationSessionPortJumpToSymbolRequest = @"CEENotificationSessionPortJumpToSymbolRequest";
-NSNotificationName CEENotificationSessionPortJumpToSourcePoint = @"CEENotificationSessionPortJumpToSourcePoint";
 NSNotificationName CEENotificationSessionPortPresentHistory = @"CEENotificationSessionPortPresentHistory";
 NSNotificationName CEENotificationSessionPortSaveSourceBuffer = @"CEENotificationSessionPortSaveSourceBuffer";
 NSNotificationName CEENotificationSessionPortSetDescriptor = @"CEENotificationSessionPortSetDescriptor";
@@ -649,7 +650,8 @@ exit:
                                                       target.statement_fregment,
                                                       reference.caretBufferOffset);
         if (cluster) {
-            _source_context = [self createSourceContext:cluster];
+            CEESourceContext* context = [self createSourceContext:cluster];
+            [self.session setSourceContext:context];
             cee_token_cluster_free(cluster);
         }
         cee_list_free_full(symbolReferences, cee_source_symbol_reference_free);
@@ -662,12 +664,6 @@ exit:
 - (void)discardReferences {    
     _sourceBufferReferences = [[NSMutableArray alloc] init];
     _bufferReferenceIndex = -1;
-}
-
-- (void)dealloc {
-    if (_source_context)
-        cee_source_context_free(_source_context);
-    _source_context = NULL;
 }
 
 - (CEESourceContext*)createSourceContext:(CEETokenCluster*)cluster {
@@ -699,28 +695,14 @@ exit:
 }
 
 - (void)createContextByCluster:(CEETokenCluster*)cluster {
-    if (_source_context)
-        cee_source_context_free(_source_context);
-    _source_context = [self createSourceContext:cluster];
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCreateSourceContext object:self];
+    CEESourceContext* context = [self createSourceContext:cluster];
+    [self.session setSourceContext:context];
 }
 
 - (void)jumpToSymbolByCluster:(CEETokenCluster*)cluster {
-    if (_source_context)
-        cee_source_context_free(_source_context);
-    _source_context = [self createSourceContext:cluster];
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortCreateSourceContext object:self];
+    CEESourceContext* context = [self createSourceContext:cluster];
+    [self.session setSourceContext:context];
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortJumpToSymbolRequest object:self];
-}
-
-- (void)jumpToSymbol:(CEESourceSymbol*)symbol {
-    _jumpPoint = [[CEESourcePoint alloc] initWithSourceSymbol:symbol];
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortJumpToSourcePoint object:self];
-}
-
-- (void)jumpToSourcePoint:(CEESourcePoint*)sourcePoint {
-    _jumpPoint = sourcePoint;
-    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortJumpToSourcePoint object:self];
 }
 
 - (void)searchReferencesByCluster:(CEETokenCluster*)cluster {
@@ -759,6 +741,8 @@ exit:
 @implementation CEESession
 
 @synthesize activedPort = _activedPort;
+@synthesize pinnedPort = _pinnedPort;
+@synthesize sourceContext = _sourceContext;
 
 - (instancetype)init {
     self = [super init];
@@ -937,6 +921,58 @@ exit:
     }
 }
 
+- (void)setPinnedPort:(CEESessionPort *)pinnedPort {
+    _pinnedPort = pinnedPort;
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPinPort object:self];
+}
+
+- (CEESessionPort*)pinnedPort {
+    return _pinnedPort;
+}
+
+- (void)setSourceContext:(CEESourceContext *)sourceContext {
+    if (_sourceContext)
+        cee_source_context_free(_sourceContext);
+    _sourceContext = sourceContext;
+    [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionCreateSourceContext object:self];
+}
+
+- (CEESourceContext*)sourceContext {
+    return _sourceContext;
+}
+
+- (void)jumpToSymbol:(CEESourceSymbol*)symbol inPort:(CEESessionPort*)port {
+    if (!symbol)
+        return;
+    
+    _jumpPoint = [[CEESourcePoint alloc] initWithSourceSymbol:symbol];
+    [self jumpToSourcePoint:_jumpPoint inPort:port];
+}
+
+- (void)jumpToSourcePoint:(CEESourcePoint*)sourcePoint inPort:(CEESessionPort*)port {
+    if (!sourcePoint)
+        return ;
+    
+    _jumpPoint = sourcePoint;
+    
+    CEESessionPort* targetPort = nil;
+    if (port)
+        targetPort = port;
+    else if (_pinnedPort)
+        targetPort = _pinnedPort;
+    else
+        targetPort = _activedPort;
+        
+    if (targetPort)
+        [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionJumpToSourcePoint object:targetPort];
+}
+
+- (void)dealloc {
+    if (_sourceContext)
+        cee_source_context_free(_sourceContext);
+    _sourceContext = NULL;
+}
+
 @end
 
 @implementation CEEProject
@@ -1088,6 +1124,9 @@ exit:
 }
 
 - (void)serialize {
+    if (![self validateDatabase])
+        return;
+    
     cee_database_session_descriptors_remove(_database);
     for (CEESessionWindowController* controller in self.windowControllers) {
         CEESession* session = controller.session;
@@ -1147,8 +1186,17 @@ exit:
 - (BOOL)validateDatabase {
     AppDelegate* delegate = [NSApp delegate];
     BOOL ret = YES;
-    NSString* infoStringLogged = nil;
-    NSString* infoStringCurrent = nil;
+    NSRegularExpression* regex = nil;
+    NSArray* matches = nil;
+    NSString* versionStringLogged = nil;
+    NSString* backwardCompatibleMaxVersionString = [delegate propertyIndex:CEEBackwardCompatibleMaxVersionIndexer];
+    NSString* patternString = @"Cymbols-([0-9]+).([0-9]+).([0-9]+)";
+    NSInteger mvs0 = 0;
+    NSInteger mvs1 = 0;
+    NSInteger mvs2 = 0;
+    NSInteger lvs0 = 0;
+    NSInteger lvs1 = 0;
+    NSInteger lvs2 = 0;
     
     // get application info in database
     cee_char* info_string = cee_database_application_info_get(_database);
@@ -1156,16 +1204,53 @@ exit:
         ret = NO;
         goto exit;
     }
+    versionStringLogged = [NSString stringWithUTF8String:info_string];
     
-    infoStringLogged = [NSString stringWithUTF8String:info_string];
-    infoStringCurrent = [delegate propertyIndex:CEEApplicationInfoStringIndexer];
-    infoStringLogged = [infoStringLogged stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    infoStringCurrent = [infoStringCurrent stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    if ([infoStringLogged compare:infoStringCurrent options:NSCaseInsensitiveSearch] != NSOrderedSame) {
+    regex = [NSRegularExpression regularExpressionWithPattern:patternString options:NSRegularExpressionCaseInsensitive error:NULL];
+    matches = [regex matchesInString:backwardCompatibleMaxVersionString options:0 range:NSMakeRange(0, [backwardCompatibleMaxVersionString length])];
+    for (NSTextCheckingResult *match in matches) {
+        mvs0 = [[backwardCompatibleMaxVersionString substringWithRange:[match rangeAtIndex:1]] integerValue];
+        mvs1 = [[backwardCompatibleMaxVersionString substringWithRange:[match rangeAtIndex:2]] integerValue];
+        mvs2 = [[backwardCompatibleMaxVersionString substringWithRange:[match rangeAtIndex:3]] integerValue];
+    }
+    
+    matches = [regex matchesInString:versionStringLogged options:0 range:NSMakeRange(0, [versionStringLogged length])];
+    for (NSTextCheckingResult *match in matches) {
+        lvs0 = [[versionStringLogged substringWithRange:[match rangeAtIndex:1]] integerValue];
+        lvs1 = [[versionStringLogged substringWithRange:[match rangeAtIndex:2]] integerValue];
+        lvs2 = [[versionStringLogged substringWithRange:[match rangeAtIndex:3]] integerValue];
+    }
+    
+    ret = YES;
+    if (lvs0 < mvs0) {
         ret = NO;
         goto exit;
     }
-
+    else if (lvs0 > mvs0) {
+        ret = YES;
+        goto exit;
+    }
+    else if (lvs0 == mvs0) {
+        if (lvs1 < mvs1) {
+            ret = NO;
+            goto exit;
+        }
+        else if (lvs1 > mvs1) {
+            ret = YES;
+            goto exit;
+        }
+        else if (lvs1 == mvs1) {
+            if (lvs2 < mvs2) {
+                ret = NO;
+                goto exit;
+            }
+            else if (lvs2 >= mvs2) {
+                ret = YES;
+                goto exit;
+            }
+        }
+    }
+    
 exit:
     cee_free(info_string);
     return ret;
@@ -1376,6 +1461,17 @@ exit:
 }
 
 - (void)close {
+    BOOL shouldClose = YES;
+    for (NSWindowController* windowController in self.windowControllers) {
+        if (windowController.window.delegate) {
+            shouldClose = [windowController.window.delegate windowShouldClose:windowController.window];
+            if (!shouldClose)
+                break;
+        }
+    }
+    if (!shouldClose)
+        return;
+    
     cee_database_close(_database);
     _database = NULL;
     [super close];

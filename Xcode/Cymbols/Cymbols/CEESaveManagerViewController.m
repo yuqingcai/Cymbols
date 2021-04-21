@@ -1,18 +1,18 @@
 //
-//  CEESourceBufferManagerViewController.m
+//  CEESaveManagerViewController.m
 //  Cymbols
 //
 //  Created by qing on 2020/7/16.
 //  Copyright © 2020 Lazycatdesign. All rights reserved.
 //
 
-#import "CEESourceBufferManagerViewController.h"
+#import "CEESaveManagerViewController.h"
 #import "CEEStyleManager.h"
 #import "AppDelegate.h"
 #import "CEESourceBuffer.h"
 #import "CEEEditViewController.h"
 
-@interface CEESourceBufferManagerViewController ()
+@interface CEESaveManagerViewController ()
 @property (weak) IBOutlet CEETableView *sourceBufferTable;
 @property (strong) CEEEditViewController *editViewController;
 @property (weak) IBOutlet CEEView *sourceContentView;
@@ -21,7 +21,7 @@
 @property (weak) IBOutlet CEECheckBox *selectAllButton;
 @end
 
-@implementation CEESourceBufferManagerViewController
+@implementation CEESaveManagerViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -34,7 +34,7 @@
     [_sourceBufferTable setAction:@selector(selectRow:)];
     [_sourceBufferTable setAllowsMultipleSelection:YES];
     [_sourceBufferTable setEnableDrawHeader:NO];
-    [_sourceBufferTable setSelectable:NO];
+    [_sourceBufferTable setSelectable:YES];
     
     _editViewController =  [[NSStoryboard storyboardWithName:@"Editor" bundle:nil] instantiateControllerWithIdentifier:@"IDTextEditViewController"];
     [_editViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -70,6 +70,8 @@
     [_editViewController setBuffer:buffer];
     
     _selectedSourceBufferFilePaths = [[NSMutableArray alloc] init];
+    [_selectAllButton setState:NSControlStateValueOn];
+    [_selectAllButton sendAction:_selectAllButton.action to:_selectAllButton.target];
 }
 
 - (NSInteger)numberOfRowsInTableView:(CEETableView *)tableView {
@@ -88,7 +90,7 @@
         if (!cellView.delegate)
             [cellView setDelegate:self];
         
-        cellView.checkbox.title = [buffer.filePath lastPathComponent];
+        cellView.text.stringValue = [buffer.filePath lastPathComponent];
         cellView.selectedIdentifier = buffer.filePath;
         if ([self sourceBufferIsSelected:buffer.filePath])
             [cellView.checkbox setState:NSControlStateValueOn];

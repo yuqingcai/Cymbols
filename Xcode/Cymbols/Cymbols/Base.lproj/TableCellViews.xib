@@ -37,18 +37,23 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <customView id="rwX-pp-pnv" customClass="CEECheckBox">
-                    <rect key="frame" x="4" y="2" width="384" height="17"/>
+                    <rect key="frame" x="4" y="2" width="20" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
-                    <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="title" value="Checkbox"/>
-                    </userDefinedRuntimeAttributes>
                     <connections>
                         <action selector="check:" target="DOt-U7-aqq" id="QaD-y9-9M7"/>
                     </connections>
                 </customView>
+                <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kKy-gj-f4q" customClass="CEETableCellViewTextLabel">
+                    <rect key="frame" x="28" y="3" width="366" height="20"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="TextLabel"/>
+                    </userDefinedRuntimeAttributes>
+                </customView>
             </subviews>
             <connections>
                 <outlet property="checkbox" destination="rwX-pp-pnv" id="AKg-vf-LVZ"/>
+                <outlet property="text" destination="kKy-gj-f4q" id="6eX-W3-pH0"/>
             </connections>
             <point key="canvasLocation" x="139" y="96"/>
         </customView>

@@ -9,15 +9,15 @@
 #include "cee_tag.h"
 #include "cee_regex.h"
 
-typedef struct _CEETextCaret {
-    cee_long buffer_offset;
-    cee_long character_index;
-} CEETextCaret;
-
 typedef struct _CEETextCursor {
     cee_long buffer_offset;
     cee_long character_index;
 } CEETextCursor;
+
+typedef struct _CEETextCaret {
+    cee_long buffer_offset;
+    cee_long character_index;
+} CEETextCaret;
 
 typedef struct _CEETextSelection {
     CEERange range;
@@ -249,6 +249,7 @@ static void selection_complete(CEETextEditRef edit,
     length = (end_offset + length) - start_offset;
     edit->selection.range = cee_range_make(start_offset, length);
 }
+
 static void marked_text_replace(CEETextEdit* edit, 
                                 const cee_uchar* str)
 {
@@ -2137,7 +2138,6 @@ void cee_text_edit_replace_ranges(CEETextEditRef edit,
     CEEList* replacements = NULL;
     CEERange range0;
     CEERange range1;
-    cee_boolean update_host = FALSE;
     
     CEERange* range = NULL;
     
@@ -2152,10 +2152,7 @@ void cee_text_edit_replace_ranges(CEETextEditRef edit,
         
         range0 = cee_range_make(range->location, range->length);
         fregment0 = text_fregment_create(storage, range0);
-        
-        if (!p->prev)
-            update_host = TRUE;
-            
+                    
         cee_text_storage_buffer_replace(storage,
                                         range0,
                                         str,

@@ -38,6 +38,13 @@ const CGFloat CEEPopupPanelSizeMinimumHeight = 120.0;
     [self setWorksWhenModal:YES];
 }
 
+- (void)setContentView:(__kindof NSView *)contentView {
+    [super setContentView:contentView];
+    self.contentView.wantsLayer = YES;
+    self.contentView.layer.cornerRadius = 6.0;
+    self.contentView.layer.masksToBounds   = YES;
+}
+
 - (instancetype)initWithContentRect:(NSRect)contentRect styleMask:(NSWindowStyleMask)style backing:(NSBackingStoreType)backingStoreType defer:(BOOL)flag {
     self = [super initWithContentRect:contentRect styleMask:style backing:backingStoreType defer:flag];
     if (!self)

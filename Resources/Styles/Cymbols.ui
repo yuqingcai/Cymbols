@@ -334,7 +334,7 @@
     },
     
     "ClassTitlebarStateButton [actived]" : {
-        "icon_color": "#858585",
+        "icon_color": "#B0B0B0",
     },
     
     "ClassTitlebarStateButton [deactived]" : {
@@ -444,6 +444,24 @@
     },
     
     "ClassTextLabel [highlighted]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "ClassTextLink [actived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "ClassTextLink [deactived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "#757575",
+        "aligment" : "left",
+    },
+    
+    "ClassTextLink [highlighted]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
         "text_color" : "#757575",
         "aligment" : "left",

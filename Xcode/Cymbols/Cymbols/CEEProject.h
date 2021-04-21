@@ -25,10 +25,11 @@ extern NSNotificationName CEENotificationSessionPortActiveSourceBuffer;
 extern NSNotificationName CEENotificationSessionPresent;
 extern NSNotificationName CEENotificationSessionCreatePort;
 extern NSNotificationName CEENotificationSessionActivePort;
+extern NSNotificationName CEENotificationSessionPinPort;
 extern NSNotificationName CEENotificationSessionDeletePort;
-extern NSNotificationName CEENotificationSessionPortCreateSourceContext;
+extern NSNotificationName CEENotificationSessionCreateSourceContext;
+extern NSNotificationName CEENotificationSessionJumpToSourcePoint;
 extern NSNotificationName CEENotificationSessionPortJumpToSymbolRequest;
-extern NSNotificationName CEENotificationSessionPortJumpToSourcePoint;
 extern NSNotificationName CEENotificationSessionPortPresentHistory;
 extern NSNotificationName CEENotificationSessionPortSaveSourceBuffer;
 extern NSNotificationName CEENotificationSessionPortSetDescriptor;
@@ -65,8 +66,6 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 @property (strong, readonly) NSString* identifier;
 @property (strong, readonly) NSMutableArray* sourceBufferReferences;
 @property (strong, readonly) NSMutableArray* openedSourceBuffers;
-@property (readonly) CEESourceContext* source_context;
-@property (readonly) CEESourcePoint* jumpPoint;
 @property NSString* descriptor;
 
 - (void)moveSourceBufferReferenceNext;
@@ -84,9 +83,6 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 - (void)createContextByCluster:(CEETokenCluster*)cluster;
 - (void)jumpToSymbolByCluster:(CEETokenCluster*)cluster;
 - (void)searchReferencesByCluster:(CEETokenCluster*)cluster;
-- (void)jumpToSymbol:(CEESourceSymbol*)symbol;
-- (void)jumpToSourcePoint:(CEESourcePoint*)sourcePoint;
-
 @end
 
 @interface CEESession : NSObject <CEESerialization>
@@ -95,6 +91,9 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 @property (strong, readonly) NSMutableArray* ports;
 @property (strong, readonly) NSDictionary* descriptor;
 @property (strong) CEESessionPort* activedPort;
+@property (strong) CEESessionPort* pinnedPort;
+@property CEESourceContext* sourceContext;
+@property CEESourcePoint* jumpPoint;
 
 - (CEESessionPort*)createPort;
 - (void)deletePort:(CEESessionPort*)port;
@@ -102,6 +101,9 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 - (NSArray*)filePathsFilter:(NSString*)condition;
 - (NSString*)serialize;
 - (void)deserialize:(NSDictionary*)dict;
+- (void)jumpToSymbol:(CEESourceSymbol*)symbol inPort:(CEESessionPort*)port;
+- (void)jumpToSourcePoint:(CEESourcePoint*)sourcePoint inPort:(CEESessionPort*)port;
+
 @end
 
 @interface CEEProject : NSDocument

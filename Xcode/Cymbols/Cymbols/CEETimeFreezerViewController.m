@@ -15,6 +15,8 @@
 @property (strong) NSTimer* freezeTimer;
 @property NSInteger freezeCounter;
 @property (weak) IBOutlet CEETextTitle *freezeTitle;
+@property (weak) IBOutlet CEETextLabel *productLinkAddress;
+
 @end
 
 @implementation CEETimeFreezerViewController

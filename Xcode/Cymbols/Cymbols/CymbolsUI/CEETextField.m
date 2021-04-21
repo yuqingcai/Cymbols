@@ -16,19 +16,22 @@ NSNotificationName CEENotificationTextViewNewline = @"CEENotificationTextViewNew
     [super initProperties];
     self.borderColor = [NSColor controlColor];
     self.borderWidth = 1.0;
-    cee_text_edit_attributes_configure(_edit, (const cee_uchar*)[[self textAttributesDescriptor] UTF8String]);
+    NSString* descriptor = [self textAttributesDescriptorFromUIContext];
+    cee_text_edit_attributes_configure(_edit, (const cee_uchar*)[descriptor UTF8String]);
     cee_text_edit_aligment_set(self.edit, self.aligment);
     cee_text_edit_wrap_set(_edit, FALSE);
 }
 
 - (void)setFont:(NSFont *)font {
     [super setFont:font];
-    [self setTextAttributesDescriptor:[self textAttributesDescriptor]];
+    NSString* descriptor = [self textAttributesDescriptorFromUIContext];
+    [self setTextAttributesDescriptor:descriptor];
 }
 
 - (void)setTextColor:(NSColor *)textColor {
     [super setTextColor:textColor];
-    [self setTextAttributesDescriptor:[self textAttributesDescriptor]];
+    NSString* descriptor = [self textAttributesDescriptorFromUIContext];
+    [self setTextAttributesDescriptor:descriptor];
 }
 
 - (void)insertNewline:(id)sender {
