@@ -8,6 +8,20 @@
 		"value" : "Null"
 	},
     
+    "show_page_guide_line" : {
+        "title" : "Show Page Guide Line",
+        "values" : [
+            "Yes",
+            "No"
+        ],
+        "value" : "Null"
+    },
+    
+    "page_guide_line_offset" : {
+        "title" : "Page Guide Line Offset",
+        "value" : "80"
+    },
+    
 	"caret_blink_time_interval" : {
 		"title" : "Caret Blink Time Interval",
 		"value" : "0.5"

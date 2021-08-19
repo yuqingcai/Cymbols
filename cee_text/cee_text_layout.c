@@ -450,7 +450,7 @@ static cee_boolean layout_line_contain_offset(CEETextLine* line,
     return FALSE;
 }
 
-void cee_text_layout_reset(CEETextLayout* layout)
+void cee_text_layout_reset(CEETextLayoutRef layout)
 {
     layout->max_line_width = 0.0;
     layout->horizontal_offset = 0.0;
@@ -1050,6 +1050,9 @@ CEEList* cee_text_layout_rects_create(CEETextLayoutRef layout,
             return NULL;
         
         line_boxes = cee_text_layout_line_boxes_create(layout, start_offset, start_offset);
+        if (!line_boxes)
+            return NULL;
+        
         rect = cee_list_first(line_boxes)->data;
         unit_node_get(layout, start_offset, NULL, &unit_node);
         unit0 = unit_node->data;
@@ -1069,7 +1072,11 @@ CEEList* cee_text_layout_rects_create(CEETextLayoutRef layout,
         }
         else if (start_offset < head_offset && 
                  end_offset >= head_offset && end_offset < tail_offset + tail_length) {
+            
             line_boxes = cee_text_layout_line_boxes_create(layout, head_offset, end_offset);
+            if (!line_boxes)
+                return NULL;
+            
             rect = cee_list_last(line_boxes)->data;
             unit_node_get(layout, end_offset, NULL, &unit_node);
             unit0 = unit_node->data;
@@ -1078,7 +1085,11 @@ CEEList* cee_text_layout_rects_create(CEETextLayoutRef layout,
         }
         else if (start_offset >= head_offset && start_offset < tail_offset + tail_length &&
                  end_offset >= tail_offset + tail_length) {
+            
             line_boxes = cee_text_layout_line_boxes_create(layout, start_offset, tail_offset);
+            if (!line_boxes)
+                return NULL;
+            
             rect = cee_list_first(line_boxes)->data;
             unit_node_get(layout, start_offset, NULL, &unit_node);
             unit0 = unit_node->data;
@@ -1090,6 +1101,8 @@ CEEList* cee_text_layout_rects_create(CEETextLayoutRef layout,
                  end_offset < tail_offset + tail_length) {
             
             line_boxes = cee_text_layout_line_boxes_create(layout, start_offset, end_offset);
+            if (!line_boxes)
+                return NULL;
             
             if (cee_list_length(line_boxes) == 1) {
                 rect = cee_list_first(line_boxes)->data;

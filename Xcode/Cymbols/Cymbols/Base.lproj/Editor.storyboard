@@ -166,7 +166,7 @@
                                             <userDefinedRuntimeAttribute type="string" keyPath="title" value="Replace All"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
-                                            <action selector="replaceAllSearched:" target="Ago-IL-Isb" id="LGO-Tv-FZt"/>
+                                            <action selector="replaceAllSearched:" target="Ago-IL-Isb" id="AMg-zd-yzm"/>
                                         </connections>
                                     </customView>
                                 </subviews>
@@ -235,7 +235,7 @@
                         <outlet property="horizontalScroller" destination="qpQ-df-c8I" id="QQc-NW-qn2"/>
                         <outlet property="horizontalScrollerHeight" destination="CZD-uU-Ysp" id="plX-sY-HOH"/>
                         <outlet property="lineNumberView" destination="f9i-e6-6yN" id="wCx-sN-sgT"/>
-                        <outlet property="lineNumberViewWidth" destination="VgX-tm-6mI" id="TqU-SJ-7i3"/>
+                        <outlet property="lineNumberViewWidthConstraint" destination="VgX-tm-6mI" id="44Y-UN-a7D"/>
                         <outlet property="replaceInput" destination="78V-Ns-7U2" id="Y6T-7l-EkC"/>
                         <outlet property="searchInput" destination="zwB-Mp-2LG" id="ynt-Mn-SPi"/>
                         <outlet property="textSearchLabel" destination="JwB-GE-K7G" id="plx-6s-fFX"/>
@@ -320,30 +320,114 @@
             <objects>
                 <viewController storyboardIdentifier="IDBinaryEditViewController" id="9mL-Er-i4M" customClass="CEEBinaryEditViewController" sceneMemberID="viewController">
                     <view key="view" id="gtF-WN-pEo" customClass="CEEView">
-                        <rect key="frame" x="0.0" y="0.0" width="575" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="584" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Mma-Rl-QK5" customClass="CEEBinaryView">
-                                <rect key="frame" x="0.0" y="0.0" width="575" height="300"/>
+                            <customView identifier="ClassTextView.IDVerticalScroller" translatesAutoresizingMaskIntoConstraints="NO" id="2Fq-aQ-Z6C" customClass="CEEScroller">
+                                <rect key="frame" x="569" y="0.0" width="15" height="300"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="DXa-DW-adL"/>
+                                    <constraint firstAttribute="width" constant="15" id="YmK-DA-cnu"/>
+                                </constraints>
+                            </customView>
+                            <splitView arrangesAllSubviews="NO" dividerStyle="thin" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vXq-oM-Ogp" customClass="CEESplitView">
+                                <rect key="frame" x="60" y="0.0" width="509" height="300"/>
+                                <subviews>
+                                    <customView misplaced="YES" id="4Ce-hV-vMY">
+                                        <rect key="frame" x="0.0" y="0.0" width="241" height="300"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <subviews>
+                                            <customView identifier="ClassTextView.IDHorizontalScroller" translatesAutoresizingMaskIntoConstraints="NO" id="APw-Bv-rzD" customClass="CEEScroller">
+                                                <rect key="frame" x="0.0" y="0.0" width="241" height="15"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="15" id="8jB-Xh-WxH"/>
+                                                </constraints>
+                                            </customView>
+                                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Mma-Rl-QK5" customClass="CEEBinaryView">
+                                                <rect key="frame" x="0.0" y="15" width="241" height="285"/>
+                                            </customView>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstItem="APw-Bv-rzD" firstAttribute="leading" secondItem="4Ce-hV-vMY" secondAttribute="leading" id="52h-zk-mqW"/>
+                                            <constraint firstItem="Mma-Rl-QK5" firstAttribute="leading" secondItem="4Ce-hV-vMY" secondAttribute="leading" id="BV3-VD-Gnn"/>
+                                            <constraint firstAttribute="trailing" secondItem="APw-Bv-rzD" secondAttribute="trailing" id="CIe-9E-Yxi"/>
+                                            <constraint firstAttribute="bottom" secondItem="APw-Bv-rzD" secondAttribute="bottom" id="EBI-jN-eIg"/>
+                                            <constraint firstAttribute="trailing" secondItem="Mma-Rl-QK5" secondAttribute="trailing" id="KTp-yk-ZHS"/>
+                                            <constraint firstItem="APw-Bv-rzD" firstAttribute="top" secondItem="Mma-Rl-QK5" secondAttribute="bottom" id="X6R-vf-rqJ"/>
+                                            <constraint firstItem="Mma-Rl-QK5" firstAttribute="top" secondItem="4Ce-hV-vMY" secondAttribute="top" id="er4-iI-VFI"/>
+                                        </constraints>
+                                    </customView>
+                                    <customView id="jdl-ji-7dM">
+                                        <rect key="frame" x="242" y="0.0" width="267" height="300"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <subviews>
+                                            <customView identifier="ClassTextView.IDHorizontalScroller" translatesAutoresizingMaskIntoConstraints="NO" id="TSq-yI-oRG" customClass="CEEScroller">
+                                                <rect key="frame" x="0.0" y="0.0" width="267" height="15"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="15" id="bvR-qh-FlZ"/>
+                                                </constraints>
+                                            </customView>
+                                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="wF5-5T-7Tl" customClass="CEEASCIIView">
+                                                <rect key="frame" x="0.0" y="15" width="267" height="285"/>
+                                            </customView>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstAttribute="bottom" secondItem="TSq-yI-oRG" secondAttribute="bottom" id="7gf-1L-AmP"/>
+                                            <constraint firstAttribute="trailing" secondItem="wF5-5T-7Tl" secondAttribute="trailing" id="QFS-zb-yGz"/>
+                                            <constraint firstItem="wF5-5T-7Tl" firstAttribute="top" secondItem="jdl-ji-7dM" secondAttribute="top" id="Sdi-4o-BZY"/>
+                                            <constraint firstAttribute="trailing" secondItem="TSq-yI-oRG" secondAttribute="trailing" id="Y75-hG-uq8"/>
+                                            <constraint firstItem="TSq-yI-oRG" firstAttribute="leading" secondItem="jdl-ji-7dM" secondAttribute="leading" id="jWL-QS-7Sz"/>
+                                            <constraint firstItem="wF5-5T-7Tl" firstAttribute="leading" secondItem="jdl-ji-7dM" secondAttribute="leading" id="k9Z-55-NYu"/>
+                                            <constraint firstItem="TSq-yI-oRG" firstAttribute="top" secondItem="wF5-5T-7Tl" secondAttribute="bottom" id="rzL-uh-4wA"/>
+                                        </constraints>
+                                    </customView>
+                                </subviews>
+                                <holdingPriorities>
+                                    <real value="136"/>
+                                    <real value="250"/>
+                                </holdingPriorities>
+                            </splitView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="HVA-Za-nSd" customClass="CEELineNumberView">
+                                <rect key="frame" x="0.0" y="0.0" width="60" height="300"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="60" id="RRy-bV-duz"/>
                                 </constraints>
                             </customView>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="Mma-Rl-QK5" firstAttribute="top" secondItem="gtF-WN-pEo" secondAttribute="top" id="JMd-lv-xGV"/>
-                            <constraint firstAttribute="trailing" secondItem="Mma-Rl-QK5" secondAttribute="trailing" id="b6J-yC-HEk"/>
-                            <constraint firstItem="Mma-Rl-QK5" firstAttribute="leading" secondItem="gtF-WN-pEo" secondAttribute="leading" id="o7X-z8-Tso"/>
-                            <constraint firstAttribute="bottom" secondItem="Mma-Rl-QK5" secondAttribute="bottom" id="pAs-ud-evE"/>
+                            <constraint firstItem="HVA-Za-nSd" firstAttribute="top" secondItem="gtF-WN-pEo" secondAttribute="top" id="0OZ-ds-uy8"/>
+                            <constraint firstAttribute="trailing" secondItem="2Fq-aQ-Z6C" secondAttribute="trailing" id="6a8-sY-fGx"/>
+                            <constraint firstItem="2Fq-aQ-Z6C" firstAttribute="leading" secondItem="vXq-oM-Ogp" secondAttribute="trailing" id="BJ8-7K-DiG"/>
+                            <constraint firstAttribute="bottom" secondItem="2Fq-aQ-Z6C" secondAttribute="bottom" id="C6K-Rr-9Mz"/>
+                            <constraint firstItem="vXq-oM-Ogp" firstAttribute="top" secondItem="gtF-WN-pEo" secondAttribute="top" id="Emq-4c-myN"/>
+                            <constraint firstItem="vXq-oM-Ogp" firstAttribute="top" secondItem="gtF-WN-pEo" secondAttribute="top" id="QsZ-tn-Pk0"/>
+                            <constraint firstItem="vXq-oM-Ogp" firstAttribute="leading" secondItem="HVA-Za-nSd" secondAttribute="trailing" id="Swh-W6-PZX"/>
+                            <constraint firstAttribute="bottom" secondItem="vXq-oM-Ogp" secondAttribute="bottom" id="VdL-hx-n7Y"/>
+                            <constraint firstItem="HVA-Za-nSd" firstAttribute="leading" secondItem="gtF-WN-pEo" secondAttribute="leading" id="dcG-Qc-7Yd"/>
+                            <constraint firstItem="vXq-oM-Ogp" firstAttribute="leading" secondItem="HVA-Za-nSd" secondAttribute="trailing" id="e8O-jn-GXY"/>
+                            <constraint firstItem="2Fq-aQ-Z6C" firstAttribute="leading" secondItem="vXq-oM-Ogp" secondAttribute="trailing" id="ebI-AW-20j"/>
+                            <constraint firstAttribute="bottom" secondItem="vXq-oM-Ogp" secondAttribute="bottom" id="iIg-pl-Zc8"/>
+                            <constraint firstAttribute="bottom" secondItem="HVA-Za-nSd" secondAttribute="bottom" id="kt1-g8-Ptq"/>
+                            <constraint firstAttribute="bottom" secondItem="vXq-oM-Ogp" secondAttribute="bottom" id="mfX-34-gLS"/>
+                            <constraint firstItem="vXq-oM-Ogp" firstAttribute="leading" secondItem="HVA-Za-nSd" secondAttribute="trailing" id="qE6-59-BL9"/>
+                            <constraint firstItem="vXq-oM-Ogp" firstAttribute="top" secondItem="gtF-WN-pEo" secondAttribute="top" id="vEo-jv-1Db"/>
+                            <constraint firstItem="2Fq-aQ-Z6C" firstAttribute="top" secondItem="gtF-WN-pEo" secondAttribute="top" id="wl8-YY-2pA"/>
+                            <constraint firstItem="2Fq-aQ-Z6C" firstAttribute="leading" secondItem="vXq-oM-Ogp" secondAttribute="trailing" id="yJ0-Dt-ySP"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="ASCIIScroller" destination="TSq-yI-oRG" id="EUK-WQ-N6e"/>
+                        <outlet property="ASCIIView" destination="wF5-5T-7Tl" id="NNr-CW-Cz9"/>
+                        <outlet property="binaryScroller" destination="APw-Bv-rzD" id="RBt-wT-Dhe"/>
                         <outlet property="binaryView" destination="Mma-Rl-QK5" id="DrO-xz-7sh"/>
+                        <outlet property="lineNumberView" destination="HVA-Za-nSd" id="c8G-Ca-OPb"/>
+                        <outlet property="lineNumberViewWidthConstraint" destination="RRy-bV-duz" id="65v-aB-Xnv"/>
+                        <outlet property="splitView" destination="vXq-oM-Ogp" id="85P-Es-5HB"/>
+                        <outlet property="verticalScroller" destination="2Fq-aQ-Z6C" id="gXt-I5-CPh"/>
                     </connections>
                 </viewController>
                 <customObject id="0Ms-NA-Adc" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="139.5" y="456"/>
+            <point key="canvasLocation" x="144" y="456"/>
         </scene>
         <!--Markdown View Controller-->
         <scene sceneID="hCc-ob-bbM">

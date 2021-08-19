@@ -17,6 +17,7 @@
 #import "CEETextLabel.h"
 #import "cee_text_edit.h"
 #import "cee_backend.h"
+#import "cee_regex.h"
 
 @interface CEETextEditViewController()
 @property (weak) IBOutlet CEETextView *textView;
@@ -32,17 +33,18 @@
 @property (weak) IBOutlet CEETextLabel *textSearchLabel;
 @property (weak) IBOutlet NSLayoutConstraint *textSearcherHeight;
 @property (weak) IBOutlet NSLayoutConstraint *horizontalScrollerHeight;
-@property (weak) IBOutlet NSLayoutConstraint *lineNumberViewWidth;
+@property (weak) IBOutlet NSLayoutConstraint *lineNumberViewWidthConstraint;
 @property BOOL showLineNumber;
 @property BOOL searchingText;
 @property BOOL searchCaseSensitive;
 @property BOOL searchRegex;
 @property BOOL searchMarchWord;
-@property BOOL searchTextWhenModifing;
+@property BOOL replacingSearchedContent;
 @property cee_boolean searchTimeout;
 @property CEEList* references;
-
-@property NSString* commandString;
+@property CEEList* highlightRanges;
+@property CEEList* searchRanges;
+@property NSInteger searchRangeIndex;
 @end
 
 @implementation CEETextEditViewController
@@ -56,16 +58,16 @@
     NSString* textHighightDescriptor = [manager textHighlightDescriptor];
     
     self.intelligentPickup = YES;
+    self.intelligence = YES;
     _searchingText = NO;
     _searchCaseSensitive = NO;
     _searchRegex = NO;
     _searchMarchWord = NO;
     _searchTimeout = FALSE;
-    _searchTextWhenModifing = YES;
+    _replacingSearchedContent = NO;
     
     [_textView setDelegate:self];
     [_textView setTextAttributesDescriptor:textHighightDescriptor];
-    
     [_lineNumberView setTextAttributesDescriptor:textHighightDescriptor];
     
     [_searchInput setDelegate:self];
@@ -86,13 +88,10 @@
     [_horizontalScroller setAction:@selector(horizontalScroll:)];
     
     [self setupConfiguration];
-    
     [self showTextSearch:NO];
     [self setShowLineNumber:_showLineNumber];
-        
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sourceBufferChangeStateResponse:) name:CEENotificationSourceBufferChangeState object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textHighlightStyleResponse:) name:CEENotificationTextHighlightStyleUpdate object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textHighlightStyleResponse:) name:CEENotificationTextHighlightStyleUpdate object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationConfigurationChanged:) name:CEENotificationApplicationConfigurationChanged object:nil];
 }
@@ -116,11 +115,20 @@
             _textView.caretBlinkTimeInterval = 0.5;
         else
             _textView.caretBlinkTimeInterval = value;
-        
     }
     else {
         _textView.caretBlinkTimeInterval = 0.5;
     }
+    
+    if (configuration[CEEApplicationConfigurationNameShowPageGuideLine])
+        [_textView setEnablePageGuideLine:[configuration[CEEApplicationConfigurationNameShowPageGuideLine] boolValue]];
+    else
+        [_textView setEnablePageGuideLine:NO];
+    
+    if (configuration[CEEApplicationConfigurationNamePageGuideLineOffset])
+        _textView.pageGuildLineOffset = [configuration[CEEApplicationConfigurationNamePageGuideLineOffset] integerValue];
+    else
+        _textView.pageGuildLineOffset = 80;
     
     if (configuration[CEEApplicationConfigurationNameShowLineNumber])
         self.showLineNumber = [configuration[CEEApplicationConfigurationNameShowLineNumber] boolValue];
@@ -130,10 +138,6 @@
 
 - (void)setEditable:(BOOL)flag {
     _textView.editable = flag;
-}
-
-- (void)setIntelligence:(BOOL)flag {
-    _textView.intelligence = flag;
 }
 
 - (void)setWrap:(BOOL)flag {
@@ -165,10 +169,10 @@
     (void)self.view;
     [super setBuffer:buffer];
     
-    if (buffer)
-        [_textView setStorage:buffer.storage];
+    if (!buffer)
+        cee_text_edit_storage_set(_textView.edit, NULL);
     else
-        [_textView setStorage:nil];
+        cee_text_edit_storage_set(_textView.edit, buffer.storage);
     
     [self updateLineNumberView];
     [self updatePortStatusInfo];
@@ -188,9 +192,9 @@
 - (void)setShowLineNumber:(BOOL)shown {
     _showLineNumber = shown;
     if (shown)
-        _lineNumberViewWidth.constant = 60.0;
+        _lineNumberViewWidthConstraint.constant = 60.0;
     else
-        _lineNumberViewWidth.constant = 0.0;  
+        _lineNumberViewWidthConstraint.constant = 0.0;
     [self.view updateConstraints];
 }
 
@@ -206,10 +210,29 @@
     [self.view updateConstraints];
 }
 
-- (void)dealloc {
+- (void)clearHighlightRanges {
+    if (_highlightRanges)
+        cee_list_free_full(_highlightRanges, cee_range_free);
+    _highlightRanges = NULL;
+}
+
+- (void)clearSearchRanges {
+    if (_searchRanges)
+        cee_list_free_full(_searchRanges, cee_range_free);
+    _searchRanges = NULL;
+}
+
+- (void)clearReferences {
     if (_references)
         cee_list_free_full(_references, cee_source_symbol_reference_free);
     _references = NULL;
+}
+
+- (void)dealloc {
+    [self clearReferences];
+    [self clearHighlightRanges];
+    [self clearSearchRanges];
+        
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -231,16 +254,15 @@
 }
 
 - (void)updateReferences {
-    CEETextLayoutRef layout = cee_text_edit_layout(_textView.edit);
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_textView.edit);
     CEERange range = cee_text_layout_range_get(layout);
-    if (_references)
-        cee_list_free_full(_references, cee_source_symbol_reference_free);
+    [self clearReferences];
     _references = [self.buffer referencesInRange:range];
 }
 
 - (void)styledText {
     AppDelegate* delegate = [NSApp delegate];
-    CEETextLayoutRef layout = cee_text_edit_layout(_textView.edit);
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_textView.edit);
     CEERange range = cee_text_layout_range_get(layout);
     CEEList* tags = NULL;
     
@@ -259,7 +281,7 @@
     _horizontalScroller.knobProportion = cee_text_edit_horizontal_scroller_proportion_get(_textView.edit);
     [self updateLineNumberView];
     [self updateReferences];
-    [self updateBufferReferenceContextLineOffset];
+    [self updateBufferReferenceContextPresentOffset];
     [self styledText];
 }
 
@@ -267,7 +289,7 @@
     cee_text_edit_scroll_horizontal_to(_textView.edit, _horizontalScroller.floatValue);
     [self updateLineNumberView];
     [self updateReferences];
-    [self updateBufferReferenceContextLineOffset];
+    [self updateBufferReferenceContextPresentOffset];
     [self styledText];
 }
 
@@ -277,26 +299,45 @@
     [self.view.window makeFirstResponder:_textView];
     [_textView setHighLightSearched:_searchingText];
     [self updateLineNumberView];
+    
+    [self clearSearchRanges];
+    [self clearHighlightRanges];
 }
 
 - (void)searchText {
-    cee_text_edit_search(_textView.edit,
-                         (cee_char*)[_searchInput.stringValue UTF8String],
-                         _searchRegex,
-                         _searchCaseSensitive,
-                         _searchMarchWord,
-                         &_searchTimeout);
+    [self clearHighlightRanges];
+    [self clearSearchRanges];
+    
+    CEETextStorageRef storage = cee_text_edit_storage_get(_textView.edit);
+    const cee_uchar* buffer = cee_text_storage_buffer_get(storage);
+    const cee_char* subject = (cee_char*)[_searchInput.stringValue UTF8String];
+    
+    if (_searchRegex) {
+        _searchRanges = cee_regex_search((const cee_char*)buffer,
+                                         subject,
+                                         TRUE,
+                                         10000,
+                                         &_searchTimeout);
+    }
+    else {
+        _searchRanges = cee_str_search((const cee_char*)buffer,
+                                       subject,
+                                       _searchCaseSensitive,
+                                       _searchMarchWord);
+    }
+    
     if (_searchTimeout) {
         cee_text_edit_select_all(_searchInput.edit);
-        cee_text_edit_insert(_searchInput.edit, 
+        cee_text_edit_insert(_searchInput.edit,
                              (const cee_uchar*)"search timeout");
         cee_text_edit_select_all(_searchInput.edit);
         _searchTimeout = FALSE;
     }
     
-    CEEList* ranges = cee_text_edit_searched_ranges_get(_textView.edit);
-    cee_ulong nb_matched = cee_list_length(ranges);
+    cee_ulong nb_matched = cee_list_length(_searchRanges);
     _textSearchLabel.stringValue = [NSString stringWithFormat:@"%lu matches", nb_matched];
+    _searchRangeIndex = -1;
+    [_textView setNeedsDisplay:YES];
 }
 
 - (IBAction)searchCaseSensitive:(id)sender {
@@ -335,107 +376,106 @@
     else
         _searchMarchWord = NO;
     
-    [self searchText];        
+    [self searchText];
 }
 
 - (IBAction)prevSearched:(id)sender {
-    cee_long index = cee_text_edit_searched_index_get(_textView.edit);
-    index --;
-    cee_text_edit_searched_index_set(_textView.edit, index);
-    [self adjustScrollers];
-    [self updateLineNumberView];
-    [self styledText];
+    NSUInteger n = cee_list_length(_searchRanges);
+    
+    if (!n)
+        return;
+    
+    _searchRangeIndex --;
+        
+    if (_searchRangeIndex < 0)
+        _searchRangeIndex = n - 1;
+    
+    [self highlightSearchWithIndex:_searchRangeIndex];
 }
 
 - (IBAction)nextSearched:(id)sender {
-    cee_long index = cee_text_edit_searched_index_get(_textView.edit);
-    index ++;
-    cee_text_edit_searched_index_set(_textView.edit, index);
-    [self adjustScrollers];
-    [self updateLineNumberView];
-    [self styledText];
+    NSUInteger n = cee_list_length(_searchRanges);
+    
+    if (!n)
+        return;
+    
+    _searchRangeIndex ++;
+    
+    if (_searchRangeIndex >= n)
+        _searchRangeIndex = 0;
+    
+    [self highlightSearchWithIndex:_searchRangeIndex];
 }
 
 - (IBAction)replaceSearched:(id)sender {
-    CEEList* ranges = NULL;
-    const cee_uchar* str = NULL;
-    cee_long index = -1;
-    CEEList* replaces = NULL;
-    CEERange replace;
-    CEERange* range = NULL;
-    CEEList* p = NULL;
-    
-    ranges = cee_text_edit_searched_ranges_get(_textView.edit);
-    if (!ranges)
+    if (!_searchRanges)
         return;
     
-    _searchTextWhenModifing = NO;
+    if (_searchRangeIndex < 0 || _searchRangeIndex >= cee_list_length(_searchRanges))
+        _searchRangeIndex = 0;
     
-    str = (const cee_uchar*)[_replaceInput.stringValue UTF8String];
-    index = cee_text_edit_searched_index_get(_textView.edit);
-    replace = *(CEERange*)cee_list_nth_data(ranges, (cee_int)index);
-    replaces = cee_list_append(replaces, &replace);
+    _replacingSearchedContent = YES;
+    
+    const cee_uchar* str = (const cee_uchar*)[_replaceInput.stringValue UTF8String];
+    CEERange replace = *(CEERange*)cee_list_nth_data(_searchRanges, (cee_int)_searchRangeIndex);;
+    CEEList* replaces = cee_list_append(NULL, &replace);
+    CEERange* range = NULL;
+    CEEList* p = NULL;
     
     cee_text_edit_replace_ranges(_textView.edit, str, replaces);
     cee_list_free(replaces);
     
+    [self.buffer setState:kCEESourceBufferStateShouldSyncToFile];
+    _replacingSearchedContent = NO;
+    
     if (_searchingText)
         [self searchText];
     
-    ranges = cee_text_edit_searched_ranges_get(_textView.edit);
-    if (ranges) {
-        index = 0;
-        p = ranges;
-        while (TRUE) {
+    if (_searchRanges) {
+        _searchRangeIndex = 0;
+        p = _searchRanges;
+        while (p) {
             range = p->data;
             if (range->location > replace.location)
                 break;
             
+            _searchRangeIndex ++;
+            
             p = p->next;
-            if (!p)
-                break;
-            index ++;
         }
-        cee_text_edit_searched_index_set(_textView.edit, index);
+        
+        if (_searchRangeIndex >= cee_list_length(_searchRanges))
+            _searchRangeIndex = 0;
+        
+        [self highlightSearchWithIndex:_searchRangeIndex];
     }
     
-    [self.buffer setState:kCEESourceBufferStateShouldSyncToFile];
-    [self styledText];
-    [self adjustScrollers];
-    [self updateLineNumberView];
-    _searchTextWhenModifing = YES;
 }
 
 - (IBAction)replaceAllSearched:(id)sender {
-    CEEList* ranges = NULL;
-    const cee_uchar* str = NULL;
-    
-    str = (const cee_uchar*)[_replaceInput.stringValue UTF8String];
-    ranges = cee_text_edit_searched_ranges_get(_textView.edit);
-    if (!ranges)
+    if (!_searchRanges)
         return;
     
-    _searchTextWhenModifing = NO;
-    
-    cee_text_edit_replace_ranges(_textView.edit, str, ranges);
-    
+    const cee_uchar* str = (const cee_uchar*)[_replaceInput.stringValue UTF8String];
+    _replacingSearchedContent = YES;
+    cee_text_edit_replace_ranges(_textView.edit, str, _searchRanges);
+    [self.buffer setState:kCEESourceBufferStateShouldSyncToFile];
+    _replacingSearchedContent = NO;
     if (_searchingText)
         [self searchText];
-    
-    [self.buffer setState:kCEESourceBufferStateShouldSyncToFile];
-    [self styledText];
-    [self adjustScrollers];
-    [self updateLineNumberView];
-    _searchTextWhenModifing = YES;
 }
 
-- (void)highlightRanges:(CEEList*)ranges {
-    cee_text_edit_highlight_set(_textView.edit, ranges);
+- (void)highlight:(CEEList*)ranges {
+    [self clearHighlightRanges];
+    _highlightRanges = cee_list_copy_deep(ranges, cee_range_list_copy, NULL);
     
-    CEETextStorageRef storage = self.buffer.storage;
+    if (!_highlightRanges)
+        return;
+    
+    CEETextStorageRef storage = cee_text_edit_storage_get(_textView.edit);
     CEERange* range0 = cee_list_nth_data(ranges, 0);
     
-    CEETextLayoutRef layout = cee_text_edit_layout(_textView.edit);
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_textView.edit);
     CEERange range = cee_text_layout_range_get(layout);
     if (!cee_location_in_range(range0->location, range)) {
         cee_long index = cee_text_storage_paragraph_index_get(storage, range0->location);
@@ -443,7 +483,26 @@
         [self adjustScrollers];
         [self updateLineNumberView];
     }
+    
+    cee_text_edit_caret_buffer_offset_set(_textView.edit, range0->location);
+    
     [self styledText];
+}
+
+- (void)highlightSearchWithIndex:(NSInteger)index {
+    if (index < 0)
+        return;
+    
+    CEEList* p = cee_list_append(NULL, cee_list_nth_data(_searchRanges, (cee_uint)index));
+    [self highlight:p];
+}
+
+- (CEEList*)textViewSearchRanges:(CEETextView*)textView {
+    return _searchRanges;
+}
+
+- (CEEList*)textViewHighlightRanges:(CEETextView*)textView {
+    return _highlightRanges;
 }
 
 - (void)sourceBufferChangeStateResponse:(NSNotification*)notification {
@@ -452,7 +511,7 @@
         return;
         
     if ([buffer stateSet:kCEESourceBufferStateShouldSyncToFile]) {
-        if (_searchingText && _searchTextWhenModifing)
+        if (_searchingText && !_replacingSearchedContent)
             [self searchText];
         
         // if view is the first responder, that means buffer is modified by
@@ -565,18 +624,19 @@
     }
 }
 
-- (void)updateBufferReferenceContextLineOffset {
+- (void)updateBufferReferenceContextPresentOffset {
     CEESourceBufferReferenceContext* reference = [self.port currentSourceBufferReference];
-    CEETextLayoutRef layout = cee_text_edit_layout(_textView.edit);
+    CEETextStorageRef storage = cee_text_edit_storage_get(_textView.edit);
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_textView.edit);
     NSInteger index = cee_text_layout_paragraph_index_get(layout);
-    NSInteger offset = cee_text_storage_buffer_offset_by_paragraph_index(self.buffer.storage, index);
-    [reference setLineBufferOffset:offset];
+    NSInteger offset = cee_text_storage_buffer_offset_by_paragraph_index(storage, index);
+    [reference setPresentBufferOffset:offset];
 }
 
-- (void)updateBufferReferenceContextCaretOffset {
+- (void)updateBufferReferenceContextFocusOffset {
     CEESourceBufferReferenceContext* reference = [self.port currentSourceBufferReference];
     NSInteger offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
-    [reference setCaretBufferOffset:offset];
+    [reference setFocusBufferOffset:offset];
 }
 
 - (void)updatePortStatusInfo {
@@ -599,13 +659,14 @@
     if (self.buffer.type == kCEESourceBufferTypeText) {
         const cee_uchar* bom = bom;
         cee_ulong bom_size = 0;
-        cee_text_storage_bom_get(self.buffer.storage, &bom, &bom_size);
+        CEETextStorageRef storage = cee_text_edit_storage_get(_textView.edit);
+        cee_text_storage_bom_get(storage, &bom, &bom_size);
         if (bom) {
             encodedTypeString = [NSString stringWithFormat:@"%s with BOM", cee_codec_encoded_type_from_bom(bom, bom_size)];
         }
         else
             encodedTypeString = @"UTF-8";
-        
+    
     }
     else if (self.buffer.type == kCEESourceBufferTypeBinary) {
         encodedTypeString = @"Binary File";
@@ -617,7 +678,7 @@
         lineBreakTypeString = @"LF";
     else if (line_break_type == kCEETextStorageLineBreakTypeCRLF)
         lineBreakTypeString = @"CRLF";
-        
+    
     NSString* infoString = [NSString stringWithFormat:@"Offset:%ld, Line:%ld, Column:%ld    %@    %@    %@",
                             buffer_offset,
                             paragraph + 1,
@@ -636,7 +697,7 @@
     }
     
     NSMutableArray* tags = [[NSMutableArray alloc] init];
-    CEETextLayoutRef layout = cee_text_edit_layout(_textView.edit);
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_textView.edit);
     CEEList* p = cee_text_layout_lines_get(layout);
     while (p) {
         NSRect rect;
@@ -662,7 +723,7 @@
 }
 
 - (void)createContext {
-    if (!_textView.intelligence)
+    if (!self.intelligence)
         return;
     
     cee_long offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
@@ -699,6 +760,46 @@
     return;
 }
 
+
+- (void)setPresentBufferOffset:(NSInteger)offset {
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_textView.edit);
+    CEETextStorageRef storage = cee_text_edit_storage_get(_textView.edit);
+    NSInteger paragraph = cee_text_storage_paragraph_index_get(storage, offset);
+    cee_text_layout_paragraph_index_set(layout, paragraph);
+    
+    [self updatePortStatusInfo];
+    [self adjustScrollers];
+    [self updateReferences];
+    [self adjustScrollers];
+    [self styledText];
+}
+
+- (void)setFocusBufferOffset:(NSInteger)offset {
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_textView.edit);
+    CEETextStorageRef storage = cee_text_edit_storage_get(_textView.edit);
+    NSInteger paragraph = cee_text_storage_paragraph_index_get(storage, offset);
+    cee_text_layout_paragraph_index_set(layout, paragraph);
+    cee_text_edit_caret_buffer_offset_set(_textView.edit, offset);
+    
+    [self updatePortStatusInfo];
+    [self adjustScrollers];
+    [self updateReferences];
+    [self adjustScrollers];
+    [self styledText];
+}
+
+- (NSInteger)presentBufferOffset {
+    CEETextStorageRef storage = cee_text_edit_storage_get(_textView.edit);
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_textView.edit);
+    NSInteger index = cee_text_layout_paragraph_index_get(layout);
+    NSInteger offset = cee_text_storage_buffer_offset_by_paragraph_index(storage, index);
+    return offset;
+}
+
+- (NSInteger)focusBufferOffset {
+    NSInteger offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
+    return offset;
+}
 #pragma mark - CEETextViewDelegate protocol
 
 - (void)textViewTextChanged:(CEETextView*)textView {
@@ -720,7 +821,7 @@
     if (textView == _textView) {
         [self adjustScrollers];
         [self updateReferences];
-        [self updateBufferReferenceContextLineOffset];
+        [self updateBufferReferenceContextPresentOffset];
         [self updateLineNumberView];
         [self updatePortStatusInfo];
         [self styledText];
@@ -729,8 +830,9 @@
 
 - (void)textViewCaretSet:(CEETextView*)textView {
     if (textView == _textView) {
-        [self updateBufferReferenceContextLineOffset];
-        [self updateBufferReferenceContextCaretOffset];
+        [self clearHighlightRanges];
+        [self updateBufferReferenceContextPresentOffset];
+        [self updateBufferReferenceContextFocusOffset];
         [self updateLineNumberView];
         [self updatePortStatusInfo];
         [self styledText];
@@ -771,6 +873,7 @@
             _searchingText = YES;
             [self showTextSearch:_searchingText];
             [_textView setHighLightSearched:_searchingText];
+            [self searchText];
             [self updateLineNumberView];
         }
         [self.view.window makeFirstResponder:_searchInput];
@@ -791,21 +894,25 @@
 }
 
 - (void)textViewSelectWithCommand:(CEETextView*)textView {
-    if (!textView.intelligence || textView != _textView)
+    if (!self.intelligence || textView != _textView)
         return;
     [self jumpToSymbol:self];
     return;
 }
 
-- (void)textViewHighlightTokenCluster:(CEETextView*)textView {
-    if (!textView.intelligence || textView != _textView)
+
+- (void)textView:(CEETextView*)textView pickWordAtPoint:(NSPoint)point {
+    if (textView != _textView || !self.intelligence || !self.intelligentPickup)
         return;
-    
-    if (!self.intelligentPickup)
-        return;
-    
+        
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_textView.edit);
+    CEEPoint p = {
+        point.x,
+        point.y
+    };
+    CEETextUnitRef unit = cee_text_unit_get_by_location(layout, p);
     CEEList* ranges_ref = NULL;
-    cee_long offset = cee_text_edit_cursor_buffer_offset_get(_textView.edit);
+    cee_long offset = cee_text_unit_buffer_offset_get(unit);
     CEETokenCluster* cluster =
         cee_token_cluster_search_by_buffer_offset(_references,
                                                   self.buffer.prep_directive_fregment,
@@ -822,27 +929,27 @@
         }
         
         if (ranges_ref) {
-            cee_text_edit_highlight_set([_textView edit], ranges_ref);
+            [self clearHighlightRanges];
+            _highlightRanges = cee_list_copy_deep(ranges_ref, cee_range_list_copy, NULL);
             [_textView setNeedsDisplay:YES];
         }
         cee_token_cluster_free(cluster);
     }
     else {
-        cee_text_edit_highlight_set([_textView edit], NULL);
+        [self clearHighlightRanges];
         [_textView setNeedsDisplay:YES];
     }
 }
 
-- (void)textViewIgnoreTokenCluster:(CEETextView*)textView {
-    if (!textView.intelligence || textView != _textView)
+
+- (void)textView:(CEETextView*)textView pickWordCompleteAtPoint:(NSPoint)point {
+    if (textView != _textView || !self.intelligence || !self.intelligentPickup)
         return;
     
-    if (!self.intelligentPickup)
-        return;
-    
-    cee_text_edit_highlight_set(_textView.edit, NULL);
+    [self clearHighlightRanges];
     [_textView setNeedsDisplay:YES];
 }
+
 
 - (void)textView:(CEETextView*)textView modifyMenu:(NSMenu**)menu {
     NSMenu* modify = *menu;
@@ -861,33 +968,6 @@
             [item setImage:[NSImage imageNamed:@"icon_file_switch_16x16"]];
         }
     }
-}
-
-- (void)setLineBufferOffset:(NSInteger)offset {
-    CEETextLayoutRef layout = cee_text_edit_layout(_textView.edit);
-    CEETextStorageRef storage = self.buffer.storage;
-    NSInteger paragraph = cee_text_storage_paragraph_index_get(storage, offset);
-    cee_text_layout_paragraph_index_set(layout, paragraph);
-    
-    [self updatePortStatusInfo];
-    [self adjustScrollers];
-    [self updateReferences];
-    [self adjustScrollers];
-    [self styledText];
-}
-
-- (void)setCaretBufferOffset:(NSInteger)offset {
-    CEETextLayoutRef layout = cee_text_edit_layout(_textView.edit);
-    CEETextStorageRef storage = self.buffer.storage;
-    NSInteger paragraph = cee_text_storage_paragraph_index_get(storage, offset);
-    cee_text_layout_paragraph_index_set(layout, paragraph);
-    cee_text_edit_caret_buffer_offset_set(_textView.edit, offset);
-    
-    [self updatePortStatusInfo];
-    [self adjustScrollers];
-    [self updateReferences];
-    [self adjustScrollers];
-    [self styledText];
 }
 
 - (void)mouseDown:(NSEvent *)event {

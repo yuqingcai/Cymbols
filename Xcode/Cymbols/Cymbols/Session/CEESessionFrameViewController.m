@@ -179,10 +179,14 @@
     [viewController setPort:_port];
     [viewController setBuffer:_sourceBuffer];
     
-    NSInteger lineBufferOffset = [[_port currentSourceBufferReference] lineBufferOffset];
-    NSInteger caretBufferOffset = [[_port currentSourceBufferReference] caretBufferOffset];
-    [viewController setCaretBufferOffset:caretBufferOffset];
-    [viewController setLineBufferOffset:lineBufferOffset];
+    CEESourceBufferReferenceContext* reference = [self.port currentSourceBufferReference];
+    if (reference) {
+        NSInteger focusBufferOffset = [reference focusBufferOffset];
+        [viewController setFocusBufferOffset:focusBufferOffset];
+        
+        NSInteger presentBufferOffset = [reference presentBufferOffset];
+        [viewController setPresentBufferOffset:presentBufferOffset];
+    }
     
     if ([_sourceBuffer stateSet:kCEESourceBufferStateFileTemporary])
         self.title = [_sourceBuffer.filePath lastPathComponent];
@@ -251,15 +255,24 @@
 - (void)jumpToSourcePointResponse:(NSNotification*)notification {
     if (notification.object != _port)
         return;
-    CEESourcePoint* jumpPoint = _port.session.jumpPoint;
     
-    if(![jumpPoint.filePath isEqualToString:_port.activedSourceBuffer.filePath])
-            [_port openSourceBufferWithFilePath:jumpPoint.filePath];
+    CEESourcePoint* jumpPoint = _port.session.jumpPoint;
+    if (!jumpPoint)
+        return;
+    
+    [_port openSourceBufferWithFilePath:jumpPoint.filePath];
+    
     CEEList* ranges = cee_ranges_from_string([jumpPoint.locations UTF8String]);
     if (ranges) {
-        [_editViewController highlightRanges: ranges];
+        [_editViewController highlight:ranges];
         [_editViewController setIntelligentPickup:NO];
         cee_list_free_full(ranges, cee_range_free);
+    }
+    
+    CEESourceBufferReferenceContext* reference = [self.port currentSourceBufferReference];
+    if (reference) {
+        [reference setPresentBufferOffset:[_editViewController presentBufferOffset]];
+        [reference setFocusBufferOffset:[_editViewController focusBufferOffset]];
     }
 }
 

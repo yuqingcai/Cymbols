@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Window Controller-->
+        <scene sceneID="Kav-73-Z00">
+            <objects>
+                <windowController storyboardIdentifier="IDPurchaseErrorWindowController" id="pM6-C0-ZYq" customClass="CEEWindowController" sceneMemberID="viewController">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="ksf-HZ-AaK">
+                        <windowStyleMask key="styleMask" titled="YES" resizable="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="425" y="462" width="480" height="270"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
+                        <view key="contentView" id="4PE-q2-fto">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="pM6-C0-ZYq" id="B5f-UY-VoR"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="qfw-H2-Fy4" kind="relationship" relationship="window.shadowedContentViewController" id="mCJ-TI-h7r"/>
+                    </connections>
+                </windowController>
+                <customObject id="NlK-r1-IMg" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-68" y="177"/>
+        </scene>
+        <!--Purchase Error View Controller-->
+        <scene sceneID="Z3z-bi-eyj">
+            <objects>
+                <viewController id="qfw-H2-Fy4" customClass="CEEPurchaseErrorViewController" sceneMemberID="viewController">
+                    <view key="view" id="x43-UL-3uD" customClass="CEEWindowContentView">
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="244"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="SSX-uU-iQc" customClass="CEEImageLinkView">
+                                <rect key="frame" x="208" y="160" width="64" height="64"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="64" id="5tC-9M-HNh"/>
+                                    <constraint firstAttribute="width" constant="64" id="nyQ-Uf-mMb"/>
+                                </constraints>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_butterfly_128x128" id="xT7-oh-pqG"/>
+                            </imageView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="DCf-lb-Q9U" customClass="CEETextTitle">
+                                <rect key="frame" x="20" y="60" width="440" height="84"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="440" id="FN8-dc-H81"/>
+                                    <constraint firstAttribute="height" constant="84" id="Kw3-vb-2Wr"/>
+                                </constraints>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="7G7-oB-xo8" customClass="CEEButton">
+                                <rect key="frame" x="190" y="20" width="100" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="Czb-uy-2ZL"/>
+                                    <constraint firstAttribute="height" constant="24" id="GhM-11-8c4"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="OK"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="confirm:" target="qfw-H2-Fy4" id="bEk-NB-NRb"/>
+                                </connections>
+                            </customView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="7G7-oB-xo8" firstAttribute="top" secondItem="DCf-lb-Q9U" secondAttribute="bottom" constant="16" id="1Po-HH-BCb"/>
+                            <constraint firstAttribute="trailing" secondItem="DCf-lb-Q9U" secondAttribute="trailing" constant="20" symbolic="YES" id="3Pm-FE-wY5"/>
+                            <constraint firstItem="DCf-lb-Q9U" firstAttribute="top" secondItem="SSX-uU-iQc" secondAttribute="bottom" constant="16" id="EOh-8j-1az"/>
+                            <constraint firstItem="SSX-uU-iQc" firstAttribute="top" secondItem="x43-UL-3uD" secondAttribute="top" constant="20" symbolic="YES" id="ICS-is-QYB"/>
+                            <constraint firstItem="7G7-oB-xo8" firstAttribute="centerX" secondItem="x43-UL-3uD" secondAttribute="centerX" id="O6i-HY-YmS"/>
+                            <constraint firstItem="SSX-uU-iQc" firstAttribute="centerX" secondItem="x43-UL-3uD" secondAttribute="centerX" id="Tpf-1H-Df2"/>
+                            <constraint firstAttribute="bottom" secondItem="7G7-oB-xo8" secondAttribute="bottom" constant="20" symbolic="YES" id="dJ8-ac-Cve"/>
+                            <constraint firstItem="DCf-lb-Q9U" firstAttribute="leading" secondItem="x43-UL-3uD" secondAttribute="leading" constant="20" symbolic="YES" id="dkT-HK-kh1"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="info" destination="DCf-lb-Q9U" id="pFr-ml-J2K"/>
+                    </connections>
+                </viewController>
+                <customObject id="Rez-GO-65q" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="557" y="179"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="icon_butterfly_128x128" width="128" height="128"/>
+    </resources>
+</document>

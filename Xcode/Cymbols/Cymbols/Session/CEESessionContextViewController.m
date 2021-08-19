@@ -168,13 +168,8 @@
 }
 
 - (void)presentContextBufferWithSymbol:(CEESourceSymbol*)symbol {
-    if (!symbol) {
-        [_monitor setBuffer:nil];
-        [_titlebar setTitle:[NSString stringWithFormat:@"Context", nil]];
-        [_detailTitlebar setTitle:@""];
-        [_detailTitlebar setIcon:nil];
+    if (!symbol)
         return;
-    }
     
     NSString* filePath = [NSString stringWithUTF8String:symbol->file_path];
     AppDelegate* delegate = [NSApp delegate];
@@ -187,7 +182,7 @@
     
     [_monitor setBuffer:_contextSourceBuffer];
     if (symbol->ranges)
-        [_monitor highlightRanges:symbol->ranges];
+        [_monitor highlight:symbol->ranges];
     
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     [_titlebar setTitle:[NSString stringWithFormat:@"Context of \"%s\"", symbol->name, nil]];
@@ -200,9 +195,11 @@
 
 - (void)sessionCreateSourceContextResponse:(NSNotification*)notification {
     CEESession* session = notification.object;
-    if (session != _session)
+    if (session != _session ||
+        !_session.sourceContext ||
+        !_session.sourceContext->symbols)
         return;
-    
+            
     [_symbolTable reloadData];
     [self selectSymbolAtIndex:0];
 }

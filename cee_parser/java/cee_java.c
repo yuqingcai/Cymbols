@@ -3353,7 +3353,6 @@ static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
                                           CEESourceFregment* statement,
                                           CEESourceSymbol** symbol)
 {
-
     cee_boolean ret = FALSE;
     CEESourceSymbol* statement_symbol = NULL;
     CEESourceSymbol* prep_directive_symbol = NULL;

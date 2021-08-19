@@ -39,9 +39,33 @@
 }
 
 - (void)mouseDown:(NSEvent *)event {
-    if (!_URLString)
-        return;
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:_URLString]];
+    BOOL keepOn = YES;
+    BOOL isInside = YES;
+    NSPoint location;
+    
+    while (keepOn) {
+        NSEventMask eventMask = NSEventMaskLeftMouseUp | NSEventMaskLeftMouseDragged;
+        event = [[self window] nextEventMatchingMask:eventMask];
+        location = [self convertPoint:[event locationInWindow] fromView:nil];
+        isInside = [self mouse:location inRect:[self bounds]];
+        
+        switch ([event type]) {
+            case NSEventTypeLeftMouseDragged:
+                break;
+                
+            case NSEventTypeLeftMouseUp:
+                
+                if (isInside && _URLString)
+                    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:_URLString]];
+                
+                keepOn = NO;
+                break;
+            default:
+                /* Ignore any other kind of event. */
+                break;
+        }
+    }
 }
+
 
 @end

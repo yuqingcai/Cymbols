@@ -30,34 +30,40 @@ IB_DESIGNABLE
 - (void)textViewEscape:(CEETextView*)textView;
 - (void)textViewNewLine:(CEETextView*)textView;
 - (void)textViewSelectWithCommand:(CEETextView*)textView;
-- (void)textViewHighlightTokenCluster:(CEETextView*)textView;
-- (void)textViewIgnoreTokenCluster:(CEETextView*)textView;
+- (void)textView:(CEETextView*)textView pickWordAtPoint:(NSPoint)point;
+- (void)textView:(CEETextView*)textView pickWordCompleteAtPoint:(NSPoint)point;
 - (void)textView:(CEETextView*)textView modifyMenu:(NSMenu**)menu;
+- (CEEList*)textViewSearchRanges:(CEETextView*)textView;
+- (CEEList*)textViewHighlightRanges:(CEETextView*)textView;
+
 @end
 
 @class CEETextView;
 
-@interface CEETextView : CEEView <NSTextInputClient> {
-@protected
-    CEETextStorageRef _storage;
-    CEETextEditRef _edit;
-    BOOL _retain_storage;
-}
-
+@interface CEETextView : CEEView <NSTextInputClient>
 @property (strong) IBInspectable NSString* stringValue;
 @property (strong) NSColor* textBackgroundColorSelected;
 @property (strong) NSColor* textBackgroundColorSelectedOutline;
+@property (strong) NSColor* textBackgroundColorSearched;
+@property (strong) NSColor* textBackgroundColorSearchedOutline;
 @property (strong) NSColor* textBackgroundColorHighlight;
 @property (strong) NSColor* textBackgroundColorHighlightOutline;
-@property CEETextLayoutAlignment aligment;
+@property (strong) NSColor* textBackgroundColorMarked;
+@property (strong) NSColor* textBackgroundColorMarkedOutline;
+@property (strong) NSColor* textBackgroundColorMarkedSelected;
+@property (strong) NSColor* textBackgroundColorMarkedSelectedOutline;
+@property (strong) NSColor* pageGuideLineColor;
+@property CEETextLayoutAlignment alignment;
 @property (readonly) CEETextEditRef edit;
-@property CEETextStorageRef _Nullable storage;
 @property BOOL wrap;
 @property BOOL editable;
-@property BOOL intelligence;
 @property BOOL highLightSearched;
+@property BOOL enablePageGuideLine;
+@property BOOL enableHighlight;
 @property CGFloat caretBlinkTimeInterval;
 @property (weak) id<CEETextViewDelegate> delegate;
+@property NSInteger pageGuildLineOffset;
+
 - (void)setTextAttributesDescriptor:(NSString*)descriptor;
 - (NSString*)textAttributesDescriptorFromUIContext;
 - (NSPoint)viewPointFromLayoutPoint:(NSPoint)point;

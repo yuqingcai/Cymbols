@@ -8,20 +8,21 @@
 
 #import "CEEViewController.h"
 #import "CEEProject.h"
-#import "CEETextView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CEEEditViewController : CEEViewController <CEETextViewDelegate>
+@interface CEEEditViewController : CEEViewController
 @property (strong) CEESessionPort* _Nullable port;
 @property (strong) CEESourceBuffer* _Nullable buffer;
 @property BOOL intelligentPickup;
-- (void)highlightRanges:(CEEList*)ranges;
+@property BOOL intelligence;
+- (void)highlight:(CEEList*)ranges;
 - (void)setEditable:(BOOL)flag;
-- (void)setIntelligence:(BOOL)flag;
 - (void)setWrap:(BOOL)flag;
-- (void)setLineBufferOffset:(NSInteger)offset;
-- (void)setCaretBufferOffset:(NSInteger)offset;
+- (void)setPresentBufferOffset:(NSInteger)offset;
+- (void)setFocusBufferOffset:(NSInteger)offset;
+- (NSInteger)presentBufferOffset;
+- (NSInteger)focusBufferOffset;
 @end
 
 NS_ASSUME_NONNULL_END

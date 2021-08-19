@@ -16,7 +16,7 @@
 //#define TRIAL_VERSION
 
 #define CEE_APP_HEART_BEAT_INTERVAL                 0.1     // in second
-#define TIMER_FREEZER_TRIGGER_INTERVAL              360     // in second
+#define TIMER_FREEZER_TRIGGER_INTERVAL              1200    // in second
 #define TIMER_FREEZER_FREEZE_INTERVAL               15      // in second
 
 extern NSNotificationName CEENotificationHeartBeat;
@@ -35,14 +35,31 @@ extern NSString* CEEApplicationVersionIndexer;
 extern NSString* CEEBundleVersionIndexer;
 extern NSString* CEESerializerVersionIndexer;
 extern NSString* CEEBackwardCompatibleMaxVersionIndexer;
-
 extern NSString* CEEApplicationConfigurationNameLineWrap;
 extern NSString* CEEApplicationConfigurationNameCaretBlinkTimeInterval;
 extern NSString* CEEApplicationConfigurationNameShowLineNumber;
 extern NSString* CEEApplicationConfigurationNameUIStyle;
 extern NSString* CEEApplicationConfigurationNameTextHighlightStyle;
+extern NSString* CEEApplicationConfigurationNameShowPageGuideLine;
+extern NSString* CEEApplicationConfigurationNamePageGuideLineOffset;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
+@property (strong, readonly) NSWindowController* projectCreatorWindowController;
+@property (strong, readonly) NSWindowController* projectParseWindowController;
+@property (strong, readonly) NSWindowController* projectCleanWindowController;
+@property (strong, readonly) NSWindowController* projectSearchWindowController;
+@property (strong, readonly) NSWindowController* projectContextWindowController;
+@property (strong, readonly) NSWindowController* timeFreezerWindowController;
+@property (strong, readonly) NSWindowController* addReferenceWindowController;
+@property (strong, readonly) NSWindowController* removeReferenceWindowController;
+@property (strong, readonly) NSWindowController* referenceRootScannerWindowController;
+@property (strong, readonly) NSWindowController* updateInfoWindowController;
+@property (strong, readonly) NSWindowController* preferenceWindowController;
+@property (strong, readonly) NSWindowController* paymentSelectionWindowController;
+@property (strong, readonly) NSWindowController* purchaseErrorWindowController;
+@property (strong, readonly) NSWindowController* purchaseCancelWindowController;
+@property (strong, readonly) NSWindowController* paymentVerifiedErrorWindowController;
+
 @property (strong, readonly) CEEProjectController* projectController;
 @property (strong, readonly) CEESourceBufferManager* sourceBufferManager;
 @property (strong, readonly) NSDictionary* configuration;

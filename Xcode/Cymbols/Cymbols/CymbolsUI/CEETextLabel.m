@@ -19,7 +19,7 @@
 
 - (void)setStringValue:(NSString *)string {
     [super setStringValue:string];
-    cee_text_storage_modify_clear(cee_text_edit_storage_get(_edit));
+    cee_text_storage_modify_clear(cee_text_edit_storage_get(self.edit));
 }
 
 - (BOOL)becomeFirstResponder {
@@ -50,7 +50,7 @@
     CEETextLayoutRef layout = NULL;
     CGRect rect;
     
-    layout = cee_text_edit_layout(_edit);
+    layout = cee_text_edit_layout_get(self.edit);
     if (!layout)
         return;
     

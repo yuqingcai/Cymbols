@@ -12,6 +12,7 @@
 #import "cee_lib.h"
 #import "cee_source_parsers.h"
 #import "CEETimerFreezer.h"
+#import "CEEStorePayment.h"
 
 NSNotificationName CEENotificationHeartBeat = @"CEENotificationHeartBeat";
 NSNotificationName CEENotificationApplicationConfigurationChanged = @"CEENotificationApplicationConfigurationChanged";
@@ -35,6 +36,8 @@ NSString* CEEApplicationConfigurationNameCaretBlinkTimeInterval = @"caret_blink_
 NSString* CEEApplicationConfigurationNameShowLineNumber = @"show_line_number";
 NSString* CEEApplicationConfigurationNameUIStyle = @"ui_style";
 NSString* CEEApplicationConfigurationNameTextHighlightStyle = @"text_highlight_style";
+NSString* CEEApplicationConfigurationNameShowPageGuideLine = @"show_page_guide_line";
+NSString* CEEApplicationConfigurationNamePageGuideLineOffset = @"page_guide_line_offset";
 
 @interface AppDelegate()
 @property (strong) NSTimer* heartBeatTimer;
@@ -46,12 +49,27 @@ NSString* CEEApplicationConfigurationNameTextHighlightStyle = @"text_highlight_s
 @implementation AppDelegate
 
 @synthesize currentProject = _currentProject;
+@synthesize projectCreatorWindowController = _projectCreatorWindowController;
+@synthesize projectParseWindowController = _projectParseWindowController;
+@synthesize projectCleanWindowController = _projectCleanWindowController;
+@synthesize projectSearchWindowController = _projectSearchWindowController;
+@synthesize timeFreezerWindowController = _timeFreezerWindowController;
+@synthesize projectContextWindowController = _projectContextWindowController;
+@synthesize addReferenceWindowController = _addReferenceWindowController;
+@synthesize removeReferenceWindowController = _removeReferenceWindowController;
+@synthesize referenceRootScannerWindowController = _referenceRootScannerWindowController;
+@synthesize updateInfoWindowController = _updateInfoWindowController;
+@synthesize preferenceWindowController = _preferenceWindowController;
+@synthesize paymentSelectionWindowController = _paymentSelectionWindowController;
+@synthesize purchaseErrorWindowController = _purchaseErrorWindowController;
+@synthesize purchaseCancelWindowController = _purchaseCancelWindowController;
+@synthesize paymentVerifiedErrorWindowController = _paymentVerifiedErrorWindowController;
 
 - (id)init {
     self = [super init];
     if (!self)
         return nil;
-        
+    
     cee_parsers_create();
     
     [self setupSupportDirectory];
@@ -186,6 +204,7 @@ NSString* CEEApplicationConfigurationNameTextHighlightStyle = @"text_highlight_s
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"NSConstraintBasedLayoutVisualizeMutuallyExclusiveConstraints"];
+    [[SKPaymentQueue defaultQueue] addTransactionObserver:[CEEStorePayment sharedInstance]];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -200,6 +219,8 @@ NSString* CEEApplicationConfigurationNameTextHighlightStyle = @"text_highlight_s
     }
     [_sourceBufferManager discardTemporaryFiles];
     [self stopAccessingSecurityScopedResourceWithLoggedBookmarks];
+    
+    [[SKPaymentQueue defaultQueue] removeTransactionObserver:[CEEStorePayment sharedInstance]];
 }
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender {
@@ -384,6 +405,97 @@ NSString* CEEApplicationConfigurationNameTextHighlightStyle = @"text_highlight_s
     }
         
     return nil;
+}
+
+- (NSWindowController*)projectCreatorWindowController {
+    if (!_projectCreatorWindowController)
+        _projectCreatorWindowController = [[NSStoryboard storyboardWithName:@"ProjectCreator" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectCreatorWindowController"];
+    return _projectCreatorWindowController;
+}
+
+- (NSWindowController*)projectParseWindowController{
+    if (!_projectParseWindowController)
+        _projectParseWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectParseWindowController"];
+    return _projectParseWindowController;
+}
+
+- (NSWindowController*)projectCleanWindowController {
+    if (!_projectCleanWindowController)
+        _projectCleanWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectCleanWindowController"];
+    return _projectCleanWindowController;
+}
+
+- (NSWindowController*)projectSearchWindowController {
+    if (!_projectSearchWindowController)
+        _projectSearchWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSearchWindowController"];
+    return _projectSearchWindowController;
+}
+
+- (NSWindowController*)timeFreezerWindowController {
+    if (!_timeFreezerWindowController)
+        _timeFreezerWindowController = [[NSStoryboard storyboardWithName:@"TimeFreezer" bundle:nil] instantiateControllerWithIdentifier:@"IDTimeFreezerWindowController"];
+    return _timeFreezerWindowController;
+}
+
+- (NSWindowController*)projectContextWindowController {
+    if (!_projectContextWindowController)
+        _projectContextWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectContextWindowController"];
+    return _projectContextWindowController;
+}
+
+- (NSWindowController*)addReferenceWindowController {
+    if (!_addReferenceWindowController)
+        _addReferenceWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDAddReferenceWindowController"];
+    return _addReferenceWindowController;
+}
+
+- (NSWindowController*)removeReferenceWindowController {
+    if (!_removeReferenceWindowController)
+        _removeReferenceWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDRemoveReferenceWindowController"];
+    return _removeReferenceWindowController;
+}
+
+- (NSWindowController*)referenceRootScannerWindowController {
+    if (!_referenceRootScannerWindowController)
+        _referenceRootScannerWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDReferenceRootScannerWindowController"];
+    return _referenceRootScannerWindowController;
+}
+
+- (NSWindowController*)updateInfoWindowController {
+    if (!_updateInfoWindowController)
+        _updateInfoWindowController = [[NSStoryboard storyboardWithName:@"UpdateInfo" bundle:nil] instantiateControllerWithIdentifier:@"IDUpdateInfoWindowController"];
+    return _updateInfoWindowController;
+}
+
+- (NSWindowController*)preferenceWindowController {
+    if (!_preferenceWindowController)
+        _preferenceWindowController = [[NSStoryboard storyboardWithName:@"Preferences" bundle:nil] instantiateControllerWithIdentifier:@"IDPreferencesWindowController"];
+    return _preferenceWindowController;
+}
+
+- (NSWindowController*)paymentSelectionWindowController {
+    if (!_paymentSelectionWindowController)
+        _paymentSelectionWindowController = [[NSStoryboard storyboardWithName:@"PaymentSelection" bundle:nil] instantiateControllerWithIdentifier:@"IDPaymentSelectionWindowController"];
+    return _paymentSelectionWindowController;
+}
+
+- (NSWindowController*)purchaseErrorWindowController {
+    if (!_purchaseErrorWindowController)
+        _purchaseErrorWindowController = [[NSStoryboard storyboardWithName:@"PurchaseError" bundle:nil] instantiateControllerWithIdentifier:@"IDPurchaseErrorWindowController"];
+    return _purchaseErrorWindowController;
+}
+
+- (NSWindowController*)purchaseCancelWindowController {
+    if (!_purchaseCancelWindowController)
+        _purchaseCancelWindowController = [[NSStoryboard storyboardWithName:@"PurchaseCancel" bundle:nil] instantiateControllerWithIdentifier:@"IDPurchaseCancelWindowController"];
+    return _purchaseCancelWindowController;
+    
+}
+
+- (NSWindowController*)paymentVerifiedErrorWindowController {
+    if (!_paymentVerifiedErrorWindowController)
+        _paymentVerifiedErrorWindowController = [[NSStoryboard storyboardWithName:@"PaymentVerifiedError" bundle:nil] instantiateControllerWithIdentifier:@"IDPaymentVerifiedErrorWindowController"];
+    return _paymentVerifiedErrorWindowController;
 }
 
 @end

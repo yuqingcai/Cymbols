@@ -17,10 +17,10 @@
     
         {
             "name" : "line_number",
-            "font" : "font(\"Menlo\", 10.0, \"regular\", 5.0)",
+            "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
             "underline" : "false",
             "strikethrough" : "false",
-            "forecolor" : "#757575",
+            "forecolor" : "#9e9e9e",
             "backgroundcolor" : "hsba(0, 0, 0, 0)"
         },
         

@@ -36,13 +36,18 @@ typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
 @property (strong) NSString* borders;
 @property CGFloat borderWidth;
 @property CGFloat cornerRadius;
-
 @property (strong) NSColor* textBackgroundColorSelected;
 @property (strong) NSColor* textBackgroundColorSelectedOutline;
 @property (strong) NSColor* textBackgroundColorHighlight;
 @property (strong) NSColor* textBackgroundColorHighlightOutline;
+@property (strong) NSColor* textBackgroundColorMarked;
+@property (strong) NSColor* textBackgroundColorMarkedOutline;
+@property (strong) NSColor* textBackgroundColorMarkedSelected;
+@property (strong) NSColor* textBackgroundColorMarkedSelectedOutline;
+@property (strong) NSColor* textBackgroundColorSearched;
+@property (strong) NSColor* textBackgroundColorSearchedOutline;
+@property (strong) NSColor* pageGuideLineColor;
 @property (strong) NSString* aligment;
-
 @property (strong) NSColor* dividerColor;
 @property (strong) NSColor* dividerColorVertical;
 @property (strong) NSColor* dividerColorHorizontal;
@@ -58,6 +63,8 @@ typedef NS_ENUM(NSUInteger, CEEViewStyleState) {
 @property (strong) NSColor* boxBackgroundColorChecked;
 @property (strong) NSColor* boxContentColor;
 @property (strong) NSColor* tintColor;
+@property (strong) NSColor* color;
+
 - (instancetype)initWithScheme:(CEEUserInterfaceStyleScheme*)scheme;
 @end
 

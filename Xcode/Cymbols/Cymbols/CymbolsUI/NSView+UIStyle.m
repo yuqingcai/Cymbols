@@ -50,7 +50,15 @@
     NSString* dividerColorVerticalProperty = scheme.descriptor[@"divider_color_vertical"];
     NSString* dividerColorHorizontalProperty = scheme.descriptor[@"divider_color_horizontal"];
     NSString* alternativeTextColorProperty = scheme.descriptor[@"alternative_text_color"];
-    
+    NSString* textBackgroundColorMarkedProperty = scheme.descriptor[@"text_background_color_marked"];
+    NSString* textBackgroundColorMarkedOutlineProperty = scheme.descriptor[@"text_background_color_marked_outline"];
+    NSString* textBackgroundColorMarkedSelectedProperty = scheme.descriptor[@"text_background_color_marked_selected"];
+    NSString* textBackgroundColorMarkedSelectedOutlineProperty = scheme.descriptor[@"text_background_color_marked_selected_outline"];
+    NSString* textBackgroundColorSearchedProperty = scheme.descriptor[@"text_background_color_searched"];
+    NSString* textBackgroundColorSearchedOutlineProperty = scheme.descriptor[@"text_background_color_searched_outline"];
+    NSString* pageGuideLineColorProperty = scheme.descriptor[@"page_guide_line_color"];
+    NSString* colorProperty = scheme.descriptor[@"color"];
+
     if (fontProperty)
         self.font = [CEEUserInterfaceStyleConfiguration createFontFromString:fontProperty];
     
@@ -143,6 +151,30 @@
     
     if (alternativeTextColorProperty)
         self.alternativeTextColor = [CEEUserInterfaceStyleConfiguration createColorFromString:alternativeTextColorProperty];
+    
+    if (textBackgroundColorMarkedProperty)
+        self.textBackgroundColorMarked = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorMarkedProperty];
+    
+    if (textBackgroundColorMarkedOutlineProperty)
+        self.textBackgroundColorMarkedOutline = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorMarkedOutlineProperty];
+    
+    if (textBackgroundColorMarkedSelectedProperty)
+        self.textBackgroundColorMarkedSelected = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorMarkedSelectedProperty];
+    
+    if (textBackgroundColorMarkedSelectedOutlineProperty)
+        self.textBackgroundColorMarkedSelectedOutline = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorMarkedSelectedOutlineProperty];
+    
+    if (textBackgroundColorSearchedProperty)
+        self.textBackgroundColorSearched = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorSearchedProperty];
+    
+    if (textBackgroundColorSearchedOutlineProperty)
+        self.textBackgroundColorSearchedOutline = [CEEUserInterfaceStyleConfiguration createColorFromString:textBackgroundColorSearchedOutlineProperty];
+    
+    if (pageGuideLineColorProperty)
+        self.pageGuideLineColor = [CEEUserInterfaceStyleConfiguration createColorFromString:pageGuideLineColorProperty];
+    
+    if (colorProperty)
+        self.color = [CEEUserInterfaceStyleConfiguration createColorFromString:colorProperty];
     
     return self;
 }

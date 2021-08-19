@@ -588,7 +588,7 @@
     [_editViewController setBuffer:_contextSourceBuffer];
     CEEList* ranges = cee_ranges_from_string([result.locations UTF8String]);
     if (ranges) {
-        [_editViewController highlightRanges:ranges];
+        [_editViewController highlight:ranges];
         cee_list_free_full(ranges, cee_range_free);
     }
     [_titlebar setTitle:result.filePath];
@@ -611,7 +611,7 @@
     [_editViewController setBuffer:_contextSourceBuffer];
     CEEList* ranges = cee_ranges_from_string([_selectedResult.locations UTF8String]);
     if (ranges) {
-        [_editViewController highlightRanges:ranges];
+        [_editViewController highlight:ranges];
         cee_list_free_full(ranges, cee_range_free);
     }
     [_titlebar setTitle:_selectedResult.filePath];

@@ -65,11 +65,17 @@ CEEPoint CEEPointFromNSPoint(NSPoint point)
     return point0;
 }
 
+@interface CEETextView() {
+@protected
+   CEETextEditRef _edit;
+}
+@end
+
 @implementation CEETextView
 @synthesize wrap = _wrap;
 @synthesize caretBlinkTimeInterval = _caretBlinkTimeInterval;
-@synthesize storage = _storage;
 @synthesize stringValue = _stringValue;
+@synthesize alignment = _alignment;
 
 static void pasteboard_string_set(cee_pointer platform_ref, const cee_uchar* str)
 {
@@ -111,21 +117,28 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     
     _textBackgroundColorSelected = [NSColor selectedTextBackgroundColor];
     _textBackgroundColorSelectedOutline = [NSColor selectedTextBackgroundColor];
-    _textBackgroundColorHighlight = [NSColor redColor];
-    _textBackgroundColorHighlightOutline = [NSColor redColor];
+    _textBackgroundColorHighlight = [NSColor highlightColor];
+    _textBackgroundColorHighlightOutline = [NSColor highlightColor];
+    _textBackgroundColorMarked = [NSColor highlightColor];
+    _textBackgroundColorMarkedOutline = [NSColor highlightColor];
+    _textBackgroundColorMarkedSelected = [NSColor textColor];
+    _textBackgroundColorMarkedSelectedOutline = [NSColor textColor];
+    _textBackgroundColorSearched = [NSColor lightGrayColor];
+    _textBackgroundColorSearchedOutline = [NSColor darkGrayColor];
+    _pageGuideLineColor = [NSColor lightGrayColor];
+    
     _styleState = kCEEViewStyleStateActived;
-    _aligment = kCEETextLayoutAlignmentLeft;
+    _alignment = kCEETextLayoutAlignmentLeft;
     _editable = YES;
     _wrap = YES;
-    _intelligence = YES;
     _highLightSearched = NO;
-    _retain_storage = YES;
+    _enablePageGuideLine = YES;
+    _enableHighlight = YES;
     _caretBlinkTimeInterval = 0.5;
+    _pageGuildLineOffset = 0;
     
-    _storage = cee_text_storage_create((const cee_uchar*)"");
     _edit = cee_text_edit_create((__bridge cee_pointer)self,
-                                 _storage,
-                                 _aligment,
+                                 _alignment,
                                  pasteboard_string_set,
                                  pasteboard_string_create);
     
@@ -133,6 +146,16 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                                  self.frame.size.height);
     cee_text_edit_container_size_set(_edit, size);
     cee_text_edit_wrap_set(self.edit, _wrap);
+}
+
+- (void)setAlignment:(CEETextLayoutAlignment)aligment {
+    _alignment = aligment;
+    cee_text_edit_aligment_set(_edit, _alignment);
+    [self setNeedsDisplay:YES];
+}
+
+- (CEETextLayoutAlignment)alignment {
+    return _alignment;
 }
 
 - (void)setStringValue:(NSString *)string {
@@ -144,7 +167,8 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (NSString*)stringValue {
-    return [NSString stringWithUTF8String:(cee_char*)cee_text_storage_buffer_get(_storage)];
+    CEETextStorageRef storage = cee_text_edit_storage_get(_edit);
+    return [NSString stringWithUTF8String:(cee_char*)cee_text_storage_buffer_get(storage)];
 }
 
 - (void)setWrap:(BOOL)wrap {
@@ -230,37 +254,12 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     return descriptor;
 }
 
-- (void)setStorage:(CEETextStorageRef)storage {
-    if (_storage && _retain_storage)
-        cee_text_storage_free(_storage);
-
-    if (storage) {
-        _storage = storage;
-        _retain_storage = NO;
-    }
-    else {
-        _storage = cee_text_storage_create((const cee_uchar*)"");
-        _retain_storage = YES;
-    }
-    
-    cee_text_edit_storage_set(_edit, _storage);
-}
-
-- (CEETextStorageRef)storage {
-    return _storage;
-}
-
 - (void)dealloc {
     if (_edit) {
         cee_text_edit_free(_edit);
         _edit = NULL;
     }
-    
-    if (_storage && _retain_storage) {
-        cee_text_storage_free(_storage);
-        _storage = NULL;
-    }
-    
+        
     if (_caretBlinkTimer) {
         [_caretBlinkTimer invalidate];
         _caretBlinkTimer = nil;
@@ -284,7 +283,6 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     self.trackingArea = [[NSTrackingArea alloc] initWithRect:self.bounds options:opt owner:self userInfo:nil];
     [self addTrackingArea:self.trackingArea];
 }
-
 
 - (void)setFrameSize:(NSSize)newSize {
     [super setFrameSize:newSize];
@@ -351,7 +349,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 - (void)insertText:(id)string replacementRange:(NSRange)replacementRange {
     cee_text_edit_insert(_edit, (const cee_uchar*)[string UTF8String]);
     [self setNeedsDisplay:YES];
-    
+
     if (_delegate && [_delegate respondsToSelector:@selector(textViewTextChanged:)])
         [_delegate textViewTextChanged:self];
 }
@@ -366,25 +364,26 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     
     cee_text_edit_mark_text(_edit, (const cee_uchar*)[string UTF8String]);
     
+    CEETextStorageRef storage = cee_text_edit_storage_get(_edit);
     CEERange marked_text_range = cee_text_edit_marked_range_get(_edit);
-    cee_long paragraph = cee_text_storage_paragraph_beginning_get(_storage,
+    cee_long paragraph = cee_text_storage_paragraph_beginning_get(storage,
                                                                   marked_text_range.location);
     cee_long buffer_offset = -1;
     cee_ulong length = 0;
     CEERange range = cee_range_make(-1, 0);
-    cee_long index =  cee_text_storage_character_index_in_paragraph(_storage, 
+    cee_long index =  cee_text_storage_character_index_in_paragraph(storage,
                                                                     paragraph, 
                                                                     marked_text_range.location);
-    buffer_offset = cee_text_storage_buffer_offset_by_character_index(_storage, 
+    buffer_offset = cee_text_storage_buffer_offset_by_character_index(storage,
                                                                       paragraph, 
                                                                       index + selectedRange.location);
     range.location = buffer_offset;
     
     for (int i = 0; i < selectedRange.length; i ++) {
-        buffer_offset = cee_text_storage_buffer_offset_by_character_index(_storage, 
+        buffer_offset = cee_text_storage_buffer_offset_by_character_index(storage,
                                                                           paragraph, 
                                                                           index + selectedRange.location + i);
-        cee_text_storage_buffer_character_next(_storage,
+        cee_text_storage_buffer_character_next(storage,
                                                buffer_offset,
                                                NULL,
                                                NULL,
@@ -496,6 +495,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (void)mouseDown:(NSEvent *)event {
+    
     if (!_editable)
         return;
     
@@ -505,9 +505,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     
     if ([self.window firstResponder] != self)
         [self.window makeFirstResponder:self];
-    
-    cee_text_edit_highlight_clear(_edit);
-    
+        
     NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
     point = [self layoutPointFromViewPoint:point];
     CEEPoint p = CEEPointFromNSPoint(point);
@@ -579,7 +577,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 
                 if (_delegate && [_delegate respondsToSelector:@selector(textViewDragged:)])
                     [_delegate textViewDragged:self];
-                                
+                
                 if (!_autoScrolling) {
                     point = [self layoutPointFromViewPoint:point];
                     p = CEEPointFromNSPoint(point);
@@ -617,6 +615,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
                 break;
         }
     }
+    
     [self setNeedsDisplay:YES];
 }
 
@@ -731,54 +730,57 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     }
 }
 
-- (void)drawSelectionRegion {
-    CEEList* rects = cee_text_edit_selection_rects_create(_edit);
+- (void)drawSelectionRegions {
+    CEETextSelection* selection = cee_text_edit_selection_get(_edit);
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_edit);
+    
+    if (!selection->range.length)
+        return;
+    
+    CEEList* rects = cee_text_layout_rects_create(layout, selection->range);
+    if (!rects)
+        return;
+    
     [_textBackgroundColorSelectedOutline setStroke];
     [_textBackgroundColorSelected setFill];
     [self drawContinuousRegion:rects];
     cee_list_free_full(rects, cee_range_free);
 }
 
-- (void)drawMarkedRegion {
-    CEEList* rects = cee_text_edit_marked_rects_create(_edit);
-    [_textBackgroundColorHighlightOutline setStroke];
-    [_textBackgroundColorHighlight setFill];
+- (void)drawMarkedRegions {
+    CEETextMarked* marked = cee_text_edit_marked_get(_edit);
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_edit);
+    
+    if (!marked->range.length)
+        return;
+        
+    CEEList* rects = cee_text_layout_rects_create(layout, marked->range);
+    if (!rects)
+        return;
+    
+    [_textBackgroundColorMarkedOutline setStroke];
+    [_textBackgroundColorMarked setFill];
     [self drawContinuousRegion:rects];
     cee_list_free_full(rects, cee_range_free);
 }
 
-- (void)drawSearchedRegions {
-    CEEList* rects = cee_text_edit_searched_rects_create(_edit);
-    [_textBackgroundColorSelectedOutline setStroke];
-    [_textBackgroundColorSelected setFill];
-    [self drawRegions:rects];
-    cee_list_free_full(rects, cee_range_free);
-}
-
-- (void)drawSearchedHighlightRegion {
-    CEEList* rects = cee_text_edit_searched_highlight_rects_create(_edit);
-    [_textBackgroundColorHighlightOutline setStroke];
-    [_textBackgroundColorHighlight setFill];
-    [self drawRegions:rects];
-    cee_list_free_full(rects, cee_range_free);
-}
-
-- (void)drawHightlightRegion {
-    CEEList* rects = cee_text_edit_highlight_rects_create(_edit);
-    [_textBackgroundColorHighlightOutline setStroke];
-    [_textBackgroundColorHighlight setFill];
-    [self drawRegions:rects];
-    cee_list_free_full(rects, cee_range_free);
-}
-
-- (void)drawMarkedSelectedRegion {
-    CEEList* rects = cee_text_edit_marked_selection_rects_create(_edit);
+- (void)drawMarkedSelectedRegions {
+    CEETextMarked* marked = cee_text_edit_marked_get(_edit);
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_edit);
+    
+    if (!marked->range.length)
+        return;
+    
+    CEEList* rects = cee_text_layout_rects_create(layout, marked->selected);
+    if (!rects)
+        return;
+        
     cee_ulong count = cee_list_length(rects);
     if (!count)
         return;
     
-    [_textBackgroundColorHighlightOutline setStroke];
-    [_textBackgroundColorHighlight setFill];
+    [_textBackgroundColorMarkedSelectedOutline setStroke];
+    [_textBackgroundColorMarkedSelected setFill];
     
     CEEList* p = rects;
     while (p) {
@@ -808,13 +810,65 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     cee_list_free_full(rects, cee_rect_free);
 }
 
+- (void)drawSearchedRegions {
+    if (!_delegate || ![_delegate respondsToSelector:@selector(textViewSearchRanges:)])
+        return;
+    
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_edit);
+    
+    CEEList* rects = NULL;
+    CEEList* p = [_delegate textViewSearchRanges:self];
+    while (p) {
+        CEERange* range = p->data;
+        CEEList* q = cee_text_layout_rects_create(layout, *range);
+        rects = cee_list_concat(rects, q);
+        p = p->next;
+    }
+    
+    [_textBackgroundColorSearchedOutline setStroke];
+    [_textBackgroundColorSearched setFill];
+    [self drawRegions:rects];
+    cee_list_free_full(rects, cee_range_free);
+}
+
+- (void)drawHighlightRegions {
+    if (!_delegate || ![_delegate respondsToSelector:@selector(textViewHighlightRanges:)])
+          return;
+        
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_edit);
+    
+    CEEList* rects = NULL;
+    CEEList* p = [_delegate textViewHighlightRanges:self];
+    while (p) {
+        CEERange* range = p->data;
+        CEEList* q = cee_text_layout_rects_create(layout, *range);
+        rects = cee_list_concat(rects, q);
+        p = p->next;
+    }
+    
+    if (!rects)
+        return;
+    
+    [_textBackgroundColorHighlightOutline setStroke];
+    [_textBackgroundColorHighlight setFill];
+    [self drawRegions:rects];
+    cee_list_free_full(rects, cee_range_free);
+}
+
 - (void)drawPageGuideLine {
-    NSBezierPath* path = nil;
-    path = [NSBezierPath bezierPath];
-    [[NSColor colorWithWhite:0.8 alpha:1.0] setStroke];
+    
+    if (_pageGuildLineOffset <= 0)
+        return;
+    
+    CEETextLayoutRef layout = cee_text_edit_layout_get(_edit);
+    cee_pointer platform = cee_text_layout_platform_get(layout);
+    CGFloat fontTypeWidth = cee_text_platform_width_get(platform, 'a', kCEETagTypePlainText);
+    CGFloat horizontalOffset = cee_text_layout_horizontal_offset_get(layout);
+    NSBezierPath* path = [NSBezierPath bezierPath];
+    [_pageGuideLineColor setStroke];
     [path setLineWidth:1.0];
-    [path moveToPoint:NSMakePoint(500, 0.0)];
-    [path lineToPoint:NSMakePoint(500, self.frame.size.height)];
+    [path moveToPoint:NSMakePoint((_pageGuildLineOffset + 1) * fontTypeWidth - horizontalOffset, 0.0)];
+    [path lineToPoint:NSMakePoint((_pageGuildLineOffset + 1) * fontTypeWidth - horizontalOffset, self.frame.size.height)];
     [path stroke];
 }
 
@@ -826,7 +880,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     NSRect rect;
     cee_pointer platform = NULL;
        
-    layout = cee_text_edit_layout(_edit);
+    layout = cee_text_edit_layout_get(_edit);
     if (!layout)
         return;
     
@@ -859,7 +913,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     CEERect unit_bounds;
     CGFloat base = 0.0;
     
-    layout = cee_text_edit_layout(_edit);
+    layout = cee_text_edit_layout_get(_edit);
     if (!layout)
         return;
 
@@ -915,7 +969,7 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     cee_pointer platform = NULL;
     BOOL drawString = NO;
     
-    layout = cee_text_edit_layout(_edit);
+    layout = cee_text_edit_layout_get(_edit);
     if (!layout)
         return;
     
@@ -934,16 +988,18 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         CGContextFillRect(context, rect);
     }
     
-    //[self drawPageGuideLine];
-    [self drawSelectionRegion];
-    [self drawMarkedRegion];
-    [self drawMarkedSelectedRegion];
-    [self drawHightlightRegion];
+    if (_enablePageGuideLine)
+        [self drawPageGuideLine];
     
-    if (_highLightSearched) {
+    [self drawSelectionRegions];
+    [self drawMarkedRegions];
+    [self drawMarkedSelectedRegions];
+    
+    if (_highLightSearched)
         [self drawSearchedRegions];
-        [self drawSearchedHighlightRegion];
-    }
+    
+    if (_enableHighlight)
+        [self drawHighlightRegions];
     
     caret_offset = cee_text_edit_caret_buffer_offset_get(_edit);
     p = cee_text_layout_lines_get(layout);
@@ -1042,23 +1098,44 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
     
     if (current.textBackgroundColorSelectedOutline)
         self.textBackgroundColorSelectedOutline = current.textBackgroundColorSelectedOutline;
-             
+        
+    if (current.textBackgroundColorSearched)
+        self.textBackgroundColorSearched = [current.textBackgroundColorSearched colorWithAlphaComponent:0.7];
+    
+    if (current.textBackgroundColorSearchedOutline)
+        self.textBackgroundColorSearchedOutline = current.textBackgroundColorSearchedOutline;
+    
     if (current.textBackgroundColorHighlight)
-        self.textBackgroundColorHighlight = current.textBackgroundColorHighlight;
+        self.textBackgroundColorHighlight = [current.textBackgroundColorHighlight colorWithAlphaComponent:0.7];
         
     if (current.textBackgroundColorHighlightOutline)
         self.textBackgroundColorHighlightOutline = current.textBackgroundColorHighlightOutline;
+        
+    if (current.textBackgroundColorMarked)
+        self.textBackgroundColorMarked = [current.textBackgroundColorMarked colorWithAlphaComponent:0.7];
+    
+    if (current.textBackgroundColorMarkedOutline)
+        self.textBackgroundColorMarkedOutline = current.textBackgroundColorMarkedOutline;
+    
+    if (current.textBackgroundColorMarkedSelected)
+        self.textBackgroundColorMarkedSelected = [current.textBackgroundColorMarkedSelected colorWithAlphaComponent:0.7];
+    
+    if (current.textBackgroundColorMarkedSelectedOutline)
+        self.textBackgroundColorMarkedSelectedOutline = current.textBackgroundColorMarkedSelectedOutline;
     
     if (current.alternativeTextColor)
         self.alternativeTextColor = current.alternativeTextColor;
-        
+    
+    if (current.pageGuideLineColor)
+        self.pageGuideLineColor = current.pageGuideLineColor;
+            
     if (current.aligment) {
         if ([current.aligment caseInsensitiveCompare:@"left"] == NSOrderedSame)
-            self.aligment = kCEETextLayoutAlignmentLeft;
+            self.alignment = kCEETextLayoutAlignmentLeft;
         else if ([current.aligment caseInsensitiveCompare:@"right"] == NSOrderedSame)
-            self.aligment = kCEETextLayoutAlignmentRight;
+            self.alignment = kCEETextLayoutAlignmentRight;
         else if ([current.aligment caseInsensitiveCompare:@"center"] == NSOrderedSame)
-            self.aligment = kCEETextLayoutAlignmentCenter;
+            self.alignment = kCEETextLayoutAlignmentCenter;
     }
 }
 
@@ -1676,33 +1753,28 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 
 - (void)mouseMoved:(NSEvent *)event {
     [super mouseMoved:event];
+    NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
+    point = [self layoutPointFromViewPoint:point];
+    
     if (event.modifierFlags & NSEventModifierFlagCommand) {
-        NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
-        point = [self layoutPointFromViewPoint:point];
-        CEEPoint p = CEEPointFromNSPoint(point);
-        cee_text_edit_cursor_position_set(_edit, p);
-        if (_delegate && [_delegate respondsToSelector:@selector(textViewHighlightTokenCluster:)])
-            [_delegate textViewHighlightTokenCluster:self];
+        if (_delegate && [_delegate respondsToSelector:@selector(textView:pickWordAtPoint:)])
+            [_delegate textView:self pickWordAtPoint:point];
     }
 }
 
 - (void)flagsChanged:(NSEvent *)event {
     [super flagsChanged:event];
+    NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
+    point = [self layoutPointFromViewPoint:point];
     
-    if ((event.modifierFlags & NSEventModifierFlagCommand)) {
-        NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
-        point = [self layoutPointFromViewPoint:point];
-        CEEPoint p = CEEPointFromNSPoint(point);
-        cee_text_edit_cursor_position_set(_edit, p);
-        
-        if (_delegate && [_delegate respondsToSelector:@selector(textViewHighlightTokenCluster:)])
-            [_delegate textViewHighlightTokenCluster:self];
+    if (event.modifierFlags & NSEventModifierFlagCommand) {
+        if (_delegate && [_delegate respondsToSelector:@selector(textView:pickWordAtPoint:)])
+            [_delegate textView:self pickWordAtPoint:point];
     }
-    else {
-        if (_delegate && [_delegate respondsToSelector:@selector(textViewIgnoreTokenCluster:)])
-            [_delegate textViewIgnoreTokenCluster:self];
+    else if (!(event.modifierFlags & NSEventModifierFlagCommand)) {
+        if (_delegate && [_delegate respondsToSelector:@selector(textView:pickWordCompleteAtPoint:)])
+            [_delegate textView:self pickWordCompleteAtPoint:point];
     }
-    
 }
 
 - (NSMenu*)menuForEvent:(NSEvent *)event {

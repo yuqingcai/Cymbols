@@ -11,6 +11,7 @@
 #include "cee_gnu_asm.h"
 #include "cee_csharp.h"
 #include "cee_xml.h"
+#include "cee_javascript.h"
 
 static CEESourceParserRef asm_parser_get(const cee_char* extension);
 static cee_boolean using_gnu_asm(void);
@@ -26,10 +27,8 @@ static CEESourceParserRef java_parser = NULL;
 static CEESourceParserRef gnu_asm_parser = NULL;
 static CEESourceParserRef arm_asm_parser = NULL;
 static CEESourceParserRef csharp_parser = NULL;
+static CEESourceParserRef js_parser = NULL;
 
-/*
-static CEESourceParserRef java_script_parser = NULL;
-*/
 
 static cee_char* asm_parser_name = NULL;
 
@@ -47,10 +46,10 @@ void cee_parsers_create()
     java_parser = cee_java_parser_create("java");
     gnu_asm_parser = cee_gnu_asm_parser_create("gnu_asm");
     csharp_parser = cee_csharp_parser_create("csharp");
+    js_parser = cee_js_parser_create("java_script");
     
     /**
      arm_asm_parser = cee_arm_asm_parser_create("ARM_ASM");
-     java_script_parser = cee_swift_parser_create("java_script");
      */
 }
 
@@ -65,9 +64,9 @@ void cee_parsers_free()
     cee_xml_parser_free(xml_parser);
     cee_html_parser_free(html_parser);
     cee_c_parser_free(c_parser);
+    cee_js_parser_free(js_parser);
     
     /**
-        cee_java_script_parser_free(java_srcipt_parser);
         cee_arm_asm_parser_free(arm_asm_parser);
      */
     
@@ -125,12 +124,11 @@ static cee_boolean is_csharp_source_extension(const cee_char* extension)
     return !cee_strcmp(extension, "cs", FALSE);
 }
 
-/*
-static cee_boolean is_java_script_source_extension(const cee_char* extension)
+static cee_boolean is_js_source_extension(const cee_char* extension)
 {
-    return !cee_strcmp(extension, "js", FALSE);
+    return (!cee_strcmp(extension, "js", FALSE) ||
+            !cee_strcmp(extension, "mjs", FALSE));
 }
-*/
 
 CEESourceParserRef cee_source_parser_get(const cee_char* filepath)
 {
@@ -156,11 +154,9 @@ CEESourceParserRef cee_source_parser_get(const cee_char* filepath)
         parser = asm_parser_get(extension);
     else if (is_csharp_source_extension(extension))
         parser = csharp_parser;
-    /*
-     else if (is_java_script_source_extension(extension))
-        parser = java_script_parser;
-     */
-    
+    else if (is_js_source_extension(extension))
+        parser = js_parser;
+     
     if (extension)
         cee_free(extension);
     

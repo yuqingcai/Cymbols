@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Window Controller-->
+        <scene sceneID="deM-Ek-97g">
+            <objects>
+                <windowController storyboardIdentifier="IDPaymentSelectionWindowController" id="qlo-Kk-6d9" customClass="CEEWindowController" sceneMemberID="viewController">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="o7B-oM-rTy">
+                        <windowStyleMask key="styleMask" titled="YES" resizable="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="425" y="462" width="480" height="270"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
+                        <view key="contentView" id="Kvh-pc-yfg">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="qlo-Kk-6d9" id="sgT-z6-lsJ"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="1HQ-zR-iP9" kind="relationship" relationship="window.shadowedContentViewController" id="ocy-3r-CR7"/>
+                    </connections>
+                </windowController>
+                <customObject id="RsI-VF-U5F" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="74" y="198"/>
+        </scene>
+        <!--Payment Selection View Controller-->
+        <scene sceneID="QWo-5D-q15">
+            <objects>
+                <viewController id="1HQ-zR-iP9" customClass="CEEPaymentSelectionViewController" sceneMemberID="viewController">
+                    <view key="view" id="jop-Fe-Cab" customClass="CEEWindowContentView">
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="450"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="HAC-dm-dXW" customClass="CEEButton">
+                                <rect key="frame" x="360" y="76" width="100" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="DEv-BR-OhG"/>
+                                    <constraint firstAttribute="height" constant="24" id="soP-6x-k8G"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Purchase"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="purchase:" target="1HQ-zR-iP9" id="Kba-Ev-2mF"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="fRy-it-kkt" customClass="CEEButton">
+                                <rect key="frame" x="20" y="76" width="97" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="NUZ-Qw-ED2"/>
+                                    <constraint firstAttribute="width" constant="97" id="NUb-Pk-yPO"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Cancel"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="cancel:" target="1HQ-zR-iP9" id="AwX-DT-RHy"/>
+                                </connections>
+                            </customView>
+                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="inP-9Y-eju" customClass="CEEImageLinkView">
+                                <rect key="frame" x="208" y="356" width="64" height="64"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="64" id="0NY-MO-EQI"/>
+                                    <constraint firstAttribute="width" constant="64" id="zZg-ZM-xZH"/>
+                                </constraints>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="icon_butterfly_128x128" id="PWc-em-lPM"/>
+                            </imageView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Yth-RR-XQg" customClass="CEETextTitle">
+                                <rect key="frame" x="139" y="317" width="202" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="202" id="533-ff-ugW"/>
+                                    <constraint firstAttribute="height" constant="24" id="Wrz-5a-TJF"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Cymbols Subscription Selection"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="dui-Sr-wh8" customClass="CEEContainerView">
+                                <rect key="frame" x="20" y="115" width="440" height="187"/>
+                                <subviews>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="Sny-nc-LFj" customClass="CEETableView">
+                                        <rect key="frame" x="1" y="1" width="438" height="185"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="185" id="QLS-br-QnI"/>
+                                            <constraint firstAttribute="width" constant="438" id="qgi-YF-cP1"/>
+                                        </constraints>
+                                    </customView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="Sny-nc-LFj" firstAttribute="leading" secondItem="dui-Sr-wh8" secondAttribute="leading" constant="1" id="Ctc-CM-hqb"/>
+                                    <constraint firstAttribute="trailing" secondItem="Sny-nc-LFj" secondAttribute="trailing" constant="1" id="OH1-46-zVE"/>
+                                    <constraint firstItem="Sny-nc-LFj" firstAttribute="top" secondItem="dui-Sr-wh8" secondAttribute="top" constant="1" id="Sie-oc-rFO"/>
+                                    <constraint firstAttribute="bottom" secondItem="Sny-nc-LFj" secondAttribute="bottom" constant="1" id="sRa-FK-bUl"/>
+                                </constraints>
+                            </customView>
+                            <progressIndicator maxValue="100" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="k7m-n2-zVq">
+                                <rect key="frame" x="20" y="310" width="16" height="16"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="16" id="IC9-PO-xRO"/>
+                                    <constraint firstAttribute="height" constant="16" id="OqT-y0-jET"/>
+                                </constraints>
+                            </progressIndicator>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="5E7-ow-nqD" customClass="CEEButton">
+                                <rect key="frame" x="255" y="76" width="97" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="46e-rJ-bjd"/>
+                                    <constraint firstAttribute="width" constant="97" id="GIG-x7-Hi9"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="title" value="Restore"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="restore:" target="1HQ-zR-iP9" id="EGn-YN-3ZR"/>
+                                </connections>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="dnz-1V-LsR" customClass="CEETextLink">
+                                <rect key="frame" x="139" y="20" width="95" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="Gtk-KD-WcN"/>
+                                    <constraint firstAttribute="width" constant="95" id="Wap-q5-Hwe"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Terms of Use"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="URLString" value="https://cymbols.io/terms-and-conditions.html"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="FpA-ed-Hzx" customClass="CEETextLink">
+                                <rect key="frame" x="255" y="20" width="95" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="95" id="Cgp-c9-uqD"/>
+                                    <constraint firstAttribute="height" constant="24" id="JXu-jt-EdO"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="stringValue" value="Privacy Policy"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="URLString" value="https://cymbols.io/privacy-policy.html"/>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="lR5-qf-0Bm" customClass="CEEHorizonalLineView">
+                                <rect key="frame" x="20" y="57" width="440" height="1"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="vA0-aQ-vaG"/>
+                                </constraints>
+                            </customView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="dnz-1V-LsR" secondAttribute="bottom" constant="20" symbolic="YES" id="3dI-od-vhb"/>
+                            <constraint firstItem="fRy-it-kkt" firstAttribute="leading" secondItem="jop-Fe-Cab" secondAttribute="leading" constant="20" symbolic="YES" id="4RE-3C-jh0"/>
+                            <constraint firstItem="HAC-dm-dXW" firstAttribute="top" secondItem="dui-Sr-wh8" secondAttribute="bottom" constant="15" id="706-aU-RhU"/>
+                            <constraint firstItem="dui-Sr-wh8" firstAttribute="leading" secondItem="jop-Fe-Cab" secondAttribute="leading" constant="20" symbolic="YES" id="7rc-Ys-s8C"/>
+                            <constraint firstItem="Yth-RR-XQg" firstAttribute="top" secondItem="inP-9Y-eju" secondAttribute="bottom" constant="15" id="8Nq-Zj-cs5"/>
+                            <constraint firstItem="dnz-1V-LsR" firstAttribute="leading" secondItem="jop-Fe-Cab" secondAttribute="leading" constant="139" id="CZk-pG-Wj6"/>
+                            <constraint firstItem="k7m-n2-zVq" firstAttribute="leading" secondItem="jop-Fe-Cab" secondAttribute="leading" constant="20" symbolic="YES" id="FDh-jl-fQ2"/>
+                            <constraint firstAttribute="trailing" secondItem="HAC-dm-dXW" secondAttribute="trailing" constant="20" symbolic="YES" id="Hv4-QB-YJy"/>
+                            <constraint firstItem="HAC-dm-dXW" firstAttribute="leading" secondItem="5E7-ow-nqD" secondAttribute="trailing" constant="8" symbolic="YES" id="O0N-AQ-n39"/>
+                            <constraint firstItem="lR5-qf-0Bm" firstAttribute="leading" secondItem="jop-Fe-Cab" secondAttribute="leading" constant="20" symbolic="YES" id="RB5-MD-lak"/>
+                            <constraint firstAttribute="bottom" secondItem="FpA-ed-Hzx" secondAttribute="bottom" constant="20" symbolic="YES" id="SRa-xy-BZz"/>
+                            <constraint firstItem="dui-Sr-wh8" firstAttribute="top" secondItem="Yth-RR-XQg" secondAttribute="bottom" constant="15" id="TV8-TH-yop"/>
+                            <constraint firstItem="inP-9Y-eju" firstAttribute="top" secondItem="jop-Fe-Cab" secondAttribute="top" constant="30" id="Wj4-ts-VB0"/>
+                            <constraint firstItem="Yth-RR-XQg" firstAttribute="centerX" secondItem="jop-Fe-Cab" secondAttribute="centerX" id="YLv-bw-kVj"/>
+                            <constraint firstAttribute="trailing" secondItem="lR5-qf-0Bm" secondAttribute="trailing" constant="20" symbolic="YES" id="b52-bq-khl"/>
+                            <constraint firstItem="FpA-ed-Hzx" firstAttribute="top" secondItem="lR5-qf-0Bm" secondAttribute="bottom" constant="13" id="b8X-G6-kSD"/>
+                            <constraint firstItem="fRy-it-kkt" firstAttribute="top" secondItem="dui-Sr-wh8" secondAttribute="bottom" constant="15" id="dTb-Ap-Jo2"/>
+                            <constraint firstItem="dnz-1V-LsR" firstAttribute="top" secondItem="lR5-qf-0Bm" secondAttribute="bottom" constant="13" id="f0B-Qu-MVp"/>
+                            <constraint firstItem="inP-9Y-eju" firstAttribute="centerX" secondItem="jop-Fe-Cab" secondAttribute="centerX" id="j32-g4-YAP"/>
+                            <constraint firstItem="5E7-ow-nqD" firstAttribute="top" secondItem="dui-Sr-wh8" secondAttribute="bottom" constant="15" id="kCA-yd-PAc"/>
+                            <constraint firstAttribute="trailing" secondItem="FpA-ed-Hzx" secondAttribute="trailing" constant="130" id="pWd-oV-fQw"/>
+                            <constraint firstAttribute="trailing" secondItem="dui-Sr-wh8" secondAttribute="trailing" constant="20" symbolic="YES" id="slP-a9-UUE"/>
+                            <constraint firstItem="k7m-n2-zVq" firstAttribute="top" secondItem="dui-Sr-wh8" secondAttribute="bottom" constant="-211" id="voU-jZ-wO5"/>
+                            <constraint firstItem="lR5-qf-0Bm" firstAttribute="top" secondItem="HAC-dm-dXW" secondAttribute="bottom" constant="18" id="w4S-SJ-7Rf"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="cancelButton" destination="fRy-it-kkt" id="5bd-ZK-Aff"/>
+                        <outlet property="indicator" destination="k7m-n2-zVq" id="RiD-Jx-igr"/>
+                        <outlet property="paymentSelectionTable" destination="Sny-nc-LFj" id="EQc-6j-k0i"/>
+                        <outlet property="purchaseButton" destination="HAC-dm-dXW" id="oVw-YK-JOr"/>
+                        <outlet property="restoreButton" destination="5E7-ow-nqD" id="4M1-6L-y5Z"/>
+                    </connections>
+                </viewController>
+                <customObject id="ncB-Mu-Gbx" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="706" y="255"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="icon_butterfly_128x128" width="128" height="128"/>
+    </resources>
+</document>

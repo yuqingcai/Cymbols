@@ -56,8 +56,8 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 
 @interface CEESourceBufferReferenceContext : NSObject
 @property NSString* filePath;
-@property NSInteger lineBufferOffset;
-@property NSInteger caretBufferOffset;
+@property NSInteger presentBufferOffset;
+@property NSInteger focusBufferOffset;
 - (instancetype)initWithFilePath:(NSString*)filePath;
 @end
 
@@ -71,9 +71,9 @@ NSArray* CreateBookmarksWithFilePaths(NSArray* filePaths);
 - (void)moveSourceBufferReferenceNext;
 - (void)moveSourceBufferReferencePrev;
 - (CEESourceBufferReferenceContext*)currentSourceBufferReference;
+- (void)presentSourceBufferReference:(CEESourceBufferReferenceContext*)reference;
 - (void)setActivedSourceBuffer:(CEESourceBuffer*)buffer;
 - (CEESourceBuffer*)activedSourceBuffer;
-- (void)presentHistory:(CEESourceBufferReferenceContext*)reference;
 - (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString*)filePath;
 - (CEESourceBuffer*)openUntitledSourceBuffer;
 - (void)closeSourceBuffers:(NSArray*)buffers;

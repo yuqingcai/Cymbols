@@ -23,6 +23,7 @@
 #import "CEEUpdateInfoViewController.h"
 #import "CEETitlebarButton.h"
 #import "CEETextTitle.h"
+#import "CEEStorePayment.h"
 
 @interface CEESessionViewController ()
 
@@ -32,17 +33,6 @@
 @property (weak) IBOutlet CEEView *containerView;
 @property (weak) CEESessionSpliter0* spliter;
 @property CGFloat titleHeight;
-@property (strong) NSWindowController* projectCreatorWindowController;
-@property (strong) NSWindowController* projectParseWindowController;
-@property (strong) NSWindowController* projectCleanWindowController;
-@property (strong) NSWindowController* projectSearchWindowController;
-@property (strong) NSWindowController* timeFreezerWindowController;
-@property (strong) NSWindowController* contextWindowController;
-@property (strong) NSWindowController* addReferenceWindowController;
-@property (strong) NSWindowController* removeReferenceWindowController;
-@property (strong) NSWindowController* referenceRootScannerWindowController;
-@property (strong) NSWindowController* updateInfoWindowController;
-@property (strong) CEEWindowController* preferenceWindowController;
 @property (weak) IBOutlet CEEToolbarButton *messageButton;
 @property (weak) IBOutlet CEETextTitle *trialVersionTitle;
 
@@ -81,6 +71,14 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cymbolsUpdateConfirmResponse:) name:CEENotificationCymbolsUpdateConfirm object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToSymbolRequestResponse:) name:CEENotificationSessionPortJumpToSymbolRequest object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(timeFreezeResponse:) name:CEENotificationTimeFreeze object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(paymentSelectionResponse:) name:CEENotificationPaymentSelection object:nil];
+}
+
+- (void)viewDidAppear {
+    [super viewDidAppear];
+    BOOL ret = [[CEEStorePayment sharedInstance] verify];
+    if (!ret)
+        [self paymentVerifiedError];
 }
 
 - (CGFloat)sheetOffset {
@@ -235,10 +233,11 @@
 }
 
 - (IBAction)newProject:(id)sender {
-    if (!_projectCreatorWindowController)
-        _projectCreatorWindowController = [[NSStoryboard storyboardWithName:@"ProjectCreator" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectCreatorWindowController"];
-    
-    [self.view.window beginSheet:_projectCreatorWindowController.window completionHandler:(^(NSInteger result) {
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate projectCreatorWindowController];
+    if (!windowController)
+        return;
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
     })];
 }
 
@@ -352,27 +351,36 @@
 }
 
 - (IBAction)addReferencesToProject:(id)sender {
-    if (!_addReferenceWindowController)
-        _addReferenceWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDAddReferenceWindowController"];
-    [self.view.window beginSheet:_addReferenceWindowController.window completionHandler:(^(NSInteger result) {
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate addReferenceWindowController];
+    if (!windowController)
+        return;
+    
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
         [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
 }
 
 - (IBAction)removeReferencesFromProject:(id)sender {
-    if (!_removeReferenceWindowController)
-        _removeReferenceWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDRemoveReferenceWindowController"];
-    [self.view.window beginSheet:_removeReferenceWindowController.window completionHandler:(^(NSInteger result) {
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate removeReferenceWindowController];
+    if (!windowController)
+        return;
+    
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
         [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
 }
 
 - (IBAction)scanReferenceRoots:(id)sender {
-    if (!_referenceRootScannerWindowController)
-        _referenceRootScannerWindowController = [[NSStoryboard storyboardWithName:@"ReferenceManager" bundle:nil] instantiateControllerWithIdentifier:@"IDReferenceRootScannerWindowController"];
-    [self.view.window beginSheet:_referenceRootScannerWindowController.window completionHandler:(^(NSInteger result) {
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate referenceRootScannerWindowController];
+    if (!windowController)
+        return;
+    
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
         [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
@@ -501,15 +509,18 @@
         return;
     }
     
-    if (!_contextWindowController)
-        _contextWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectContextWindowController"];
-    NSModalResponse responese = [NSApp runModalForWindow:_contextWindowController.window];
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate projectContextWindowController];
+    if (!windowController)
+        return;
+    
+    NSModalResponse responese = [NSApp runModalForWindow:windowController.window];
     if (responese == NSModalResponseOK) {
-        CEEProjectContextViewController* contextViewController = (CEEProjectContextViewController*)_contextWindowController.contentViewController;
+        CEEProjectContextViewController* contextViewController = (CEEProjectContextViewController*)windowController.contentViewController;
         if (contextViewController.selectedSymbolRef)
             [port.session jumpToSymbol:contextViewController.selectedSymbolRef inPort:_session.pinnedPort];
     }
-    [_contextWindowController close];
+    [windowController close];
 }
 
 - (void)searchReferenceRequestResponse:(NSNotification*)notification {
@@ -517,19 +528,21 @@
     if (port.session != _session)
         return;
     
-    if (!_projectSearchWindowController)
-        _projectSearchWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSearchWindowController"];
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate projectSearchWindowController];
+    if (!windowController)
+        return;
     
-    CEEProjectSearchViewController* projectSearchViewController = (CEEProjectSearchViewController*)_projectSearchWindowController.contentViewController;
+    CEEProjectSearchViewController* projectSearchViewController = (CEEProjectSearchViewController*)windowController.contentViewController;
     
     [projectSearchViewController setAutoStart:YES];
-    NSModalResponse responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
+    NSModalResponse responese = [NSApp runModalForWindow:windowController.window];
     if (responese == NSModalResponseOK) {
         if (projectSearchViewController.selectedResult)
             [port.session jumpToSourcePoint:projectSearchViewController.selectedResult inPort:_session.pinnedPort];
     }
     [projectSearchViewController setAutoStart:NO];
-    [_projectSearchWindowController close];
+    [windowController close];
 }
 
 - (void)timeFreezeResponse:(NSNotification*)notification {
@@ -541,46 +554,56 @@
     if (!port)
         return;
     
-    if (!_projectSearchWindowController)
-        _projectSearchWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectSearchWindowController"];
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate projectSearchWindowController];
+    if (!windowController)
+        return;
     
-    CEEProjectSearchViewController* projectSearchViewController = (CEEProjectSearchViewController*)_projectSearchWindowController.contentViewController;
-    
-    NSModalResponse responese = [NSApp runModalForWindow:_projectSearchWindowController.window];
+    CEEProjectSearchViewController* projectSearchViewController = (CEEProjectSearchViewController*)windowController.contentViewController;
+        
+    NSModalResponse responese = [NSApp runModalForWindow:windowController.window];
     if (responese == NSModalResponseOK) {
         if (projectSearchViewController.selectedResult)
             [port.session jumpToSourcePoint:projectSearchViewController.selectedResult inPort:_session.pinnedPort];
     }
-    [_projectSearchWindowController close];
+    [windowController close];
 }
 
 - (IBAction)buildProject:(id)sender {
-    if (!_projectParseWindowController)
-        _projectParseWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectParseWindowController"];
-    CEEProjectParseViewController* controller = (CEEProjectParseViewController*)_projectParseWindowController.contentViewController;
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate projectParseWindowController];
+    if (!windowController)
+        return;
+    
+    CEEProjectParseViewController* controller = (CEEProjectParseViewController*)windowController.contentViewController;
     controller.sync = NO;
-    [self.view.window beginSheet:_projectParseWindowController.window completionHandler:(^(NSInteger result) {
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
         [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
 }
 
 - (IBAction)syncProject:(id)sender {
-    if (!_projectParseWindowController)
-        _projectParseWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectParseWindowController"];
-    CEEProjectParseViewController* controller = (CEEProjectParseViewController*)_projectParseWindowController.contentViewController;
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate projectParseWindowController];
+    if (!windowController)
+        return;
+    
+    CEEProjectParseViewController* controller = (CEEProjectParseViewController*)windowController.contentViewController;
     controller.sync = YES;
-    [self.view.window beginSheet:_projectParseWindowController.window completionHandler:(^(NSInteger result) {
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
         [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
 }
 
 - (IBAction)cleanProject:(id)sender {
-    if (!_projectCleanWindowController)
-        _projectCleanWindowController = [[NSStoryboard storyboardWithName:@"ProjectProcess" bundle:nil] instantiateControllerWithIdentifier:@"IDProjectCleanWindowController"];
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate projectCleanWindowController];
+    if (!windowController)
+        return;
     
-    [self.view.window beginSheet:_projectCleanWindowController.window completionHandler:(^(NSInteger result) {
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
         [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
@@ -626,13 +649,14 @@
 }
 
 - (IBAction)update:(id)sender {
-    if (!_updateInfoWindowController)
-        _updateInfoWindowController = [[NSStoryboard storyboardWithName:@"UpdateInfo" bundle:nil] instantiateControllerWithIdentifier:@"IDUpdateInfoWindowController"];
-    
     AppDelegate* delegate = [NSApp delegate];
-    CEEUpdateInfoViewController* viewController = (CEEUpdateInfoViewController*)_updateInfoWindowController.contentViewController;
+    NSWindowController* windowController = [delegate updateInfoWindowController];
+    if (!windowController)
+        return;
+    
+    CEEUpdateInfoViewController* viewController = (CEEUpdateInfoViewController*)windowController.contentViewController;
     viewController.infoString = [delegate.network updateInfoString];
-    [self.view.window beginSheet:_updateInfoWindowController.window completionHandler:(^(NSInteger result) {
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
         [NSApp stopModalWithCode:NSModalResponseOK];
     })];
     [NSApp runModalForWindow:self.view.window];
@@ -640,21 +664,74 @@
 }
 
 - (IBAction)setPreferences:(id)sender {
-    if (!_preferenceWindowController)
-        _preferenceWindowController = [[NSStoryboard storyboardWithName:@"Preferences" bundle:nil] instantiateControllerWithIdentifier:@"IDPreferencesWindowController"];
-    [NSApp runModalForWindow:_preferenceWindowController.window];
-    [_preferenceWindowController close];
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate preferenceWindowController];
+    if (!windowController)
+        return;
+    
+    [NSApp runModalForWindow:windowController.window];
+    [windowController close];
 }
 
 - (void)showTrialWelcome {
-    if (!_timeFreezerWindowController)
-        _timeFreezerWindowController = [[NSStoryboard storyboardWithName:@"TimeFreezer" bundle:nil] instantiateControllerWithIdentifier:@"IDTimeFreezerWindowController"];
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate timeFreezerWindowController];
+    if (!windowController)
+        return;
+    
     if ([self.view.window isMainWindow]) {
-        [self.view.window beginSheet:_timeFreezerWindowController.window completionHandler:(^(NSInteger result) {
+        [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
             [NSApp stopModalWithCode:NSModalResponseOK];
         })];
         [NSApp runModalForWindow:self.view.window];
     }
+}
+
+- (void)paymentSelectionResponse:(NSNotification*)notification {
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate paymentSelectionWindowController];
+    if (!windowController)
+        return;
+    
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
+        if (result == kCEEPurchaseStateCancel)
+            [self purchaseCanceled];
+        else if (result == kCEEPurchaseStateError)
+            [self purchaseError];
+    })];
+}
+
+- (void)purchaseCanceled {
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate purchaseCancelWindowController];
+    if (!windowController)
+        return;
+    
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
+        [[NSApplication sharedApplication] terminate:self];
+    })];
+}
+
+- (void)purchaseError {
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate purchaseErrorWindowController];
+    if (!windowController)
+        return;
+    
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
+        [[NSApplication sharedApplication] terminate:self];
+    })];
+}
+
+- (void)paymentVerifiedError {
+    AppDelegate* delegate = (AppDelegate*)[NSApp delegate];
+    NSWindowController* windowController = [delegate paymentVerifiedErrorWindowController];
+    if (!windowController)
+        return;
+    
+    [self.view.window beginSheet:windowController.window completionHandler:(^(NSInteger result) {
+        [[NSApplication sharedApplication] terminate:self];
+    })];
 }
 
 @end

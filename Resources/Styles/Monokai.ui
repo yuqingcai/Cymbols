@@ -22,6 +22,14 @@
         "border_color" : "#4B464D",
         "border_width" : "1.0",
     },
+        
+    "ClassHorizonalLineView [actived]" : {
+        "color" : "#4B464D",
+    },
+
+    "ClassHorizonalLineView [deactived]" : {
+        "color" : "#4B464D",
+    },
     
     "ClassHighlightView [actived]" : {
         "background_color" : "rgba(75, 70, 77, 40)",
@@ -183,6 +191,24 @@
     
     "ClassTableCellViewTextLabel [highlighted]" : {
         "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "text_color" : "#EBEBEA",
+        "aligment" : "left",
+    },
+        
+    "ClassTableCellViewTextTitle [actived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"bold\", 5.0)",
+        "text_color" : "#EBEBEA",
+        "aligment" : "left",
+    },
+    
+    "ClassTableCellViewTextTitle [deactived]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"bold\", 5.0)",
+        "text_color" : "#EBEBEA",
+        "aligment" : "left",
+    },
+    
+    "ClassTableCellViewTextTitle [highlighted]" : {
+        "font" : "font(\"Helvetica\", 12.0, \"bold\", 5.0)",
         "text_color" : "#EBEBEA",
         "aligment" : "left",
     },
@@ -480,6 +506,13 @@
         "text_background_color_selected_outline" : "#5F5861",
         "text_background_color_highlight" : "#6E4B7A",
         "text_background_color_highlight_outline" : "#5F5861",
+        "text_background_color_marked" : "#388e3c",
+        "text_background_color_marked_outline" : "#388e3c",
+        "text_background_color_marked_selected" : "#388e3c",
+        "text_background_color_marked_selected_outline" : "#388e3c",
+        "text_background_color_searched" : "#ffccbc",
+        "text_background_color_searched_outline" : "#ff7043",
+        "page_guide_line_color" : "#757575",
         "aligment" : "left",
         "IDVerticalScroller [actived]" : {
             "knob_color" : "#4B464D",
@@ -500,6 +533,13 @@
         "text_background_color_selected_outline" : "#A6A48D",
         "text_background_color_highlight" : "#6E4B7A",
         "text_background_color_highlight_outline" : "#A6A48D",
+        "text_background_color_marked" : "#388e3c",
+        "text_background_color_marked_outline" : "#388e3c",
+        "text_background_color_marked_selected" : "#388e3c",
+        "text_background_color_marked_selected_outline" : "#388e3c",
+        "text_background_color_searched" : "#ffccbc",
+        "text_background_color_searched_outline" : "#ff7043",
+        "page_guide_line_color" : "#757575",
         "aligment" : "left",
         "IDVerticalScroller [deactived]" : {
             "knob_color" : "#4B464D",
@@ -520,6 +560,12 @@
         "text_background_color_selected_outline" : "#48473D",
         "text_background_color_highlight" : "#696759",
         "text_background_color_highlight_outline" : "#48473D",
+        "text_background_color_marked" : "#388e3c",
+        "text_background_color_marked_outline" : "#388e3c",
+        "text_background_color_marked_selected" : "#388e3c",
+        "text_background_color_marked_selected_outline" : "#388e3c",
+        "text_background_color_searched" : "#ffccbc",
+        "text_background_color_searched_outline" : "#ff7043",
         "corner_radius" : "2.0",
         "border_color" : "#4B464D",
         "border_width" : "1.0",
@@ -535,6 +581,12 @@
         "text_background_color_selected_outline" : "#48473D",
         "text_background_color_highlight" : "#5A545C",
         "text_background_color_highlight_outline" : "#48473D",
+        "text_background_color_marked" : "#388e3c",
+        "text_background_color_marked_outline" : "#388e3c",
+        "text_background_color_marked_selected" : "#388e3c",
+        "text_background_color_marked_selected_outline" : "#388e3c",
+        "text_background_color_searched" : "#ffccbc",
+        "text_background_color_searched_outline" : "#ff7043",
         "corner_radius" : "2.0",
         "border_color" : "#4B464D",
         "border_width" : "1.0",
@@ -550,6 +602,12 @@
         "text_background_color_selected_outline" : "#48473D",
         "text_background_color_highlight" : "#696759",
         "text_background_color_highlight_outline" : "#48473D",
+        "text_background_color_marked" : "#388e3c",
+        "text_background_color_marked_outline" : "#388e3c",
+        "text_background_color_marked_selected" : "#388e3c",
+        "text_background_color_marked_selected_outline" : "#388e3c",
+        "text_background_color_searched" : "#ffccbc",
+        "text_background_color_searched_outline" : "#ff7043",
         "corner_radius" : "2.0",
         "border_color" : "#4B464D",
         "border_width" : "1.0",
@@ -566,15 +624,21 @@
         "text_background_color_selected_outline" : "#48473D",
         "text_background_color_highlight" : "#5A545C",
         "text_background_color_highlight_outline" : "#48473D",
+        "text_background_color_marked" : "#388e3c",
+        "text_background_color_marked_outline" : "#388e3c",
+        "text_background_color_marked_selected" : "#388e3c",
+        "text_background_color_marked_selected_outline" : "#388e3c",
+        "text_background_color_searched" : "#ffccbc",
+        "text_background_color_searched_outline" : "#ff7043",
         "corner_radius" : "2.0",
         "border_color" : "#4B464D",
         "border_width" : "1.0",
         "borders" : "bottom",
         "aligment" : "left",
     },
-        
+    
     "ClassBinaryView [actived]" : {
-        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
         "text_color" : "#EBEBEA",
         "background_color" : "#2C292D",
         "text_background_color_selected" : "#5F5861",
@@ -593,7 +657,7 @@
     },
     
     "ClassBinaryView [deactived]" : {
-        "font" : "font(\"Helvetica\", 12.0, \"regular\", 5.0)",
+        "font" : "font(\"Menlo\", 12.0, \"regular\", 5.0)",
         "text_color" : "#EBEBEA",
         "background_color" : "#2C292D",
         "text_background_color_selected" : "#4B464D",

@@ -126,8 +126,8 @@ BOOL ContextContainSymbol(CEEList* context,
         return nil;
     
     _filePath = filePath;
-    _lineBufferOffset = 0;
-    _caretBufferOffset = 0;
+    _presentBufferOffset = 0;
+    _focusBufferOffset = 0;
     return self;
 }
 
@@ -187,16 +187,13 @@ BOOL ContextContainSymbol(CEEList* context,
     return self;
 }
 
-- (void)appendBufferReference:(CEESourceBuffer*)buffer {
-    CEESourceBufferReferenceContext* current = [self currentSourceBufferReference];
-    if (current) {
-        if ([current.filePath isEqualToString:buffer.filePath])
-            return;
-    }
+- (void)appendBufferReferenceWithFilePath:(NSString*)filePath presentBufferOffset:(NSInteger)presentBufferOffset focusBufferOffset:(NSInteger)focusBufferOffset {
+    CEESourceBufferReferenceContext* reference = [[CEESourceBufferReferenceContext alloc] initWithFilePath:filePath];
+    reference.presentBufferOffset = presentBufferOffset;
+    reference.focusBufferOffset = focusBufferOffset;
     
-    CEESourceBufferReferenceContext* refernce = [[CEESourceBufferReferenceContext alloc] initWithFilePath:buffer.filePath];
     if (!_sourceBufferReferences.count) {
-        [_sourceBufferReferences addObject:refernce];
+        [_sourceBufferReferences addObject:reference];
     }
     else {
         if (_bufferReferenceIndex < _sourceBufferReferences.count - 1) {
@@ -204,7 +201,7 @@ BOOL ContextContainSymbol(CEEList* context,
             [_sourceBufferReferences removeObjectsInRange:range];
         }
         
-        [_sourceBufferReferences addObject:refernce];
+        [_sourceBufferReferences addObject:reference];
     }
     
     _bufferReferenceIndex ++;
@@ -213,14 +210,14 @@ BOOL ContextContainSymbol(CEEList* context,
 - (void)moveSourceBufferReferenceNext {
     if (_bufferReferenceIndex < _sourceBufferReferences.count - 1) {
         _bufferReferenceIndex ++;
-        [self presentHistory:_sourceBufferReferences[_bufferReferenceIndex]];
+        [self presentSourceBufferReference:_sourceBufferReferences[_bufferReferenceIndex]];
     }
 }
 
 - (void)moveSourceBufferReferencePrev {
     if (_bufferReferenceIndex > 0) {
         _bufferReferenceIndex --;
-        [self presentHistory:_sourceBufferReferences[_bufferReferenceIndex]];
+        [self presentSourceBufferReference:_sourceBufferReferences[_bufferReferenceIndex]];
     }
 }
 
@@ -230,7 +227,7 @@ BOOL ContextContainSymbol(CEEList* context,
     return _sourceBufferReferences[_bufferReferenceIndex];
 }
 
-- (void)presentHistory:(CEESourceBufferReferenceContext*)reference {
+- (void)presentSourceBufferReference:(CEESourceBufferReferenceContext*)reference {
     CEESourceBuffer* target = nil;
     BOOL isDirectory = FALSE;
     
@@ -242,7 +239,6 @@ BOOL ContextContainSymbol(CEEList* context,
             _bufferReferenceIndex = i;
     }
     
-    reference = [self currentSourceBufferReference];
     for (CEESourceBuffer* buffer in _openedSourceBuffers) {
         if ([buffer.filePath isEqualToString:reference.filePath]) {
             target = buffer;
@@ -250,37 +246,35 @@ BOOL ContextContainSymbol(CEEList* context,
         }
     }
     
-    if (!target) {
+    if (!target)
         target = [self openSourceBufferWithFilePath:reference.filePath];
-        if (target)
-            [_openedSourceBuffers addObject:target];
-    }
-
-    if (target) {
+    
+    if (target)
         [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortPresentHistory object:self];
-    }
 }
 
 - (NSDictionary*)lastPresentedBufferOffsetInHistory:(NSString*)filePath {
-    NSDictionary* bufferOffsets = nil;
+    /** should always return a dictionary contain @"presentBufferOffset" and @"focusBufferOffset" */
+    NSDictionary* bufferOffsets = @{
+        @"presentBufferOffset" : @(0),
+        @"focusBufferOffset" : @(0)
+    };
+    
     for (NSInteger i = _sourceBufferReferences.count - 1; i >= 0; i --) {
         CEESourceBufferReferenceContext* reference = _sourceBufferReferences[i];
         if ([reference.filePath isEqualToString:filePath]) {
             bufferOffsets = @{
-                @"lineBufferOffset" : @(reference.lineBufferOffset),
-                @"caretBufferOffset" : @(reference.caretBufferOffset)
+                @"presentBufferOffset" : @(reference.presentBufferOffset),
+                @"focusBufferOffset" : @(reference.focusBufferOffset)
             };
             break;
         }
     }
+    
     return bufferOffsets;
 }
 
 - (CEESourceBuffer*)openSourceBufferWithFilePath:(NSString*)filePath {
-    NSDictionary* bufferOffsets = nil;
-    NSInteger lineBufferOffset = 0;
-    NSInteger caretBufferOffset = 0;
-    
     CEESourceBuffer* target = nil;
     for (CEESourceBuffer* buffer in _openedSourceBuffers) {
         if ([buffer.filePath isEqualToString:filePath]) {
@@ -296,19 +290,9 @@ BOOL ContextContainSymbol(CEEList* context,
     }
     
     if (target) {
-        bufferOffsets = [self lastPresentedBufferOffsetInHistory:target.filePath];
-        if (bufferOffsets) {
-            lineBufferOffset = [bufferOffsets[@"lineBufferOffset"] integerValue];
-            caretBufferOffset = [bufferOffsets[@"caretBufferOffset"] integerValue];
-        }
-        
-        [self appendBufferReference:target];
-        [self.currentSourceBufferReference setLineBufferOffset:lineBufferOffset];
-        [self.currentSourceBufferReference setCaretBufferOffset:caretBufferOffset];
-    }
-    
-    if (target)
+        [self appendBufferReferenceWithFilePath:target.filePath presentBufferOffset:0 focusBufferOffset:0];
         [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortOpenSourceBuffer object:self];
+    }
     
     return target;
 }
@@ -319,7 +303,7 @@ BOOL ContextContainSymbol(CEEList* context,
     CEESourceBuffer* buffer = [sourceBufferManager openUntitledSourceBuffer];
     if (buffer) {
         [_openedSourceBuffers addObject:buffer];
-        [self appendBufferReference:buffer];
+        [self appendBufferReferenceWithFilePath:buffer.filePath presentBufferOffset:0 focusBufferOffset:0];
         [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortOpenSourceBuffer object:self];
     }
     return buffer;
@@ -432,17 +416,12 @@ exit:
 }
 
 - (void)setActivedSourceBuffer:(CEESourceBuffer*)buffer {
-    NSInteger lineBufferOffset = 0;
-    NSInteger caretBufferOffset = 0;
+    NSInteger presentBufferOffset = 0;
+    NSInteger focusBufferOffset = 0;
     NSDictionary* bufferOffsets = [self lastPresentedBufferOffsetInHistory:buffer.filePath];
-    if (bufferOffsets) {
-        lineBufferOffset = [bufferOffsets[@"lineBufferOffset"] integerValue];
-        caretBufferOffset = [bufferOffsets[@"caretBufferOffset"] integerValue];
-    }
-    
-    [self appendBufferReference:buffer];
-    [self.currentSourceBufferReference setLineBufferOffset:lineBufferOffset];
-    [self.currentSourceBufferReference setCaretBufferOffset:caretBufferOffset];
+    presentBufferOffset = [bufferOffsets[@"presentBufferOffset"] integerValue];
+    focusBufferOffset = [bufferOffsets[@"focusBufferOffset"] integerValue];
+    [self appendBufferReferenceWithFilePath:buffer.filePath presentBufferOffset:presentBufferOffset focusBufferOffset:focusBufferOffset];
     [[NSNotificationCenter defaultCenter] postNotificationName:CEENotificationSessionPortActiveSourceBuffer object:self];
 }
 
@@ -519,7 +498,7 @@ exit:
     serializing = [serializing stringByAppendingFormat:@","];
     
     // references serialize begin
-    // ignore all Temporary File References
+    // ignore all Temporary File ReferencesR
     int backStep = 0;
     NSMutableArray* bufferReferences = [NSMutableArray arrayWithArray:_sourceBufferReferences];
     for (int i = 0; i < _sourceBufferReferences.count; i ++) {
@@ -541,9 +520,9 @@ exit:
         serializing = [serializing stringByAppendingFormat:@"{"];
         serializing = [serializing stringByAppendingFormat:@"\"filePath\":\"%@\"", reference.filePath];
         serializing = [serializing stringByAppendingFormat:@","];
-        serializing = [serializing stringByAppendingFormat:@"\"lineBufferOffset\":\"%lu\"", reference.lineBufferOffset];
+        serializing = [serializing stringByAppendingFormat:@"\"presentBufferOffset\":\"%lu\"", reference.presentBufferOffset];
         serializing = [serializing stringByAppendingFormat:@","];
-        serializing = [serializing stringByAppendingFormat:@"\"caretBufferOffset\":\"%lu\"", reference.caretBufferOffset];
+        serializing = [serializing stringByAppendingFormat:@"\"focusBufferOffset\":\"%lu\"", reference.focusBufferOffset];
         serializing = [serializing stringByAppendingFormat:@"}"];
         
         if (i < bufferReferences.count - 1)
@@ -598,16 +577,16 @@ exit:
         NSArray* referenceDescriptors = descriptor[@"sourceBufferReferences"];
         for (NSDictionary* referenceDescriptor in referenceDescriptors) {
             NSString* filePath = referenceDescriptor[@"filePath"];
-            NSString* lineBufferOffset = referenceDescriptor[@"lineBufferOffset"];
-            NSString* caretBufferOffset = referenceDescriptor[@"caretBufferOffset"];
+            NSString* presentBufferOffset = referenceDescriptor[@"presentBufferOffset"];
+            NSString* focusBufferOffset = referenceDescriptor[@"focusBufferOffset"];
             BOOL isDirectory = NO;
             if (![[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&isDirectory] || isDirectory)
                 continue;
             
             reference = [[CEESourceBufferReferenceContext alloc] initWithFilePath:filePath];
             if (reference) {
-                [reference setLineBufferOffset:[lineBufferOffset integerValue]];
-                [reference setCaretBufferOffset:[caretBufferOffset integerValue]];
+                [reference setPresentBufferOffset:[presentBufferOffset integerValue]];
+                [reference setFocusBufferOffset:[focusBufferOffset integerValue]];
                 [_sourceBufferReferences addObject:reference];
             }
         }
@@ -648,7 +627,7 @@ exit:
             cee_token_cluster_search_by_buffer_offset(symbolReferences,
                                                       target.prep_directive_fregment,
                                                       target.statement_fregment,
-                                                      reference.caretBufferOffset);
+                                                      reference.focusBufferOffset);
         if (cluster) {
             CEESourceContext* context = [self createSourceContext:cluster];
             [self.session setSourceContext:context];
@@ -696,7 +675,8 @@ exit:
 
 - (void)createContextByCluster:(CEETokenCluster*)cluster {
     CEESourceContext* context = [self createSourceContext:cluster];
-    [self.session setSourceContext:context];
+    if (context)
+        [self.session setSourceContext:context];
 }
 
 - (void)jumpToSymbolByCluster:(CEETokenCluster*)cluster {

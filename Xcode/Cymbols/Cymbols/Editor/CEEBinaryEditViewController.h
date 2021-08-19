@@ -10,7 +10,9 @@
 #import "cee_lib.h"
 #import "CEEProject.h"
 #import "CEEEditViewController.h"
+#import "CEEBinaryView.h"
+#import "CEEASCIIView.h"
 
-@interface CEEBinaryEditViewController : CEEEditViewController
+@interface CEEBinaryEditViewController : CEEEditViewController <CEEBinaryViewDelegate, CEEASCIIViewDelegate>
 @end
 

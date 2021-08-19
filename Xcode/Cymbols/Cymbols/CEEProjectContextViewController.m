@@ -142,7 +142,7 @@
             [delegate.sourceBufferManager closeSourceBuffer:_contextSourceBuffer];
         _contextSourceBuffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
         [_editViewController setBuffer:_contextSourceBuffer];
-        [_editViewController highlightRanges:symbol->ranges];
+        [_editViewController highlight:symbol->ranges];
         [_titlebar setTitle:filePath];
         return;
     }
@@ -164,7 +164,7 @@
             [delegate.sourceBufferManager closeSourceBuffer:_contextSourceBuffer];
         _contextSourceBuffer = [delegate.sourceBufferManager openSourceBufferWithFilePath:filePath];
         [_editViewController setBuffer:_contextSourceBuffer];
-        [_editViewController highlightRanges:symbol->ranges];
+        [_editViewController highlight:symbol->ranges];
         [_titlebar setTitle:filePath];
     }
 }

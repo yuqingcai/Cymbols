@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "CEESourceHistoryViewController.h"
 #import "CEEImageTextTableCellView.h"
+#import "CEETextTableCellView.h"
 #import "CEEProject.h"
 #import "CEEStyleManager.h"
 
@@ -63,15 +64,16 @@
 - (CEEView *)tableView:(CEETableView *)tableView viewForColumn:(NSInteger)column row:(NSInteger)row {
     CEEStyleManager* styleManager = [CEEStyleManager defaultStyleManager];
     CEESourceBufferReferenceContext* reference = _port.sourceBufferReferences[row];
+    
     CEEImageTextTableCellView *cellView = [_historyTable makeViewWithIdentifier:@"IDImageTextTableCellView"];
     NSString* string = [reference.filePath lastPathComponent];
     BOOL validated = YES;
     BOOL isDirectory = NO;
     if (![[NSFileManager defaultManager] fileExistsAtPath:reference.filePath isDirectory:&isDirectory] || isDirectory)
         validated = NO;
-    
+        
     if (validated) {
-        cellView.text.stringValue = string;
+        cellView.text.stringValue = [string stringByAppendingFormat:@" - %ld (bytes)", reference.presentBufferOffset];
         [cellView.icon setImage:[styleManager iconFromFileName:[reference.filePath lastPathComponent]]];
     }
     else {
@@ -98,7 +100,7 @@
 - (IBAction)selectRow:sender {
     if (!_historyTable.selectedRowIndexes)
         return;
-    [_port presentHistory:_port.sourceBufferReferences[_historyTable.selectedRow]];
+    [_port presentSourceBufferReference:_port.sourceBufferReferences[_historyTable.selectedRow]];
 }
 
 - (CEETableView*)tableView {

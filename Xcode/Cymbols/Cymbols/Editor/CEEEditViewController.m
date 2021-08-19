@@ -15,76 +15,27 @@
     
 }
 
-- (void)setIntelligence:(BOOL)flag {
-    
-}
-
 - (void)setWrap:(BOOL)flag {
     
 }
 
-- (void)highlightRanges:(CEEList*)ranges {
+- (void)highlight:(CEEList*)ranges {
     
 }
 
-- (void)textViewTextChanged:(CEETextView*)textView {
+- (void)setPresentBufferOffset:(NSInteger)offset {
     
 }
 
-- (void)textViewScrolled:(CEETextView*)textView {
+- (void)setFocusBufferOffset:(NSInteger)offset {
     
 }
 
-- (void)textViewCaretSet:(CEETextView*)textView {
-    
+- (NSInteger)presentBufferOffset {
+    return 0;
 }
 
-- (void)textViewSelectionChanged:(CEETextView*)textView {
-    
+- (NSInteger)focusBufferOffset {
+    return 0;
 }
-
-- (void)textViewDragged:(CEETextView*)textView {
-    
-}
-
-- (void)textViewCaretMove:(CEETextView*)textView {
-    
-}
-
-- (void)textViewSelectionChangedWhenCaretMove:(CEETextView*)textView {
-    
-}
-
-- (void)textViewFrameChanged:(CEETextView*)textView {
-    
-}
-
-- (void)textViewSearchText:(CEETextView*)textView {
-    
-}
-
-- (void)textViewEscape:(CEETextView*)textView {
-    
-}
-
-- (void)textViewMouseUp:(CEETextView*)textView {
-    
-}
-
-- (void)textViewMouseDown:(CEETextView*)textView {
-    
-}
-
-- (void)textViewNewLine:(CEETextView*)textView {
-    
-}
-
-- (void)setLineBufferOffset:(NSInteger)offset {
-    
-}
-
-- (void)setCaretBufferOffset:(NSInteger)offset {
-    
-}
-
 @end

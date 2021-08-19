@@ -11,7 +11,8 @@
 #import "CEEProject.h"
 #import "CEEEditViewController.h"
 #import "CEELineNumberView.h"
+#import "CEETextView.h"
 
-@interface CEETextEditViewController : CEEEditViewController
+@interface CEETextEditViewController : CEEEditViewController <CEETextViewDelegate>
 @end
 

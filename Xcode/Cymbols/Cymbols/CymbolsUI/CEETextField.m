@@ -16,10 +16,12 @@ NSNotificationName CEENotificationTextViewNewline = @"CEENotificationTextViewNew
     [super initProperties];
     self.borderColor = [NSColor controlColor];
     self.borderWidth = 1.0;
+    self.enablePageGuideLine = NO;
+    self.enableHighlight = NO;
     NSString* descriptor = [self textAttributesDescriptorFromUIContext];
-    cee_text_edit_attributes_configure(_edit, (const cee_uchar*)[descriptor UTF8String]);
-    cee_text_edit_aligment_set(self.edit, self.aligment);
-    cee_text_edit_wrap_set(_edit, FALSE);
+    cee_text_edit_attributes_configure(self.edit, (const cee_uchar*)[descriptor UTF8String]);
+    cee_text_edit_aligment_set(self.edit, self.alignment);
+    cee_text_edit_wrap_set(self.edit, FALSE);
 }
 
 - (void)setFont:(NSFont *)font {
@@ -56,7 +58,7 @@ NSNotificationName CEENotificationTextViewNewline = @"CEENotificationTextViewNew
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
     
-    CEETextStorageRef storage = cee_text_edit_storage_get(_edit);
+    CEETextStorageRef storage = cee_text_edit_storage_get(self.edit);
     if (!cee_text_storage_size_get(storage)) {
         if (_placeholderString)
             [self drawPlaceholderString];
@@ -76,7 +78,7 @@ NSNotificationName CEENotificationTextViewNewline = @"CEENotificationTextViewNew
     CEERect unit_bounds;
     CGPoint position = NSMakePoint(0.0, 0.0);
     
-    layout = cee_text_edit_layout(self.edit);
+    layout = cee_text_edit_layout_get(self.edit);
     if (!layout)
         goto exit;
     

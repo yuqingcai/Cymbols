@@ -106,12 +106,18 @@
         NSString* label = tag[@"number"];
         NSRect bounds = NSRectFromString(tag[@"bounds"]);
         NSAttributedString* attributedLabel = [[NSAttributedString alloc] initWithString:label attributes: attribtues];
-    
-        NSRect rect = NSMakeRect((self.frame.size.width - [attributedLabel size].width) - 10,
-                                 self.frame.size.height - bounds.origin.y - bounds.size.height,
+        
+        NSRect rect = NSMakeRect((self.frame.size.width - [attributedLabel size].width),
+                                 self.frame.size.height - (bounds.origin.y + bounds.size.height),
                                  self.frame.size.width,
                                  bounds.size.height);
-        [attributedLabel drawInRect:rect];
+        
+        //[[NSColor redColor] setStroke];
+        //NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:1.0 yRadius:1.0];
+        //[path setLineWidth:1.0];
+        //[path stroke];
+        
+        [attributedLabel drawAtPoint:rect.origin];
     }
 }
 

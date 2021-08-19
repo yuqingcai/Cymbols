@@ -186,7 +186,20 @@
 		8A0712E82626970500EF1376 /* iconvFrameworks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A02E8262616E456008F77BA /* iconvFrameworks.framework */; };
 		8A0712E92626970500EF1376 /* iconvFrameworks.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8A02E8262616E456008F77BA /* iconvFrameworks.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8A091E18262807F6006D3B94 /* cee_ui_macos.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A091E16262807F6006D3B94 /* cee_ui_macos.m */; };
+		8A313BBD26CCE3F000EDC65B /* PurchaseCancel.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8A313BB926CCE3F000EDC65B /* PurchaseCancel.storyboard */; };
+		8A313BBE26CCE3F000EDC65B /* PurchaseError.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8A313BBB26CCE3F000EDC65B /* PurchaseError.storyboard */; };
+		8A313BC126CCE43000EDC65B /* PaymentVerifiedError.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8A313BBF26CCE43000EDC65B /* PaymentVerifiedError.storyboard */; };
+		8A313BC526CCE47800EDC65B /* CEEPaymentVerifiedErrorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A313BC326CCE47800EDC65B /* CEEPaymentVerifiedErrorViewController.m */; };
+		8A35C7082667524D0074FAAD /* CEEASCIIView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A35C7062667524D0074FAAD /* CEEASCIIView.m */; };
+		8A35C70F266757B70074FAAD /* cee_ascii_edit.c in Sources */ = {isa = PBXBuildFile; fileRef = 8A35C709266757B70074FAAD /* cee_ascii_edit.c */; };
+		8A35C710266757B70074FAAD /* cee_ascii_layout.c in Sources */ = {isa = PBXBuildFile; fileRef = 8A35C70C266757B70074FAAD /* cee_ascii_layout.c */; };
+		8A35C711266757B70074FAAD /* cee_ascii_storage.c in Sources */ = {isa = PBXBuildFile; fileRef = 8A35C70E266757B70074FAAD /* cee_ascii_storage.c */; };
+		8A3CCB2126664B1A00AF66EF /* cee_binary_layout.c in Sources */ = {isa = PBXBuildFile; fileRef = 8A3CCB1D26664B1A00AF66EF /* cee_binary_layout.c */; };
+		8A3CCB2226664B1A00AF66EF /* cee_binary_edit.c in Sources */ = {isa = PBXBuildFile; fileRef = 8A3CCB2026664B1A00AF66EF /* cee_binary_edit.c */; };
 		8A4A009E2623C7A3001B1667 /* Configuration.tpl in Resources */ = {isa = PBXBuildFile; fileRef = 8A4A009D2623C7A3001B1667 /* Configuration.tpl */; };
+		8A54F73C26C2561C007DE193 /* PaymentSelection.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8A54F73A26C2561C007DE193 /* PaymentSelection.storyboard */; };
+		8A54F73F26C26181007DE193 /* CEEStorePayment.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A54F73E26C26181007DE193 /* CEEStorePayment.m */; };
+		8A54F74226C26781007DE193 /* CEEPaymentSelectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A54F74126C26781007DE193 /* CEEPaymentSelectionViewController.m */; };
 		8A5705182615A42500CB4557 /* pcreFrameworks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A5705172615A42500CB4557 /* pcreFrameworks.framework */; };
 		8A5705192615A42500CB4557 /* pcreFrameworks.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8A5705172615A42500CB4557 /* pcreFrameworks.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8A5B5F11260C2F3B00A2A63C /* cee_source_context.c in Sources */ = {isa = PBXBuildFile; fileRef = 8A5B5F0F260C2F3B00A2A63C /* cee_source_context.c */; };
@@ -199,6 +212,8 @@
 		8A836063261BF39E007EBD71 /* CEEPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A836062261BF39E007EBD71 /* CEEPreferencesViewController.m */; };
 		8A94A96A262D700B002DB894 /* CEETextLink.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A94A968262D700B002DB894 /* CEETextLink.m */; };
 		8A94A96D262D7852002DB894 /* CEEImageLinkView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A94A96C262D7852002DB894 /* CEEImageLinkView.m */; };
+		8A99A93A26C3631E00579F79 /* CEEPaymentSelectionTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A99A93926C3631E00579F79 /* CEEPaymentSelectionTableCellView.m */; };
+		8A99A93D26C365F500579F79 /* CEETableCellViewTextTitle.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A99A93C26C365F500579F79 /* CEETableCellViewTextTitle.m */; };
 		8AA63F7A25E8C4D600318902 /* icon_database_clean_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA63F0525E8C4D300318902 /* icon_database_clean_16x16@2x.png */; };
 		8AA63F7B25E8C4D600318902 /* icon_message_declaration_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA63F0625E8C4D300318902 /* icon_message_declaration_16x16@2x.png */; };
 		8AA63F7C25E8C4D600318902 /* icon_file_type_csharp_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA63F0725E8C4D300318902 /* icon_file_type_csharp_16x16@2x.png */; };
@@ -315,7 +330,13 @@
 		8AA63FEC25E8C4D600318902 /* icon_save_all_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA63F7725E8C4D600318902 /* icon_save_all_16x16@2x.png */; };
 		8AA63FED25E8C4D600318902 /* icon_relation_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA63F7825E8C4D600318902 /* icon_relation_16x16@2x.png */; };
 		8AA63FEE25E8C4D600318902 /* icon_source_block_16x16@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AA63F7925E8C4D600318902 /* icon_source_block_16x16@2x.png */; };
+		8AAF1E7026CB526800DED00F /* CEEHorizonalLineView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AAF1E6F26CB526800DED00F /* CEEHorizonalLineView.m */; };
 		8ACE9D84261C4DBA0006106A /* CEEComboBoxTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8ACE9D82261C4DBA0006106A /* CEEComboBoxTableCellView.m */; };
+		8ADA1A4E266DE3F3002ADFC4 /* cee_javascript.l in Sources */ = {isa = PBXBuildFile; fileRef = 8ADA1A4B266DE3F3002ADFC4 /* cee_javascript.l */; };
+		8ADA1A4F266DE3F3002ADFC4 /* cee_javascript.c in Sources */ = {isa = PBXBuildFile; fileRef = 8ADA1A4C266DE3F3002ADFC4 /* cee_javascript.c */; };
+		8AED246F26CA096400A71F68 /* CEEPurchaseErrorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AED246E26CA096400A71F68 /* CEEPurchaseErrorViewController.m */; };
+		8AED247426CA0EBC00A71F68 /* CEEPurchaseCancelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AED247326CA0EBC00A71F68 /* CEEPurchaseCancelViewController.m */; };
+		8AF35CD32671DB63002EA5FF /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AF35CD12671DAC1002EA5FF /* StoreKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -673,7 +694,29 @@
 		8A02E8262616E456008F77BA /* iconvFrameworks.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = iconvFrameworks.framework; sourceTree = "<group>"; };
 		8A091E16262807F6006D3B94 /* cee_ui_macos.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cee_ui_macos.m; sourceTree = "<group>"; };
 		8A091E17262807F6006D3B94 /* cee_ui_macos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_ui_macos.h; sourceTree = "<group>"; };
+		8A313BBA26CCE3F000EDC65B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/PurchaseCancel.storyboard; sourceTree = "<group>"; };
+		8A313BBC26CCE3F000EDC65B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/PurchaseError.storyboard; sourceTree = "<group>"; };
+		8A313BC026CCE43000EDC65B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/PaymentVerifiedError.storyboard; sourceTree = "<group>"; };
+		8A313BC226CCE47800EDC65B /* CEEPaymentVerifiedErrorViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEEPaymentVerifiedErrorViewController.h; sourceTree = "<group>"; };
+		8A313BC326CCE47800EDC65B /* CEEPaymentVerifiedErrorViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEEPaymentVerifiedErrorViewController.m; sourceTree = "<group>"; };
+		8A35C7062667524D0074FAAD /* CEEASCIIView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEASCIIView.m; sourceTree = "<group>"; };
+		8A35C7072667524D0074FAAD /* CEEASCIIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEASCIIView.h; sourceTree = "<group>"; };
+		8A35C709266757B70074FAAD /* cee_ascii_edit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_ascii_edit.c; sourceTree = "<group>"; };
+		8A35C70A266757B70074FAAD /* cee_ascii_edit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_ascii_edit.h; sourceTree = "<group>"; };
+		8A35C70B266757B70074FAAD /* cee_ascii_storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_ascii_storage.h; sourceTree = "<group>"; };
+		8A35C70C266757B70074FAAD /* cee_ascii_layout.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_ascii_layout.c; sourceTree = "<group>"; };
+		8A35C70D266757B70074FAAD /* cee_ascii_layout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_ascii_layout.h; sourceTree = "<group>"; };
+		8A35C70E266757B70074FAAD /* cee_ascii_storage.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_ascii_storage.c; sourceTree = "<group>"; };
+		8A3CCB1D26664B1A00AF66EF /* cee_binary_layout.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_binary_layout.c; sourceTree = "<group>"; };
+		8A3CCB1E26664B1A00AF66EF /* cee_binary_edit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_binary_edit.h; sourceTree = "<group>"; };
+		8A3CCB1F26664B1A00AF66EF /* cee_binary_layout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_binary_layout.h; sourceTree = "<group>"; };
+		8A3CCB2026664B1A00AF66EF /* cee_binary_edit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_binary_edit.c; sourceTree = "<group>"; };
 		8A4A009D2623C7A3001B1667 /* Configuration.tpl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Configuration.tpl; sourceTree = "<group>"; };
+		8A54F73B26C2561C007DE193 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/PaymentSelection.storyboard; sourceTree = "<group>"; };
+		8A54F73D26C26181007DE193 /* CEEStorePayment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEEStorePayment.h; sourceTree = "<group>"; };
+		8A54F73E26C26181007DE193 /* CEEStorePayment.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEEStorePayment.m; sourceTree = "<group>"; };
+		8A54F74026C26781007DE193 /* CEEPaymentSelectionViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEEPaymentSelectionViewController.h; sourceTree = "<group>"; };
+		8A54F74126C26781007DE193 /* CEEPaymentSelectionViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEEPaymentSelectionViewController.m; sourceTree = "<group>"; };
 		8A5705172615A42500CB4557 /* pcreFrameworks.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = pcreFrameworks.framework; sourceTree = "<group>"; };
 		8A5B5F0F260C2F3B00A2A63C /* cee_source_context.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_source_context.c; sourceTree = "<group>"; };
 		8A5B5F10260C2F3B00A2A63C /* cee_source_context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_source_context.h; sourceTree = "<group>"; };
@@ -693,6 +736,10 @@
 		8A94A969262D700B002DB894 /* CEETextLink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEETextLink.h; sourceTree = "<group>"; };
 		8A94A96B262D7852002DB894 /* CEEImageLinkView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEImageLinkView.h; sourceTree = "<group>"; };
 		8A94A96C262D7852002DB894 /* CEEImageLinkView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEImageLinkView.m; sourceTree = "<group>"; };
+		8A99A93826C3631E00579F79 /* CEEPaymentSelectionTableCellView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEEPaymentSelectionTableCellView.h; sourceTree = "<group>"; };
+		8A99A93926C3631E00579F79 /* CEEPaymentSelectionTableCellView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEEPaymentSelectionTableCellView.m; sourceTree = "<group>"; };
+		8A99A93B26C365F500579F79 /* CEETableCellViewTextTitle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEETableCellViewTextTitle.h; sourceTree = "<group>"; };
+		8A99A93C26C365F500579F79 /* CEETableCellViewTextTitle.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEETableCellViewTextTitle.m; sourceTree = "<group>"; };
 		8AA63F0525E8C4D300318902 /* icon_database_clean_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_database_clean_16x16@2x.png"; sourceTree = "<group>"; };
 		8AA63F0625E8C4D300318902 /* icon_message_declaration_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_message_declaration_16x16@2x.png"; sourceTree = "<group>"; };
 		8AA63F0725E8C4D300318902 /* icon_file_type_csharp_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_file_type_csharp_16x16@2x.png"; sourceTree = "<group>"; };
@@ -809,8 +856,18 @@
 		8AA63F7725E8C4D600318902 /* icon_save_all_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_save_all_16x16@2x.png"; sourceTree = "<group>"; };
 		8AA63F7825E8C4D600318902 /* icon_relation_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_relation_16x16@2x.png"; sourceTree = "<group>"; };
 		8AA63F7925E8C4D600318902 /* icon_source_block_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_source_block_16x16@2x.png"; sourceTree = "<group>"; };
+		8AAF1E6E26CB526800DED00F /* CEEHorizonalLineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEHorizonalLineView.h; sourceTree = "<group>"; };
+		8AAF1E6F26CB526800DED00F /* CEEHorizonalLineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEHorizonalLineView.m; sourceTree = "<group>"; };
 		8ACE9D82261C4DBA0006106A /* CEEComboBoxTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CEEComboBoxTableCellView.m; sourceTree = "<group>"; };
 		8ACE9D83261C4DBA0006106A /* CEEComboBoxTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CEEComboBoxTableCellView.h; sourceTree = "<group>"; };
+		8ADA1A4B266DE3F3002ADFC4 /* cee_javascript.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = cee_javascript.l; sourceTree = "<group>"; };
+		8ADA1A4C266DE3F3002ADFC4 /* cee_javascript.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cee_javascript.c; sourceTree = "<group>"; };
+		8ADA1A4D266DE3F3002ADFC4 /* cee_javascript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cee_javascript.h; sourceTree = "<group>"; };
+		8AED246D26CA096400A71F68 /* CEEPurchaseErrorViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEEPurchaseErrorViewController.h; sourceTree = "<group>"; };
+		8AED246E26CA096400A71F68 /* CEEPurchaseErrorViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEEPurchaseErrorViewController.m; sourceTree = "<group>"; };
+		8AED247226CA0EBC00A71F68 /* CEEPurchaseCancelViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CEEPurchaseCancelViewController.h; sourceTree = "<group>"; };
+		8AED247326CA0EBC00A71F68 /* CEEPurchaseCancelViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CEEPurchaseCancelViewController.m; sourceTree = "<group>"; };
+		8AF35CD12671DAC1002EA5FF /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -818,6 +875,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8AF35CD32671DB63002EA5FF /* StoreKit.framework in Frameworks */,
 				8A5705182615A42500CB4557 /* pcreFrameworks.framework in Frameworks */,
 				8A0712E82626970500EF1376 /* iconvFrameworks.framework in Frameworks */,
 			);
@@ -829,6 +887,7 @@
 		231C454322EA86D400409A47 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8AF35CD12671DAC1002EA5FF /* StoreKit.framework */,
 				8A5705172615A42500CB4557 /* pcreFrameworks.framework */,
 				8A02E8262616E456008F77BA /* iconvFrameworks.framework */,
 			);
@@ -860,6 +919,7 @@
 				26920270252FF35600D6E2DC /* cee_lib */,
 				2692029C252FF37400D6E2DC /* cee_backend */,
 				269202A0252FF38300D6E2DC /* cee_parser */,
+				8ABB4C2F26664807006C784A /* cee_binary */,
 				269202CA252FF39000D6E2DC /* cee_text */,
 				269203D5252FF4F400D6E2DC /* CymbolsUI */,
 				26920449252FF50300D6E2DC /* Editor */,
@@ -901,11 +961,25 @@
 				269204E1252FF5F100D6E2DC /* AppDelegate.m */,
 				2625379D25DCF37B0060E922 /* CEEUpdateInfoViewController.h */,
 				2625379C25DCF37B0060E922 /* CEEUpdateInfoViewController.m */,
+				8A54F74026C26781007DE193 /* CEEPaymentSelectionViewController.h */,
+				8A54F74126C26781007DE193 /* CEEPaymentSelectionViewController.m */,
+				8A313BC226CCE47800EDC65B /* CEEPaymentVerifiedErrorViewController.h */,
+				8A313BC326CCE47800EDC65B /* CEEPaymentVerifiedErrorViewController.m */,
+				8AED246D26CA096400A71F68 /* CEEPurchaseErrorViewController.h */,
+				8AED246E26CA096400A71F68 /* CEEPurchaseErrorViewController.m */,
+				8AED247226CA0EBC00A71F68 /* CEEPurchaseCancelViewController.h */,
+				8AED247326CA0EBC00A71F68 /* CEEPurchaseCancelViewController.m */,
+				8A54F73D26C26181007DE193 /* CEEStorePayment.h */,
+				8A54F73E26C26181007DE193 /* CEEStorePayment.m */,
 				2667ECFB25037D8000ED5010 /* Assets.xcassets */,
 				26548526254150AC00E1D0DE /* Credits.rtf */,
 				269204F4252FF60200D6E2DC /* Main.storyboard */,
 				269204EC252FF60100D6E2DC /* Session.storyboard */,
 				2660771025D816930087D883 /* TimeFreezer.storyboard */,
+				8A54F73A26C2561C007DE193 /* PaymentSelection.storyboard */,
+				8A313BBF26CCE43000EDC65B /* PaymentVerifiedError.storyboard */,
+				8A313BB926CCE3F000EDC65B /* PurchaseCancel.storyboard */,
+				8A313BBB26CCE3F000EDC65B /* PurchaseError.storyboard */,
 				2625379925DCF3270060E922 /* UpdateInfo.storyboard */,
 				269204F8252FF60200D6E2DC /* Editor.storyboard */,
 				269204EE252FF60100D6E2DC /* Theme.storyboard */,
@@ -1031,6 +1105,7 @@
 		269202A0252FF38300D6E2DC /* cee_parser */ = {
 			isa = PBXGroup;
 			children = (
+				8ADA1A4A266DC687002ADFC4 /* javascript */,
 				269202A8252FF38300D6E2DC /* c */,
 				26381F242564A692004CC769 /* csharp */,
 				2602A928254BFAD40011FBD5 /* java */,
@@ -1102,8 +1177,6 @@
 				269202D2252FF39000D6E2DC /* cee_text_layout.h */,
 				269202D3252FF39000D6E2DC /* cee_text_modify.c */,
 				269202D4252FF39000D6E2DC /* cee_text_modify.h */,
-				269202CB252FF39000D6E2DC /* cee_binary_storage.c */,
-				269202CC252FF39000D6E2DC /* cee_binary_storage.h */,
 				269202D5252FF39000D6E2DC /* cee_text_storage.c */,
 				269202D6252FF39000D6E2DC /* cee_text_storage.h */,
 				269202D7252FF39000D6E2DC /* mac */,
@@ -1296,6 +1369,8 @@
 				269203DB252FF4F400D6E2DC /* CEECheckBox.m */,
 				269203DC252FF4F400D6E2DC /* CEEContainerView.h */,
 				269203DD252FF4F400D6E2DC /* CEEContainerView.m */,
+				8AAF1E6E26CB526800DED00F /* CEEHorizonalLineView.h */,
+				8AAF1E6F26CB526800DED00F /* CEEHorizonalLineView.m */,
 				269203E2252FF4F400D6E2DC /* CEEIdentifier.h */,
 				269203E3252FF4F400D6E2DC /* CEEIdentifier.m */,
 				269203E4252FF4F400D6E2DC /* CEEImageView.h */,
@@ -1335,6 +1410,8 @@
 				8A94A968262D700B002DB894 /* CEETextLink.m */,
 				26920403252FF4F400D6E2DC /* CEETextTitle.h */,
 				26920404252FF4F400D6E2DC /* CEETextTitle.m */,
+				8A35C7072667524D0074FAAD /* CEEASCIIView.h */,
+				8A35C7062667524D0074FAAD /* CEEASCIIView.m */,
 				269203D6252FF4F400D6E2DC /* CEEBinaryView.h */,
 				269203D7252FF4F400D6E2DC /* CEEBinaryView.m */,
 				2692040D252FF4F400D6E2DC /* CEEToolbarView.h */,
@@ -1495,10 +1572,14 @@
 				269204B5252FF54000D6E2DC /* CEETextTableCellView.m */,
 				269204BA252FF54000D6E2DC /* CEETableCellViewTextLabel.h */,
 				269204BB252FF54000D6E2DC /* CEETableCellViewTextLabel.m */,
+				8A99A93B26C365F500579F79 /* CEETableCellViewTextTitle.h */,
+				8A99A93C26C365F500579F79 /* CEETableCellViewTextTitle.m */,
 				8ACE9D83261C4DBA0006106A /* CEEComboBoxTableCellView.h */,
 				8ACE9D82261C4DBA0006106A /* CEEComboBoxTableCellView.m */,
 				8A6F310F261D4EB600F9523D /* CEETextFieldTableCellView.h */,
 				8A6F310E261D4EB600F9523D /* CEETextFieldTableCellView.m */,
+				8A99A93826C3631E00579F79 /* CEEPaymentSelectionTableCellView.h */,
+				8A99A93926C3631E00579F79 /* CEEPaymentSelectionTableCellView.m */,
 			);
 			path = CellViews;
 			sourceTree = "<group>";
@@ -1521,6 +1602,36 @@
 				26DDED3E2547B6A500BD8246 /* cee_css.h */,
 			);
 			path = css;
+			sourceTree = "<group>";
+		};
+		8ABB4C2F26664807006C784A /* cee_binary */ = {
+			isa = PBXGroup;
+			children = (
+				8A35C709266757B70074FAAD /* cee_ascii_edit.c */,
+				8A35C70A266757B70074FAAD /* cee_ascii_edit.h */,
+				8A35C70C266757B70074FAAD /* cee_ascii_layout.c */,
+				8A35C70D266757B70074FAAD /* cee_ascii_layout.h */,
+				8A35C70E266757B70074FAAD /* cee_ascii_storage.c */,
+				8A35C70B266757B70074FAAD /* cee_ascii_storage.h */,
+				8A3CCB2026664B1A00AF66EF /* cee_binary_edit.c */,
+				8A3CCB1E26664B1A00AF66EF /* cee_binary_edit.h */,
+				8A3CCB1D26664B1A00AF66EF /* cee_binary_layout.c */,
+				8A3CCB1F26664B1A00AF66EF /* cee_binary_layout.h */,
+				269202CB252FF39000D6E2DC /* cee_binary_storage.c */,
+				269202CC252FF39000D6E2DC /* cee_binary_storage.h */,
+			);
+			name = cee_binary;
+			path = ../../../cee_binary;
+			sourceTree = "<group>";
+		};
+		8ADA1A4A266DC687002ADFC4 /* javascript */ = {
+			isa = PBXGroup;
+			children = (
+				8ADA1A4C266DE3F3002ADFC4 /* cee_javascript.c */,
+				8ADA1A4D266DE3F3002ADFC4 /* cee_javascript.h */,
+				8ADA1A4B266DE3F3002ADFC4 /* cee_javascript.l */,
+			);
+			path = javascript;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1591,6 +1702,7 @@
 				8AA63F9F25E8C4D600318902 /* icon_expandable_16x16@2x.png in Resources */,
 				2692050D252FF60300D6E2DC /* SaveManager.storyboard in Resources */,
 				8AA63F7A25E8C4D600318902 /* icon_database_clean_16x16@2x.png in Resources */,
+				8A313BBE26CCE3F000EDC65B /* PurchaseError.storyboard in Resources */,
 				8AA63FB725E8C4D600318902 /* icon_css_selector_16x16@2x.png in Resources */,
 				8AA63FDA25E8C4D600318902 /* icon_file_not_existed_16x16@2x.png in Resources */,
 				261BE13B25C79F4C0099158E /* ReferenceManager.storyboard in Resources */,
@@ -1602,11 +1714,13 @@
 				8AA63FA425E8C4D600318902 /* icon_redo_16x16@2x.png in Resources */,
 				8AA63FC525E8C4D600318902 /* icon_whole_word_16x16@2x.png in Resources */,
 				8AA63FDD25E8C4D600318902 /* icon_cut_16x16@2x.png in Resources */,
+				8A313BBD26CCE3F000EDC65B /* PurchaseCancel.storyboard in Resources */,
 				8AA63F9325E8C4D600318902 /* icon_new_directory_16x16@2x.png in Resources */,
 				8AA63F8825E8C4D600318902 /* icon_namespace_definition_16x16@2x.png in Resources */,
 				8AA63FA025E8C4D600318902 /* icon_open_file_16x16@2x.png in Resources */,
 				8AA63FE825E8C4D600318902 /* icon_file_type_common_16x16@2x.png in Resources */,
 				8AA63F7B25E8C4D600318902 /* icon_message_declaration_16x16@2x.png in Resources */,
+				8A313BC126CCE43000EDC65B /* PaymentVerifiedError.storyboard in Resources */,
 				8AA63FC625E8C4D600318902 /* icon_file_type_image_16x16@2x.png in Resources */,
 				2692050A252FF60300D6E2DC /* Editor.storyboard in Resources */,
 				8AA63FE525E8C4D600318902 /* icon_reload_16x16@2x.png in Resources */,
@@ -1617,6 +1731,7 @@
 				8AA63F8B25E8C4D600318902 /* icon_split1_16x16@2x.png in Resources */,
 				8AA63F7E25E8C4D600318902 /* icon_add_16x16@2x.png in Resources */,
 				8AA63FBD25E8C4D600318902 /* icon_protocol_declaration_16x16@2x.png in Resources */,
+				8A54F73C26C2561C007DE193 /* PaymentSelection.storyboard in Resources */,
 				2647CE3925309A1700970FE4 /* WelcomeGuide in Resources */,
 				8AA63F9C25E8C4D600318902 /* icon_new_file_16x16@2x.png in Resources */,
 				8AA63FE225E8C4D600318902 /* icon_character_16x16@2x.png in Resources */,
@@ -1749,7 +1864,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/sh\nbuildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\nbuildNumber=$(($buildNumber + 1))\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n";
+			shellScript = "#!/bin/sh\n#buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\n#buildNumber=$(($buildNumber + 1))\n#/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n#\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1772,6 +1887,7 @@
 				26920495252FF51A00D6E2DC /* CEESessionWindowController.m in Sources */,
 				8A6F3110261D4EB600F9523D /* CEETextFieldTableCellView.m in Sources */,
 				269204A6252FF52700D6E2DC /* CEERemoveReferenceView.m in Sources */,
+				8A3CCB2126664B1A00AF66EF /* cee_binary_layout.c in Sources */,
 				269204CE252FF5A000D6E2DC /* CEESaveManagerViewController.m in Sources */,
 				2692048B252FF51A00D6E2DC /* CEESessionSourceBufferViewController.m in Sources */,
 				26920297252FF35600D6E2DC /* cee_range.c in Sources */,
@@ -1793,9 +1909,13 @@
 				269204E3252FF5F200D6E2DC /* AppDelegate.m in Sources */,
 				269204C8252FF58200D6E2DC /* CEESearcher.m in Sources */,
 				26B3F0792560F410007D902C /* cee_c.l in Sources */,
+				8A3CCB2226664B1A00AF66EF /* cee_binary_edit.c in Sources */,
+				8ADA1A4E266DE3F3002ADFC4 /* cee_javascript.l in Sources */,
+				8A54F74226C26781007DE193 /* CEEPaymentSelectionViewController.m in Sources */,
 				26C9B01A2599C01300A24B60 /* CEETreeView.m in Sources */,
 				8A66A4E625DF507D003244E3 /* CEETableCellView.m in Sources */,
 				26920446252FF4F400D6E2DC /* NSSplitView+UIStyle.m in Sources */,
+				8A54F73F26C26181007DE193 /* CEEStorePayment.m in Sources */,
 				2602BB0B25C7D2D5004B5D52 /* CEEReferenceRootScannerViewController.m in Sources */,
 				269202BD252FF38400D6E2DC /* cee_arm_asm.c in Sources */,
 				8A6F3113261D516C00F9523D /* CEETextFieldSimple.m in Sources */,
@@ -1821,6 +1941,7 @@
 				26920454252FF50300D6E2DC /* CEEMarkdownViewController.m in Sources */,
 				26920445252FF4F400D6E2DC /* NSImageView+UIStyle.m in Sources */,
 				26DDED402547B6A500BD8246 /* cee_css.c in Sources */,
+				8A35C7082667524D0074FAAD /* CEEASCIIView.m in Sources */,
 				2692042A252FF4F400D6E2DC /* CEEImageView.m in Sources */,
 				2692043C252FF4F400D6E2DC /* CEETitleView.m in Sources */,
 				26920299252FF35600D6E2DC /* cee_strfuncs.c in Sources */,
@@ -1834,13 +1955,18 @@
 				26CBA6D225C927B100062C23 /* CEECreateFileAtPathViewController.m in Sources */,
 				26920424252FF4F400D6E2DC /* CEEButton.m in Sources */,
 				2660770F25D80A870087D883 /* CEETimerFreezer.m in Sources */,
+				8A35C711266757B70074FAAD /* cee_ascii_storage.c in Sources */,
 				2660771525D8188F0087D883 /* CEETimeFreezerViewController.m in Sources */,
+				8AAF1E7026CB526800DED00F /* CEEHorizonalLineView.m in Sources */,
 				26920291252FF35600D6E2DC /* cee_error.c in Sources */,
 				2692048F252FF51A00D6E2DC /* CEESessionSpliter1.m in Sources */,
+				8ADA1A4F266DE3F3002ADFC4 /* cee_javascript.c in Sources */,
 				2692028F252FF35600D6E2DC /* cee_codec.c in Sources */,
+				8A35C70F266757B70074FAAD /* cee_ascii_edit.c in Sources */,
 				26920490252FF51A00D6E2DC /* CEESessionStatusBar.m in Sources */,
 				269204B0252FF53100D6E2DC /* CEEProjectSettingView.m in Sources */,
 				26920423252FF4F400D6E2DC /* CEEBinaryView.m in Sources */,
+				8A35C710266757B70074FAAD /* cee_ascii_layout.c in Sources */,
 				26920290252FF35600D6E2DC /* cee_datetime.c in Sources */,
 				2692048D252FF51A00D6E2DC /* CEESessionSourceViewController.m in Sources */,
 				26920488252FF51A00D6E2DC /* CEESessionFrameTitleView.m in Sources */,
@@ -1863,11 +1989,13 @@
 				2692043A252FF4F400D6E2DC /* CEETextView.m in Sources */,
 				26920296252FF35600D6E2DC /* cee_mem.c in Sources */,
 				26DAE285255C0A16005C8A2D /* CEESecurityBookmark.m in Sources */,
+				8A313BC526CCE47800EDC65B /* CEEPaymentVerifiedErrorViewController.m in Sources */,
 				26920492252FF51A00D6E2DC /* CEESessionToolbar.m in Sources */,
 				268376E025490C720066305C /* cee_swift.c in Sources */,
 				269204C2252FF55600D6E2DC /* CEESessionDescriptor.c in Sources */,
 				269204A4252FF52700D6E2DC /* CEEAddReferenceViewController.m in Sources */,
 				269202C5252FF38400D6E2DC /* cee_symbol.c in Sources */,
+				8AED246F26CA096400A71F68 /* CEEPurchaseErrorViewController.m in Sources */,
 				26920453252FF50300D6E2DC /* CEEEditViewController.m in Sources */,
 				2692042B252FF4F400D6E2DC /* CEEJSONReader.m in Sources */,
 				26381F292564A692004CC769 /* cee_csharp.l in Sources */,
@@ -1890,6 +2018,7 @@
 				26920293252FF35600D6E2DC /* cee_geometry.c in Sources */,
 				269202C2252FF38400D6E2DC /* cee_reference.c in Sources */,
 				26920427252FF4F400D6E2DC /* CEEControl.m in Sources */,
+				8AED247426CA0EBC00A71F68 /* CEEPurchaseCancelViewController.m in Sources */,
 				26920295252FF35600D6E2DC /* cee_list.c in Sources */,
 				26920493252FF51A00D6E2DC /* CEESessionView.m in Sources */,
 				26B3F07D2560F422007D902C /* cee_html.l in Sources */,
@@ -1898,12 +2027,14 @@
 				2692029B252FF35600D6E2DC /* cee_uuid.c in Sources */,
 				2692043E252FF4F400D6E2DC /* CEEToolbarView.m in Sources */,
 				269202DF252FF39000D6E2DC /* cee_text_storage.c in Sources */,
+				8A99A93A26C3631E00579F79 /* CEEPaymentSelectionTableCellView.m in Sources */,
 				269204DC252FF5BC00D6E2DC /* CEEProjectContextViewController.m in Sources */,
 				26920447252FF4F400D6E2DC /* NSView+UIStyle.m in Sources */,
 				269204D9252FF5BC00D6E2DC /* CEEProjectCleanViewController.m in Sources */,
 				2692043B252FF4F400D6E2DC /* CEETitlebarButton.m in Sources */,
 				26920438252FF4F400D6E2DC /* CEETextLabel.m in Sources */,
 				269202BF252FF38400D6E2DC /* cee_gnu_asm.c in Sources */,
+				8A99A93D26C365F500579F79 /* CEETableCellViewTextTitle.m in Sources */,
 				2692048E252FF51A00D6E2DC /* CEESessionSpliter0.m in Sources */,
 				2692042E252FF4F400D6E2DC /* CEEPopupPanel.m in Sources */,
 				269204A3252FF52700D6E2DC /* CEEFilePathView.m in Sources */,
@@ -2084,6 +2215,38 @@
 			name = FileSettingView.xib;
 			sourceTree = "<group>";
 		};
+		8A313BB926CCE3F000EDC65B /* PurchaseCancel.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8A313BBA26CCE3F000EDC65B /* Base */,
+			);
+			name = PurchaseCancel.storyboard;
+			sourceTree = "<group>";
+		};
+		8A313BBB26CCE3F000EDC65B /* PurchaseError.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8A313BBC26CCE3F000EDC65B /* Base */,
+			);
+			name = PurchaseError.storyboard;
+			sourceTree = "<group>";
+		};
+		8A313BBF26CCE43000EDC65B /* PaymentVerifiedError.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8A313BC026CCE43000EDC65B /* Base */,
+			);
+			name = PaymentVerifiedError.storyboard;
+			sourceTree = "<group>";
+		};
+		8A54F73A26C2561C007DE193 /* PaymentSelection.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8A54F73B26C2561C007DE193 /* Base */,
+			);
+			name = PaymentSelection.storyboard;
+			sourceTree = "<group>";
+		};
 		8A83605E261BF07D007EBD71 /* Preferences.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -2215,6 +2378,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 10041;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -2233,7 +2397,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.3;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2250,6 +2414,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 10041;
 				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = N77YA486UJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -2268,7 +2433,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.3;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lazycatdesign.cymbols;
 				PRODUCT_NAME = "$(TARGET_NAME)";
