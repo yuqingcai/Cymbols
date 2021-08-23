@@ -93,7 +93,6 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 - (BOOL)becomeFirstResponder {
     if (!_editable)
         return NO;
-    
     [super setStyleState:kCEEViewStyleStateActived];
     [self startCaretBlink];
     return YES;
@@ -355,7 +354,6 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
 }
 
 - (void)setMarkedText:(id)markedText selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange {
-    
     NSString* string = nil;
     if ([markedText isKindOfClass:[NSAttributedString class]])
         string = [markedText string];
@@ -1137,6 +1135,9 @@ static void pasteboard_string_create(cee_pointer platform_ref, cee_uchar** str)
         else if ([current.aligment caseInsensitiveCompare:@"center"] == NSOrderedSame)
             self.alignment = kCEETextLayoutAlignmentCenter;
     }
+    
+    if (_delegate && [_delegate respondsToSelector:@selector(textViewUserInterfaceUpdated:)])
+        [_delegate textViewUserInterfaceUpdated:self];
 }
 
 // move caret

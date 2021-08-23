@@ -108,7 +108,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "270"
             endingLineNumber = "270"
-            landmarkName = "-horizontalScroll:"
+            landmarkName = "-styledText"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -123,9 +123,7 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2604"
-            endingLineNumber = "2604"
-            landmarkName = "cee_text_edit_modified_update(edit)"
-            landmarkType = "9">
+            endingLineNumber = "2604">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -172,7 +170,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "122"
             endingLineNumber = "122"
-            landmarkName = "-heartBeat:"
+            landmarkName = "-deleteHeartBeatTimer"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -412,7 +410,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "252"
             endingLineNumber = "252"
-            landmarkName = "-styledText"
+            landmarkName = "-adjustScrollers"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

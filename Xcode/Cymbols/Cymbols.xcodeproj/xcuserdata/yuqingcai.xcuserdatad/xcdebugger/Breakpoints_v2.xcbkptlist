@@ -510,8 +510,8 @@
             filePath = "Cymbols/Session/CEESessionViewController.m"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "455"
-            endingLineNumber = "455"
+            startingLineNumber = "457"
+            endingLineNumber = "457"
             landmarkName = "-autoShowReferenceListWhenOpenedSourceBufferIsMultiple"
             landmarkType = "7">
          </BreakpointContent>
@@ -791,15 +791,47 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "4FACC85C-F498-46FD-9213-488A1AECC445"
+            uuid = "60FB7DCC-A47D-4456-A481-A3C897A27AC3"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Cymbols/CEESourceBuffer.m"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "252"
+            endingLineNumber = "252"
+            landmarkName = "-parse"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "FC2E3FCA-C095-42E7-8214-96026F07C201"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../cee_text/cee_text_layout.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1253"
+            endingLineNumber = "1253"
+            landmarkName = "cee_text_layout_styled(layout, range, tags)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0F627BE0-14FB-4E41-929F-8F88930BAE29"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Cymbols/CymbolsUI/CEETextView.m"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "948"
-            endingLineNumber = "948"
+            startingLineNumber = "1022"
+            endingLineNumber = "1022"
             landmarkName = "-drawRect:"
             landmarkType = "7">
          </BreakpointContent>
@@ -807,16 +839,48 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "30F4F407-81F6-4102-83E9-8324209DF6A7"
+            uuid = "3A6A5BE3-4484-424A-84C4-5586BA746DDB"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Cymbols/CymbolsUI/CEETextView.m"
+            filePath = "Cymbols/Session/CEESessionViewController.m"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "103"
-            endingLineNumber = "103"
-            landmarkName = "-resignFirstResponder"
+            startingLineNumber = "80"
+            endingLineNumber = "80"
+            landmarkName = "-viewDidAppear"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "576A9B78-6DAA-4ADF-BD75-22A0EACA9848"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Cymbols/Editor/CEETextEditViewController.m"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "974"
+            endingLineNumber = "974"
+            landmarkName = "-textViewBecomeFirstResponder:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2020DA73-4D84-4C98-B233-8C2E6A64584F"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Cymbols/Editor/CEETextEditViewController.m"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "978"
+            endingLineNumber = "978"
+            landmarkName = "-textViewResignFirstResponder:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

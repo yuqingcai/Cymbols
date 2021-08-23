@@ -76,9 +76,11 @@
 
 - (void)viewDidAppear {
     [super viewDidAppear];
+#ifndef DEBUG
     BOOL ret = [[CEEStorePayment sharedInstance] verify];
     if (!ret)
         [self paymentVerifiedError];
+#endif
 }
 
 - (CGFloat)sheetOffset {

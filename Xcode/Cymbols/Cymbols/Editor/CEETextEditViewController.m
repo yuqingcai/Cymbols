@@ -970,6 +970,10 @@
     }
 }
 
+- (void)textViewUserInterfaceUpdated:(CEETextView*)textView {
+    [self styledText];
+}
+
 - (void)mouseDown:(NSEvent *)event {
     [super mouseDown:event];
     if (!self.intelligentPickup)

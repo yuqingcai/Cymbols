@@ -35,7 +35,7 @@ IB_DESIGNABLE
 - (void)textView:(CEETextView*)textView modifyMenu:(NSMenu**)menu;
 - (CEEList*)textViewSearchRanges:(CEETextView*)textView;
 - (CEEList*)textViewHighlightRanges:(CEETextView*)textView;
-
+- (void)textViewUserInterfaceUpdated:(CEETextView*)textView;
 @end
 
 @class CEETextView;
