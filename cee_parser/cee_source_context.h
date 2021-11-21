@@ -17,13 +17,13 @@ typedef struct _CEESourceContext {
 
 CEESourceContext* cee_source_symbol_context_create(const cee_char* file_path,
                                                    CEESourceSymbol* symbol,
-                                                   CEESourceFregment* prep_directive,
-                                                   CEESourceFregment* statement,
+                                                   CEESourceFragment* prep_directive,
+                                                   CEESourceFragment* statement,
                                                    cee_pointer database);
 CEESourceContext* cee_source_reference_context_create(const cee_char* file_path,
                                                       CEESourceSymbolReference* reference,
-                                                      CEESourceFregment* prep_directive,
-                                                      CEESourceFregment* statement,
+                                                      CEESourceFragment* prep_directive,
+                                                      CEESourceFragment* statement,
                                                       cee_pointer database);
 void cee_source_context_free(CEESourceContext* context);
 

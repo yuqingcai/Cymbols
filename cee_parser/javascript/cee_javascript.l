@@ -2,7 +2,7 @@
 %option noyywrap
 %option prefix="js_scan_"
 %x Preprocesser
-L   [a-zA-Z_]
+L   [a-zA-Z_$#]
 H   [a-fA-F0-9]
 D   [0-9]
 O   [0-7]
@@ -47,6 +47,7 @@ static int character(cee_long offset,
 %%
 "abstract"                                  RETURN_TOKEN_ID(kCEETokenID_ABSTRACT                        )
 "arguments"                                 RETURN_TOKEN_ID(kCEETokenID_ARGUMENTS                       )
+"async"                                     RETURN_TOKEN_ID(kCEETokenID_ASYNC                           )
 "await"                                     RETURN_TOKEN_ID(kCEETokenID_AWAIT                           )
 "boolean"                                   RETURN_TOKEN_ID(kCEETokenID_BOOLEAN                         )
 "break"                                     RETURN_TOKEN_ID(kCEETokenID_BREAK                           )
@@ -109,6 +110,8 @@ static int character(cee_long offset,
 "while"                                     RETURN_TOKEN_ID(kCEETokenID_WHILE                           )
 "with"                                      RETURN_TOKEN_ID(kCEETokenID_WITH                            )
 "yield"                                     RETURN_TOKEN_ID(kCEETokenID_YIELD                           )
+"get"                                       RETURN_TOKEN_ID(kCEETokenID_GET                             )
+"set"                                       RETURN_TOKEN_ID(kCEETokenID_SET                             )
 "/*"                                        RETURN_TOKEN_ID(kCEETokenID_LINES_COMMENT                   )
 "//"                                        RETURN_TOKEN_ID(kCEETokenID_LINE_COMMENT                    )
 "\""                                        RETURN_TOKEN_ID(kCEETokenID_LITERAL                         )
@@ -151,7 +154,20 @@ static int character(cee_long offset,
 "<="                                        RETURN_TOKEN_ID(kCEETokenID_LOGIC_LESS_EQUAL                )
 "&&"                                        RETURN_TOKEN_ID(kCEETokenID_LOGIC_AND                       )
 "||"                                        RETURN_TOKEN_ID(kCEETokenID_LOGIC_OR                        )
+"=>"                                        RETURN_TOKEN_ID(kCEETokenID_ASSIGNMENT_ARROW                )
 "!"                                         RETURN_TOKEN_ID('!'                                         )
+":"                                         RETURN_TOKEN_ID(':'                                         )
+"("                                         RETURN_TOKEN_ID('('                                         )
+")"                                         RETURN_TOKEN_ID(')'                                         )
+"{"                                         RETURN_TOKEN_ID('{'                                         )
+"}"                                         RETURN_TOKEN_ID('}'                                         )
+"["                                         RETURN_TOKEN_ID('['                                         )
+"]"                                         RETURN_TOKEN_ID(']'                                         )
+"#"                                         RETURN_TOKEN_ID('#'                                         )
+","                                         RETURN_TOKEN_ID(','                                         )
+";"                                         RETURN_TOKEN_ID(';'                                         )
+"@"                                         RETURN_TOKEN_ID('@'                                         )
+"..."                                       RETURN_TOKEN_ID(kCEETokenID_ELLIPSIS                        )
 0[xX]{H}+{IS}?                              RETURN_TOKEN_ID(kCEETokenID_CONSTANT                        )
 {D}+{IS}?                                   RETURN_TOKEN_ID(kCEETokenID_CONSTANT                        )
 0b{B}+{IS}?                                 RETURN_TOKEN_ID(kCEETokenID_CONSTANT                        )

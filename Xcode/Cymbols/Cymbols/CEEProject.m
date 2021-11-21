@@ -619,14 +619,14 @@ exit:
                                    [target.filePath UTF8String],
                                    (const cee_char*)subject,
                                    target.source_token_map,
-                                   target.prep_directive_fregment,
-                                   target.statement_fregment,
+                                   target.prep_directive_fragment,
+                                   target.statement_fragment,
                                    range,
                                    &symbolReferences);
         CEETokenCluster* cluster =
             cee_token_cluster_search_by_buffer_offset(symbolReferences,
-                                                      target.prep_directive_fregment,
-                                                      target.statement_fregment,
+                                                      target.prep_directive_fragment,
+                                                      target.statement_fragment,
                                                       reference.focusBufferOffset);
         if (cluster) {
             CEESourceContext* context = [self createSourceContext:cluster];
@@ -658,14 +658,14 @@ exit:
     if (cluster->type == kCEETokenClusterTypeReference)
         context = cee_source_reference_context_create([bufferReference.filePath UTF8String],
                                                       (CEESourceSymbolReference*)cluster->content_ref,
-                                                      buffer.prep_directive_fregment,
-                                                      buffer.statement_fregment,
+                                                      buffer.prep_directive_fragment,
+                                                      buffer.statement_fragment,
                                                       self.session.project.database);
     else if (cluster->type == kCEETokenClusterTypeSymbol)
         context = cee_source_symbol_context_create([bufferReference.filePath UTF8String],
                                                    (CEESourceSymbol*)cluster->content_ref,
-                                                   buffer.prep_directive_fregment,
-                                                   buffer.statement_fregment,
+                                                   buffer.prep_directive_fragment,
+                                                   buffer.statement_fragment,
                                                    self.session.project.database);
     
     [sourceBufferManager closeSourceBuffer:buffer];
@@ -1421,8 +1421,8 @@ exit:
     if (symbols_count)
         cee_database_symbols_delete_by_file_path(_database, [buffer.filePath UTF8String]);
     
-    cee_source_fregment_symbol_tree_dump_to_list(buffer.prep_directive_symbol_tree, &list);
-    cee_source_fregment_symbol_tree_dump_to_list(buffer.statement_symbol_tree, &list);
+    cee_source_fragment_symbol_tree_dump_to_list(buffer.prep_directive_symbol_tree, &list);
+    cee_source_fragment_symbol_tree_dump_to_list(buffer.statement_symbol_tree, &list);
     if (list) {
         // update last parsed time to buffer
         cee_char* time_str = cee_time_to_iso8601(cee_time_current());

@@ -364,7 +364,7 @@ typedef enum _ObjectiveCEnumDefinitionTranslateState {
     kObjectiveCEnumDefinitionTranslateStateMax,
 } ObjectiveCEnumDefinitionTranslateState;
 
-typedef cee_boolean (*ParseTrap)(CEESourceFregment*, 
+typedef cee_boolean (*ParseTrap)(CEESourceFragment*,
                                  CEEList**);
 
 typedef enum _CParserState {
@@ -376,12 +376,12 @@ typedef struct _CParser {
     CEESourceParserRef super;
     const cee_char* filepath_ref;
     const cee_char* subject_ref;
-    CEESourceFregment* statement_root;
-    CEESourceFregment* statement_current;
-    CEESourceFregment* prep_directive_root;
-    CEESourceFregment* prep_directive_current;
-    CEESourceFregment* comment_root;
-    CEESourceFregment* comment_current;
+    CEESourceFragment* statement_root;
+    CEESourceFragment* statement_current;
+    CEESourceFragment* prep_directive_root;
+    CEESourceFragment* prep_directive_current;
+    CEESourceFragment* comment_root;
+    CEESourceFragment* comment_current;
     ParseTrap block_header_traps[CEETokenID_MAX];
     CParserState state;
 } CParser;
@@ -421,7 +421,7 @@ static cee_boolean token_is_comment(CEEToken* token);
 static cee_boolean comment_attach(CParser* parser);
 static cee_boolean comment_token_push(CParser* parser,
                                       CEEToken* push);
-static cee_boolean comment_fregment_reduce(CParser* parser);
+static cee_boolean comment_fragment_reduce(CParser* parser);
 
 /** prep directive */
 static cee_boolean prep_directive_parsing(CParser* parser);
@@ -429,26 +429,26 @@ static cee_boolean prep_directive_token_push(CParser* parser,
                                              CEEToken* push);
 static cee_boolean prep_directive_terminated(CParser* parser);
 static cee_boolean prep_directive_attach(CParser* parser,
-                                         CEESourceFregmentType type);
+                                         CEESourceFragmentType type);
 static cee_boolean prep_directive_sub_attach(CParser* parser,
-                                             CEESourceFregmentType type);
+                                             CEESourceFragmentType type);
 static void prep_directive_branch_push(CParser* parser);
 static cee_boolean prep_directive_branch_pop(CParser* parser);
 static cee_boolean prep_directive_pop(CParser* parser);
 static void prep_directive_parse(CParser* parser);
 static cee_boolean should_statement_parsing(CParser* parser);
 static void c_prep_directive_include_translate_table_init(void);
-static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment);
+static cee_boolean prep_directive_include_parse(CEESourceFragment* fragment);
 static void c_prep_directive_define_translate_table_init(void);
-static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment);
-static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment);
+static cee_boolean prep_directive_define_parse(CEESourceFragment* fragment);
+static cee_boolean prep_directive_common_parse(CEESourceFragment* fragment);
 
 /** statement */
 static cee_boolean statement_parsing(CParser* parser);
 static cee_boolean statement_attach(CParser* parser,
-                                    CEESourceFregmentType type);
+                                    CEESourceFragmentType type);
 static cee_boolean statement_sub_attach(CParser* parser,
-                                        CEESourceFregmentType type);
+                                        CEESourceFragmentType type);
 static cee_boolean statement_pop(CParser* parser);
 static void block_push(CParser* parser);
 static cee_boolean block_pop(CParser* parser);
@@ -456,8 +456,8 @@ static void block_parse(CParser* parser);
 static void c_template_declaration_translate_table_init(void);
 static cee_boolean c_template_token_push(CParser* parser,
                                          CEEToken* push);
-static cee_boolean c_template_parameters_parse(CEESourceFregment* fregment);
-static cee_char* c_template_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_boolean c_template_parameters_parse(CEESourceFragment* fragment);
+static cee_char* c_template_proto_descriptor_create(CEESourceFragment* fragment,
                                                     CEESourceSymbol* template);
 static void template_push(CParser* parser);
 static cee_boolean template_pop(CParser* parser);
@@ -465,12 +465,12 @@ static void c_inheritance_definition_translate_table_init(void);
 static cee_boolean c_inheritance_parse(CEEList* tokens,
                                        CEEList** inherited,
                                        CEEList** derives);
-CEESourceSymbol* c_inheritance_definition_create(CEESourceFregment* fregment,
+CEESourceSymbol* c_inheritance_definition_create(CEESourceFragment* fragment,
                                                  CEEList* tokens,
                                                  const cee_char* filepath,
                                                  const cee_char* subject,
                                                  CEESourceSymbolType symbol_type);
-static cee_char* c_inheritance_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_inheritance_proto_descriptor_create(CEESourceFragment* fragment,
                                                        CEESourceSymbol* inheritance,
                                                        const cee_char* derives_str);
 static cee_char* c_name_scope_list_string_create(CEEList* scopes,
@@ -478,136 +478,136 @@ static cee_char* c_name_scope_list_string_create(CEEList* scopes,
 static cee_char* c_name_scope_create(CEEList* tokens,
                                      const cee_char* subject);
 static void derived_chain_free(cee_pointer data);
-static cee_boolean c_class_definition_trap(CEESourceFregment* fregment,
+static cee_boolean c_class_definition_trap(CEESourceFragment* fragment,
                                            CEEList** pp);
-static cee_boolean c_struct_definition_trap(CEESourceFregment* fregment,
+static cee_boolean c_struct_definition_trap(CEESourceFragment* fragment,
                                             CEEList** pp);
-static cee_boolean c_enum_definition_trap(CEESourceFregment* fregment,
+static cee_boolean c_enum_definition_trap(CEESourceFragment* fragment,
                                           CEEList** pp);
-static cee_boolean c_enumerators_parse(CEESourceFregment* fregment);
-static cee_char* c_enumerator_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_boolean c_enumerators_parse(CEESourceFragment* fragment);
+static cee_char* c_enumerator_proto_descriptor_create(CEESourceFragment* fragment,
                                                       CEESourceSymbol* enumerator,
                                                       const cee_char* proto);
-static cee_boolean c_union_definition_trap(CEESourceFregment* fregment,
+static cee_boolean c_union_definition_trap(CEESourceFragment* fragment,
                                            CEEList** pp);
-static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
+static cee_boolean objective_c_enum_definition_trap(CEESourceFragment* fragment,
                                                     CEEList** pp);
-static cee_boolean statement_block_parse(CEESourceFregment* fregment);
+static cee_boolean statement_block_parse(CEESourceFragment* fragment);
 static void c_function_definition_translate_table_init(void);
-static cee_boolean c_function_definition_parse(CEESourceFregment* fregment);
-static cee_boolean c_function_definition_is_proto(CEESourceFregment* fregment,
+static cee_boolean c_function_definition_parse(CEESourceFragment* fragment);
+static cee_boolean c_function_definition_is_proto(CEESourceFragment* fragment,
                                                   CEEList* identifier);
 static cee_boolean should_proto_descriptor_append_whitespace(CEEToken* token,
                                                                     CEEToken* token_prev);
 static cee_boolean token_id_is_c_function_proto_header_ignored(CEETokenID identifier);
 static void c_function_parameters_declaration_translate_table_init(void);
-static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment);
-static CEESourceSymbol* c_function_parameter_identifier_create(CEESourceFregment* fregment,
+static cee_boolean c_function_parameters_parse(CEESourceFragment* fragment);
+static CEESourceSymbol* c_function_parameter_identifier_create(CEESourceFragment* fragment,
                                                                CEEList* prefix,
                                                                CEEList* identifier);
-static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFragment* fragment,
                                                                CEEList* prefix,
                                                                CEEList* surrounded);
-static cee_char* c_function_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_function_parameter_proto_descriptor_create(CEESourceFragment* fragment,
                                                               CEEList* prefix,
                                                               CEEList* prefix_tail,
                                                               CEESourceSymbol* parameter);
 static void objective_c_message_translate_table_init(void);
-static cee_boolean objective_c_message_parse(CEESourceFregment* fregment);
-static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_boolean objective_c_message_parse(CEESourceFragment* fragment);
+static cee_char* objective_c_message_proto_descriptor_create(CEESourceFragment* fragment,
                                                              CEEList* message_begin,
                                                              CEEList* return_type,
                                                              CEEList* return_type_end,
                                                              CEEList* name_chain,
                                                              CEEList* parameter_types,
                                                              CEEList* parameters);
-static cee_char* objective_c_message_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* objective_c_message_parameter_proto_descriptor_create(CEESourceFragment* fragment,
                                                                        cee_int index,
                                                                        CEESourceSymbol* parameter);
 static void c_proto_translate_table_init(void);
-static cee_char* c_type_descriptor_from_token_slice(CEESourceFregment* fregment,
+static cee_char* c_type_descriptor_from_token_slice(CEESourceFragment* fragment,
                                                     CEEList* p,
                                                     CEEList* q);
-static CEESourceSymbol* objective_c_interface_extract(CEESourceFregment* fregment,
+static CEESourceSymbol* objective_c_interface_extract(CEESourceFragment* fragment,
                                                       CEEList* tokens,
                                                       const cee_char* filepath,
                                                       const cee_char* subject);
-static cee_char* objective_c_interface_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* objective_c_interface_proto_descriptor_create(CEESourceFragment* fragment,
                                                                CEESourceSymbol* interface,
                                                                const cee_char* derives_str);
-static CEESourceSymbol* objective_c_implementation_extract(CEESourceFregment* fregment,
+static CEESourceSymbol* objective_c_implementation_extract(CEESourceFragment* fragment,
                                                            CEEList* tokens,
                                                            const cee_char* filepath,
                                                            const cee_char* subject);
-static cee_char* objective_c_implementation_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* objective_c_implementation_proto_descriptor_create(CEESourceFragment* fragment,
                                                                     CEESourceSymbol* implementation);
-static CEESourceSymbol* objective_c_protocol_extract(CEESourceFregment* fregment,
+static CEESourceSymbol* objective_c_protocol_extract(CEESourceFragment* fragment,
                                                      CEEList* tokens,
                                                      const cee_char* filepath,
                                                      const cee_char* subject);
-static cee_char* objective_c_protocol_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* objective_c_protocol_proto_descriptor_create(CEESourceFragment* fragment,
                                                               CEESourceSymbol* protocol);
 static cee_char* c_name_list_create(CEEList* tokens,
                                     const cee_char* subject);
 static void objective_c_property_translate_table_init(void);
-static cee_boolean objective_c_property_parse(CEESourceFregment* fregment);
+static cee_boolean objective_c_property_parse(CEESourceFragment* fragment);
 static void c_declaration_translate_table_init(void);
 static CEEList* skip_template_parameter_list(CEEList* p,
                                              cee_boolean reverse);
 static CEEList* skip_include_path(CEEList* p);
 static CEEList* skip_c_declaration_interval(CEEList* p);
-static cee_boolean c_declaration_parse(CEESourceFregment* fregment);
-static CEEList* c_declaration_prefix_tail_get(CEESourceFregment* fregment,
+static cee_boolean c_declaration_parse(CEESourceFragment* fragment);
+static CEEList* c_declaration_prefix_tail_get(CEESourceFragment* fragment,
                                               CEEList* identifier,
                                               CEEList* object_identifier,
                                               CEEList* parameter_list,
                                               CEEList* surround);
-static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_function_declaration_create(CEESourceFragment* fragment,
                                                       CEEList* prefix,
                                                       CEEList* prefix_tail,
                                                       CEEList* identifier,
                                                       CEEList* parameter_list,
                                                       CEEList* parameter_list_end);
-static CEESourceSymbol* c_function_pointer_declaration_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_function_pointer_declaration_create(CEESourceFragment* fragment,
                                                               CEEList* prefix,
                                                               CEEList* prefix_tail,
                                                               CEEList* parameter_list,
                                                               CEEList* parameter_list_end,
                                                               CEEList* surround,
                                                               CEEList* surround_end);
-static cee_char* c_function_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_function_proto_descriptor_create(CEESourceFragment* fragment,
                                                     CEEList* prefix,
                                                     CEEList* prefix_tail,
                                                     CEEList* identifier,
                                                     CEEList* parameter_list,
                                                     CEEList* parameter_list_end);
-static CEESourceSymbol* c_identifier_declaration_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_identifier_declaration_create(CEESourceFragment* fragment,
                                                         CEEList* prefix,
                                                         CEEList* prefix_tail,
                                                         CEEList* identifier);
-static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFragment* fragment,
                                                          CEEList* prefix,
                                                          CEEList* prefix_tail,
                                                          CEEList* identifier);
-static cee_char* c_declaration_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_declaration_proto_descriptor_create(CEESourceFragment* fragment,
                                                        CEEList* prefix,
                                                        CEEList* prefix_tail,
                                                        CEEList* identifier);
 static void c_namespace_definition_translate_table_init(void);
-static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
+static cee_boolean c_namespace_definition_trap(CEESourceFragment* fragment,
                                                CEEList** pp);
-static cee_char* c_namespace_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_namespace_proto_descriptor_create(CEESourceFragment* fragment,
                                                      CEESourceSymbol* namespace);
 static void c_extern_block_translate_table_init(void);
-static cee_boolean c_extern_block_parse(CEESourceFregment* fregment);
+static cee_boolean c_extern_block_parse(CEESourceFragment* fragment);
 static void block_header_parse(CParser* parser);
 static cee_boolean block_reduce(CParser* parser);
 static cee_boolean colon_parse(CParser* parser);
-static cee_boolean label_parse(CEESourceFregment* fregment);
-static cee_boolean access_level_parse(CEESourceFregment* fregment);
+static cee_boolean label_parse(CEESourceFragment* fragment);
+static cee_boolean access_level_parse(CEESourceFragment* fragment);
 static void parser_access_level_transform(CParser* parser,
                                           CEEToken* token);
-static void access_level_transform(CEESourceFregment* current,
+static void access_level_transform(CEESourceFragment* current,
                                    CEEToken* token);
 static void parameter_list_push(CParser* parser);
 static cee_boolean parameter_list_pop(CParser* parser);
@@ -616,7 +616,7 @@ static cee_boolean subscript_pop(CParser* parser);
 static void objective_c_definition_translate_table_init(void);
 static cee_boolean objective_c_token_push(CParser* parser,
                                           CEEToken* push);
-static cee_boolean objective_c_definition_parse(CEESourceFregment* fregment,
+static cee_boolean objective_c_definition_parse(CEESourceFragment* fragment,
                                                 const cee_char* subject);
 static void statement_parse(CParser* parser);
 static cee_boolean statement_reduce(CParser* parser);
@@ -632,52 +632,52 @@ static void parser_state_set(CParser* parser,
 static void parser_state_clear(CParser* parser,
                                CParserState state);
 static cee_boolean current_statement_type_is(CParser* parser,
-                                             CEESourceFregmentType type);
+                                             CEESourceFragmentType type);
 static void current_statement_type_transform(CParser* parser,
-                                             CEESourceFregmentType type);
+                                             CEESourceFragmentType type);
 static cee_boolean statement_token_push(CParser* parser,
                                         CEEToken* push);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    const cee_char* filepath,
                                    const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
-                                   CEESourceFregment* prep_directive,
-                                   CEESourceFregment* statement,
+                                   CEESourceFragment* prep_directive,
+                                   CEESourceFragment* statement,
                                    CEERange range,
                                    CEEList** references);
-static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser_ref,
+static cee_boolean references_in_source_fragment_parse(CEESourceParserRef parser_ref,
                                                        const cee_char* filepath,
-                                                       CEESourceFregment* fregment,
+                                                       CEESourceFragment* fragment,
                                                        const cee_char* subject,
-                                                       CEESourceFregment* prep_directive,
-                                                       CEESourceFregment* statement,
+                                                       CEESourceFragment* prep_directive,
+                                                       CEESourceFragment* statement,
                                                        CEERange range,
                                                        CEEList** references);
-static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregment,
+static CEESourceFragment* c_referernce_fragment_convert(CEESourceFragment* fragment,
                                                         const cee_char* subject);
-static void c_reference_fregment_parse(CEESourceParserRef parser_ref,
+static void c_reference_fragment_parse(CEESourceParserRef parser_ref,
                                        const cee_char* filepath,
-                                       CEESourceFregment* fregment,
+                                       CEESourceFragment* fragment,
                                        const cee_char* subject,
-                                       CEESourceFregment* prep_directive,
-                                       CEESourceFregment* statement,
+                                       CEESourceFragment* prep_directive,
+                                       CEESourceFragment* statement,
                                        CEEList** references);
 static cee_boolean token_type_matcher(CEEToken* token,
                                       CEETokenType type);
 static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
                                           CEESourceSymbolReference* reference,
-                                          CEESourceFregment* prep_directive,
-                                          CEESourceFregment* statement,
+                                          CEESourceFragment* prep_directive,
+                                          CEESourceFragment* statement,
                                           CEESourceSymbol** symbol);
-static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* searching,
+static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFragment* searching,
                                                          const cee_char* name);
 
 static void c_token_type_map_init(void)
@@ -1096,13 +1096,13 @@ static cee_boolean token_is_comment(CEEToken* token)
 
 static cee_boolean comment_attach(CParser* parser)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->comment_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->comment_current,
-                                          kCEESourceFregmentTypeComment,
+    attached = cee_source_fragment_attach(parser->comment_current,
+                                          kCEESourceFragmentTypeComment,
                                           parser->filepath_ref,
                                           parser->subject_ref,
                                           "c");
@@ -1123,7 +1123,7 @@ static cee_boolean comment_token_push(CParser* parser,
     return TRUE;
 }
 
-static cee_boolean comment_fregment_reduce(CParser* parser)
+static cee_boolean comment_fragment_reduce(CParser* parser)
 {
     if (!parser->comment_current)
         return FALSE;
@@ -1152,12 +1152,12 @@ static cee_boolean prep_directive_token_push(CParser* parser,
 
 static cee_boolean prep_directive_terminated(CParser* parser)
 {
-    CEESourceFregment* fregment = parser->prep_directive_current;
+    CEESourceFragment* fragment = parser->prep_directive_current;
     
-    if (!fregment->tokens_ref)
+    if (!fragment->tokens_ref)
         return FALSE;
     
-    CEEList* p = SOURCE_FREGMENT_TOKENS_LAST(fregment);
+    CEEList* p = SOURCE_FREGMENT_TOKENS_LAST(fragment);
     
     if (cee_token_is_identifier(p, 0))
         return TRUE;
@@ -1175,14 +1175,14 @@ static cee_boolean prep_directive_terminated(CParser* parser)
 }
 
 static cee_boolean prep_directive_attach(CParser* parser,
-                                         CEESourceFregmentType type)
+                                         CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->prep_directive_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->prep_directive_current,
+    attached = cee_source_fragment_attach(parser->prep_directive_current,
                                           type,
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -1195,14 +1195,14 @@ static cee_boolean prep_directive_attach(CParser* parser,
 }
 
 static cee_boolean prep_directive_sub_attach(CParser* parser,
-                                             CEESourceFregmentType type)
+                                             CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->prep_directive_current)
         return FALSE;
     
-    attached = cee_source_fregment_sub_attach(parser->prep_directive_current,
+    attached = cee_source_fragment_sub_attach(parser->prep_directive_current,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,
@@ -1216,8 +1216,8 @@ static cee_boolean prep_directive_sub_attach(CParser* parser,
 
 static void prep_directive_branch_push(CParser* parser)
 {
-    prep_directive_sub_attach(parser, kCEESourceFregmentTypeSourceList);
-    prep_directive_sub_attach(parser, kCEESourceFregmentTypePrepDirective);
+    prep_directive_sub_attach(parser, kCEESourceFragmentTypeSourceList);
+    prep_directive_sub_attach(parser, kCEESourceFragmentTypePrepDirective);
 }
 
 static cee_boolean prep_directive_branch_pop(CParser* parser)
@@ -1241,9 +1241,9 @@ static cee_boolean prep_directive_pop(CParser* parser)
 
 static void prep_directive_parse(CParser* parser)
 {
-    CEESourceFregment* fregment = parser->prep_directive_current;
+    CEESourceFragment* fragment = parser->prep_directive_current;
     CEEToken* token = NULL;
-    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
         
     while (p) {
         token = p->data;
@@ -1262,19 +1262,19 @@ static void prep_directive_parse(CParser* parser)
                 parser_state_set(parser, kCParserStateStatementParsing);
             else
                 parser_state_clear(parser, kCParserStateStatementParsing);
-            cee_source_fregment_type_set(parser->prep_directive_current,
-                                         kCEESourceFregmentTypePrepDirectiveCondition);
+            cee_source_fragment_type_set(parser->prep_directive_current,
+                                         kCEESourceFragmentTypePrepDirectiveCondition);
             prep_directive_branch_push(parser);
         }
         else if (token->identifier == kCEETokenID_HASH_ELIF ||
                  token->identifier == kCEETokenID_HASH_ELSE) {
             parser_state_clear(parser, kCParserStateStatementParsing);
-            cee_source_fregment_type_set(parser->prep_directive_current,
-                                         kCEESourceFregmentTypePrepDirectiveBranch);
+            cee_source_fragment_type_set(parser->prep_directive_current,
+                                         kCEESourceFragmentTypePrepDirectiveBranch);
             prep_directive_branch_push(parser);
         }
         else if (token->identifier == kCEETokenID_HASH_ENDIF) {
-            prep_directive_attach(parser, kCEESourceFregmentTypePrepDirective);
+            prep_directive_attach(parser, kCEESourceFragmentTypePrepDirective);
             if (should_statement_parsing(parser))
                 parser_state_set(parser, kCParserStateStatementParsing);
             else
@@ -1283,15 +1283,15 @@ static void prep_directive_parse(CParser* parser)
         else {
             if (token->identifier == kCEETokenID_HASH_INCLUDE ||
                 token->identifier == kCEETokenID_HASH_IMPORT) {
-                prep_directive_include_parse(fregment);
+                prep_directive_include_parse(fragment);
             }
             else if (token->identifier == kCEETokenID_HASH_DEFINE) {
-                prep_directive_define_parse(fregment);
+                prep_directive_define_parse(fragment);
             }
             else {
-                prep_directive_common_parse(fregment);
+                prep_directive_common_parse(fragment);
             }
-            prep_directive_attach(parser, kCEESourceFregmentTypePrepDirective);
+            prep_directive_attach(parser, kCEESourceFragmentTypePrepDirective);
         }
     }
 }
@@ -1299,12 +1299,12 @@ static void prep_directive_parse(CParser* parser)
 static cee_boolean should_statement_parsing(CParser* parser)
 {
     cee_boolean ret = TRUE;
-    CEESourceFregment* current = parser->prep_directive_current->parent;
+    CEESourceFragment* current = parser->prep_directive_current->parent;
     while (current) {
-        if (cee_source_fregment_type_is(current, kCEESourceFregmentTypeRoot)) {
+        if (cee_source_fragment_type_is(current, kCEESourceFragmentTypeRoot)) {
             break;
         }
-        else if (cee_source_fregment_type_is(current, kCEESourceFregmentTypePrepDirectiveBranch)) {
+        else if (cee_source_fragment_type_is(current, kCEESourceFragmentTypePrepDirectiveBranch)) {
             ret = FALSE;
             break;
         }
@@ -1331,7 +1331,7 @@ static void c_prep_directive_include_translate_table_init(void)
     TRANSLATE_STATE_SET(c_prep_directive_include_translate_table,   kCPrepDirectiveIncludeTranslateStateDirective   , '<'                       , kCPrepDirectiveIncludeTranslateStatePath      );
 }
 
-static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
+static cee_boolean prep_directive_include_parse(CEESourceFragment* fragment)
 {
     CEEList* p = NULL;
     CEEList* q = NULL;
@@ -1351,7 +1351,7 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
         -1
     };
     
-    p = cee_source_fregment_token_find(fregment, token_ids);
+    p = cee_source_fragment_token_find(fragment, token_ids);
     if (!p)
         return FALSE;
     
@@ -1384,8 +1384,8 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
     }
     
     if (current == kCPrepDirectiveIncludeTranslateStateConfirm && s && q) {
-        include_directive = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                      fregment->subject_ref,
+        include_directive = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                      fragment->subject_ref,
                                                                       s,
                                                                       q,
                                                                       kCEESourceSymbolTypePrepDirectiveInclude,
@@ -1393,18 +1393,18 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
                                                                       kCEETokenStringOptionIncompact);
         cee_source_symbol_name_format(include_directive->name);
         cee_token_slice_state_mark(TOKEN_NEXT(s), q, kCEETokenStateSymbolOccupied);
-        fregment->symbols = cee_list_prepend(fregment->symbols, include_directive);
+        fragment->symbols = cee_list_prepend(fragment->symbols, include_directive);
         
         if (r && t) {
-            include_path = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                     fregment->subject_ref,
+            include_path = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                     fragment->subject_ref,
                                                                      r,
                                                                      t,
                                                                      kCEESourceSymbolTypePrepDirectiveIncludePath,
                                                                      "c",
                                                                      kCEETokenStringOptionIncompact);
             cee_token_slice_state_mark(r, t, kCEETokenStateSymbolOccupied);
-            fregment->symbols = cee_list_prepend(fregment->symbols, include_path);
+            fragment->symbols = cee_list_prepend(fragment->symbols, include_path);
         }
         
         ret = TRUE;
@@ -1412,8 +1412,8 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
     
     
 #ifdef DEBUG_PREP_DIRECTIVE
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif
     
     return ret;
@@ -1444,7 +1444,7 @@ static void c_prep_directive_define_translate_table_init(void)
     TRANSLATE_STATE_SET(c_prep_directive_define_translate_table,    kCPrepDirectiveDefineTranslateStateParameter        , '\\'                                      , kCPrepDirectiveDefineTranslateStateParameter      );
 }
 
-static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
+static cee_boolean prep_directive_define_parse(CEESourceFragment* fragment)
 {
     CEEList* p = NULL;
     CEEList* q = NULL;
@@ -1462,7 +1462,7 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
         -1
     };
     
-    p = cee_source_fregment_token_find(fregment, token_ids);
+    p = cee_source_fragment_token_find(fragment, token_ids);
     if (!p)
         return FALSE;
     
@@ -1490,29 +1490,29 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
     
     if (current == kCPrepDirectiveDefineTranslateStateConfirm && s) {
         /** define macro */
-        define_directive = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                     fregment->subject_ref,
+        define_directive = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                     fragment->subject_ref,
                                                                      s,
                                                                      s,
                                                                      kCEESourceSymbolTypePrepDirectiveDefine,
                                                                      "c",
                                                                      kCEETokenStringOptionIncompact);
         cee_token_slice_state_mark(s, t, kCEETokenStateSymbolOccupied);
-        fregment->symbols = cee_list_prepend(fregment->symbols, define_directive);
+        fragment->symbols = cee_list_prepend(fragment->symbols, define_directive);
         ret = TRUE;
         
         /** parameters */
         p = TOKEN_FIRST(q);
         while (p) {
-            parameter = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                  fregment->subject_ref,
+            parameter = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                  fragment->subject_ref,
                                                                   p,
                                                                   p,
                                                                   kCEESourceSymbolTypePrepDirectiveParameter,
                                                                   "c",
                                                                   kCEETokenStringOptionCompact);
             cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
-            fregment->symbols = cee_list_prepend(fregment->symbols, parameter);
+            fragment->symbols = cee_list_prepend(fragment->symbols, parameter);
             p = TOKEN_NEXT(p);
         }
     }
@@ -1521,14 +1521,14 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
         cee_list_free(q);
         
 #ifdef DEBUG_PREP_DIRECTIVE
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif
     
     return ret;
 }
 
-static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
+static cee_boolean prep_directive_common_parse(CEESourceFragment* fragment)
 {
     CEEList* p = NULL;
     CEEList* q = NULL;
@@ -1545,27 +1545,27 @@ static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
         -1
     };
     
-    p = cee_source_fregment_token_find(fregment, token_ids);
+    p = cee_source_fragment_token_find(fragment, token_ids);
     if (!p)
         return FALSE;
     
-    q = SOURCE_FREGMENT_TOKENS_LAST(fregment);
+    q = SOURCE_FREGMENT_TOKENS_LAST(fragment);
     if (p && q) {
-        common_directive = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                     fregment->subject_ref,
+        common_directive = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                     fragment->subject_ref,
                                                                      p,
                                                                      q,
                                                                      kCEESourceSymbolTypePrepDirectiveCommon,
                                                                      "c",
                                                                      kCEETokenStringOptionIncompact);
         cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
-        fregment->symbols = cee_list_prepend(fregment->symbols, common_directive);
+        fragment->symbols = cee_list_prepend(fragment->symbols, common_directive);
         ret = TRUE;
     }
         
 #ifdef DEBUG_PREP_DIRECTIVE
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif
     
     return ret;
@@ -1575,14 +1575,14 @@ static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
  * statement
  */
 static cee_boolean statement_attach(CParser* parser,
-                                    CEESourceFregmentType type)
+                                    CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->statement_current,
+    attached = cee_source_fragment_attach(parser->statement_current,
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -1595,14 +1595,14 @@ static cee_boolean statement_attach(CParser* parser,
 }
 
 static cee_boolean statement_sub_attach(CParser* parser,
-                                        CEESourceFregmentType type)
+                                        CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_sub_attach(parser->statement_current, 
+    attached = cee_source_fragment_sub_attach(parser->statement_current,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,
@@ -1630,7 +1630,7 @@ static cee_boolean statement_parsing(CParser* parser)
 
 static void statement_parse(CParser* parser)
 {
-    CEESourceFregment* current = parser->statement_current;
+    CEESourceFragment* current = parser->statement_current;
     
     if (!current || !current->tokens_ref)
         return;
@@ -1650,12 +1650,12 @@ static cee_boolean statement_reduce(CParser* parser)
     if (!parser->statement_current)
         return FALSE;
     
-    if (cee_source_fregment_grandfather_type_is(parser->statement_current, 
-                                                kCEESourceFregmentTypeTemplateDeclaration))
+    if (cee_source_fragment_grandfather_type_is(parser->statement_current,
+                                                kCEESourceFragmentTypeTemplateDeclaration))
         if (!template_pop(parser))
             return FALSE;
     
-    statement_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_attach(parser, kCEESourceFragmentTypeStatement);
     
     return TRUE;
 }
@@ -1665,8 +1665,8 @@ static cee_boolean statement_reduce(CParser* parser)
  */
 static void block_push(CParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeCurlyBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeCurlyBracketList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean block_pop(CParser* parser)
@@ -1717,7 +1717,7 @@ static cee_boolean c_template_token_push(CParser* parser,
     
     current = c_template_declaration_translate_table[current][push->identifier];
     if (current == kCTemplateDeclarationTranslateStateError) {
-        statement_attach(parser, kCEESourceFregmentTypeStatement);
+        statement_attach(parser, kCEESourceFragmentTypeStatement);
         return FALSE;
     }
     
@@ -1741,14 +1741,14 @@ static cee_boolean c_template_token_push(CParser* parser,
     return TRUE;
 }
 
-static cee_boolean c_template_parameters_parse(CEESourceFregment* fregment)
+static cee_boolean c_template_parameters_parse(CEESourceFragment* fragment)
 {
     CEESourceSymbol* template = NULL;
     CEEList* p = NULL;
     CEEList* begin = NULL;
     CEEList* end = NULL;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         if (cee_token_is_identifier(p, kCEETokenID_TEMPLATE))
             begin = p;
@@ -1760,29 +1760,29 @@ static cee_boolean c_template_parameters_parse(CEESourceFregment* fregment)
     }
     
     if (begin && end) {
-        template = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                             fregment->subject_ref,
+        template = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                             fragment->subject_ref,
                                                              begin, 
                                                              end, 
                                                              kCEESourceSymbolTypeTemplateDeclaration,
                                                              "c",
                                                              kCEETokenStringOptionCompact);
-        template->proto_descriptor = c_template_proto_descriptor_create(fregment, template);
-        fregment->symbols = cee_list_prepend(fregment->symbols, template);
+        template->proto_descriptor = c_template_proto_descriptor_create(fragment, template);
+        fragment->symbols = cee_list_prepend(fragment->symbols, template);
     }
 
 #ifdef DEBUG_TEMPLATE
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif
     
     return TRUE;
 }
 
-static cee_char* c_template_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_template_proto_descriptor_create(CEESourceFragment* fragment,
                                                     CEESourceSymbol* template)
 {
-    if (!fregment || !template)
+    if (!fragment || !template)
         return NULL;
     
     cee_char* descriptor = NULL;
@@ -1798,8 +1798,8 @@ static cee_char* c_template_proto_descriptor_create(CEESourceFregment* fregment,
 
 static void template_push(CParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeSourceList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeSourceList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean template_pop(CParser* parser)
@@ -1939,7 +1939,7 @@ static cee_boolean c_inheritance_parse(CEEList* tokens,
     return TRUE;
 }
 
-CEESourceSymbol* c_inheritance_definition_create(CEESourceFregment* fregment,
+CEESourceSymbol* c_inheritance_definition_create(CEESourceFragment* fragment,
                                                  CEEList* tokens,
                                                  const cee_char* filepath,
                                                  const cee_char* subject,
@@ -1955,12 +1955,12 @@ CEESourceSymbol* c_inheritance_definition_create(CEESourceFregment* fregment,
     
     if (name)
         inheritance = cee_source_symbol_create_from_token_slice(filepath,
-                                                               subject, 
-                                                               name, 
-                                                               name, 
-                                                               symbol_type,
-                                                               "c",
-                                                               kCEETokenStringOptionCompact);
+                                                                subject,
+                                                                name,
+                                                                name,
+                                                                symbol_type,
+                                                                "c",
+                                                                kCEETokenStringOptionCompact);
     else
         inheritance = cee_source_symbol_create_from_token_slice(filepath,
                                                                 subject,
@@ -1977,7 +1977,7 @@ CEESourceSymbol* c_inheritance_definition_create(CEESourceFregment* fregment,
         if (name)
             cee_token_slice_state_mark(name, name, kCEETokenStateSymbolOccupied);
         
-        inheritance->proto_descriptor = c_inheritance_proto_descriptor_create(fregment,
+        inheritance->proto_descriptor = c_inheritance_proto_descriptor_create(fragment,
                                                                               inheritance,
                                                                               inheritance->derives);
     }
@@ -1991,11 +1991,11 @@ CEESourceSymbol* c_inheritance_definition_create(CEESourceFregment* fregment,
     return inheritance;
 }
 
-static cee_char* c_inheritance_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_inheritance_proto_descriptor_create(CEESourceFragment* fragment,
                                                        CEESourceSymbol* inheritance,
                                                        const cee_char* derives_str)
 {
-    if (!fregment || !inheritance)
+    if (!fragment || !inheritance)
         return NULL;
     
     cee_char* descriptor = NULL;
@@ -2084,19 +2084,19 @@ static void derived_chain_free(cee_pointer data)
     cee_list_free((CEEList*)data);
 }
 
-static cee_boolean c_class_definition_trap(CEESourceFregment* fregment, 
+static cee_boolean c_class_definition_trap(CEESourceFragment* fragment,
                                            CEEList** pp)
 {
-    CEESourceSymbol* definition = c_inheritance_definition_create(fregment,
+    CEESourceSymbol* definition = c_inheritance_definition_create(fragment,
                                                                   *pp,
-                                                                  fregment->filepath_ref,
-                                                                  fregment->subject_ref,
+                                                                  fragment->filepath_ref,
+                                                                  fragment->subject_ref,
                                                                   kCEESourceSymbolTypeClassDefinition);
     if (!definition)
         return FALSE;
     
-    fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-    cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeClassDefinition);
+    fragment->symbols = cee_list_prepend(fragment->symbols, definition);
+    cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeClassDefinition);
     *pp = NULL;
     
 #ifdef DEBUG_CLASS
@@ -2106,19 +2106,19 @@ static cee_boolean c_class_definition_trap(CEESourceFregment* fregment,
     return TRUE;
 }
 
-static cee_boolean c_struct_definition_trap(CEESourceFregment* fregment,
+static cee_boolean c_struct_definition_trap(CEESourceFragment* fragment,
                                             CEEList** pp)
 {
-    CEESourceSymbol* definition = c_inheritance_definition_create(fregment,
+    CEESourceSymbol* definition = c_inheritance_definition_create(fragment,
                                                                   *pp,
-                                                                  fregment->filepath_ref,
-                                                                  fregment->subject_ref,
+                                                                  fragment->filepath_ref,
+                                                                  fragment->subject_ref,
                                                                   kCEESourceSymbolTypeStructDefinition);
     if (!definition)
         return FALSE;
     
-    fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-    cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeStructDefinition);
+    fragment->symbols = cee_list_prepend(fragment->symbols, definition);
+    cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeStructDefinition);
     *pp = NULL;
     
 #ifdef DEBUG_STRUCT
@@ -2128,19 +2128,19 @@ static cee_boolean c_struct_definition_trap(CEESourceFregment* fregment,
     return TRUE;
 }
 
-static cee_boolean c_enum_definition_trap(CEESourceFregment* fregment, 
+static cee_boolean c_enum_definition_trap(CEESourceFragment* fragment,
                                           CEEList** pp)
 {
-    CEESourceSymbol* definition = c_inheritance_definition_create(fregment,
+    CEESourceSymbol* definition = c_inheritance_definition_create(fragment,
                                                                   *pp,
-                                                                  fregment->filepath_ref,
-                                                                  fregment->subject_ref,
+                                                                  fragment->filepath_ref,
+                                                                  fragment->subject_ref,
                                                                   kCEESourceSymbolTypeEnumDefinition);
     if (!definition)
         return FALSE;
     
-    fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-    cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeEnumDefinition);
+    fragment->symbols = cee_list_prepend(fragment->symbols, definition);
+    cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeEnumDefinition);
     *pp = NULL;
         
 #ifdef DEBUG_ENUM
@@ -2151,13 +2151,13 @@ static cee_boolean c_enum_definition_trap(CEESourceFregment* fregment,
     return TRUE;
 }
 
-static cee_boolean c_enumerators_parse(CEESourceFregment* fregment)
+static cee_boolean c_enumerators_parse(CEESourceFragment* fragment)
 {
-    if (!cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition))
+    if (!cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeEnumDefinition))
         return FALSE;
     
     cee_boolean ret = FALSE;
-    CEESourceFregment* grandfather = NULL;
+    CEESourceFragment* grandfather = NULL;
     CEESourceSymbol* enum_symbol = NULL;
     CEEList* enum_symbols = NULL;
     CEESourceSymbol* enumerator = NULL;
@@ -2167,13 +2167,13 @@ static cee_boolean c_enumerators_parse(CEESourceFregment* fregment)
     CEEList* q = NULL;
     cee_boolean enumurating = TRUE;
     
-    grandfather = cee_source_fregment_grandfather_get(fregment);
-    enum_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+    grandfather = cee_source_fragment_grandfather_get(fragment);
+    enum_symbols = cee_source_fragment_symbols_search_by_type(grandfather,
                                                               kCEESourceSymbolTypeEnumDefinition);
     if (enum_symbols)
         enum_symbol = cee_list_nth_data(enum_symbols, 0);
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         if (token->identifier == kCEETokenID_IDENTIFIER && enumurating)
@@ -2181,8 +2181,8 @@ static cee_boolean c_enumerators_parse(CEESourceFregment* fregment)
         
         if (token->identifier == ',' || token->identifier == ';' || !TOKEN_NEXT(p)) {
             if (q) {
-                enumerator = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                       fregment->subject_ref,
+                enumerator = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                       fragment->subject_ref,
                                                                        q,
                                                                        q,
                                                                        kCEESourceSymbolTypeEnumerator,
@@ -2190,7 +2190,7 @@ static cee_boolean c_enumerators_parse(CEESourceFregment* fregment)
                                                                        kCEETokenStringOptionCompact);
                 if (enumerator) {
                     enumerator->proto_descriptor =
-                        c_enumerator_proto_descriptor_create(token->fregment_ref,
+                        c_enumerator_proto_descriptor_create(token->fragment_ref,
                                                              enumerator,
                                                              enum_symbol->name);
                     cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
@@ -2211,8 +2211,8 @@ static cee_boolean c_enumerators_parse(CEESourceFregment* fregment)
         cee_list_free(enum_symbols);
     
     if (enumerators) {
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeEnumerators);
-        fregment->symbols = cee_list_concat(fregment->symbols, enumerators);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeEnumerators);
+        fragment->symbols = cee_list_concat(fragment->symbols, enumerators);
         ret = TRUE;
     }
     
@@ -2225,11 +2225,11 @@ exit:
     return ret;
 }
 
-static cee_char* c_enumerator_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_enumerator_proto_descriptor_create(CEESourceFragment* fragment,
                                                       CEESourceSymbol* enumerator,
                                                       const cee_char* proto)
 {
-    if (!fregment || !enumerator)
+    if (!fragment || !enumerator)
         return NULL;
     
     cee_char* descriptor = NULL;
@@ -2248,19 +2248,19 @@ static cee_char* c_enumerator_proto_descriptor_create(CEESourceFregment* fregmen
     return descriptor;
 }
 
-static cee_boolean c_union_definition_trap(CEESourceFregment* fregment, 
+static cee_boolean c_union_definition_trap(CEESourceFragment* fragment,
                                            CEEList** pp)
 {
-    CEESourceSymbol* definition = c_inheritance_definition_create(fregment,
+    CEESourceSymbol* definition = c_inheritance_definition_create(fragment,
                                                                   *pp,
-                                                                  fregment->filepath_ref,
-                                                                  fregment->subject_ref,
+                                                                  fragment->filepath_ref,
+                                                                  fragment->subject_ref,
                                                                   kCEESourceSymbolTypeUnionDefinition);
     if (!definition)
         return TRUE;
     
-    fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-    cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeUnionDefinition);
+    fragment->symbols = cee_list_prepend(fragment->symbols, definition);
+    cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeUnionDefinition);
     *pp = NULL;
         
 #ifdef DEBUG_UNION
@@ -2290,7 +2290,7 @@ static void objective_c_enum_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(objective_c_enum_definition_translate_table, kObjectiveCEnumDefinitionTranslateStateParameterListEnd    , '{'                       , kObjectiveCEnumDefinitionTranslateStateConfirm            );
 }
 
-static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
+static cee_boolean objective_c_enum_definition_trap(CEESourceFragment* fragment,
                                                     CEEList** pp)
 {
     cee_boolean ret = FALSE;
@@ -2299,7 +2299,7 @@ static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
     CEEList* r = NULL;
     CEEToken* token = NULL;
     CEEList* parameter_list = NULL;
-    CEESourceFregment* child = NULL;
+    CEESourceFragment* child = NULL;
     ObjectiveCEnumDefinitionTranslateState current = kObjectiveCEnumDefinitionTranslateStateInit;
     ObjectiveCEnumDefinitionTranslateState prev = kObjectiveCEnumDefinitionTranslateStateInit;
     
@@ -2321,7 +2321,7 @@ static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
     
     if (current == kObjectiveCEnumDefinitionTranslateStateConfirm) {
         if (parameter_list) {
-            child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
+            child = cee_source_fragment_child_index_by_leaf(fragment, parameter_list->data);
             if (child) {
                 child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
                 r = child->tokens_ref_last;
@@ -2334,16 +2334,16 @@ static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
             }
         }
         
-        definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                               fregment->subject_ref,
+        definition = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                               fragment->subject_ref,
                                                                r,
                                                                r,
                                                                kCEESourceSymbolTypeEnumDefinition,
                                                                "c",
                                                                kCEETokenStringOptionCompact);
         cee_token_slice_state_mark(r, r, kCEETokenStateSymbolOccupied);
-        fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeEnumDefinition);
+        fragment->symbols = cee_list_prepend(fragment->symbols, definition);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeEnumDefinition);
         ret = TRUE;
     }
     
@@ -2357,17 +2357,17 @@ static cee_boolean objective_c_enum_definition_trap(CEESourceFregment* fregment,
     return TRUE;
 }
 
-static cee_boolean statement_block_parse(CEESourceFregment* fregment)
+static cee_boolean statement_block_parse(CEESourceFragment* fragment)
 {
     CEEList* p = NULL;
     CEEToken* token = NULL;
     CEEList* q = NULL;
     
-    if (cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeAssignmentBlock) ||
-        cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeStatementBlock))
+    if (cee_source_fragment_type_is(fragment, kCEESourceFragmentTypeAssignmentBlock) ||
+        cee_source_fragment_type_is(fragment, kCEESourceFragmentTypeStatementBlock))
         return TRUE;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         if (token->identifier == '{' ||
@@ -2377,22 +2377,22 @@ static cee_boolean statement_block_parse(CEESourceFregment* fregment)
                 token = q->data;
                 if (token_id_is_assignment(token->identifier)) {
 #ifdef DEBUG_STATEMENT_BLOCK
-                    cee_source_fregment_string_print(fregment);
+                    cee_source_fragment_string_print(fragment);
 #endif
-                    cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeAssignmentBlock);
+                    cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeAssignmentBlock);
                 }
                 else {
 #ifdef DEBUG_STATEMENT_BLOCK
-                    cee_source_fregment_string_print(fregment);
+                    cee_source_fragment_string_print(fragment);
 #endif
-                    cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeStatementBlock);
+                    cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeStatementBlock);
                 }
             }
             else {
 #ifdef DEBUG_STATEMENT_BLOCK
-                cee_source_fregment_string_print(fregment);
+                cee_source_fragment_string_print(fragment);
 #endif
-                cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeStatementBlock);
+                cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeStatementBlock);
             }
         }
         p = TOKEN_NEXT(p);
@@ -2621,7 +2621,7 @@ static void c_function_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(c_function_definition_translate_table, kCFunctionDefinitionTranslateStateOverloadRoundBracketEnd            , '('                                   , kCFunctionDefinitionTranslateStateParameterList                       );
 }
 
-static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
+static cee_boolean c_function_definition_parse(CEESourceFragment* fragment)
 {
     CEEList* p = NULL;
     CEEList* q = NULL;
@@ -2632,11 +2632,11 @@ static cee_boolean c_function_definition_parse(CEESourceFregment* fregment)
     CEEList* trialing = NULL;
     CEESourceSymbol* definition = NULL;
     CEEToken* token = NULL;
-    CEESourceFregment* child = NULL;
+    CEESourceFragment* child = NULL;
     CFunctionDefinitionTranslateState current = kCFunctionDefinitionTranslateStateInit;
     CFunctionDefinitionTranslateState prev = kCFunctionDefinitionTranslateStateInit;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         
@@ -2695,8 +2695,8 @@ next_token:
                 q = identifier;
         }
         
-        definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                               fregment->subject_ref,
+        definition = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                               fragment->subject_ref,
                                                                q,
                                                                r,
                                                                kCEESourceSymbolTypeFunctionDefinition,
@@ -2704,16 +2704,16 @@ next_token:
                                                                kCEETokenStringOptionCompact);
         if (definition) {
             cee_token_slice_state_mark(q, r, kCEETokenStateSymbolOccupied);
-            cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDefinition);
-            child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
+            cee_source_fragment_type_set_exclusive(fragment, kCEESourceFragmentTypeFunctionDefinition);
+            child = cee_source_fragment_child_index_by_leaf(fragment, parameter_list->data);
             if (child) {
                 child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
                 c_function_parameters_parse(child);
             }
             
-            if (q && c_function_definition_is_proto(fregment, q)) {
-                definition->proto_descriptor = c_function_proto_descriptor_create(fregment,
-                                                                                  SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+            if (q && c_function_definition_is_proto(fragment, q)) {
+                definition->proto_descriptor = c_function_proto_descriptor_create(fragment,
+                                                                                  SOURCE_FREGMENT_TOKENS_FIRST(fragment),
                                                                                   TOKEN_PREV(q),
                                                                                   q,
                                                                                   parameter_list,
@@ -2722,21 +2722,21 @@ next_token:
         }
     }
     else if (current == kCFunctionDefinitionTranslateStateMemberInit) {
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeAssignmentBlock);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeAssignmentBlock);
     }
     
     if (definition)
-        fregment->symbols = cee_list_prepend(fregment->symbols, definition);
+        fragment->symbols = cee_list_prepend(fragment->symbols, definition);
     
 #ifdef DEBUG_FUNCTION_DEFINITION
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif
     
     return TRUE;
 }
 
-static cee_boolean c_function_definition_is_proto(CEESourceFregment* fregment,
+static cee_boolean c_function_definition_is_proto(CEESourceFragment* fragment,
                                                   CEEList* identifier)
 {
     CEEList* p = cee_token_not_whitespace_newline_before(identifier);
@@ -2863,7 +2863,7 @@ static void c_function_parameters_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_function_parameters_declaration_translate_table, kCFunctionParametersDeclarationTranslateStateEllipsis                , ','                               , kCFunctionParametersDeclarationTranslateStateConfirm              );
 }
 
-static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
+static cee_boolean c_function_parameters_parse(CEESourceFragment* fragment)
 {
     CEEList* p = NULL;
     CEEList* q = NULL;
@@ -2879,15 +2879,11 @@ static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
     CEEList* surrounded_end = NULL;
     CEEList* ellipsis = NULL;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     prefix = p;
     while (p) {
         token = p->data;
-        
-        if (cee_token_id_is_newline(token->identifier) ||
-            cee_token_id_is_whitespace(token->identifier))
-            goto next_token;
-        
+                
         prev = current;
         current = c_function_parameters_declaration_translate_table[current][token->identifier];
         
@@ -2934,19 +2930,19 @@ static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
         
         if (current == kCFunctionParametersDeclarationTranslateStateConfirm || !TOKEN_NEXT(p)) {
             if (surrounded) {
-                declaration = c_function_parameter_surrounded_create(fregment,
+                declaration = c_function_parameter_surrounded_create(fragment,
                                                                      prefix,
                                                                      parameter_list);
             }
             else if (parameter_list) {
                 q = cee_token_not_whitespace_newline_before(parameter_list);
                 if (cee_token_is_identifier(q, kCEETokenID_IDENTIFIER))
-                    declaration = c_function_parameter_identifier_create(fregment,
+                    declaration = c_function_parameter_identifier_create(fragment,
                                                                          prefix,
                                                                          q);
             }
             else if (identifier) {
-                declaration = c_function_parameter_identifier_create(fregment,
+                declaration = c_function_parameter_identifier_create(fragment,
                                                                      prefix,
                                                                      identifier);
             }
@@ -2955,7 +2951,7 @@ static cee_boolean c_function_parameters_parse(CEESourceFregment* fregment)
             }
             
             if (declaration)
-                fregment->symbols = cee_list_prepend(fregment->symbols, declaration);
+                fragment->symbols = cee_list_prepend(fragment->symbols, declaration);
             
             declaration = NULL;
             identifier = NULL;
@@ -2979,23 +2975,23 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (fregment->symbols)
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeDeclaration);
+    if (fragment->symbols)
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeDeclaration);
     
 #ifdef DEBUG_FUNCTION_DEFINITION
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif
 
     return TRUE;
 }
 
-static CEESourceSymbol* c_function_parameter_identifier_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_function_parameter_identifier_create(CEESourceFragment* fragment,
                                                                CEEList* prefix,
                                                                CEEList* identifier)
 {
-    CEESourceSymbol* parameter = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                           fregment->subject_ref,
+    CEESourceSymbol* parameter = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                           fragment->subject_ref,
                                                                            identifier,
                                                                            identifier,
                                                                            kCEESourceSymbolTypeFunctionParameter,
@@ -3006,23 +3002,23 @@ static CEESourceSymbol* c_function_parameter_identifier_create(CEESourceFregment
     
     cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
     if (prefix && TOKEN_PREV(identifier))
-        parameter->proto_descriptor = c_function_parameter_proto_descriptor_create(fregment,
+        parameter->proto_descriptor = c_function_parameter_proto_descriptor_create(fragment,
                                                                                    prefix,
                                                                                    TOKEN_PREV(identifier),
                                                                                    parameter);
     return parameter;
 }
 
-static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFragment* fragment,
                                                                CEEList* prefix,
                                                                CEEList* surrounded)
 {
     CEESourceSymbol* parameter = NULL;
-    CEESourceFregment* child = NULL;
+    CEESourceFragment* child = NULL;
     CEEList* tokens = NULL;
     CEEList* p = NULL;
     
-    child = cee_source_fregment_child_index_by_leaf(fregment, surrounded->data);
+    child = cee_source_fragment_child_index_by_leaf(fragment, surrounded->data);
     if (!child)
         return NULL;
     
@@ -3030,7 +3026,7 @@ static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment
     if (!child)
         return NULL;
     
-    tokens = cee_source_fregment_tokens_expand(child);
+    tokens = cee_source_fragment_tokens_expand(child);
     if (!tokens)
         return NULL;
     
@@ -3042,8 +3038,8 @@ static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment
     }
     
     if (p) {
-        parameter = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                              fregment->subject_ref,
+        parameter = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                              fragment->subject_ref,
                                                               p, 
                                                               p,
                                                               kCEESourceSymbolTypeFunctionParameter,
@@ -3054,7 +3050,7 @@ static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment
         
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
         if (prefix && TOKEN_PREV(surrounded))
-            parameter->proto_descriptor = c_function_parameter_proto_descriptor_create(fregment,
+            parameter->proto_descriptor = c_function_parameter_proto_descriptor_create(fragment,
                                                                                        prefix,
                                                                                        TOKEN_PREV(surrounded),
                                                                                        parameter);
@@ -3064,12 +3060,12 @@ static CEESourceSymbol* c_function_parameter_surrounded_create(CEESourceFregment
     return parameter;
 }
 
-static cee_char* c_function_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_function_parameter_proto_descriptor_create(CEESourceFragment* fragment,
                                                               CEEList* prefix,
                                                               CEEList* prefix_tail,
                                                               CEESourceSymbol* parameter)
 {
-    if (!fregment || !parameter)
+    if (!fragment || !parameter)
         return NULL;
     
     cee_char* descriptor = NULL;
@@ -3083,7 +3079,7 @@ static cee_char* c_function_parameter_proto_descriptor_create(CEESourceFregment*
         cee_strconcat0(&descriptor, ", \"name\":", "\"", parameter->name, "\"", NULL);
     
     if (prefix && prefix_tail)
-        proto_str = c_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+        proto_str = c_type_descriptor_from_token_slice(fragment, prefix, prefix_tail);
     if (proto_str) {
         cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto_str, "\"", NULL);
         cee_free(proto_str);
@@ -3125,7 +3121,7 @@ static void objective_c_message_translate_table_init(void)
     TRANSLATE_STATE_SET(objective_c_message_translate_table, kObjectiveCMessageTranslateStateParameter         , ';'                       , kObjectiveCMessageTranslateStateDeclaration        );
 }
 
-static cee_boolean objective_c_message_parse(CEESourceFregment* fregment)
+static cee_boolean objective_c_message_parse(CEESourceFragment* fragment)
 {
     cee_boolean ret = FALSE;
     CEEList* symbols = NULL;
@@ -3141,10 +3137,10 @@ static cee_boolean objective_c_message_parse(CEESourceFregment* fregment)
     CEEList* q = NULL;
     cee_int i = 0;
     CEESourceSymbolType symbol_type = kCEESourceSymbolTypeUnknow;
-    CEESourceFregmentType fregment_type = kCEESourceFregmentTypeStatement;
+    CEESourceFragmentType fragment_type = kCEESourceFragmentTypeStatement;
     ObjectiveCMessageTranslateState current = kObjectiveCMessageTranslateStateInit;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         
@@ -3183,23 +3179,23 @@ next_token:
     
     if (current == kObjectiveCMessageTranslateStateDefinition) {
         symbol_type = kCEESourceSymbolTypeMessageDefinition;
-        fregment_type = kCEESourceFregmentTypeFunctionDefinition;
+        fragment_type = kCEESourceFragmentTypeFunctionDefinition;
     }
     else if (current == kObjectiveCMessageTranslateStateDeclaration) {
         symbol_type = kCEESourceSymbolTypeMessageDeclaration;
-        fregment_type = kCEESourceFregmentTypeDeclaration;
+        fragment_type = kCEESourceFragmentTypeDeclaration;
     }
     
     if (name_chain) {
-        symbol = cee_source_symbol_create_from_tokens(fregment->filepath_ref,
-                                                      fregment->subject_ref,
+        symbol = cee_source_symbol_create_from_tokens(fragment->filepath_ref,
+                                                      fragment->subject_ref,
                                                       name_chain,
                                                       symbol_type,
                                                       "c",
                                                       kCEETokenStringOptionCompact);
         if (symbol) {
             if (symbol_type == kCEESourceSymbolTypeMessageDeclaration)
-                symbol->proto_descriptor = objective_c_message_proto_descriptor_create(fregment,
+                symbol->proto_descriptor = objective_c_message_proto_descriptor_create(fragment,
                                                                                        message_begin,
                                                                                        return_type,
                                                                                        return_type_end,
@@ -3215,15 +3211,15 @@ next_token:
         q = TOKEN_FIRST(parameters);
         i = 0;
         while (q) {
-            symbol = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                               fregment->subject_ref,
+            symbol = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                               fragment->subject_ref,
                                                                q,
                                                                q,
                                                                kCEESourceSymbolTypeMessageParameter,
                                                                "c",
                                                                kCEETokenStringOptionCompact);
             if (symbol) {
-                symbol->proto_descriptor = objective_c_message_parameter_proto_descriptor_create(fregment,
+                symbol->proto_descriptor = objective_c_message_parameter_proto_descriptor_create(fragment,
                                                                                                  i,
                                                                                                  symbol);
                 symbols = cee_list_prepend(symbols, symbol);
@@ -3235,8 +3231,8 @@ next_token:
     }
     
     if (symbols) {
-        fregment->symbols = cee_list_concat(symbols, fregment->symbols);
-        cee_source_fregment_type_set(fregment, fregment_type);
+        fragment->symbols = cee_list_concat(symbols, fragment->symbols);
+        cee_source_fragment_type_set(fragment, fragment_type);
         ret = TRUE;
     }
     
@@ -3260,13 +3256,13 @@ exit:
         cee_list_free(message_begin);
     
 #ifdef DEBUG_MESSAGE
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif   
     return ret;
 }
 
-static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* objective_c_message_proto_descriptor_create(CEESourceFragment* fragment,
                                                              CEEList* message_begin,
                                                              CEEList* return_type,
                                                              CEEList* return_type_end,
@@ -3274,7 +3270,7 @@ static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* 
                                                              CEEList* parameter_types,
                                                              CEEList* parameters)
 {
-    if (!fregment ||
+    if (!fragment ||
         !message_begin ||
         !name_chain ||
         !return_type ||
@@ -3283,8 +3279,8 @@ static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* 
         !parameters)
         return NULL;
     
-    const cee_char* subject = fregment->subject_ref;
-    CEEList* tokens = cee_source_fregment_tokens_expand(fregment);
+    const cee_char* subject = fragment->subject_ref;
+    CEEList* tokens = cee_source_fragment_tokens_expand(fragment);
     CEEList* p = NULL;
     CEEList* q = NULL;
     CEEList* r = NULL;
@@ -3298,12 +3294,12 @@ static cee_char* objective_c_message_proto_descriptor_create(CEESourceFregment* 
     cee_boolean found_parameter = FALSE;
     CEEList* header = NULL;
     cee_size l = 0;
-    CEESourceFregment* grandfather = NULL;
+    CEESourceFragment* grandfather = NULL;
     const cee_char* access_level = NULL;
     
-    grandfather = cee_source_fregment_grandfather_get(fregment);
+    grandfather = cee_source_fragment_grandfather_get(fragment);
     if (grandfather)
-        access_level = cee_source_fregment_attribute_get(grandfather, "access_level");
+        access_level = cee_source_fragment_attribute_get(grandfather, "access_level");
     
     p = TOKEN_FIRST(tokens);
     
@@ -3415,13 +3411,13 @@ exit:
     return descriptor;
 }
 
-static cee_char* objective_c_message_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* objective_c_message_parameter_proto_descriptor_create(CEESourceFragment* fragment,
                                                                        cee_int index,
                                                                        CEESourceSymbol* parameter)
 {
     cee_char* descriptor = NULL;
     cee_int i = 0;
-    CEEList* p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
+    CEEList* p = SOURCE_FREGMENT_CHILDREN_FIRST(fragment);
     if (!p)
         return NULL;
     
@@ -3441,7 +3437,7 @@ static cee_char* objective_c_message_parameter_proto_descriptor_create(CEESource
     if (!p)
         return NULL;
     
-    descriptor = c_function_parameter_proto_descriptor_create(fregment,
+    descriptor = c_function_parameter_proto_descriptor_create(fragment,
                                                               SOURCE_FREGMENT_TOKENS_FIRST(p->data),
                                                               SOURCE_FREGMENT_TOKENS_LAST(p->data),
                                                               parameter);
@@ -3524,7 +3520,7 @@ static void objective_c_property_translate_table_init(void)
     TRANSLATE_STATE_SET(objective_c_property_translate_table, kObjectiveCPropertyTranslateStateTypeInit             , ';'                                       , kObjectiveCPropertyTranslateStateConfirm              );
 }
 
-static cee_boolean objective_c_property_parse(CEESourceFregment* fregment)
+static cee_boolean objective_c_property_parse(CEESourceFragment* fragment)
 {
     cee_boolean ret = FALSE;
     CEEList* declarations = NULL;
@@ -3539,7 +3535,7 @@ static cee_boolean objective_c_property_parse(CEESourceFregment* fregment)
     cee_boolean prefix_parse = FALSE;
     ObjectiveCPropertyTranslateState current = kObjectiveCPropertyTranslateStateInit;
         
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         
@@ -3588,8 +3584,8 @@ static cee_boolean objective_c_property_parse(CEESourceFregment* fregment)
             }
             
             if (identifier) {
-                declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                        fregment->subject_ref,
+                declaration = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                        fragment->subject_ref,
                                                                         identifier,
                                                                         identifier,
                                                                         kCEESourceSymbolTypePropertyDeclaration,
@@ -3597,7 +3593,7 @@ static cee_boolean objective_c_property_parse(CEESourceFregment* fregment)
                                                                         kCEETokenStringOptionCompact);
                 if (declaration) {
                     declaration->alias = cee_strconcat("_", declaration->name, NULL);
-                    declaration->proto_descriptor = c_declaration_proto_descriptor_create(fregment,
+                    declaration->proto_descriptor = c_declaration_proto_descriptor_create(fragment,
                                                                                           prefix,
                                                                                           prefix_tail,
                                                                                           identifier);
@@ -3616,14 +3612,14 @@ next_token:
     }
     
     if (declarations) {
-        fregment->symbols = cee_list_concat(declarations, fregment->symbols);
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeDeclaration);
+        fragment->symbols = cee_list_concat(declarations, fragment->symbols);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeDeclaration);
         ret = TRUE;
     }
     
 #ifdef DEBUG_PROPERTY
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif
     
     return ret;
@@ -3727,11 +3723,11 @@ static void c_proto_translate_table_init(void)
     TRANSLATE_STATE_SET(c_proto_translate_table, kCProtosTranslateStateObjectDefinition            , '}'                               , kCProtosTranslateStateObjectDefinitionConfirm     );
 }
 
-static cee_char* c_type_descriptor_from_token_slice(CEESourceFregment* fregment,
+static cee_char* c_type_descriptor_from_token_slice(CEESourceFragment* fragment,
                                                     CEEList* p,
                                                     CEEList* q)
 {
-    const cee_char* subject = fregment->subject_ref;
+    const cee_char* subject = fragment->subject_ref;
     CProtosTranslateState prev = kCProtosTranslateStateInit;
     CProtosTranslateState current = kCProtosTranslateStateInit;
     CProtosTranslateState alignas_prev_status = kCProtosTranslateStateInit;
@@ -4216,7 +4212,7 @@ static void c_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(c_declaration_translate_table, kCDeclarationTranslateStateOverloadRoundBracketEnd                   , '('                                   , kCDeclarationTranslateStateParameterList                              );
 }
 
-static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
+static cee_boolean c_declaration_parse(CEESourceFragment* fragment)
 {
     cee_boolean ret = FALSE;
     cee_boolean is_class_member = FALSE;
@@ -4238,11 +4234,11 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
     CDeclarationTranslateState current = kCDeclarationTranslateStateInit;
     CDeclarationTranslateState prev = kCDeclarationTranslateStateInit;
     
-    if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeClassDefinition) ||
-        cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeStructDefinition))
+    if (cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeClassDefinition) ||
+        cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeStructDefinition))
         is_class_member = TRUE;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         
@@ -4333,8 +4329,8 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
                  current == kCDeclarationTranslateStateConfirm) {
             
             if (!prefix_parse) {
-                prefix = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
-                prefix_tail = c_declaration_prefix_tail_get(fregment,
+                prefix = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
+                prefix_tail = c_declaration_prefix_tail_get(fragment,
                                                             identifier,
                                                             object_identifier,
                                                             parameter_list,
@@ -4352,7 +4348,7 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
                  *  ^~~~~~~~~~ prefix
                  *         ^prefix_tail
                  */
-                declaration = c_function_pointer_declaration_create(fregment,
+                declaration = c_function_pointer_declaration_create(fragment,
                                                                     prefix,
                                                                     prefix_tail,
                                                                     parameter_list,
@@ -4361,7 +4357,7 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
                                                                     surrounded_end);
             }
             else if (parameter_list) {
-                declaration = c_function_declaration_create(fregment,
+                declaration = c_function_declaration_create(fragment,
                                                             prefix,
                                                             prefix_tail,
                                                             identifier,
@@ -4369,7 +4365,7 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
                                                             parameter_list_end);
             }
             else if (identifier) {
-                declaration = c_identifier_declaration_create(fregment,
+                declaration = c_identifier_declaration_create(fragment,
                                                               prefix,
                                                               prefix_tail,
                                                               identifier);
@@ -4379,12 +4375,12 @@ static cee_boolean c_declaration_parse(CEESourceFregment* fregment)
                 if (q)
                     token = q->data;
                 if (token_id_is_object_specifier(token->identifier))
-                    declaration = c_custom_type_declaration_create(fregment,
+                    declaration = c_custom_type_declaration_create(fragment,
                                                                    prefix,
                                                                    prefix_tail,
                                                                    object_identifier);
                 else
-                    declaration = c_identifier_declaration_create(fregment,
+                    declaration = c_identifier_declaration_create(fragment,
                                                                   prefix,
                                                                   prefix_tail,
                                                                   object_identifier);
@@ -4419,14 +4415,14 @@ next_token:
     }
         
     if (declarations) {
-        fregment->symbols = cee_list_concat(fregment->symbols, declarations);
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeDeclaration);
+        fragment->symbols = cee_list_concat(fragment->symbols, declarations);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeDeclaration);
         ret = TRUE;
     }
     
 #ifdef DEBUG_DECLARATION
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif
     
     return ret;
@@ -4441,7 +4437,7 @@ next_token:
  *         +~~ prefix tail
  *
  */
-static CEEList* c_declaration_prefix_tail_get(CEESourceFregment* fregment,
+static CEEList* c_declaration_prefix_tail_get(CEESourceFragment* fragment,
                                               CEEList* identifier,
                                               CEEList* object_identifier,
                                               CEEList* parameter_list,
@@ -4470,7 +4466,7 @@ static CEEList* c_declaration_prefix_tail_get(CEESourceFregment* fregment,
     return tail;
 }
 
-static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_function_declaration_create(CEESourceFragment* fragment,
                                                       CEEList* prefix,
                                                       CEEList* prefix_tail,
                                                       CEEList* identifier,
@@ -4478,7 +4474,7 @@ static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregmen
                                                       CEEList* parameter_list_end)
 {
     CEESourceSymbol* declaration = NULL;
-    CEESourceFregment* child = NULL;
+    CEESourceFragment* child = NULL;
     CEEList* q = NULL;
     CEEList* r = NULL;
     
@@ -4492,8 +4488,8 @@ static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregmen
     if (!cee_token_is_identifier(r, '~')) /** cpp destructor */
         r = q;
     
-    declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                            fregment->subject_ref,
+    declaration = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                            fragment->subject_ref,
                                                             r,
                                                             q,
                                                             kCEESourceSymbolTypeFunctionDeclaration,
@@ -4504,13 +4500,13 @@ static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregmen
     
     cee_token_slice_state_mark(r, q, kCEETokenStateSymbolOccupied);
     
-    child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
+    child = cee_source_fragment_child_index_by_leaf(fragment, parameter_list->data);
     if (child) {
         child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
         c_function_parameters_parse(child);
     }
     
-    declaration->proto_descriptor = c_function_proto_descriptor_create(fregment,
+    declaration->proto_descriptor = c_function_proto_descriptor_create(fragment,
                                                                        prefix,
                                                                        prefix_tail,
                                                                        r,
@@ -4519,7 +4515,7 @@ static CEESourceSymbol* c_function_declaration_create(CEESourceFregment* fregmen
     return declaration;
 }
 
-static CEESourceSymbol* c_function_pointer_declaration_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_function_pointer_declaration_create(CEESourceFragment* fragment,
                                                               CEEList* prefix,
                                                               CEEList* prefix_tail,
                                                               CEEList* parameter_list,
@@ -4529,7 +4525,7 @@ static CEESourceSymbol* c_function_pointer_declaration_create(CEESourceFregment*
 {
     
     CEESourceSymbol* declaration = NULL;
-    CEESourceFregment* child = NULL;
+    CEESourceFragment* child = NULL;
     CEEList* q = NULL;
     
     if (!parameter_list ||
@@ -4538,7 +4534,7 @@ static CEESourceSymbol* c_function_pointer_declaration_create(CEESourceFregment*
         !surround_end)
         return NULL;
 
-    child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
+    child = cee_source_fragment_child_index_by_leaf(fragment, parameter_list->data);
     if (child) {
         child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
         q = cee_token_until_identifier(SOURCE_FREGMENT_TOKENS_FIRST(child),
@@ -4546,8 +4542,8 @@ static CEESourceSymbol* c_function_pointer_declaration_create(CEESourceFregment*
                                        FALSE);
     }
     if (q)
-        declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                fregment->subject_ref,
+        declaration = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                fragment->subject_ref,
                                                                 q,
                                                                 q,
                                                                 kCEESourceSymbolTypeFunctionDeclaration,
@@ -4558,13 +4554,13 @@ static CEESourceSymbol* c_function_pointer_declaration_create(CEESourceFregment*
     
     cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
         
-    child = cee_source_fregment_child_index_by_leaf(fregment, surround->data);
+    child = cee_source_fragment_child_index_by_leaf(fragment, surround->data);
     if (child) {
         child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
         c_function_parameters_parse(child);
     }
     
-    declaration->proto_descriptor = c_function_proto_descriptor_create(fregment,
+    declaration->proto_descriptor = c_function_proto_descriptor_create(fragment,
                                                                        prefix,
                                                                        prefix_tail,
                                                                        q,
@@ -4574,21 +4570,21 @@ static CEESourceSymbol* c_function_pointer_declaration_create(CEESourceFregment*
     return declaration;
 }
 
-static cee_char* c_function_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_function_proto_descriptor_create(CEESourceFragment* fragment,
                                                     CEEList* prefix,
                                                     CEEList* prefix_tail,
                                                     CEEList* identifier,
                                                     CEEList* parameter_list,
                                                     CEEList* parameter_list_end)
 {
-    if (!fregment ||
+    if (!fragment ||
         !identifier ||
         !parameter_list ||
         !parameter_list_end)
         return NULL;
     
-    const cee_char* subject = fregment->subject_ref;
-    CEEList* tokens = cee_source_fregment_tokens_expand(fregment);
+    const cee_char* subject = fragment->subject_ref;
+    CEEList* tokens = cee_source_fragment_tokens_expand(fragment);
     CEEList* p = NULL;
     CEEToken* token = NULL;
     CEEToken* token_prev = NULL;
@@ -4601,32 +4597,32 @@ static cee_char* c_function_proto_descriptor_create(CEESourceFregment* fregment,
     cee_size l = 0;
     cee_boolean is_class_member = FALSE;
     CEEList* parent_symbols = NULL;
-    CEESourceFregment* grandfather = NULL;
+    CEESourceFragment* grandfather = NULL;
     const cee_char* access_level = NULL;
     cee_char* return_type_str = NULL;
     CEESourceSymbol* parent_symbol = NULL;
     
-    grandfather = cee_source_fregment_grandfather_get(fregment);
+    grandfather = cee_source_fragment_grandfather_get(fragment);
     if (grandfather) {
-        access_level = cee_source_fregment_attribute_get(grandfather, "access_level");
+        access_level = cee_source_fragment_attribute_get(grandfather, "access_level");
         
-        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition))
-            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+        if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeClassDefinition))
+            parent_symbols = cee_source_fragment_symbols_search_by_type(grandfather,
                                                                         kCEESourceSymbolTypeClassDefinition);
-        else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition))
-            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+        else if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeStructDefinition))
+            parent_symbols = cee_source_fragment_symbols_search_by_type(grandfather,
                                                                         kCEESourceSymbolTypeStructDefinition);
         
-        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
-            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition))
+        if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeClassDefinition) ||
+            cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeStructDefinition))
             is_class_member = TRUE;
     }
     
     if (!access_level) {
         if (grandfather) {
-            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition))
+            if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeClassDefinition))
                 access_level = "private";
-            else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition))
+            else if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeStructDefinition))
                 access_level = "public";
         }
         if (!access_level)
@@ -4634,7 +4630,7 @@ static cee_char* c_function_proto_descriptor_create(CEESourceFregment* fregment,
     }
     
     if (prefix && prefix_tail)
-        return_type_str = c_type_descriptor_from_token_slice(fregment,
+        return_type_str = c_type_descriptor_from_token_slice(fragment,
                                                              prefix,
                                                              prefix_tail);
     /**
@@ -4698,7 +4694,7 @@ static cee_char* c_function_proto_descriptor_create(CEESourceFregment* fregment,
         TOKEN_APPEND(trialing_tokens, p->data);
         p = TOKEN_NEXT(p);
     }
-        
+    
     cee_strconcat0(&descriptor, "{", NULL);
     
     cee_strconcat0(&descriptor, "\"type\":", "\"function\"", NULL);
@@ -4849,14 +4845,14 @@ exit:
     return descriptor;
 }
 
-static CEESourceSymbol* c_identifier_declaration_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_identifier_declaration_create(CEESourceFragment* fragment,
                                                         CEEList* prefix,
                                                         CEEList* prefix_tail,
                                                         CEEList* identifier)
 {
     CEESourceSymbol* declaration = NULL;
-    declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                            fregment->subject_ref,
+    declaration = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                            fragment->subject_ref,
                                                             identifier,
                                                             identifier,
                                                             kCEESourceSymbolTypeVariableDeclaration,
@@ -4864,21 +4860,21 @@ static CEESourceSymbol* c_identifier_declaration_create(CEESourceFregment* fregm
                                                             kCEETokenStringOptionCompact);
     cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
     if (prefix && prefix_tail)
-        declaration->proto_descriptor = c_declaration_proto_descriptor_create(fregment,
+        declaration->proto_descriptor = c_declaration_proto_descriptor_create(fragment,
                                                                               prefix,
                                                                               prefix_tail,
                                                                               identifier);
     return declaration;
 }
 
-static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFregment* fregment,
+static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFragment* fragment,
                                                          CEEList* prefix,
                                                          CEEList* prefix_tail,
                                                          CEEList* identifier)
 {
     CEESourceSymbol* declaration = NULL;
-    declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                            fregment->subject_ref,
+    declaration = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                            fragment->subject_ref,
                                                             identifier,
                                                             identifier,
                                                             kCEESourceSymbolTypeCustomTypeDeclaration,
@@ -4887,34 +4883,34 @@ static CEESourceSymbol* c_custom_type_declaration_create(CEESourceFregment* freg
     cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
     
     if (prefix && prefix_tail)
-        declaration->proto_descriptor = c_declaration_proto_descriptor_create(fregment,
+        declaration->proto_descriptor = c_declaration_proto_descriptor_create(fragment,
                                                                               prefix,
                                                                               prefix_tail,
                                                                               identifier);
     return declaration;
 }
 
-static cee_char* c_declaration_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_declaration_proto_descriptor_create(CEESourceFragment* fragment,
                                                        CEEList* prefix,
                                                        CEEList* prefix_tail,
                                                        CEEList* identifier)
 {
-    CEESourceFregment* grandfather = NULL;
+    CEESourceFragment* grandfather = NULL;
     const cee_char* access_level = NULL;
     cee_char* proto = NULL;
     cee_char* descriptor = NULL;
-    const cee_char* subject = fregment->subject_ref;
+    const cee_char* subject = fragment->subject_ref;
     cee_char* identifier_str = NULL;
     
-    grandfather = cee_source_fregment_grandfather_get(fregment);
+    grandfather = cee_source_fragment_grandfather_get(fragment);
     if (grandfather)
-        access_level = cee_source_fregment_attribute_get(grandfather, "access_level");
+        access_level = cee_source_fragment_attribute_get(grandfather, "access_level");
     
     if (!access_level) {
         if (grandfather) {
-            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
-                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeStructDefinition) ||
-                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDeclaration)) {
+            if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeClassDefinition) ||
+                cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeStructDefinition) ||
+                cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeInterfaceDeclaration)) {
                 access_level = "private";
             }
         }
@@ -4930,7 +4926,7 @@ static cee_char* c_declaration_proto_descriptor_create(CEESourceFregment* fregme
         cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
     
     if (prefix && prefix_tail)
-        proto = c_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+        proto = c_type_descriptor_from_token_slice(fragment, prefix, prefix_tail);
     if (proto) {
         cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto, "\"", NULL);
         cee_free(proto);
@@ -5032,7 +5028,7 @@ static void c_namespace_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(c_namespace_definition_translate_table, kCNamespaceDefinitionTranslateStateInlineSpecifier  , kCEETokenID_IDENTIFIER    , kCNamespaceDefinitionTranslateStateDefinitionName     );
 }
 
-static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
+static cee_boolean c_namespace_definition_trap(CEESourceFragment* fragment,
                                                CEEList** pp)
 {
     cee_boolean ret = FALSE;
@@ -5066,8 +5062,8 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
     
     if (current == kCNamespaceDefinitionTranslateStateConfirm) {
         if (q) {
-            definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                   fregment->subject_ref,
+            definition = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                   fragment->subject_ref,
                                                                    q, 
                                                                    q, 
                                                                    kCEESourceSymbolTypeNamespaceDefinition, 
@@ -5076,8 +5072,8 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
             cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
         }
         else {
-            definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                   fregment->subject_ref, 
+            definition = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                   fragment->subject_ref,
                                                                    trap_keyword, 
                                                                    trap_keyword, 
                                                                    kCEESourceSymbolTypeNamespaceDefinition, 
@@ -5086,9 +5082,9 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
         }
         
         if (definition) {
-            definition->proto_descriptor = c_namespace_proto_descriptor_create(fregment, definition);
-            fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-            cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeNamespaceDefinition);
+            definition->proto_descriptor = c_namespace_proto_descriptor_create(fragment, definition);
+            fragment->symbols = cee_list_prepend(fragment->symbols, definition);
+            cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeNamespaceDefinition);
             ret = TRUE;
         }
     }
@@ -5096,17 +5092,17 @@ static cee_boolean c_namespace_definition_trap(CEESourceFregment* fregment,
     *pp = NULL;
     
 #ifdef DEBUG_NAMESPACE
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif
     
     return ret;
 }
 
-static cee_char* c_namespace_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* c_namespace_proto_descriptor_create(CEESourceFragment* fragment,
                                                      CEESourceSymbol* namespace)
 {
-    if (!fregment || !namespace)
+    if (!fragment || !namespace)
         return NULL;
     
     cee_char* descriptor = NULL;
@@ -5139,7 +5135,7 @@ static void c_extern_block_translate_table_init(void)
     TRANSLATE_STATE_SET(c_extern_block_translate_table, kCExternBlockTranslateStateIdentifier   , '{'                       , kCExternBlockTranslateStateConfirm            );
 }
 
-static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
+static cee_boolean c_extern_block_parse(CEESourceFragment* fragment)
 {
     cee_boolean ret = FALSE;
     CEEList* p = NULL;
@@ -5149,7 +5145,7 @@ static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
     CEESourceSymbol* extern_block = NULL;
     CExternBlockTranslateState current = kCExternBlockTranslateStateInit;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         current = c_extern_block_translate_table[current][token->identifier];
@@ -5167,8 +5163,8 @@ static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
                 r = p;
         }
         else if (current == kCExternBlockTranslateStateConfirm) {
-            extern_block = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                     fregment->subject_ref,
+            extern_block = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                     fragment->subject_ref,
                                                                      q,
                                                                      r,
                                                                      kCEESourceSymbolTypeExternBlock,
@@ -5177,7 +5173,7 @@ static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
             
             if (extern_block->name)
                 cee_free(extern_block->name);
-            extern_block->name = cee_string_from_token_slice(fregment->subject_ref,
+            extern_block->name = cee_string_from_token_slice(fragment->subject_ref,
                                                              q,
                                                              r,
                                                              kCEETokenStringOptionDefault);
@@ -5191,8 +5187,8 @@ static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
     }
     
     if (extern_block) {
-        fregment->symbols = cee_list_prepend(fregment->symbols, extern_block);
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeIdentifierBlock);
+        fragment->symbols = cee_list_prepend(fragment->symbols, extern_block);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeIdentifierBlock);
         ret = TRUE;
     }
     
@@ -5206,7 +5202,7 @@ static cee_boolean c_extern_block_parse(CEESourceFregment* fregment)
 
 static void block_header_parse(CParser* parser)
 {
-    CEESourceFregment* current = parser->statement_current;
+    CEESourceFragment* current = parser->statement_current;
     CEEToken* token = NULL;
     CEEList* p = NULL;
     ParseTrap trap = NULL;
@@ -5249,54 +5245,54 @@ static cee_boolean block_reduce(CParser* parser)
     if (!parser->statement_current)
         return FALSE;
     
-    cee_source_fregment_symbols_fregment_range_mark(parser->statement_current);
+    cee_source_fragment_symbols_fragment_range_mark(parser->statement_current);
     
-    if (cee_source_fregment_type_is(parser->statement_current, kCEESourceFregmentTypeClassDefinition) ||
-        cee_source_fregment_type_is(parser->statement_current, kCEESourceFregmentTypeStructDefinition) ||
-        cee_source_fregment_type_is(parser->statement_current, kCEESourceFregmentTypeEnumDefinition) ||
-        cee_source_fregment_type_is(parser->statement_current, kCEESourceFregmentTypeUnionDefinition) ||
-        cee_source_fregment_type_is(parser->statement_current, kCEESourceFregmentTypeAssignmentBlock)) {
+    if (cee_source_fragment_type_is(parser->statement_current, kCEESourceFragmentTypeClassDefinition) ||
+        cee_source_fragment_type_is(parser->statement_current, kCEESourceFragmentTypeStructDefinition) ||
+        cee_source_fragment_type_is(parser->statement_current, kCEESourceFragmentTypeEnumDefinition) ||
+        cee_source_fragment_type_is(parser->statement_current, kCEESourceFragmentTypeUnionDefinition) ||
+        cee_source_fragment_type_is(parser->statement_current, kCEESourceFragmentTypeAssignmentBlock)) {
         /** expect statement terminate ';' */
     }
     else {
-        if (cee_source_fregment_grandfather_type_is(parser->statement_current,
-                                                    kCEESourceFregmentTypeTemplateDeclaration))
+        if (cee_source_fragment_grandfather_type_is(parser->statement_current,
+                                                    kCEESourceFragmentTypeTemplateDeclaration))
             if (!template_pop(parser))
                 return FALSE;
         
-        statement_attach(parser, kCEESourceFregmentTypeStatement);
+        statement_attach(parser, kCEESourceFragmentTypeStatement);
     }
     return TRUE;
 }
 
 static cee_boolean colon_parse(CParser* parser)
 {
-    CEESourceFregment* fregment = parser->statement_current;
-    if (!fregment || !fregment->tokens_ref)
+    CEESourceFragment* fragment = parser->statement_current;
+    if (!fragment || !fragment->tokens_ref)
         return FALSE;
     
-    if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeFunctionDefinition) ||
-        cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeStatementBlock)) {
-        return label_parse(fregment);
+    if (cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeFunctionDefinition) ||
+        cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeStatementBlock)) {
+        return label_parse(fragment);
     }
-    else if (cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeClassDefinition) ||
-             cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeStructDefinition) ||
-             cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeUnionDefinition) ||
-             cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition) ) {
-        return access_level_parse(fregment);
+    else if (cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeClassDefinition) ||
+             cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeStructDefinition) ||
+             cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeUnionDefinition) ||
+             cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeEnumDefinition) ) {
+        return access_level_parse(fragment);
     }
     return FALSE;
 }
 
-static cee_boolean label_parse(CEESourceFregment* fregment)
+static cee_boolean label_parse(CEESourceFragment* fragment)
 {
-    const cee_char* subject = fregment->subject_ref;
+    const cee_char* subject = fragment->subject_ref;
     cee_boolean ret = FALSE;
     CEEList* p = NULL;
     CEEList* q = NULL;
     CEESourceSymbol* label = NULL;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         if (cee_token_is_identifier(p, kCEETokenID_NEW_LINE) ||
             cee_token_is_identifier(p, kCEETokenID_WHITE_SPACE)) {
@@ -5306,7 +5302,7 @@ static cee_boolean label_parse(CEESourceFregment* fregment)
             if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER)) {
                 q = cee_token_not_whitespace_newline_after(p);
                 if (q && cee_token_is_identifier(q, ':')) {
-                    label = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
+                    label = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
                                                                       subject,
                                                                       p,
                                                                       p,
@@ -5315,8 +5311,8 @@ static cee_boolean label_parse(CEESourceFregment* fregment)
                                                                       kCEETokenStringOptionCompact);
                     if (label) {
                         cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
-                        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeLabelDeclaration);
-                        fregment->symbols = cee_list_prepend(fregment->symbols, label);
+                        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeLabelDeclaration);
+                        fragment->symbols = cee_list_prepend(fragment->symbols, label);
                         ret = TRUE;
                         break;
                     }
@@ -5338,14 +5334,14 @@ next_token:
     return ret;
 }
 
-static cee_boolean access_level_parse(CEESourceFregment* fregment)
+static cee_boolean access_level_parse(CEESourceFragment* fragment)
 {
     cee_boolean ret = FALSE;
     CEEList* p = NULL;
     CEEList* q = NULL;
     CEEToken* token = NULL;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         
@@ -5358,7 +5354,7 @@ static cee_boolean access_level_parse(CEESourceFregment* fregment)
             if (q) {
                 token = q->data;
                 if (token_id_is_access_specifier(token->identifier)) {
-                    access_level_transform(fregment, token);
+                    access_level_transform(fragment, token);
                     ret = TRUE;
                 }
             }
@@ -5380,29 +5376,29 @@ static void parser_access_level_transform(CParser* parser,
     access_level_transform(parser->statement_current, token);
 }
 
-static void access_level_transform(CEESourceFregment* fregment,
+static void access_level_transform(CEESourceFragment* fragment,
                                    CEEToken* token)
 {
-    if (!fregment || !token)
+    if (!fragment || !token)
         return;
     
-    CEESourceFregment* grandfather = cee_source_fregment_grandfather_get(fregment);
+    CEESourceFragment* grandfather = cee_source_fragment_grandfather_get(fragment);
     if (!grandfather)
         return;
     
     if (token->identifier == kCEETokenID_PUBLIC ||
         token->identifier == kCEETokenID_AT_PUBLIC)
-        cee_source_fregment_attribute_set(grandfather,
+        cee_source_fragment_attribute_set(grandfather,
                                           "access_level",
                                           "public");
     else if (token->identifier == kCEETokenID_PRIVATE ||
              token->identifier == kCEETokenID_AT_PRIVATE)
-        cee_source_fregment_attribute_set(grandfather,
+        cee_source_fragment_attribute_set(grandfather,
                                           "access_level",
                                           "private");
     else if (token->identifier == kCEETokenID_PROTECTED ||
              token->identifier == kCEETokenID_AT_PROTECTED)
-        cee_source_fregment_attribute_set(grandfather,
+        cee_source_fragment_attribute_set(grandfather,
                                           "access_level",
                                           "protected");
 }
@@ -5412,8 +5408,8 @@ static void access_level_transform(CEESourceFregment* fregment,
  */
 static void parameter_list_push(CParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeRoundBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeRoundBracketList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean parameter_list_pop(CParser* parser)
@@ -5429,8 +5425,8 @@ static cee_boolean parameter_list_pop(CParser* parser)
  */
 static void subscript_push(CParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeSquareBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeSquareBracketList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean subscript_pop(CParser* parser)
@@ -5521,12 +5517,12 @@ static cee_boolean objective_c_token_push(CParser* parser,
     if (current == kObjectiveCDefinitionTranslateStateVariableBlock) {
         objective_c_definition_parse(parser->statement_current, subject);
         
-        statement_sub_attach(parser, kCEESourceFregmentTypeCurlyBracketList);
-        statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+        statement_sub_attach(parser, kCEESourceFragmentTypeCurlyBracketList);
+        statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
         statement_token_push(parser, push);
-        current_statement_type_transform(parser, kCEESourceFregmentTypeVariableBlock);
-        statement_sub_attach(parser, kCEESourceFregmentTypeCurlyBracketList);
-        statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+        current_statement_type_transform(parser, kCEESourceFragmentTypeVariableBlock);
+        statement_sub_attach(parser, kCEESourceFragmentTypeCurlyBracketList);
+        statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
         
         return TRUE;
     }
@@ -5539,8 +5535,8 @@ static cee_boolean objective_c_token_push(CParser* parser,
             
             objective_c_definition_parse(parser->statement_current, subject);
             
-            statement_sub_attach(parser, kCEESourceFregmentTypeCurlyBracketList);
-            statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+            statement_sub_attach(parser, kCEESourceFragmentTypeCurlyBracketList);
+            statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
         }
         return FALSE;
     }
@@ -5550,35 +5546,35 @@ static cee_boolean objective_c_token_push(CParser* parser,
     return TRUE;
 }
 
-static cee_boolean objective_c_definition_parse(CEESourceFregment* fregment,
+static cee_boolean objective_c_definition_parse(CEESourceFragment* fragment,
                                                 const cee_char* subject)
 {
-    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     ObjectiveCDefinitionType type = kObjectiveCDefinitionTypeInit;
     CEESourceSymbol* definition = NULL;
     
     while (p) {
         if (cee_token_is_identifier(p, kCEETokenID_AT_INTERFACE)) {
             type = kObjectiveCDefinitionTypeInterface;
-            definition = objective_c_interface_extract(fregment,
-                                                       fregment->tokens_ref,
-                                                       fregment->filepath_ref,
+            definition = objective_c_interface_extract(fragment,
+                                                       fragment->tokens_ref,
+                                                       fragment->filepath_ref,
                                                        subject);
             break;
         }
         else if (cee_token_is_identifier(p, kCEETokenID_AT_IMPLEMENTATION)) {
             type = kObjectiveCDefinitionTypeImplementation;
-            definition = objective_c_implementation_extract(fregment,
-                                                            fregment->tokens_ref,
-                                                            fregment->filepath_ref,
+            definition = objective_c_implementation_extract(fragment,
+                                                            fragment->tokens_ref,
+                                                            fragment->filepath_ref,
                                                             subject);
             break;
         }
         else if (cee_token_is_identifier(p, kCEETokenID_AT_PROTOCOL)) {
             type = kObjectiveCDefinitionTypeProtocol;
-            definition = objective_c_protocol_extract(fregment,
-                                                      fregment->tokens_ref,
-                                                      fregment->filepath_ref,
+            definition = objective_c_protocol_extract(fragment,
+                                                      fragment->tokens_ref,
+                                                      fragment->filepath_ref,
                                                       subject);
             break;
         }
@@ -5588,19 +5584,19 @@ static cee_boolean objective_c_definition_parse(CEESourceFregment* fregment,
     if (!definition)
         return FALSE;
     
-    fregment->symbols = cee_list_prepend(fregment->symbols, definition);
+    fragment->symbols = cee_list_prepend(fragment->symbols, definition);
     
     if (type == kObjectiveCDefinitionTypeInterface)
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeInterfaceDeclaration);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeInterfaceDeclaration);
     else if (type == kObjectiveCDefinitionTypeImplementation)
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeImplementationDefinition);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeImplementationDefinition);
     else if (type == kObjectiveCDefinitionTypeProtocol)
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeProtocolDeclaration);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeProtocolDeclaration);
     
     return TRUE;
 }
 
-static CEESourceSymbol* objective_c_interface_extract(CEESourceFregment* fregment,
+static CEESourceSymbol* objective_c_interface_extract(CEESourceFragment* fragment,
                                                       CEEList* tokens,
                                                       const cee_char* filepath,
                                                       const cee_char* subject)
@@ -5641,7 +5637,7 @@ static CEESourceSymbol* objective_c_interface_extract(CEESourceFregment* fregmen
         cee_token_slice_state_mark(name, name, kCEETokenStateSymbolOccupied);
         if (derives)
             interface->derives = c_name_list_create(derives, subject);
-        interface->proto_descriptor = objective_c_interface_proto_descriptor_create(fregment,
+        interface->proto_descriptor = objective_c_interface_proto_descriptor_create(fragment,
                                                                                     interface,
                                                                                     interface->derives);
     }
@@ -5682,11 +5678,11 @@ static cee_char* c_name_list_create(CEEList* tokens,
     return names_str;
 }
 
-static cee_char* objective_c_interface_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* objective_c_interface_proto_descriptor_create(CEESourceFragment* fragment,
                                                                CEESourceSymbol* interface,
                                                                const cee_char* derives_str)
 {
-    if (!fregment || !interface)
+    if (!fragment || !interface)
         return NULL;
     
     cee_char* descriptor = NULL;
@@ -5706,7 +5702,7 @@ static cee_char* objective_c_interface_proto_descriptor_create(CEESourceFregment
     return descriptor;
 }
 
-static CEESourceSymbol* objective_c_implementation_extract(CEESourceFregment* fregment,
+static CEESourceSymbol* objective_c_implementation_extract(CEESourceFragment* fragment,
                                                            CEEList* tokens,
                                                            const cee_char* filepath,
                                                            const cee_char* subject)
@@ -5740,7 +5736,7 @@ static CEESourceSymbol* objective_c_implementation_extract(CEESourceFregment* fr
                                                                kCEETokenStringOptionCompact);
     if (implementation) {
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
-        implementation->proto_descriptor = objective_c_implementation_proto_descriptor_create(fregment,
+        implementation->proto_descriptor = objective_c_implementation_proto_descriptor_create(fragment,
                                                                                               implementation);
     }
     
@@ -5753,10 +5749,10 @@ exit:
     return implementation;
 }
 
-static cee_char* objective_c_implementation_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* objective_c_implementation_proto_descriptor_create(CEESourceFragment* fragment,
                                                                     CEESourceSymbol* implementation)
 {
-    if (!fregment || !implementation)
+    if (!fragment || !implementation)
         return NULL;
     
     cee_char* descriptor = NULL;
@@ -5773,7 +5769,7 @@ static cee_char* objective_c_implementation_proto_descriptor_create(CEESourceFre
     return descriptor;
 }
 
-static CEESourceSymbol* objective_c_protocol_extract(CEESourceFregment* fregment,
+static CEESourceSymbol* objective_c_protocol_extract(CEESourceFragment* fragment,
                                                      CEEList* tokens,
                                                      const cee_char* filepath,
                                                      const cee_char* subject)
@@ -5807,7 +5803,7 @@ static CEESourceSymbol* objective_c_protocol_extract(CEESourceFregment* fregment
                                                          kCEETokenStringOptionCompact);
     if (protocol) {
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
-        protocol->proto_descriptor = objective_c_protocol_proto_descriptor_create(fregment,
+        protocol->proto_descriptor = objective_c_protocol_proto_descriptor_create(fragment,
                                                                                   protocol);
     }
     
@@ -5820,10 +5816,10 @@ exit:
     return protocol;
 }
 
-static cee_char* objective_c_protocol_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* objective_c_protocol_proto_descriptor_create(CEESourceFragment* fragment,
                                                               CEESourceSymbol* protocol)
 {
-    if (!fregment || !protocol)
+    if (!fragment || !protocol)
         return NULL;
     
     cee_char* descriptor = NULL;
@@ -5942,53 +5938,53 @@ static void symbol_parse_init(CParser* parser,
     parser->subject_ref = subject;
     
     parser->prep_directive_root =
-        cee_source_fregment_create(kCEESourceFregmentTypeRoot,
+        cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                    parser->filepath_ref,
                                    parser->subject_ref,
                                    "c");
     parser->prep_directive_current =
-        cee_source_fregment_sub_attach(parser->prep_directive_root,
-                                       kCEESourceFregmentTypeSourceList,
+        cee_source_fragment_sub_attach(parser->prep_directive_root,
+                                       kCEESourceFragmentTypeSourceList,
                                        parser->filepath_ref,
                                        parser->subject_ref,
                                        "c");
     parser->prep_directive_current =
-        cee_source_fregment_sub_attach(parser->prep_directive_current,
-                                       kCEESourceFregmentTypePrepDirective,
+        cee_source_fragment_sub_attach(parser->prep_directive_current,
+                                       kCEESourceFragmentTypePrepDirective,
                                        parser->filepath_ref,
                                        parser->subject_ref,
                                        "c");
     parser->statement_root =
-        cee_source_fregment_create(kCEESourceFregmentTypeRoot,
+        cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                    parser->filepath_ref,
                                    parser->subject_ref,
                                    "c");
     parser->statement_current =
-        cee_source_fregment_sub_attach(parser->statement_root,
-                                       kCEESourceFregmentTypeSourceList,
+        cee_source_fragment_sub_attach(parser->statement_root,
+                                       kCEESourceFragmentTypeSourceList,
                                        parser->filepath_ref,
                                        parser->subject_ref,
                                        "c");
     parser->statement_current =
-        cee_source_fregment_sub_attach(parser->statement_current,
-                                       kCEESourceFregmentTypeStatement,
+        cee_source_fragment_sub_attach(parser->statement_current,
+                                       kCEESourceFragmentTypeStatement,
                                        parser->filepath_ref,
                                        parser->subject_ref,
                                        "c");
     parser->comment_root =
-        cee_source_fregment_create(kCEESourceFregmentTypeRoot,
+        cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                    parser->filepath_ref,
                                    parser->subject_ref,
                                    "c");
     parser->comment_current =
-        cee_source_fregment_sub_attach(parser->comment_root,
-                                       kCEESourceFregmentTypeSourceList,
+        cee_source_fragment_sub_attach(parser->comment_root,
+                                       kCEESourceFragmentTypeSourceList,
                                        parser->filepath_ref,
                                        parser->subject_ref,
                                        "c");
     parser->comment_current =
-        cee_source_fregment_sub_attach(parser->comment_current,
-                                       kCEESourceFregmentTypeComment,
+        cee_source_fragment_sub_attach(parser->comment_current,
+                                       kCEESourceFragmentTypeComment,
                                        parser->filepath_ref,
                                        parser->subject_ref,
                                        "c");
@@ -5996,18 +5992,18 @@ static void symbol_parse_init(CParser* parser,
 }
 
 static cee_boolean current_statement_type_is(CParser* parser,
-                                             CEESourceFregmentType type)
+                                             CEESourceFragmentType type)
 {
     if (parser->statement_current)
-        return cee_source_fregment_type_is(parser->statement_current, type);
+        return cee_source_fragment_type_is(parser->statement_current, type);
         
     return FALSE;
 }
 
 static void current_statement_type_transform(CParser* parser,
-                                             CEESourceFregmentType type)
+                                             CEESourceFragmentType type)
 {
-    cee_source_fregment_type_set(parser->statement_current, type);
+    cee_source_fragment_type_set(parser->statement_current, type);
 }
 
 static cee_boolean statement_token_push(CParser* parser,
@@ -6024,9 +6020,9 @@ static cee_boolean statement_token_push(CParser* parser,
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map)
 {
@@ -6052,7 +6048,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
     
         if (token_is_comment(token)) {
             comment_token_push(parser, token);
-            comment_fregment_reduce(parser);
+            comment_fragment_reduce(parser);
         
             if (!ret)
                 break;
@@ -6080,7 +6076,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                 if (!prep_directive_branch_pop(parser))
                     parser_state_clear(parser, kCParserStatePrepDirectiveParsing);
         
-                prep_directive_attach(parser, kCEESourceFregmentTypePrepDirective);
+                prep_directive_attach(parser, kCEESourceFragmentTypePrepDirective);
                 prep_directive_token_push(parser, token);
             }
             else {
@@ -6091,30 +6087,30 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
             
             pushed = FALSE;
             
-            if (current_statement_type_is(parser, kCEESourceFregmentTypeInterfaceDeclaration) ||
-                current_statement_type_is(parser, kCEESourceFregmentTypeImplementationDefinition) ||
-                current_statement_type_is(parser, kCEESourceFregmentTypeProtocolDeclaration)) {
+            if (current_statement_type_is(parser, kCEESourceFragmentTypeInterfaceDeclaration) ||
+                current_statement_type_is(parser, kCEESourceFragmentTypeImplementationDefinition) ||
+                current_statement_type_is(parser, kCEESourceFragmentTypeProtocolDeclaration)) {
                 pushed = objective_c_token_push(parser, token);
             }
-            else if (current_statement_type_is(parser, kCEESourceFregmentTypeTemplateDeclaration)) {
+            else if (current_statement_type_is(parser, kCEESourceFragmentTypeTemplateDeclaration)) {
                 pushed = c_template_token_push(parser, token);
             }
         
             if (!pushed) {
                 if (token->identifier == kCEETokenID_AT_INTERFACE) {
-                    current_statement_type_transform(parser, kCEESourceFregmentTypeInterfaceDeclaration);
+                    current_statement_type_transform(parser, kCEESourceFragmentTypeInterfaceDeclaration);
                     statement_token_push(parser, token);
                 }
                 else if (token->identifier == kCEETokenID_AT_IMPLEMENTATION) {
-                    current_statement_type_transform(parser, kCEESourceFregmentTypeImplementationDefinition);
+                    current_statement_type_transform(parser, kCEESourceFragmentTypeImplementationDefinition);
                     statement_token_push(parser, token);
                 }
                 else if (token->identifier == kCEETokenID_AT_PROTOCOL) {
-                    current_statement_type_transform(parser, kCEESourceFregmentTypeProtocolDeclaration);
+                    current_statement_type_transform(parser, kCEESourceFragmentTypeProtocolDeclaration);
                     statement_token_push(parser, token);
                 }
                 else if (token->identifier == kCEETokenID_TEMPLATE) {
-                    current_statement_type_transform(parser, kCEESourceFregmentTypeTemplateDeclaration);
+                    current_statement_type_transform(parser, kCEESourceFragmentTypeTemplateDeclaration);
                     statement_token_push(parser, token);
                 }
                 else if (token->identifier == kCEETokenID_AT_END) {
@@ -6196,7 +6192,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
     
     } while(1);
     
-    cee_source_fregment_tree_symbols_parent_parse(parser->statement_root);
+    cee_source_fragment_tree_symbols_parent_parse(parser->statement_root);
     
     *statement = parser->statement_root;
     *prep_directive = parser->prep_directive_root;
@@ -6226,29 +6222,29 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    const cee_char* filepath,
                                    const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
-                                   CEESourceFregment* prep_directive,
-                                   CEESourceFregment* statement,
+                                   CEESourceFragment* prep_directive,
+                                   CEESourceFragment* statement,
                                    CEERange range,
                                    CEEList** references)
 {
-    CEESourceFregment* fregment = NULL;
+    CEESourceFragment* fragment = NULL;
     CEEList* p = NULL;
     
-    CEESourceFregment* indexes[kCEESourceFregmentIndexMax];
-    memset(indexes, 0, sizeof(CEESourceFregment*)*kCEESourceFregmentIndexMax);
-    cee_source_fregment_indexes_in_range(source_token_map, range, indexes);
+    CEESourceFragment* indexes[kCEESourceFragmentIndexMax];
+    memset(indexes, 0, sizeof(CEESourceFragment*)*kCEESourceFragmentIndexMax);
+    cee_source_fragment_indexes_in_range(source_token_map, range, indexes);
     
-    for (cee_int i = kCEESourceFregmentIndexPrepDirective; i < kCEESourceFregmentIndexMax; i ++) {
+    for (cee_int i = kCEESourceFragmentIndexPrepDirective; i < kCEESourceFragmentIndexMax; i ++) {
         
         if (!indexes[i])
             continue;
         
         p = indexes[i]->node_ref;
         while (p) {
-            fregment = p->data;
-            if (!references_in_source_fregment_parse(parser_ref,
+            fragment = p->data;
+            if (!references_in_source_fragment_parse(parser_ref,
                                                      filepath,
-                                                     fregment, 
+                                                     fragment,
                                                      subject, 
                                                      prep_directive,
                                                      statement,
@@ -6258,18 +6254,18 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
             p = SOURCE_FREGMENT_NEXT(p);
         }
                 
-        while (fregment && !cee_source_fregment_over_range(fregment, range)) {
-            fregment = cee_source_fregment_grandfather_get(fregment);
-            if (!fregment || !fregment->node_ref ||
-                !SOURCE_FREGMENT_HAS_NEXT(fregment->node_ref))
+        while (fragment && !cee_source_fragment_over_range(fragment, range)) {
+            fragment = cee_source_fragment_grandfather_get(fragment);
+            if (!fragment || !fragment->node_ref ||
+                !SOURCE_FREGMENT_HAS_NEXT(fragment->node_ref))
                 break;
             
-            p = SOURCE_FREGMENT_NEXT(fregment->node_ref);
+            p = SOURCE_FREGMENT_NEXT(fragment->node_ref);
             while (p) {
-                fregment = p->data;
-                if (!references_in_source_fregment_parse(parser_ref,
+                fragment = p->data;
+                if (!references_in_source_fragment_parse(parser_ref,
                                                          filepath,
-                                                         fregment,
+                                                         fragment,
                                                          subject,
                                                          prep_directive,
                                                          statement,
@@ -6284,34 +6280,34 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
     return TRUE;
 }
 
-static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser_ref,
+static cee_boolean references_in_source_fragment_parse(CEESourceParserRef parser_ref,
                                                        const cee_char* filepath,
-                                                       CEESourceFregment* fregment,
+                                                       CEESourceFragment* fragment,
                                                        const cee_char* subject,
-                                                       CEESourceFregment* prep_directive,
-                                                       CEESourceFregment* statement,
+                                                       CEESourceFragment* prep_directive,
+                                                       CEESourceFragment* statement,
                                                        CEERange range,
                                                        CEEList** references)
 {    
-    CEESourceFregment* reference_fregment = NULL;
+    CEESourceFragment* reference_fragment = NULL;
     CEEList* p = NULL;
     
-    if (cee_source_fregment_over_range(fregment, range))
+    if (cee_source_fragment_over_range(fragment, range))
         return FALSE;
         
-    reference_fregment = c_referernce_fregment_convert(fregment, subject);
-    c_reference_fregment_parse(parser_ref,
+    reference_fragment = c_referernce_fragment_convert(fragment, subject);
+    c_reference_fragment_parse(parser_ref,
                                filepath,
-                               reference_fregment, 
+                               reference_fragment,
                                subject, 
                                prep_directive,
                                statement,
                                references);
-    cee_source_fregment_free(reference_fregment);
+    cee_source_fragment_free(reference_fragment);
     
-    p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
+    p = SOURCE_FREGMENT_CHILDREN_FIRST(fragment);
     while (p) {
-        if (!references_in_source_fregment_parse(parser_ref,
+        if (!references_in_source_fragment_parse(parser_ref,
                                                  filepath,
                                                  p->data, 
                                                  subject, 
@@ -6327,35 +6323,35 @@ static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser
     return TRUE;
 }
 
-static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregment,
+static CEESourceFragment* c_referernce_fragment_convert(CEESourceFragment* fragment,
                                                         const cee_char* subject)
 {
     CEEList* p = NULL;
     CEEToken* token = NULL;
-    CEESourceFregment* reference_fregment = NULL;
-    CEESourceFregment* current = reference_fregment;
+    CEESourceFragment* reference_fragment = NULL;
+    CEESourceFragment* current = reference_fragment;
     
-    if (cee_source_fregment_parent_type_is(fregment, kCEESourceFregmentTypeSquareBracketList)) {
-        reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeSquareBracketList,
-                                                        fregment->filepath_ref,
-                                                        fregment->subject_ref,
+    if (cee_source_fragment_parent_type_is(fragment, kCEESourceFragmentTypeSquareBracketList)) {
+        reference_fragment = cee_source_fragment_create(kCEESourceFragmentTypeSquareBracketList,
+                                                        fragment->filepath_ref,
+                                                        fragment->subject_ref,
                                                         "c");
-        reference_fregment = cee_source_fregment_sub_attach(reference_fregment, 
-                                                            kCEESourceFregmentTypeStatement,
-                                                            fregment->filepath_ref,
-                                                            fregment->subject_ref,
+        reference_fragment = cee_source_fragment_sub_attach(reference_fragment,
+                                                            kCEESourceFragmentTypeStatement,
+                                                            fragment->filepath_ref,
+                                                            fragment->subject_ref,
                                                             "c");
     }
     else {
-        reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeStatement,
-                                                        fregment->filepath_ref,
-                                                        fregment->subject_ref,
+        reference_fragment = cee_source_fragment_create(kCEESourceFragmentTypeStatement,
+                                                        fragment->filepath_ref,
+                                                        fragment->subject_ref,
                                                         "c");
     }
     
-    current = reference_fregment;
+    current = reference_fragment;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     
     while (p) {
         token = p->data;
@@ -6365,14 +6361,14 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
                 token->identifier == kCEETokenID_AT_BRACE ||      /** @{ */
                 token->identifier == kCEETokenID_CARAT_BRACE) {   /** ^{ */
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
-                current = cee_source_fregment_push(current,
-                                                   kCEESourceFregmentTypeCurlyBracketList,
-                                                   fregment->filepath_ref,
-                                                   fregment->subject_ref,
+                current = cee_source_fragment_push(current,
+                                                   kCEESourceFragmentTypeCurlyBracketList,
+                                                   fragment->filepath_ref,
+                                                   fragment->subject_ref,
                                                    "c");
             }
             else if (token->identifier == '}') {
-                current = cee_source_fregment_pop(current);
+                current = cee_source_fragment_pop(current);
                 if (!current)
                     break;
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
@@ -6380,28 +6376,28 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
             else if (token->identifier == '[' || 
                      token->identifier == kCEETokenID_AT_BRACKET) {   /** @[ */
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
-                current = cee_source_fregment_push(current, 
-                                                   kCEESourceFregmentTypeSquareBracketList,
-                                                   fregment->filepath_ref,
-                                                   fregment->subject_ref,
+                current = cee_source_fragment_push(current,
+                                                   kCEESourceFragmentTypeSquareBracketList,
+                                                   fragment->filepath_ref,
+                                                   fragment->subject_ref,
                                                    "c");
             }
             else if (token->identifier == ']') {
-                current = cee_source_fregment_pop(current);
+                current = cee_source_fragment_pop(current);
                 if (!current)
                     break;
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
             }
             else if (token->identifier == '(') {
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
-                current = cee_source_fregment_push(current, 
-                                                   kCEESourceFregmentTypeRoundBracketList,
-                                                   fregment->filepath_ref,
-                                                   fregment->subject_ref,
+                current = cee_source_fragment_push(current,
+                                                   kCEESourceFragmentTypeRoundBracketList,
+                                                   fragment->filepath_ref,
+                                                   fragment->subject_ref,
                                                    "c");
             }
             else if (token->identifier == ')') {
-                current = cee_source_fregment_pop(current);
+                current = cee_source_fragment_pop(current);
                 if (!current)
                     break;
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
@@ -6416,17 +6412,17 @@ static CEESourceFregment* c_referernce_fregment_convert(CEESourceFregment* fregm
     }
     
     if (!current)
-        cee_source_fregment_free(reference_fregment);
+        cee_source_fragment_free(reference_fragment);
     
     return current;
 }
 
-static void c_reference_fregment_parse(CEESourceParserRef parser_ref,
+static void c_reference_fragment_parse(CEESourceParserRef parser_ref,
                                        const cee_char* filepath,
-                                       CEESourceFregment* fregment,
+                                       CEESourceFragment* fragment,
                                        const cee_char* subject,
-                                       CEESourceFregment* prep_directive,
-                                       CEESourceFregment* statement,
+                                       CEESourceFragment* prep_directive,
+                                       CEESourceFragment* statement,
                                        CEEList** references)
 {
     CEEList* p = NULL;
@@ -6434,43 +6430,43 @@ static void c_reference_fregment_parse(CEESourceParserRef parser_ref,
     CEEList* sub = NULL;
     CEEList* objective_c_message = NULL;
     CEESourceReferenceType type = kCEESourceReferenceTypeUnknow;
-    if (!fregment)
+    if (!fragment)
         return;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         
         type = kCEESourceReferenceTypeUnknow;
         
-        if (cee_source_fregment_tokens_pattern_match(fregment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {
+        if (cee_source_fragment_tokens_pattern_match(fragment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
-            p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
+            p = cee_source_fragment_tokens_break(fragment, p, cee_range_make(1, 1), &sub);
             type = kCEESourceReferenceTypeMember;
         }
-        else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_MEMBER_POINTER, kCEETokenID_IDENTIFIER, NULL)) {
+        else if (cee_source_fragment_tokens_pattern_match(fragment, p, kCEETokenID_MEMBER_POINTER, kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
-            p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
+            p = cee_source_fragment_tokens_break(fragment, p, cee_range_make(1, 1), &sub);
             type = kCEESourceReferenceTypeMember;
         }
-        else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_SCOPE, kCEETokenID_IDENTIFIER, NULL)) {
+        else if (cee_source_fragment_tokens_pattern_match(fragment, p, kCEETokenID_SCOPE, kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
-            p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
+            p = cee_source_fragment_tokens_break(fragment, p, cee_range_make(1, 1), &sub);
             type = kCEESourceReferenceTypeMember;
         }
-        else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_IDENTIFIER, ':',  NULL) &&
-                 cee_source_fregment_parent_type_is(fregment, kCEESourceFregmentTypeSquareBracketList)) {
+        else if (cee_source_fragment_tokens_pattern_match(fragment, p, kCEETokenID_IDENTIFIER, ':',  NULL) &&
+                 cee_source_fragment_parent_type_is(fragment, kCEESourceFragmentTypeSquareBracketList)) {
             /** catch objective-c message component */
-            p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(0, 2), &sub);
+            p = cee_source_fragment_tokens_break(fragment, p, cee_range_make(0, 2), &sub);
             objective_c_message = cee_list_concat(sub, objective_c_message);
             sub = NULL;
         }
-        else if (cee_source_fregment_tokens_pattern_match(fregment, p, '~', kCEETokenID_IDENTIFIER, '(', ')', NULL)) {
+        else if (cee_source_fragment_tokens_pattern_match(fragment, p, '~', kCEETokenID_IDENTIFIER, '(', ')', NULL)) {
             /** catch desctructor */
-            p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(0, 2), &sub);
+            p = cee_source_fragment_tokens_break(fragment, p, cee_range_make(0, 2), &sub);
         }
-        else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_IDENTIFIER, NULL)) {
+        else if (cee_source_fragment_tokens_pattern_match(fragment, p, kCEETokenID_IDENTIFIER, NULL)) {
             /** catch any other identifier */
-            p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(0, 1), &sub);
+            p = cee_source_fragment_tokens_break(fragment, p, cee_range_make(0, 1), &sub);
         }
         else {
             p = TOKEN_NEXT(p);
@@ -6498,9 +6494,9 @@ static void c_reference_fregment_parse(CEESourceParserRef parser_ref,
         objective_c_message = NULL;
     }
     
-    p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
+    p = SOURCE_FREGMENT_CHILDREN_FIRST(fragment);
     while (p) {
-        c_reference_fregment_parse(parser_ref,
+        c_reference_fragment_parse(parser_ref,
                                    filepath,
                                    p->data, 
                                    subject, 
@@ -6513,8 +6509,8 @@ static void c_reference_fregment_parse(CEESourceParserRef parser_ref,
 
 static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
                                           CEESourceSymbolReference* reference,
-                                          CEESourceFregment* prep_directive,
-                                          CEESourceFregment* statement,
+                                          CEESourceFragment* prep_directive,
+                                          CEESourceFragment* statement,
                                           CEESourceSymbol** symbol)
 {
 
@@ -6522,7 +6518,7 @@ static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
     CEESourceSymbol* statement_symbol = NULL;
     CEESourceSymbol* prep_directive_symbol = NULL;
     CEEList* searched_symbols = NULL;
-    CEESourceFregment* current = cee_source_fregment_from_reference_get(reference);
+    CEESourceFragment* current = cee_source_fragment_from_reference_get(reference);
     
     if (!current || !symbol || reference->type == kCEESourceReferenceTypeMember)
         goto exit;
@@ -6534,7 +6530,7 @@ static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
         statement_symbol = cee_source_symbol_copy(statement_symbol);
     
     searched_symbols =
-        cee_source_fregment_tree_symbols_search(prep_directive,
+        cee_source_fragment_tree_symbols_search(prep_directive,
                                                 cee_source_symbol_matcher_by_name,
                                                 (cee_pointer)reference->name);
     if (searched_symbols) {
@@ -6570,33 +6566,33 @@ exit:
     return ret;
 }
 
-static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* current,
+static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFragment* current,
                                                          const cee_char* name)
 {
     CEEList* symbols = NULL;
     CEESourceSymbol* referenced = NULL;
-    CEESourceFregment* searching = current;
+    CEESourceFragment* searching = current;
     CEEList* p = NULL;
     
     if (!searching)
         goto exit;
     
-    /** search current fregment */
-    symbols = cee_source_fregment_symbols_search_by_name(searching, name);
+    /** search current fragment */
+    symbols = cee_source_fragment_symbols_search_by_name(searching, name);
     if (symbols) {
         referenced = cee_list_nth_data(symbols, 0);
         goto exit;
     }
     
     /**
-     * Search current round bracket list child fregment,
+     * Search current round bracket list child fragment,
      * function parameters , "for" / "while" / "if" statments
      */
     p = SOURCE_FREGMENT_CHILDREN_FIRST(searching);
     while (p) {
         searching = p->data;
-        if (searching->type[kCEESourceFregmentTypeRoundBracketList]) {
-            symbols = cee_source_fregment_symbols_in_children_search_by_name(searching,
+        if (searching->type[kCEESourceFragmentTypeRoundBracketList]) {
+            symbols = cee_source_fragment_symbols_in_children_search_by_name(searching,
                                                                              name);
             if (symbols) {
                 referenced = cee_list_nth_data(symbols, 0);
@@ -6614,18 +6610,18 @@ static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* curr
         p = SOURCE_FREGMENT_PREV(searching->node_ref);
         while (p) {
             searching = p->data;
-            symbols = cee_source_fregment_symbols_search_by_name(searching, name);
+            symbols = cee_source_fragment_symbols_search_by_name(searching, name);
             if (symbols) {
                 referenced = cee_list_nth_data(symbols, 0);
                 goto exit;
             }
             
             /** enumerator search */
-            if (searching->type[kCEESourceFregmentTypeEnumDefinition]) {
+            if (searching->type[kCEESourceFragmentTypeEnumDefinition]) {
                 CEEList* q = SOURCE_FREGMENT_CHILDREN_FIRST(searching);
                 while (q) {
                     searching = q->data;
-                    symbols = cee_source_fregment_symbols_in_children_search_by_name(searching,
+                    symbols = cee_source_fragment_symbols_in_children_search_by_name(searching,
                                                                                      name);
                     if (symbols) {
                         referenced = cee_list_nth_data(symbols, 0);
@@ -6640,10 +6636,10 @@ static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* curr
     }
     
     searching = current;
-    if (cee_source_fregment_parent_type_is(searching, kCEESourceFregmentTypeRoundBracketList) ||
-        cee_source_fregment_parent_type_is(searching, kCEESourceFregmentTypeCurlyBracketList) ||
-        cee_source_fregment_parent_type_is(searching, kCEESourceFregmentTypeSquareBracketList)) {
-        searching = cee_source_fregment_grandfather_get(searching);
+    if (cee_source_fragment_parent_type_is(searching, kCEESourceFragmentTypeRoundBracketList) ||
+        cee_source_fragment_parent_type_is(searching, kCEESourceFragmentTypeCurlyBracketList) ||
+        cee_source_fragment_parent_type_is(searching, kCEESourceFragmentTypeSquareBracketList)) {
+        searching = cee_source_fragment_grandfather_get(searching);
         referenced = symbol_search_in_scope_recursive(searching, name);
     }
     

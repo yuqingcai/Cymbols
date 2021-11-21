@@ -154,17 +154,17 @@ typedef enum _JavaPackageStatementTranslateState {
     kJavaPackageStatementTranslateStateMax,
 } JavaPackageStatementTranslateState;
 
-typedef cee_boolean (*ParseTrap)(CEESourceFregment*, 
+typedef cee_boolean (*ParseTrap)(CEESourceFragment*,
                                  CEEList**);
 
 typedef struct _JavaParser {
     CEESourceParserRef super;
     const cee_char* filepath_ref;
     const cee_char* subject_ref;
-    CEESourceFregment* statement_root;
-    CEESourceFregment* statement_current;
-    CEESourceFregment* comment_root;
-    CEESourceFregment* comment_current;
+    CEESourceFragment* statement_root;
+    CEESourceFragment* statement_current;
+    CEESourceFragment* comment_root;
+    CEESourceFragment* comment_current;
     ParseTrap block_header_traps[CEETokenID_MAX];
 } JavaParser;
 
@@ -194,35 +194,35 @@ static cee_boolean token_id_is_punctuation(CEETokenID identifier);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    const cee_char* filepath,
                                    const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
-                                   CEESourceFregment* prep_directive,
-                                   CEESourceFregment* statement,
+                                   CEESourceFragment* prep_directive,
+                                   CEESourceFragment* statement,
                                    CEERange range,
                                    CEEList** references);
-static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser_ref,
+static cee_boolean references_in_source_fragment_parse(CEESourceParserRef parser_ref,
                                                        const cee_char* filepath,
-                                                       CEESourceFregment* fregment,
+                                                       CEESourceFragment* fragment,
                                                        const cee_char* subject,
-                                                       CEESourceFregment* prep_directive,
-                                                       CEESourceFregment* statement,
+                                                       CEESourceFragment* prep_directive,
+                                                       CEESourceFragment* statement,
                                                        CEERange range,
                                                        CEEList** references);
-static CEESourceFregment* java_referernce_fregment_convert(CEESourceFregment* fregment,
+static CEESourceFragment* java_referernce_fragment_convert(CEESourceFragment* fragment,
                                                            const cee_char* subject);
-static void java_reference_fregment_parse(CEESourceParserRef parser_ref,
+static void java_reference_fragment_parse(CEESourceParserRef parser_ref,
                                           const cee_char* filepath,
-                                          CEESourceFregment* fregment,
+                                          CEESourceFragment* fragment,
                                           const cee_char* subject,
-                                          CEESourceFregment* prep_directive,
-                                          CEESourceFregment* statement,
+                                          CEESourceFragment* prep_directive,
+                                          CEESourceFragment* statement,
                                           CEEList** references);
 static void symbol_parse_init(JavaParser* parser,
                               const cee_char* filepath,
@@ -231,10 +231,10 @@ static void symbol_parse_clear(JavaParser* parser);
 static cee_boolean token_is_comment(CEEToken* token);
 static cee_boolean comment_token_push(JavaParser* parser,
                                       CEEToken* push);
-static cee_boolean comment_fregment_reduce(JavaParser* parser);
+static cee_boolean comment_fragment_reduce(JavaParser* parser);
 static cee_boolean comment_attach(JavaParser* parser);
 static void block_header_parse(JavaParser* parser);
-static cee_boolean statement_block_parse(CEESourceFregment* fregment);
+static cee_boolean statement_block_parse(CEESourceFragment* fragment);
 static void block_push(JavaParser* parser);
 static cee_boolean block_pop(JavaParser* parser);
 static void block_parse(JavaParser* parser);
@@ -246,9 +246,9 @@ static cee_boolean label_reduce(JavaParser* parser);
 static void statement_parse(JavaParser* parser);
 static cee_boolean statement_reduce(JavaParser* parser);
 static cee_boolean statement_attach(JavaParser* parser,
-                                    CEESourceFregmentType type);
+                                    CEESourceFragmentType type);
 static cee_boolean statement_sub_attach(JavaParser* parser,
-                                        CEESourceFregmentType type);
+                                        CEESourceFragmentType type);
 static cee_boolean statement_pop(JavaParser* parser);
 static cee_boolean statement_token_push(JavaParser* parser,
                                         CEEToken* push);
@@ -258,29 +258,29 @@ static void subscript_push(JavaParser* parser);
 static cee_boolean subscript_pop(JavaParser* parser);
 
 static void java_declaration_translate_table_init(void);
-static cee_boolean java_declaration_parse(CEESourceFregment* fregment);
+static cee_boolean java_declaration_parse(CEESourceFragment* fragment);
 static CEEList* skip_java_declaration_interval(CEEList* p);
 static void java_import_statement_translate_table_init(void);
-static cee_boolean java_import_statement_parse(CEESourceFregment* fregment);
+static cee_boolean java_import_statement_parse(CEESourceFragment* fragment);
 static void java_package_statement_translate_table_init(void);
-static cee_boolean java_package_statement_parse(CEESourceFregment* fregment);
+static cee_boolean java_package_statement_parse(CEESourceFragment* fragment);
 static void java_class_definition_translate_table_init(void);
-static cee_boolean java_class_definition_trap(CEESourceFregment* fregment,
+static cee_boolean java_class_definition_trap(CEESourceFragment* fragment,
                                               CEEList** pp);
 static void java_interface_definition_translate_table_init(void);
-static cee_boolean java_interface_definition_trap(CEESourceFregment* fregment,
+static cee_boolean java_interface_definition_trap(CEESourceFragment* fragment,
                                                   CEEList** pp);
 static void java_enum_definition_translate_table_init(void);
-static cee_boolean java_enum_definition_trap(CEESourceFregment* fregment,
+static cee_boolean java_enum_definition_trap(CEESourceFragment* fragment,
                                              CEEList** pp);
-static cee_char* java_enumerator_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_enumerator_proto_descriptor_create(CEESourceFragment* fragment,
                                                          CEESourceSymbol* enumerator,
                                                          const cee_char* proto);
-static cee_char* java_declaration_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_declaration_proto_descriptor_create(CEESourceFragment* fragment,
                                                           CEEList* prefix,
                                                           CEEList* prefix_tail,
                                                           CEEList* identifier);
-static cee_char* java_object_type_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_object_type_proto_descriptor_create(CEESourceFragment* fragment,
                                                           CEESourceSymbol* definition,
                                                           const cee_char* derives_str);
 static cee_char* java_name_scope_list_string_create(CEEList* scopes,
@@ -290,24 +290,24 @@ static cee_char* java_name_scope_create(CEEList* tokens,
 static void superclass_free(cee_pointer data);
 static void superinterface_free(cee_pointer data);
 static void extendinterface_free(cee_pointer data);
-static cee_boolean java_enumerators_parse(CEESourceFregment* fregment);
+static cee_boolean java_enumerators_parse(CEESourceFragment* fragment);
 static void java_enumerator_block_translate_table_init(void);
-static cee_boolean java_enumerator_block_parse(CEESourceFregment* fregment);
+static cee_boolean java_enumerator_block_parse(CEESourceFragment* fragment);
 static void java_method_translate_table_init(void);
-static cee_boolean java_method_parse(CEESourceFregment* fregment);
+static cee_boolean java_method_parse(CEESourceFragment* fragment);
 static void java_method_parameters_declaration_translate_table_init(void);
-static cee_boolean java_method_parameters_parse(CEESourceFregment* fregment);
-static CEESourceSymbol* java_method_parameter_create(CEESourceFregment* fregment,
+static cee_boolean java_method_parameters_parse(CEESourceFragment* fragment);
+static CEESourceSymbol* java_method_parameter_create(CEESourceFragment* fragment,
                                                      CEEList* prefix,
                                                      CEEList* identifier);
-static cee_char* java_method_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_method_parameter_proto_descriptor_create(CEESourceFragment* fragment,
                                                                CEEList* prefix,
                                                                CEEList* prefix_tail,
                                                                CEESourceSymbol* parameter);
-static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregment,
+static cee_char* java_type_descriptor_from_token_slice(CEESourceFragment* fragment,
                                                        CEEList* p,
                                                        CEEList* q);
-static cee_char* java_method_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_method_proto_descriptor_create(CEESourceFragment* fragment,
                                                      CEEList* prefix,
                                                      CEEList* prefix_tail,
                                                      CEEList* identifier,
@@ -315,15 +315,15 @@ static cee_char* java_method_proto_descriptor_create(CEESourceFregment* fregment
                                                      CEEList* parameter_list_end);
 static cee_boolean should_proto_descriptor_append_whitespace(CEEToken* token,
                                                              CEEToken* token_prev);
-static const cee_char* java_access_level_search(CEESourceFregment* fregment,
+static const cee_char* java_access_level_search(CEESourceFragment* fragment,
                                                 CEEList* begin,
                                                 CEEList* end);
 static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
                                           CEESourceSymbolReference* reference,
-                                          CEESourceFregment* prep_directive,
-                                          CEESourceFregment* statement,
+                                          CEESourceFragment* prep_directive,
+                                          CEESourceFragment* statement,
                                           CEESourceSymbol** symbol);
-static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* searching,
+static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFragment* searching,
                                                          const cee_char* name);
 /**
  * parser
@@ -561,9 +561,9 @@ static cee_boolean token_id_is_punctuation(CEETokenID identifier)
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map)
 {
@@ -588,7 +588,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
         if (token_is_comment(token)) {
             comment_token_push(parser, token);
-            comment_fregment_reduce(parser);
+            comment_fragment_reduce(parser);
             
             if (!ret)
                 break;
@@ -650,7 +650,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
     } while(1);
     
-    cee_source_fregment_tree_symbols_parent_parse(parser->statement_root);
+    cee_source_fragment_tree_symbols_parent_parse(parser->statement_root);
     
     *statement = parser->statement_root;
     *prep_directive = NULL;
@@ -668,21 +668,21 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    const cee_char* filepath,
                                    const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
-                                   CEESourceFregment* prep_directive,
-                                   CEESourceFregment* statement,
+                                   CEESourceFragment* prep_directive,
+                                   CEESourceFragment* statement,
                                    CEERange range,
                                    CEEList** references)
 {
-    CEESourceFregment* fregment = NULL;
+    CEESourceFragment* fragment = NULL;
     CEEList* p = NULL;
     
-    CEESourceFregment* indexes[kCEESourceFregmentIndexMax];
-    memset(indexes, 0, sizeof(CEESourceFregment*)*kCEESourceFregmentIndexMax);
+    CEESourceFragment* indexes[kCEESourceFragmentIndexMax];
+    memset(indexes, 0, sizeof(CEESourceFragment*)*kCEESourceFragmentIndexMax);
     
-    cee_source_fregment_indexes_in_range(source_token_map, range, indexes);
+    cee_source_fragment_indexes_in_range(source_token_map, range, indexes);
     
-    for (cee_int i = kCEESourceFregmentIndexPrepDirective;
-         i < kCEESourceFregmentIndexMax;
+    for (cee_int i = kCEESourceFragmentIndexPrepDirective;
+         i < kCEESourceFragmentIndexMax;
          i ++) {
         
         if (!indexes[i])
@@ -690,11 +690,11 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
         
         p = indexes[i]->node_ref;
         while (p) {
-            fregment = p->data;
+            fragment = p->data;
             
-            if (!references_in_source_fregment_parse(parser_ref,
+            if (!references_in_source_fragment_parse(parser_ref,
                                                      filepath,
-                                                     fregment,
+                                                     fragment,
                                                      subject,
                                                      prep_directive,
                                                      statement,
@@ -709,34 +709,34 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
     return TRUE;
 }
 
-static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser_ref,
+static cee_boolean references_in_source_fragment_parse(CEESourceParserRef parser_ref,
                                                        const cee_char* filepath,
-                                                       CEESourceFregment* fregment,
+                                                       CEESourceFragment* fragment,
                                                        const cee_char* subject,
-                                                       CEESourceFregment* prep_directive,
-                                                       CEESourceFregment* statement,
+                                                       CEESourceFragment* prep_directive,
+                                                       CEESourceFragment* statement,
                                                        CEERange range,
                                                        CEEList** references)
 {
-    CEESourceFregment* reference_fregment = NULL;
+    CEESourceFragment* reference_fragment = NULL;
     CEEList* p = NULL;
     
-    if (cee_source_fregment_over_range(fregment, range))
+    if (cee_source_fragment_over_range(fragment, range))
         return FALSE;
     
-    reference_fregment = java_referernce_fregment_convert(fregment, subject);
-    java_reference_fregment_parse(parser_ref,
+    reference_fragment = java_referernce_fragment_convert(fragment, subject);
+    java_reference_fragment_parse(parser_ref,
                                   filepath,
-                                  reference_fregment,
+                                  reference_fragment,
                                   subject,
                                   prep_directive,
                                   statement,
                                   references);
-    cee_source_fregment_free(reference_fregment);
+    cee_source_fragment_free(reference_fragment);
     
-    p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
+    p = SOURCE_FREGMENT_CHILDREN_FIRST(fragment);
     while (p) {
-        if (!references_in_source_fregment_parse(parser_ref,
+        if (!references_in_source_fragment_parse(parser_ref,
                                                  filepath,
                                                  p->data,
                                                  subject,
@@ -752,35 +752,35 @@ static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser
     return TRUE;
 }
 
-static CEESourceFregment* java_referernce_fregment_convert(CEESourceFregment* fregment,
+static CEESourceFragment* java_referernce_fragment_convert(CEESourceFragment* fragment,
                                                            const cee_char* subject)
 {
     CEEList* p = NULL;
     CEEToken* token = NULL;
-    CEESourceFregment* reference_fregment = NULL;
-    CEESourceFregment* current = reference_fregment;
+    CEESourceFragment* reference_fragment = NULL;
+    CEESourceFragment* current = reference_fragment;
     
-    if (cee_source_fregment_parent_type_is(fregment, kCEESourceFregmentTypeSquareBracketList)) {
-        reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeSquareBracketList,
-                                                        fregment->filepath_ref,
-                                                        fregment->subject_ref,
+    if (cee_source_fragment_parent_type_is(fragment, kCEESourceFragmentTypeSquareBracketList)) {
+        reference_fragment = cee_source_fragment_create(kCEESourceFragmentTypeSquareBracketList,
+                                                        fragment->filepath_ref,
+                                                        fragment->subject_ref,
                                                         "java");
-        reference_fregment = cee_source_fregment_sub_attach(reference_fregment,
-                                                            kCEESourceFregmentTypeStatement,
-                                                            fregment->filepath_ref,
-                                                            fregment->subject_ref,
+        reference_fragment = cee_source_fragment_sub_attach(reference_fragment,
+                                                            kCEESourceFragmentTypeStatement,
+                                                            fragment->filepath_ref,
+                                                            fragment->subject_ref,
                                                             "java");
     }
     else {
-        reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeStatement,
-                                                        fregment->filepath_ref,
-                                                        fregment->subject_ref,
+        reference_fragment = cee_source_fragment_create(kCEESourceFragmentTypeStatement,
+                                                        fragment->filepath_ref,
+                                                        fragment->subject_ref,
                                                         "java");
     }
     
-    current = reference_fregment;
+    current = reference_fragment;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     
     while (p) {
         token = p->data;
@@ -788,42 +788,42 @@ static CEESourceFregment* java_referernce_fregment_convert(CEESourceFregment* fr
         if (!(token->state & kCEETokenStateSymbolOccupied)) {
             if (token->identifier == '{') {   /** ^{ */
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
-                current = cee_source_fregment_push(current,
-                                                   kCEESourceFregmentTypeCurlyBracketList,
-                                                   fregment->filepath_ref,
-                                                   fregment->subject_ref,
+                current = cee_source_fragment_push(current,
+                                                   kCEESourceFragmentTypeCurlyBracketList,
+                                                   fragment->filepath_ref,
+                                                   fragment->subject_ref,
                                                    "java");
             }
             else if (token->identifier == '}') {
-                current = cee_source_fregment_pop(current);
+                current = cee_source_fragment_pop(current);
                 if (!current)
                     break;
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
             }
             else if (token->identifier == '[') {
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
-                current = cee_source_fregment_push(current,
-                                                   kCEESourceFregmentTypeSquareBracketList,
-                                                   fregment->filepath_ref,
-                                                   fregment->subject_ref,
+                current = cee_source_fragment_push(current,
+                                                   kCEESourceFragmentTypeSquareBracketList,
+                                                   fragment->filepath_ref,
+                                                   fragment->subject_ref,
                                                    "java");
             }
             else if (token->identifier == ']') {
-                current = cee_source_fregment_pop(current);
+                current = cee_source_fragment_pop(current);
                 if (!current)
                     break;
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
             }
             else if (token->identifier == '(') {
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
-                current = cee_source_fregment_push(current,
-                                                   kCEESourceFregmentTypeRoundBracketList,
-                                                   fregment->filepath_ref,
-                                                   fregment->subject_ref,
+                current = cee_source_fragment_push(current,
+                                                   kCEESourceFragmentTypeRoundBracketList,
+                                                   fragment->filepath_ref,
+                                                   fragment->subject_ref,
                                                    "java");
             }
             else if (token->identifier == ')') {
-                current = cee_source_fregment_pop(current);
+                current = cee_source_fragment_pop(current);
                 if (!current)
                     break;
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
@@ -838,17 +838,17 @@ static CEESourceFregment* java_referernce_fregment_convert(CEESourceFregment* fr
     }
     
     if (!current)
-        cee_source_fregment_free(reference_fregment);
+        cee_source_fragment_free(reference_fragment);
     
     return current;
 }
 
-static void java_reference_fregment_parse(CEESourceParserRef parser_ref,
+static void java_reference_fragment_parse(CEESourceParserRef parser_ref,
                                           const cee_char* filepath,
-                                          CEESourceFregment* fregment,
+                                          CEESourceFragment* fragment,
                                           const cee_char* subject,
-                                          CEESourceFregment* prep_directive,
-                                          CEESourceFregment* statement,
+                                          CEESourceFragment* prep_directive,
+                                          CEESourceFragment* statement,
                                           CEEList** references)
 {
     CEEList* p = NULL;
@@ -856,22 +856,22 @@ static void java_reference_fregment_parse(CEESourceParserRef parser_ref,
     CEEList* sub = NULL;
     CEESourceReferenceType type = kCEESourceReferenceTypeUnknow;
     
-    if (!fregment)
+    if (!fragment)
         return;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         
         type = kCEESourceReferenceTypeUnknow;
         
-        if (cee_source_fregment_tokens_pattern_match(fregment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {
+        if (cee_source_fragment_tokens_pattern_match(fragment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
-            p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
+            p = cee_source_fragment_tokens_break(fragment, p, cee_range_make(1, 1), &sub);
             type = kCEESourceReferenceTypeMember;
         }
-        else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_IDENTIFIER, NULL)) {
+        else if (cee_source_fragment_tokens_pattern_match(fragment, p, kCEETokenID_IDENTIFIER, NULL)) {
             /** catch any other identifier */
-            p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(0, 1), &sub);
+            p = cee_source_fragment_tokens_break(fragment, p, cee_range_make(0, 1), &sub);
         }
         else {
             p = TOKEN_NEXT(p);
@@ -890,9 +890,9 @@ static void java_reference_fregment_parse(CEESourceParserRef parser_ref,
     }
     
     
-    p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
+    p = SOURCE_FREGMENT_CHILDREN_FIRST(fragment);
     while (p) {
-        java_reference_fregment_parse(parser_ref,
+        java_reference_fragment_parse(parser_ref,
                                       filepath,
                                       p->data,
                                       subject,
@@ -910,32 +910,32 @@ static void symbol_parse_init(JavaParser* parser,
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
     
-    parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->statement_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                         parser->filepath_ref,
                                                         parser->subject_ref,
                                                         "java");
-    parser->statement_current = cee_source_fregment_sub_attach(parser->statement_root, 
-                                                               kCEESourceFregmentTypeSourceList, 
+    parser->statement_current = cee_source_fragment_sub_attach(parser->statement_root,
+                                                               kCEESourceFragmentTypeSourceList,
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
                                                                "java");
-    parser->statement_current = cee_source_fregment_sub_attach(parser->statement_current, 
-                                                               kCEESourceFregmentTypeStatement, 
+    parser->statement_current = cee_source_fragment_sub_attach(parser->statement_current,
+                                                               kCEESourceFragmentTypeStatement,
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
                                                                "java");
     
-    parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->comment_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                       parser->filepath_ref,
                                                       parser->subject_ref,
                                                       "java");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
-                                                             kCEESourceFregmentTypeSourceList, 
+    parser->comment_current = cee_source_fragment_sub_attach(parser->comment_root,
+                                                             kCEESourceFragmentTypeSourceList,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "java");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
-                                                             kCEESourceFregmentTypeComment, 
+    parser->comment_current = cee_source_fragment_sub_attach(parser->comment_current,
+                                                             kCEESourceFragmentTypeComment,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "java");
@@ -970,7 +970,7 @@ static cee_boolean comment_token_push(JavaParser* parser,
     return TRUE;
 }
 
-static cee_boolean comment_fregment_reduce(JavaParser* parser)
+static cee_boolean comment_fragment_reduce(JavaParser* parser)
 {
     if (!parser->comment_current)
         return FALSE;
@@ -981,13 +981,13 @@ static cee_boolean comment_fregment_reduce(JavaParser* parser)
 
 static cee_boolean comment_attach(JavaParser* parser)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->comment_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->comment_current,
-                                          kCEESourceFregmentTypeComment, 
+    attached = cee_source_fragment_attach(parser->comment_current,
+                                          kCEESourceFragmentTypeComment,
                                           parser->filepath_ref,
                                           parser->subject_ref,
                                           "java");
@@ -1003,7 +1003,7 @@ static cee_boolean comment_attach(JavaParser* parser)
  */
 static void block_header_parse(JavaParser* parser)
 {
-    CEESourceFregment* current = parser->statement_current;
+    CEESourceFragment* current = parser->statement_current;
     CEEToken* token = NULL;
     CEEList* p = NULL;
     ParseTrap trap = NULL;
@@ -1038,16 +1038,16 @@ static void block_header_parse(JavaParser* parser)
     return;
 }
 
-static cee_boolean statement_block_parse(CEESourceFregment* fregment)
+static cee_boolean statement_block_parse(CEESourceFragment* fragment)
 {
     CEEList* p = NULL;
     CEEToken* token = NULL;
     
-    if (cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeAssignmentBlock) ||
-        cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeStatementBlock))
+    if (cee_source_fragment_type_is(fragment, kCEESourceFragmentTypeAssignmentBlock) ||
+        cee_source_fragment_type_is(fragment, kCEESourceFragmentTypeStatementBlock))
         return TRUE;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         
@@ -1058,7 +1058,7 @@ static cee_boolean statement_block_parse(CEESourceFregment* fregment)
         }
         else {
             if (token_id_is_assignment(token->identifier)) {
-                cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeAssignmentBlock);
+                cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeAssignmentBlock);
                 break;
             }
         }
@@ -1066,16 +1066,16 @@ static cee_boolean statement_block_parse(CEESourceFregment* fregment)
         p = TOKEN_NEXT(p);
     }
     
-    if (!cee_source_fregment_type_is(fregment, kCEESourceFregmentTypeAssignmentBlock))
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeStatementBlock);
+    if (!cee_source_fragment_type_is(fragment, kCEESourceFragmentTypeAssignmentBlock))
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeStatementBlock);
     
     return TRUE;
 }
 
 static void block_push(JavaParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeCurlyBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeCurlyBracketList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean block_pop(JavaParser* parser)
@@ -1096,35 +1096,35 @@ static cee_boolean block_reduce(JavaParser* parser)
     if (!parser->statement_current)
         return FALSE;
     
-    cee_source_fregment_symbols_fregment_range_mark(parser->statement_current);
+    cee_source_fragment_symbols_fragment_range_mark(parser->statement_current);
     
-    if (cee_source_fregment_type_is(parser->statement_current, kCEESourceFregmentTypeAssignmentBlock)) {
+    if (cee_source_fragment_type_is(parser->statement_current, kCEESourceFragmentTypeAssignmentBlock)) {
         /** expect statement terminate ';' */
     }
     else {
-        statement_attach(parser, kCEESourceFregmentTypeStatement);
+        statement_attach(parser, kCEESourceFragmentTypeStatement);
     }
     return TRUE;
 }
 
 static void label_parse(JavaParser* parser)
 {
-    CEESourceFregment* fregment = NULL;
+    CEESourceFragment* fragment = NULL;
     const cee_char* subject = NULL;
     CEEList* p = NULL;
     CEEList* q = NULL;
     CEESourceSymbol* declaration = NULL;
         
-    fregment = parser->statement_current;
-    if (!fregment || !fregment->tokens_ref)
+    fragment = parser->statement_current;
+    if (!fragment || !fragment->tokens_ref)
         return;
     
-    if (!cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeFunctionDefinition) &&
-        !cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeStatementBlock))
+    if (!cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeFunctionDefinition) &&
+        !cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeStatementBlock))
         return;
     
     subject = parser->subject_ref;
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         if (cee_token_is_identifier(p, kCEETokenID_NEW_LINE) ||
             cee_token_is_identifier(p, kCEETokenID_WHITE_SPACE)) {
@@ -1135,7 +1135,7 @@ static void label_parse(JavaParser* parser)
             if (cee_token_is_identifier(p, kCEETokenID_IDENTIFIER)) {
                 q = cee_token_not_whitespace_newline_after(p);
                 if (q && cee_token_is_identifier(q, ':')) {
-                    declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
+                    declaration = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
                                                                             subject,
                                                                             p,
                                                                             p,
@@ -1144,8 +1144,8 @@ static void label_parse(JavaParser* parser)
                                                                             kCEETokenStringOptionCompact);
                     if (declaration) {
                         cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
-                        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeLabelDeclaration);
-                        fregment->symbols = cee_list_prepend(fregment->symbols, declaration);
+                        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeLabelDeclaration);
+                        fragment->symbols = cee_list_prepend(fragment->symbols, declaration);
                     }
                 }
                 break;
@@ -1167,8 +1167,8 @@ static cee_boolean label_reduce(JavaParser* parser)
     if (!parser->statement_current)
         return FALSE;
     
-    if (cee_source_fregment_type_is(parser->statement_current, kCEESourceFregmentTypeLabelDeclaration))
-        statement_attach(parser, kCEESourceFregmentTypeStatement);
+    if (cee_source_fragment_type_is(parser->statement_current, kCEESourceFragmentTypeLabelDeclaration))
+        statement_attach(parser, kCEESourceFragmentTypeStatement);
     
     return TRUE;
 }
@@ -1178,7 +1178,7 @@ static cee_boolean label_reduce(JavaParser* parser)
  */
 static void statement_parse(JavaParser* parser)
 {
-    CEESourceFregment* current = parser->statement_current;    
+    CEESourceFragment* current = parser->statement_current;
     if (!current || !current->tokens_ref)
         return;
     
@@ -1197,7 +1197,7 @@ static cee_boolean statement_reduce(JavaParser* parser)
     if (!parser->statement_current)
         return FALSE;
     
-    statement_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_attach(parser, kCEESourceFragmentTypeStatement);
     
     return TRUE;
 }
@@ -1212,14 +1212,14 @@ static cee_boolean statement_pop(JavaParser* parser)
 }
 
 static cee_boolean statement_attach(JavaParser* parser,
-                                    CEESourceFregmentType type)
+                                    CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->statement_current, 
+    attached = cee_source_fragment_attach(parser->statement_current,
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -1232,14 +1232,14 @@ static cee_boolean statement_attach(JavaParser* parser,
 }
 
 static cee_boolean statement_sub_attach(JavaParser* parser,
-                                        CEESourceFregmentType type)
+                                        CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_sub_attach(parser->statement_current, 
+    attached = cee_source_fragment_sub_attach(parser->statement_current,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,
@@ -1267,8 +1267,8 @@ static cee_boolean statement_token_push(JavaParser* parser,
  */
 static void parameter_list_push(JavaParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeRoundBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeRoundBracketList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean parameter_list_pop(JavaParser* parser)
@@ -1284,8 +1284,8 @@ static cee_boolean parameter_list_pop(JavaParser* parser)
  */
 static void subscript_push(JavaParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeSquareBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeSquareBracketList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean subscript_pop(JavaParser* parser)
@@ -1373,7 +1373,7 @@ static void java_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(java_declaration_translate_table,   kJavaDeclarationTranslateStateConfirm               , ';'                                   , kJavaDeclarationTranslateStateConfirm                 );
 }
 
-static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
+static cee_boolean java_declaration_parse(CEESourceFragment* fragment)
 {
     cee_boolean ret = FALSE;
     CEEToken* token = NULL;
@@ -1387,7 +1387,7 @@ static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
     JavaDeclarationTranslateState current = kJavaDeclarationTranslateStateInit;
     JavaDeclarationTranslateState prev = kJavaDeclarationTranslateStateInit;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         
@@ -1414,15 +1414,15 @@ static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
         else if (current == kJavaDeclarationTranslateStateDefault || 
                  current == kJavaDeclarationTranslateStateConfirm) {
             if (!prefix_parse) {
-                prefix = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+                prefix = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
                 if (identifier)
                     prefix_tail = TOKEN_PREV(identifier);
                 prefix_parse = TRUE;
             }
             
             if (identifier)
-                declaration = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                        fregment->subject_ref,
+                declaration = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                        fragment->subject_ref,
                                                                         identifier,
                                                                         identifier,
                                                                         kCEESourceSymbolTypeVariableDeclaration,
@@ -1432,7 +1432,7 @@ static cee_boolean java_declaration_parse(CEESourceFregment* fregment)
             if (declaration) {
                 cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
                 if (prefix && prefix_tail)
-                    declaration->proto_descriptor = java_declaration_proto_descriptor_create(fregment,
+                    declaration->proto_descriptor = java_declaration_proto_descriptor_create(fragment,
                                                                                              prefix,
                                                                                              prefix_tail,
                                                                                              identifier);
@@ -1458,8 +1458,8 @@ next_token:
     }
     
     if (declarations) {
-        fregment->symbols = cee_list_concat(fregment->symbols, declarations);
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeDeclaration);
+        fragment->symbols = cee_list_concat(fragment->symbols, declarations);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeDeclaration);
         ret = TRUE;
     }
     
@@ -1514,10 +1514,10 @@ static void java_import_statement_translate_table_init(void)
     TRANSLATE_STATE_SET(java_import_statement_translate_table, kJavaImportStatementTranslateStateDemand                 , ';'                           , kJavaImportStatementTranslateStateConfirm             );
 }
 
-static cee_boolean java_import_statement_parse(CEESourceFregment* fregment)
+static cee_boolean java_import_statement_parse(CEESourceFragment* fragment)
 {
     cee_boolean ret = FALSE;
-    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     JavaImportStatementTranslateState current = kJavaImportStatementTranslateStateInit;
     JavaImportStatementTranslateState prev = kJavaImportStatementTranslateStateInit;
     CEEToken* token = NULL;
@@ -1555,8 +1555,8 @@ next_token:
     if (current != kJavaImportStatementTranslateStateConfirm)
         goto exit;
     
-    import = cee_source_symbol_create_from_token_slice(fregment->filepath_ref, 
-                                                       fregment->subject_ref, 
+    import = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                       fragment->subject_ref,
                                                        r, 
                                                        s, 
                                                        kCEESourceSymbolTypeImport, 
@@ -1564,9 +1564,9 @@ next_token:
                                                        kCEETokenStringOptionIncompact);
     if (import) {
         cee_source_symbol_name_format(import->name);
-        fregment->symbols = cee_list_prepend(fregment->symbols, import);
-        cee_source_fregment_type_set_exclusive(fregment,
-                                               kCEESourceFregmentTypeDeclaration);
+        fragment->symbols = cee_list_prepend(fragment->symbols, import);
+        cee_source_fragment_type_set_exclusive(fragment,
+                                               kCEESourceFragmentTypeDeclaration);
         ret = TRUE;
     }
     
@@ -1604,10 +1604,10 @@ static void java_package_statement_translate_table_init(void)
     TRANSLATE_STATE_SET(java_package_statement_translate_table, kJavaPackageStatementTranslateStateIdentifierSeparator      , kCEETokenID_IDENTIFIER            , kJavaPackageStatementTranslateStateIdentifier             );
 }
 
-static cee_boolean java_package_statement_parse(CEESourceFregment* fregment)
+static cee_boolean java_package_statement_parse(CEESourceFragment* fragment)
 {
     cee_boolean ret = FALSE;
-    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     JavaPackageStatementTranslateState current = kJavaPackageStatementTranslateStateInit;
     JavaPackageStatementTranslateState prev = kJavaPackageStatementTranslateStateInit;
     CEEToken* token = NULL;
@@ -1644,8 +1644,8 @@ next_token:
     if (current != kJavaPackageStatementTranslateStateConfirm)
         goto exit;
     
-    package = cee_source_symbol_create_from_token_slice(fregment->filepath_ref, 
-                                                        fregment->subject_ref, 
+    package = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                        fragment->subject_ref,
                                                         r, 
                                                         s, 
                                                         kCEESourceSymbolTypePackage, 
@@ -1653,8 +1653,8 @@ next_token:
                                                         kCEETokenStringOptionIncompact);
     if (package) {
         cee_source_symbol_name_format(package->name);
-        fregment->symbols = cee_list_prepend(fregment->symbols, package);
-        cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeDeclaration);
+        fragment->symbols = cee_list_prepend(fragment->symbols, package);
+        cee_source_fragment_type_set_exclusive(fragment, kCEESourceFragmentTypeDeclaration);
         ret = TRUE;
     }
     
@@ -1710,7 +1710,7 @@ static void java_class_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(java_class_definition_translate_table,  kJavaClassDefinitionTranslateStateSuperinterfaces       , kCEETokenID_ANNOTATION    , kJavaClassDefinitionTranslateStateAnnotation              );
 }
 
-static cee_boolean java_class_definition_trap(CEESourceFregment* fregment, 
+static cee_boolean java_class_definition_trap(CEESourceFragment* fragment,
                                               CEEList** pp)
 {
     enum _State {
@@ -1815,8 +1815,8 @@ next_token:
     
     
     p = TOKEN_LAST(identifier);
-    definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                           fregment->subject_ref,
+    definition = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                           fragment->subject_ref,
                                                            p,
                                                            p,
                                                            kCEESourceSymbolTypeClassDefinition,
@@ -1826,13 +1826,13 @@ next_token:
     if (definition) {
         if (superclasses) {
             superclasses_str = java_name_scope_list_string_create(superclasses,
-                                                                  fregment->subject_ref);
+                                                                  fragment->subject_ref);
             derives_str = cee_strdup(superclasses_str);
         }
         
         if (superinterfaces) {
             superinterfaces_str = java_name_scope_list_string_create(superinterfaces,
-                                                                     fregment->subject_ref);
+                                                                     fragment->subject_ref);
             if (derives_str)
                 cee_strconcat0(&derives_str, ",", superinterfaces_str, NULL);
             else
@@ -1841,12 +1841,12 @@ next_token:
         
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
         definition->derives = derives_str;
-        definition->proto_descriptor = java_object_type_proto_descriptor_create(fregment,
+        definition->proto_descriptor = java_object_type_proto_descriptor_create(fragment,
                                                                                 definition,
                                                                                 definition->derives);
-        fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-        cee_source_fregment_type_set_exclusive(fregment,
-                                               kCEESourceFregmentTypeClassDefinition);
+        fragment->symbols = cee_list_prepend(fragment->symbols, definition);
+        cee_source_fragment_type_set_exclusive(fragment,
+                                               kCEESourceFragmentTypeClassDefinition);
     }
     
     *pp = NULL;
@@ -1917,7 +1917,7 @@ static void java_interface_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(java_interface_definition_translate_table,  kJavaInterfaceDefinitionTranslateStateAnnotationListEnd     , kCEETokenID_IDENTIFIER    , kJavaInterfaceDefinitionTranslateStateIdentifier              );
 }
 
-static cee_boolean java_interface_definition_trap(CEESourceFregment* fregment,
+static cee_boolean java_interface_definition_trap(CEESourceFragment* fragment,
                                                   CEEList** pp)
 {
     enum _State {
@@ -1998,8 +1998,8 @@ next_token:
         goto exit;
     
     p = TOKEN_LAST(identifier);
-    definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                           fregment->subject_ref, 
+    definition = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                           fragment->subject_ref,
                                                            p, 
                                                            p, 
                                                            kCEESourceSymbolTypeInterfaceDefinition,
@@ -2009,16 +2009,16 @@ next_token:
         
         if (extendinterfaces)
             derives_str = java_name_scope_list_string_create(extendinterfaces,
-                                                             fregment->subject_ref);
+                                                             fragment->subject_ref);
         
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
         definition->derives = derives_str;
-        definition->proto_descriptor = java_object_type_proto_descriptor_create(fregment,
+        definition->proto_descriptor = java_object_type_proto_descriptor_create(fragment,
                                                                                 definition,
                                                                                 definition->derives);
-        fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-        cee_source_fregment_type_set_exclusive(fregment,
-                                               kCEESourceFregmentTypeInterfaceDefinition);
+        fragment->symbols = cee_list_prepend(fragment->symbols, definition);
+        cee_source_fragment_type_set_exclusive(fragment,
+                                               kCEESourceFragmentTypeInterfaceDefinition);
     }
         
     *pp = NULL;
@@ -2082,7 +2082,7 @@ static void java_enum_definition_translate_table_init(void)
     TRANSLATE_STATE_SET(java_enum_definition_translate_table, kJavaEnumDefinitionTranslateStateSuperinterfaces      , kCEETokenID_ANNOTATION    , kJavaEnumDefinitionTranslateStateAnnotation               );
 }
 
-static cee_boolean java_enum_definition_trap(CEESourceFregment* fregment,
+static cee_boolean java_enum_definition_trap(CEESourceFragment* fragment,
                                              CEEList** pp)
 {
     enum _State {
@@ -2165,8 +2165,8 @@ next_token:
 
     
     p = TOKEN_LAST(identifier);
-    definition = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                           fregment->subject_ref, 
+    definition = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                           fragment->subject_ref,
                                                            p, 
                                                            p, 
                                                            kCEESourceSymbolTypeEnumDefinition, 
@@ -2175,16 +2175,16 @@ next_token:
     if (definition) {
         if (supperinterfaces)
             derives_str = java_name_scope_list_string_create(supperinterfaces,
-                                                             fregment->subject_ref);
+                                                             fragment->subject_ref);
         
         cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
         definition->derives = derives_str;
-        definition->proto_descriptor = java_object_type_proto_descriptor_create(fregment,
+        definition->proto_descriptor = java_object_type_proto_descriptor_create(fragment,
                                                                                 definition,
                                                                                 definition->derives);
-        fregment->symbols = cee_list_prepend(fregment->symbols, definition);
-        cee_source_fregment_type_set_exclusive(fregment,
-                                               kCEESourceFregmentTypeEnumDefinition);
+        fragment->symbols = cee_list_prepend(fragment->symbols, definition);
+        cee_source_fragment_type_set_exclusive(fragment,
+                                               kCEESourceFragmentTypeEnumDefinition);
     }
     
     *pp = NULL;
@@ -2207,13 +2207,13 @@ exit:
     return ret;
 }
 
-static cee_boolean java_enumerators_parse(CEESourceFregment* fregment)
+static cee_boolean java_enumerators_parse(CEESourceFragment* fragment)
 {
-    if (!cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition))
+    if (!cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeEnumDefinition))
         return FALSE;
     
     cee_boolean ret = FALSE;
-    CEESourceFregment* grandfather = NULL;
+    CEESourceFragment* grandfather = NULL;
     CEESourceSymbol* enum_symbol = NULL;
     CEEList* enum_symbols = NULL;
     CEESourceSymbol* enumerator = NULL;
@@ -2223,13 +2223,13 @@ static cee_boolean java_enumerators_parse(CEESourceFregment* fregment)
     CEEList* q = NULL;
     cee_boolean enumurating = TRUE;
     
-    grandfather = cee_source_fregment_grandfather_get(fregment);
-    enum_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+    grandfather = cee_source_fragment_grandfather_get(fragment);
+    enum_symbols = cee_source_fragment_symbols_search_by_type(grandfather,
                                                               kCEESourceSymbolTypeEnumDefinition);
     if (enum_symbols)
         enum_symbol = cee_list_nth_data(enum_symbols, 0);
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         if (token->identifier == kCEETokenID_IDENTIFIER && enumurating)
@@ -2237,8 +2237,8 @@ static cee_boolean java_enumerators_parse(CEESourceFregment* fregment)
         
         if (token->identifier == ',' || token->identifier == ';' || !TOKEN_NEXT(p)) {
             if (q) {
-                enumerator = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                       fregment->subject_ref,
+                enumerator = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                       fragment->subject_ref,
                                                                        q,
                                                                        q,
                                                                        kCEESourceSymbolTypeEnumerator,
@@ -2246,7 +2246,7 @@ static cee_boolean java_enumerators_parse(CEESourceFregment* fregment)
                                                                        kCEETokenStringOptionCompact);
                 if (enumerator) {
                     enumerator->proto_descriptor =
-                        java_enumerator_proto_descriptor_create(token->fregment_ref,
+                        java_enumerator_proto_descriptor_create(token->fragment_ref,
                                                                 enumerator,
                                                                 enum_symbol->name);
                     cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
@@ -2267,8 +2267,8 @@ static cee_boolean java_enumerators_parse(CEESourceFregment* fregment)
         cee_list_free(enum_symbols);
     
     if (enumerators) {
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeEnumerators);
-        fregment->symbols = cee_list_concat(fregment->symbols, enumerators);
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeEnumerators);
+        fragment->symbols = cee_list_concat(fragment->symbols, enumerators);
         ret = TRUE;
     }
     
@@ -2281,11 +2281,11 @@ exit:
     return ret;
 }
 
-static cee_char* java_enumerator_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_enumerator_proto_descriptor_create(CEESourceFragment* fragment,
                                                          CEESourceSymbol* enumerator,
                                                          const cee_char* proto)
 {
-    if (!fregment || !enumerator)
+    if (!fragment || !enumerator)
         return NULL;
     
     cee_char* descriptor = NULL;
@@ -2304,30 +2304,30 @@ static cee_char* java_enumerator_proto_descriptor_create(CEESourceFregment* freg
     return descriptor;
 }
 
-static cee_char* java_declaration_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_declaration_proto_descriptor_create(CEESourceFragment* fragment,
                                                           CEEList* prefix,
                                                           CEEList* prefix_tail,
                                                           CEEList* identifier)
 {
-    if (!fregment || !identifier)
+    if (!fragment || !identifier)
         return NULL;
     
-    CEESourceFregment* grandfather = NULL;
+    CEESourceFragment* grandfather = NULL;
     const cee_char* access_level = "public";
     cee_char* proto = NULL;
     cee_char* descriptor = NULL;
-    const cee_char* subject = fregment->subject_ref;
+    const cee_char* subject = fragment->subject_ref;
     cee_char* identifier_str = NULL;
     
-    access_level = java_access_level_search(fregment, SOURCE_FREGMENT_TOKENS_FIRST(fregment), NULL);
+    access_level = java_access_level_search(fragment, SOURCE_FREGMENT_TOKENS_FIRST(fragment), NULL);
     if (!access_level) {
-        grandfather = cee_source_fregment_grandfather_get(fregment);
+        grandfather = cee_source_fragment_grandfather_get(fragment);
         if (grandfather) {
-            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
-                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition) ||
-                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeEnumDefinition))
+            if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeClassDefinition) ||
+                cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeInterfaceDefinition) ||
+                cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeEnumDefinition))
                 access_level = "private";
-            else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeEnumeratorBlock))
+            else if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeEnumeratorBlock))
                 access_level = "public";
         }
         if (!access_level)
@@ -2342,7 +2342,7 @@ static cee_char* java_declaration_proto_descriptor_create(CEESourceFregment* fre
         cee_strconcat0(&descriptor, ", \"access_level\":", "\"", access_level, "\"", NULL);
     
     if (prefix && prefix_tail)
-        proto = java_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+        proto = java_type_descriptor_from_token_slice(fragment, prefix, prefix_tail);
     if (proto) {
         cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto, "\"", NULL);
         cee_free(proto);
@@ -2360,27 +2360,27 @@ static cee_char* java_declaration_proto_descriptor_create(CEESourceFregment* fre
     return descriptor;
 }
 
-static cee_char* java_object_type_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_object_type_proto_descriptor_create(CEESourceFragment* fragment,
                                                           CEESourceSymbol* definition,
                                                           const cee_char* derives_str)
 {
-    if (!fregment || !definition)
+    if (!fragment || !definition)
         return NULL;
     
-    CEESourceFregment* grandfather = NULL;
+    CEESourceFragment* grandfather = NULL;
     const cee_char* access_level = "public";
     cee_char* descriptor = NULL;
     
-    access_level = java_access_level_search(fregment,
-                                            SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+    access_level = java_access_level_search(fragment,
+                                            SOURCE_FREGMENT_TOKENS_FIRST(fragment),
                                             NULL);
         
     if (!access_level) {
-        grandfather = cee_source_fregment_grandfather_get(fregment);
+        grandfather = cee_source_fragment_grandfather_get(fragment);
         if (grandfather) {
-            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
-                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition) ||
-                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeEnumDefinition))
+            if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeClassDefinition) ||
+                cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeInterfaceDefinition) ||
+                cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeEnumDefinition))
                 access_level = "private";
         }
         if (!access_level)
@@ -2493,22 +2493,22 @@ static void java_enumerator_block_translate_table_init(void)
     TRANSLATE_STATE_SET(java_enumerator_block_translate_table, kJavaEnumeratorBlockTranslateStateIdentifier    , '{'                               , kJavaEnumeratorBlockTranslateStateConfirm       );
 }
 
-static cee_boolean java_enumerator_block_parse(CEESourceFregment* fregment)
+static cee_boolean java_enumerator_block_parse(CEESourceFragment* fragment)
 {
-    if (!cee_source_fregment_grandfather_type_is(fregment, kCEESourceFregmentTypeEnumDefinition))
+    if (!cee_source_fragment_grandfather_type_is(fragment, kCEESourceFragmentTypeEnumDefinition))
         return FALSE;
     
     cee_boolean ret = FALSE;
     CEEToken* token = NULL;
     CEEList* p = NULL;
     CEEList* identifier = NULL;
-    CEESourceFregment* grandfather = NULL;
+    CEESourceFragment* grandfather = NULL;
     CEESourceSymbol* enum_symbol = NULL;
     CEEList* enum_symbols = NULL;
     CEESourceSymbol* enumerator = NULL;
     JavaEnumeratorBlockTranslateState current = kJavaEnumeratorBlockTranslateStateInit;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         
@@ -2537,8 +2537,8 @@ next_token:
     if (current != kJavaEnumeratorBlockTranslateStateConfirm)
         goto exit;
     
-    enumerator = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                           fregment->subject_ref,
+    enumerator = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                           fragment->subject_ref,
                                                            identifier,
                                                            identifier,
                                                            kCEESourceSymbolTypeEnumerator,
@@ -2546,18 +2546,18 @@ next_token:
                                                            kCEETokenStringOptionCompact);
     if (enumerator) {
         cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
-        cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeEnumeratorBlock);
+        cee_source_fragment_type_set_exclusive(fragment, kCEESourceFragmentTypeEnumeratorBlock);
         
-        grandfather = cee_source_fregment_grandfather_get(fregment);
-        enum_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+        grandfather = cee_source_fragment_grandfather_get(fragment);
+        enum_symbols = cee_source_fragment_symbols_search_by_type(grandfather,
                                                                   kCEESourceSymbolTypeEnumDefinition);
         if (enum_symbols)
             enum_symbol = cee_list_nth_data(enum_symbols, 0);
         
-        enumerator->proto_descriptor = java_enumerator_proto_descriptor_create(fregment,
+        enumerator->proto_descriptor = java_enumerator_proto_descriptor_create(fragment,
                                                                                enumerator,
                                                                                enum_symbol->name);
-        fregment->symbols = cee_list_prepend(fregment->symbols, enumerator);
+        fragment->symbols = cee_list_prepend(fragment->symbols, enumerator);
     }
     
 #ifdef DEBUG_METHOD_DEFINITION
@@ -2656,7 +2656,7 @@ static void java_method_translate_table_init(void)
     TRANSLATE_STATE_SET(java_method_translate_table, kJavaMethodTranslateStateExceptionSeparator   , kCEETokenID_IDENTIFIER            , kJavaMethodTranslateStateException              );
 }
 
-static cee_boolean java_method_parse(CEESourceFregment* fregment)
+static cee_boolean java_method_parse(CEESourceFragment* fragment)
 {
     cee_boolean ret = FALSE;
     cee_boolean is_class_member = FALSE;
@@ -2664,24 +2664,24 @@ static cee_boolean java_method_parse(CEESourceFregment* fregment)
     JavaMethodTranslateState prev = kJavaMethodTranslateStateInit;
     CEEToken* token = NULL;
     CEEList* p = NULL;
-    CEESourceFregment* child = NULL;
-    CEESourceFregment* grandfather = NULL;
+    CEESourceFragment* child = NULL;
+    CEESourceFragment* grandfather = NULL;
     CEEList* identifier = NULL;
     CEEList* parameter_list = NULL;
     CEEList* parameter_list_end = NULL;
     CEESourceSymbol* method = NULL;
     CEESourceSymbolType symbol_type = kCEESourceSymbolTypeUnknow;
         
-    grandfather = cee_source_fregment_grandfather_get(fregment);
+    grandfather = cee_source_fragment_grandfather_get(fragment);
     if (grandfather) {
-        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
-            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition) ||
-            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeEnumDefinition) ||
-            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeEnumeratorBlock))
+        if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeClassDefinition) ||
+            cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeInterfaceDefinition) ||
+            cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeEnumDefinition) ||
+            cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeEnumeratorBlock))
             is_class_member = TRUE;
     }
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         
@@ -2741,8 +2741,8 @@ next_token:
         !identifier || !parameter_list)
         goto exit;
     
-    method = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                       fregment->subject_ref,
+    method = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                       fragment->subject_ref,
                                                        identifier,
                                                        identifier,
                                                        symbol_type,
@@ -2752,22 +2752,22 @@ next_token:
         cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
         
         if (symbol_type == kCEESourceSymbolTypeFunctionDefinition)
-            cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDefinition);
+            cee_source_fragment_type_set_exclusive(fragment, kCEESourceFragmentTypeFunctionDefinition);
         else if (symbol_type == kCEESourceSymbolTypeFunctionDeclaration)
-            cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeFunctionDeclaration);
+            cee_source_fragment_type_set_exclusive(fragment, kCEESourceFragmentTypeFunctionDeclaration);
         
-        child = cee_source_fregment_child_index_by_leaf(fregment, parameter_list->data);
+        child = cee_source_fragment_child_index_by_leaf(fragment, parameter_list->data);
         if (child) {
             child = SOURCE_FREGMENT_CHILDREN_FIRST(child)->data;
             java_method_parameters_parse(child);
         }
-        method->proto_descriptor = java_method_proto_descriptor_create(fregment,
-                                                                       SOURCE_FREGMENT_TOKENS_FIRST(fregment),
+        method->proto_descriptor = java_method_proto_descriptor_create(fragment,
+                                                                       SOURCE_FREGMENT_TOKENS_FIRST(fragment),
                                                                        TOKEN_PREV(identifier),
                                                                        identifier,
                                                                        parameter_list,
                                                                        parameter_list_end);
-        fregment->symbols = cee_list_prepend(fregment->symbols, method);
+        fragment->symbols = cee_list_prepend(fragment->symbols, method);
     }
     
 #ifdef DEBUG_METHOD_DEFINITION
@@ -2846,7 +2846,7 @@ static void java_method_parameters_declaration_translate_table_init(void)
     TRANSLATE_STATE_SET(java_method_parameters_declaration_translate_table, kJavaMethodParametersDeclarationTranslateStateThis                  , ','                               , kJavaMethodParametersDeclarationTranslateStateConfirm                 );
 }
 
-static cee_boolean java_method_parameters_parse(CEESourceFregment* fregment)
+static cee_boolean java_method_parameters_parse(CEESourceFragment* fragment)
 {
     cee_boolean ret = TRUE;
     JavaMethodParametersDeclarationTranslateState current = kJavaMethodParametersDeclarationTranslateStateInit;
@@ -2857,14 +2857,10 @@ static cee_boolean java_method_parameters_parse(CEESourceFregment* fregment)
     CEEList* prefix = NULL;
     CEEList* identifier = NULL;
         
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     prefix = p;
     while (p) {
         token = p->data;
-        
-        if (cee_token_id_is_newline(token->identifier) ||
-            cee_token_id_is_whitespace(token->identifier))
-            goto next_token;
         
         prev = current;
         current = java_method_parameters_declaration_translate_table[current][token->identifier];
@@ -2893,10 +2889,10 @@ static cee_boolean java_method_parameters_parse(CEESourceFregment* fregment)
         
         if (current == kJavaMethodParametersDeclarationTranslateStateConfirm || !TOKEN_NEXT(p)) {
             if (identifier)
-                parameter = java_method_parameter_create(fregment, prefix, identifier);
+                parameter = java_method_parameter_create(fragment, prefix, identifier);
                         
             if (parameter)
-                fregment->symbols = cee_list_append(fregment->symbols, parameter);
+                fragment->symbols = cee_list_append(fragment->symbols, parameter);
             
             parameter = NULL;
             identifier = NULL;
@@ -2915,23 +2911,23 @@ next_token:
         p = TOKEN_NEXT(p);
     }
     
-    if (fregment->symbols)
-        cee_source_fregment_type_set(fregment, kCEESourceFregmentTypeDeclaration);
+    if (fragment->symbols)
+        cee_source_fragment_type_set(fragment, kCEESourceFragmentTypeDeclaration);
     
 #ifdef DEBUG_METHOD_DEFINITION
-    if (fregment->symbols)
-        cee_source_symbols_print(fregment->symbols);
+    if (fragment->symbols)
+        cee_source_symbols_print(fragment->symbols);
 #endif
     
     return ret;
 }
 
-static CEESourceSymbol* java_method_parameter_create(CEESourceFregment* fregment,
+static CEESourceSymbol* java_method_parameter_create(CEESourceFragment* fragment,
                                                      CEEList* prefix,
                                                      CEEList* identifier)
 {
-    CEESourceSymbol* parameter = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                           fregment->subject_ref,
+    CEESourceSymbol* parameter = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                           fragment->subject_ref,
                                                                            identifier,
                                                                            identifier,
                                                                            kCEESourceSymbolTypeFunctionParameter,
@@ -2943,7 +2939,7 @@ static CEESourceSymbol* java_method_parameter_create(CEESourceFregment* fregment
     
     cee_token_slice_state_mark(identifier, identifier, kCEETokenStateSymbolOccupied);
     if (prefix && TOKEN_PREV(identifier)) {
-        parameter->proto_descriptor = java_method_parameter_proto_descriptor_create(fregment,
+        parameter->proto_descriptor = java_method_parameter_proto_descriptor_create(fragment,
                                                                                     prefix,
                                                                                     TOKEN_PREV(identifier),
                                                                                     parameter);
@@ -2951,12 +2947,12 @@ static CEESourceSymbol* java_method_parameter_create(CEESourceFregment* fregment
     return parameter;
 }
 
-static cee_char* java_method_parameter_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_method_parameter_proto_descriptor_create(CEESourceFragment* fragment,
                                                                CEEList* prefix,
                                                                CEEList* prefix_tail,
                                                                CEESourceSymbol* parameter)
 {
-    if (!fregment || !parameter)
+    if (!fragment || !parameter)
         return NULL;
     
     cee_char* descriptor = NULL;
@@ -2970,7 +2966,7 @@ static cee_char* java_method_parameter_proto_descriptor_create(CEESourceFregment
         cee_strconcat0(&descriptor, ", \"name\":", "\"", parameter->name, "\"", NULL);
     
     if (prefix && prefix_tail)
-        proto_str = java_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+        proto_str = java_type_descriptor_from_token_slice(fragment, prefix, prefix_tail);
     if (proto_str) {
         cee_strconcat0(&descriptor, ", \"proto\":", "\"", proto_str, "\"", NULL);
         cee_free(proto_str);
@@ -2981,11 +2977,11 @@ static cee_char* java_method_parameter_proto_descriptor_create(CEESourceFregment
     return descriptor;
 }
 
-static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregment,
+static cee_char* java_type_descriptor_from_token_slice(CEESourceFragment* fragment,
                                                        CEEList* p,
                                                        CEEList* q)
 {
-    const cee_char* subject = fregment->subject_ref;
+    const cee_char* subject = fragment->subject_ref;
     cee_char* proto = NULL;
     CEEToken* token = NULL;
     cee_boolean found_type = FALSE;
@@ -3035,21 +3031,21 @@ static cee_char* java_type_descriptor_from_token_slice(CEESourceFregment* fregme
     return proto;
 }
 
-static cee_char* java_method_proto_descriptor_create(CEESourceFregment* fregment,
+static cee_char* java_method_proto_descriptor_create(CEESourceFragment* fragment,
                                                      CEEList* prefix,
                                                      CEEList* prefix_tail,
                                                      CEEList* identifier,
                                                      CEEList* parameter_list,
                                                      CEEList* parameter_list_end)
 {
-    if (!fregment ||
+    if (!fragment ||
         !identifier ||
         !parameter_list ||
         !parameter_list_end)
         return NULL;
     
-    const cee_char* subject = fregment->subject_ref;
-    CEEList* tokens = cee_source_fregment_tokens_expand(fregment);
+    const cee_char* subject = fragment->subject_ref;
+    CEEList* tokens = cee_source_fragment_tokens_expand(fragment);
     CEEList* p = NULL;
     CEEToken* token = NULL;
     CEEToken* token_prev = NULL;
@@ -3063,37 +3059,37 @@ static cee_char* java_method_proto_descriptor_create(CEESourceFregment* fregment
     cee_boolean is_class_member = FALSE;
     CEEList* parent_symbols = NULL;
     CEESourceSymbol* parent_symbol = NULL;
-    CEESourceFregment* grandfather = NULL;
+    CEESourceFragment* grandfather = NULL;
     const cee_char* access_level = "public";
     cee_char* return_type_str = NULL;
     
-    grandfather = cee_source_fregment_grandfather_get(fregment);
+    grandfather = cee_source_fragment_grandfather_get(fragment);
     if (grandfather) {
-        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition))
-            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+        if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeClassDefinition))
+            parent_symbols = cee_source_fragment_symbols_search_by_type(grandfather,
                                                                         kCEESourceSymbolTypeClassDefinition);
-        else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition))
-            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+        else if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeInterfaceDefinition))
+            parent_symbols = cee_source_fragment_symbols_search_by_type(grandfather,
                                                                         kCEESourceSymbolTypeInterfaceDefinition);
-        else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeEnumDefinition))
-            parent_symbols = cee_source_fregment_symbols_search_by_type(grandfather,
+        else if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeEnumDefinition))
+            parent_symbols = cee_source_fragment_symbols_search_by_type(grandfather,
                                                                         kCEESourceSymbolTypeEnumDefinition);
         
-        if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
-            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition) ||
-            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeEnumDefinition) ||
-            cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeEnumeratorBlock))
+        if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeClassDefinition) ||
+            cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeInterfaceDefinition) ||
+            cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeEnumDefinition) ||
+            cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeEnumeratorBlock))
             is_class_member = TRUE;
     }
     
-    access_level = java_access_level_search(fregment, SOURCE_FREGMENT_TOKENS_FIRST(fregment), NULL);
+    access_level = java_access_level_search(fragment, SOURCE_FREGMENT_TOKENS_FIRST(fragment), NULL);
     if (!access_level) {
         if (grandfather) {
-            if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeClassDefinition) ||
-                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeInterfaceDefinition) ||
-                cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeEnumDefinition))
+            if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeClassDefinition) ||
+                cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeInterfaceDefinition) ||
+                cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeEnumDefinition))
                 access_level = "private";
-            else if (cee_source_fregment_type_is(grandfather, kCEESourceFregmentTypeEnumeratorBlock))
+            else if (cee_source_fragment_type_is(grandfather, kCEESourceFragmentTypeEnumeratorBlock))
                 access_level = "public";
         }
         if (!access_level)
@@ -3101,7 +3097,7 @@ static cee_char* java_method_proto_descriptor_create(CEESourceFregment* fregment
     }
     
     if (prefix && prefix_tail)
-        return_type_str = java_type_descriptor_from_token_slice(fregment, prefix, prefix_tail);
+        return_type_str = java_type_descriptor_from_token_slice(fragment, prefix, prefix_tail);
     /**
      * Constructor and Destructor doesn't has return type declaraton,
      * use its parent symbol type as return type
@@ -3322,7 +3318,7 @@ static cee_boolean should_proto_descriptor_append_whitespace(CEEToken* token,
              !token_id_is_punctuation(token->identifier)));
 }
 
-static const cee_char* java_access_level_search(CEESourceFregment* fregment,
+static const cee_char* java_access_level_search(CEESourceFragment* fragment,
                                                 CEEList* begin,
                                                 CEEList* end)
 {
@@ -3349,15 +3345,15 @@ static const cee_char* java_access_level_search(CEESourceFregment* fregment,
 
 static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
                                           CEESourceSymbolReference* reference,
-                                          CEESourceFregment* prep_directive,
-                                          CEESourceFregment* statement,
+                                          CEESourceFragment* prep_directive,
+                                          CEESourceFragment* statement,
                                           CEESourceSymbol** symbol)
 {
     cee_boolean ret = FALSE;
     CEESourceSymbol* statement_symbol = NULL;
     CEESourceSymbol* prep_directive_symbol = NULL;
     CEEList* searched_symbols = NULL;
-    CEESourceFregment* current = cee_source_fregment_from_reference_get(reference);
+    CEESourceFragment* current = cee_source_fragment_from_reference_get(reference);
     
     if (!current || !symbol || reference->type == kCEESourceReferenceTypeMember)
         goto exit;
@@ -3369,7 +3365,7 @@ static cee_boolean symbol_search_in_scope(CEESourceParserRef parser_ref,
         statement_symbol = cee_source_symbol_copy(statement_symbol);
     
     searched_symbols =
-        cee_source_fregment_tree_symbols_search(prep_directive,
+        cee_source_fragment_tree_symbols_search(prep_directive,
                                                 cee_source_symbol_matcher_by_name,
                                                 (cee_pointer)reference->name);
     if (searched_symbols) {
@@ -3405,33 +3401,33 @@ exit:
     return ret;
 }
 
-static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* current,
+static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFragment* current,
                                                          const cee_char* name)
 {
     CEEList* symbols = NULL;
     CEESourceSymbol* referenced = NULL;
-    CEESourceFregment* searching = current;
+    CEESourceFragment* searching = current;
     CEEList* p = NULL;
     
     if (!searching)
         goto exit;
     
-    /** search current fregment */
-    symbols = cee_source_fregment_symbols_search_by_name(searching, name);
+    /** search current fragment */
+    symbols = cee_source_fragment_symbols_search_by_name(searching, name);
     if (symbols) {
         referenced = cee_list_nth_data(symbols, 0);
         goto exit;
     }
     
     /**
-     * Search current round bracket list child fregment,
+     * Search current round bracket list child fragment,
      * function parameters , "for" / "while" / "if" statments
      */
     p = SOURCE_FREGMENT_CHILDREN_FIRST(searching);
     while (p) {
         searching = p->data;
-        if (searching->type[kCEESourceFregmentTypeRoundBracketList]) {
-            symbols = cee_source_fregment_symbols_in_children_search_by_name(searching,
+        if (searching->type[kCEESourceFragmentTypeRoundBracketList]) {
+            symbols = cee_source_fragment_symbols_in_children_search_by_name(searching,
                                                                              name);
             if (symbols) {
                 referenced = cee_list_nth_data(symbols, 0);
@@ -3449,18 +3445,18 @@ static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* curr
         p = SOURCE_FREGMENT_PREV(searching->node_ref);
         while (p) {
             searching = p->data;
-            symbols = cee_source_fregment_symbols_search_by_name(searching, name);
+            symbols = cee_source_fragment_symbols_search_by_name(searching, name);
             if (symbols) {
                 referenced = cee_list_nth_data(symbols, 0);
                 goto exit;
             }
             
             /** enumerator search */
-            if (searching->type[kCEESourceFregmentTypeEnumDefinition]) {
+            if (searching->type[kCEESourceFragmentTypeEnumDefinition]) {
                 CEEList* q = SOURCE_FREGMENT_CHILDREN_FIRST(searching);
                 while (q) {
                     searching = q->data;
-                    symbols = cee_source_fregment_symbols_in_children_search_by_name(searching,
+                    symbols = cee_source_fragment_symbols_in_children_search_by_name(searching,
                                                                                      name);
                     if (symbols) {
                         referenced = cee_list_nth_data(symbols, 0);
@@ -3475,10 +3471,10 @@ static CEESourceSymbol* symbol_search_in_scope_recursive(CEESourceFregment* curr
     }
     
     searching = current;
-    if (cee_source_fregment_parent_type_is(searching, kCEESourceFregmentTypeRoundBracketList) ||
-        cee_source_fregment_parent_type_is(searching, kCEESourceFregmentTypeCurlyBracketList) ||
-        cee_source_fregment_parent_type_is(searching, kCEESourceFregmentTypeSquareBracketList)) {
-        searching = cee_source_fregment_grandfather_get(searching);
+    if (cee_source_fragment_parent_type_is(searching, kCEESourceFragmentTypeRoundBracketList) ||
+        cee_source_fragment_parent_type_is(searching, kCEESourceFragmentTypeCurlyBracketList) ||
+        cee_source_fragment_parent_type_is(searching, kCEESourceFragmentTypeSquareBracketList)) {
+        searching = cee_source_fragment_grandfather_get(searching);
         referenced = symbol_search_in_scope_recursive(searching, name);
     }
     

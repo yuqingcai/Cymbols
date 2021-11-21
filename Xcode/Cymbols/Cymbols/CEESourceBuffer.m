@@ -108,17 +108,17 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
 }
 
 - (void)cleanParsedContext {
-    if (_comment_fregment)
-        cee_source_fregment_free_full(_comment_fregment);
-    _comment_fregment = NULL;
+    if (_comment_fragment)
+        cee_source_fragment_free_full(_comment_fragment);
+    _comment_fragment = NULL;
     
-    if (_prep_directive_fregment)
-        cee_source_fregment_free_full(_prep_directive_fregment);
-    _prep_directive_fregment = NULL;
+    if (_prep_directive_fragment)
+        cee_source_fragment_free_full(_prep_directive_fragment);
+    _prep_directive_fragment = NULL;
     
-    if (_statement_fregment)
-        cee_source_fregment_free_full(_statement_fregment);
-    _statement_fregment = NULL;
+    if (_statement_fragment)
+        cee_source_fragment_free_full(_statement_fragment);
+    _statement_fragment = NULL;
         
     if (_tokens)
         cee_list_free_full(_tokens, cee_token_free);
@@ -266,14 +266,14 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
     cee_source_symbol_parse(_parser_ref,
                             [_filePath UTF8String],
                             (const cee_char*)subject,
-                            &_prep_directive_fregment,
-                            &_statement_fregment,
-                            &_comment_fregment,
+                            &_prep_directive_fragment,
+                            &_statement_fragment,
+                            &_comment_fragment,
                             &_tokens,
                             &_source_token_map);
         
-    _prep_directive_symbol_tree = cee_source_fregment_symbol_tree_create(_prep_directive_fregment);
-    _statement_symbol_tree = cee_source_fregment_symbol_tree_create(_statement_fregment);
+    _prep_directive_symbol_tree = cee_source_fragment_symbol_tree_create(_prep_directive_fragment);
+    _statement_symbol_tree = cee_source_fragment_symbol_tree_create(_statement_fragment);
     
     //cee_ulong m1 = cee_timestamp_ms();
     //fprintf(stdout, "parse cost: %ld ms\n", m1 - m0);
@@ -321,8 +321,8 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
                                [_filePath UTF8String],
                                (const cee_char*)subject,
                                _source_token_map,
-                               _prep_directive_fregment,
-                               _statement_fregment,
+                               _prep_directive_fragment,
+                               _statement_fragment,
                                range,
                                &references);
     //cee_ulong m1 = cee_timestamp_ms();
@@ -337,8 +337,8 @@ NSNotificationName CEENotificationSourceBufferReload = @"CEENotificationSourceBu
     
     tags = cee_source_tags_create(_parser_ref,
                                   _source_token_map,
-                                  _prep_directive_fregment,
-                                  _statement_fregment,
+                                  _prep_directive_fragment,
+                                  _statement_fragment,
                                   database,
                                   range,
                                   references,

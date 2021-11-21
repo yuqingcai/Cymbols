@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -158,21 +158,21 @@
                                 </connections>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="htA-Rh-ctM" customClass="CEEContainerView">
-                                <rect key="frame" x="20" y="63" width="680" height="433"/>
+                                <rect key="frame" x="20" y="63" width="680" height="459"/>
                                 <subviews>
                                     <splitView arrangesAllSubviews="NO" dividerStyle="thin" translatesAutoresizingMaskIntoConstraints="NO" id="ePX-hl-o4S" customClass="CEESplitView">
-                                        <rect key="frame" x="1" y="1" width="678" height="431"/>
+                                        <rect key="frame" x="1" y="1" width="678" height="457"/>
                                         <subviews>
                                             <customView fixedFrame="YES" id="R2K-tJ-0gL" customClass="CEETableView">
                                                 <rect key="frame" x="0.0" y="0.0" width="678" height="159"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                             </customView>
                                             <customView fixedFrame="YES" id="oUs-wM-uEi" customClass="CEEView">
-                                                <rect key="frame" x="0.0" y="160" width="678" height="271"/>
+                                                <rect key="frame" x="0.0" y="160" width="678" height="297"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <subviews>
                                                     <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="CDe-fd-ZhS" customClass="CEETitleView">
-                                                        <rect key="frame" x="0.0" y="246" width="678" height="25"/>
+                                                        <rect key="frame" x="0.0" y="272" width="678" height="25"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     </customView>
                                                 </subviews>
@@ -199,7 +199,7 @@
                             <constraint firstAttribute="trailing" secondItem="VQu-cH-28u" secondAttribute="trailing" constant="20" id="Mpy-oL-z7U"/>
                             <constraint firstItem="htA-Rh-ctM" firstAttribute="leading" secondItem="BDH-dz-TVj" secondAttribute="leading" constant="20" id="Swz-Wv-Iha"/>
                             <constraint firstItem="VQu-cH-28u" firstAttribute="top" secondItem="htA-Rh-ctM" secondAttribute="bottom" constant="20" id="WBs-KY-0k6"/>
-                            <constraint firstItem="htA-Rh-ctM" firstAttribute="top" secondItem="BDH-dz-TVj" secondAttribute="top" constant="54" id="eC3-Yi-F9G"/>
+                            <constraint firstItem="htA-Rh-ctM" firstAttribute="top" secondItem="BDH-dz-TVj" secondAttribute="top" constant="28" id="eC3-Yi-F9G"/>
                             <constraint firstAttribute="trailing" secondItem="htA-Rh-ctM" secondAttribute="trailing" constant="20" id="qIt-ax-TR4"/>
                             <constraint firstItem="VQu-cH-28u" firstAttribute="leading" secondItem="xS7-HQ-vc8" secondAttribute="trailing" constant="8" id="sox-iW-Fp0"/>
                             <constraint firstAttribute="bottom" secondItem="VQu-cH-28u" secondAttribute="bottom" constant="20" id="z2p-nT-b1s"/>
@@ -300,7 +300,7 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="PEY-hR-M1e" customClass="CEETextField">
-                                <rect key="frame" x="20" y="471" width="231" height="25"/>
+                                <rect key="frame" x="20" y="497" width="231" height="25"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="231" id="5FR-W6-FtG"/>
                                     <constraint firstAttribute="height" constant="25" id="hkF-Yk-joL"/>
@@ -310,7 +310,7 @@
                                 </userDefinedRuntimeAttributes>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="tR6-5v-Gs5" customClass="CEETextField">
-                                <rect key="frame" x="20" y="438" width="231" height="25"/>
+                                <rect key="frame" x="20" y="464" width="231" height="25"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="25" id="Y9c-aL-PqE"/>
                                     <constraint firstAttribute="width" constant="231" id="Yfn-CN-GdM"/>
@@ -320,21 +320,21 @@
                                 </userDefinedRuntimeAttributes>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="L4q-pz-PLo" customClass="CEEContainerView">
-                                <rect key="frame" x="270" y="63" width="510" height="433"/>
+                                <rect key="frame" x="270" y="63" width="510" height="459"/>
                                 <subviews>
                                     <splitView arrangesAllSubviews="NO" dividerStyle="thin" translatesAutoresizingMaskIntoConstraints="NO" id="c17-0a-dnQ" customClass="CEESplitView">
-                                        <rect key="frame" x="1" y="1" width="508" height="431"/>
+                                        <rect key="frame" x="1" y="1" width="508" height="457"/>
                                         <subviews>
                                             <customView fixedFrame="YES" id="kjX-mq-fYv" customClass="CEETableView">
-                                                <rect key="frame" x="0.0" y="0.0" width="508" height="179"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="508" height="189"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             </customView>
                                             <customView fixedFrame="YES" id="aAA-p7-Vde" customClass="CEEView">
-                                                <rect key="frame" x="0.0" y="180" width="508" height="251"/>
+                                                <rect key="frame" x="0.0" y="190" width="508" height="267"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <subviews>
                                                     <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vq9-EZ-vGZ" customClass="CEETitleView">
-                                                        <rect key="frame" x="1" y="225" width="677" height="25"/>
+                                                        <rect key="frame" x="1" y="241" width="677" height="25"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     </customView>
                                                 </subviews>
@@ -397,7 +397,7 @@
                                 </userDefinedRuntimeAttributes>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="byh-L2-zff" customClass="CEEContainerView">
-                                <rect key="frame" x="20" y="254" width="231" height="166"/>
+                                <rect key="frame" x="20" y="280" width="231" height="166"/>
                                 <subviews>
                                     <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WNH-gL-5qz" customClass="CEECheckBox">
                                         <rect key="frame" x="20" y="120" width="191" height="26"/>
@@ -486,7 +486,7 @@
                             <constraint firstItem="IkI-xj-gL2" firstAttribute="leading" secondItem="meA-TY-8pT" secondAttribute="leading" constant="20" id="53l-no-deW"/>
                             <constraint firstItem="tR6-5v-Gs5" firstAttribute="leading" secondItem="meA-TY-8pT" secondAttribute="leading" constant="20" id="5J7-RE-wTp"/>
                             <constraint firstAttribute="bottom" secondItem="cTS-UI-33l" secondAttribute="bottom" constant="20" symbolic="YES" id="8Co-QY-XRc"/>
-                            <constraint firstItem="PEY-hR-M1e" firstAttribute="top" secondItem="meA-TY-8pT" secondAttribute="top" constant="54" id="BQ1-c4-eaq"/>
+                            <constraint firstItem="PEY-hR-M1e" firstAttribute="top" secondItem="meA-TY-8pT" secondAttribute="top" constant="28" id="BQ1-c4-eaq"/>
                             <constraint firstItem="cTS-UI-33l" firstAttribute="leading" secondItem="AKU-cR-6vN" secondAttribute="trailing" constant="8" symbolic="YES" id="Bsi-Sf-WKD"/>
                             <constraint firstItem="byh-L2-zff" firstAttribute="leading" secondItem="meA-TY-8pT" secondAttribute="leading" constant="20" id="C4p-Tm-s9g"/>
                             <constraint firstAttribute="trailing" secondItem="cTS-UI-33l" secondAttribute="trailing" constant="20" symbolic="YES" id="LQS-5L-Li4"/>
@@ -501,7 +501,7 @@
                             <constraint firstItem="J1I-9g-hqA" firstAttribute="leading" secondItem="meA-TY-8pT" secondAttribute="leading" constant="20" id="mX8-k2-vPu"/>
                             <constraint firstItem="L4q-pz-PLo" firstAttribute="leading" secondItem="PEY-hR-M1e" secondAttribute="trailing" constant="19" id="nf8-PY-SLv"/>
                             <constraint firstItem="OaW-Il-nYA" firstAttribute="leading" secondItem="J1I-9g-hqA" secondAttribute="trailing" constant="8" id="oOc-dq-M7S"/>
-                            <constraint firstItem="L4q-pz-PLo" firstAttribute="top" secondItem="meA-TY-8pT" secondAttribute="top" constant="54" id="pNx-el-gtG"/>
+                            <constraint firstItem="L4q-pz-PLo" firstAttribute="top" secondItem="meA-TY-8pT" secondAttribute="top" constant="28" id="pNx-el-gtG"/>
                             <constraint firstItem="byh-L2-zff" firstAttribute="top" secondItem="tR6-5v-Gs5" secondAttribute="bottom" constant="18" id="qeH-Be-uJI"/>
                             <constraint firstItem="zUj-sM-7jt" firstAttribute="top" relation="greaterThanOrEqual" secondItem="byh-L2-zff" secondAttribute="bottom" constant="104" id="uaM-4a-zHs"/>
                             <constraint firstItem="PEY-hR-M1e" firstAttribute="leading" secondItem="meA-TY-8pT" secondAttribute="leading" constant="20" id="ukR-J7-44n"/>

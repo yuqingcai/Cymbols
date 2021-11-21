@@ -41,7 +41,6 @@ typedef NS_ENUM(NSUInteger, CEEStorePaymentType) {
 @property BOOL verified;
 @property (strong) NSArray* products;
 @property dispatch_semaphore_t semaphore_products;
-@property NSDictionary *receiptVerified;
 @property NSMutableArray* transcationsRestored;
 @end
 
@@ -64,46 +63,53 @@ typedef NS_ENUM(NSUInteger, CEEStorePaymentType) {
     if (_verified)
         return YES;
     
-    NSData *receipt = [NSData dataWithContentsOfURL:[NSBundle mainBundle].appStoreReceiptURL];
+    NSDictionary* verifiedResponse = nil;
+    NSData* receipt = [NSData dataWithContentsOfURL:[NSBundle mainBundle].appStoreReceiptURL];
     
     if (!receipt) {
+        // Receipt doesn't exist, relaunch app and refresh receipt
         exit(173);
     }
     else {
         NSURL *productionURL = [NSURL URLWithString:productionURLString];
         NSURL *sandBoxURL = [NSURL URLWithString:sandboxURLString];
         
-        NSError* error = nil;
-        NSData* data = nil;
+        verifiedResponse = [self verifyReceipt:receipt fromStoreURL:productionURL];
+        if (!verifiedResponse) {
+            NSLog(@"No receipt verify!");
+            return NO;
+        }
         
-        [self verifyReceipt:receipt fromStoreURL:sandBoxURL data:&data error:&error];
-        if (error) {
-            if (error.code == 21007) {
-                [self verifyReceipt:receipt fromStoreURL:productionURL data:&data error:&error];
-                if (error) {
-                    NSLog(@"verify receipt error: %ld", error.code);
-                    return NO;
-                }
-            }
-            else {
-                NSLog(@"verify receipt error: %ld", error.code);
+        if ([verifiedResponse[@"status"] integerValue] == 21007) {
+            verifiedResponse = [self verifyReceipt:receipt fromStoreURL:sandBoxURL];
+            if (!verifiedResponse) {
+                NSLog(@"No receipt verify!");
                 return NO;
             }
         }
         
-        if (data) {
-            _receiptVerified = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-            CEEStorePaymentType paymentType = [self detectPaymentType:_receiptVerified];
-            [self makePaymentProcess:paymentType];
-        }
-        else {
-            NSLog(@"verify receipt error: no data");
-            return NO;
-        }
+        CEEStorePaymentType paymentType = [self detectPaymentType:verifiedResponse];
+        [self makePaymentProcess:paymentType];
     }
     
     _verified = YES;
     return YES;
+}
+
+- (void)logReceiptVerifiedResponse:(NSData*)data {
+    NSArray* searchPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+    NSString* supportDirectory = [searchPaths firstObject];
+    NSString* logPath = [supportDirectory stringByAppendingPathComponent:@"ReceiptResponse.txt"];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:logPath])
+        [[NSFileManager defaultManager] removeItemAtPath:logPath error:nil];
+    
+    NSString* responseString = nil;
+    if (data)
+        responseString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    else
+        responseString = @"No Receipt Verified Response.";
+    
+    [responseString writeToFile:logPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
 }
 
 - (void)restore {
@@ -111,8 +117,7 @@ typedef NS_ENUM(NSUInteger, CEEStorePaymentType) {
     [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
 }
 
-
-- (void)verifyReceipt:(NSData*)receipt fromStoreURL:(NSURL*)url data:(NSData**)receiveData error:(NSError**)receiveError {
+- (NSDictionary*)verifyReceipt:(NSData*)receipt fromStoreURL:(NSURL*)url {
     NSString *encodedReceipt = [receipt base64EncodedStringWithOptions:0];
     NSDictionary *contents = @{
         @"receipt-data": encodedReceipt,
@@ -128,34 +133,29 @@ typedef NS_ENUM(NSUInteger, CEEStorePaymentType) {
     NSURLSession * session = [NSURLSession sessionWithConfiguration:configuration];
     
     __block dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-    __block NSError* error0 = nil;
-    __block NSData* data0 = nil;
+    __block NSDictionary* verifiedResponse = nil;
     NSURLSessionDataTask * dataTask = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        error0 = error;
-        data0 = data;
+        if (!data)
+            verifiedResponse = nil;
+        else
+            verifiedResponse = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        
+        [self logReceiptVerifiedResponse:data];
         dispatch_semaphore_signal(sem);
     }];
     [dataTask resume];
     dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
     
-    *receiveData = data0;
-    *receiveError = error0;
+    return verifiedResponse;
 }
 
-- (CEEStorePaymentType)detectPaymentType:(NSDictionary*)userInfo {
-    NSLog(@"%@", userInfo);
-    
-    NSArray* latest_receipt_info = userInfo[@"latest_receipt_info"];
+- (CEEStorePaymentType)detectPaymentType:(NSDictionary*)verifiedResponse {
+    NSArray* latest_receipt_info = verifiedResponse[@"latest_receipt_info"];
     if (!latest_receipt_info || !latest_receipt_info.count)
         return kCEEStorePaymentTypeIntroductoryOffer;
-        
-    NSDictionary* latest = userInfo[@"latest_receipt_info"][0];
-    NSString* expires_date_string = latest[@"expires_date"];
     
-    //NSLog(@"%@", userInfo[@"latest_receipt_info"]);
-    //NSLog(@"%@", userInfo[@"pending_renewal_info"]);
-    //NSString* expires_date_string_local = [self getLocalDateFormateUTCDate:expires_date_string];
-    //NSLog(@"expiresed date: %@", expires_date_string_local);
+    NSDictionary* latest = verifiedResponse[@"latest_receipt_info"][0];
+    NSString* expires_date_string = latest[@"expires_date"];
     
     NSDate* expires_date = [self getUTCDate:expires_date_string];
     NSDate* current_date = [NSDate date];

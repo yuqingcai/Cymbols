@@ -21,7 +21,7 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* file_path,
                                           cee_int line_no,
                                           CEEList* ranges,
-                                          CEERange fregment_range)
+                                          CEERange fragment_range)
 {
     CEESourceSymbol* symbol = cee_malloc0(sizeof(CEESourceSymbol));
     
@@ -50,7 +50,7 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
     
     symbol->line_no = line_no;
     symbol->ranges = ranges;
-    symbol->fregment_range = fregment_range;
+    symbol->fragment_range = fragment_range;
         
     cee_source_symbol_count ++;
     
@@ -116,7 +116,7 @@ CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol)
     if (symbol->ranges)
         copy->ranges = cee_list_copy_deep(symbol->ranges, cee_range_list_copy, NULL);
     
-    copy->fregment_range = symbol->fregment_range;
+    copy->fragment_range = symbol->fragment_range;
     copy->proto_descriptor = cee_strdup(symbol->proto_descriptor);
     
     return copy;
@@ -158,7 +158,7 @@ CEESourceSymbol* cee_source_symbol_create_from_token_slice(const cee_char* file_
     symbol->ranges = cee_ranges_from_token_slice(begin,
                                                  end,
                                                  kCEERangeListTypeContinue);
-    symbol->fregment_range = cee_range_consistent_from_discrete(symbol->ranges);
+    symbol->fragment_range = cee_range_consistent_from_discrete(symbol->ranges);
     return symbol;
 }
 
@@ -188,7 +188,7 @@ CEESourceSymbol* cee_source_symbol_create_from_tokens(const cee_char* file_path,
                                           option);
     symbol->line_no = token->line_no;
     symbol->ranges = cee_ranges_from_tokens(TOKEN_FIRST(tokens), kCEERangeListTypeSeparate);
-    symbol->fregment_range = cee_range_consistent_from_discrete(symbol->ranges);
+    symbol->fragment_range = cee_range_consistent_from_discrete(symbol->ranges);
     return symbol;
 }
 
@@ -224,7 +224,7 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     const cee_char* parent = "?";
     const cee_char* alias = "?";
     cee_char* ranges = NULL;
-    cee_char* fregment_range = NULL;
+    cee_char* fragment_range = NULL;
     cee_int line_no = symbol->line_no;
     
     CEESourceSymbolType type = symbol->type;
@@ -249,7 +249,7 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
     else
         ranges = cee_strdup("?");
     
-    fregment_range = cee_string_from_range(&symbol->fregment_range);
+    fragment_range = cee_string_from_range(&symbol->fragment_range);
     
     if (symbol->parent)
         parent = symbol->parent;
@@ -264,14 +264,14 @@ void cee_source_symbol_print(CEESourceSymbol* symbol)
             ranges,
             derives,
             filepath,
-            fregment_range,
+            fragment_range,
             parent);
     
     if (ranges)
         cee_free(ranges);
     
-    if (fregment_range)
-        cee_free(fregment_range);
+    if (fragment_range)
+        cee_free(fragment_range);
 }
 
 void cee_source_symbols_print(CEEList* symbols)

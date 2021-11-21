@@ -24,7 +24,7 @@ typedef enum _GNUASMPrepDirectiveDefineTranslateState {
     kGNUASMPrepDirectiveDefineTranslateStateMax,
 } GNUASMPrepDirectiveDefineTranslateState;
 
-typedef cee_boolean (*ParseTrap)(CEESourceFregment*, 
+typedef cee_boolean (*ParseTrap)(CEESourceFragment*,
                                  CEEList**);
 
 typedef enum _GNUASMParserState {
@@ -36,12 +36,12 @@ typedef struct _GNUASMParser {
     CEESourceParserRef super;
     const cee_char* filepath_ref;
     const cee_char* subject_ref;
-    CEESourceFregment* statement_root;
-    CEESourceFregment* statement_current;
-    CEESourceFregment* prep_directive_root;
-    CEESourceFregment* prep_directive_current;
-    CEESourceFregment* comment_root;
-    CEESourceFregment* comment_current;
+    CEESourceFragment* statement_root;
+    CEESourceFragment* statement_current;
+    CEESourceFragment* prep_directive_root;
+    CEESourceFragment* prep_directive_current;
+    CEESourceFragment* comment_root;
+    CEESourceFragment* comment_current;
     ParseTrap block_header_traps[CEETokenID_MAX];
     GNUASMParserState state;
 } GNUASMParser;
@@ -60,35 +60,35 @@ static void parser_state_clear(GNUASMParser* parser,
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    const cee_char* filepath,
                                    const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
-                                   CEESourceFregment* prep_directive,
-                                   CEESourceFregment* statement,
+                                   CEESourceFragment* prep_directive,
+                                   CEESourceFragment* statement,
                                    CEERange range,
                                    CEEList** references);
-static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser_ref,
+static cee_boolean references_in_source_fragment_parse(CEESourceParserRef parser_ref,
                                                        const cee_char* filepath,
-                                                       CEESourceFregment* fregment,
+                                                       CEESourceFragment* fragment,
                                                        const cee_char* subject,
-                                                       CEESourceFregment* prep_directive,
-                                                       CEESourceFregment* statement,
+                                                       CEESourceFragment* prep_directive,
+                                                       CEESourceFragment* statement,
                                                        CEERange range,
                                                        CEEList** references);
-static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment* fregment,
+static CEESourceFragment* gnu_asm_referernce_fragment_convert(CEESourceFragment* fragment,
                                                               const cee_char* subject);
-static void gnu_asm_reference_fregment_parse(CEESourceParserRef parser_ref,
+static void gnu_asm_reference_fragment_parse(CEESourceParserRef parser_ref,
                                              const cee_char* filepath,
-                                             CEESourceFregment* fregment,
+                                             CEESourceFragment* fragment,
                                              const cee_char* subject,
-                                             CEESourceFregment* prep_directive,
-                                             CEESourceFregment* statement,
+                                             CEESourceFragment* prep_directive,
+                                             CEESourceFragment* statement,
                                              CEEList** references);
 static void symbol_parse_init(GNUASMParser* parser,
                               const cee_char* filepath,
@@ -103,7 +103,7 @@ static cee_boolean token_is_comment(CEEToken* token);
 static cee_boolean comment_attach(GNUASMParser* parser);
 static cee_boolean comment_token_push(GNUASMParser* parser,
                                       CEEToken* push);
-static cee_boolean comment_fregment_reduce(GNUASMParser* parser);
+static cee_boolean comment_fragment_reduce(GNUASMParser* parser);
 
 /** prep directive */
 static cee_boolean prep_directive_parsing(GNUASMParser* parser);
@@ -111,19 +111,19 @@ static cee_boolean prep_directive_token_push(GNUASMParser* parser,
                                              CEEToken* push);
 static cee_boolean prep_directive_terminated(GNUASMParser* parser);
 static cee_boolean prep_directive_attach(GNUASMParser* parser,
-                                         CEESourceFregmentType type);
+                                         CEESourceFragmentType type);
 static cee_boolean prep_directive_sub_attach(GNUASMParser* parser,
-                                             CEESourceFregmentType type);
+                                             CEESourceFragmentType type);
 static void prep_directive_branch_push(GNUASMParser* parser);
 static cee_boolean prep_directive_branch_pop(GNUASMParser* parser);
 static cee_boolean prep_directive_pop(GNUASMParser* parser);
 static void prep_directive_parse(GNUASMParser* parser);
 static cee_boolean should_statement_parsing(GNUASMParser* parser);
 static void gnu_asm_prep_directive_include_translate_table_init(void);
-static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment);
+static cee_boolean prep_directive_include_parse(CEESourceFragment* fragment);
 static void gnu_asm_prep_directive_define_translate_table_init(void);
-static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment);
-static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment);
+static cee_boolean prep_directive_define_parse(CEESourceFragment* fragment);
+static cee_boolean prep_directive_common_parse(CEESourceFragment* fragment);
 
 /** statement */
 static void statement_parse(GNUASMParser* parser);
@@ -132,9 +132,9 @@ static cee_boolean statement_parsing(GNUASMParser* parser);
 static cee_boolean statement_token_push(GNUASMParser* parser,
                                         CEEToken* push);
 static cee_boolean statement_attach(GNUASMParser* parser,
-                                    CEESourceFregmentType type);
+                                    CEESourceFragmentType type);
 static cee_boolean statement_sub_attach(GNUASMParser* parser,
-                                        CEESourceFregmentType type);
+                                        CEESourceFragmentType type);
 static cee_boolean statement_pop(GNUASMParser* parser);
 
 /**
@@ -511,8 +511,8 @@ static cee_boolean token_type_matcher(CEEToken* token,
 {
     if (type & kCEETokenTypeASMDirective) {
         if (token->identifier == kCEETokenID_IDENTIFIER) {
-            CEESourceFregment* fregment = token->fregment_ref;
-            return token_is_directive(fregment->subject_ref, token);
+            CEESourceFragment* fragment = token->fragment_ref;
+            return token_is_directive(fragment->subject_ref, token);
         }
         else
             return FALSE;
@@ -524,9 +524,9 @@ static cee_boolean token_type_matcher(CEEToken* token,
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map)
 {
@@ -551,7 +551,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
         if (token_is_comment(token)) {
             comment_token_push(parser, token);
-            comment_fregment_reduce(parser);
+            comment_fragment_reduce(parser);
             
             if (!ret)
                 break;
@@ -574,7 +574,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                 if (!prep_directive_branch_pop(parser))
                     parser_state_clear(parser, kGNUASMParserStatePrepDirectiveParsing);
                 
-                prep_directive_attach(parser, kCEESourceFregmentTypePrepDirective);
+                prep_directive_attach(parser, kCEESourceFragmentTypePrepDirective);
                 prep_directive_token_push(parser, token);
             }
             else {
@@ -619,21 +619,21 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    const cee_char* filepath,
                                    const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
-                                   CEESourceFregment* prep_directive,
-                                   CEESourceFregment* statement,
+                                   CEESourceFragment* prep_directive,
+                                   CEESourceFragment* statement,
                                    CEERange range,
                                    CEEList** references)
 {
-    CEESourceFregment* fregment = NULL;
+    CEESourceFragment* fragment = NULL;
     CEEList* p = NULL;
     
-    CEESourceFregment* indexes[kCEESourceFregmentIndexMax];
-    memset(indexes, 0, sizeof(CEESourceFregment*)*kCEESourceFregmentIndexMax);
+    CEESourceFragment* indexes[kCEESourceFragmentIndexMax];
+    memset(indexes, 0, sizeof(CEESourceFragment*)*kCEESourceFragmentIndexMax);
     
-    cee_source_fregment_indexes_in_range(source_token_map, range, indexes);
+    cee_source_fragment_indexes_in_range(source_token_map, range, indexes);
     
-    for (cee_int i = kCEESourceFregmentIndexPrepDirective;
-         i < kCEESourceFregmentIndexMax;
+    for (cee_int i = kCEESourceFragmentIndexPrepDirective;
+         i < kCEESourceFragmentIndexMax;
          i ++) {
         
         if (!indexes[i])
@@ -641,11 +641,11 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
         
         p = indexes[i]->node_ref;
         while (p) {
-            fregment = p->data;
+            fragment = p->data;
             
-            if (!references_in_source_fregment_parse(parser_ref,
+            if (!references_in_source_fragment_parse(parser_ref,
                                                      filepath,
-                                                     fregment,
+                                                     fragment,
                                                      subject,
                                                      prep_directive,
                                                      statement,
@@ -660,34 +660,34 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
     return TRUE;
 }
 
-static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser_ref,
+static cee_boolean references_in_source_fragment_parse(CEESourceParserRef parser_ref,
                                                        const cee_char* filepath,
-                                                       CEESourceFregment* fregment,
+                                                       CEESourceFragment* fragment,
                                                        const cee_char* subject,
-                                                       CEESourceFregment* prep_directive,
-                                                       CEESourceFregment* statement,
+                                                       CEESourceFragment* prep_directive,
+                                                       CEESourceFragment* statement,
                                                        CEERange range,
                                                        CEEList** references)
 {
-    CEESourceFregment* reference_fregment = NULL;
+    CEESourceFragment* reference_fragment = NULL;
     CEEList* p = NULL;
     
-    if (cee_source_fregment_over_range(fregment, range))
+    if (cee_source_fragment_over_range(fragment, range))
         return FALSE;
     
-    reference_fregment = gnu_asm_referernce_fregment_convert(fregment, subject);
-    gnu_asm_reference_fregment_parse(parser_ref,
+    reference_fragment = gnu_asm_referernce_fragment_convert(fragment, subject);
+    gnu_asm_reference_fragment_parse(parser_ref,
                                      filepath,
-                                     reference_fregment,
+                                     reference_fragment,
                                      subject,
                                      prep_directive,
                                      statement,
                                      references);
-    cee_source_fregment_free(reference_fregment);
+    cee_source_fragment_free(reference_fragment);
     
-    p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
+    p = SOURCE_FREGMENT_CHILDREN_FIRST(fragment);
     while (p) {
-        if (!references_in_source_fregment_parse(parser_ref,
+        if (!references_in_source_fragment_parse(parser_ref,
                                                  filepath,
                                                  p->data,
                                                  subject,
@@ -703,35 +703,35 @@ static cee_boolean references_in_source_fregment_parse(CEESourceParserRef parser
     return TRUE;
 }
 
-static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment* fregment,
+static CEESourceFragment* gnu_asm_referernce_fragment_convert(CEESourceFragment* fragment,
                                                               const cee_char* subject)
 {
     CEEList* p = NULL;
     CEEToken* token = NULL;
-    CEESourceFregment* reference_fregment = NULL;
-    CEESourceFregment* current = reference_fregment;
+    CEESourceFragment* reference_fragment = NULL;
+    CEESourceFragment* current = reference_fragment;
     
-    if (cee_source_fregment_parent_type_is(fregment, kCEESourceFregmentTypeSquareBracketList)) {
-        reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeSquareBracketList,
-                                                        fregment->filepath_ref,
-                                                        fregment->subject_ref,
+    if (cee_source_fragment_parent_type_is(fragment, kCEESourceFragmentTypeSquareBracketList)) {
+        reference_fragment = cee_source_fragment_create(kCEESourceFragmentTypeSquareBracketList,
+                                                        fragment->filepath_ref,
+                                                        fragment->subject_ref,
                                                         "gnu_asm");
-        reference_fregment = cee_source_fregment_sub_attach(reference_fregment,
-                                                            kCEESourceFregmentTypeStatement,
-                                                            fregment->filepath_ref,
-                                                            fregment->subject_ref,
+        reference_fragment = cee_source_fragment_sub_attach(reference_fragment,
+                                                            kCEESourceFragmentTypeStatement,
+                                                            fragment->filepath_ref,
+                                                            fragment->subject_ref,
                                                             "gnu_asm");
     }
     else {
-        reference_fregment = cee_source_fregment_create(kCEESourceFregmentTypeStatement,
-                                                        fregment->filepath_ref,
-                                                        fregment->subject_ref,
+        reference_fragment = cee_source_fragment_create(kCEESourceFragmentTypeStatement,
+                                                        fragment->filepath_ref,
+                                                        fragment->subject_ref,
                                                         "gnu_asm");
     }
     
-    current = reference_fregment;
+    current = reference_fragment;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     
     while (p) {
         token = p->data;
@@ -739,42 +739,42 @@ static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment*
         if (!(token->state & kCEETokenStateSymbolOccupied)) {
             if (token->identifier == '{') {   /** ^{ */
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
-                current = cee_source_fregment_push(current,
-                                                   kCEESourceFregmentTypeCurlyBracketList,
-                                                   fregment->filepath_ref,
-                                                   fregment->subject_ref,
+                current = cee_source_fragment_push(current,
+                                                   kCEESourceFragmentTypeCurlyBracketList,
+                                                   fragment->filepath_ref,
+                                                   fragment->subject_ref,
                                                    "gnu_asm");
             }
             else if (token->identifier == '}') {
-                current = cee_source_fregment_pop(current);
+                current = cee_source_fragment_pop(current);
                 if (!current)
                     break;
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
             }
             else if (token->identifier == '[') {
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
-                current = cee_source_fregment_push(current,
-                                                   kCEESourceFregmentTypeSquareBracketList,
-                                                   fregment->filepath_ref,
-                                                   fregment->subject_ref,
+                current = cee_source_fragment_push(current,
+                                                   kCEESourceFragmentTypeSquareBracketList,
+                                                   fragment->filepath_ref,
+                                                   fragment->subject_ref,
                                                    "gnu_asm");
             }
             else if (token->identifier == ']') {
-                current = cee_source_fregment_pop(current);
+                current = cee_source_fragment_pop(current);
                 if (!current)
                     break;
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
             }
             else if (token->identifier == '(') {
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
-                current = cee_source_fregment_push(current,
-                                                   kCEESourceFregmentTypeRoundBracketList,
-                                                   fregment->filepath_ref,
-                                                   fregment->subject_ref,
+                current = cee_source_fragment_push(current,
+                                                   kCEESourceFragmentTypeRoundBracketList,
+                                                   fragment->filepath_ref,
+                                                   fragment->subject_ref,
                                                    "gnu_asm");
             }
             else if (token->identifier == ')') {
-                current = cee_source_fregment_pop(current);
+                current = cee_source_fragment_pop(current);
                 if (!current)
                     break;
                 SOURCE_FREGMENT_TOKEN_PUSH(current, token, FALSE);
@@ -789,17 +789,17 @@ static CEESourceFregment* gnu_asm_referernce_fregment_convert(CEESourceFregment*
     }
     
     if (!current)
-        cee_source_fregment_free(reference_fregment);
+        cee_source_fragment_free(reference_fragment);
     
     return current;
 }
 
-static void gnu_asm_reference_fregment_parse(CEESourceParserRef parser_ref,
+static void gnu_asm_reference_fragment_parse(CEESourceParserRef parser_ref,
                                              const cee_char* filepath,
-                                             CEESourceFregment* fregment,
+                                             CEESourceFragment* fragment,
                                              const cee_char* subject,
-                                             CEESourceFregment* prep_directive,
-                                             CEESourceFregment* statement,
+                                             CEESourceFragment* prep_directive,
+                                             CEESourceFragment* statement,
                                              CEEList** references)
 {
     CEEList* p = NULL;
@@ -807,19 +807,19 @@ static void gnu_asm_reference_fregment_parse(CEESourceParserRef parser_ref,
     CEEList* sub = NULL;
     CEESourceReferenceType type = kCEESourceReferenceTypeUnknow;
     
-    if (!fregment)
+    if (!fragment)
         return;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
-        if (cee_source_fregment_tokens_pattern_match(fregment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {
+        if (cee_source_fragment_tokens_pattern_match(fragment, p, '.', kCEETokenID_IDENTIFIER, NULL)) {
             /** catch object member */
-            p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(1, 1), &sub);
+            p = cee_source_fragment_tokens_break(fragment, p, cee_range_make(1, 1), &sub);
             type = kCEESourceReferenceTypeUnknow;
         }
-        else if (cee_source_fregment_tokens_pattern_match(fregment, p, kCEETokenID_IDENTIFIER, NULL)) {
+        else if (cee_source_fragment_tokens_pattern_match(fragment, p, kCEETokenID_IDENTIFIER, NULL)) {
             /** catch any other identifier */
-            p = cee_source_fregment_tokens_break(fregment, p, cee_range_make(0, 1), &sub);
+            p = cee_source_fragment_tokens_break(fragment, p, cee_range_make(0, 1), &sub);
             type = kCEESourceReferenceTypeUnknow;
         }
         else {
@@ -840,9 +840,9 @@ static void gnu_asm_reference_fregment_parse(CEESourceParserRef parser_ref,
     }
     
     
-    p = SOURCE_FREGMENT_CHILDREN_FIRST(fregment);
+    p = SOURCE_FREGMENT_CHILDREN_FIRST(fragment);
     while (p) {
-        gnu_asm_reference_fregment_parse(parser_ref,
+        gnu_asm_reference_fragment_parse(parser_ref,
                                          filepath,
                                          p->data,
                                          subject,
@@ -860,47 +860,47 @@ static void symbol_parse_init(GNUASMParser* parser,
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
     
-    parser->prep_directive_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->prep_directive_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "gnu_asm");
-    parser->prep_directive_current = cee_source_fregment_sub_attach(parser->prep_directive_root, 
-                                                                    kCEESourceFregmentTypeSourceList, 
+    parser->prep_directive_current = cee_source_fragment_sub_attach(parser->prep_directive_root,
+                                                                    kCEESourceFragmentTypeSourceList,
                                                                     parser->filepath_ref,
                                                                     parser->subject_ref,
                                                                     "gnu_asm");
-    parser->prep_directive_current = cee_source_fregment_sub_attach(parser->prep_directive_current, 
-                                                                    kCEESourceFregmentTypePrepDirective, 
+    parser->prep_directive_current = cee_source_fragment_sub_attach(parser->prep_directive_current,
+                                                                    kCEESourceFragmentTypePrepDirective,
                                                                     parser->filepath_ref,
                                                                     parser->subject_ref,
                                                                     "gnu_asm");
     
-    parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->statement_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                         parser->filepath_ref,
                                                         parser->subject_ref,
                                                         "gnu_asm");
-    parser->statement_current = cee_source_fregment_sub_attach(parser->statement_root, 
-                                                               kCEESourceFregmentTypeSourceList, 
+    parser->statement_current = cee_source_fragment_sub_attach(parser->statement_root,
+                                                               kCEESourceFragmentTypeSourceList,
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
                                                                "gnu_asm");
-    parser->statement_current = cee_source_fregment_sub_attach(parser->statement_current, 
-                                                               kCEESourceFregmentTypeStatement, 
+    parser->statement_current = cee_source_fragment_sub_attach(parser->statement_current,
+                                                               kCEESourceFragmentTypeStatement,
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
                                                                "gnu_asm");
     
-    parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->comment_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                       parser->filepath_ref,
                                                       parser->subject_ref,
                                                       "gnu_asm");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
-                                                             kCEESourceFregmentTypeSourceList, 
+    parser->comment_current = cee_source_fragment_sub_attach(parser->comment_root,
+                                                             kCEESourceFragmentTypeSourceList,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "gnu_asm");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
-                                                             kCEESourceFregmentTypeComment, 
+    parser->comment_current = cee_source_fragment_sub_attach(parser->comment_current,
+                                                             kCEESourceFragmentTypeComment,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "gnu_asm");
@@ -930,13 +930,13 @@ static cee_boolean token_is_comment(CEEToken* token)
 
 static cee_boolean comment_attach(GNUASMParser* parser)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->comment_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->comment_current,
-                                          kCEESourceFregmentTypeComment,
+    attached = cee_source_fragment_attach(parser->comment_current,
+                                          kCEESourceFragmentTypeComment,
                                           parser->filepath_ref,
                                           parser->subject_ref,
                                           "gnu_asm");
@@ -957,7 +957,7 @@ static cee_boolean comment_token_push(GNUASMParser* parser,
     return TRUE;
 }
 
-static cee_boolean comment_fregment_reduce(GNUASMParser* parser)
+static cee_boolean comment_fragment_reduce(GNUASMParser* parser)
 {
     if (!parser->comment_current)
         return FALSE;
@@ -986,12 +986,12 @@ static cee_boolean prep_directive_token_push(GNUASMParser* parser,
 
 static cee_boolean prep_directive_terminated(GNUASMParser* parser)
 {
-    CEESourceFregment* fregment = parser->prep_directive_current;
+    CEESourceFragment* fragment = parser->prep_directive_current;
     
-    if (!fregment->tokens_ref)
+    if (!fragment->tokens_ref)
         return FALSE;
     
-    CEEList* p = SOURCE_FREGMENT_TOKENS_LAST(fregment);
+    CEEList* p = SOURCE_FREGMENT_TOKENS_LAST(fragment);
     
     if (cee_token_is_identifier(p, 0))
         return TRUE;
@@ -1009,14 +1009,14 @@ static cee_boolean prep_directive_terminated(GNUASMParser* parser)
 }
 
 static cee_boolean prep_directive_attach(GNUASMParser* parser,
-                                         CEESourceFregmentType type)
+                                         CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->prep_directive_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->prep_directive_current,
+    attached = cee_source_fragment_attach(parser->prep_directive_current,
                                           type,
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -1029,14 +1029,14 @@ static cee_boolean prep_directive_attach(GNUASMParser* parser,
 }
 
 static cee_boolean prep_directive_sub_attach(GNUASMParser* parser,
-                                             CEESourceFregmentType type)
+                                             CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->prep_directive_current)
         return FALSE;
     
-    attached = cee_source_fregment_sub_attach(parser->prep_directive_current,
+    attached = cee_source_fragment_sub_attach(parser->prep_directive_current,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,
@@ -1050,8 +1050,8 @@ static cee_boolean prep_directive_sub_attach(GNUASMParser* parser,
 
 static void prep_directive_branch_push(GNUASMParser* parser)
 {
-    prep_directive_sub_attach(parser, kCEESourceFregmentTypeSourceList);
-    prep_directive_sub_attach(parser, kCEESourceFregmentTypePrepDirective);
+    prep_directive_sub_attach(parser, kCEESourceFragmentTypeSourceList);
+    prep_directive_sub_attach(parser, kCEESourceFragmentTypePrepDirective);
 }
 
 static cee_boolean prep_directive_branch_pop(GNUASMParser* parser)
@@ -1075,9 +1075,9 @@ static cee_boolean prep_directive_pop(GNUASMParser* parser)
 
 static void prep_directive_parse(GNUASMParser* parser)
 {
-    CEESourceFregment* fregment = parser->prep_directive_current;
+    CEESourceFragment* fragment = parser->prep_directive_current;
     CEEToken* token = NULL;
-    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
         
     while (p) {
         token = p->data;
@@ -1096,19 +1096,19 @@ static void prep_directive_parse(GNUASMParser* parser)
                 parser_state_set(parser, kGNUASMParserStateStatementParsing);
             else
                 parser_state_clear(parser, kGNUASMParserStateStatementParsing);
-            cee_source_fregment_type_set(parser->prep_directive_current,
-                                         kCEESourceFregmentTypePrepDirectiveCondition);
+            cee_source_fragment_type_set(parser->prep_directive_current,
+                                         kCEESourceFragmentTypePrepDirectiveCondition);
             prep_directive_branch_push(parser);
         }
         else if (token->identifier == kCEETokenID_HASH_ELIF ||
                  token->identifier == kCEETokenID_HASH_ELSE) {
             parser_state_clear(parser, kGNUASMParserStateStatementParsing);
-            cee_source_fregment_type_set(parser->prep_directive_current,
-                                         kCEESourceFregmentTypePrepDirectiveBranch);
+            cee_source_fragment_type_set(parser->prep_directive_current,
+                                         kCEESourceFragmentTypePrepDirectiveBranch);
             prep_directive_branch_push(parser);
         }
         else if (token->identifier == kCEETokenID_HASH_ENDIF) {
-            prep_directive_attach(parser, kCEESourceFregmentTypePrepDirective);
+            prep_directive_attach(parser, kCEESourceFragmentTypePrepDirective);
             if (should_statement_parsing(parser))
                 parser_state_set(parser, kGNUASMParserStateStatementParsing);
             else
@@ -1117,15 +1117,15 @@ static void prep_directive_parse(GNUASMParser* parser)
         else {
             if (token->identifier == kCEETokenID_HASH_INCLUDE ||
                 token->identifier == kCEETokenID_HASH_IMPORT) {
-                prep_directive_include_parse(fregment);
+                prep_directive_include_parse(fragment);
             }
             else if (token->identifier == kCEETokenID_HASH_DEFINE) {
-                prep_directive_define_parse(fregment);
+                prep_directive_define_parse(fragment);
             }
             else {
-                prep_directive_common_parse(fregment);
+                prep_directive_common_parse(fragment);
             }
-            prep_directive_attach(parser, kCEESourceFregmentTypePrepDirective);
+            prep_directive_attach(parser, kCEESourceFragmentTypePrepDirective);
         }
     }
 }
@@ -1133,12 +1133,12 @@ static void prep_directive_parse(GNUASMParser* parser)
 static cee_boolean should_statement_parsing(GNUASMParser* parser)
 {
     cee_boolean ret = TRUE;
-    CEESourceFregment* current = parser->prep_directive_current->parent;
+    CEESourceFragment* current = parser->prep_directive_current->parent;
     while (current) {
-        if (cee_source_fregment_type_is(current, kCEESourceFregmentTypeRoot)) {
+        if (cee_source_fragment_type_is(current, kCEESourceFragmentTypeRoot)) {
             break;
         }
-        else if (cee_source_fregment_type_is(current, kCEESourceFregmentTypePrepDirectiveBranch)) {
+        else if (cee_source_fragment_type_is(current, kCEESourceFragmentTypePrepDirectiveBranch)) {
             ret = FALSE;
             break;
         }
@@ -1166,7 +1166,7 @@ static void gnu_asm_prep_directive_include_translate_table_init(void)
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_include_translate_table, kGNUASMPrepDirectiveIncludeTranslateStateDirective  , '<'                       , kGNUASMPrepDirectiveIncludeTranslateStatePath         );
 }
 
-static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
+static cee_boolean prep_directive_include_parse(CEESourceFragment* fragment)
 {
     CEEList* p = NULL;
     CEEList* q = NULL;
@@ -1186,7 +1186,7 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
         -1
     };
     
-    p = cee_source_fregment_token_find(fregment, token_ids);
+    p = cee_source_fragment_token_find(fragment, token_ids);
     if (!p)
         return FALSE;
     
@@ -1219,8 +1219,8 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
     }
     
     if (current == kGNUASMPrepDirectiveIncludeTranslateStateConfirm && s && q) {
-        include_directive = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                      fregment->subject_ref,
+        include_directive = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                      fragment->subject_ref,
                                                                       s,
                                                                       q,
                                                                       kCEESourceSymbolTypePrepDirectiveInclude,
@@ -1228,18 +1228,18 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
                                                                       kCEETokenStringOptionCompact);
         cee_source_symbol_name_format(include_directive->name);
         cee_token_slice_state_mark(TOKEN_NEXT(s), q, kCEETokenStateSymbolOccupied);
-        fregment->symbols = cee_list_prepend(fregment->symbols, include_directive);
+        fragment->symbols = cee_list_prepend(fragment->symbols, include_directive);
         
         if (r && t) {
-            include_path = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                     fregment->subject_ref,
+            include_path = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                     fragment->subject_ref,
                                                                      r,
                                                                      t,
                                                                      kCEESourceSymbolTypePrepDirectiveIncludePath,
                                                                      "gnu_asm",
                                                                      kCEETokenStringOptionCompact);
             cee_token_slice_state_mark(r, t, kCEETokenStateSymbolOccupied);
-            fregment->symbols = cee_list_prepend(fregment->symbols, include_path);
+            fragment->symbols = cee_list_prepend(fragment->symbols, include_path);
         }
         
         ret = TRUE;
@@ -1247,7 +1247,7 @@ static cee_boolean prep_directive_include_parse(CEESourceFregment* fregment)
     
     
 #ifdef DEBUG_PREP_DIRECTIVE
-    cee_source_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fragment->symbols);
 #endif
     
     return ret;
@@ -1278,7 +1278,7 @@ static void gnu_asm_prep_directive_define_translate_table_init(void)
     TRANSLATE_STATE_SET(gnu_asm_prep_directive_define_translate_table,  kGNUASMPrepDirectiveDefineTranslateStateParameter       , '\\'                                      , kGNUASMPrepDirectiveDefineTranslateStateParameter      );
 }
 
-static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
+static cee_boolean prep_directive_define_parse(CEESourceFragment* fragment)
 {
     CEEList* p = NULL;
     CEEList* q = NULL;
@@ -1296,7 +1296,7 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
         -1
     };
     
-    p = cee_source_fregment_token_find(fregment, token_ids);
+    p = cee_source_fragment_token_find(fragment, token_ids);
     if (!p)
         return FALSE;
     
@@ -1324,29 +1324,29 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
     
     if (current == kGNUASMPrepDirectiveDefineTranslateStateConfirm && s) {
         /** define macro */
-        define_directive = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                     fregment->subject_ref,
+        define_directive = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                     fragment->subject_ref,
                                                                      s,
                                                                      s,
                                                                      kCEESourceSymbolTypePrepDirectiveDefine,
                                                                      "gnu_asm",
                                                                      kCEETokenStringOptionCompact);
         cee_token_slice_state_mark(s, t, kCEETokenStateSymbolOccupied);
-        fregment->symbols = cee_list_prepend(fregment->symbols, define_directive);
+        fragment->symbols = cee_list_prepend(fragment->symbols, define_directive);
         ret = TRUE;
         
         /** parameters */
         p = TOKEN_FIRST(q);
         while (p) {
-            parameter = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                  fregment->subject_ref,
+            parameter = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                  fragment->subject_ref,
                                                                   p,
                                                                   p,
                                                                   kCEESourceSymbolTypePrepDirectiveParameter,
                                                                   "gnu_asm",
                                                                   kCEETokenStringOptionCompact);
             cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
-            fregment->symbols = cee_list_prepend(fregment->symbols, parameter);
+            fragment->symbols = cee_list_prepend(fragment->symbols, parameter);
             p = TOKEN_NEXT(p);
         }
     }
@@ -1355,13 +1355,13 @@ static cee_boolean prep_directive_define_parse(CEESourceFregment* fregment)
         cee_list_free(q);
         
 #ifdef DEBUG_PREP_DIRECTIVE
-    cee_source_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fragment->symbols);
 #endif
     
     return ret;
 }
 
-static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
+static cee_boolean prep_directive_common_parse(CEESourceFragment* fragment)
 {
     
     CEEList* p = NULL;
@@ -1379,26 +1379,26 @@ static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
         -1
     };
     
-    p = cee_source_fregment_token_find(fregment, token_ids);
+    p = cee_source_fragment_token_find(fragment, token_ids);
     if (!p)
         return FALSE;
     
-    q = SOURCE_FREGMENT_TOKENS_LAST(fregment);
+    q = SOURCE_FREGMENT_TOKENS_LAST(fragment);
     if (p && q) {
-        common_directive = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                                     fregment->subject_ref,
+        common_directive = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                                     fragment->subject_ref,
                                                                      p,
                                                                      q,
                                                                      kCEESourceSymbolTypePrepDirectiveCommon,
                                                                      "gnu_asm",
                                                                      kCEETokenStringOptionCompact);
         cee_token_slice_state_mark(p, q, kCEETokenStateSymbolOccupied);
-        fregment->symbols = cee_list_prepend(fregment->symbols, common_directive);
+        fragment->symbols = cee_list_prepend(fragment->symbols, common_directive);
         ret = TRUE;
     }
         
 #ifdef DEBUG_PREP_DIRECTIVE
-    cee_source_symbols_print(fregment->symbols);
+    cee_source_symbols_print(fragment->symbols);
 #endif
     
     return ret;
@@ -1409,7 +1409,7 @@ static cee_boolean prep_directive_common_parse(CEESourceFregment* fregment)
  */
 static void statement_parse(GNUASMParser* parser)
 {
-    CEESourceFregment* current = parser->statement_current;
+    CEESourceFragment* current = parser->statement_current;
     
     if (!current || !current->tokens_ref)
         return;
@@ -1432,7 +1432,7 @@ static void statement_parse(GNUASMParser* parser)
                     symbol->name = cee_strtrim(symbol->name, ":");
                 
                 current->symbols = cee_list_prepend(current->symbols, symbol);
-                cee_source_fregment_type_set(current, kCEESourceFregmentTypeDeclaration);
+                cee_source_fragment_type_set(current, kCEESourceFragmentTypeDeclaration);
             }
             cee_token_slice_state_mark(p, p, kCEETokenStateSymbolOccupied);
         }
@@ -1456,7 +1456,7 @@ static void statement_parse(GNUASMParser* parser)
                                                                            kCEETokenStringOptionCompact);
                         if (symbol) {
                             current->symbols = cee_list_prepend(current->symbols, symbol);
-                            cee_source_fregment_type_set(current, kCEESourceFregmentTypeDeclaration);
+                            cee_source_fragment_type_set(current, kCEESourceFragmentTypeDeclaration);
                         }
                         cee_token_slice_state_mark(q, q, kCEETokenStateSymbolOccupied);
                     }
@@ -1477,7 +1477,7 @@ static cee_boolean statement_reduce(GNUASMParser* parser)
     if (!parser->statement_current)
         return FALSE;
         
-    statement_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_attach(parser, kCEESourceFragmentTypeStatement);
     
     return TRUE;
 }
@@ -1498,14 +1498,14 @@ static cee_boolean statement_token_push(GNUASMParser* parser,
 }
 
 static cee_boolean statement_attach(GNUASMParser* parser,
-                                    CEESourceFregmentType type)
+                                    CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->statement_current, 
+    attached = cee_source_fragment_attach(parser->statement_current,
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -1518,14 +1518,14 @@ static cee_boolean statement_attach(GNUASMParser* parser,
 }
 
 static cee_boolean statement_sub_attach(GNUASMParser* parser,
-                                        CEESourceFregmentType type)
+                                        CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_sub_attach(parser->statement_current, 
+    attached = cee_source_fragment_sub_attach(parser->statement_current,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,

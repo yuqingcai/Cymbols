@@ -170,8 +170,8 @@
                                             [buffer.filePath UTF8String],
                                             (const cee_char*)subject,
                                             buffer.source_token_map,
-                                            buffer.prep_directive_fregment,
-                                            buffer.statement_fregment,
+                                            buffer.prep_directive_fragment,
+                                            buffer.statement_fragment,
                                             range,
                                             &references);
                 CEEList* p = references;

@@ -12,9 +12,9 @@ static void parser_free(cee_pointer data);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_uchar* filepath,
                                 const cee_uchar* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 
@@ -56,9 +56,9 @@ static void parser_free(cee_pointer data)
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_uchar* filepath,
                                 const cee_uchar* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map)
 {

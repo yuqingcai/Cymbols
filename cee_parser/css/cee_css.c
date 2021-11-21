@@ -10,10 +10,10 @@ typedef struct _CSSParser {
     CEESourceParserRef super;
     const cee_char* filepath_ref;
     const cee_char* subject_ref;
-    CEESourceFregment* statement_root;
-    CEESourceFregment* statement_current;
-    CEESourceFregment* comment_root;
-    CEESourceFregment* comment_current;
+    CEESourceFragment* statement_root;
+    CEESourceFragment* statement_current;
+    CEESourceFragment* comment_root;
+    CEESourceFragment* comment_current;
 } CSSParser;
 
 static CSSParser* parser_create(void);
@@ -21,9 +21,9 @@ static void parser_free(cee_pointer data);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 static void symbol_parse_init(CSSParser* parser,
@@ -33,7 +33,7 @@ static void symbol_parse_clear(CSSParser* parser);
 static cee_boolean token_is_comment(CEEToken* token);
 static cee_boolean comment_token_push(CSSParser* parser,
                                       CEEToken* push);
-static cee_boolean comment_fregment_reduce(CSSParser* parser);
+static cee_boolean comment_fragment_reduce(CSSParser* parser);
 static cee_boolean comment_attach(CSSParser* parser);
 static cee_boolean statement_token_push(CSSParser* parser,
                                         CEEToken* push);
@@ -46,9 +46,9 @@ static cee_boolean block_reduce(CSSParser* parser);
 static void statement_parse(CSSParser* parser);
 static cee_boolean statement_reduce(CSSParser* parser);
 static cee_boolean statement_attach(CSSParser* parser,
-                                    CEESourceFregmentType type);
+                                    CEESourceFragmentType type);
 static cee_boolean statement_sub_attach(CSSParser* parser,
-                                        CEESourceFregmentType type);
+                                        CEESourceFragmentType type);
 
 /**
  * parser
@@ -92,9 +92,9 @@ static void parser_free(cee_pointer data)
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map)
 {
@@ -119,7 +119,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
         if (token_is_comment(token)) {
             comment_token_push(parser, token);
-            comment_fregment_reduce(parser);
+            comment_fragment_reduce(parser);
             
             if (!ret)
                 break;
@@ -176,32 +176,32 @@ static void symbol_parse_init(CSSParser* parser,
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
     
-    parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->statement_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                         parser->filepath_ref,
                                                         parser->subject_ref,
                                                         "css");
-    parser->statement_current = cee_source_fregment_sub_attach(parser->statement_root, 
-                                                               kCEESourceFregmentTypeSourceList, 
+    parser->statement_current = cee_source_fragment_sub_attach(parser->statement_root,
+                                                               kCEESourceFragmentTypeSourceList,
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
                                                                "css");
-    parser->statement_current = cee_source_fregment_sub_attach(parser->statement_current, 
-                                                               kCEESourceFregmentTypeStatement, 
+    parser->statement_current = cee_source_fragment_sub_attach(parser->statement_current,
+                                                               kCEESourceFragmentTypeStatement,
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
                                                                "css");
     
-    parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->comment_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                       parser->filepath_ref,
                                                       parser->subject_ref,
                                                       "css");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
-                                                             kCEESourceFregmentTypeSourceList, 
+    parser->comment_current = cee_source_fragment_sub_attach(parser->comment_root,
+                                                             kCEESourceFragmentTypeSourceList,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "css");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
-                                                             kCEESourceFregmentTypeComment, 
+    parser->comment_current = cee_source_fragment_sub_attach(parser->comment_current,
+                                                             kCEESourceFragmentTypeComment,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "css");
@@ -232,7 +232,7 @@ static cee_boolean comment_token_push(CSSParser* parser,
     return TRUE;
 }
 
-static cee_boolean comment_fregment_reduce(CSSParser* parser)
+static cee_boolean comment_fragment_reduce(CSSParser* parser)
 {
     if (!parser->comment_current)
         return FALSE;
@@ -243,13 +243,13 @@ static cee_boolean comment_fregment_reduce(CSSParser* parser)
 
 static cee_boolean comment_attach(CSSParser* parser)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->comment_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->comment_current,
-                                          kCEESourceFregmentTypeComment, 
+    attached = cee_source_fragment_attach(parser->comment_current,
+                                          kCEESourceFragmentTypeComment,
                                           parser->filepath_ref,
                                           parser->subject_ref,
                                           "css");
@@ -273,19 +273,19 @@ static cee_boolean statement_token_push(CSSParser* parser,
 
 static void block_header_parse(CSSParser* parser)
 {
-    CEESourceFregment* fregment = parser->statement_current;
+    CEESourceFragment* fragment = parser->statement_current;
     CEESourceSymbol* symbol = NULL;
     
-    if (!fregment || !fregment->tokens_ref)
+    if (!fragment || !fragment->tokens_ref)
         return;
     
-    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    CEEList* p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     /** skip whitesapce and newline */
     if (cee_token_is_identifier(p, kCEETokenID_WHITE_SPACE) ||
         cee_token_is_identifier(p, kCEETokenID_NEW_LINE))
         p = cee_token_not_whitespace_newline_after(p);
     
-    CEEList* q = SOURCE_FREGMENT_TOKENS_LAST(fregment);
+    CEEList* q = SOURCE_FREGMENT_TOKENS_LAST(fragment);
     /** skip '{' */
     if (cee_token_is_identifier(q, '{'))
         q = TOKEN_PREV(q);
@@ -297,15 +297,15 @@ static void block_header_parse(CSSParser* parser)
     if (!p || !q)
         return;
     
-    symbol = cee_source_symbol_create_from_token_slice(fregment->filepath_ref, 
-                                                       fregment->subject_ref, 
+    symbol = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                       fragment->subject_ref,
                                                        p, 
                                                        q, 
                                                        kCEESourceSymbolTypeCSSSelector, 
                                                        "css",
                                                        kCEETokenStringOptionCompact);
-    fregment->symbols = cee_list_prepend(fregment->symbols, symbol);
-    cee_source_fregment_type_set_exclusive(fregment, kCEESourceFregmentTypeCSSBlock);
+    fragment->symbols = cee_list_prepend(fragment->symbols, symbol);
+    cee_source_fragment_type_set_exclusive(fragment, kCEESourceFragmentTypeCSSBlock);
     
     return;
 }
@@ -315,8 +315,8 @@ static void block_header_parse(CSSParser* parser)
  */
 static void block_push(CSSParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeCurlyBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeCurlyBracketList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean block_pop(CSSParser* parser)
@@ -346,8 +346,8 @@ static cee_boolean block_reduce(CSSParser* parser)
     if (!parser->statement_current)
         return FALSE;
     
-    cee_source_fregment_symbols_fregment_range_mark(parser->statement_current);
-    statement_attach(parser, kCEESourceFregmentTypeStatement);
+    cee_source_fragment_symbols_fragment_range_mark(parser->statement_current);
+    statement_attach(parser, kCEESourceFragmentTypeStatement);
     return TRUE;
 }
 
@@ -356,7 +356,7 @@ static cee_boolean block_reduce(CSSParser* parser)
  */
 static void statement_parse(CSSParser* parser)
 {
-    CEESourceFregment* current = parser->statement_current;
+    CEESourceFragment* current = parser->statement_current;
     
     if (!current || !current->tokens_ref)
         return;
@@ -369,20 +369,20 @@ static cee_boolean statement_reduce(CSSParser* parser)
     if (!parser->statement_current)
         return FALSE;
     
-    statement_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_attach(parser, kCEESourceFragmentTypeStatement);
     
     return TRUE;
 }
 
 static cee_boolean statement_attach(CSSParser* parser,
-                                    CEESourceFregmentType type)
+                                    CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->statement_current, 
+    attached = cee_source_fragment_attach(parser->statement_current,
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -395,14 +395,14 @@ static cee_boolean statement_attach(CSSParser* parser,
 }
 
 static cee_boolean statement_sub_attach(CSSParser* parser,
-                                        CEESourceFregmentType type)
+                                        CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_sub_attach(parser->statement_current, 
+    attached = cee_source_fragment_sub_attach(parser->statement_current,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,

@@ -368,7 +368,7 @@ static cee_boolean tables_create(sqlite3* database)
     "   file_path           TEXT                                            ,"  \
     "   line_no             INTEGER                                         ,"  \
     "   ranges              TEXT                                            ,"  \
-    "   fregment_range      TEXT                                             "  \
+    "   fragment_range      TEXT                                             "  \
     ");";
     
     if (sqlite3_exec(database, sql, NULL, NULL, &message) != SQLITE_OK) {
@@ -1132,7 +1132,7 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
     sqlite3_stmt* stmt = NULL;
     cee_char* message = NULL;
     cee_char* sql = "INSERT INTO cee_source_symbols (" \
-                        "type, name, alias, parent, derives, proto_descriptor, language, file_path, line_no, ranges, fregment_range" \
+                        "type, name, alias, parent, derives, proto_descriptor, language, file_path, line_no, ranges, fragment_range" \
                     ")" \
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
     int ret = SQLITE_OK;
@@ -1148,7 +1148,7 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
     while (p) {
         CEESourceSymbol* symbol = p->data;
         cee_char* ranges_str = cee_string_from_ranges(symbol->ranges);
-        cee_char* fregment_range_str = cee_string_from_range(&symbol->fregment_range);
+        cee_char* fragment_range_str = cee_string_from_range(&symbol->fragment_range);
         
         sqlite3_bind_int (stmt, 1, symbol->type);
         sqlite3_bind_text(stmt, 2, symbol->name, -1, SQLITE_STATIC);
@@ -1160,7 +1160,7 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
         sqlite3_bind_text(stmt, 8, symbol->file_path, -1, SQLITE_STATIC);
         sqlite3_bind_int (stmt, 9, symbol->line_no);
         sqlite3_bind_text(stmt, 10, ranges_str, -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 11, fregment_range_str, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 11, fragment_range_str, -1, SQLITE_STATIC);
         ret = sqlite3_step(stmt);
         
         sqlite3_reset(stmt);
@@ -1169,8 +1169,8 @@ cee_boolean cee_database_symbols_write(cee_pointer db,
         if (ranges_str)
             cee_free(ranges_str);
         
-        if (fregment_range_str)
-            cee_free(fregment_range_str);
+        if (fragment_range_str)
+            cee_free(fragment_range_str);
         
         if (ret != SQLITE_DONE)
             break;
@@ -1281,7 +1281,7 @@ static CEEList* symbols_search(sqlite3* db,
     cee_char* str = NULL;
     
     cee_strconcat0(&sql, 
-                   "SELECT type, name, alias, parent, derives, proto_descriptor, language, file_path, line_no, ranges, fregment_range FROM cee_source_symbols WHERE ",
+                   "SELECT type, name, alias, parent, derives, proto_descriptor, language, file_path, line_no, ranges, fragment_range FROM cee_source_symbols WHERE ",
                    condition, 
                    ";",
                    NULL);
@@ -1354,12 +1354,12 @@ static CEEList* symbols_search(sqlite3* db,
             cee_free(str);
         }
         
-        /** fregment_range */
+        /** fragment_range */
         text = (char*)sqlite3_column_text(stmt, 10);
         length = sqlite3_column_bytes(stmt, 10);
         str = cee_strndup(text, length);
         if (str) {
-            symbol->fregment_range = cee_range_from_string(str);
+            symbol->fragment_range = cee_range_from_string(str);
             cee_free(str);
         }
         

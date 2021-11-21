@@ -492,6 +492,7 @@ typedef enum _CEETokenID {
     kCEETokenID_ZERO_FILL_RIGHT_SHIFT_ASSIGNMENT,
     kCEETokenID_EQUAL_VALUE_AND_TYPE,
     kCEETokenID_NOT_EQUAL_VALUE_AND_TYPE,
+    kCEETokenID_ASSIGNMENT_ARROW,
     
     kCEETokenID_END
 } CEETokenID;
@@ -545,7 +546,7 @@ typedef struct _CEEToken {
     cee_ulong length;
     cee_int line_no;
     CEETokenState state;
-    cee_pointer fregment_ref;
+    cee_pointer fragment_ref;
 } CEEToken;
 
 typedef struct _CEESourceTokenMap {

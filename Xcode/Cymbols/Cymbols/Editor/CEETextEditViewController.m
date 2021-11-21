@@ -729,8 +729,8 @@
     cee_long offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
     CEETokenCluster* cluster =
         cee_token_cluster_search_by_buffer_offset(_references,
-                                                  self.buffer.prep_directive_fregment,
-                                                  self.buffer.statement_fregment,
+                                                  self.buffer.prep_directive_fragment,
+                                                  self.buffer.statement_fragment,
                                                   offset);
     [self.port createContextByCluster:cluster];
     cee_token_cluster_free(cluster);
@@ -740,8 +740,8 @@
     cee_long offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
     CEETokenCluster* cluster =
         cee_token_cluster_search_by_buffer_offset(_references,
-                                                  self.buffer.prep_directive_fregment,
-                                                  self.buffer.statement_fregment,
+                                                  self.buffer.prep_directive_fragment,
+                                                  self.buffer.statement_fragment,
                                                   offset);
     [self.port jumpToSymbolByCluster:cluster];
     cee_token_cluster_free(cluster);
@@ -752,8 +752,8 @@
     cee_long offset = cee_text_edit_caret_buffer_offset_get(_textView.edit);
     CEETokenCluster* cluster =
         cee_token_cluster_search_by_buffer_offset(_references,
-                                                  self.buffer.prep_directive_fregment,
-                                                  self.buffer.statement_fregment,
+                                                  self.buffer.prep_directive_fragment,
+                                                  self.buffer.statement_fragment,
                                                   offset);
     [self.port searchReferencesByCluster:cluster];
     cee_token_cluster_free(cluster);
@@ -915,8 +915,8 @@
     cee_long offset = cee_text_unit_buffer_offset_get(unit);
     CEETokenCluster* cluster =
         cee_token_cluster_search_by_buffer_offset(_references,
-                                                  self.buffer.prep_directive_fregment,
-                                                  self.buffer.statement_fregment,
+                                                  self.buffer.prep_directive_fragment,
+                                                  self.buffer.statement_fragment,
                                                   offset);
     if (cluster) {
         if (cluster->type == kCEETokenClusterTypeReference) {

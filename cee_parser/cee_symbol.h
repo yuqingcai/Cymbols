@@ -50,6 +50,7 @@ typedef enum _CEESourceSymbolType {
     kCEESourceSymbolTypeASMDirective,
     kCEESourceSymbolTypeOperatorOverloadDefinition,
     kCEESourceSymbolTypeOperatorOverloadDeclaration,
+    kCEESourceSymbolTypeObjectDefinition,
     
     /** ... */
     kCEESourceSymbolTypeMax,
@@ -65,7 +66,7 @@ typedef struct _CEESourceSymbol {
     cee_char* derives;
     CEEList* ranges;
     cee_int line_no;
-    CEERange fregment_range;
+    CEERange fragment_range;
     cee_char* proto_descriptor;
 } CEESourceSymbol;
 
@@ -79,7 +80,7 @@ CEESourceSymbol* cee_source_symbol_create(CEESourceSymbolType type,
                                           const cee_char* file_path,
                                           cee_int line_no,
                                           CEEList* ranges,
-                                          CEERange fregment_range);
+                                          CEERange fragment_range);
 void cee_source_symbol_free(cee_pointer data);
 cee_int cee_source_symbol_count_get(void);
 CEESourceSymbol* cee_source_symbol_copy(CEESourceSymbol* symbol);

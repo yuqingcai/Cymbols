@@ -38,9 +38,9 @@ typedef NS_ENUM(NSUInteger, CEESourceBufferType) {
 @property (readonly) CEESourceBufferType type;
 @property (readonly) cee_pointer storage;
 @property (readonly) CEESourceBufferState state;
-@property (readonly) CEESourceFregment* comment_fregment;
-@property (readonly) CEESourceFregment* prep_directive_fregment;
-@property (readonly) CEESourceFregment* statement_fregment;
+@property (readonly) CEESourceFragment* comment_fragment;
+@property (readonly) CEESourceFragment* prep_directive_fragment;
+@property (readonly) CEESourceFragment* statement_fragment;
 @property (readonly) CEESourceTokenMap* source_token_map;
 @property (readonly) CEETree* prep_directive_symbol_tree;
 @property (readonly) CEETree* statement_symbol_tree;

@@ -10,10 +10,10 @@ typedef struct _XMLParser {
     CEESourceParserRef super;
     const cee_char* filepath_ref;
     const cee_char* subject_ref;
-    CEESourceFregment* statement_root;
-    CEESourceFregment* statement_current;
-    CEESourceFregment* comment_root;
-    CEESourceFregment* comment_current;
+    CEESourceFragment* statement_root;
+    CEESourceFragment* statement_current;
+    CEESourceFragment* comment_root;
+    CEESourceFragment* comment_current;
 } XMLParser;
 
 typedef enum _XMLTagType {
@@ -32,9 +32,9 @@ static void parser_free(cee_pointer data);
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 static void symbol_parse_init(XMLParser* parser,
@@ -44,12 +44,12 @@ static void symbol_parse_clear(XMLParser* parser);
 static cee_boolean token_is_comment(CEEToken* token);
 static cee_boolean comment_token_push(XMLParser* parser,
                                       CEEToken* push);
-static cee_boolean comment_fregment_reduce(XMLParser* parser);
+static cee_boolean comment_fragment_reduce(XMLParser* parser);
 static cee_boolean comment_attach(XMLParser* parser);
-static XMLTagType tag_parse(CEESourceFregment* fregment);
-static void xml_tag_symbols_create(CEESourceFregment* fregment);
+static XMLTagType tag_parse(CEESourceFragment* fragment);
+static void xml_tag_symbols_create(CEESourceFragment* fragment);
 static cee_boolean statement_push(XMLParser* parser,
-                                  CEESourceFregment* fregment);
+                                  CEESourceFragment* fragment);
 static cee_boolean statement_pop(XMLParser* parser);
 
 /**
@@ -111,9 +111,9 @@ static void parser_free(cee_pointer data)
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map)
 {
@@ -127,15 +127,15 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
     if (!subject)
         return FALSE;
     
-    CEESourceFregment* fregment = NULL;
+    CEESourceFragment* fragment = NULL;
     
     map = cee_source_token_map_create(subject);
     cee_lexer_xml_buffer_create(subject);
     symbol_parse_init(parser, filepath, subject);
         
     do {
-        if (!fregment)
-            fregment = cee_source_fregment_create(kCEESourceFregmentTypeXMLTagStart,
+        if (!fragment)
+            fragment = cee_source_fragment_create(kCEESourceFragmentTypeXMLTagStart,
                                                   filepath, 
                                                   subject,
                                                   "xml");
@@ -147,7 +147,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
         if (token_is_comment(token)) {
             comment_token_push(parser, token);
-            comment_fregment_reduce(parser);
+            comment_fragment_reduce(parser);
             
             if (!ret)
                 break;
@@ -156,44 +156,44 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         }
         
         if (token->identifier == '<') {
-            SOURCE_FREGMENT_TOKEN_PUSH(fregment, token, TRUE);
+            SOURCE_FREGMENT_TOKEN_PUSH(fragment, token, TRUE);
             if (!parsing)
                 parsing = TRUE;
         }
         else if (token->identifier == '>') {
-            SOURCE_FREGMENT_TOKEN_PUSH(fregment, token, TRUE);
+            SOURCE_FREGMENT_TOKEN_PUSH(fragment, token, TRUE);
             
             if (parsing) {
                 
-                XMLTagType type = tag_parse(fregment);
+                XMLTagType type = tag_parse(fragment);
                 
                 if (type == kXMLTagTypeBegin) {
-                    if (!statement_push(parser, fregment))
+                    if (!statement_push(parser, fragment))
                         break;
-                    fregment = NULL;
+                    fragment = NULL;
                 }
                 else if (type == kXMLTagTypeClose) {
-                    cee_source_fregment_type_set_exclusive(fregment,
-                                                           kCEESourceFregmentTypeXMLTagEnd);
+                    cee_source_fragment_type_set_exclusive(fragment,
+                                                           kCEESourceFragmentTypeXMLTagEnd);
                     if (!statement_pop(parser))
                         break;
                                 
-                    if (!statement_push(parser, fregment))
+                    if (!statement_push(parser, fragment))
                         break;
                     
                     if (!statement_pop(parser))
                         break;
                     
-                    fregment = NULL;
+                    fragment = NULL;
                 }
                 else if (type == kXMLTagTypeEmpty) {
-                    if (!statement_push(parser, fregment))
+                    if (!statement_push(parser, fragment))
                         break;
                         
                     if (!statement_pop(parser))
                         break;
                         
-                    fregment = NULL;
+                    fragment = NULL;
                 }
                 else {
                     break;;
@@ -204,7 +204,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         }
         else {
             if (parsing)
-                SOURCE_FREGMENT_TOKEN_PUSH(fregment, token, TRUE);
+                SOURCE_FREGMENT_TOKEN_PUSH(fragment, token, TRUE);
         }
         
         if (!ret)
@@ -212,16 +212,16 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
     } while(1);
     
-    if (fregment) {
-        cee_source_fregment_free(fregment);
+    if (fragment) {
+        cee_source_fragment_free(fragment);
         CEEList* p = TOKEN_FIRST(tokens);
         while (p) {
             CEEToken* token = p->data;
-            if (token->fregment_ref == fregment)
-                token->fregment_ref = NULL;
+            if (token->fragment_ref == fragment)
+                token->fragment_ref = NULL;
             p = TOKEN_NEXT(p);
         }
-        fregment = NULL;
+        fragment = NULL;
         
     }
     
@@ -244,23 +244,23 @@ static void symbol_parse_init(XMLParser* parser,
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
     
-    parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->statement_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                         parser->filepath_ref,
                                                         parser->subject_ref,
                                                         "xml");
     parser->statement_current = parser->statement_root;
     
-    parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->comment_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                       parser->filepath_ref,
                                                       parser->subject_ref,
                                                       "xml");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
-                                                             kCEESourceFregmentTypeSourceList, 
+    parser->comment_current = cee_source_fragment_sub_attach(parser->comment_root,
+                                                             kCEESourceFragmentTypeSourceList,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "xml");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
-                                                             kCEESourceFregmentTypeComment, 
+    parser->comment_current = cee_source_fragment_sub_attach(parser->comment_current,
+                                                             kCEESourceFragmentTypeComment,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "xml");
@@ -276,7 +276,7 @@ static void symbol_parse_clear(XMLParser* parser)
     parser->comment_current = NULL;
 }
 
-static XMLTagType tag_parse(CEESourceFregment* fregment)
+static XMLTagType tag_parse(CEESourceFragment* fragment)
 {
     CEEToken* token = NULL;
     CEEList* p = NULL;
@@ -285,10 +285,10 @@ static XMLTagType tag_parse(CEESourceFregment* fregment)
     cee_boolean tag_close = FALSE;
     cee_boolean empty_element = FALSE;
         
-    if (!fregment || !fregment->tokens_ref)
+    if (!fragment || !fragment->tokens_ref)
         return kXMLTagTypeUnknow;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         token = p->data;
         
@@ -317,7 +317,7 @@ static XMLTagType tag_parse(CEESourceFregment* fregment)
         p = TOKEN_NEXT(p);
     }
     
-    xml_tag_symbols_create(fregment);
+    xml_tag_symbols_create(fragment);
     
     if (tag_close)
         return kXMLTagTypeClose;
@@ -328,9 +328,9 @@ static XMLTagType tag_parse(CEESourceFregment* fregment)
     return kXMLTagTypeBegin;
 }
 
-static void xml_tag_symbols_create(CEESourceFregment* fregment)
+static void xml_tag_symbols_create(CEESourceFragment* fragment)
 {
-    if (!fregment)
+    if (!fragment)
         return;
     
     CEEList* p = NULL;
@@ -339,7 +339,7 @@ static void xml_tag_symbols_create(CEESourceFregment* fregment)
     CEESourceSymbol* symbol = NULL;
     CEESourceSymbolType type = kCEESourceSymbolTypeUnknow;
     
-    p = SOURCE_FREGMENT_TOKENS_FIRST(fregment);
+    p = SOURCE_FREGMENT_TOKENS_FIRST(fragment);
     while (p) {
         type = kCEESourceSymbolTypeUnknow;
         
@@ -354,14 +354,14 @@ static void xml_tag_symbols_create(CEESourceFregment* fregment)
         }
         
         if (type != kCEESourceSymbolTypeUnknow) {
-            symbol = cee_source_symbol_create_from_token_slice(fregment->filepath_ref,
-                                                               fregment->subject_ref,
+            symbol = cee_source_symbol_create_from_token_slice(fragment->filepath_ref,
+                                                               fragment->subject_ref,
                                                                p,
                                                                p,
                                                                type,
                                                                "xml",
                                                                kCEETokenStringOptionCompact);
-            fregment->symbols = cee_list_prepend(fregment->symbols, symbol);
+            fragment->symbols = cee_list_prepend(fragment->symbols, symbol);
         }
         p = TOKEN_NEXT(p);
     }
@@ -384,7 +384,7 @@ static cee_boolean comment_token_push(XMLParser* parser,
     return TRUE;
 }
 
-static cee_boolean comment_fregment_reduce(XMLParser* parser)
+static cee_boolean comment_fragment_reduce(XMLParser* parser)
 {
     if (!parser->comment_current)
         return FALSE;
@@ -395,13 +395,13 @@ static cee_boolean comment_fregment_reduce(XMLParser* parser)
 
 static cee_boolean comment_attach(XMLParser* parser)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->comment_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->comment_current, 
-                                          kCEESourceFregmentTypeComment, 
+    attached = cee_source_fragment_attach(parser->comment_current,
+                                          kCEESourceFragmentTypeComment,
                                           parser->filepath_ref,
                                           parser->subject_ref,
                                           "xml");
@@ -413,15 +413,15 @@ static cee_boolean comment_attach(XMLParser* parser)
 }
 
 static cee_boolean statement_push(XMLParser* parser,
-                                  CEESourceFregment* fregment)
+                                  CEESourceFragment* fragment)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     if (!parser->statement_current)
         return FALSE;
     
     if (!parser->statement_current->children) {
-        attached = cee_source_fregment_sub_attach(parser->statement_current, 
-                                                  kCEESourceFregmentTypeXMLTagList,
+        attached = cee_source_fragment_sub_attach(parser->statement_current,
+                                                  kCEESourceFragmentTypeXMLTagList,
                                                   parser->filepath_ref,
                                                   parser->subject_ref,
                                                   "xml");
@@ -435,9 +435,9 @@ static cee_boolean statement_push(XMLParser* parser,
     }
     
     
-    SOURCE_FREGMENT_CHILD_APPEND(parser->statement_current, fregment);
-    fregment->parent = parser->statement_current;
-    parser->statement_current = fregment;
+    SOURCE_FREGMENT_CHILD_APPEND(parser->statement_current, fragment);
+    fragment->parent = parser->statement_current;
+    parser->statement_current = fragment;
         
     return TRUE;
 }

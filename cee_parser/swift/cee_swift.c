@@ -10,10 +10,10 @@ typedef struct _SwiftParser {
     CEESourceParserRef super;
     const cee_char* filepath_ref;
     const cee_char* subject_ref;
-    CEESourceFregment* statement_root;
-    CEESourceFregment* statement_current;
-    CEESourceFregment* comment_root;
-    CEESourceFregment* comment_current;
+    CEESourceFragment* statement_root;
+    CEESourceFragment* statement_current;
+    CEESourceFragment* comment_root;
+    CEESourceFragment* comment_current;
 } SwiftParser;
 
 static CEETokenType swift_token_type_map[CEETokenID_MAX];
@@ -25,17 +25,17 @@ static cee_boolean token_type_matcher(CEEToken* token,
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map);
 static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    const cee_char* filepath,
                                    const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
-                                   CEESourceFregment* prep_directive,
-                                   CEESourceFregment* statement,
+                                   CEESourceFragment* prep_directive,
+                                   CEESourceFragment* statement,
                                    CEERange range,
                                    CEEList** references);
 static void symbol_parse_init(SwiftParser* parser,
@@ -45,7 +45,7 @@ static void symbol_parse_clear(SwiftParser* parser);
 static cee_boolean token_is_comment(CEEToken* token);
 static cee_boolean comment_token_push(SwiftParser* parser,
                                       CEEToken* push);
-static cee_boolean comment_fregment_reduce(SwiftParser* parser);
+static cee_boolean comment_fragment_reduce(SwiftParser* parser);
 static cee_boolean comment_attach(SwiftParser* parser);
 static cee_boolean statement_token_push(SwiftParser* parser,
                                         CEEToken* push);
@@ -59,17 +59,17 @@ static cee_boolean parameter_list_pop(SwiftParser* parser);
 static void subscript_push(SwiftParser* parser);
 static cee_boolean subscript_pop(SwiftParser* parser);
 static cee_boolean statement_attach(SwiftParser* parser,
-                                    CEESourceFregmentType type);
+                                    CEESourceFragmentType type);
 static cee_boolean statement_sub_attach(SwiftParser* parser,
-                                        CEESourceFregmentType type);
+                                        CEESourceFragmentType type);
 static void statement_parse(SwiftParser* parser);
 static cee_boolean statement_pop(SwiftParser* parser);
 static cee_boolean statement_reduce(SwiftParser* parser);
 static cee_boolean statement_complete(SwiftParser* parser);
 static cee_boolean current_statement_type_is(SwiftParser* parser,
-                                             CEESourceFregmentType type);
+                                             CEESourceFragmentType type);
 static void current_statement_type_transform(SwiftParser* parser,
-                                             CEESourceFregmentType type);
+                                             CEESourceFragmentType type);
 /**
  * parser
  */
@@ -287,9 +287,9 @@ static cee_boolean token_type_matcher(CEEToken* token,
 static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
                                 const cee_char* filepath,
                                 const cee_char* subject,
-                                CEESourceFregment** prep_directive,
-                                CEESourceFregment** statement,
-                                CEESourceFregment** comment,
+                                CEESourceFragment** prep_directive,
+                                CEESourceFragment** statement,
+                                CEESourceFragment** comment,
                                 CEEList** tokens_ref,
                                 CEESourceTokenMap** source_token_map)
 {
@@ -316,7 +316,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
         if (token_is_comment(token)) {
             comment_token_push(parser, token);
-            comment_fregment_reduce(parser);
+            comment_fragment_reduce(parser);
             
             if (!ret)
                 break;
@@ -326,28 +326,28 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
         pushed = FALSE;
         
-        if (current_statement_type_is(parser, kCEESourceFregmentTypeDeclaration)) {
+        if (current_statement_type_is(parser, kCEESourceFragmentTypeDeclaration)) {
             //pushed = import_statement_token_push(parser, token);
         }
-        else if (current_statement_type_is(parser, kCEESourceFregmentTypeClassDefinition)) {
+        else if (current_statement_type_is(parser, kCEESourceFragmentTypeClassDefinition)) {
             //pushed = class_definition_statement_token_push(parser, token);
         }
-        else if (current_statement_type_is(parser, kCEESourceFregmentTypeFunctionDefinition)) {
+        else if (current_statement_type_is(parser, kCEESourceFragmentTypeFunctionDefinition)) {
             //pushed = function_definition_statement_token_push(parser, token);
         }
         
         if (!pushed) {
             if (token->identifier == kCEETokenID_IMPORT) {
-                current_statement_type_transform(parser, kCEESourceFregmentTypeDeclaration);
+                current_statement_type_transform(parser, kCEESourceFragmentTypeDeclaration);
                 statement_token_push(parser, token);
             }
             else if (token->identifier == kCEETokenID_CLASS ||
                      token->identifier == kCEETokenID_STRUCT) {
-                current_statement_type_transform(parser, kCEESourceFregmentTypeClassDefinition);
+                current_statement_type_transform(parser, kCEESourceFragmentTypeClassDefinition);
                 statement_token_push(parser, token);
             }
             else if (token->identifier == kCEETokenID_FUNC) {
-                current_statement_type_transform(parser, kCEESourceFregmentTypeFunctionDefinition);
+                current_statement_type_transform(parser, kCEESourceFragmentTypeFunctionDefinition);
                 statement_token_push(parser, token);
             }
             else if (token->identifier == '{') { 
@@ -398,7 +398,7 @@ static cee_boolean symbol_parse(CEESourceParserRef parser_ref,
         
     } while(1);
     
-    cee_source_fregment_tree_symbols_parent_parse(parser->statement_root);
+    cee_source_fragment_tree_symbols_parent_parse(parser->statement_root);
     
     *statement = parser->statement_root;
     *prep_directive = NULL;
@@ -417,8 +417,8 @@ static cee_boolean reference_parse(CEESourceParserRef parser_ref,
                                    const cee_char* filepath,
                                    const cee_char* subject,
                                    CEESourceTokenMap* source_token_map,
-                                   CEESourceFregment* prep_directive,
-                                   CEESourceFregment* statement,
+                                   CEESourceFragment* prep_directive,
+                                   CEESourceFragment* statement,
                                    CEERange range,
                                    CEEList** references)
 {
@@ -431,31 +431,31 @@ static void symbol_parse_init(SwiftParser* parser,
 {    
     parser->filepath_ref = filepath;
     parser->subject_ref = subject;
-    parser->statement_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->statement_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                         parser->filepath_ref,
                                                         parser->subject_ref,
                                                         "swift");
-    parser->statement_current = cee_source_fregment_sub_attach(parser->statement_root, 
-                                                               kCEESourceFregmentTypeSourceList, 
+    parser->statement_current = cee_source_fragment_sub_attach(parser->statement_root,
+                                                               kCEESourceFragmentTypeSourceList,
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
                                                                "swift");
-    parser->statement_current = cee_source_fregment_sub_attach(parser->statement_current, 
-                                                               kCEESourceFregmentTypeStatement, 
+    parser->statement_current = cee_source_fragment_sub_attach(parser->statement_current,
+                                                               kCEESourceFragmentTypeStatement,
                                                                parser->filepath_ref,
                                                                parser->subject_ref,
                                                                "swift");
-    parser->comment_root = cee_source_fregment_create(kCEESourceFregmentTypeRoot, 
+    parser->comment_root = cee_source_fragment_create(kCEESourceFragmentTypeRoot,
                                                       parser->filepath_ref,
                                                       parser->subject_ref,
                                                       "swift");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_root, 
-                                                             kCEESourceFregmentTypeSourceList, 
+    parser->comment_current = cee_source_fragment_sub_attach(parser->comment_root,
+                                                             kCEESourceFragmentTypeSourceList,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "swift");
-    parser->comment_current = cee_source_fregment_sub_attach(parser->comment_current, 
-                                                             kCEESourceFregmentTypeComment, 
+    parser->comment_current = cee_source_fragment_sub_attach(parser->comment_current,
+                                                             kCEESourceFragmentTypeComment,
                                                              parser->filepath_ref,
                                                              parser->subject_ref,
                                                              "swift");
@@ -487,7 +487,7 @@ static cee_boolean comment_token_push(SwiftParser* parser,
     return TRUE;
 }
 
-static cee_boolean comment_fregment_reduce(SwiftParser* parser)
+static cee_boolean comment_fragment_reduce(SwiftParser* parser)
 {
     if (!parser->comment_current)
         return FALSE;
@@ -498,13 +498,13 @@ static cee_boolean comment_fregment_reduce(SwiftParser* parser)
 
 static cee_boolean comment_attach(SwiftParser* parser)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->comment_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->comment_current,
-                                          kCEESourceFregmentTypeComment, 
+    attached = cee_source_fragment_attach(parser->comment_current,
+                                          kCEESourceFragmentTypeComment,
                                           parser->filepath_ref,
                                           parser->subject_ref,
                                           "swift");
@@ -531,8 +531,8 @@ static cee_boolean statement_token_push(SwiftParser* parser,
  */
 static void block_push(SwiftParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeCurlyBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeCurlyBracketList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean block_pop(SwiftParser* parser)
@@ -548,9 +548,9 @@ static cee_boolean block_reduce(SwiftParser* parser)
     if (!parser->statement_current)
         return FALSE;
     
-    cee_source_fregment_symbols_fregment_range_mark(parser->statement_current);
+    cee_source_fragment_symbols_fragment_range_mark(parser->statement_current);
     
-    statement_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_attach(parser, kCEESourceFragmentTypeStatement);
     return TRUE;
 }
 
@@ -569,8 +569,8 @@ static void block_header_parse(SwiftParser* parser)
  */
 static void parameter_list_push(SwiftParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeRoundBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeRoundBracketList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean parameter_list_pop(SwiftParser* parser)
@@ -586,8 +586,8 @@ static cee_boolean parameter_list_pop(SwiftParser* parser)
  */
 static void subscript_push(SwiftParser* parser)
 {
-    statement_sub_attach(parser, kCEESourceFregmentTypeSquareBracketList);
-    statement_sub_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_sub_attach(parser, kCEESourceFragmentTypeSquareBracketList);
+    statement_sub_attach(parser, kCEESourceFragmentTypeStatement);
 }
 
 static cee_boolean subscript_pop(SwiftParser* parser)
@@ -602,14 +602,14 @@ static cee_boolean subscript_pop(SwiftParser* parser)
 * statement
 */
 static cee_boolean statement_attach(SwiftParser* parser,
-                                    CEESourceFregmentType type)
+                                    CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_attach(parser->statement_current, 
+    attached = cee_source_fragment_attach(parser->statement_current,
                                           type, 
                                           parser->filepath_ref,
                                           parser->subject_ref,
@@ -622,14 +622,14 @@ static cee_boolean statement_attach(SwiftParser* parser,
 }
 
 static cee_boolean statement_sub_attach(SwiftParser* parser,
-                                        CEESourceFregmentType type)
+                                        CEESourceFragmentType type)
 {
-    CEESourceFregment* attached = NULL;
+    CEESourceFragment* attached = NULL;
     
     if (!parser->statement_current)
         return FALSE;
     
-    attached = cee_source_fregment_sub_attach(parser->statement_current, 
+    attached = cee_source_fragment_sub_attach(parser->statement_current,
                                               type,
                                               parser->filepath_ref,
                                               parser->subject_ref,
@@ -643,7 +643,7 @@ static cee_boolean statement_sub_attach(SwiftParser* parser,
 
 static void statement_parse(SwiftParser* parser)
 {
-    CEESourceFregment* current = parser->statement_current;
+    CEESourceFragment* current = parser->statement_current;
     
     if (!current || !current->tokens_ref)
         return;
@@ -665,7 +665,7 @@ static cee_boolean statement_reduce(SwiftParser* parser)
     if (!parser->statement_current)
         return FALSE;
        
-    statement_attach(parser, kCEESourceFregmentTypeStatement);
+    statement_attach(parser, kCEESourceFragmentTypeStatement);
     
     return TRUE;
 }
@@ -675,7 +675,7 @@ static cee_boolean statement_complete(SwiftParser* parser)
     if (!parser->statement_current)
         return FALSE;
     
-    CEESourceFregment* current = parser->statement_current;
+    CEESourceFragment* current = parser->statement_current;
     CEEList* p = SOURCE_FREGMENT_TOKENS_LAST(current);
     CEEToken* token = NULL;
     
@@ -707,17 +707,17 @@ static cee_boolean statement_complete(SwiftParser* parser)
 }
 
 static cee_boolean current_statement_type_is(SwiftParser* parser,
-                                             CEESourceFregmentType type)
+                                             CEESourceFragmentType type)
 {
     if (parser->statement_current)
-        return cee_source_fregment_type_is(parser->statement_current, type);
+        return cee_source_fragment_type_is(parser->statement_current, type);
         
     return FALSE;
 }
 
 static void current_statement_type_transform(SwiftParser* parser,
-                                             CEESourceFregmentType type)
+                                             CEESourceFragmentType type)
 {
-    cee_source_fregment_type_set(parser->statement_current, type);
+    cee_source_fragment_type_set(parser->statement_current, type);
 }
 
