@@ -18,7 +18,7 @@
  C Implementation of Wu's Color Quantizer (v. 2)
  (see Graphics Gems vol. II, pp. 126-133)
  
- Author:    Xiaolin Wu
+ Author: Xiaolin Wu
  Dept. of Computer Science
  Univ. of Western Ontario
  London, Ontario N6A 5B7

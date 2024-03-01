@@ -154,7 +154,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "4275"
             endingLineNumber = "4275"
-            landmarkName = "c_declaration_parse(fregment)"
+            landmarkName = "c_declaration_parse(fragment)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>

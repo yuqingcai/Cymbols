@@ -15,6 +15,7 @@ NSString* sandboxURLString = @"https://sandbox.itunes.apple.com/verifyReceipt";
 // Shared Secret, generate URL: https://appstoreconnect.apple.com/access/shared-secret
 NSString* sharedSecret = @"c1377177fac14906935fcaa1ac55a8a4";
 
+
 // Products
 NSString* subscriptionYearlyWithIntroductory = @"com.cymbols.subscription.yearly.introductory";
 NSString* subscriptionMonthlyWithIntroductory = @"com.cymbols.subscription.monthly.introductory";
@@ -299,3 +300,4 @@ typedef NS_ENUM(NSUInteger, CEEStorePaymentType) {
 }
 
 @end
+
