@@ -5,7 +5,7 @@
 Cymbols is a source code analyzer that tries implementing software called ["Source Insignht"](https://www.sourceinsight.com/)(a classical Windows software) on MacOS started in 2018. There is no reason to continue this project when Microsoft's VS Code becomes increasingly populated because VS Code implements all the features that Cymbols tries to do.
 Now, Cymbols has become an open-source project to help people who want to learn how to write a text editor and how to use Flex to do computer program lexical analysis. I hope you enjoy it.
 
-### Source Architecture
+Cymbols is built in Xcode using Objective-C/C. Source Architecture comes following:
 
 -   cee_backend: database operations.
 -   cee_binary: binary content display and edit.
