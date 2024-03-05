@@ -1,6 +1,18 @@
 # Cymbols
 ## A Source Code Analyser Helps You To Understand Code Efficiently
 
+Cymbols is a source code analyzer that tries implementing software called ["Source Insignht"](https://www.sourceinsight.com/)(a classical Windows software) on MacOS started in 2018. There is no reason to continue this project when Microsoft's VS Code becomes increasingly populated because VS Code implements all the features that Cymbols tries to do.
+Now, Cymbols has become an open-source project to help people who want to learn how to write a text editor and how to use Flex to do computer program lexical analysis. I hope you enjoy it.
+
+### Source Architecture
+  - cee_backend: database operations.
+  - cee_binary: binary content display and edit.
+  - cee_lib: libraries of base algorithms such as list/regex operations,  memory management, etc.
+  - cee_parser: languages parsers implemented in Flex.
+  - cee_text: source content display and edit.
+  - All UI-related components source is in path "Cymbols/Cymbols".
+
+
 ![](https://raw.githubusercontent.com/yuqingcai/Cymbols/7d789abfd785bcf56d73f4393b12e3634f4769cb/Resources/Prompt/screen_shot.svg)
 
 
